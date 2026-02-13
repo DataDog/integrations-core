@@ -285,24 +285,26 @@ class TestSession:
 
 
 class TestLogger:
-    def test_default(self, caplog):
+    def test_default(self, caplog, mock_http_response):
         check = AgentCheck('test', {}, [{}])
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        mock_http_response('')
+        with caplog.at_level(logging.DEBUG):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
         for _, _, message in caplog.record_tuples:
             assert message != expected_message
 
-    def test_instance(self, caplog):
+    def test_instance(self, caplog, mock_http_response):
         instance = {'log_requests': True}
         init_config = {}
         check = AgentCheck('test', init_config, [instance])
 
         assert check.http.logger is check.log
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        mock_http_response('')
+        with caplog.at_level(logging.DEBUG):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -312,14 +314,15 @@ class TestLogger:
         else:
             raise AssertionError('Expected DEBUG log with message `{}`'.format(expected_message))
 
-    def test_init_config(self, caplog):
+    def test_init_config(self, caplog, mock_http_response):
         instance = {}
         init_config = {'log_requests': True}
         check = AgentCheck('test', init_config, [instance])
 
         assert check.http.logger is check.log
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        mock_http_response('')
+        with caplog.at_level(logging.DEBUG):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -329,12 +332,13 @@ class TestLogger:
         else:
             raise AssertionError('Expected DEBUG log with message `{}`'.format(expected_message))
 
-    def test_instance_override(self, caplog):
+    def test_instance_override(self, caplog, mock_http_response):
         instance = {'log_requests': False}
         init_config = {'log_requests': True}
         check = AgentCheck('test', init_config, [instance])
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        mock_http_response('')
+        with caplog.at_level(logging.DEBUG):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
