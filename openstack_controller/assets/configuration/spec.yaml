@@ -27,7 +27,6 @@ files:
           description: |
            The User name used to connect to Openstack.
           fleet_configurable: true
-          fleet_configurable: true
           value:
             example: "admin"
             type: string
