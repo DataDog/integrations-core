@@ -27,6 +27,7 @@ flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.
 foundationdb,PyPI,Apache-2.0,Copyright 2017 FoundationDB
 hazelcast-python-client,PyPI,Apache-2.0,"Copyright (c) 2008-2023, Hazelcast, Inc. All Rights Reserved."
 httpx,PyPI,BSD-3-Clause,"Copyright © 2019, [Encode OSS Ltd](https://www.encode.io/)."
+httpx-gssapi,PyPI,MIT,"Copyright (c) 2017-2025, Ian Cordasco, Cory Benfield, Michael Komitee, Robbie Harwood, Roger Aiudi"
 in-toto,PyPI,Apache-2.0,Copyright 2018 New York University
 jellyfish,PyPI,MIT,Copyright (c) 2015 James Turk
 kentik-snmp-profiles,"https://github.com/kentik/snmp-profiles",Apache-2.0,

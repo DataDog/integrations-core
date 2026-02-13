@@ -19,6 +19,7 @@ from binary import KIBIBYTE
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.headers import get_default_headers, update_headers
 from datadog_checks.base.utils.tls import SUPPORTED_PROTOCOL_VERSIONS, create_ssl_context
 
@@ -160,13 +161,49 @@ class HTTPXResponseAdapter:
         self._response.close()
 
 
+def _create_kerberos_auth_httpx(config: dict, logger: logging.Logger):
+    """
+    Build httpx-compatible Kerberos/SPNEGO auth from config (same keys as create_kerberos_auth in http.py).
+    Requires httpx-gssapi. Returns None on ImportError or invalid config (with log or ConfigurationError).
+    """
+    try:
+        from httpx_gssapi import DISABLED, OPTIONAL, REQUIRED, HTTPSPNEGOAuth
+    except ImportError:
+        logger.warning(
+            'Kerberos auth requested but httpx-gssapi is not installed; request will be sent without auth.',
+        )
+        return None
+
+    strategies = {'required': REQUIRED, 'optional': OPTIONAL, 'disabled': DISABLED}
+    kerberos_auth = config.get('kerberos_auth')
+    if kerberos_auth is None or is_affirmative(kerberos_auth):
+        kerberos_auth = 'required'
+    if kerberos_auth not in strategies:
+        raise ConfigurationError(
+            'Invalid Kerberos strategy `{}`, must be one of: {}'.format(kerberos_auth, ' | '.join(strategies))
+        )
+
+    kwargs = {
+        'mutual_authentication': strategies[kerberos_auth],
+        'delegate': is_affirmative(config.get('kerberos_delegate', False)),
+        'opportunistic_auth': is_affirmative(config.get('kerberos_force_initiate', False)),
+    }
+    if config.get('kerberos_hostname') is not None:
+        kwargs['target_name'] = config['kerberos_hostname']
+    if config.get('kerberos_principal') is not None:
+        kwargs['principal'] = config['kerberos_principal']
+    return HTTPSPNEGOAuth(**kwargs)
+
+
 def _make_httpx_auth(config: dict, logger: logging.Logger):
-    """Build httpx-compatible auth from config. Supports basic; others fall back to None with warning."""
+    """Build httpx-compatible auth from config. Supports basic and kerberos; others fall back to None with warning."""
     auth_type = config.get('auth_type', 'basic').lower()
     if auth_type == 'basic':
         if config.get('username') is not None and config.get('password') is not None:
             return (config['username'], config['password'])
         return None
+    if auth_type == 'kerberos':
+        return _create_kerberos_auth_httpx(config, logger)
     logger.warning(
         'HTTPXWrapper does not yet support auth_type=%s; request will be sent without auth.',
         auth_type,

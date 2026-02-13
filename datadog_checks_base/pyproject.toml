@@ -57,6 +57,7 @@ deps = [
 http = [
     "aws-requests-auth==0.4.3",
     "botocore==1.40.21",
+    "httpx-gssapi==0.6",
     "oauthlib==3.3.1",
     "pyjwt==2.10.1",
     "pyopenssl==25.3.0",

@@ -8,11 +8,12 @@ from unittest import mock
 import httpx
 import pytest
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.httpx import (
     HTTPXResponseAdapter,
     HTTPXWrapper,
+    _create_kerberos_auth_httpx,
     _make_httpx_auth,
     _parse_uds_url,
 )
@@ -39,6 +40,83 @@ class TestMakeHttpxAuth:
         with caplog.at_level(logging.WARNING):
             assert _make_httpx_auth(config, logger) is None
         assert 'digest' in caplog.text and 'without auth' in caplog.text
+
+    def test_kerberos_auth_when_httpx_gssapi_installed(self):
+        logger = logging.getLogger('test')
+        fake_auth = object()
+        with mock.patch('datadog_checks.base.utils.httpx._create_kerberos_auth_httpx', return_value=fake_auth):
+            result = _make_httpx_auth({'auth_type': 'kerberos', 'kerberos_auth': 'required'}, logger)
+        assert result is fake_auth
+
+    def test_kerberos_auth_delegates_to_create_kerberos(self):
+        logger = logging.getLogger('test')
+        config = {'auth_type': 'kerberos', 'kerberos_auth': 'optional'}
+        with mock.patch('datadog_checks.base.utils.httpx._create_kerberos_auth_httpx') as m:
+            m.return_value = None
+            _make_httpx_auth(config, logger)
+            m.assert_called_once_with(config, logger)
+
+
+class TestCreateKerberosAuthHttpx:
+    """Test _create_kerberos_auth_httpx with mocked httpx_gssapi."""
+
+    def test_invalid_kerberos_strategy_raises_when_gssapi_mocked(self):
+        logger = logging.getLogger('test')
+        config = {'kerberos_auth': 'invalid'}
+        fake_gssapi = mock.MagicMock()
+        fake_gssapi.REQUIRED = 'REQ'
+        fake_gssapi.OPTIONAL = 'OPT'
+        fake_gssapi.DISABLED = 'DIS'
+        fake_gssapi.HTTPSPNEGOAuth = mock.MagicMock()
+        with mock.patch.dict('sys.modules', {'httpx_gssapi': fake_gssapi}):
+            with pytest.raises(ConfigurationError, match='Invalid Kerberos strategy'):
+                _create_kerberos_auth_httpx(config, logger)
+
+    def test_kerberos_required_calls_httpspnego_with_correct_kwargs_when_mocked(self):
+        logger = logging.getLogger('test')
+        config = {
+            'kerberos_auth': 'required',
+            'kerberos_delegate': False,
+            'kerberos_force_initiate': False,
+        }
+        fake_gssapi = mock.MagicMock()
+        fake_gssapi.REQUIRED = 'REQ'
+        fake_gssapi.OPTIONAL = 'OPT'
+        fake_gssapi.DISABLED = 'DIS'
+        auth_cls = mock.MagicMock()
+        fake_gssapi.HTTPSPNEGOAuth = auth_cls
+        with mock.patch.dict('sys.modules', {'httpx_gssapi': fake_gssapi}):
+            _create_kerberos_auth_httpx(config, logger)
+        auth_cls.assert_called_once_with(
+            mutual_authentication='REQ',
+            delegate=False,
+            opportunistic_auth=False,
+        )
+
+    def test_kerberos_optional_with_overrides_passes_target_name_and_principal_when_mocked(self):
+        logger = logging.getLogger('test')
+        config = {
+            'kerberos_auth': 'optional',
+            'kerberos_delegate': True,
+            'kerberos_force_initiate': True,
+            'kerberos_hostname': 'custom.service',
+            'kerberos_principal': 'user@REALM',
+        }
+        fake_gssapi = mock.MagicMock()
+        fake_gssapi.REQUIRED = 'REQ'
+        fake_gssapi.OPTIONAL = 'OPT'
+        fake_gssapi.DISABLED = 'DIS'
+        auth_cls = mock.MagicMock()
+        fake_gssapi.HTTPSPNEGOAuth = auth_cls
+        with mock.patch.dict('sys.modules', {'httpx_gssapi': fake_gssapi}):
+            _create_kerberos_auth_httpx(config, logger)
+        auth_cls.assert_called_once_with(
+            mutual_authentication='OPT',
+            delegate=True,
+            opportunistic_auth=True,
+            target_name='custom.service',
+            principal='user@REALM',
+        )
 
 
 class TestParseUdsUrl:
