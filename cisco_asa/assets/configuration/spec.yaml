@@ -1,4 +1,5 @@
 name: Cisco ASA
+fleet_configurable: true
 files:
 - name: cisco_asa.yaml
   options:
