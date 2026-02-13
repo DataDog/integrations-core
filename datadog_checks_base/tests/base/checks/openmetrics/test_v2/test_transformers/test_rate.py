@@ -2,16 +2,19 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from datadog_checks.base import OpenMetricsBaseCheckV2
+
 from ..utils import get_check
 
 
 def test(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
+        OpenMetricsBaseCheckV2,
         """
         # HELP istio_requests_total requests_total
         # TYPE istio_requests_total counter
         istio_requests_total 6.396288e+06
-        """
+        """,
     )
     check = get_check({'metrics': [{'istio_requests': {'type': 'rate'}}]})
     dd_run_check(check)

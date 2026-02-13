@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.base import OpenMetricsBaseCheckV2
+
 from ..utils import get_check
 
 
@@ -34,6 +36,7 @@ def test_untyped_counter(aggregator, dd_run_check, mock_http_response, metric_ty
     """
 
     mock_http_response(
+        OpenMetricsBaseCheckV2,
         """
         # HELP foo The metricset and metric sample does not end in '_total' and is untyped.
         # TYPE foo untyped
@@ -50,7 +53,7 @@ def test_untyped_counter(aggregator, dd_run_check, mock_http_response, metric_ty
         # HELP bux The metricset and metric samples are a non counter type
         # TYPE bux histogram
         bux 4
-        """
+        """,
     )
     check = get_check(
         {

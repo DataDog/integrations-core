@@ -98,8 +98,8 @@ def text_data():
 def mock_get(mock_http_response):
     """Provide ksm.txt content and queue two identical responses for the first two check.process() calls."""
     path = os.path.join(FIXTURE_PATH, 'ksm.txt')
-    mock_http_response(file_path=path, headers={'Content-Type': text_content_type})
-    mock_http_response(file_path=path, headers={'Content-Type': text_content_type})
+    mock_http_response(OpenMetricsBaseCheck, file_path=path, headers={'Content-Type': text_content_type})
+    mock_http_response(OpenMetricsBaseCheck, file_path=path, headers={'Content-Type': text_content_type})
     with open(path) as f:
         yield f.read()
 
@@ -2256,7 +2256,9 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
     )
 
 
-def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get, mock_http_response):
+def test_label_joins_gc(
+    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get, mock_http_response
+):
     """Tests label join GC on text format"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
@@ -2304,7 +2306,7 @@ def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_s
     pvc_replace = re.compile(r'^kube_persistentvolumeclaim_.*\n', re.MULTILINE)
     text_data = pvc_replace.sub('', text_data)
 
-    mock_http_response(content=text_data, headers={'Content-Type': text_content_type})
+    mock_http_response(OpenMetricsBaseCheck, content=text_data, headers={'Content-Type': text_content_type})
     check.process(mocked_prometheus_scraper_config)
     assert 'dd-agent-1337' in mocked_prometheus_scraper_config['_label_mapping']['pod']
     assert 'dd-agent-62bgh' not in mocked_prometheus_scraper_config['_label_mapping']['pod']
@@ -2463,7 +2465,7 @@ def test_label_join_state_change(
         'kube_pod_status_phase{namespace="default",phase="Test",pod="dd-agent-62bgh"} 1',
     )
 
-    mock_http_response(content=text_data, headers={'Content-Type': text_content_type})
+    mock_http_response(OpenMetricsBaseCheck, content=text_data, headers={'Content-Type': text_content_type})
     check.process(mocked_prometheus_scraper_config)
     assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
     assert mocked_prometheus_scraper_config['_label_mapping']['pod']['dd-agent-62bgh']['phase'] == 'Test'

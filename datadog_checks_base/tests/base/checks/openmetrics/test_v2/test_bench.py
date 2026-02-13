@@ -25,7 +25,7 @@ def fixture_amazon_msk_jmx_metrics():
 
 
 def test_ksm_new(benchmark, dd_run_check, mock_http_response, fixture_ksm):
-    mock_http_response(file_path=fixture_ksm)
+    mock_http_response(OpenMetricsBaseCheckV2, file_path=fixture_ksm)
     c = OpenMetricsBaseCheckV2('test', {}, [{'openmetrics_endpoint': 'foo', 'namespace': 'bar', 'metrics': ['.+']}])
 
     # Run once to get initialization steps out of the way.
@@ -35,7 +35,7 @@ def test_ksm_new(benchmark, dd_run_check, mock_http_response, fixture_ksm):
 
 
 def test_amazon_msk_jmx_metrics_new(benchmark, dd_run_check, mock_http_response, fixture_amazon_msk_jmx_metrics):
-    mock_http_response(file_path=fixture_amazon_msk_jmx_metrics)
+    mock_http_response(OpenMetricsBaseCheckV2, file_path=fixture_amazon_msk_jmx_metrics)
 
     metrics = []
     for raw_metric_name, metric_name in AMAZON_MSK_JMX_METRICS_MAP.items():
@@ -54,7 +54,7 @@ def test_amazon_msk_jmx_metrics_new(benchmark, dd_run_check, mock_http_response,
 
 
 def test_label_joins_new(benchmark, dd_run_check, mock_http_response, fixture_ksm):
-    mock_http_response(file_path=fixture_ksm)
+    mock_http_response(OpenMetricsBaseCheckV2, file_path=fixture_ksm)
     instance = {
         'openmetrics_endpoint': 'foo',
         'namespace': 'bar',

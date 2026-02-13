@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.constants import ServiceCheck
 
 from ..utils import get_check
@@ -8,11 +9,12 @@ from ..utils import get_check
 
 def test_known(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
+        OpenMetricsBaseCheckV2,
         """
         # HELP state Node state
         # TYPE state gauge
         state{foo="bar"} 3
-        """
+        """,
     )
     check = get_check({'metrics': [{'state': {'type': 'service_check', 'status_map': {'3': 'ok'}}}]})
     dd_run_check(check)
@@ -24,11 +26,12 @@ def test_known(aggregator, dd_run_check, mock_http_response):
 
 def test_unknown(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
+        OpenMetricsBaseCheckV2,
         """
         # HELP state Node state
         # TYPE state gauge
         state{foo="bar"} 3
-        """
+        """,
     )
     check = get_check({'metrics': [{'state': {'type': 'service_check', 'status_map': {'7': 'ok'}}}]})
     dd_run_check(check)

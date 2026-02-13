@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from datadog_checks.base import OpenMetricsBaseCheckV2
+
 from ..utils import get_check
 
 
@@ -37,7 +39,7 @@ def test_default(aggregator, dd_run_check, mock_http_response):
         http_request_duration_microseconds_sum{handler="prometheus"} 65093.229
         http_request_duration_microseconds_count{handler="prometheus"} 25
         """
-    mock_http_response(payload)
+    mock_http_response(OpenMetricsBaseCheckV2, payload)
     check = get_check({'metrics': ['.+']})
     dd_run_check(check)
 
@@ -83,7 +85,7 @@ def test_no_quantiles(aggregator, dd_run_check, mock_http_response):
         http_request_duration_microseconds_sum{handler="prometheus"} 65093.229
         http_request_duration_microseconds_count{handler="prometheus"} 25
         """
-    mock_http_response(payload)
+    mock_http_response(OpenMetricsBaseCheckV2, payload)
     check = get_check({'metrics': ['.+']})
     dd_run_check(check)
 
@@ -115,7 +117,7 @@ def test_quantiles_remapped_metric_name(aggregator, dd_run_check, mock_http_resp
         prometheus_target_interval_length_seconds_sum{interval="1s"} 26649.83516454906
         prometheus_target_interval_length_seconds_count{interval="1s"} 26032
         """
-    mock_http_response(payload)
+    mock_http_response(OpenMetricsBaseCheckV2, payload)
     check = get_check({'metrics': [{'prometheus_target_interval_length_seconds': 'target_interval_seconds'}]})
     dd_run_check(check)
 

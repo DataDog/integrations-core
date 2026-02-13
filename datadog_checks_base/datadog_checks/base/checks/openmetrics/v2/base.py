@@ -8,6 +8,7 @@ from requests.exceptions import RequestException
 
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.tracing import traced_class
 
 from .scraper import OpenMetricsScraper
@@ -109,6 +110,13 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
     def get_default_config(self):
         return {}
+
+    def get_http_handler(self, config):
+        """
+        Return an HTTP client for the given scraper config.
+        Overridable so tests can inject a mock (e.g. via mock_http_response).
+        """
+        return RequestsWrapper(config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
     def refresh_scrapers(self):
         pass

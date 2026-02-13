@@ -2,16 +2,19 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from datadog_checks.base import OpenMetricsBaseCheckV2
+
 from ..utils import get_check
 
 
 def test_named(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
+        OpenMetricsBaseCheckV2,
         """
         # HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
         # TYPE process_cpu_seconds_total counter
         process_cpu_seconds_total{foo="bar"} 5.2
-        """
+        """,
     )
     check = get_check(
         {
@@ -37,11 +40,12 @@ def test_named(aggregator, dd_run_check, mock_http_response):
 
 def test_integer(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
+        OpenMetricsBaseCheckV2,
         """
         # HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
         # TYPE process_cpu_seconds_total counter
         process_cpu_seconds_total{foo="bar"} 5.2
-        """
+        """,
     )
     check = get_check(
         {'metrics': [{'process_cpu_seconds': {'name': 'process_cpu_usage', 'type': 'temporal_percent', 'scale': 1}}]}

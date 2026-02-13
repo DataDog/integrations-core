@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.stubs import datadog_agent
 from tests.base.checks.openmetrics.test_v2.utils import get_check
 
@@ -99,7 +100,7 @@ def test_first_scrape_handler(
         aggregator.reset()
 
         if idx != 5:
-            mock_http_response(_make_test_data(process_start_time))
+            mock_http_response(OpenMetricsBaseCheckV2, _make_test_data(process_start_time))
             dd_run_check(check)
 
             aggregator.assert_metric(
@@ -149,7 +150,7 @@ def test_first_scrape_handler(
 
             expect_first_flush = True
         else:
-            mock_http_response("", status_code=500)
+            mock_http_response(OpenMetricsBaseCheckV2, "", status_code=500)
             with pytest.raises(Exception):
                 dd_run_check(check)
 

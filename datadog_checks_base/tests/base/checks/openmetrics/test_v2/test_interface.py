@@ -15,11 +15,12 @@ def test_default_config(aggregator, dd_run_check, mock_http_response):
             return {'metrics': ['.+'], 'rename_labels': {'foo': 'bar'}}
 
     mock_http_response(
+        OpenMetricsBaseCheckV2,
         """
         # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
         # TYPE go_memstats_alloc_bytes gauge
         go_memstats_alloc_bytes{foo="baz"} 6.396288e+06
-        """
+        """,
     )
     check = Check('test', {}, [{'openmetrics_endpoint': 'test'}])
     dd_run_check(check)
@@ -33,11 +34,12 @@ def test_default_config(aggregator, dd_run_check, mock_http_response):
 
 def test_tag_by_endpoint(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
+        OpenMetricsBaseCheckV2,
         """
         # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
         # TYPE go_memstats_alloc_bytes gauge
         go_memstats_alloc_bytes{foo="baz"} 6.396288e+06
-        """
+        """,
     )
     check = get_check({'metrics': ['.+'], 'tag_by_endpoint': False})
     dd_run_check(check)
@@ -54,8 +56,8 @@ def test_service_check_dynamic_tags(aggregator, dd_run_check, mock_http_response
         # TYPE state gauge
         state{bar="baz"} 3
         """
-    mock_http_response(payload)
-    mock_http_response(payload)
+    mock_http_response(OpenMetricsBaseCheckV2, payload)
+    mock_http_response(OpenMetricsBaseCheckV2, payload)
     check = get_check(
         {'metrics': ['.+', {'state': {'type': 'service_check', 'status_map': {'3': 'ok'}}}], 'tags': ['foo:bar']}
     )
@@ -74,6 +76,8 @@ def test_service_check_dynamic_tags(aggregator, dd_run_check, mock_http_response
     assert len(aggregator.service_check_names) == 2
 
     aggregator.reset()
+    mock_http_response(OpenMetricsBaseCheckV2, payload)
+    mock_http_response(OpenMetricsBaseCheckV2, payload)
     check.set_dynamic_tags('baz:foo')
     dd_run_check(check)
 
@@ -114,12 +118,13 @@ def test_custom_transformer(aggregator, dd_run_check, mock_http_response):
             )
 
     mock_http_response(
+        OpenMetricsBaseCheckV2,
         """
         # TYPE envoy_server_worker_0_watchdog_mega_miss counter
         envoy_server_worker_0_watchdog_mega_miss{} 1
         # TYPE envoy_server_worker_1_watchdog_mega_miss counter
         envoy_server_worker_1_watchdog_mega_miss{} 0
-        """
+        """,
     )
     check = Check('test', {}, [{'openmetrics_endpoint': 'test'}])
     dd_run_check(check)

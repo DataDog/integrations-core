@@ -2,11 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from datadog_checks.base import OpenMetricsBaseCheckV2
+
 from ..utils import get_check
 
 
 def test_basic(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
+        OpenMetricsBaseCheckV2,
         """
         # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
         # TYPE go_memstats_alloc_bytes gauge
@@ -14,7 +17,7 @@ def test_basic(aggregator, dd_run_check, mock_http_response):
         # HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
         # TYPE go_memstats_alloc_bytes_total counter
         go_memstats_alloc_bytes_total 2.58684656e+08
-        """
+        """,
     )
     check = get_check({'metrics': [{'go_memstats_alloc_bytes': {'type': 'native_dynamic'}}]})
     dd_run_check(check)
