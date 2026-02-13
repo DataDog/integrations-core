@@ -1,4 +1,5 @@
 name: Juniper SRX Firewall
+fleet_configurable: true
 files:
 - name: juniper_srx_firewall.yaml
   options:
