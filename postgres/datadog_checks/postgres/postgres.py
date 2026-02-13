@@ -196,7 +196,9 @@ class PostgreSql(DatabaseCheck):
                 status=(
                     HealthStatus.ERROR
                     if not self._validation_result.valid
-                    else HealthStatus.WARNING if self._validation_result.warnings else HealthStatus.OK
+                    else HealthStatus.WARNING
+                    if self._validation_result.warnings
+                    else HealthStatus.OK
                 ),
                 cooldown_time=60 * 60 * 6,  # 6 hours
                 data={
