@@ -354,45 +354,7 @@ class PostgresSchemaCollector(SchemaCollector):
             else ""
         )
         limit = int(self._config.max_tables or 1_000_000)
-
-        # Build additional columns for schema_tables CTE
-        additional_table_columns = """tables.row_count_estimate, tables.page_count, tables.all_visible_pages,
-                tables.frozen_xid, tables.min_mxid, tables.table_options,
-                tables.has_indexes, tables.relation_kind, tables.num_columns,
-                tables.num_check_constraints, tables.has_triggers, tables.row_security_enabled,
-                tables.is_populated"""
-
-        # Add is_partition for PG 10+
-        if VersionUtils.parse_version(str(self._check.version)) >= V10:
-            additional_table_columns += ", tables.is_partition"
-
-        # Build additional columns for final SELECT
-        additional_select_columns = (
-            """schema_tables.row_count_estimate, schema_tables.page_count, """
-            """schema_tables.all_visible_pages,
-            schema_tables.frozen_xid, schema_tables.min_mxid, schema_tables.table_options,
-            schema_tables.has_indexes, schema_tables.relation_kind, schema_tables.num_columns,
-            schema_tables.num_check_constraints, schema_tables.has_triggers,
-            schema_tables.row_security_enabled, schema_tables.is_populated"""
-        )
-
-        # Add is_partition for PG 10+
-        if VersionUtils.parse_version(str(self._check.version)) >= V10:
-            additional_select_columns += ", schema_tables.is_partition"
-
-        # Build additional columns for GROUP BY
-        additional_group_by_columns = (
-            """schema_tables.row_count_estimate, schema_tables.page_count, """
-            """schema_tables.all_visible_pages,
-                schema_tables.frozen_xid, schema_tables.min_mxid, schema_tables.table_options,
-                schema_tables.has_indexes, schema_tables.relation_kind, schema_tables.num_columns,
-                schema_tables.num_check_constraints, schema_tables.has_triggers,
-                schema_tables.row_security_enabled, schema_tables.is_populated"""
-        )
-
-        # Add is_partition for PG 10+
-        if VersionUtils.parse_version(str(self._check.version)) >= V10:
-            additional_group_by_columns += ", schema_tables.is_partition"
+        is_pg10_or_newer = VersionUtils.parse_version(str(self._check.version)) >= V10
 
         query = f"""
             WITH
@@ -405,7 +367,11 @@ class PostgresSchemaCollector(SchemaCollector):
             schema_tables AS (
                 SELECT schemas.schema_id, schemas.schema_name, schemas.schema_owner,
                 tables.table_id, tables.table_name, tables.table_owner, tables.toast_table,
-                {additional_table_columns}
+                tables.row_count_estimate, tables.page_count, tables.all_visible_pages,
+                tables.frozen_xid, tables.min_mxid, tables.table_options,
+                tables.has_indexes, tables.relation_kind, tables.num_columns,
+                tables.num_check_constraints, tables.has_triggers, tables.row_security_enabled,
+                tables.is_populated{', tables.is_partition' if is_pg10_or_newer else ''}
                 FROM schemas
                 LEFT JOIN tables ON schemas.schema_id = tables.schema_id
                 ORDER BY schemas.schema_name, tables.table_name
@@ -424,7 +390,11 @@ class PostgresSchemaCollector(SchemaCollector):
 
             SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.schema_owner,
             schema_tables.table_id, schema_tables.table_name, schema_tables.table_owner, schema_tables.toast_table,
-            {additional_select_columns},
+            schema_tables.row_count_estimate, schema_tables.page_count, schema_tables.all_visible_pages,
+            schema_tables.frozen_xid, schema_tables.min_mxid, schema_tables.table_options,
+            schema_tables.has_indexes, schema_tables.relation_kind, schema_tables.num_columns,
+            schema_tables.num_check_constraints, schema_tables.has_triggers,
+            schema_tables.row_security_enabled, schema_tables.is_populated{', schema_tables.is_partition' if is_pg10_or_newer else ''},
                 array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
                 array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes,
                 array_agg(row_to_json(constraints.*)) FILTER (WHERE constraints.name IS NOT NULL)
@@ -437,7 +407,11 @@ class PostgresSchemaCollector(SchemaCollector):
                 {partition_joins}
             GROUP BY schema_tables.schema_id, schema_tables.schema_name, schema_tables.schema_owner,
                 schema_tables.table_id, schema_tables.table_name, schema_tables.table_owner, schema_tables.toast_table,
-                {additional_group_by_columns}
+                schema_tables.row_count_estimate, schema_tables.page_count, schema_tables.all_visible_pages,
+                schema_tables.frozen_xid, schema_tables.min_mxid, schema_tables.table_options,
+                schema_tables.has_indexes, schema_tables.relation_kind, schema_tables.num_columns,
+                schema_tables.num_check_constraints, schema_tables.has_triggers,
+                schema_tables.row_security_enabled, schema_tables.is_populated{', schema_tables.is_partition' if is_pg10_or_newer else ''}
             ;
         """
 
