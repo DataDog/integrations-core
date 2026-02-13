@@ -1,4 +1,5 @@
 name: Keycloak
+fleet_configurable: true
 files:
 - name: keycloak.yaml
   options:

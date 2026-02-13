@@ -1,4 +1,5 @@
 name: Ceph
+fleet_configurable: true
 files:
   - name: ceph.yaml
     options:
@@ -9,11 +10,13 @@ files:
         options:
           - name: ceph_cmd
             description: Ceph command to use.
+            fleet_configurable: true
             value:
               example: /usr/bin/ceph
               type: string
           - name: ceph_cluster
             description: Cluster ceph to query.
+            fleet_configurable: true
             value:
               example: ceph
               type: string
@@ -24,6 +27,7 @@ files:
               dd-agent ALL=(ALL) NOPASSWD:/usr/bin/ceph
 
               to your sudoers file, and uncomment the option below:
+            fleet_configurable: true
             value:
               type: boolean
               example: false
@@ -33,6 +37,7 @@ files:
               It collects by default the health check listed below.
               The list of health checks is available here: http://docs.ceph.com/docs/master/rados/operations/health-checks/
               The health checks are only available if you're running ceph luminous or later
+            fleet_configurable: true
             value:
               type: array
               items:
