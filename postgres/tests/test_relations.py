@@ -351,6 +351,25 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
+def test_index_metrics_exclude_toast_tables(aggregator, integration_check, pg_instance):
+    """
+    Regression test: ensure index metrics exclude pg_toast tables when using
+    a broad relation_regex.
+    """
+    pg_instance["relations"] = [{"relation_regex": ".*"}]
+    pg_instance["dbname"] = "dogs"
+
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    idx_metric_names = IDX_METRICS + ["postgresql.individual_index_size"]
+    for metric_name in idx_metric_names:
+        aggregator.assert_metric_has_tag_prefix(metric_name, "table:pg_toast", count=0)
+        aggregator.assert_metric_has_tag_prefix(metric_name, "index:pg_toast", count=0)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
 @pytest.mark.flaky(max_runs=5)
 def test_vacuum_age(aggregator, integration_check, pg_instance):
     pg_instance["relations"] = ["persons"]
