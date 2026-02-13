@@ -20,6 +20,10 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_enable_legacy_tags_normalization():
+    return True
+
+
 def instance_ipv4_only():
     return False
 
