@@ -19,7 +19,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
 
-        self._api_endpoint = self.instance["control_m_api_endpoint"].rstrip("/")
+        self._api_endpoint = self.instance.get("control_m_api_endpoint", "").rstrip("/")
 
         # Static tokens can be created that have no expiration. This is the ideal approach for production.
         # But we can support both. The logic here is that we'll try first with a static token and if it fails,
@@ -46,6 +46,8 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         # Tokens last 30 minutes by default. We can try refreshing them before they expire to interruptions.
         self._token_lifetime = self.instance.get("token_lifetime_seconds", 1800)
         self._token_refresh_buffer = self.instance.get("token_refresh_buffer_seconds", 300)
+
+        self._base_tags = [f"control_m_instance:{self._api_endpoint}"]
 
         self._token = None
         self._token_expiration = 0.0
@@ -123,13 +125,15 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         return response
 
     def _auth_method_tag(self):
-        # Used in both modes. Return the appropriate authentication method tag.
         if self._use_session_login:
             return "auth_method:session_login"
         return "auth_method:static_token"
 
+    def _auth_tags(self):
+        return self._base_tags + [self._auth_method_tag()]
+
     def check(self, _):
-        tags = [self._auth_method_tag()]
+        auth_tags = self._auth_tags()
 
         if self._use_session_login:
             try:
@@ -138,33 +142,49 @@ class ControlMCheck(AgentCheck, ConfigMixin):
                 self.service_check(
                     _SERVICE_CHECK_CAN_LOGIN,
                     self.CRITICAL,
-                    tags=tags,
+                    tags=auth_tags,
                     message=f"Failed to authenticate to Control-M API: {e}",
                 )
                 self.service_check(
                     _SERVICE_CHECK_CAN_CONNECT,
                     self.CRITICAL,
-                    tags=tags,
+                    tags=auth_tags,
                     message=f"Failed to authenticate to Control-M API: {e}",
                 )
-                self.gauge("can_connect", 0, tags=tags)
+                self.gauge("can_connect", 0, tags=auth_tags)
                 raise
-            self.service_check(_SERVICE_CHECK_CAN_LOGIN, self.OK, tags=tags)
+            self.service_check(_SERVICE_CHECK_CAN_LOGIN, self.OK, tags=auth_tags)
 
         try:
             response = self._make_request("get", f"{self._api_endpoint}/config/servers")
             response.raise_for_status()
+            servers = response.json()
         except Exception as e:
-            tags = [self._auth_method_tag()]
+            auth_tags = self._auth_tags()
             self.service_check(
                 _SERVICE_CHECK_CAN_CONNECT,
                 self.CRITICAL,
-                tags=tags,
+                tags=auth_tags,
                 message=f"Failed to connect to Control-M API: {e}",
             )
-            self.gauge("can_connect", 0, tags=tags)
+            self.gauge("can_connect", 0, tags=auth_tags)
             raise
 
-        tags = [self._auth_method_tag()]
-        self.service_check(_SERVICE_CHECK_CAN_CONNECT, self.OK, tags=tags)
-        self.gauge("can_connect", 1, tags=tags)
+        auth_tags = self._auth_tags()
+        self.service_check(_SERVICE_CHECK_CAN_CONNECT, self.OK, tags=auth_tags)
+        self.gauge("can_connect", 1, tags=auth_tags)
+
+        self._collect_metadata(servers)
+
+    @AgentCheck.metadata_entrypoint
+    def _collect_metadata(self, servers):
+        # The /config/servers response is a list of server objects, each with
+        # a "version" field (e.g. "9.0.21.080").  Report the first one found.
+        if isinstance(servers, list):
+            for server in servers:
+                version = server.get("version")
+                if version:
+                    self.set_metadata("version", version)
+                    self.log.debug("Collected Control-M version: %s", version)
+                    return
+        self.log.debug("Could not determine Control-M version from /config/servers response")
