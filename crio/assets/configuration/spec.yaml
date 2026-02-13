@@ -1,4 +1,5 @@
 name: CRI-O
+fleet_configurable: true
 files:
 - name: crio.yaml
   options:
