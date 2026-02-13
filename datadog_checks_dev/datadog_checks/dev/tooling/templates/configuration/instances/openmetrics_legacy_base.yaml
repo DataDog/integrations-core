@@ -39,11 +39,13 @@
   description: |
     Send a service check reporting about the health of the Prometheus endpoint.
     The service check is named <NAMESPACE>.prometheus.health
+  fleet_configurable: true
   value:
     type: boolean
     example: true
 - name: label_to_hostname
   description: Override the hostname with the value of one label.
+  fleet_configurable: true
   value:
     type: string
     example: <LABEL>
@@ -160,6 +162,7 @@
     If set to true, adds a bearer token authentication header.
     If set to 'tls_only', only adds a bearer token authentication header if the endpoint is secure https.
     Note: If bearer_token_path is not set, the default path is /var/run/secrets/kubernetes.io/serviceaccount/token.
+  fleet_configurable: true
   value:
     example: false
     anyOf:
