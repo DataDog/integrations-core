@@ -116,3 +116,25 @@ class TestRequestWrapperMock:
         with mock:
             assert check._http is mock
         assert check._http is original
+
+
+class TestMockHttpResponseGeneralMode:
+    """mock_http_response fixture in general mode returns (client, enqueue) for use without a check class."""
+
+    def test_general_mode_returns_client_and_enqueue(self, mock_http_response):
+        client, enqueue = mock_http_response(content=b'first')
+        assert client.get('http://example.com/').content == b'first'
+
+    def test_general_mode_enqueue_serves_responses_in_order(self, mock_http_response):
+        client, enqueue = mock_http_response(content=b'first')
+        enqueue(content=b'second')
+        assert client.get('http://example.com/').content == b'first'
+        assert client.get('http://example.com/').content == b'second'
+
+    def test_general_mode_empty_queue_returns_default_response(self, mock_http_response):
+        client, enqueue = mock_http_response(content=b'only')
+        assert client.get('http://example.com/').content == b'only'
+        # Queue empty; client returns default 200 empty body
+        resp = client.get('http://example.com/')
+        assert resp.status_code == 200
+        assert resp.content == b''

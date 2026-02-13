@@ -295,41 +295,58 @@ def mock_response():
 @pytest.fixture
 def mock_http_response(mocker, mock_response):
     """
-    Patch HTTP so openmetrics/prometheus checks get a mock response.
+    Mock HTTP in two modes (implementation-independent; uses HTTPResponseMock / RequestWrapperMock).
 
-    First positional argument must be a check class with get_http_handler (e.g.
-    OpenMetricsBaseCheckV2, OpenMetricsBaseCheck). That class is patched so its
-    get_http_handler returns a mock that serves responses in order. Remaining
-    args/kwargs are passed to mock_response to build each response.
+    **Check mode** – mock_http_response(CheckClass, ...): First argument is a check class with
+    get_http_handler (e.g. OpenMetricsBaseCheckV2, OpenMetricsBaseCheck). Patches that class's
+    get_http_handler with a RequestWrapperMock that serves responses from a per-test queue.
+    Remaining args/kwargs are passed to mock_response to build each response. Multiple calls
+    in one test enqueue responses so the check receives them in order.
 
-    Multiple calls in one test (e.g. mock_http_response(Check, p1); mock_http_response(Check, p2))
-    enqueue responses so the check receives them in order.
+    **General mode** – mock_http_response(...) with no check class: Call with only response spec
+    (e.g. content=b'...', file_path=...) or no args. Returns (client, enqueue) where client is a
+    RequestWrapperMock that pops responses from an internal queue and enqueue(*args, **kwargs)
+    appends responses (built via mock_response). Use when the test has no check; inject client
+    where the HTTP wrapper is created or used.
     """
+    from datadog_checks.dev.http import HTTPResponseMock, RequestWrapperMock
 
-    response_queue = []  # per test; ensures tests do not share mock response state
+    response_queue = []  # check mode: per-test queue
+    general_queue = []  # general mode: queue for returned client
+    general_client = []  # [RequestWrapperMock | None]; list to allow assignment in closure
+
+    def enqueue(*args, **kwargs):
+        """Append a response to the general-mode queue. Use after mock_http_response(...) returned (client, enqueue)."""
+        general_queue.append(mock_response(*args, **kwargs))
 
     def _mock(*args, **kwargs):
-        from datadog_checks.dev.http import RequestWrapperMock
+        # Check mode: first arg is a check class with get_http_handler
+        if args and isinstance(args[0], type) and hasattr(args[0], 'get_http_handler'):
+            handler_target = args[0]
+            response = mock_response(*args[1:], **kwargs)
+            response_queue.append(response)
+            if len(response_queue) == 1:
+                wrapper_mock = RequestWrapperMock(
+                    get=lambda url, **kw: response_queue.pop(0),
+                )
+                wrapper_mock.options = {'headers': {'Accept': '*/*'}}
+                return mocker.patch.object(
+                    handler_target,
+                    'get_http_handler',
+                    return_value=wrapper_mock,
+                )
+            return None
 
-        if not args or not isinstance(args[0], type) or not hasattr(args[0], 'get_http_handler'):
-            raise TypeError(
-                'mock_http_response requires a check class with get_http_handler as first argument '
-                '(e.g. OpenMetricsBaseCheckV2, OpenMetricsBaseCheck)'
+        # General mode: no check class; build response, enqueue, return (client, enqueue)
+        response = mock_response(*args, **kwargs)
+        general_queue.append(response)
+        if not general_client:
+            client = RequestWrapperMock(
+                get=lambda url, **kw: general_queue.pop(0) if general_queue else HTTPResponseMock(200, content=b''),
             )
-        handler_target = args[0]
-        response = mock_response(*args[1:], **kwargs)
-        response_queue.append(response)
-        if len(response_queue) == 1:
-            wrapper_mock = RequestWrapperMock(
-                get=lambda url, **kw: response_queue.pop(0),
-            )
-            wrapper_mock.options = {'headers': {'Accept': '*/*'}}
-            return mocker.patch.object(
-                handler_target,
-                'get_http_handler',
-                return_value=wrapper_mock,
-            )
-        return None
+            client.options = {'headers': {'Accept': '*/*'}}
+            general_client.append(client)
+        return (general_client[0], enqueue)
 
     yield _mock
 

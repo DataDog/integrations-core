@@ -49,18 +49,34 @@ response = self.http.get(url)
 
 ## Testing
 
-To mock HTTP in tests without depending on `requests` or `httpx`, use the helpers in `datadog_checks.dev.http` (or the `http_response_mock` and `request_wrapper_mock` pytest fixtures from the dev plugin):
+To mock HTTP in tests without depending on `requests` or `httpx`, use the helpers in `datadog_checks.dev.http` (or the `mock_response`, `mock_http_response`, `http_response_mock`, and `request_wrapper_mock` pytest fixtures from the dev plugin).
 
-- **`HTTPResponseMock`**: Builds a response (status_code, content, headers, json_data) that satisfies the same interface as the real response.
-- **`RequestWrapperMock`**: Implements the HTTP client interface. Pass callables for `get`, `post`, etc. to control responses. As a context manager with a check instance, it patches `check.http` for the duration:
+**Mock HTTP design (implementation-independent):**
 
-```python
-from datadog_checks.dev.http import HTTPResponseMock, RequestWrapperMock
+1. **Check mode** – When testing a check that has `get_http_handler` (e.g. OpenMetrics, Prometheus), use the `mock_http_response` fixture with the check class as first argument. It patches that class’s `get_http_handler` with a `RequestWrapperMock` and a response queue:
 
-def test_check(dd_run_check, check, instance):
-    with RequestWrapperMock(check, get=lambda url, **kwargs: HTTPResponseMock(200, content=b'...')):
-        dd_run_check(check(instance))
-```
+   ```python
+   mock_http_response(OpenMetricsBaseCheckV2, file_path=fixture_path)
+   dd_run_check(check(instance))
+   ```
+
+2. **General mode** – When the test does not have a check (e.g. wrapper-level or helper code), call `mock_http_response(...)` with only response spec (no check class). It returns `(client, enqueue)` where `client` is a `RequestWrapperMock` and `enqueue(...)` adds responses; inject `client` where the HTTP wrapper is created or used.
+
+   ```python
+   client, enqueue = mock_http_response(content=b'first')
+   enqueue(content=b'second')
+   with patch('mymodule.get_http_handler', return_value=client):
+       ...
+   ```
+
+3. **Direct helpers** – For ad-hoc tests, use `HTTPResponseMock` and `RequestWrapperMock` from `datadog_checks.dev.http`:
+
+   ```python
+   from datadog_checks.dev.http import HTTPResponseMock, RequestWrapperMock
+
+   with RequestWrapperMock(check, get=lambda url, **kwargs: HTTPResponseMock(200, content=b'...')):
+       dd_run_check(check(instance))
+   ```
 
 This keeps tests implementation-independent so they pass whether the check uses the requests-based or httpx-based wrapper.
 

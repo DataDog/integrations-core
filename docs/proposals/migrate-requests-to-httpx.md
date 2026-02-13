@@ -5,6 +5,10 @@
 - Status: draft
 - [Discussion][1]
 
+**Implementation branches (as of 2026-02):**
+- **`mwdd146980/ai-6576`** – Base httpx implementation: `HTTPXWrapper`, `HTTPXResponseAdapter`, shared `http_exceptions`/`http_protocol`, `use_httpx` on AgentCheck, Kerberos via httpx-gssapi.
+- **`mwdd146980/base-httpx-migration`** – Application in datadog_checks_base: `OpenMetricsBaseCheckV2.get_http_handler(config)`, scraper uses it, `mock_http_response(CheckClass, ...)` fixture, OpenMetrics legacy tests migrated to implementation-independent mocks.
+
 ## Overview
 
 The Datadog Agent check base currently uses the `requests` library for all HTTP traffic via a shared wrapper (`RequestsWrapper`) in `datadog_checks_base`. The `requests` project is in maintenance mode (no new features; security and bug fixes only) and does not support async or HTTP/2. This RFC proposes migrating to `httpx`: we introduce an httpx-based wrapper that preserves the current public API, switch the base check to use it first, then migrate Prometheus/OpenMetrics and remaining code paths incrementally. Integrations will not need to change how they call `self.http.get(url)` or consume responses; only the implementation behind those calls changes.
@@ -18,7 +22,7 @@ The Datadog Agent check base currently uses the `requests` library for all HTTP 
   - **Prometheus mixin**: `get_http_handler()` in [`datadog_checks_base/datadog_checks/base/checks/prometheus/mixins.py`](datadog_checks_base/datadog_checks/base/checks/prometheus/mixins.py) creates and caches a `RequestsWrapper` per endpoint.
   - **OpenMetrics mixin and v2 scraper**: Same pattern in [`datadog_checks_base/datadog_checks/base/checks/openmetrics/mixins.py`](datadog_checks_base/datadog_checks/base/checks/openmetrics/mixins.py) and [`datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/scraper/base_scraper.py`](datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/scraper/base_scraper.py).
   - **Direct instantiation**: A few integrations (e.g. vsphere, kube_controller_manager, kube_scheduler, kube_proxy, kube_metrics_server, kube_dns) construct `RequestsWrapper` directly.
-- **Testing**: Many tests mock `requests.Session.get` or similar; migrating to httpx allows use of `httpx.MockTransport` and a single, modern stack.
+- **Testing**: Many tests mock `requests.Session.get` or similar. The migration uses a single, implementation-independent mock design: (1) **Check mode** – `mock_http_response(CheckClass, ...)` patches the check’s `get_http_handler` with a `RequestWrapperMock` and response queue. (2) **General mode** – `mock_http_response(...)` with no check class returns `(client, enqueue)` for use in tests without a check (e.g. inject `client` where the HTTP wrapper is created). Both use `HTTPResponseMock` / `RequestWrapperMock` from `datadog_checks.dev.http` so tests work with either requests or httpx. See `.cursor/rfc-requests-to-httpx-migration.md` and `docs/developer/base/http.md`.
 
 A big-bang replacement would be risky and hard to roll back. An incremental migration by code path (base check first, then Prometheus, then OpenMetrics, then remaining direct usage) keeps rollback options and allows validation at each step.
 
