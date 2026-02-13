@@ -610,7 +610,7 @@ class TestAuthTokenDCOS:
                 return MockResponse(json_data={'token': 'auth-token'})
             return MockResponse(status_code=404)
 
-        mock_http_response_per_endpoint(
+        mock_get = mock_http_response_per_endpoint(
             {'https://leader.mesos/service/some-service': [MockResponse(json_data={})]},
             mode='default',
             default_response=MockResponse(status_code=404),
@@ -619,6 +619,11 @@ class TestAuthTokenDCOS:
         with mock.patch('requests.post', side_effect=login):
             http = RequestsWrapper(instance, init_config)
             http.get('https://leader.mesos/service/some-service')
+
+        # Ensure the request to the service endpoint carried the DCOS token in headers
+        mock_get.assert_called_once()
+        call_kwargs = mock_get.call_args[1]
+        assert call_kwargs['headers']['Authorization'] == 'token=auth-token'
 
 
 class TestAuthTokenWriteHeader:
