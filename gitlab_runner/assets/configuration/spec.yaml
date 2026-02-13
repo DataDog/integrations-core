@@ -1,4 +1,5 @@
 name: Gitlab Runner
+fleet_configurable: true
 files:
 - name: gitlab_runner.yaml
   options:
@@ -6,6 +7,7 @@ files:
     options:
     - name: allowed_metrics
       description: List of metrics to extract from Prometheus.
+      fleet_configurable: true
       required: true
       value:
         type: array
@@ -59,6 +61,7 @@ files:
   - template: instances
     options:
       - name: gitlab_url
+        fleet_configurable: true
         required: true
         description: |
           Master URL to probe for service health status.
@@ -67,6 +70,7 @@ files:
         value:
           type: string
       - name: prometheus_endpoint
+        fleet_configurable: true
         required: true
         description: URL of the metrics endpoint of prometheus
         value:
