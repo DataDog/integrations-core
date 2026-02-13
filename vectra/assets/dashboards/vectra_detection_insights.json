@@ -87,7 +87,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -149,7 +149,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -194,7 +194,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -271,7 +271,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -380,7 +380,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -450,7 +450,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -527,7 +527,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -604,7 +604,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -680,7 +680,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -762,7 +762,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -828,7 +828,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -873,7 +873,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -950,7 +950,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1027,7 +1027,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1104,7 +1104,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1176,7 +1176,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections -@usr.name:* @threat:>60 $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections -@usr.name:* @threat:>60 $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1269,7 +1269,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1341,7 +1341,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections -@usr.name:null $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections -@usr.name:null $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1418,7 +1418,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1497,7 +1497,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1567,7 +1567,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1645,7 +1645,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detections -@usr.name:null $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detections -@usr.name:null $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1718,7 +1718,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:vectra service:detections $detection_id $detection_category $entity_type $detection_name $status",
+                                        "query_string": "source:vectra @vendor.endpoint:detections $detection_id $detection_category $entity_type $detection_name $status",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1825,7 +1825,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detection-events $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detection-events $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1894,7 +1894,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detection-events $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detection-events $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1947,7 +1947,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detection-events $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detection-events $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2015,7 +2015,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detection-events $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detection-events $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2084,7 +2084,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detection-events $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detection-events $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2160,7 +2160,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detection-events $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detection-events $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2230,7 +2230,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:detection-events $detection_id $detection_category $entity_type $detection_name $status"
+                                                "query": "source:vectra @vendor.endpoint:detection-events $detection_id $detection_category $entity_type $detection_name $status"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2303,7 +2303,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:vectra service:detection-events $detection_id $detection_category $entity_type $detection_name $status",
+                                        "query_string": "source:vectra @vendor.endpoint:detection-events $detection_id $detection_category $entity_type $detection_name $status",
                                         "indexes": [],
                                         "storage": "hot"
                                     },

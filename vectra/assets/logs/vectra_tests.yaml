@@ -18,12 +18,13 @@ tests:
       "user_type" : "JWT",
       "user_id" : "12345",
       "result_status" : "success",
-      "service" : "audit-events",
+      "vendor" : {
+        "endpoint" : "audit-events"
+      },
       "id" : 34567,
       "event_object" : "user",
       "username" : "test@example.com"
     }
-  service: "audit-events"
   result:
     custom:
       event_action: "login"
@@ -40,16 +41,16 @@ tests:
           geoip: {}
           ip: "10.10.10.10"
       result_status: "success"
-      service: "audit-events"
       status: "Ok"
       user_role: "Security Analyst"
       user_type: "JWT"
       usr:
         id: "12345"
         name: "test@example.com"
+      vendor:
+        endpoint: "audit-events"
       version: "202512.3.0"
     message: "Failed login/logout attempt"
-    service: "audit-events"
     status: "ok"
     tags:
      - "source:LOGS_SOURCE"
@@ -74,12 +75,13 @@ tests:
       },
       "breadth_contrib" : 1,
       "urgency_score" : 74,
-      "service" : "entity-scoring-events",
+      "vendor" : {
+        "endpoint" : "entity-scoring-events"
+      },
       "name" : "AWS:test@example.com",
       "id" : 32738,
       "category" : "ACCOUNT SCORING"
     }
-  service: "entity-scoring-events"
   result:
     custom:
       active_detection_types:
@@ -99,13 +101,14 @@ tests:
         type: "AWS User Hijacking"
         url: "https://xyz.portal.vectra.ai/detections/35431"
       name: "AWS:test@example.com"
-      service: "entity-scoring-events"
       severity: "Low"
       status: "Notice"
       type: "account"
       urgency_score: 74
       url: "https://xyz.portal.vectra.ai/accounts/1013"
       velocity_contrib: 2
+      vendor:
+        endpoint: "entity-scoring-events"
     message: |-
       {
         "severity" : "Low",
@@ -125,12 +128,13 @@ tests:
         },
         "breadth_contrib" : 1,
         "urgency_score" : 74,
-        "service" : "entity-scoring-events",
+        "vendor" : {
+          "endpoint" : "entity-scoring-events"
+        },
         "name" : "AWS:test@example.com",
         "id" : 32738,
         "category" : "ACCOUNT SCORING"
       }
-    service: "entity-scoring-events"
     status: "notice"
     tags:
      - "source:LOGS_SOURCE"
@@ -173,13 +177,14 @@ tests:
       "filtered_by_rule" : false,
       "first_timestamp" : "2025-12-10T09:29:14Z",
       "detection_category" : "command_and_control",
-      "service" : "detections",
+      "vendor" : {
+        "endpoint" : "detections"
+      },
       "detection_type" : "M365 Suspicious Power Automate Flow Creation",
       "sensor" : "s9z9x5sj",
       "threat" : 70,
       "sensor_name" : "Vectra X"
     }
-  service: "detections"
   result:
     custom:
       certainty: 60
@@ -208,7 +213,6 @@ tests:
           ip: "10.10.10.10"
       sensor: "s9z9x5sj"
       sensor_name: "Vectra X"
-      service: "detections"
       src_account:
         certainty: 87
         id: 1083
@@ -224,6 +228,8 @@ tests:
       url: "https://xyz.portal.vectra.ai/api/v3.4/detections/36224"
       usr:
         name: "test@example.com"
+      vendor:
+        endpoint: "detections"
     message: |-
       {
         "last_timestamp" : 1765437592585,
@@ -261,13 +267,14 @@ tests:
         "filtered_by_rule" : false,
         "first_timestamp" : "2025-12-10T09:29:14Z",
         "detection_category" : "command_and_control",
-        "service" : "detections",
+        "vendor" : {
+          "endpoint" : "detections"
+        },
         "detection_type" : "M365 Suspicious Power Automate Flow Creation",
         "sensor" : "s9z9x5sj",
         "threat" : 70,
         "sensor_name" : "Vectra X"
       }
-    service: "detections"
     status: "critical"
     tags:
      - "source:LOGS_SOURCE"
@@ -285,7 +292,9 @@ tests:
       "entity_id" : 1083,
       "url" : "https://308714519558.cc1.portal.vectra.ai/accounts/1083",
       "entity_uid" : "O365:test1@example.com",
-      "service" : "detection-events",
+      "vendor" : {
+        "endpoint" : "detection-events"
+      },
       "detection_type" : "M365 Suspicious Power Automate Flow Creation",
       "mitre" : [ "T1041", "T1020", "T1008", "T1105", "T1064" ],
       "threat" : 70,
@@ -307,7 +316,6 @@ tests:
       "detection_id" : 36224,
       "d_type_vname" : "M365 Suspicious Power Automate Flow Creation"
     }
-  service: "detection-events"
   result:
     custom:
       certainty: 60
@@ -341,13 +349,14 @@ tests:
        - "T1008"
        - "T1105"
        - "T1064"
-      service: "detection-events"
       severity: 7
       status: "Critical"
       threat: 70
       triaged: false
       type: "account"
       url: "https://308714519558.cc1.portal.vectra.ai/accounts/1083"
+      vendor:
+        endpoint: "detection-events"
     message: |-
       {
         "triaged" : false,
@@ -360,7 +369,9 @@ tests:
         "entity_id" : 1083,
         "url" : "https://308714519558.cc1.portal.vectra.ai/accounts/1083",
         "entity_uid" : "O365:test1@example.com",
-        "service" : "detection-events",
+        "vendor" : {
+          "endpoint" : "detection-events"
+        },
         "detection_type" : "M365 Suspicious Power Automate Flow Creation",
         "mitre" : [ "T1041", "T1020", "T1008", "T1105", "T1064" ],
         "threat" : 70,
@@ -382,7 +393,6 @@ tests:
         "detection_id" : 36224,
         "d_type_vname" : "M365 Suspicious Power Automate Flow Creation"
       }
-    service: "detection-events"
     status: "critical"
     tags:
      - "source:LOGS_SOURCE"

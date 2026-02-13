@@ -55,7 +55,7 @@
                         "id": 4939439455925397,
                         "definition": {
                             "type": "note",
-                            "content": "This group provides a high-level view of ingested logs, showing volume trends, service distribution, top client IPs, geographic patterns, and detailed log records for quick monitoring and investigation.",
+                            "content": "This group provides a high-level view of ingested logs, showing volume trends, event type distribution, top client IPs, geographic patterns, and detailed log records for quick monitoring and investigation.",
                             "background_color": "green",
                             "font_size": "14",
                             "text_align": "center",
@@ -87,7 +87,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra $service $client_ip $client_country"
+                                                "query": "source:vectra $event_type $client_ip $client_country"
                                             },
                                             "indexes": [
                                                 "*"
@@ -154,7 +154,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra $service $client_ip $client_country"
+                                                "query": "source:vectra $event_type $client_ip $client_country"
                                             },
                                             "indexes": [
                                                 "*"
@@ -187,7 +187,7 @@
                     {
                         "id": 8058964983473200,
                         "definition": {
-                            "title": "Logs by service",
+                            "title": "Logs by event types",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -197,14 +197,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra $service $client_ip $client_country"
+                                                "query": "source:vectra $event_type $client_ip $client_country"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "service",
+                                                    "facet": "@vendor.endpoint",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -265,7 +265,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra $service $client_ip $client_country"
+                                                "query": "source:vectra $event_type $client_ip $client_country"
                                             },
                                             "indexes": [
                                                 "*"
@@ -343,7 +343,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra $service $client_ip $client_country"
+                                                "query": "source:vectra $event_type $client_ip $client_country"
                                             },
                                             "indexes": [
                                                 "*"
@@ -409,7 +409,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:vectra $service $client_ip $client_country",
+                                        "query_string": "source:vectra $event_type $client_ip $client_country",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -423,7 +423,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "service",
+                                            "field": "vendor.endpoint",
                                             "width": "auto"
                                         },
                                         {
@@ -959,8 +959,8 @@
     ],
     "template_variables": [
         {
-            "name": "service",
-            "prefix": "@service",
+            "name": "event_type",
+            "prefix": "@vendor.endpoint",
             "available_values": [],
             "default": "*"
         },

@@ -87,7 +87,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
+                                                "query": "source:vectra @vendor.endpoint:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -156,7 +156,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
+                                                "query": "source:vectra @vendor.endpoint:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -200,7 +200,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
+                                                "query": "source:vectra @vendor.endpoint:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -278,7 +278,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
+                                                "query": "source:vectra @vendor.endpoint:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -393,7 +393,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:audit-events @result_status:success $user_name $user_role $event_action $event_object $event_result_status $client_ip"
+                                                "query": "source:vectra @vendor.endpoint:audit-events @result_status:success $user_name $user_role $event_action $event_object $event_result_status $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -462,7 +462,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
+                                                "query": "source:vectra @vendor.endpoint:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -517,7 +517,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:audit-events @result_status:failure $user_name $user_role $event_action $event_object $event_result_status $client_ip"
+                                                "query": "source:vectra @vendor.endpoint:audit-events @result_status:failure $user_name $user_role $event_action $event_object $event_result_status $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -571,7 +571,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
+                                                "query": "source:vectra @vendor.endpoint:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -647,7 +647,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
+                                                "query": "source:vectra @vendor.endpoint:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -722,7 +722,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
+                                                "query": "source:vectra @vendor.endpoint:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -846,7 +846,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:audit-events -@usr.name:\"\" $user_name $user_role $event_action $event_object $event_result_status $client_ip"
+                                                "query": "source:vectra @vendor.endpoint:audit-events -@usr.name:\"\" $user_name $user_role $event_action $event_object $event_result_status $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -923,7 +923,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
+                                                "query": "source:vectra @vendor.endpoint:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -992,7 +992,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:audit-events -@usr.name:\"\" $user_name $user_role $event_action $event_object $event_result_status $client_ip"
+                                                "query": "source:vectra @vendor.endpoint:audit-events -@usr.name:\"\" $user_name $user_role $event_action $event_object $event_result_status $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1085,7 +1085,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
+                                                "query": "source:vectra @vendor.endpoint:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1163,7 +1163,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
+                                                "query": "source:vectra @vendor.endpoint:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1227,7 +1227,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:vectra service:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip",
+                                        "query_string": "source:vectra @vendor.endpoint:audit-events $user_name $user_role $event_action $event_object $event_result_status $client_ip",
                                         "indexes": [],
                                         "storage": "hot"
                                     },

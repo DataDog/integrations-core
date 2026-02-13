@@ -87,7 +87,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -156,7 +156,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -215,7 +215,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events @type:account $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events @type:account $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -270,7 +270,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events @type:host $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events @type:host $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -320,7 +320,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -440,7 +440,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events @is_prioritized:true $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events @is_prioritized:true $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -489,7 +489,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -559,7 +559,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -636,7 +636,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -719,7 +719,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -785,7 +785,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -830,7 +830,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -924,7 +924,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1016,7 +1016,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1060,7 +1060,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1152,7 +1152,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1196,7 +1196,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1288,7 +1288,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity"
+                                                "query": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1329,7 +1329,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:vectra service:entity-scoring-events $entity_name $entity_type $category $severity",
+                                        "query_string": "source:vectra @vendor.endpoint:entity-scoring-events $entity_name $entity_type $category $severity",
                                         "indexes": [],
                                         "storage": "hot"
                                     },

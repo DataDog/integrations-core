@@ -66,16 +66,11 @@ pipeline:
       sources:
         - last_timestamp
         - event_timestamp
-    - type: service-remapper
-      name: Define `service` as the official service of the log
-      enabled: true
-      sources:
-        - service
     - type: pipeline
       name: Audit events
       enabled: true
       filter:
-        query: service:audit-events
+        query: "@vendor.endpoint:audit-events"
       processors:
         - type: attribute-remapper
           name: Map `user_id` to `usr.id`
@@ -124,7 +119,7 @@ pipeline:
       name: Entity scoring events
       enabled: true
       filter:
-        query: service:entity-scoring-events
+        query: "@vendor.endpoint:entity-scoring-events"
       processors:
         - name: Lookup for `severity` to `status`
           enabled: true
@@ -139,7 +134,7 @@ pipeline:
       name: Detections
       enabled: true
       filter:
-        query: service:detections
+        query: "@vendor.endpoint:detections"
       processors:
         - type: attribute-remapper
           name: Map `assigned_to` to `usr.name`
@@ -185,7 +180,7 @@ pipeline:
       name: Detections events
       enabled: true
       filter:
-        query: service:detection-events
+        query: "@vendor.endpoint:detection-events"
       processors:
         - type: attribute-remapper
           name: Map `d_type_vname` to `detection_name`
@@ -211,7 +206,7 @@ pipeline:
       name: Detection and Detection events
       enabled: true
       filter:
-        query: service:(detections OR detection-events)
+        query: "@vendor.endpoint:(detections OR detection-events)"
       processors:
         - type: category-processor
           name: Category processor for defining `status` from log
