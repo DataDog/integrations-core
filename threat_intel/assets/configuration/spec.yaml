@@ -1,0 +1,46 @@
+name: Threat Intel
+fleet_configurable: true
+files:
+- name: threat_intel.yaml
+  options:
+  - template: logs
+    example:
+    - type: integration
+      service: threat_intel
+      source: threat_intel
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: api_key
+      fleet_configurable: true
+      required: true
+      secret: true
+      description: "AbuseIPDB API key for querying IP threat intelligence."
+      value:
+        type: string
+        example: <ABUSEIPDB_API_KEY>
+    - name: ip_addresses
+      fleet_configurable: true
+      required: true
+      description: "List of IP addresses to check for threat intelligence."
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - 192.168.1.1
+    - name: max_age_in_days
+      fleet_configurable: true
+      description: "Maximum age in days for abuse reports."
+      value:
+        type: integer
+        example: 90
+        minimum: 1
+        maximum: 365
+
+    - template: instances/default
+      overrides:
+        min_collection_interval.value.example: 3600
+        min_collection_interval.value.minimum: 60

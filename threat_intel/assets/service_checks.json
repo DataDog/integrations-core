@@ -1,0 +1,11 @@
+[
+  {
+    "agent_version": "7.0.0",
+    "integration": "threat_intel",
+    "check": "threat_intel.can_connect",
+    "statuses": ["ok", "critical"],
+    "groups": [],
+    "name": "threat_intel.can_connect",
+    "description": "Returns CRITICAL if the check cannot query the AbuseIPDB API. Returns OK otherwise."
+  }
+]
