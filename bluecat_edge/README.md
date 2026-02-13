@@ -24,7 +24,7 @@ Integrate BlueCat Edge with Datadog to analyze DNS query logs using pre-built da
 1. Add your `BlueCat Edge Domain`, `Client ID` and `Secret key`.
    | Parameter | Description |
    | ---------- | ---------------------------------------------- |
-   | BlueCat Edge Domain | BlueCat Edge Domain of Instance. |
+   | BlueCat Edge Domain | The BlueCat Edge domain of the instance. |
    | Client ID | Client ID of BlueCat Edge. |
    | Secret key | Secret key of BlueCat Edge. |
    | Collect NOERROR DNS Query Logs | Control the collection of NOERROR DNS Query Logs. Enabled by default. |
