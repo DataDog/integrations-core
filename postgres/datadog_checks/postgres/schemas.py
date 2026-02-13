@@ -260,10 +260,9 @@ class PostgresSchemaCollector(SchemaCollector):
                 for exclude_regex in self._config.exclude_databases:
                     query += " AND datname !~ '{}'".format(exclude_regex)
                 if self._config.include_databases:
-                    include_or_conditions = ' OR '.join(
-                        f"datname ~ '{include_regex}'" for include_regex in self._config.include_databases
-                    )
-                    query += f" AND ({include_or_conditions})"
+                    query += f" AND ({
+                        ' OR '.join(f"datname ~ '{include_regex}'" for include_regex in self._config.include_databases)
+                    })"
 
                 # Autodiscovery trumps exclude and include
                 if self._check.autodiscovery:
@@ -288,10 +287,9 @@ class PostgresSchemaCollector(SchemaCollector):
         for exclude_regex in self._config.exclude_schemas:
             query += " AND nspname !~ '{}'".format(exclude_regex)
         if self._config.include_schemas:
-            include_or_conditions = ' OR '.join(
-                f"nspname ~ '{include_regex}'" for include_regex in self._config.include_schemas
-            )
-            query += f" AND ({include_or_conditions})"
+            query += f" AND ({
+                ' OR '.join(f"nspname ~ '{include_regex}'" for include_regex in self._config.include_schemas)
+            })"
         if self._check._config.ignore_schemas_owned_by:
             query += " AND nspowner :: regrole :: text not IN ({})".format(
                 ", ".join(f"'{owner}'" for owner in self._check._config.ignore_schemas_owned_by)
@@ -303,14 +301,12 @@ class PostgresSchemaCollector(SchemaCollector):
             query = PG_TABLES_QUERY_V9
         else:
             query = PG_TABLES_QUERY_V10_PLUS
-
         for exclude_regex in self._config.exclude_tables:
             query += " AND c.relname !~ '{}'".format(exclude_regex)
         if self._config.include_tables:
-            include_or_conditions = ' OR '.join(
-                f"c.relname ~ '{include_regex}'" for include_regex in self._config.include_tables
-            )
-            query += f" AND ({include_or_conditions})"
+            query += f" AND ({
+                ' OR '.join(f"c.relname ~ '{include_regex}'" for include_regex in self._config.include_tables)
+            })"
         return query
 
     def get_rows_query(self):
@@ -435,49 +431,45 @@ class PostgresSchemaCollector(SchemaCollector):
                     "id": str(cursor_row.get("schema_id")),
                     "name": cursor_row.get("schema_name"),
                     "owner": cursor_row.get("schema_owner"),
-                    "tables": (
-                        [
-                            {
-                                k: v
-                                for k, v in {
-                                    "id": str(cursor_row.get("table_id")),
-                                    "name": cursor_row.get("table_name"),
-                                    "owner": cursor_row.get("table_owner"),
-                                    # The query can create duplicates of the joined tables
-                                    "columns": list(
-                                        {v and v['name']: v for v in cursor_row.get("columns") or []}.values()
-                                    )[: self._config.max_columns],
-                                    "indexes": list(
-                                        {v and v['name']: v for v in cursor_row.get("indexes") or []}.values()
-                                    ),
-                                    "foreign_keys": list(
-                                        {v and v['name']: v for v in cursor_row.get("foreign_keys") or []}.values()
-                                    ),
-                                    "toast_table": cursor_row.get("toast_table"),
-                                    "num_partitions": cursor_row.get("num_partitions"),
-                                    "partition_key": cursor_row.get("partition_key"),
-                                    # pg_class statistics and metadata
-                                    "row_count_estimate": cursor_row.get("row_count_estimate"),
-                                    "page_count": cursor_row.get("page_count"),
-                                    "all_visible_pages": cursor_row.get("all_visible_pages"),
-                                    "frozen_xid": cursor_row.get("frozen_xid"),
-                                    "min_mxid": cursor_row.get("min_mxid"),
-                                    "table_options": cursor_row.get("table_options"),
-                                    "has_indexes": cursor_row.get("has_indexes"),
-                                    "relation_kind": cursor_row.get("relation_kind"),
-                                    "num_columns": cursor_row.get("num_columns"),
-                                    "num_check_constraints": cursor_row.get("num_check_constraints"),
-                                    "has_triggers": cursor_row.get("has_triggers"),
-                                    "row_security_enabled": cursor_row.get("row_security_enabled"),
-                                    "is_populated": cursor_row.get("is_populated"),
-                                    "is_partition": cursor_row.get("is_partition"),
-                                }.items()
-                                if v is not None
-                            }
-                        ]
-                        if cursor_row.get("table_name")
-                        else []
-                    ),
+                    "tables": [
+                        {
+                            k: v
+                            for k, v in {
+                                "id": str(cursor_row.get("table_id")),
+                                "name": cursor_row.get("table_name"),
+                                "owner": cursor_row.get("table_owner"),
+                                # The query can create duplicates of the joined tables
+                                "columns": list({v and v['name']: v for v in cursor_row.get("columns") or []}.values())[
+                                    : self._config.max_columns
+                                ],
+                                "indexes": list({v and v['name']: v for v in cursor_row.get("indexes") or []}.values()),
+                                "foreign_keys": list(
+                                    {v and v['name']: v for v in cursor_row.get("foreign_keys") or []}.values()
+                                ),
+                                "toast_table": cursor_row.get("toast_table"),
+                                "num_partitions": cursor_row.get("num_partitions"),
+                                "partition_key": cursor_row.get("partition_key"),
+                                # pg_class statistics and metadata
+                                "row_count_estimate": cursor_row.get("row_count_estimate"),
+                                "page_count": cursor_row.get("page_count"),
+                                "all_visible_pages": cursor_row.get("all_visible_pages"),
+                                "frozen_xid": cursor_row.get("frozen_xid"),
+                                "min_mxid": cursor_row.get("min_mxid"),
+                                "table_options": cursor_row.get("table_options"),
+                                "has_indexes": cursor_row.get("has_indexes"),
+                                "relation_kind": cursor_row.get("relation_kind"),
+                                "num_columns": cursor_row.get("num_columns"),
+                                "num_check_constraints": cursor_row.get("num_check_constraints"),
+                                "has_triggers": cursor_row.get("has_triggers"),
+                                "row_security_enabled": cursor_row.get("row_security_enabled"),
+                                "is_populated": cursor_row.get("is_populated"),
+                                "is_partition": cursor_row.get("is_partition"),
+                            }.items()
+                            if v is not None
+                        }
+                    ]
+                    if cursor_row.get("table_name")
+                    else [],
                 }.items()
                 if v is not None
             }
