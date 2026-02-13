@@ -9,11 +9,31 @@ files:
   - template: instances
     options:
     - name: server
-      description: The server's url.
-      required: true
+      description: |
+        The server's url for the legacy REST API-based check.
+        Required if prometheus_url is not set.
+      required: false
       value:
         example: http://localhost:8091
         type: string
+    - name: prometheus_url
+      description: |
+        The Prometheus/OpenMetrics endpoint URL for the Prometheus-based check.
+        Required if server is not set. This enables collection of metrics from Couchbase's
+        Prometheus exporter (available in Couchbase 7.0+).
+      required: false
+      value:
+        example: http://localhost:8091/metrics
+        type: string
+    - name: labels_mapper
+      description: |
+        A mapping of Prometheus labels to rename to avoid conflicts with reserved tag names.
+        By default, the "service" label is renamed to "couchbase_service" to avoid conflict
+        with Datadog's reserved "service" tag while preserving the contextual information.
+      value:
+        example:
+          service: couchbase_service
+        type: object
     - name: query_monitoring_url
       description: |
         Url to get query monitoring stats, available since couchbase 4.5.

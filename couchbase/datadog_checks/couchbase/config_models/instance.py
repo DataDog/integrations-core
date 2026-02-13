@@ -75,17 +75,19 @@ class InstanceConfig(BaseModel):
     kerberos_hostname: Optional[str] = None
     kerberos_keytab: Optional[str] = None
     kerberos_principal: Optional[str] = None
+    labels_mapper: Optional[MappingProxyType[str, Any]] = None
     log_requests: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     ntlm_domain: Optional[str] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
+    prometheus_url: Optional[str] = None
     proxy: Optional[Proxy] = None
     query_monitoring_url: Optional[str] = None
     read_timeout: Optional[float] = None
     request_size: Optional[float] = None
-    server: str
+    server: Optional[str] = None
     service: Optional[str] = None
     skip_proxy: Optional[bool] = None
     sync_gateway_url: Optional[str] = None

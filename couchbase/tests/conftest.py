@@ -19,6 +19,7 @@ from .common import (
     BUCKET_NAME,
     CB_CONTAINER_NAME,
     COUCHBASE_MAJOR_VERSION,
+    COUCHBASE_METRIC_SOURCE,
     COUCHBASE_MINOR_VERSION,
     COUCHBASE_SYNCGW_MAJOR_VERSION,
     COUCHBASE_SYNCGW_MINOR_VERSION,
@@ -27,6 +28,7 @@ from .common import (
     INDEX_STATS_URL,
     PASSWORD,
     PORT,
+    PROMETHEUS_INSTANCE,
     QUERY_URL,
     SG_URL,
     URL,
@@ -36,25 +38,37 @@ from .common import (
 
 @pytest.fixture
 def instance():
+    if COUCHBASE_METRIC_SOURCE == "prometheus":
+        return deepcopy(PROMETHEUS_INSTANCE)
     return deepcopy(DEFAULT_INSTANCE)
 
 
 @pytest.fixture
-def instance_query(instance):
-    instance['query_monitoring_url'] = QUERY_URL
-    return instance
+def rest_instance():
+    return deepcopy(DEFAULT_INSTANCE)
 
 
 @pytest.fixture
-def instance_sg(instance):
-    instance['sync_gateway_url'] = SG_URL
-    return instance
+def prometheus_instance():
+    return deepcopy(PROMETHEUS_INSTANCE)
 
 
 @pytest.fixture
-def instance_index_stats(instance):
-    instance['index_stats_url'] = INDEX_STATS_URL
-    return instance
+def instance_query(rest_instance):
+    rest_instance['query_monitoring_url'] = QUERY_URL
+    return rest_instance
+
+
+@pytest.fixture
+def instance_sg(rest_instance):
+    rest_instance['sync_gateway_url'] = SG_URL
+    return rest_instance
+
+
+@pytest.fixture
+def instance_index_stats(rest_instance):
+    rest_instance['index_stats_url'] = INDEX_STATS_URL
+    return rest_instance
 
 
 @pytest.fixture
@@ -86,7 +100,10 @@ def dd_environment():
         conditions=conditions,
         sleep=15,
     ):
-        yield deepcopy(DEFAULT_INSTANCE)
+        if COUCHBASE_METRIC_SOURCE == "prometheus":
+            yield deepcopy(PROMETHEUS_INSTANCE)
+        else:
+            yield deepcopy(DEFAULT_INSTANCE)
 
 
 @pytest.fixture()
