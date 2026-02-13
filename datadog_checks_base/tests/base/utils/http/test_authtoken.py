@@ -387,7 +387,7 @@ class TestAuthTokenHeaderWriterCreation:
 
 
 class TestAuthTokenReadFile:
-    def test_pattern_no_match(self):
+    def test_pattern_no_match(self, mock_http_response):
         with TempDir() as temp_dir:
             token_file = os.path.join(temp_dir, 'token.txt')
             instance = {
@@ -399,18 +399,18 @@ class TestAuthTokenReadFile:
             init_config = {}
             http = RequestsWrapper(instance, init_config)
 
-            with mock.patch('requests.Session.get'):
-                write_file(token_file, '\nsecret\nsecret\n')
+            mock_http_response('')
+            write_file(token_file, '\nsecret\nsecret\n')
 
-                with pytest.raises(
+            with pytest.raises(
                     ValueError,
                     match='^{}$'.format(
                         re.escape('The pattern `foo(.+)` does not match anything in file: {}'.format(token_file))
                     ),
-                ):
-                    http.get('https://www.google.com')
+            ):
+                http.get('https://www.google.com')
 
-    def test_pattern_match(self):
+    def test_pattern_match(self, mock_http_response):
         with TempDir() as temp_dir:
             token_file = os.path.join(temp_dir, 'token.txt')
             instance = {
@@ -424,26 +424,26 @@ class TestAuthTokenReadFile:
 
             expected_headers = {'Authorization': 'Bearer bar'}
             expected_headers.update(DEFAULT_OPTIONS['headers'])
-            with mock.patch('requests.Session.get') as get:
-                write_file(token_file, '\nfoobar\nfoobaz\n')
-                http.get('https://www.google.com')
+            mock_get = mock_http_response('')
+            write_file(token_file, '\nfoobar\nfoobaz\n')
+            http.get('https://www.google.com')
 
-                get.assert_called_with(
-                    'https://www.google.com',
-                    headers=expected_headers,
-                    auth=None,
-                    cert=None,
-                    proxies=None,
-                    timeout=(10.0, 10.0),
-                    verify=True,
-                    allow_redirects=True,
-                )
+            mock_get.assert_called_with(
+                'https://www.google.com',
+                headers=expected_headers,
+                auth=None,
+                cert=None,
+                proxies=None,
+                timeout=(10.0, 10.0),
+                verify=True,
+                allow_redirects=True,
+            )
 
-                assert http.options['headers'] == expected_headers
+            assert http.options['headers'] == expected_headers
 
 
 class TestAuthTokenOAuth:
-    def test_failure(self):
+    def test_failure(self, mock_http_response):
         instance = {
             'auth_token': {
                 'reader': {'type': 'oauth', 'url': 'foo', 'client_id': 'bar', 'client_secret': 'baz'},
@@ -463,8 +463,8 @@ class TestAuthTokenOAuth:
             def fetch_token(self, *args, **kwargs):
                 return {'error': 'unauthorized_client'}
 
+        mock_http_response('')
         with (
-            mock.patch('requests.Session.get'),
             mock.patch('oauthlib.oauth2.BackendApplicationClient'),
             mock.patch('requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session),
         ):
@@ -485,7 +485,7 @@ class TestAuthTokenOAuth:
             ),
         ],
     )
-    def test_success(self, token_response, expected_expiration):
+    def test_success(self, mock_http_response, token_response, expected_expiration):
         instance = {
             'auth_token': {
                 'reader': {'type': 'oauth', 'url': 'foo', 'client_id': 'bar', 'client_secret': 'baz'},
@@ -505,15 +505,15 @@ class TestAuthTokenOAuth:
             def fetch_token(self, *args, **kwargs):
                 return token_response
 
+        mock_get = mock_http_response('')
         with (
-            mock.patch('requests.Session.get') as get,
             mock.patch('oauthlib.oauth2.BackendApplicationClient'),
             mock.patch('requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session),
             mock.patch('datadog_checks.base.utils.http.get_timestamp', return_value=0),
         ):
             http.get('https://www.google.com')
 
-            get.assert_called_with(
+            mock_get.assert_called_with(
                 'https://www.google.com',
                 headers=expected_headers,
                 auth=None,
@@ -527,7 +527,7 @@ class TestAuthTokenOAuth:
             assert http.options['headers'] == expected_headers
             assert http.auth_token_handler.reader._expiration == expected_expiration
 
-    def test_success_with_auth_params(self):
+    def test_success_with_auth_params(self, mock_http_response):
         instance = {
             'auth_token': {
                 'reader': {
@@ -555,14 +555,14 @@ class TestAuthTokenOAuth:
                 assert kwargs['audience'] == 'http://example.com'
                 return {'access_token': 'foo', 'expires_in': 9000}
 
+        mock_get = mock_http_response('')
         with (
-            mock.patch('requests.Session.get') as get,
             mock.patch('oauthlib.oauth2.BackendApplicationClient'),
             mock.patch('requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session),
         ):
             http.get('https://www.google.com')
 
-            get.assert_called_with(
+            mock_get.assert_called_with(
                 'https://www.google.com',
                 headers=expected_headers,
                 auth=None,
@@ -577,7 +577,7 @@ class TestAuthTokenOAuth:
 
 
 class TestAuthTokenDCOS:
-    def test_token_auth(self):
+    def test_token_auth(self, mock_http_response_per_endpoint):
         priv_key_path = os.path.join(FIXTURE_PATH, 'dcos', 'private-key.pem')
         pub_key_path = os.path.join(FIXTURE_PATH, 'dcos', 'public-key.pem')
 
@@ -610,19 +610,19 @@ class TestAuthTokenDCOS:
                 return MockResponse(json_data={'token': 'auth-token'})
             return MockResponse(status_code=404)
 
-        def auth(*args, **kwargs):
-            if args[0] == 'https://leader.mesos/service/some-service':
-                assert kwargs['headers']['Authorization'] == 'token=auth-token'
-                return MockResponse(json_data={})
-            return MockResponse(status_code=404)
-
-        with mock.patch('requests.post', side_effect=login), mock.patch('requests.Session.get', side_effect=auth):
+        mock_http_response_per_endpoint(
+            {'https://leader.mesos/service/some-service': [MockResponse(json_data={})]},
+            mode='default',
+            default_response=MockResponse(status_code=404),
+            url_arg_index=1,
+        )
+        with mock.patch('requests.post', side_effect=login):
             http = RequestsWrapper(instance, init_config)
             http.get('https://leader.mesos/service/some-service')
 
 
 class TestAuthTokenWriteHeader:
-    def test_default_placeholder_same_as_value(self):
+    def test_default_placeholder_same_as_value(self, mock_http_response):
         with TempDir() as temp_dir:
             token_file = os.path.join(temp_dir, 'token.txt')
             instance = {
@@ -636,26 +636,26 @@ class TestAuthTokenWriteHeader:
 
             expected_headers = {'X-Vault-Token': 'foobar'}
             expected_headers.update(DEFAULT_OPTIONS['headers'])
-            with mock.patch('requests.Session.get') as get:
-                write_file(token_file, '\nfoobar\n')
-                http.get('https://www.google.com')
+            mock_get = mock_http_response('')
+            write_file(token_file, '\nfoobar\n')
+            http.get('https://www.google.com')
 
-                get.assert_called_with(
-                    'https://www.google.com',
-                    headers=expected_headers,
-                    auth=None,
-                    cert=None,
-                    proxies=None,
-                    timeout=(10.0, 10.0),
-                    verify=True,
-                    allow_redirects=True,
-                )
+            mock_get.assert_called_with(
+                'https://www.google.com',
+                headers=expected_headers,
+                auth=None,
+                cert=None,
+                proxies=None,
+                timeout=(10.0, 10.0),
+                verify=True,
+                allow_redirects=True,
+            )
 
-                assert http.options['headers'] == expected_headers
+            assert http.options['headers'] == expected_headers
 
 
 class TestAuthTokenFileReaderWithHeaderWriter:
-    def test_read_before_first_request(self):
+    def test_read_before_first_request(self, mock_http_response):
         with TempDir() as temp_dir:
             token_file = os.path.join(temp_dir, 'token.txt')
             instance = {
@@ -669,41 +669,41 @@ class TestAuthTokenFileReaderWithHeaderWriter:
 
             expected_headers = {'Authorization': 'Bearer secret1'}
             expected_headers.update(DEFAULT_OPTIONS['headers'])
-            with mock.patch('requests.Session.get') as get:
-                write_file(token_file, '\nsecret1\n')
-                http.get('https://www.google.com')
+            mock_get = mock_http_response('')
+            write_file(token_file, '\nsecret1\n')
+            http.get('https://www.google.com')
 
-                get.assert_called_with(
-                    'https://www.google.com',
-                    headers=expected_headers,
-                    auth=None,
-                    cert=None,
-                    proxies=None,
-                    timeout=(10.0, 10.0),
-                    verify=True,
-                    allow_redirects=True,
-                )
+            mock_get.assert_called_with(
+                'https://www.google.com',
+                headers=expected_headers,
+                auth=None,
+                cert=None,
+                proxies=None,
+                timeout=(10.0, 10.0),
+                verify=True,
+                allow_redirects=True,
+            )
 
-                assert http.options['headers'] == expected_headers
+            assert http.options['headers'] == expected_headers
 
-                # Should use cached token
-                write_file(token_file, '\nsecret2\n')
-                http.get('https://www.google.com')
+            # Should use cached token
+            write_file(token_file, '\nsecret2\n')
+            http.get('https://www.google.com')
 
-                get.assert_called_with(
-                    'https://www.google.com',
-                    headers=expected_headers,
-                    auth=None,
-                    cert=None,
-                    proxies=None,
-                    timeout=(10.0, 10.0),
-                    verify=True,
-                    allow_redirects=True,
-                )
+            mock_get.assert_called_with(
+                'https://www.google.com',
+                headers=expected_headers,
+                auth=None,
+                cert=None,
+                proxies=None,
+                timeout=(10.0, 10.0),
+                verify=True,
+                allow_redirects=True,
+            )
 
-                assert http.options['headers'] == expected_headers
+            assert http.options['headers'] == expected_headers
 
-    def test_refresh_after_connection_error(self):
+    def test_refresh_after_connection_error(self, mock_http_response):
         with TempDir() as temp_dir:
             token_file = os.path.join(temp_dir, 'token.txt')
             instance = {
@@ -715,9 +715,9 @@ class TestAuthTokenFileReaderWithHeaderWriter:
             init_config = {}
             http = RequestsWrapper(instance, init_config)
 
-            with mock.patch('requests.Session.get'):
-                write_file(token_file, '\nsecret1\n')
-                http.get('https://www.google.com')
+            mock_http_response('')
+            write_file(token_file, '\nsecret1\n')
+            http.get('https://www.google.com')
 
             counter = {'errors': 0}
 
@@ -748,7 +748,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
 
                 assert http.options['headers'] == expected_headers
 
-    def test_refresh_after_bad_status_code(self):
+    def test_refresh_after_bad_status_code(self, mock_http_response):
         with TempDir() as temp_dir:
             token_file = os.path.join(temp_dir, 'token.txt')
             instance = {
@@ -760,9 +760,9 @@ class TestAuthTokenFileReaderWithHeaderWriter:
             init_config = {}
             http = RequestsWrapper(instance, init_config)
 
-            with mock.patch('requests.Session.get'):
-                write_file(token_file, '\nsecret1\n')
-                http.get('https://www.google.com')
+            mock_http_response('')
+            write_file(token_file, '\nsecret1\n')
+            http.get('https://www.google.com')
 
             def error():
                 raise Exception()
