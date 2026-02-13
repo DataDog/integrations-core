@@ -148,6 +148,9 @@ tests:
       "filtered_by_ai" : false,
       "type" : "account",
       "src_ip" : "10.10.10.10",
+      "vendor" : {
+        "endpoint" : "detections"
+      },
       "src_account" : {
         "name" : "O365:test1@example.com",
         "certainty" : 87,
@@ -177,9 +180,6 @@ tests:
       "filtered_by_rule" : false,
       "first_timestamp" : "2025-12-10T09:29:14Z",
       "detection_category" : "command_and_control",
-      "vendor" : {
-        "endpoint" : "detections"
-      },
       "detection_type" : "M365 Suspicious Power Automate Flow Creation",
       "sensor" : "s9z9x5sj",
       "threat" : 70,
@@ -238,6 +238,9 @@ tests:
         "filtered_by_ai" : false,
         "type" : "account",
         "src_ip" : "10.10.10.10",
+        "vendor" : {
+          "endpoint" : "detections"
+        },
         "src_account" : {
           "name" : "O365:test1@example.com",
           "certainty" : 87,
@@ -267,9 +270,6 @@ tests:
         "filtered_by_rule" : false,
         "first_timestamp" : "2025-12-10T09:29:14Z",
         "detection_category" : "command_and_control",
-        "vendor" : {
-          "endpoint" : "detections"
-        },
         "detection_type" : "M365 Suspicious Power Automate Flow Creation",
         "sensor" : "s9z9x5sj",
         "threat" : 70,
