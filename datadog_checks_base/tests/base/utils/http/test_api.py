@@ -10,12 +10,12 @@ from datadog_checks.base.utils.http import RequestsWrapper
 from .common import DEFAULT_OPTIONS
 
 
-def test_get():
+def test_get(mock_http_response):
     http = RequestsWrapper({}, {})
 
-    with mock.patch('requests.Session.get'):
-        http.get('https://www.google.com')
-        requests.Session.get.assert_called_once_with('https://www.google.com', **http.options)
+    mock_get = mock_http_response('')
+    http.get('https://www.google.com')
+    mock_get.assert_called_once_with('https://www.google.com', **http.options)
 
 
 def test_get_session():
@@ -26,14 +26,14 @@ def test_get_session():
         http.session.get.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
 
 
-def test_get_option_override():
+def test_get_option_override(mock_http_response):
     http = RequestsWrapper({}, {})
     options = http.options.copy()
     options['auth'] = ('user', 'pass')
 
-    with mock.patch('requests.Session.get'):
-        http.get('https://www.google.com', auth=options['auth'])
-        requests.Session.get.assert_called_once_with('https://www.google.com', **options)
+    mock_get = mock_http_response('')
+    http.get('https://www.google.com', auth=options['auth'])
+    mock_get.assert_called_once_with('https://www.google.com', **options)
 
 
 def test_get_session_option_override():
