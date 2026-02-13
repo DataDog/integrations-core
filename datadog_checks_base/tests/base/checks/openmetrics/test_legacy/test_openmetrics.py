@@ -2662,7 +2662,7 @@ def test_metadata_transformer(mocked_openmetrics_check_factory, text_data, datad
     datadog_agent.assert_metadata_count(len(version_metadata))
 
 
-def test_ssl_verify_not_raise_warning(caplog, mocked_openmetrics_check_factory, text_data):
+def test_ssl_verify_not_raise_warning(caplog, mocked_openmetrics_check_factory, mock_http_response):
     instance = {
         'prometheus_url': 'https://www.example.com',
         'metrics': [{'foo': 'bar'}],
@@ -2672,7 +2672,8 @@ def test_ssl_verify_not_raise_warning(caplog, mocked_openmetrics_check_factory, 
     check = mocked_openmetrics_check_factory(instance)
     scraper_config = check.get_scraper_config(instance)
 
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockResponse('httpbin.org')):
+    mock_http_response('httpbin.org')
+    with caplog.at_level(logging.DEBUG):
         resp = check.send_request('https://httpbin.org/get', scraper_config)
 
     assert "httpbin.org" in resp.content.decode('utf-8')
@@ -2682,7 +2683,7 @@ def test_ssl_verify_not_raise_warning(caplog, mocked_openmetrics_check_factory, 
         assert message != expected_message
 
 
-def test_send_request_with_dynamic_prometheus_url(caplog, mocked_openmetrics_check_factory, text_data):
+def test_send_request_with_dynamic_prometheus_url(caplog, mocked_openmetrics_check_factory, mock_http_response):
     instance = {
         'prometheus_url': 'https://www.example.com',
         'metrics': [{'foo': 'bar'}],
@@ -2696,7 +2697,8 @@ def test_send_request_with_dynamic_prometheus_url(caplog, mocked_openmetrics_che
     # `prometheus_url` changed just before calling `send_request`
     scraper_config['prometheus_url'] = 'https://www.example.com/foo/bar'
 
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockResponse('httpbin.org')):
+    mock_http_response('httpbin.org')
+    with caplog.at_level(logging.DEBUG):
         resp = check.send_request('https://httpbin.org/get', scraper_config)
 
     assert "httpbin.org" in resp.content.decode('utf-8')
