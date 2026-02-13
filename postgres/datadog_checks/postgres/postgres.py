@@ -193,13 +193,11 @@ class PostgreSql(DatabaseCheck):
             # TODO: Use the submission debouncer to only send this every 6 hours
             self.health.submit_health_event(
                 name=HealthEvent.INITIALIZATION,
-                status=(
-                    HealthStatus.ERROR
-                    if not self._validation_result.valid
-                    else HealthStatus.WARNING
-                    if self._validation_result.warnings
-                    else HealthStatus.OK
-                ),
+                status=HealthStatus.ERROR
+                if not self._validation_result.valid
+                else HealthStatus.WARNING
+                if self._validation_result.warnings
+                else HealthStatus.OK,
                 cooldown_time=60 * 60 * 6,  # 6 hours
                 data={
                     "errors": [str(error) for error in self._validation_result.errors],
