@@ -2,6 +2,28 @@
 
 <!-- towncrier release notes start -->
 
+## 37.30.0 / 2026-02-11
+
+***Security***:
+
+* Bump `cryptography` to 46.0.5 ([#22607](https://github.com/DataDog/integrations-core/pull/22607))
+
+***Added***:
+
+* Bump `pyOpenSSL` to 25.3.0 ([#22607](https://github.com/DataDog/integrations-core/pull/22607))
+
+## 37.29.0 / 2026-02-04
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
+## 37.28.0 / 2026-02-04
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
 ## 37.27.1 / 2026-01-20
 
 ***Fixed***:

@@ -1,4 +1,5 @@
 name: ProxySQL
+fleet_configurable: true
 files:
 - name: proxysql.yaml
   options:
@@ -8,6 +9,7 @@ files:
   - template: instances
     options:
     - name: host
+      fleet_configurable: true
       required: true
       description: |
         Specify the ProxySQL host to connect to.
@@ -15,12 +17,14 @@ files:
         type: string
         example: <PROXYSQL_HOST>
     - name: port
+      fleet_configurable: true
       required: true
       description: |
         The ProxySQL port to use for the Admin interface
       value:
         type: integer
     - name: username
+      fleet_configurable: true
       required: true
       description: |
         The ProxySQL admin user. It must be able to connect remotely.
@@ -28,6 +32,7 @@ files:
         type: string
         example: <PROXYSQL_ADMIN_USER>
     - name: password
+      fleet_configurable: true
       required: true
       description: |
         The ProxySQL admin password.
@@ -37,12 +42,13 @@ files:
         example: <PROXYSQL_ADMIN_PASSWORD>
     - template: instances/tls
       overrides:
-        tls_verify.display_default: false
+        tls_verify.value.display_default: false
         tls_verify.value.example: false
         tls_cert.hidden: true
         tls_private_key.hidden: true
         tls_private_key_password.hidden: true
     - name: connect_timeout
+      fleet_configurable: true
       required: false
       description: |
         Timeout in seconds for connecting to ProxySQL.
@@ -50,6 +56,7 @@ files:
         type: integer
         example: 10
     - name: read_timeout
+      fleet_configurable: true
       required: false
       description: |
         Timeout in seconds for reading data from ProxySQL. Unlimited by default.
@@ -60,6 +67,7 @@ files:
         List of additional metrics to collect in addition to the global ones.
         Learn more about these metrics at:
         https://github.com/sysown/proxysql/wiki/STATS-(statistics)
+      fleet_configurable: true
       value:
         type: array
         items:

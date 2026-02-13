@@ -84,6 +84,7 @@ class InstanceConfig(BaseModel):
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     exclude_labels: Optional[tuple[str, ...]] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     extra_limiters: Optional[tuple[str, ...]] = None

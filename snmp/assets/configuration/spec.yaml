@@ -282,6 +282,7 @@ files:
         description: |
           Username to connect to your SNMP devices.
           SNMP v3 specific configuration
+        fleet_configurable: true
         value:
           type: string
           example: <USERNAME>

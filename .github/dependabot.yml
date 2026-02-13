@@ -1,5 +1,7 @@
 version: 2
+
 updates:
+  # For dependabot to update actions in composite actions we need to have separate entries for each directory.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -8,8 +10,24 @@ updates:
       time: "06:00"
     # Group all actions updates together in the same PR
     groups:
-       actions:
-          patterns:
-             - "*"
+      actions:
+        patterns:
+          - "*"
     labels:
-    - dependabot
+      - dependabot/actions
+      - qa/skip-qa
+
+  - package-ecosystem: "github-actions"
+    directory: "/actions/tag-job"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    # Group all actions updates together in the same PR
+    groups:
+      actions:
+        patterns:
+          - "*"
+    labels:
+      - dependabot/actions
+      - qa/skip-qa

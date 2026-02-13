@@ -40,6 +40,7 @@ class InstanceConfig(BaseModel):
     dirtagname: Optional[str] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     exclude_dirs: Optional[tuple[str, ...]] = None
     filegauges: Optional[bool] = None
     filetagname: Optional[str] = None

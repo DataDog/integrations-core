@@ -1,4 +1,5 @@
 name: Kafka Consumer
+fleet_configurable: true
 files:
 - name: kafka_consumer.yaml
   options:
@@ -13,10 +14,11 @@ files:
     options:
     - name: kafka_timeout
       description: Customizes the Kafka connection timeout.
+      fleet_configurable: true
       value:
         type: integer
         example: 5
-      display_default: 5
+        display_default: 5
     - template: init_config/default
   - template: instances
     options:
@@ -39,6 +41,7 @@ files:
             kafka_connect_str:
             - server1:9092
             - server2:9092
+        fleet_configurable: true
         required: true
         value:
           anyOf:
@@ -55,6 +58,7 @@ files:
           this bypasses that probe, saving 3-5 network calls depending on the broker version. Note that
           probing randomly picks a broker to probe, so in a mixed-version cluster, probing returns a
           non-deterministic result.
+        fleet_configurable: true
         value:
           type: string
           example: "2.3.0"
@@ -69,6 +73,7 @@ files:
           
           If both `consumer_groups` and `monitor_unlisted_consumer_groups` are used,
           then `consumer_groups` is ignored.
+        fleet_configurable: true
         value:
           type: object
           example:
@@ -84,6 +89,7 @@ files:
           both configuration options will be used. 
           If `monitor_unlisted_consumer_groups` is enabled, then
           `consumer_groups_regex` is ignored.
+        fleet_configurable: true
         value:
           type: object
           example:
@@ -98,6 +104,7 @@ files:
           consumer group state as a tag. 
 
           WARNING: Enabling this feature might cause some increase in Agent resource consumption.
+        fleet_configurable: true
         value:
           type: boolean
           example: false
@@ -111,6 +118,7 @@ files:
           support this feature on older brokers because they do not provide a way to determine the mapping
           of consumer groups to topics. For details, see KIP-88. For older Kafka brokers, the consumer groups
           must be specified. This requirement only applies to the brokers, not the consumers--they can be any version.
+        fleet_configurable: true
         value:
           type: boolean
           example: false
@@ -120,6 +128,7 @@ files:
           To reduce memory usage, tune down queued.max.messages.kbytes (maximum cache size per partition).
           Override the kafka default to 1MB for the integration check to optimize
           memory consumption to avoid potential out of memory (OOM) kill. (Default setting is 1GB per Kafka client)
+        fleet_configurable: true
         value:
           type: integer
           example: 1024
@@ -129,6 +138,7 @@ files:
           running over the entire life of the check. By deallocating the AdminClient after the check run, we should free 
           up any memory used in the client, although the performance of the check run would be slower (since we will 
           need to reconnect with a new client). Set this config option to false to improve performance.
+        fleet_configurable: true
         value:
           type: boolean
           example: true
@@ -139,6 +149,7 @@ files:
           the cluster. Otherwise highwater mark offsets will only be fetched for topic
           partitions where that check run has already fetched a consumer offset. Internal
           Kafka topics like __consumer_offsets, __transaction_state, etc are always excluded.
+        fleet_configurable: true
         value:
           type: boolean
           example: false
@@ -147,25 +158,30 @@ files:
           Protocol used to communicate with brokers.
           Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL.
           Default: PLAINTEXT.
-        display_default: PLAINTEXT
+        fleet_configurable: true
         value:
           type: string
           example: PLAINTEXT
+          display_default: PLAINTEXT
       - name: sasl_mechanism
         description: |
           String picking sasl mechanism when security_protocol is SASL_PLAINTEXT or SASL_SSL.
           Valid values are: PLAIN, GSSAPI, OAUTHBEARER, SCRAM-SHA-256, SCRAM-SHA-512.
+        fleet_configurable: true
         value:
           type: string
           example: PLAIN
           display_default: null
       - name: sasl_plain_username
         description: Username for sasl PLAIN or SCRAM authentication.
+        fleet_configurable: true
         value:
           type: string
           example: <USERNAME>
       - name: sasl_plain_password
         description: Password for sasl PLAIN or SCRAM authentication.
+        fleet_configurable: true
+        secret: true
         value:
           type: string
           example: <PASSWORD>
@@ -176,21 +192,25 @@ files:
           the keytab file using the environment variable KRB5_CLIENT_KTNAME.
           Using `sasl_kerberos_keytab` will eventually be required and using the
           environment variable directly will be deprecated.
+        fleet_configurable: true
         value:
           type: string
       - name: sasl_kerberos_principal
         description: |
           Kerberos principal to use.
+        fleet_configurable: true
         value:
           type: string
           example: kafkaclient
       - name: sasl_kerberos_service_name
         description: Service name to include in GSSAPI sasl mechanism handshake.
+        fleet_configurable: true
         value:
           type: string
           example: kafka
       - name: sasl_kerberos_domain_name
         description: Kerberos domain name to use in GSSAPI sasl mechanism handshake.
+        fleet_configurable: true
         value:
           type: string
           example: localhost
@@ -198,8 +218,10 @@ files:
       - name: sasl_oauth_token_provider
         description: |
           Settings for when `sasl_mechanism` is set to `OAUTHBEARER`.
+        fleet_configurable: true
         options:
         - name: url
+          fleet_configurable: true
           required: true
           enabled: false
           description: |
@@ -207,6 +229,7 @@ files:
           value:
             type: string
         - name: client_id
+          fleet_configurable: true
           required: true
           enabled: false
           description: |
@@ -214,11 +237,28 @@ files:
           value:
             type: string
         - name: client_secret
+          fleet_configurable: true
           secret: true
           required: true
           enabled: false
           description: |
             The client secret.
+          value:
+            type: string
+        - name: scope
+          enabled: false
+          description: |
+            The OAuth scope to request. Required by most identity providers.
+            For example, a custom scope like 'kafka' or 'api://default'.
+          value:
+            type: string
+        - name: extensions
+          enabled: false
+          description: |
+            SASL/OAUTHBEARER extensions to pass to the broker.
+            For Confluent Cloud, this typically includes the logical cluster ID
+            and optionally the identity pool ID.
+            Format: 'logicalCluster=lkc-xxxxx' or 'logicalCluster=lkc-xxxxx,identityPoolId=pool-xxxxx'
           value:
             type: string
       - template: instances/tls
@@ -227,6 +267,7 @@ files:
           Filename path containing the CRL to check for certificate expiration.
           By default, no CRL check is done. When providing a file, only the leaf certificate
           will be checked against this CRL.
+        fleet_configurable: true
         value:
           type: string
           example: <SSL_FILE_PATH>
@@ -235,10 +276,11 @@ files:
         description: |
           Collects consumer lag metric in seconds. It may result in additional billing charges.
           Note: This is automatically enabled when enable_cluster_monitoring is set to true.
+        fleet_configurable: true
         value:
           type: boolean
           example: false
-        display_default: false
+          display_default: false
       - name: enable_cluster_monitoring
         description: |
           (PREVIEW) Enable cluster monitoring to collect broker, topic, partition, consumer group,
@@ -249,13 +291,15 @@ files:
             - Collects highwater mark offsets for all topic partitions (same as monitor_all_broker_highwatermarks)
             - Collects consumer lag for all consumer groups (same as monitor_unlisted_consumer_groups)
             - Enables Data Streams monitoring (same as data_streams_enabled)
+        fleet_configurable: true
         value:
           type: boolean
           example: false
-        display_default: false
+          display_default: false
       - name: schema_registry_url
         description: |
           Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.
+        fleet_configurable: true
         value:
           type: string
           example: http://localhost:8081
@@ -263,6 +307,7 @@ files:
         description: |
           Username for Schema Registry Basic Authentication.
           Used in combination with schema_registry_password.
+        fleet_configurable: true
         value:
           type: string
           example: <USERNAME>
@@ -270,6 +315,7 @@ files:
         description: |
           Password for Schema Registry Basic Authentication.
           Used in combination with schema_registry_username.
+        fleet_configurable: true
         secret: true
         value:
           type: string
@@ -278,14 +324,16 @@ files:
         description: |
           Whether to verify the Schema Registry TLS certificate.
           Set to false to disable verification (not recommended for production).
+        fleet_configurable: true
         value:
           type: boolean
           example: true
-        display_default: true
+          display_default: true
       - name: schema_registry_tls_ca_cert
         description: |
           Path to a custom CA certificate file for Schema Registry TLS verification.
           If not specified, uses the system's default CA bundle.
+        fleet_configurable: true
         value:
           type: string
           example: /path/to/ca_cert.pem
@@ -293,6 +341,7 @@ files:
         description: |
           Path to the client certificate file for Schema Registry mutual TLS authentication.
           Must be used in combination with schema_registry_tls_key.
+        fleet_configurable: true
         value:
           type: string
           example: /path/to/client_cert.pem
@@ -300,6 +349,7 @@ files:
         description: |
           Path to the client private key file for Schema Registry mutual TLS authentication.
           Must be used in combination with schema_registry_tls_cert.
+        fleet_configurable: true
         value:
           type: string
           example: /path/to/client_key.pem
