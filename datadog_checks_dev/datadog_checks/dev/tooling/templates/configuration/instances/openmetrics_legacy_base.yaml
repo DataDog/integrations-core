@@ -140,6 +140,7 @@
   description: |
     A list of labels to be excluded. May be used in conjunction with `include_labels`.
     Labels defined in `excluded labels` will take precedence in case of overlap.
+  fleet_configurable: true
   value:
     example:
       - timestamp
