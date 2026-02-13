@@ -31,4 +31,9 @@ class SSLError(Exception):
     Raised when an SSL/TLS error occurs during the request (e.g. certificate
     verification failure). Used so callers can catch SSL failures without
     depending on requests or httpx.
+
+    Catch this together with ConnectionError and RequestException where
+    connection/request failures are handled (e.g. in OpenMetricsBaseCheckV2.check)
+    so that both requests-backed and httpx-backed wrappers get consistent
+    error handling.
     """
