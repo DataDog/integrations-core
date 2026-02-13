@@ -1962,12 +1962,11 @@ def test_text_filter_input():
     assert filtered == expected_out
 
 
-def test_ssl_verify_not_raise_warning(caplog, mocked_prometheus_check, text_data):
-    from datadog_checks.dev.http import MockResponse
-
+def test_ssl_verify_not_raise_warning(caplog, mocked_prometheus_check, mock_http_response):
     check = mocked_prometheus_check
 
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockResponse('httpbin.org')):
+    mock_http_response('httpbin.org')
+    with caplog.at_level(logging.DEBUG):
         resp = check.poll('https://httpbin.org/get')
 
     assert 'httpbin.org' in resp.content.decode('utf-8')
@@ -1977,13 +1976,12 @@ def test_ssl_verify_not_raise_warning(caplog, mocked_prometheus_check, text_data
         assert message != expected_message
 
 
-def test_ssl_verify_not_raise_warning_cert_false(caplog, mocked_prometheus_check, text_data):
-    from datadog_checks.dev.http import MockResponse
-
+def test_ssl_verify_not_raise_warning_cert_false(caplog, mocked_prometheus_check, mock_http_response):
     check = mocked_prometheus_check
     check.ssl_ca_cert = False
 
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockResponse('httpbin.org')):
+    mock_http_response('httpbin.org')
+    with caplog.at_level(logging.DEBUG):
         resp = check.poll('https://httpbin.org/get')
 
     assert 'httpbin.org' in resp.content.decode('utf-8')
@@ -1993,7 +1991,7 @@ def test_ssl_verify_not_raise_warning_cert_false(caplog, mocked_prometheus_check
         assert message != expected_message
 
 
-def test_requests_wrapper_config():
+def test_requests_wrapper_config(mock_http_response):
     instance_http = {
         'prometheus_endpoint': 'http://localhost:8080',
         'extra_headers': {'foo': 'bar'},
@@ -2019,32 +2017,32 @@ def test_requests_wrapper_config():
         ]
     )
 
-    with mock.patch("requests.Session.get") as get:
-        with mock.patch.object(ssl.SSLContext, 'load_cert_chain') as mock_load_cert_chain:
-            mock_load_cert_chain.return_value = None
+    mock_get = mock_http_response('')
+    with mock.patch.object(ssl.SSLContext, 'load_cert_chain') as mock_load_cert_chain:
+        mock_load_cert_chain.return_value = None
 
-            check.poll(instance_http['prometheus_endpoint'], instance=instance_http)
-            get.assert_called_with(
-                instance_http['prometheus_endpoint'],
-                stream=False,
-                headers=expected_headers,
-                auth=requests.auth.HTTPDigestAuth('data', 'dog'),
-                cert='/path/to/cert',
-                timeout=(42.0, 42.0),
-                proxies=None,
-                verify=True,
-                allow_redirects=True,
-            )
+        check.poll(instance_http['prometheus_endpoint'], instance=instance_http)
+        mock_get.assert_called_with(
+            instance_http['prometheus_endpoint'],
+            stream=False,
+            headers=expected_headers,
+            auth=requests.auth.HTTPDigestAuth('data', 'dog'),
+            cert='/path/to/cert',
+            timeout=(42.0, 42.0),
+            proxies=None,
+            verify=True,
+            allow_redirects=True,
+        )
 
-            check.poll(instance_http['prometheus_endpoint'])
-            get.assert_called_with(
-                instance_http['prometheus_endpoint'],
-                stream=False,
-                headers=expected_headers,
-                auth=requests.auth.HTTPDigestAuth('data', 'dog'),
-                cert='/path/to/cert',
-                timeout=(42.0, 42.0),
-                proxies=None,
-                verify=True,
-                allow_redirects=True,
-            )
+        check.poll(instance_http['prometheus_endpoint'])
+        mock_get.assert_called_with(
+            instance_http['prometheus_endpoint'],
+            stream=False,
+            headers=expected_headers,
+            auth=requests.auth.HTTPDigestAuth('data', 'dog'),
+            cert='/path/to/cert',
+            timeout=(42.0, 42.0),
+            proxies=None,
+            verify=True,
+            allow_redirects=True,
+        )
