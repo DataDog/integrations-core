@@ -227,7 +227,7 @@ def build_image():
 
             script_args = ['--python', args.python]
 
-            # Assumption: if a digest was provided we're not changing the build image and therefore
+            # Assumptions: if a digest was provided we're not changing the build image and therefore
             # we're fine with reusing wheels we've built previously
             if args.digest:
                 script_args.append('--use-built-index')
