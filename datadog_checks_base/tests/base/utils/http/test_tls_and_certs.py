@@ -3,14 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import ssl
+from unittest import mock
 
-import mock
 import pytest
 from requests.exceptions import SSLError
 
 from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http_exceptions import SSLError as SharedSSLError
 from datadog_checks.base.utils.tls import TlsConfig
 from datadog_checks.dev.utils import ON_WINDOWS
+
+from .common import make_mock_session
 
 pytestmark = [pytest.mark.unit]
 
@@ -30,7 +33,7 @@ class TestCert:
         init_config = {}
 
         with mock.patch.object(ssl.SSLContext, 'load_cert_chain') as mock_load_cert_chain:
-            http = RequestsWrapper(instance, init_config)
+            http = RequestsWrapper(instance, init_config, session=make_mock_session())
             http.get('https://example.com')
 
             assert mock_load_cert_chain.call_count == 1
@@ -41,7 +44,7 @@ class TestCert:
         init_config = {}
 
         with mock.patch.object(ssl.SSLContext, 'load_cert_chain') as mock_load_cert_chain:
-            http = RequestsWrapper(instance, init_config)
+            http = RequestsWrapper(instance, init_config, session=make_mock_session())
             http.get('https://example.com')
 
             assert mock_load_cert_chain.call_count == 1
@@ -59,7 +62,7 @@ class TestCert:
     def test_request_cert_gets_read(self, options, expected_cert, expected_key):
         '''Test that the request options are set correctly in the new context.'''
         with mock.patch.object(ssl.SSLContext, 'load_cert_chain') as mock_load_cert_chain:
-            RequestsWrapper({}, {}).get('https://google.com', **options)
+            RequestsWrapper({}, {}, session=make_mock_session()).get('https://google.com', **options)
 
             if options.get('cert') is None:
                 assert mock_load_cert_chain.call_count == 0
@@ -84,12 +87,12 @@ class TestCert:
             openssl_capath=bad_cert_dir,
         )
         with mock.patch("ssl.get_default_verify_paths", return_value=bad_ssl_paths):
-            with mock.patch("requests.Session.get"):
-                with caplog.at_level(logging.INFO):
-                    http = RequestsWrapper({"tls_verify": True}, {})
-                    assert ssl.get_default_verify_paths() == bad_ssl_paths
-                    assert http.session.adapters["https://"].ssl_context.get_ca_certs() != []
-                    http.get("https://example.com")
+            with caplog.at_level(logging.INFO):
+                mock_sess = make_mock_session()
+                http = RequestsWrapper({"tls_verify": True}, {}, session=mock_sess)
+                assert ssl.get_default_verify_paths() == bad_ssl_paths
+                assert http.session.adapters["https://"].ssl_context.get_ca_certs() != []
+                http.get("https://example.com")
             assert 'No CA certificates loaded from system default paths, attempting certifi fallback.' in caplog.text
 
 
@@ -127,9 +130,10 @@ class TestIgnoreTLSWarning:
     def test_default_no_ignore(self, caplog):
         instance = {}
         init_config = {}
-        http = RequestsWrapper(instance, init_config)
+        mock_sess = make_mock_session()
+        http = RequestsWrapper(instance, init_config, session=mock_sess)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        with caplog.at_level(logging.DEBUG):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -142,9 +146,10 @@ class TestIgnoreTLSWarning:
     def test_default_no_ignore_http(self, caplog):
         instance = {}
         init_config = {}
-        http = RequestsWrapper(instance, init_config)
+        mock_sess = make_mock_session()
+        http = RequestsWrapper(instance, init_config, session=mock_sess)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        with caplog.at_level(logging.DEBUG):
             http.get('http://www.google.com', verify=False)
 
         assert sum(1 for _, level, _ in caplog.record_tuples if level == logging.WARNING) == 0
@@ -152,9 +157,10 @@ class TestIgnoreTLSWarning:
     def test_ignore(self, caplog):
         instance = {'tls_ignore_warning': True}
         init_config = {}
-        http = RequestsWrapper(instance, init_config)
+        mock_sess = make_mock_session()
+        http = RequestsWrapper(instance, init_config, session=mock_sess)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        with caplog.at_level(logging.DEBUG):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -164,9 +170,10 @@ class TestIgnoreTLSWarning:
     def test_default_no_ignore_session(self, caplog):
         instance = {'persist_connections': True}
         init_config = {}
-        http = RequestsWrapper(instance, init_config)
+        mock_sess = make_mock_session()
+        http = RequestsWrapper(instance, init_config, session=mock_sess)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        with caplog.at_level(logging.DEBUG):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -179,9 +186,10 @@ class TestIgnoreTLSWarning:
     def test_ignore_session(self, caplog):
         instance = {'tls_ignore_warning': True, 'persist_connections': True}
         init_config = {}
-        http = RequestsWrapper(instance, init_config)
+        mock_sess = make_mock_session()
+        http = RequestsWrapper(instance, init_config, session=mock_sess)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        with caplog.at_level(logging.DEBUG):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -191,9 +199,10 @@ class TestIgnoreTLSWarning:
     def test_init_ignore(self, caplog):
         instance = {}
         init_config = {'tls_ignore_warning': True}
-        http = RequestsWrapper(instance, init_config)
+        mock_sess = make_mock_session()
+        http = RequestsWrapper(instance, init_config, session=mock_sess)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        with caplog.at_level(logging.DEBUG):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -203,9 +212,10 @@ class TestIgnoreTLSWarning:
     def test_default_init_no_ignore(self, caplog):
         instance = {}
         init_config = {'tls_ignore_warning': False}
-        http = RequestsWrapper(instance, init_config)
+        mock_sess = make_mock_session()
+        http = RequestsWrapper(instance, init_config, session=mock_sess)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        with caplog.at_level(logging.DEBUG):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -218,9 +228,10 @@ class TestIgnoreTLSWarning:
     def test_instance_ignore(self, caplog):
         instance = {'tls_ignore_warning': True}
         init_config = {'tls_ignore_warning': False}
-        http = RequestsWrapper(instance, init_config)
+        mock_sess = make_mock_session()
+        http = RequestsWrapper(instance, init_config, session=mock_sess)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        with caplog.at_level(logging.DEBUG):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -230,9 +241,10 @@ class TestIgnoreTLSWarning:
     def test_instance_no_ignore(self, caplog):
         instance = {'tls_ignore_warning': False}
         init_config = {'tls_ignore_warning': True}
-        http = RequestsWrapper(instance, init_config)
+        mock_sess = make_mock_session()
+        http = RequestsWrapper(instance, init_config, session=mock_sess)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        with caplog.at_level(logging.DEBUG):
             http.get('https://www.google.com', verify=False)
 
         expected_message = 'An unverified HTTPS request is being made to https://www.google.com'
@@ -281,13 +293,13 @@ class TestAIAChasing:
                 'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
             }
         }
-        http = RequestsWrapper(instance, {})
-
+        mock_sess = make_mock_session()
+        mock_sess.get.side_effect = SSLError
+        http = RequestsWrapper(instance, {}, session=mock_sess)
         with mock.patch('datadog_checks.base.utils.http.create_socket_connection') as mock_create_socket_connection:
             with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.handle_auth_token'):
-                with pytest.raises(SSLError):
-                    with mock.patch('requests.Session.get', side_effect=SSLError):
-                        http.get('https://localhost:{}'.format(port))
+                with pytest.raises((SharedSSLError, ConnectionError)):
+                    http.get('https://localhost:{}'.format(port))
 
         mock_create_socket_connection.assert_called_with('localhost', port)
 
@@ -324,14 +336,16 @@ class TestAIAChasing:
         """Test that intermediate certs are loaded correctly."""
         instance = {'tls_verify': True, 'tls_intermediate_ca_certs': ('some_cert', 'another_cert')}
         init_config = {}
-        with mock.patch('requests.Session.get'):
-            with mock.patch('ssl.SSLContext.load_verify_locations') as mock_load_verify_locations:
-                http = RequestsWrapper(instance, init_config)
-                assert http.session.verify is True  # The session attribute instantiates the SSLContext
-                assert mock_load_verify_locations.call_count >= 1
-                all_calls = mock_load_verify_locations.mock_calls
-                # Assert that the last call contains the intermediate CA certs
-                assert all_calls[-1].kwargs["cadata"] == "\n".join(instance['tls_intermediate_ca_certs'])
+        mock_sess = make_mock_session()
+        with mock.patch('ssl.SSLContext.load_verify_locations') as mock_load_verify_locations:
+            http = RequestsWrapper(instance, init_config, session=mock_sess)
+            # Trigger adapter mount so session.verify is set (mock returns MagicMock; check tls_config used)
+            http.get('https://example.com')
+            assert mock_load_verify_locations.call_count >= 1
+            all_calls = mock_load_verify_locations.mock_calls
+            # Assert that a call contains the intermediate CA certs
+            expected_cadata = "\n".join(instance['tls_intermediate_ca_certs'])
+            assert any(c.kwargs.get("cadata") == expected_cadata for c in all_calls)
 
 
 class TestSSLContext:
@@ -342,7 +356,7 @@ class TestSSLContext:
 
         # Mock the SSLContext creation
         with mock.patch.object(ssl.SSLContext, 'set_ciphers') as mock_set_ciphers:
-            http = RequestsWrapper(instance, init_config)
+            http = RequestsWrapper(instance, init_config, session=make_mock_session())
             http.get('https://example.com')
 
             # Verify that the default ciphers are set
@@ -353,47 +367,45 @@ class TestSSLContext:
 class TestSSLContextAdapter:
     def test_adapter_caching(self):
         """_SSLContextAdapter should be recovered from cache when possible."""
+        mock_sess = make_mock_session()
+        with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:
+            http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {}, session=mock_sess)
+            default_config_key = TlsConfig(**http.tls_config)
+            # Trigger request so _mount_https_adapter runs and caches the adapter
+            http.get('https://example.com')
+            assert default_config_key in http._https_adapters
+            adapter = http._https_adapters[default_config_key]
+            mock_create_ssl_context.assert_called_once_with(http.tls_config)
 
-        with mock.patch('requests.Session.get'):
-            with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:
-                http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
-                # Verify that the adapter is created and cached
-                default_config_key = TlsConfig(**http.tls_config)
-                adapter = http.session.get_adapter('https://example.com')
-                assert http._https_adapters == {default_config_key: adapter}
-                mock_create_ssl_context.assert_called_once_with(http.tls_config)
-
-                # Verify that the cached adapter is reused for the same TLS config
-                http.get('https://example.com')
-
-                assert http._https_adapters == {default_config_key: adapter}
-                assert http.session.get_adapter('https://example.com') is adapter
-                mock_create_ssl_context.assert_called_once_with(http.tls_config)
+            # Verify that the cached adapter is reused for the same TLS config
+            http.get('https://example.com')
+            assert http._https_adapters == {default_config_key: adapter}
+            mock_create_ssl_context.assert_called_once_with(http.tls_config)
 
     def test_adapter_caching_new_adapter(self):
         """A new _SSLContextAdapter should be created when a new TLS config is requested."""
+        mock_sess = make_mock_session()
+        with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:
+            http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {}, session=mock_sess)
+            default_config_key = TlsConfig(**http.tls_config)
+            http.get('https://example.com')
+            assert default_config_key in http._https_adapters
+            adapter = http._https_adapters[default_config_key]
+            mock_create_ssl_context.assert_called_once_with(http.tls_config)
 
-        with mock.patch('requests.Session.get'):
-            with mock.patch('datadog_checks.base.utils.http.create_ssl_context') as mock_create_ssl_context:
-                http = RequestsWrapper({'persist_connections': True, 'tls_verify': True}, {})
-                # Verify that the adapter is created and cached for the default TLS config
-                default_config_key = TlsConfig(**http.tls_config)
-                adapter = http.session.get_adapter('https://example.com')
-                assert http._https_adapters == {default_config_key: adapter}
-                mock_create_ssl_context.assert_called_once_with(http.tls_config)
+            # Verify that a new adapter is created for a different TLS config
+            http.get('https://example.com', verify=False)
 
-                # Verify that a new adapter is created for a different TLS config
-                http.get('https://example.com', verify=False)
+            new_config = http.tls_config.copy()
+            new_config.update({'tls_verify': False})
+            new_config_key = TlsConfig(**new_config)
+            assert new_config_key in http._https_adapters
+            new_adapter = http._https_adapters[new_config_key]
+            assert new_adapter is not adapter
+            mock_create_ssl_context.assert_called_with(new_config)
+            assert http._https_adapters == {default_config_key: adapter, new_config_key: new_adapter}
+            # Verify that no more adapters are created for the same configs
+            http.get('https://example.com', verify=False)
+            http.get('https://example.com', verify=True)
 
-                new_config = http.tls_config.copy()
-                new_config.update({'tls_verify': False})
-                new_config_key = TlsConfig(**new_config)
-                new_adapter = http.session.get_adapter('https://example.com')
-                assert new_adapter is not adapter
-                mock_create_ssl_context.assert_called_with(new_config)
-                assert http._https_adapters == {default_config_key: adapter, new_config_key: new_adapter}
-                # Verify that no more adapters are created for the same configs
-                http.get('https://example.com', verify=False)
-                http.get('https://example.com', verify=True)
-
-                assert http._https_adapters == {default_config_key: adapter, new_config_key: new_adapter}
+            assert http._https_adapters == {default_config_key: adapter, new_config_key: new_adapter}

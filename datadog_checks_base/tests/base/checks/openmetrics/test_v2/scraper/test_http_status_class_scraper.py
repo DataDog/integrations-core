@@ -78,7 +78,9 @@ def test_http_status_class_scraper(
     dd_run_check: Callable,
     target_info: bool,
 ):
-    mock_http_response(response(status_label, status_code, target_info))
+    resp = response(status_label, status_code, target_info)
+    mock_http_response(resp)
+    mock_http_response(resp)
 
     check = get_check(status_label=status_label, target_info=target_info)
     dd_run_check(check)

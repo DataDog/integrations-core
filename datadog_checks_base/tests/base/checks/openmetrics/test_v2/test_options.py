@@ -592,8 +592,7 @@ class TestShareLabels:
         aggregator.assert_all_metrics_covered()
 
     def test_shared_labels_with_cache(self, aggregator, dd_run_check, mock_http_response):
-        mock_http_response(
-            """
+        payload = """
             # HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
             # TYPE go_memstats_gc_sys_bytes gauge
             go_memstats_gc_sys_bytes{bar="foo"} 901120
@@ -604,7 +603,8 @@ class TestShareLabels:
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
             """
-        )
+        mock_http_response(payload)
+        mock_http_response(payload)
         check = get_check({'metrics': ['.+'], 'share_labels': {'go_memstats_alloc_bytes': True}})
         dd_run_check(check)
 
@@ -734,8 +734,7 @@ class TestShareLabels:
     def test_target_info_tags_propagation_unordered_w_cache(self, aggregator, dd_run_check, mock_http_response):
         check = get_check({'metrics': ['.+'], 'target_info': True})
 
-        mock_http_response(
-            """
+        payload = """
             # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
             # TYPE go_memstats_alloc_bytes gauge
             go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
@@ -743,7 +742,8 @@ class TestShareLabels:
             # TYPE target info
             target_info{env="prod", region="europe"} 1.0
             """
-        )
+        mock_http_response(payload)
+        mock_http_response(payload)
 
         dd_run_check(check)
 

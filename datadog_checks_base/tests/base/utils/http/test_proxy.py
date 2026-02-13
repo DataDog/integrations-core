@@ -2,26 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import OrderedDict
-from io import BytesIO
 from unittest import mock
 
 import pytest
-from requests import Response, Session
 
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev import EnvVars
 
+from .common import make_mock_session
+
 pytestmark = [pytest.mark.unit]
-
-
-@pytest.fixture(scope="module")
-def mock_requests_get():
-    with mock.patch.object(Session, 'get', autospec=True) as mock_get:
-        response = Response()
-        response.status_code = 200
-        response.raw = BytesIO("Proxied request successful!".encode('utf-8'))
-        mock_get.return_value = response
-        yield mock_get
 
 
 def test_config_default():
@@ -108,10 +98,11 @@ def test_config_proxy_skip_init_config():
     [('http://www.google.com', 'HTTP_PROXY'), ('https://www.google.com', 'HTTPS_PROXY')],
     ids=['http', 'https'],
 )
-def test_proxy_env_vars_skip(mock_requests_get: mock.MagicMock, url: str, env_var: str):
+def test_proxy_env_vars_skip(url: str, env_var: str):
     instance = {'skip_proxy': True}
     init_config = {}
-    http = RequestsWrapper(instance, init_config)
+    mock_session = make_mock_session()
+    http = RequestsWrapper(instance, init_config, session=mock_session)
 
     expected_proxies = {'http': '', 'https': ''}
 
@@ -119,7 +110,7 @@ def test_proxy_env_vars_skip(mock_requests_get: mock.MagicMock, url: str, env_va
         http.get(url)
 
         # Since skip is true, we inject empty proxies to the call
-        actual_proxies = mock_requests_get.call_args[1]['proxies']
+        actual_proxies = mock_session.get.call_args[1]['proxies']
         assert actual_proxies == expected_proxies
 
 
@@ -128,14 +119,15 @@ def test_proxy_env_vars_skip(mock_requests_get: mock.MagicMock, url: str, env_va
     [('http://www.google.com', 'HTTP_PROXY'), ('https://www.google.com', 'HTTPS_PROXY')],
     ids=['http', 'https'],
 )
-def test_proxy_env_vars_override_skip_fail(mock_requests_get: mock.MagicMock, url: str, env_var: str):
+def test_proxy_env_vars_override_skip_fail(url: str, env_var: str):
     instance = {'skip_proxy': True}
     init_config = {}
-    http = RequestsWrapper(instance, init_config)
+    mock_session = make_mock_session()
+    http = RequestsWrapper(instance, init_config, session=mock_session)
 
     with EnvVars({env_var: 'http://1.2.3.4:567'}):
         http.get(url, timeout=1, proxies=None)
-        actual_proxies = mock_requests_get.call_args[1]['proxies']
+        actual_proxies = mock_session.get.call_args[1]['proxies']
 
         # Even with skip true, we ignore it to call get with the proxies supplied to the get method
         assert actual_proxies is None
@@ -157,22 +149,24 @@ def test_proxy_env_vars_override_skip_fail(mock_requests_get: mock.MagicMock, ur
         pytest.param({}, True, id='without_no_proxy'),
     ],
 )
-def test_no_proxy_bypass(mock_requests_get: mock.MagicMock, url: str, no_proxies: dict, should_proxy: bool):
+def test_no_proxy_bypass(url: str, no_proxies: dict, should_proxy: bool):
     proxies = {'http': 'http://1.2.3.4:567', 'https': 'https://1.2.3.4:567'}
     instance = {'proxy': proxies | no_proxies}
     init_config = {}
-    http = RequestsWrapper(instance, init_config)
+    mock_session = make_mock_session()
+    http = RequestsWrapper(instance, init_config, session=mock_session)
 
     # Validate that the proxies are injected appropriately
     expected_proxies = proxies if should_proxy else {'http': '', 'https': ''}
 
     http.get(url)
-    actual_proxies = mock_requests_get.call_args[1]['proxies']
+    actual_proxies = mock_session.get.call_args[1]['proxies']
     assert actual_proxies == expected_proxies
 
 
 def test_no_proxy_uris_coverage():
-    http = RequestsWrapper({}, {})
+    mock_session = make_mock_session()
+    http = RequestsWrapper({}, {}, session=mock_session)
 
     # Coverage is not smart enough to detect that looping an empty
     # iterable will never occur when gated by `if iterable:`.
@@ -226,21 +220,20 @@ def test_no_proxy_uris_coverage():
 def test_proxy_passes_right_params_to_requests(proxy, expected_proxy, url):
     instance = {'proxy': proxy}
     init_config = {}
+    mock_session = make_mock_session()
+    http = RequestsWrapper(instance, init_config, session=mock_session)
 
-    http = RequestsWrapper(instance, init_config)
+    http.get(url)
 
-    with mock.patch('requests.Session.get') as mock_get:
-        http.get(url)
-
-        call_args = {
-            'auth': None,
-            'cert': None,
-            'headers': OrderedDict(
-                [('User-Agent', 'Datadog Agent/0.0.0'), ('Accept', '*/*'), ('Accept-Encoding', 'gzip, deflate')]
-            ),
-            'proxies': expected_proxy,
-            'timeout': (10.0, 10.0),
-            'verify': True,
-            'allow_redirects': True,
-        }
-        mock_get.assert_called_with(url, **call_args)
+    call_args = {
+        'auth': None,
+        'cert': None,
+        'headers': OrderedDict(
+            [('User-Agent', 'Datadog Agent/0.0.0'), ('Accept', '*/*'), ('Accept-Encoding', 'gzip, deflate')]
+        ),
+        'proxies': expected_proxy,
+        'timeout': (10.0, 10.0),
+        'verify': True,
+        'allow_redirects': True,
+    }
+    mock_session.get.assert_called_with(url, **call_args)

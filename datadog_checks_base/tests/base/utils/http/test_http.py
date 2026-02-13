@@ -7,15 +7,18 @@ import ssl
 import subprocess
 import tempfile
 import time
+from unittest import mock
 
-import mock
 import pytest
 import requests
 import requests_unixsocket
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
+from datadog_checks.dev.http import HTTPResponseMock
 from datadog_checks.dev.utils import ON_WINDOWS
+
+from .common import make_mock_session
 
 
 @pytest.fixture(scope="module")
@@ -117,12 +120,16 @@ class TestTLSCiphers:
 
         # Mock SSL context creation before RequestsWrapper initialization
         with mock.patch.object(ssl.SSLContext, 'set_ciphers') as mock_set_ciphers:
-            http = RequestsWrapper(instance, init_config)
+            http = RequestsWrapper(instance, init_config, session=make_mock_session())
             http.get('https://example.com')
 
             # Verify that set_ciphers was called with the expected ciphers during TLS context creation
             mock_set_ciphers.assert_called_once_with(expected_ciphers)
 
+    @pytest.mark.skipif(
+        not os.environ.get('RUN_TLS_LIVE_TESTS'),
+        reason='Set RUN_TLS_LIVE_TESTS=1 to run (requires OpenSSL server on localhost:8443)',
+    )
     def test_http_success_with_default_ciphers(self, openssl_https_server):
         '''
         Test that the default ciphers are sufficient to connect to the server.
@@ -137,6 +144,10 @@ class TestTLSCiphers:
         response = http.get(url)
         assert response.status_code == 200
 
+    @pytest.mark.skipif(
+        not os.environ.get('RUN_TLS_LIVE_TESTS'),
+        reason='Set RUN_TLS_LIVE_TESTS=1 to run (requires OpenSSL server on localhost:8443)',
+    )
     def test_http_failure_with_wrong_cipher(self, openssl_https_server):
         '''
         Test that setting a TLS1.2 cipher that is not allowed by the server raises an error.
@@ -154,6 +165,10 @@ class TestTLSCiphers:
         with pytest.raises(requests.exceptions.SSLError):
             http.get(url)
 
+    @pytest.mark.skipif(
+        not os.environ.get('RUN_TLS_LIVE_TESTS'),
+        reason='Set RUN_TLS_LIVE_TESTS=1 to run (requires OpenSSL server on localhost:8443)',
+    )
     def test_http_failure_with_ssl_defaults(self, openssl_https_server):
         '''
         Test that the SSL default ciphers are not sufficient to connect to the server.
@@ -173,15 +188,15 @@ class TestTLSCiphers:
 
 
 class TestRequestSize:
-    def test_behavior_correct(self, mock_http_response):
+    def test_behavior_correct(self):
         instance = {'request_size': 0.5}
         init_config = {}
-        http = RequestsWrapper(instance, init_config)
+        payload_size = 1000
+        mock_session = make_mock_session()
+        mock_session.get.return_value = HTTPResponseMock(200, content=(b'a' * payload_size))
+        http = RequestsWrapper(instance, init_config, session=mock_session)
 
         chunk_size = 512
-        payload_size = 1000
-        mock_http_response('a' * payload_size)
-
         with http.get('https://www.google.com', stream=True) as response:
             chunks = list(response.iter_content())
 
@@ -287,8 +302,10 @@ class TestSession:
 class TestLogger:
     def test_default(self, caplog):
         check = AgentCheck('test', {}, [{}])
+        mock_session = make_mock_session()
+        check._http = RequestsWrapper({}, {}, session=mock_session)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        with caplog.at_level(logging.DEBUG):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -299,10 +316,12 @@ class TestLogger:
         instance = {'log_requests': True}
         init_config = {}
         check = AgentCheck('test', init_config, [instance])
+        mock_session = make_mock_session()
+        check._http = RequestsWrapper(instance, init_config, session=mock_session, logger=check.log)
 
         assert check.http.logger is check.log
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        with caplog.at_level(logging.DEBUG):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -316,10 +335,12 @@ class TestLogger:
         instance = {}
         init_config = {'log_requests': True}
         check = AgentCheck('test', init_config, [instance])
+        mock_session = make_mock_session()
+        check._http = RequestsWrapper(instance, init_config, session=mock_session, logger=check.log)
 
         assert check.http.logger is check.log
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        with caplog.at_level(logging.DEBUG):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -333,8 +354,10 @@ class TestLogger:
         instance = {'log_requests': False}
         init_config = {'log_requests': True}
         check = AgentCheck('test', init_config, [instance])
+        mock_session = make_mock_session()
+        check._http = RequestsWrapper(instance, init_config, session=mock_session)
 
-        with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get'):
+        with caplog.at_level(logging.DEBUG):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'

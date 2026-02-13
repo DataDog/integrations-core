@@ -96,9 +96,12 @@ def text_data():
 
 @pytest.fixture
 def mock_get(mock_http_response):
-    yield mock_http_response(
-        file_path=os.path.join(FIXTURE_PATH, 'ksm.txt'), headers={'Content-Type': text_content_type}
-    ).return_value.text
+    """Provide ksm.txt content and queue two identical responses for the first two check.process() calls."""
+    path = os.path.join(FIXTURE_PATH, 'ksm.txt')
+    mock_http_response(file_path=path, headers={'Content-Type': text_content_type})
+    mock_http_response(file_path=path, headers={'Content-Type': text_content_type})
+    with open(path) as f:
+        yield f.read()
 
 
 def test_config_instance(mocked_prometheus_check):
@@ -2253,7 +2256,7 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
     )
 
 
-def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get, mock_http_response):
     """Tests label join GC on text format"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
@@ -2301,14 +2304,11 @@ def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_s
     pvc_replace = re.compile(r'^kube_persistentvolumeclaim_.*\n', re.MULTILINE)
     text_data = pvc_replace.sub('', text_data)
 
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
-    )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
-        check.process(mocked_prometheus_scraper_config)
-        assert 'dd-agent-1337' in mocked_prometheus_scraper_config['_label_mapping']['pod']
-        assert 'dd-agent-62bgh' not in mocked_prometheus_scraper_config['_label_mapping']['pod']
-        assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
+    mock_http_response(content=text_data, headers={'Content-Type': text_content_type})
+    check.process(mocked_prometheus_scraper_config)
+    assert 'dd-agent-1337' in mocked_prometheus_scraper_config['_label_mapping']['pod']
+    assert 'dd-agent-62bgh' not in mocked_prometheus_scraper_config['_label_mapping']['pod']
+    assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
 
 
 def test_label_joins_missconfigured(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
@@ -2434,7 +2434,9 @@ def test_label_join_with_hostname(aggregator, mocked_prometheus_check, mocked_pr
     )
 
 
-def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_join_state_change(
+    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get, mock_http_response
+):
     """
     This test checks that the label join picks up changes for already watched labels.
     If a phase changes for example, the tag should change as well.
@@ -2461,13 +2463,10 @@ def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_pro
         'kube_pod_status_phase{namespace="default",phase="Test",pod="dd-agent-62bgh"} 1',
     )
 
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
-    )
-    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
-        check.process(mocked_prometheus_scraper_config)
-        assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
-        assert mocked_prometheus_scraper_config['_label_mapping']['pod']['dd-agent-62bgh']['phase'] == 'Test'
+    mock_http_response(content=text_data, headers={'Content-Type': text_content_type})
+    check.process(mocked_prometheus_scraper_config)
+    assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
+    assert mocked_prometheus_scraper_config['_label_mapping']['pod']['dd-agent-62bgh']['phase'] == 'Test'
 
 
 def test_label_to_match_single(benchmark, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
@@ -2548,7 +2547,7 @@ def test_health_service_check_failing(aggregator, mocked_prometheus_check, mocke
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
     mocked_prometheus_scraper_config['_metric_tags'] = ['bar:foo']
-    with pytest.raises(requests.ConnectionError):
+    with pytest.raises(ConnectionError):
         check.process(mocked_prometheus_scraper_config)
     aggregator.assert_service_check(
         'ksm.prometheus.health',

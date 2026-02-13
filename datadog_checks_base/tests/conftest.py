@@ -2,6 +2,7 @@ import os
 
 import pytest
 import requests
+from tenacity import RetryError
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev import TempDir, docker_run, get_here
@@ -22,13 +23,16 @@ def socks5_proxy():
         resp.raise_for_status()
 
     compose_file = os.path.join(HERE, "compose", "socks5-proxy.yaml")
-    with docker_run(
-        compose_file=compose_file,
-        log_patterns=['Start listening proxy service on port'],
-        conditions=[WaitFor(check_proxy)],
-        attempts=2,
-    ):
-        yield "proxy_user:proxy_password@localhost:1080"
+    try:
+        with docker_run(
+            compose_file=compose_file,
+            log_patterns=['Start listening proxy service on port'],
+            conditions=[WaitFor(check_proxy)],
+            attempts=2,
+        ):
+            yield "proxy_user:proxy_password@localhost:1080"
+    except RetryError as e:
+        pytest.skip('socks5 proxy not available: {}'.format(e))
 
 
 @pytest.fixture(scope="session")

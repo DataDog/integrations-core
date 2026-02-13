@@ -109,35 +109,37 @@ def test_config_kerberos_keytab_file():
     instance = {'auth_type': 'kerberos', 'kerberos_keytab': '/test/file'}
     init_config = {}
 
-    http = RequestsWrapper(instance, init_config)
+    with EnvVars(ignore=['KRB5_CLIENT_KTNAME']):
+        http = RequestsWrapper(instance, init_config)
 
-    assert os.environ.get('KRB5_CLIENT_KTNAME') is None
+        assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
-    with mock.patch(
-        'requests.Session.get',
-        side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5_CLIENT_KTNAME', '')),
-    ):
-        response = http.get('https://www.google.com')
-        assert response.text == '/test/file'
+        with mock.patch(
+            'requests.Session.get',
+            side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5_CLIENT_KTNAME', '')),
+        ):
+            response = http.get('https://www.google.com')
+            assert response.text == '/test/file'
 
-    assert os.environ.get('KRB5_CLIENT_KTNAME') is None
+        assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
 
 def test_config_kerberos_cache():
     instance = {'auth_type': 'kerberos', 'kerberos_cache': '/test/file'}
     init_config = {}
 
-    http = RequestsWrapper(instance, init_config)
+    with EnvVars(ignore=['KRB5CCNAME']):
+        http = RequestsWrapper(instance, init_config)
 
-    assert os.environ.get('KRB5CCNAME') is None
+        assert os.environ.get('KRB5CCNAME') is None
 
-    with mock.patch(
-        'requests.Session.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5CCNAME', ''))
-    ):
-        response = http.get('https://www.google.com')
-        assert response.text == '/test/file'
+        with mock.patch(
+            'requests.Session.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5CCNAME', ''))
+        ):
+            response = http.get('https://www.google.com')
+            assert response.text == '/test/file'
 
-    assert os.environ.get('KRB5CCNAME') is None
+        assert os.environ.get('KRB5CCNAME') is None
 
 
 def test_config_kerberos_cache_restores_rollback():

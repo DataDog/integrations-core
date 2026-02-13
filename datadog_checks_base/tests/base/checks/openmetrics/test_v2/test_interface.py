@@ -46,8 +46,7 @@ def test_tag_by_endpoint(aggregator, dd_run_check, mock_http_response):
 
 
 def test_service_check_dynamic_tags(aggregator, dd_run_check, mock_http_response):
-    mock_http_response(
-        """
+    payload = """
         # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
         # TYPE go_memstats_alloc_bytes gauge
         go_memstats_alloc_bytes{foo="baz"} 6.396288e+06
@@ -55,7 +54,8 @@ def test_service_check_dynamic_tags(aggregator, dd_run_check, mock_http_response
         # TYPE state gauge
         state{bar="baz"} 3
         """
-    )
+    mock_http_response(payload)
+    mock_http_response(payload)
     check = get_check(
         {'metrics': ['.+', {'state': {'type': 'service_check', 'status_map': {'3': 'ok'}}}], 'tags': ['foo:bar']}
     )
