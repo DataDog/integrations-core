@@ -1,4 +1,5 @@
 name: Boundary
+fleet_configurable: true
 files:
 - name: boundary.yaml
   options:
@@ -8,6 +9,7 @@ files:
   - template: instances
     options:
     - name: health_endpoint
+      fleet_configurable: true
       required: true
       description: |
         The Boundary controller's health endpoint.

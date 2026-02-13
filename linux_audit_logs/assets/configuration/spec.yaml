@@ -1,4 +1,5 @@
 name: Linux Audit Logs
+fleet_configurable: true
 files:
 - name: linux_audit_logs.yaml
   options:

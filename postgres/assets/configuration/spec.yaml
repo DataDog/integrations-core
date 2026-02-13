@@ -1182,7 +1182,6 @@ files:
         explain plans into Datadog, which can then become viewable in query samples or explain plans. 
         This option is disabled by default.
         Note: Collection of raw query statements is currently in preview.
-        If you are interested in participating, please reach out to your Datadog Customer Success Manager.
         This option only applies when dbm is enabled.
       options:
         - name: enabled
