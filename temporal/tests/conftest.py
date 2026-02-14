@@ -5,7 +5,6 @@ import copy
 import os
 import time
 from contextlib import contextmanager
-from unittest import mock
 
 import pytest
 
@@ -82,14 +81,9 @@ def check(instance):
 
 
 @pytest.fixture()
-def mock_metrics():
+def mock_metrics(mock_http_response):
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+    mock_http_response(text_data)
+    yield
