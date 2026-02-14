@@ -441,7 +441,7 @@ def test_data_methods(aggregator, http_check):
         aggregator.reset()
 
 
-def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check):
+def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check, mock_http_response):
     instance = {
         'name': 'Test Web VM HTTPS SSL',
         'url': 'https://foo.bar.net/',
@@ -453,10 +453,8 @@ def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check):
         'skip_proxy': 'false',
     }
 
-    with (
-        mock.patch('datadog_checks.base.utils.http.logging.Logger.warning') as mock_warning,
-        mock.patch('requests.Session.get'),
-    ):
+    mock_http_response('')
+    with mock.patch('datadog_checks.base.utils.http.logging.Logger.warning') as mock_warning:
         check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
         dd_run_check(check)
         mock_warning.assert_called()
