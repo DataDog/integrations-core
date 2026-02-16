@@ -10,11 +10,11 @@ Integrate IDE Shepherd with Datadog's pre-built dashboard visualizations for ins
 
 ### Configuration
 
-**1. Install and Start Datadog Agent**
+**1. Install and start Datadog Agent**
 
 First, verify the Datadog Agent is installed and running on your system with your organization API key configured. See [Datadog Agent Installation Guide](https://docs.datadoghq.com/agent/) for installation instructions.
 
-**2. Install IDE Shepherd Extension**
+**2. Install IDE Shepherd extension**
 
 Install the IDE Shepherd extension in VS Code or Cursor. See the [IDE Shepherd repository][1] for installation instructions.
 
