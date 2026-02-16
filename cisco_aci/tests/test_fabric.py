@@ -739,10 +739,10 @@ def test_fabric_topology_with_ip_mismatch(aggregator):
 
         # Remote devices SHOULD have dd_id even with IP mismatch (IP matching is always skipped)
         for link in links:
-            assert (
-                link['remote']['device']['dd_id'] is not None
-            ), "Remote device should have dd_id even with IP mismatch"
+            assert link['remote']['device']['dd_id'] is not None, (
+                "Remote device should have dd_id even with IP mismatch"
+            )
 
-            assert (
-                link['remote']['interface']['dd_id'] is not None
-            ), "Remote interface should have dd_id even with IP mismatch"
+            assert link['remote']['interface']['dd_id'] is not None, (
+                "Remote interface should have dd_id even with IP mismatch"
+            )

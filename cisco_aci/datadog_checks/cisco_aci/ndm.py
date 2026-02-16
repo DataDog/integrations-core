@@ -28,9 +28,7 @@ def create_node_metadata(node_attrs, tags, namespace):
     """
     node = Node(attributes=node_attrs)
     hostname = node.attributes.name
-    id_tags = [
-        device_id_tag(namespace, node.attributes.address)
-    ]
+    id_tags = [device_id_tag(namespace, node.attributes.address)]
     device_tags = [
         'device_vendor:{}'.format(VENDOR_CISCO),
         "source:cisco-aci",
