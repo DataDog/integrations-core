@@ -10,24 +10,23 @@ Integrate BlueCat Edge with Datadog to analyze DNS query logs using pre-built da
 
 ## Setup
 
-### Generate an API credentials in BlueCat Edge
+### Generate API credentials in BlueCat Edge
 
 1. Log in to **BlueCat Edge** using a user with the **Analyst** role or higher.
-2. Click on **Account > Profile** tab.
-3. In the **Access key sets** section, click **New**.
-4. The **Client ID** and **Secret key** are displayed.
-5. Identify your **BlueCat Edge Domain URL** using the URL of your BlueCat Edge cloud instance.
+2. Click the **Account > Profile** tab.
+3. In the **Access key sets** section, click **New**. The **Client ID** and **Secret key** are displayed.
+4. Identify your **BlueCat Edge Domain URL** using the URL of your BlueCat Edge cloud instance.
    - For example, if your BlueCat Edge cloud instance URL is **https://myBlueCat.edge.bluec.at/**, the BlueCat Edge Domain URL is **myBlueCat.edge.bluec.at**.
 
 ### Connect your BlueCat Edge account to Datadog
 
-1. Add your `BlueCat Edge Domain`, `Client ID` and `Secret key`.
+1. Add your `BlueCat Edge Domain`, `Client ID`, and `Secret key`.
    | Parameter | Description |
    | ---------- | ---------------------------------------------- |
    | BlueCat Edge Domain | The BlueCat Edge domain of the instance. |
-   | Client ID | Client ID of BlueCat Edge. |
-   | Secret key | Secret key of BlueCat Edge. |
-   | Collect NOERROR DNS Query Logs | Control the collection of NOERROR DNS Query Logs. Enabled by default. |
+   | Client ID | The Client ID for BlueCat Edge. |
+   | Secret key | The secret key for BlueCat Edge. |
+   | Collect NOERROR DNS Query Logs | Controls the collection of NOERROR DNS query logs. Enabled by default. |
 2. Click **Save**.
 
 ## Data Collected
