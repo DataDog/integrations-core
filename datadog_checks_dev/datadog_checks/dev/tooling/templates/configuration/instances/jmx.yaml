@@ -83,8 +83,9 @@
     type: string
   
 - name: java_options
-  description: 'A list of Java JVM options, for example: "-Xmx200m -Xms50m".'
+  description: 'Java JVM heap memory options. Only -Xms (initial heap) and -Xmx (maximum heap) are allowed, for example: "-Xmx200m -Xms50m".'
   fleet_configurable: true
+  fleet_formats: ["java_jvm_options"]
   value:
     type: string
   
