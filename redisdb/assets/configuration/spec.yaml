@@ -18,6 +18,7 @@ files:
     - name: port
       required: true
       description: Enter the port of the host to connect to.
+      fleet_formats: ["port"]
       value:
         type: integer
         example: 6379
@@ -47,6 +48,7 @@ files:
     - name: password
       description: The password for the connection.
       secret: true
+      fleet_formats: ["secret"]
       value:
         type: string
       fleet_configurable: true

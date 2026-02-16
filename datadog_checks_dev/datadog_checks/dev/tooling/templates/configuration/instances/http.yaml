@@ -90,6 +90,7 @@
   fleet_configurable: true
 - name: password
   secret: true
+  fleet_formats: ["secret"]
   value:
     type: string
   description: The password to use if services are behind basic or NTLM auth.
@@ -167,6 +168,7 @@
     See https://github.com/requests/requests-kerberos#explicit-principal
 - name: kerberos_keytab
   fleet_configurable: true
+  fleet_formats: ["path"]
   value:
     example: <KEYTAB_FILE_PATH>
     type: string

@@ -8,6 +8,7 @@
 - name: port
   required: true
   description: JMX port to connect to.
+  fleet_formats: ["port"]
   value:
     type: integer
   fleet_configurable: true
@@ -25,6 +26,7 @@
 - name: jmx_url
   description: JMX URL to connect to. Can be used instead of host/port configs.
   hidden: true
+  fleet_formats: ["url"]
   value:
     type: string
   fleet_configurable: true
@@ -38,6 +40,7 @@
 - name: password
   description: Password to use when connecting to JMX.
   secret: true
+  fleet_formats: ["secret"]
   value:
     type: string
   fleet_configurable: true
@@ -63,6 +66,7 @@
     Note: tools.jar was removed in Java 9: https://openjdk.java.net/jeps/220.
     This option is supported in Java 8 and below.
   fleet_configurable: true
+  fleet_formats: ["path"]
   value:
     type: string
 
@@ -88,6 +92,7 @@
   description: |
     The path to your trusted store.
     `trust_store_path` should be set if SSL is enabled.
+  fleet_formats: ["path"]
   value:
     type: string
   fleet_configurable: true
@@ -96,6 +101,7 @@
     The password for your TrustStore.jks file.
     `trust_store_password` should be set if SSL is enabled.
   secret: true
+  fleet_formats: ["secret"]
   value:
     type: string
   fleet_configurable: true
@@ -104,6 +110,7 @@
   description: |
     The path to your key store.
     `key_store_path` should be set if client authentication is enabled on the target JVM.
+  fleet_formats: ["path"]
   value:
     type: string
   fleet_configurable: true
@@ -113,6 +120,7 @@
     The password to your key store.
     `key_store_password` should be set if client authentication is enabled on the target JVM.
   secret: true
+  fleet_formats: ["secret"]
   value:
     type: string
   fleet_configurable: true

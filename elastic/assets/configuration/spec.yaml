@@ -15,6 +15,7 @@ files:
       description: |
         The URL where Elasticsearch accepts HTTP requests. This is used to
         fetch statistics from the nodes and information about the cluster health.
+      fleet_formats: ["url"]
       value:
         example: http://localhost:9200
         type: string
