@@ -235,6 +235,10 @@ def append_to_payload(item, current_payload, namespace, collect_ts):
         return current_payload, new_payload
 
 
+def device_id_tag(namespace, address):
+    return f"device_id:{namespace}:{address}"
+
+
 def common_tags(address, hostname, namespace):
     """
     Return a list of common tags (following NDM standards) for a device
@@ -243,5 +247,5 @@ def common_tags(address, hostname, namespace):
         'device_ip:{}'.format(address),
         'device_namespace:{}'.format(namespace),
         'device_hostname:{}'.format(hostname),
-        'device_id:{}:{}'.format(namespace, address),
+        device_id_tag(namespace, address),
     ]
