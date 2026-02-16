@@ -1,4 +1,5 @@
 name: Airflow
+fleet_configurable: true
 files:
 - name: airflow.yaml
   options:
@@ -9,11 +10,13 @@ files:
   - template: instances
     options:
     - name: url
+      fleet_configurable: true
       required: true
       description: The URL used to connect to the Airflow instance (use the Airflow web server REST API endpoint).
       value:
         type: string
     - name: collect_ongoing_duration
+      fleet_configurable: true
       required: false
       description: Collect ongoing duration metric for DAG task instances.
       value:

@@ -1,5 +1,5 @@
 name: System Core
-
+fleet_configurable: true
 files:
   - name: system_core.yaml
     options:

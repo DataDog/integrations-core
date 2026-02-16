@@ -1,4 +1,5 @@
 name: KubeVirt Controller
+fleet_configurable: true
 files:
   - name: kubevirt_controller.yaml
     options:
@@ -10,6 +11,7 @@ files:
           - name: kubevirt_controller_metrics_endpoint
             description: |
               URL to the KubeVirt Controller Service /metrics endpoint.
+            fleet_configurable: true
             value:
               display_default: null
               example: https://10.244.0.38:443/metrics
@@ -17,6 +19,7 @@ files:
           - name: kubevirt_controller_healthz_endpoint
             description: |
               URL to check the KubeVirt Controller /healthz endpoint.
+            fleet_configurable: true
             value:
               display_default: null
               example: https://10.244.0.38:443/healthz
@@ -24,6 +27,7 @@ files:
           - name: kube_namespace
             description: |
               The namespace where the KubeVirt Controller is running. (Provided by autodiscovery template variables)
+            fleet_configurable: true
             value:
               display_default: null
               example: kubevirt
@@ -31,6 +35,7 @@ files:
           - name: kube_pod_name
             description: |
               The name of the KubeVirt Controller pod. (Provided by autodiscovery template variables)
+            fleet_configurable: true
             value:
               display_default: null
               example: virt-controller-id-1234

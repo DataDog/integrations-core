@@ -1,4 +1,5 @@
 name: Network
+fleet_configurable: true
 files:
   - name: network.yaml
     example_name: conf.yaml.default
@@ -19,6 +20,7 @@ files:
               Set to true to collect connection states for your interfaces
               Note: this will require either the command `ss` from system package `iproute2` or
               the command `netstat` from the system package `net-tools` to be installed
+            fleet_configurable: true
             value:
               example: false
               type: boolean
@@ -30,11 +32,13 @@ files:
               because it also requires the command `ss` from system package `iproute2` or
               the command `netstat` from the system package `net-tools` to be installed
               Note: This option is only available on linux and will be ignored in other systems.
+            fleet_configurable: true
             value:
               example: false
               type: boolean
           - name: excluded_interfaces
             description: List of interface to exclude from the check.
+            fleet_configurable: true
             value:
               example:
                 - lo
@@ -44,6 +48,7 @@ files:
                 type: string
           - name: excluded_interface_re
             description: Completely ignore any network interface matching the given regex.
+            fleet_configurable: true
             value:
               display_default: null
               example: <NETWORK_INTERFACE_NAME>.*
@@ -53,6 +58,7 @@ files:
               Set to false to not combine connection states.
               By default we combine states like fin_wait_1 and fin_wait_2
               together into one state: 'closing' disable this option to get more granular data.
+            fleet_configurable: true
             value:
               example: true
               type: boolean
@@ -62,6 +68,7 @@ files:
               However, some metrics like tcp/udp retransmissions and errors are
               better handled as counts.
               Choose to disable rate metrics by setting collect_rate_metrics to false.
+            fleet_configurable: true
             value:
               example: true
               type: boolean
@@ -72,6 +79,7 @@ files:
               better handled as counts.
               Choose to enable count metrics by setting collect_count_metrics to true.
               Count metrics have '.count' added to the metric name.
+            fleet_configurable: true
             value:
               example: false
               type: boolean
@@ -81,6 +89,7 @@ files:
               The location of the conntrack executable in order to get the stats from conntrack -S.
               It will be run with sudo by default, so an entry needs to be added to the sudoers file.
               By default, these metrics will not be sent.
+            fleet_configurable: true
             value:
               display_default: null
               example: /usr/sbin/conntrack
@@ -89,6 +98,7 @@ files:
             description: |
               Set to False to disable sudo when running `conntrack -S`
               (`sudo` isn't normally available in containers)
+            fleet_configurable: true
             value:
               example: true
               type: boolean
@@ -136,6 +146,7 @@ files:
               Note that when running this check in container, it will return metrics for the container
               network interfaces. To get host-level ENA metrics from a container, it needs to be executed
               with `CAP_NET_ADMIN` capability and use the `host` network mode.
+            fleet_configurable: true
             value:
               display_default: false
               example: false
@@ -156,6 +167,7 @@ files:
               - virtio_net
               - hv_netvsc
               - gve
+            fleet_configurable: true
             value:
               display_default: false
               example: false

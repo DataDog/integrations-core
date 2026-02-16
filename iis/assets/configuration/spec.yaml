@@ -1,4 +1,5 @@
 name: IIS
+fleet_configurable: true
 files:
 - name: iis.yaml
   options:
@@ -18,6 +19,7 @@ files:
         On Agent versions 7.34 or higher, this may also be defined as a mapping
         with `include` and/or `exclude` keys representing arrays of regular
         expressions strings.
+      fleet_configurable: true
       value:
         example:
           include:
@@ -50,6 +52,7 @@ files:
         On Agent versions 7.34 or higher, this may also be defined as a mapping
         with `include` and/or `exclude` keys representing arrays of regular
         expressions strings.
+      fleet_configurable: true
       value:
         example:
           include:

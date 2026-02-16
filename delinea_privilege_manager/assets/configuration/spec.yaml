@@ -1,4 +1,5 @@
 name: Delinea Privilege Manager
+fleet_configurable: true
 files:
 - name: delinea_privilege_manager.yaml
   options:
