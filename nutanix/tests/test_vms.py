@@ -24,6 +24,7 @@ def test_vm_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
         'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
         'ntnx_vm_id:f3272103-ea1e-4a90-8318-899636993ed6',
         'ntnx_vm_name:PC-OptionName-1',
+        'nutanix',
         'prism_central:10.0.0.197',
     ]
 
@@ -44,6 +45,7 @@ def test_vm_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get
         'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
         'ntnx_vm_id:f3272103-ea1e-4a90-8318-899636993ed6',
         'ntnx_vm_name:PC-OptionName-1',
+        'nutanix',
         'prism_central:10.0.0.197',
     ]
 
@@ -68,6 +70,7 @@ def test_external_tags_for_vm(dd_run_check, aggregator, mock_instance, mock_http
                 'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
                 'ntnx_vm_id:f3272103-ea1e-4a90-8318-899636993ed6',
                 'ntnx_vm_name:PC-OptionName-1',
+                'nutanix',
                 'prism_central:10.0.0.197',
             ]
         },

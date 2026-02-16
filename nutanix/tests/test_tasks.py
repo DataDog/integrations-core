@@ -24,6 +24,7 @@ EXPECTED_TASKS = [
         'msg_title': 'Task: LogCollectionFromPC',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_task_id:ZXJnb24=:c26e2479-8a31-4ca8-7390-f7ac065816b3',
             'ntnx_task_status:SUCCEEDED',
@@ -45,6 +46,7 @@ EXPECTED_TASKS = [
         'msg_title': 'Task: LogCollectionWithDownloadLink',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_task_id:ZXJnb24=:a87db417-a83d-4d8d-7a1b-4441099d9850',
             'ntnx_task_status:SUCCEEDED',
@@ -65,6 +67,7 @@ EXPECTED_TASKS = [
         'msg_title': 'Task: update_vm_intentful',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_task_id:ZXJnb24=:8cd5cb75-37dc-4aa0-9726-3bf31f2239af',
             'ntnx_task_status:SUCCEEDED',

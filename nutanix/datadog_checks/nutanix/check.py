@@ -55,6 +55,7 @@ class NutanixCheck(AgentCheck):
         self.health_check_url = f"{self.base_url}/console"
 
         self.base_tags = self.instance.get("tags", [])
+        self.base_tags.append("nutanix")
         self.base_tags.append(f"prism_central:{self.pc_ip}")
 
         self.infrastructure_monitor = InfrastructureMonitor(self)

@@ -22,6 +22,7 @@ EXPECTED_EVENTS = [
         'msg_title': 'LicenseAudit',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_event_id:9dba574f-90c0-473f-b91b-9be33f1d4732',
             'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
@@ -38,6 +39,7 @@ EXPECTED_EVENTS = [
         'msg_title': 'PasswordAudit',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_event_id:1f4d5f21-8bdd-4b15-8886-d232b5d030d8',
             'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
@@ -54,6 +56,7 @@ EXPECTED_EVENTS = [
         'msg_title': 'PulseAudit',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_event_id:4b7625c6-8a8d-4816-8ef1-019e8636f498',
             'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
@@ -70,6 +73,7 @@ EXPECTED_EVENTS = [
         'msg_title': 'PasswordAudit',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_event_id:14f94d80-4404-4f1e-869d-fe22cbb4d00a',
             'ntnx_cluster_id:b6d83094-9404-48de-9c74-ca6bddc3a01d',
@@ -86,6 +90,7 @@ EXPECTED_EVENTS = [
         'msg_title': 'PasswordAudit',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_event_id:0e7621b9-db61-4344-8978-3001cf386c3d',
             'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
@@ -102,6 +107,7 @@ EXPECTED_EVENTS = [
         'msg_title': 'PasswordAudit',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_event_id:3c3da430-7670-406e-8f03-d29bdbc173f5',
             'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
@@ -118,6 +124,7 @@ EXPECTED_EVENTS = [
         'msg_title': 'EnableDisableUserAudit',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_event_id:348a9873-f3c4-47f7-95bb-5ff52ad069cc',
             'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
@@ -134,6 +141,7 @@ EXPECTED_EVENTS = [
         'msg_title': 'PulseAudit',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_event_id:57d23178-e257-497d-9db4-9aa2ccbcd89e',
             'ntnx_cluster_id:b6d83094-9404-48de-9c74-ca6bddc3a01d',
@@ -150,6 +158,7 @@ EXPECTED_EVENTS = [
         'msg_title': 'PulseAudit',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_event_id:48c8d441-040e-480c-a36f-a05c5f276d35',
             'ntnx_cluster_id:b6d83094-9404-48de-9c74-ca6bddc3a01d',
@@ -166,6 +175,7 @@ EXPECTED_EVENTS = [
         'msg_title': 'MulticlusterAudit',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_event_id:f1e41e4e-3a4b-4e22-970d-6df49f008e4c',
             'ntnx_cluster_id:b6d83094-9404-48de-9c74-ca6bddc3a01d',

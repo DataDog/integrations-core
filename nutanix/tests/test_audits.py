@@ -21,6 +21,7 @@ EXPECTED_AUDITS = [
         'msg_title': 'Audit: LoginInfoAudit',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_audit_id:529bb5f3-fb9f-412c-9452-1dbff8a5b1fc',
             'ntnx_audit_type:LoginInfoAudit',
@@ -44,6 +45,7 @@ EXPECTED_AUDITS = [
         'msg_title': 'Audit: LoginInfoAudit',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_audit_id:cee0bd9d-ec29-4f47-a7f8-3a341a7e56c4',
             'ntnx_audit_type:LoginInfoAudit',
@@ -67,6 +69,7 @@ EXPECTED_AUDITS = [
         'msg_title': 'Audit: LoginInfoAudit',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_audit_id:c583fa23-d8fd-42af-a0f3-3425bd2e4300',
             'ntnx_audit_type:LoginInfoAudit',
@@ -90,6 +93,7 @@ EXPECTED_AUDITS = [
         'msg_title': 'Audit: LoginInfoAudit',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_audit_id:f13a286e-6a73-492d-bc91-c9e6041cf4a2',
             'ntnx_audit_type:LoginInfoAudit',

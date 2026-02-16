@@ -30,6 +30,7 @@ def test_health_check(dd_run_check, aggregator, aws_instance):
     dd_run_check(check)
 
     aggregator.assert_metric("nutanix.health.up", value=1)
+    aggregator.assert_metric_has_tag("nutanix.health.up", tag="nutanix")
     aggregator.assert_metric_has_tag_prefix("nutanix.health.up", tag_prefix="prism_central:")
 
 

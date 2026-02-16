@@ -23,6 +23,7 @@ def test_host_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
         'ntnx_hypervisor_name:AHV 10.0.1.4',
         'ntnx_hypervisor_type:AHV',
         'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+        'nutanix',
         'prism_central:10.0.0.197',
     ]
 
@@ -42,6 +43,7 @@ def test_host_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_g
         'ntnx_hypervisor_name:AHV 10.0.1.4',
         'ntnx_hypervisor_type:AHV',
         'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+        'nutanix',
         'prism_central:10.0.0.197',
     ]
 
@@ -65,6 +67,7 @@ def test_external_tags_for_host(dd_run_check, aggregator, mock_instance, mock_ht
                 'ntnx_hypervisor_name:AHV 10.0.1.4',
                 'ntnx_hypervisor_type:AHV',
                 'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+                'nutanix',
                 'prism_central:10.0.0.197',
             ]
         },

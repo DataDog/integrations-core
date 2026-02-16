@@ -14,7 +14,7 @@ def test_health_check_success(dd_run_check, aggregator, mock_instance, mock_http
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    aggregator.assert_metric("nutanix.health.up", value=1, count=1, tags=['prism_central:10.0.0.197'])
+    aggregator.assert_metric("nutanix.health.up", value=1, count=1, tags=['nutanix', 'prism_central:10.0.0.197'])
 
 
 def test_health_check_failure(dd_run_check, aggregator, mock_instance, mocker):
@@ -27,7 +27,7 @@ def test_health_check_failure(dd_run_check, aggregator, mock_instance, mocker):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    aggregator.assert_metric("nutanix.health.up", value=0, count=1, tags=['prism_central:10.0.0.197'])
+    aggregator.assert_metric("nutanix.health.up", value=0, count=1, tags=['nutanix', 'prism_central:10.0.0.197'])
 
 
 def test_cluster_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -37,6 +37,7 @@ def test_cluster_metrics(dd_run_check, aggregator, mock_instance, mock_http_get)
     expected_tags = [
         'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
         'ntnx_cluster_name:datadog-nutanix-dev',
+        'nutanix',
         'prism_central:10.0.0.197',
     ]
 
@@ -55,6 +56,7 @@ def test_cluster_stats_metrics(dd_run_check, aggregator, mock_instance, mock_htt
     expected_tags = [
         'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
         'ntnx_cluster_name:datadog-nutanix-dev',
+        'nutanix',
         'prism_central:10.0.0.197',
     ]
 

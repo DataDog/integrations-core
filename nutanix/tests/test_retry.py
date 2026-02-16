@@ -61,8 +61,8 @@ def test_retry_on_rate_limit_429_then_success(dd_run_check, aggregator, mock_ins
     assert 1.0 <= sleep_time <= 2.0
 
     # Check retry metrics
-    aggregator.assert_metric("nutanix.api.retry.count", value=1, tags=['prism_central:10.0.0.197'])
-    aggregator.assert_metric("nutanix.api.retry.backoff_seconds", tags=['prism_central:10.0.0.197'])
+    aggregator.assert_metric("nutanix.api.retry.count", value=1, tags=['nutanix', 'prism_central:10.0.0.197'])
+    aggregator.assert_metric("nutanix.api.retry.backoff_seconds", tags=['nutanix', 'prism_central:10.0.0.197'])
     aggregator.assert_metric("nutanix.api.retry.exhausted", count=0)
 
 
@@ -89,7 +89,7 @@ def test_retry_on_rate_limit_max_retries_exceeded(dd_run_check, aggregator, mock
     assert mock_sleep.call_count == 1  # Sleep between retries (not after final failure)
 
     # Check retry exhausted metric
-    aggregator.assert_metric("nutanix.api.retry.exhausted", value=1, tags=['prism_central:10.0.0.197'])
+    aggregator.assert_metric("nutanix.api.retry.exhausted", value=1, tags=['nutanix', 'prism_central:10.0.0.197'])
 
 
 def test_retry_on_non_429_error_no_retry(dd_run_check, aggregator, mock_instance, mocker):
@@ -216,7 +216,7 @@ def test_retry_disabled_with_zero_max_retries(dd_run_check, aggregator, mock_ins
     assert mock_sleep.call_count == 0
 
     # Should report exhausted metric immediately
-    aggregator.assert_metric("nutanix.api.retry.exhausted", value=1, tags=['prism_central:10.0.0.197'])
+    aggregator.assert_metric("nutanix.api.retry.exhausted", value=1, tags=['nutanix', 'prism_central:10.0.0.197'])
 
 
 def test_health_check_with_retry(dd_run_check, aggregator, mock_instance, mocker):
@@ -244,7 +244,7 @@ def test_health_check_with_retry(dd_run_check, aggregator, mock_instance, mocker
     assert mock_sleep.call_count == 1
 
     # Health check should report up after successful retry
-    aggregator.assert_metric("nutanix.health.up", value=1, tags=['prism_central:10.0.0.197'])
+    aggregator.assert_metric("nutanix.health.up", value=1, tags=['nutanix', 'prism_central:10.0.0.197'])
 
 
 def test_make_request_with_different_methods(dd_run_check, aggregator, mock_instance, mocker):

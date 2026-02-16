@@ -23,6 +23,7 @@ EXPECTED_ALERTS = [
         'msg_title': 'Alert: Disk space usage high for {mount_path} on {entity} {ip_address}',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_alert_id:5bfd312f-dff9-4c08-a0fe-e059d2167606',
             'ntnx_alert_type:A1031',
@@ -43,6 +44,7 @@ EXPECTED_ALERTS = [
         'msg_title': 'Alert: Disk space usage high for {mount_path} on {entity} {ip_address}',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_alert_id:ebf72745-2c84-4e5a-a94e-7bec727a206c',
             'ntnx_alert_type:A1031',
@@ -64,6 +66,7 @@ EXPECTED_ALERTS = [
         'msg_title': 'Alert: Degraded VM Recovery Point.',
         'source_type_name': 'nutanix',
         'tags': [
+            'nutanix',
             'prism_central:10.0.0.197',
             'ntnx_alert_id:c17420bd-d048-4a3a-ba02-fb485cae2aaf',
             'ntnx_alert_type:A130172',
