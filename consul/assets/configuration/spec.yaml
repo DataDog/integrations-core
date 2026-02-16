@@ -11,6 +11,7 @@ files:
     options:
     - name: url
       fleet_configurable: true
+      fleet_formats: ["url"]
       display_priority: 2
       required: true
       description: |

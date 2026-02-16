@@ -11,9 +11,10 @@ files:
       - template: instances
         options:
           - name: url
-            description: URL used to connect to the Mesos Master instance.
             fleet_configurable: true
+            fleet_formats: ["url"]
             required: true
+            description: URL used to connect to the Mesos Master instance.
             value:
               type: string
               example: http://localhost:5050

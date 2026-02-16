@@ -10,6 +10,7 @@ files:
       options:
       - name: prometheus_url
         fleet_configurable: true
+        fleet_formats: ["url"]
         required: true
         description: The URL where your application metrics are exposed by Prometheus.
         value:

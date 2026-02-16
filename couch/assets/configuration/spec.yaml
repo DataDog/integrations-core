@@ -11,6 +11,7 @@ files:
     options:
     - name: server
       fleet_configurable: true
+      fleet_formats: ["url"]
       required: true
       description: The Couch server's url.
       display_priority: 3

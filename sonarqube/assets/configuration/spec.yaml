@@ -25,6 +25,7 @@ files:
           Note: This only takes effect when `is_jmx` is set to `false` and is required for all
           API metrics.
         fleet_configurable: true
+        fleet_formats: ["url"]
         value:
           type: string
       - name: default_tag
