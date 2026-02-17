@@ -112,12 +112,23 @@ jobs:
 
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    # We run this for EVERYONE to ensure the scripts are moved
-    # from the action folder to the expected workspace path.
-    # It should cover all repos using this workflow and respect the context if the
-    # workflow is being called with a pinned version.
-    - name: Install workflow scripts
+    # The local composite action only works for core since it exists in the checkout.
+    - name: Install workflow scripts (core)
+      if: inputs.repo == 'core'
       uses: ./.github/actions/setup-test-target-scripts
+
+    # Non-core repos don't have the action locally, so we download the scripts.
+    # We use github.workflow_sha to match whatever version the caller pinned to.
+    # Keep script names in sync with .github/actions/setup-test-target-scripts/action.yml
+    - name: Install workflow scripts (non-core)
+      if: inputs.repo != 'core'
+      run: |
+        mkdir -p .github/workflows/scripts
+        for script in setup-test-env.sh run-unit-integration-tests.sh run-e2e-tests.sh; do
+          curl -fsSL "https://raw.githubusercontent.com/DataDog/integrations-core/${{ github.workflow_sha }}/.github/actions/setup-test-target-scripts/src/$script" \
+            -o ".github/workflows/scripts/$script"
+        done
+        chmod +x .github/workflows/scripts/*.sh
 
     - name: Set environment variables
       # This step sets the following environment variables for the entire workflow via setup-test-env.sh:
