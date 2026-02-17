@@ -1,0 +1,1 @@
+Catch `AssertionError` from `bmemcached` when the memcached binary protocol response is malformed, preventing unhandled crashes during transient connection issues.

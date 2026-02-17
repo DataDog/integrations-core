@@ -293,7 +293,7 @@ class Memcache(AgentCheck):
                 self.OPTIONAL_STATS["items"][2] = Memcache.get_items_stats
                 self.OPTIONAL_STATS["slabs"][2] = Memcache.get_slabs_stats
                 self._get_optional_metrics(client, tags, options)
-        except BadResponseError as e:
+        except (BadResponseError, AssertionError) as e:
             self.service_check(
                 self.SERVICE_CHECK,
                 AgentCheck.CRITICAL,
