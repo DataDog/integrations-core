@@ -245,7 +245,7 @@ files:
         - name: client_id
           fleet_configurable: true
           description: |
-            The client identifier. Required when method is 'oidc'.
+            The client identifier. Required when method is `oidc`.
           value:
             type: string
         - name: client_secret
