@@ -19,6 +19,7 @@ files:
         Console in the `Workload Password`.
       fleet_configurable: true
       required: true
+      secret: true
       value:
         type: string
     - template: init_config/default

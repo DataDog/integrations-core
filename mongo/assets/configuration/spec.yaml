@@ -697,6 +697,7 @@ files:
       description: |
         Specify the MongoDB URI, with database to use for reporting (defaults to "admin")
         E.g. mongodb://datadog:LnCbkX4uhpuLHSUrcayEoAZA@localhost:27016/admin
+      secret: true
       value:
         example: mongodb://<USER>:<PASSWORD>@<HOST>:<PORT>/<DB_NAME>
         display_default: null
