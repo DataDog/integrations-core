@@ -46,6 +46,7 @@ files:
       fleet_configurable: true
       required: true
       description: "Silverstripe Database Password."
+      secret: true
       value:
         type: string
         example: "<PASSWORD>"
