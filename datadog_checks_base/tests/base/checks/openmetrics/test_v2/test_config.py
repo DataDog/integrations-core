@@ -225,6 +225,25 @@ class TestMetrics:
         with pytest.raises(Exception, match='^Error compiling transformer for metric `foo`: unknown type `bar`$'):
             dd_run_check(check, extract_message=True)
 
+    def test_config_type_count_alias_for_counter(self, aggregator, dd_run_check, mock_http_response):
+        mock_http_response(
+            """
+            # HELP oracledb_rts_total_records Total records
+            # TYPE oracledb_rts_total_records counter
+            oracledb_rts_total_records 2.610012e+06
+            """
+        )
+        check = get_check(
+            {'metrics': [{'oracledb_rts_total_records': {'type': 'count'}}]}
+        )
+        dd_run_check(check)
+        aggregator.assert_metric(
+            'test.oracledb_rts_total_records.count',
+            2610012,
+            metric_type=aggregator.MONOTONIC_COUNT,
+            tags=['endpoint:test'],
+        )
+
 
 class TestExtraMetrics:
     def test_not_array(self, dd_run_check):
