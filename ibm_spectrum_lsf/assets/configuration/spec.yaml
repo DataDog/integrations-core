@@ -1,4 +1,5 @@
 name: IBM Spectrum LSF
+fleet_configurable: true
 files:
 - name: ibm_spectrum_lsf.yaml
   options:
@@ -8,6 +9,7 @@ files:
   - template: instances
     options:
     - name: cluster_name
+      fleet_configurable: true
       required: true
       description: The exact name of the IBM cluster to monitor.
       value:
@@ -18,13 +20,16 @@ files:
         By default, all commands except GPU commands are enabled.
 
         Possible values: lsclusters, lshosts, bhosts, lsload, bqueues,
-        bhist, bslots, bjobs, lsload_gpu, bhosts_gpu, badmin_perfmon.
+        bhist, bslots, bjobs, lsload_gpu, bhosts_gpu, badmin_perfmon, bhist_details.
 
         Note: Enabling `badmin_perfmon` will run the command `badmin perfmon start <YOUR_MIN_COLLECTION_INTERVAL>`.
         By default, this is set to 15 seconds. It is recommended to set this to a higher value such as 60 seconds
         to decrease load on the cluster. We recommend creating a separate instance to collect `badmin_perfmon` metrics
         with a higher `min_collection_interval` like 60. Similarly, the `bhist` command can be query intensive, so we 
-        recommend monitoring it with a higher `min_collection_interval` like 60.
+        recommend monitoring it with a higher `min_collection_interval` like 60. The `bhist_details` command involves
+        running `bhist -l` for each completed job, so we recommend monitoring it with a higher `min_collection_interval`
+        along with `bhist`.
+      fleet_configurable: true
       value:
         type: array
         default:
@@ -46,9 +51,11 @@ files:
         - bhist
         - lsload_gpu
         - bhosts_gpu
+        - bhist_details
         items:
           type: string
     - name: badmin_perfmon_auto
+      fleet_configurable: true
       required: false
       description: |
         Whether or not to call `badmin perfmon start` when starting badmin perfmon metrics collection and
@@ -61,3 +68,19 @@ files:
         display_default: true
         example: false
     - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      source: ibm_spectrum_lsf
+      tags:
+        - "log_type:job"
+      path:
+        - <PATH_TO_JOB_LOGS>/*.out
+        - <PATH_TO_SYSTEM_LOGS>/*.err
+      service: <SERVICE_NAME>
+    - type: file
+      source: ibm_spectrum_lsf
+      tags:
+        - "log_type:system"
+      path: <LSF_TOP_DIR>/log/*
+      service: <SERVICE_NAME>

@@ -24,6 +24,8 @@ on:
     - '*/metadata.csv'
     # In case some linting formatting config has changed
     - 'pyproject.toml'
+  schedule:
+    - cron: '0 2 * * *'
 
 jobs:
   cache:

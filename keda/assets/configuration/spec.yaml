@@ -1,4 +1,5 @@
 name: Keda
+fleet_configurable: true
 files:
 - name: keda.yaml
   options:

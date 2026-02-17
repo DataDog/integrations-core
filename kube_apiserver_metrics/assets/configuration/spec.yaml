@@ -1,4 +1,5 @@
 name: Kubernetes API server metrics
+fleet_configurable: true
 files:
 - name: kube_apiserver_metrics.yaml
   options:
@@ -12,6 +13,7 @@ files:
         Used to specify the scheme to reach the APIServer endpoints. Default to https.
         This option is deprecated, declare the scheme in the prometheus_url
         parameter instead.
+      fleet_configurable: true
       value:
         type: string
         example: https
@@ -60,7 +62,6 @@ files:
       enabled: true
       value:
         example: tls_only
-        default: false
         anyOf:
         - type: boolean
         - type: string

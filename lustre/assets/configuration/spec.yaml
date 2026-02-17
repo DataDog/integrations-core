@@ -1,4 +1,5 @@
 name: Lustre
+fleet_configurable: true
 files:
 - name: lustre.yaml
   options:
@@ -11,6 +12,7 @@ files:
       description: |
         Specify the type of Lustre node: client, mds, or oss.
         If not specified, the integration will attempt to auto-detect the node type.
+      fleet_configurable: true
       required: false
       value:
         type: string
@@ -22,6 +24,7 @@ files:
       description: |
         List of specific filesystems to monitor.
         If not specified, all available filesystems will be monitored.
+      fleet_configurable: true
       required: false
       value:
         type: array
@@ -34,30 +37,35 @@ files:
       description: |
         Enable changelog collection on client nodes.
         Requires changelog users to be registered.
+      fleet_configurable: true
       required: false
       value:
         type: boolean
         example: false
     - name: lctl_path
       description: Path to the lctl binary.
+      fleet_configurable: true
       required: false
       value:
         type: string
         default: /usr/sbin/lctl
     - name: lnetctl_path
       description: Path to the lnetctl binary.
+      fleet_configurable: true
       required: false
       value:
         type: string
         default: /usr/sbin/lnetctl
     - name: lfs_path
       description: Path to the lfs binary.
+      fleet_configurable: true
       required: false
       value:
         type: string
         default: /usr/bin/lfs
     - name: enable_lnetctl_detailed
       description: Enable detailed LNET statistics collection.
+      fleet_configurable: true
       required: false
       value:
         type: boolean
@@ -66,6 +74,7 @@ files:
       description: |
         Enable collection of additional Lustre parameters.
         This includes MDS, OSS, and client-specific advanced metrics.
+      fleet_configurable: true
       required: false
       value:
         type: boolean
@@ -74,6 +83,7 @@ files:
       description: |
         Number of changelog lines to process per check run (client nodes only).
         Higher values may impact performance.
+      fleet_configurable: true
       required: false
       value:
         type: integer

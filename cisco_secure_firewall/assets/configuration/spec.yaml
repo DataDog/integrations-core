@@ -1,4 +1,5 @@
 name: cisco-secure-firewall
+fleet_configurable: true
 files:
   - name: cisco_secure_firewall.yaml
     options:

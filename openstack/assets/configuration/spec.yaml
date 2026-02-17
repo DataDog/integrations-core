@@ -1,4 +1,5 @@
 name: OpenStack
+fleet_configurable: true
 
 files:
   - name: openstack.yaml
@@ -7,6 +8,7 @@ files:
       - template: init_config
         options:
           - name: keystone_server_url
+            fleet_configurable: true
             required: true
             description: |
               Where your identity server lives. Note that the server must support Identity API v3
@@ -26,7 +28,7 @@ files:
              Nova API version to use - this check supports `v2` and `v2.1`.
             value:
               example: v2.1
-              default_value: v2.1
+              default: v2.1
               type: string
           - name: hypervisor_ids
             description: |
@@ -86,6 +88,7 @@ files:
       - template: instances
         options:
           - name: name
+            fleet_configurable: true
             required: true
             description: |
               Unique identifier for this instance.

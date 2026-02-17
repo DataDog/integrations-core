@@ -1,4 +1,5 @@
 name: HyperV
+fleet_configurable: true
 files:
 - name: hyperv.yaml
   options:

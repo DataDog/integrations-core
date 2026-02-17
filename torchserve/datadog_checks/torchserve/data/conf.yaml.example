@@ -1038,7 +1038,7 @@ instances:
     # exclude: []
 
     ## @param interval - integer - optional
-    ## Refresh interval in second to use for the models to be 'autodiscovered'. 
+    ## Refresh interval, in seconds, for models to be 'autodiscovered'.
     ## By default, we refresh the list each time the check runs.
     #
     # interval: <INTERVAL>
