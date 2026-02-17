@@ -18,10 +18,9 @@ on:
         type: string
         default: "master"
 
-  # PR trigger for testing
+  # PR trigger for testing (only test branch, not master)
   pull_request:
     branches:
-      - master
       - dk/test-release-trigger
 
   # TODO: Add tag trigger after testing
