@@ -239,7 +239,7 @@ files:
         - name: url
           fleet_configurable: true
           description: |
-            The token endpoint. Required when method is 'oidc'.
+            The token endpoint. Required when method is `oidc`.
           value:
             type: string
         - name: client_id
