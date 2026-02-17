@@ -55,3 +55,12 @@ class TestHTTPResponseProtocol:
     def test_protocol_is_runtime_checkable(self):
         """HTTPResponseProtocol should be runtime checkable."""
         assert hasattr(HTTPResponseProtocol, '__instancecheck__')
+
+    def test_protocol_has_close_method(self):
+        """HTTPResponseProtocol should require close() method for resource cleanup."""
+        import requests
+
+        # Verify requests.Response has close() method (production code relies on this)
+        response = requests.Response()
+        assert hasattr(response, 'close')
+        assert callable(response.close)

@@ -43,6 +43,10 @@ class HTTPResponseProtocol(Protocol):
         """Iterate over response content line by line."""
         ...  # no cov
 
+    def close(self) -> None:
+        """Close the response and release connection back to pool."""
+        ...  # no cov
+
     # Context manager support
     def __enter__(self) -> 'HTTPResponseProtocol': ...  # no cov
 
