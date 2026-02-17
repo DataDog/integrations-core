@@ -18,10 +18,12 @@ on:
         type: string
         default: "master"
 
-  # PR trigger for testing (only test branch, not master)
+  # PR trigger for testing (when PRs target master from test branch)
   pull_request:
     branches:
-      - dk/test-release-trigger
+      - master
+    paths:
+      - '.github/workflows/trigger-release.yml'
 
   # TODO: Add tag trigger after testing
   # push:
