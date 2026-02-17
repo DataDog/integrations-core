@@ -293,7 +293,7 @@ class Memcache(AgentCheck):
                 self.OPTIONAL_STATS["items"][2] = Memcache.get_items_stats
                 self.OPTIONAL_STATS["slabs"][2] = Memcache.get_slabs_stats
                 self._get_optional_metrics(client, tags, options)
-        except (BadResponseError, AssertionError) as e:
+        except BadResponseError as e:
             self.service_check(
                 self.SERVICE_CHECK,
                 AgentCheck.CRITICAL,
@@ -304,6 +304,16 @@ class Memcache(AgentCheck):
                 "Unable to retrieve stats from memcache instance: {}:{}. Please check your configuration. ({})".format(
                     server, port, e
                 )
+            )
+        except AssertionError:
+            self.warning(
+                "Received malformed response from memcache instance %s:%s, skipping this check run", server, port
+            )
+            self.service_check(
+                self.SERVICE_CHECK,
+                AgentCheck.WARNING,
+                tags=service_check_tags,
+                message="Malformed binary protocol response",
             )
         else:
             client.disconnect_all()
