@@ -42,7 +42,6 @@ files:
       description: The password associated with the Datadog user.
       fleet_configurable: true
       secret: true
-      fleet_formats: ["secret"]
       value:
         type: string
     - name: dbname
@@ -197,7 +196,6 @@ files:
 
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       secret: true
-      fleet_formats: ["secret"]
       value:
         type: string
         default: null

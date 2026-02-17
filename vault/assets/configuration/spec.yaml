@@ -50,7 +50,6 @@ files:
     - name: client_token
       description: Client token necessary to collect metrics.
       fleet_configurable: true
-      fleet_formats: ["secret"]
       secret: true
       value:
         example: <CLIENT_TOKEN>

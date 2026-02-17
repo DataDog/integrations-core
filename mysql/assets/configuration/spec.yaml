@@ -51,7 +51,6 @@ files:
             fleet_configurable: true
             enabled: true
             secret: true
-            fleet_formats: ["secret"]
             value:
               type: string
 

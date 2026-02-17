@@ -48,7 +48,6 @@ files:
     - name: password
       description: The password for the connection.
       secret: true
-      fleet_formats: ["secret"]
       value:
         type: string
       fleet_configurable: true

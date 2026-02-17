@@ -27,7 +27,6 @@ files:
       fleet_configurable: true
       required: true
       secret: true
-      fleet_formats: ["secret"]
       value:
         type: string
     - name: event_filter

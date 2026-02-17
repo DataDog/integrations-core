@@ -19,7 +19,6 @@ files:
         Console in the `Workload Password`.
       fleet_configurable: true
       secret: true
-      fleet_formats: ["secret"]
       required: true
       value:
         type: string
