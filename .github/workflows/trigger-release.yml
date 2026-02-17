@@ -74,33 +74,62 @@ jobs:
         env:
           INTEGRATIONS_JSON: ${{ steps.extract.outputs.integrations }}
           SOURCE_REF: ${{ steps.extract.outputs.source-ref }}
+          EVENT_NAME: ${{ github.event_name }}
         with:
           github-token: ${{ steps.octo-sts.outputs.token }}
           script: |
             // Parse inputs from environment to prevent code injection
             const integrations = JSON.parse(process.env.INTEGRATIONS_JSON);
             const sourceRef = process.env.SOURCE_REF;
+            const eventName = process.env.EVENT_NAME;
 
             console.log('🚀 Triggering build for:', integrations);
             console.log('📦 Source: integrations-core at', sourceRef);
 
             try {
-              await github.rest.repos.createDispatchEvent({
-                owner: 'DataDog',
-                repo: 'agent-integration-wheels-release',
-                event_type: 'build-integrations',
-                client_payload: {
-                  integrations: integrations,
-                  source_repo: 'integrations-core',
-                  source_repo_ref: sourceRef,
-                  triggered_by_repo: context.repo.repo,
-                  triggered_by_ref: context.ref,
-                  triggered_by_sha: context.sha
-                }
-              });
+              let workflowUrl;
+
+              if (eventName === 'pull_request') {
+                // For PRs: use workflow_dispatch to target the feature branch
+                console.log('📋 Using workflow_dispatch for PR testing');
+
+                const response = await github.rest.actions.createWorkflowDispatch({
+                  owner: 'DataDog',
+                  repo: 'agent-integration-wheels-release',
+                  workflow_id: 'release-integrations.yml',
+                  ref: '01-28-add_release_workflow',
+                  inputs: {
+                    integrations: JSON.stringify(integrations),
+                    'source-repo': 'integrations-core',
+                    'source-repo-ref': sourceRef,
+                    'release-cli-ref': '01-28-add_release_workflow'
+                  }
+                });
+
+                workflowUrl = `https://github.com/DataDog/agent-integration-wheels-release/actions/workflows/release-integrations.yml`;
+              } else {
+                // For manual triggers: use repository_dispatch (will work once workflow is on main)
+                console.log('📋 Using repository_dispatch for production');
+
+                await github.rest.repos.createDispatchEvent({
+                  owner: 'DataDog',
+                  repo: 'agent-integration-wheels-release',
+                  event_type: 'build-integrations',
+                  client_payload: {
+                    integrations: integrations,
+                    source_repo: 'integrations-core',
+                    source_repo_ref: sourceRef,
+                    triggered_by_repo: context.repo.repo,
+                    triggered_by_ref: context.ref,
+                    triggered_by_sha: context.sha
+                  }
+                });
+
+                workflowUrl = 'https://github.com/DataDog/agent-integration-wheels-release/actions';
+              }
 
               console.log('✅ Build triggered successfully');
-              console.log('📊 Check build status at: https://github.com/DataDog/agent-integration-wheels-release/actions');
+              console.log(`📊 Check build status at: ${workflowUrl}`);
             } catch (error) {
               console.error('❌ Failed to trigger build:', error.message);
               throw error;
