@@ -63,7 +63,7 @@ jobs:
         uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
         with:
           scope: DataDog/agent-integration-wheels-release
-          policy: integrations-core.trigger-build
+          policy: integrations-core.dispatch-wheel-builds
 
       - name: Trigger wheel build in agent-integration-wheels-release
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
