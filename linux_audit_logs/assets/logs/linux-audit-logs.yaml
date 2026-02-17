@@ -285,7 +285,7 @@ pipeline:
       sourceType: attribute
       target: network.client.ip
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: pipeline
       name: Map `AUID` when `UID` is not present
@@ -301,7 +301,7 @@ pipeline:
           sourceType: attribute
           target: usr.name
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
     - type: attribute-remapper
       name: Map `UID`, `OUID` to `usr.name`
@@ -312,7 +312,7 @@ pipeline:
       sourceType: attribute
       target: usr.name
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: pipeline
       name: Map `auid` when `uid` is not present
@@ -406,36 +406,6 @@ pipeline:
       sources:
         - status
     - type: pipeline
-      name: Parsing User Role Assign logs
-      enabled: true
-      filter:
-        query: "@type:ROLE_ASSIGN"
-      processors:
-        - type: grok-parser
-          name: Convert `msg.new-role` into an array
-          enabled: true
-          source: msg.new-role
-          samples:
-            - staff_r
-          grok:
-            supportRules: ""
-            matchRules: rule_convert_role_into_array %{data:privileges:array}
-    - type: pipeline
-      name: Parsing User Role Remove logs
-      enabled: true
-      filter:
-        query: "@type:ROLE_REMOVE"
-      processors:
-        - type: grok-parser
-          name: Convert `msg.old-role` into an array
-          enabled: true
-          source: msg.old-role
-          samples:
-            - staff_r
-          grok:
-            supportRules: ""
-            matchRules: rule_convert_role_into_array %{data:privileges:array}
-    - type: pipeline
       name: OCSF pre transformations
       enabled: true
       filter:
@@ -467,7 +437,7 @@ pipeline:
           name: Set ocsf.metadata.original_time attribute
           enabled: true
           template: "%{original_timestamp}"
-          target: ocsf.metadata.original_time
+          target: original_timestamp
           replaceMissing: false
     - type: pipeline
       name: OCSF sub pipeline for class Base Event [0]
@@ -505,8 +475,8 @@ pipeline:
               categories:
                 - filter:
                     query: "*"
-                  name: Unknown
-                  id: 0
+                  name: Informational
+                  id: 1
               targets:
                 name: ocsf.severity
                 id: ocsf.severity_id
@@ -531,22 +501,6 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: Map `ocsf.metadata` to `ocsf.metadata`
-              sources:
-                - ocsf.metadata
-              sourceType: attribute
-              target: ocsf.metadata
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product` to `ocsf.metadata.product`
-              sources:
-                - ocsf.metadata.product
-              sourceType: attribute
-              target: ocsf.metadata.product
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
             - name: Map `timestamp` to `ocsf.time`
               sources:
                 - timestamp
@@ -582,1147 +536,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+            - name: Map `original_timestamp` to `ocsf.metadata.original_time`
               sources:
-                - ocsf.metadata.original_time
+                - original_timestamp
               sourceType: attribute
               target: ocsf.metadata.original_time
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-    - type: pipeline
-      name: OCSF sub pipeline for class Authentication [3002]
-      enabled: true
-      ocsf:
-        isOcsf: true
-      filter:
-        query: "@type:USER_AUTH"
-      processors:
-        - type: string-builder-processor
-          name: Set ocsf.actor.session.uid attribute
-          enabled: true
-          template: "%{ses}"
-          target: ocsf.actor.session.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.process.user.uid attribute
-          enabled: true
-          template: "%{usr.id}"
-          target: ocsf.actor.process.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.user.uid attribute
-          enabled: true
-          template: "%{auid}"
-          target: ocsf.actor.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.user.uid attribute
-          enabled: true
-          template: "%{msg.id}"
-          target: ocsf.user.uid
-          replaceMissing: false
-        - type: schema-processor
-          name: Apply OCSF schema for 3002
-          enabled: true
-          schema:
-            schemaType: ocsf
-            version: 1.5.0
-            className: Authentication
-            classUid: 3002
-            extensions: []
-            profiles:
-              - host
-          mappers:
-            - name: ocsf.activity_id
-              categories:
-                - filter:
-                    query: "@type:USER_AUTH"
-                  name: Logon
-                  id: 1
-              targets:
-                name: ocsf.activity_name
-                id: ocsf.activity_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: ocsf.severity_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.severity
-                id: ocsf.severity_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: ocsf.status_id
-              categories:
-                - filter:
-                    query: "@msg.res:success"
-                  name: Success
-                  id: 1
-                - filter:
-                    query: "@msg.res:failed"
-                  name: Failure
-                  id: 2
-              targets:
-                name: ocsf.status
-                id: ocsf.status_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: ocsf.device.type_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.device.type
-                id: ocsf.device.type_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: Map `ocsf.metadata` to `ocsf.metadata`
-              sources:
-                - ocsf.metadata
-              sourceType: attribute
-              target: ocsf.metadata
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product` to `ocsf.metadata.product`
-              sources:
-                - ocsf.metadata.product
-              sourceType: attribute
-              target: ocsf.metadata.product
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `timestamp` to `ocsf.time`
-              sources:
-                - timestamp
-              sourceType: attribute
-              target: ocsf.time
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
-              sources:
-                - ocsf.metadata.product.name
-              sourceType: attribute
-              target: ocsf.metadata.product.name
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `type` to `ocsf.metadata.event_code`
-              sources:
-                - type
-              sourceType: attribute
-              target: ocsf.metadata.event_code
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
-              sources:
-                - ocsf.metadata.product.vendor_name
-              sourceType: attribute
-              target: ocsf.metadata.product.vendor_name
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `pid` to `ocsf.actor.process.pid`
-              sources:
-                - pid
-              sourceType: attribute
-              target: ocsf.actor.process.pid
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
-              sources:
-                - ocsf.actor.user.uid
-              sourceType: attribute
-              target: ocsf.actor.user.uid
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
-              sources:
-                - ocsf.actor.session.uid
-              sourceType: attribute
-              target: ocsf.actor.session.uid
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `AUID` to `ocsf.actor.user.name`
-              sources:
-                - AUID
-              sourceType: attribute
-              target: ocsf.actor.user.name
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.user` to `ocsf.user`
-              sources:
-                - ocsf.user
-              sourceType: attribute
-              target: ocsf.user
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `msg.acct`, `ID` to `ocsf.user.name`
-              sources:
-                - msg.acct
-                - ID
-              sourceType: attribute
-              target: ocsf.user.name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
-              sources:
-                - msg.terminal
-              sourceType: attribute
-              target: ocsf.actor.session.terminal
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `network.client.ip` to `ocsf.dst_endpoint.ip`
-              sources:
-                - network.client.ip
-              sourceType: attribute
-              target: ocsf.dst_endpoint.ip
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `msg.hostname` to `ocsf.dst_endpoint.hostname`
-              sources:
-                - msg.hostname
-              sourceType: attribute
-              target: ocsf.dst_endpoint.hostname
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `usr.name` to `ocsf.actor.process.user.name`
-              sources:
-                - usr.name
-              sourceType: attribute
-              target: ocsf.actor.process.user.name
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
-              sources:
-                - ocsf.actor.process.user.uid
-              sourceType: attribute
-              target: ocsf.actor.process.user.uid
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `msg.exe` to `ocsf.actor.process.path`
-              sources:
-                - msg.exe
-              sourceType: attribute
-              target: ocsf.actor.process.path
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.user.uid` to `ocsf.user.uid`
-              sources:
-                - ocsf.user.uid
-              sourceType: attribute
-              target: ocsf.user.uid
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `msg.hostname` to `ocsf.device.hostname`
-              sources:
-                - msg.hostname
-              sourceType: attribute
-              target: ocsf.device.hostname
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `network.client.ip` to `ocsf.device.ip`
-              sources:
-                - network.client.ip
-              sourceType: attribute
-              target: ocsf.device.ip
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
-              sources:
-                - ocsf.metadata.original_time
-              sourceType: attribute
-              target: ocsf.metadata.original_time
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-    - type: pipeline
-      name: OCSF sub pipeline for class Account Change [3001]
-      enabled: true
-      ocsf:
-        isOcsf: true
-      filter:
-        query: "@type:(ADD_USER OR DEL_USER OR USER_CHAUTHTOK)"
-      processors:
-        - type: string-builder-processor
-          name: Set ocsf.actor.session.uid attribute
-          enabled: true
-          template: "%{ses}"
-          target: ocsf.actor.session.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.process.user.uid attribute
-          enabled: true
-          template: "%{usr.id}"
-          target: ocsf.actor.process.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.user.uid attribute
-          enabled: true
-          template: "%{auid}"
-          target: ocsf.actor.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.user.uid attribute
-          enabled: true
-          template: "%{msg.id}"
-          target: ocsf.user.uid
-          replaceMissing: false
-        - type: schema-processor
-          name: Apply OCSF schema for 3001
-          enabled: true
-          schema:
-            schemaType: ocsf
-            version: 1.5.0
-            className: Account Change
-            classUid: 3001
-            extensions: []
-            profiles:
-              - host
-          mappers:
-            - name: Map `ocsf.metadata` to `ocsf.metadata`
-              sources:
-                - ocsf.metadata
-              sourceType: attribute
-              target: ocsf.metadata
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product` to `ocsf.metadata.product`
-              sources:
-                - ocsf.metadata.product
-              sourceType: attribute
-              target: ocsf.metadata.product
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `timestamp` to `ocsf.time`
-              sources:
-                - timestamp
-              sourceType: attribute
-              target: ocsf.time
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
-              sources:
-                - ocsf.metadata.product.name
-              sourceType: attribute
-              target: ocsf.metadata.product.name
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `type` to `ocsf.metadata.event_code`
-              sources:
-                - type
-              sourceType: attribute
-              target: ocsf.metadata.event_code
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
-              sources:
-                - ocsf.metadata.product.vendor_name
-              sourceType: attribute
-              target: ocsf.metadata.product.vendor_name
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `pid` to `ocsf.actor.process.pid`
-              sources:
-                - pid
-              sourceType: attribute
-              target: ocsf.actor.process.pid
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
-              sources:
-                - ocsf.actor.process.user.uid
-              sourceType: attribute
-              target: ocsf.actor.process.user.uid
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
-              sources:
-                - ocsf.actor.user.uid
-              sourceType: attribute
-              target: ocsf.actor.user.uid
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
-              sources:
-                - ocsf.actor.session.uid
-              sourceType: attribute
-              target: ocsf.actor.session.uid
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `AUID` to `ocsf.actor.user.name`
-              sources:
-                - AUID
-              sourceType: attribute
-              target: ocsf.actor.user.name
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `usr.name` to `ocsf.actor.process.user.name`
-              sources:
-                - usr.name
-              sourceType: attribute
-              target: ocsf.actor.process.user.name
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.user` to `ocsf.user`
-              sources:
-                - ocsf.user
-              sourceType: attribute
-              target: ocsf.user
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `msg.acct`, `ID` to `ocsf.user.name`
-              sources:
-                - msg.acct
-                - ID
-              sourceType: attribute
-              target: ocsf.user.name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.user.uid` to `ocsf.user.uid`
-              sources:
-                - ocsf.user.uid
-              sourceType: attribute
-              target: ocsf.user.uid
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
-              sources:
-                - msg.terminal
-              sourceType: attribute
-              target: ocsf.actor.session.terminal
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `msg.exe` to `ocsf.actor.process.path`
-              sources:
-                - msg.exe
-              sourceType: attribute
-              target: ocsf.actor.process.path
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.activity_id
-              categories:
-                - filter:
-                    query: "@type:ADD_USER"
-                  name: Create
-                  id: 1
-                - filter:
-                    query: "@type:DEL_USER"
-                  name: Delete
-                  id: 6
-                - filter:
-                    query: "@type:USER_CHAUTHTOK"
-                  name: Password Change
-                  id: 3
-              targets:
-                name: ocsf.activity_name
-                id: ocsf.activity_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: ocsf.severity_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.severity
-                id: ocsf.severity_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: ocsf.status_id
-              categories:
-                - filter:
-                    query: "@msg.res:success"
-                  name: Success
-                  id: 1
-                - filter:
-                    query: "@msg.res:failed"
-                  name: Failure
-                  id: 2
-              targets:
-                name: ocsf.status
-                id: ocsf.status_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: ocsf.device.type_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.device.type
-                id: ocsf.device.type_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: Map `msg.hostname` to `ocsf.device.hostname`
-              sources:
-                - msg.hostname
-              sourceType: attribute
-              target: ocsf.device.hostname
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `network.client.ip` to `ocsf.device.ip`
-              sources:
-                - network.client.ip
-              sourceType: attribute
-              target: ocsf.device.ip
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
-              sources:
-                - ocsf.metadata.original_time
-              sourceType: attribute
-              target: ocsf.metadata.original_time
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-    - type: pipeline
-      name: OCSF sub pipeline for class Group Management [3006]
-      enabled: true
-      ocsf:
-        isOcsf: true
-      filter:
-        query: "@type:(ADD_GROUP OR DEL_GROUP)"
-      processors:
-        - type: string-builder-processor
-          name: Set ocsf.actor.session.uid attribute
-          enabled: true
-          template: "%{ses}"
-          target: ocsf.actor.session.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.process.user.uid attribute
-          enabled: true
-          template: "%{usr.id}"
-          target: ocsf.actor.process.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.user.uid attribute
-          enabled: true
-          template: "%{auid}"
-          target: ocsf.actor.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.group.uid attribute
-          enabled: true
-          template: "%{msg.id}"
-          target: ocsf.group.uid
-          replaceMissing: false
-        - type: schema-processor
-          name: Apply OCSF schema for 3006
-          enabled: true
-          schema:
-            schemaType: ocsf
-            version: 1.5.0
-            className: Group Management
-            classUid: 3006
-            extensions: []
-            profiles:
-              - host
-          mappers:
-            - name: Map `ocsf.metadata` to `ocsf.metadata`
-              sources:
-                - ocsf.metadata
-              sourceType: attribute
-              target: ocsf.metadata
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product` to `ocsf.metadata.product`
-              sources:
-                - ocsf.metadata.product
-              sourceType: attribute
-              target: ocsf.metadata.product
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.group` to `ocsf.group`
-              sources:
-                - ocsf.group
-              sourceType: attribute
-              target: ocsf.group
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `timestamp` to `ocsf.time`
-              sources:
-                - timestamp
-              sourceType: attribute
-              target: ocsf.time
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
-              sources:
-                - ocsf.metadata.product.name
-              sourceType: attribute
-              target: ocsf.metadata.product.name
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `type` to `ocsf.metadata.event_code`
-              sources:
-                - type
-              sourceType: attribute
-              target: ocsf.metadata.event_code
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `msg.acct` to `ocsf.group.name`
-              sources:
-                - msg.acct
-              sourceType: attribute
-              target: ocsf.group.name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
-              sources:
-                - ocsf.metadata.product.vendor_name
-              sourceType: attribute
-              target: ocsf.metadata.product.vendor_name
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `pid` to `ocsf.actor.process.pid`
-              sources:
-                - pid
-              sourceType: attribute
-              target: ocsf.actor.process.pid
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
-              sources:
-                - ocsf.actor.process.user.uid
-              sourceType: attribute
-              target: ocsf.actor.process.user.uid
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
-              sources:
-                - ocsf.actor.user.uid
-              sourceType: attribute
-              target: ocsf.actor.user.uid
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
-              sources:
-                - ocsf.actor.session.uid
-              sourceType: attribute
-              target: ocsf.actor.session.uid
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `AUID` to `ocsf.actor.user.name`
-              sources:
-                - AUID
-              sourceType: attribute
-              target: ocsf.actor.user.name
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `usr.name` to `ocsf.actor.process.user.name`
-              sources:
-                - usr.name
-              sourceType: attribute
-              target: ocsf.actor.process.user.name
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.group.uid` to `ocsf.group.uid`
-              sources:
-                - ocsf.group.uid
-              sourceType: attribute
-              target: ocsf.group.uid
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
-              sources:
-                - msg.terminal
-              sourceType: attribute
-              target: ocsf.actor.session.terminal
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `msg.exe` to `ocsf.actor.process.path`
-              sources:
-                - msg.exe
-              sourceType: attribute
-              target: ocsf.actor.process.path
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.activity_id
-              categories:
-                - filter:
-                    query: type:ADD_GROUP
-                  name: Create
-                  id: 6
-                - filter:
-                    query: "@type:ADD_GROUP"
-                  name: Create
-                  id: 6
-                - filter:
-                    query: "@type:DEL_GROUP"
-                  name: Delete
-                  id: 5
-              targets:
-                name: ocsf.activity_name
-                id: ocsf.activity_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: ocsf.severity_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.severity
-                id: ocsf.severity_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: ocsf.status_id
-              categories:
-                - filter:
-                    query: "@msg.res:success"
-                  name: Success
-                  id: 1
-                - filter:
-                    query: "@msg.res:failed"
-                  name: Failure
-                  id: 2
-              targets:
-                name: ocsf.status
-                id: ocsf.status_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: ocsf.device.type_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.device.type
-                id: ocsf.device.type_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: Map `msg.hostname` to `ocsf.device.hostname`
-              sources:
-                - msg.hostname
-              sourceType: attribute
-              target: ocsf.device.hostname
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `network.client.ip` to `ocsf.device.ip`
-              sources:
-                - network.client.ip
-              sourceType: attribute
-              target: ocsf.device.ip
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
-              sources:
-                - ocsf.metadata.original_time
-              sourceType: attribute
-              target: ocsf.metadata.original_time
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-    - type: pipeline
-      name: OCSF sub pipeline for class User Access Management [3005]
-      enabled: true
-      ocsf:
-        isOcsf: true
-      filter:
-        query: "@type:(ROLE_ASSIGN OR ROLE_REMOVE)"
-      processors:
-        - type: string-builder-processor
-          name: Set ocsf.actor.session.uid attribute
-          enabled: true
-          template: "%{ses}"
-          target: ocsf.actor.session.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.process.user.uid attribute
-          enabled: true
-          template: "%{usr.id}"
-          target: ocsf.actor.process.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.user.uid attribute
-          enabled: true
-          template: "%{auid}"
-          target: ocsf.actor.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.user.uid attribute
-          enabled: true
-          template: "%{msg.id}"
-          target: ocsf.user.uid
-          replaceMissing: false
-        - type: schema-processor
-          name: Apply OCSF schema for 3005
-          enabled: true
-          schema:
-            schemaType: ocsf
-            version: 1.5.0
-            className: User Access Management
-            classUid: 3005
-            extensions: []
-            profiles:
-              - host
-          mappers:
-            - name: Map `ocsf.metadata` to `ocsf.metadata`
-              sources:
-                - ocsf.metadata
-              sourceType: attribute
-              target: ocsf.metadata
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product` to `ocsf.metadata.product`
-              sources:
-                - ocsf.metadata.product
-              sourceType: attribute
-              target: ocsf.metadata.product
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `timestamp` to `ocsf.time`
-              sources:
-                - timestamp
-              sourceType: attribute
-              target: ocsf.time
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `privileges` to `ocsf.privileges`
-              sources:
-                - privileges
-              sourceType: attribute
-              target: ocsf.privileges
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.user` to `ocsf.user`
-              sources:
-                - ocsf.user
-              sourceType: attribute
-              target: ocsf.user
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
-              sources:
-                - ocsf.metadata.product.name
-              sourceType: attribute
-              target: ocsf.metadata.product.name
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
-              sources:
-                - ocsf.metadata.product.vendor_name
-              sourceType: attribute
-              target: ocsf.metadata.product.vendor_name
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ID` to `ocsf.user.name`
-              sources:
-                - ID
-              sourceType: attribute
-              target: ocsf.user.name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `pid` to `ocsf.actor.process.pid`
-              sources:
-                - pid
-              sourceType: attribute
-              target: ocsf.actor.process.pid
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
-              sources:
-                - ocsf.actor.process.user.uid
-              sourceType: attribute
-              target: ocsf.actor.process.user.uid
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `usr.name` to `ocsf.actor.process.user.name`
-              sources:
-                - usr.name
-              sourceType: attribute
-              target: ocsf.actor.process.user.name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
-              sources:
-                - ocsf.actor.user.uid
-              sourceType: attribute
-              target: ocsf.actor.user.uid
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `AUID` to `ocsf.actor.user.name`
-              sources:
-                - AUID
-              sourceType: attribute
-              target: ocsf.actor.user.name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor.user` to `ocsf.actor.user`
-              sources:
-                - ocsf.actor.user
-              sourceType: attribute
-              target: ocsf.actor.user
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor` to `ocsf.actor`
-              sources:
-                - ocsf.actor
-              sourceType: attribute
-              target: ocsf.actor
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `type` to `ocsf.metadata.event_code`
-              sources:
-                - type
-              sourceType: attribute
-              target: ocsf.metadata.event_code
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `msg.exe` to `ocsf.actor.process.path`
-              sources:
-                - msg.exe
-              sourceType: attribute
-              target: ocsf.actor.process.path
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
-              sources:
-                - msg.terminal
-              sourceType: attribute
-              target: ocsf.actor.session.terminal
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.activity_id
-              categories:
-                - filter:
-                    query: "@type:ROLE_REMOVE"
-                  name: Revoke Privileges
-                  id: 2
-                - filter:
-                    query: "@type:ROLE_ASSIGN"
-                  name: Assign Privileges
-                  id: 1
-              targets:
-                name: ocsf.activity_name
-                id: ocsf.activity_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: ocsf.severity_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.severity
-                id: ocsf.severity_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: ocsf.status_id
-              categories:
-                - filter:
-                    query: "@msg.res:success"
-                  name: Success
-                  id: 1
-                - filter:
-                    query: "@msg.res:failed"
-                  name: Failure
-                  id: 2
-              targets:
-                name: ocsf.status
-                id: ocsf.status_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: ocsf.device.type_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.device.type
-                id: ocsf.device.type_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: Map `msg.hostname` to `ocsf.device.hostname`
-              sources:
-                - msg.hostname
-              sourceType: attribute
-              target: ocsf.device.hostname
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `network.client.ip` to `ocsf.device.ip`
-              sources:
-                - network.client.ip
-              sourceType: attribute
-              target: ocsf.device.ip
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
-              sources:
-                - ocsf.metadata.original_time
-              sourceType: attribute
-              target: ocsf.metadata.original_time
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.user.uid` to `ocsf.user.uid`
-              sources:
-                - ocsf.user.uid
-              sourceType: attribute
-              target: ocsf.user.uid
               targetFormat: string
               preserveSource: false
               overrideOnConflict: true
@@ -1813,15 +631,19 @@ pipeline:
                   name: Delete
                   id: 4
                 - filter:
-                    query: -@nametype:(CREATE OR DELETE PARENT OR NORMAL OR UNKNOWN)
+                    query: -@nametype:(CREATE OR DELETE OR PARENT OR NORMAL OR UNKNOWN)
                   name: Other
                   id: 99
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
               fallback:
-                values: {}
-                sources: {}
+                values:
+                  ocsf.activity_id: "99"
+                  ocsf.activity_name: Other
+                sources:
+                  ocsf.activity_name:
+                    - nametype
               type: schema-category-mapper
             - name: ocsf.file.type_id
               categories:
@@ -1831,8 +653,8 @@ pipeline:
                   id: 2
                 - filter:
                     query: "@file_name:*"
-                  name: Unknown
-                  id: 0
+                  name: Regular File
+                  id: 1
               targets:
                 name: ocsf.file.type
                 id: ocsf.file.type_id
@@ -1844,8 +666,8 @@ pipeline:
               categories:
                 - filter:
                     query: "*"
-                  name: Unknown
-                  id: 0
+                  name: Informational
+                  id: 1
               targets:
                 name: ocsf.severity
                 id: ocsf.severity_id
@@ -1866,22 +688,6 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: Map `ocsf.metadata` to `ocsf.metadata`
-              sources:
-                - ocsf.metadata
-              sourceType: attribute
-              target: ocsf.metadata
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product` to `ocsf.metadata.product`
-              sources:
-                - ocsf.metadata.product
-              sourceType: attribute
-              target: ocsf.metadata.product
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
             - name: Map `timestamp` to `ocsf.time`
               sources:
                 - timestamp
@@ -1918,31 +724,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.user` to `ocsf.actor.user`
-              sources:
-                - ocsf.actor.user
-              sourceType: attribute
-              target: ocsf.actor.user
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.actor` to `ocsf.actor`
-              sources:
-                - ocsf.actor
-              sourceType: attribute
-              target: ocsf.actor
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.file` to `ocsf.file`
-              sources:
-                - ocsf.file
-              sourceType: attribute
-              target: ocsf.file
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
             - name: Map `ocsf.file.name` to `ocsf.file.name`
               sources:
                 - ocsf.file.name
@@ -1967,14 +748,6 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.device` to `ocsf.device`
-              sources:
-                - ocsf.device
-              sourceType: attribute
-              target: ocsf.device
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
             - name: Map `dev` to `ocsf.device.uid`
               sources:
                 - dev
@@ -1984,9 +757,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+            - name: Map `original_timestamp` to `ocsf.metadata.original_time`
               sources:
-                - ocsf.metadata.original_time
+                - original_timestamp
               sourceType: attribute
               target: ocsf.metadata.original_time
               targetFormat: string
@@ -2011,13 +784,1066 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `usr.name` to `ocsf.actor.user.name`
+            - name: Map `OUID` to `ocsf.actor.user.name`
               sources:
-                - usr.name
+                - OUID
+              sourceType: attribute
+              target: ocsf.actor.user.name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+    - type: pipeline
+      name: OCSF sub pipeline for class Account Change [3001]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@type:(ADD_USER OR DEL_USER OR USER_CHAUTHTOK)"
+      processors:
+        - type: string-builder-processor
+          name: Set ocsf.actor.session.uid attribute
+          enabled: true
+          template: "%{ses}"
+          target: ocsf.actor.session.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.process.user.uid attribute
+          enabled: true
+          template: "%{usr.id}"
+          target: ocsf.actor.process.user.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.user.uid attribute
+          enabled: true
+          template: "%{auid}"
+          target: ocsf.actor.user.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.user.uid attribute
+          enabled: true
+          template: "%{msg.id}"
+          target: ocsf.user.uid
+          replaceMissing: false
+        - type: schema-processor
+          name: Apply OCSF schema for 3001
+          enabled: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Account Change
+            classUid: 3001
+            extensions: []
+            profiles:
+              - host
+          mappers:
+            - name: Map `timestamp` to `ocsf.time`
+              sources:
+                - timestamp
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              sourceType: attribute
+              target: ocsf.metadata.product.name
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `type` to `ocsf.metadata.event_code`
+              sources:
+                - type
+              sourceType: attribute
+              target: ocsf.metadata.event_code
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              sourceType: attribute
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `pid` to `ocsf.actor.process.pid`
+              sources:
+                - pid
+              sourceType: attribute
+              target: ocsf.actor.process.pid
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
+              sources:
+                - ocsf.actor.process.user.uid
+              sourceType: attribute
+              target: ocsf.actor.process.user.uid
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
+              sources:
+                - ocsf.actor.user.uid
+              sourceType: attribute
+              target: ocsf.actor.user.uid
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
+              sources:
+                - ocsf.actor.session.uid
+              sourceType: attribute
+              target: ocsf.actor.session.uid
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUID` to `ocsf.actor.user.name`
+              sources:
+                - AUID
+              sourceType: attribute
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `UID` to `ocsf.actor.process.user.name`
+              sources:
+                - UID
+              sourceType: attribute
+              target: ocsf.actor.process.user.name
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.acct`, `ID` to `ocsf.user.name`
+              sources:
+                - msg.acct
+                - ID
+              sourceType: attribute
+              target: ocsf.user.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.user.uid` to `ocsf.user.uid`
+              sources:
+                - ocsf.user.uid
+              sourceType: attribute
+              target: ocsf.user.uid
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
+              sources:
+                - msg.terminal
+              sourceType: attribute
+              target: ocsf.actor.session.terminal
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.exe` to `ocsf.actor.process.path`
+              sources:
+                - msg.exe
+              sourceType: attribute
+              target: ocsf.actor.process.path
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@type:ADD_USER"
+                  name: Create
+                  id: 1
+                - filter:
+                    query: "@type:DEL_USER"
+                  name: Delete
+                  id: 6
+                - filter:
+                    query: "@type:USER_CHAUTHTOK"
+                  name: Password Change
+                  id: 3
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@msg.res:success"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@msg.res:failed"
+                  name: Failure
+                  id: 2
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: Map `msg.hostname` to `ocsf.device.hostname`
+              sources:
+                - msg.hostname
+              sourceType: attribute
+              target: ocsf.device.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.addr` to `ocsf.device.ip`
+              sources:
+                - msg.addr
+              sourceType: attribute
+              target: ocsf.device.ip
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `original_timestamp` to `ocsf.metadata.original_time`
+              sources:
+                - original_timestamp
+              sourceType: attribute
+              target: ocsf.metadata.original_time
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+    - type: pipeline
+      name: OCSF sub pipeline for class Authentication [3002]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@type:USER_AUTH"
+      processors:
+        - type: string-builder-processor
+          name: Set ocsf.actor.session.uid attribute
+          enabled: true
+          template: "%{ses}"
+          target: ocsf.actor.session.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.process.user.uid attribute
+          enabled: true
+          template: "%{usr.id}"
+          target: ocsf.actor.process.user.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.user.uid attribute
+          enabled: true
+          template: "%{auid}"
+          target: ocsf.actor.user.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.user.uid attribute
+          enabled: true
+          template: "%{msg.id}"
+          target: ocsf.user.uid
+          replaceMissing: false
+        - type: schema-processor
+          name: Apply OCSF schema for 3002
+          enabled: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Authentication
+            classUid: 3002
+            extensions: []
+            profiles:
+              - host
+          mappers:
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@type:USER_AUTH"
+                  name: Logon
+                  id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@msg.res:success"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@msg.res:failed"
+                  name: Failure
+                  id: 2
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: Map `timestamp` to `ocsf.time`
+              sources:
+                - timestamp
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              sourceType: attribute
+              target: ocsf.metadata.product.name
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `type` to `ocsf.metadata.event_code`
+              sources:
+                - type
+              sourceType: attribute
+              target: ocsf.metadata.event_code
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              sourceType: attribute
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `pid` to `ocsf.actor.process.pid`
+              sources:
+                - pid
+              sourceType: attribute
+              target: ocsf.actor.process.pid
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
+              sources:
+                - ocsf.actor.user.uid
+              sourceType: attribute
+              target: ocsf.actor.user.uid
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
+              sources:
+                - ocsf.actor.session.uid
+              sourceType: attribute
+              target: ocsf.actor.session.uid
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUID` to `ocsf.actor.user.name`
+              sources:
+                - AUID
+              sourceType: attribute
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.acct`, `ID` to `ocsf.user.name`
+              sources:
+                - msg.acct
+                - ID
+              sourceType: attribute
+              target: ocsf.user.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
+              sources:
+                - msg.terminal
+              sourceType: attribute
+              target: ocsf.actor.session.terminal
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.addr` to `ocsf.dst_endpoint.ip`
+              sources:
+                - msg.addr
+              sourceType: attribute
+              target: ocsf.dst_endpoint.ip
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.hostname` to `ocsf.dst_endpoint.hostname`
+              sources:
+                - msg.hostname
+              sourceType: attribute
+              target: ocsf.dst_endpoint.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `UID` to `ocsf.actor.process.user.name`
+              sources:
+                - UID
+              sourceType: attribute
+              target: ocsf.actor.process.user.name
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
+              sources:
+                - ocsf.actor.process.user.uid
+              sourceType: attribute
+              target: ocsf.actor.process.user.uid
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.exe` to `ocsf.actor.process.path`
+              sources:
+                - msg.exe
+              sourceType: attribute
+              target: ocsf.actor.process.path
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.user.uid` to `ocsf.user.uid`
+              sources:
+                - ocsf.user.uid
+              sourceType: attribute
+              target: ocsf.user.uid
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.hostname` to `ocsf.device.hostname`
+              sources:
+                - msg.hostname
+              sourceType: attribute
+              target: ocsf.device.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.addr` to `ocsf.device.ip`
+              sources:
+                - msg.addr
+              sourceType: attribute
+              target: ocsf.device.ip
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `original_timestamp` to `ocsf.metadata.original_time`
+              sources:
+                - original_timestamp
+              sourceType: attribute
+              target: ocsf.metadata.original_time
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+    - type: pipeline
+      name: OCSF sub pipeline for role assign logs
+      enabled: true
+      filter:
+        query: "@type:ROLE_ASSIGN"
+      processors:
+        - type: grok-parser
+          name: Convert `msg.new-role` into an array
+          enabled: true
+          source: msg.new-role
+          samples:
+            - staff_r
+          grok:
+            supportRules: ""
+            matchRules: rule_convert_role_into_array %{data:ocsf.privileges:array}
+    - type: pipeline
+      name: OCSF sub pipeline for role remove logs
+      enabled: true
+      filter:
+        query: "@type:ROLE_REMOVE"
+      processors:
+        - type: grok-parser
+          name: Convert `msg.old-role` into an array
+          enabled: true
+          source: msg.old-role
+          samples:
+            - staff_r
+          grok:
+            supportRules: ""
+            matchRules: rule_convert_role_into_array %{data:ocsf.privileges:array}
+    - type: pipeline
+      name: OCSF sub pipeline for class User Access Management [3005]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@type:(ROLE_ASSIGN OR ROLE_REMOVE)"
+      processors:
+        - type: string-builder-processor
+          name: Set ocsf.actor.session.uid attribute
+          enabled: true
+          template: "%{ses}"
+          target: ocsf.actor.session.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.process.user.uid attribute
+          enabled: true
+          template: "%{usr.id}"
+          target: ocsf.actor.process.user.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.user.uid attribute
+          enabled: true
+          template: "%{auid}"
+          target: ocsf.actor.user.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.user.uid attribute
+          enabled: true
+          template: "%{msg.id}"
+          target: ocsf.user.uid
+          replaceMissing: false
+        - type: schema-processor
+          name: Apply OCSF schema for 3005
+          enabled: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: User Access Management
+            classUid: 3005
+            extensions: []
+            profiles:
+              - host
+          mappers:
+            - name: Map `timestamp` to `ocsf.time`
+              sources:
+                - timestamp
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.privileges` to `ocsf.privileges`
+              sources:
+                - ocsf.privileges
+              sourceType: attribute
+              target: ocsf.privileges
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              sourceType: attribute
+              target: ocsf.metadata.product.name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              sourceType: attribute
+              target: ocsf.metadata.product.vendor_name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ID` to `ocsf.user.name`
+              sources:
+                - ID
+              sourceType: attribute
+              target: ocsf.user.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `pid` to `ocsf.actor.process.pid`
+              sources:
+                - pid
+              sourceType: attribute
+              target: ocsf.actor.process.pid
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
+              sources:
+                - ocsf.actor.process.user.uid
+              sourceType: attribute
+              target: ocsf.actor.process.user.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `UID` to `ocsf.actor.process.user.name`
+              sources:
+                - UID
+              sourceType: attribute
+              target: ocsf.actor.process.user.name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
+              sources:
+                - ocsf.actor.user.uid
+              sourceType: attribute
+              target: ocsf.actor.user.uid
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUID` to `ocsf.actor.user.name`
+              sources:
+                - AUID
               sourceType: attribute
               target: ocsf.actor.user.name
               targetFormat: string
               preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `type` to `ocsf.metadata.event_code`
+              sources:
+                - type
+              sourceType: attribute
+              target: ocsf.metadata.event_code
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.exe` to `ocsf.actor.process.path`
+              sources:
+                - msg.exe
+              sourceType: attribute
+              target: ocsf.actor.process.path
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
+              sources:
+                - msg.terminal
+              sourceType: attribute
+              target: ocsf.actor.session.terminal
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@type:ROLE_REMOVE"
+                  name: Revoke Privileges
+                  id: 2
+                - filter:
+                    query: "@type:ROLE_ASSIGN"
+                  name: Assign Privileges
+                  id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@msg.res:success"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@msg.res:failed"
+                  name: Failure
+                  id: 2
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: Map `msg.hostname` to `ocsf.device.hostname`
+              sources:
+                - msg.hostname
+              sourceType: attribute
+              target: ocsf.device.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.addr` to `ocsf.device.ip`
+              sources:
+                - msg.addr
+              sourceType: attribute
+              target: ocsf.device.ip
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `original_timestamp` to `ocsf.metadata.original_time`
+              sources:
+                - original_timestamp
+              sourceType: attribute
+              target: ocsf.metadata.original_time
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.user.uid` to `ocsf.user.uid`
+              sources:
+                - ocsf.user.uid
+              sourceType: attribute
+              target: ocsf.user.uid
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+    - type: pipeline
+      name: OCSF sub pipeline for class Group Management [3006]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@type:(ADD_GROUP OR DEL_GROUP)"
+      processors:
+        - type: string-builder-processor
+          name: Set ocsf.actor.session.uid attribute
+          enabled: true
+          template: "%{ses}"
+          target: ocsf.actor.session.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.process.user.uid attribute
+          enabled: true
+          template: "%{usr.id}"
+          target: ocsf.actor.process.user.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.actor.user.uid attribute
+          enabled: true
+          template: "%{auid}"
+          target: ocsf.actor.user.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set ocsf.group.uid attribute
+          enabled: true
+          template: "%{msg.id}"
+          target: ocsf.group.uid
+          replaceMissing: false
+        - type: schema-processor
+          name: Apply OCSF schema for 3006
+          enabled: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Group Management
+            classUid: 3006
+            extensions: []
+            profiles:
+              - host
+          mappers:
+            - name: Map `timestamp` to `ocsf.time`
+              sources:
+                - timestamp
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              sourceType: attribute
+              target: ocsf.metadata.product.name
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `type` to `ocsf.metadata.event_code`
+              sources:
+                - type
+              sourceType: attribute
+              target: ocsf.metadata.event_code
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.acct` to `ocsf.group.name`
+              sources:
+                - msg.acct
+              sourceType: attribute
+              target: ocsf.group.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              sourceType: attribute
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `pid` to `ocsf.actor.process.pid`
+              sources:
+                - pid
+              sourceType: attribute
+              target: ocsf.actor.process.pid
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
+              sources:
+                - ocsf.actor.process.user.uid
+              sourceType: attribute
+              target: ocsf.actor.process.user.uid
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
+              sources:
+                - ocsf.actor.user.uid
+              sourceType: attribute
+              target: ocsf.actor.user.uid
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
+              sources:
+                - ocsf.actor.session.uid
+              sourceType: attribute
+              target: ocsf.actor.session.uid
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUID` to `ocsf.actor.user.name`
+              sources:
+                - AUID
+              sourceType: attribute
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `UID` to `ocsf.actor.process.user.name`
+              sources:
+                - UID
+              sourceType: attribute
+              target: ocsf.actor.process.user.name
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.group.uid` to `ocsf.group.uid`
+              sources:
+                - ocsf.group.uid
+              sourceType: attribute
+              target: ocsf.group.uid
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
+              sources:
+                - msg.terminal
+              sourceType: attribute
+              target: ocsf.actor.session.terminal
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.exe` to `ocsf.actor.process.path`
+              sources:
+                - msg.exe
+              sourceType: attribute
+              target: ocsf.actor.process.path
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: type:ADD_GROUP
+                  name: Create
+                  id: 6
+                - filter:
+                    query: "@type:ADD_GROUP"
+                  name: Create
+                  id: 6
+                - filter:
+                    query: "@type:DEL_GROUP"
+                  name: Delete
+                  id: 5
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@msg.res:success"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@msg.res:failed"
+                  name: Failure
+                  id: 2
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: Map `msg.hostname` to `ocsf.device.hostname`
+              sources:
+                - msg.hostname
+              sourceType: attribute
+              target: ocsf.device.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `msg.addr` to `ocsf.device.ip`
+              sources:
+                - msg.addr
+              sourceType: attribute
+              target: ocsf.device.ip
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `original_timestamp` to `ocsf.metadata.original_time`
+              sources:
+                - original_timestamp
+              sourceType: attribute
+              target: ocsf.metadata.original_time
+              targetFormat: string
+              preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
     - type: pipeline
@@ -2074,8 +1900,8 @@ pipeline:
               categories:
                 - filter:
                     query: "*"
-                  name: Unknown
-                  id: 0
+                  name: Informational
+                  id: 1
               targets:
                 name: ocsf.severity
                 id: ocsf.severity_id
@@ -2113,22 +1939,6 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: Map `ocsf.metadata` to `ocsf.metadata`
-              sources:
-                - ocsf.metadata
-              sourceType: attribute
-              target: ocsf.metadata
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product` to `ocsf.metadata.product`
-              sources:
-                - ocsf.metadata.product
-              sourceType: attribute
-              target: ocsf.metadata.product
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
             - name: Map `timestamp` to `ocsf.time`
               sources:
                 - timestamp
@@ -2136,14 +1946,6 @@ pipeline:
               target: ocsf.time
               targetFormat: integer
               preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.device` to `ocsf.device`
-              sources:
-                - ocsf.device
-              sourceType: attribute
-              target: ocsf.device
-              preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `type` to `ocsf.metadata.event_code`
@@ -2155,9 +1957,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+            - name: Map `original_timestamp` to `ocsf.metadata.original_time`
               sources:
-                - ocsf.metadata.original_time
+                - original_timestamp
               sourceType: attribute
               target: ocsf.metadata.original_time
               targetFormat: string
@@ -2173,13 +1975,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `network.client.ip` to `ocsf.device.ip`
+            - name: Map `msg.addr` to `ocsf.device.ip`
               sources:
-                - network.client.ip
+                - msg.addr
               sourceType: attribute
               target: ocsf.device.ip
               targetFormat: string
-              preserveSource: true
+              preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
@@ -2245,13 +2047,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `usr.name` to `ocsf.actor.process.user.name`
+            - name: Map `UID` to `ocsf.actor.process.user.name`
               sources:
-                - usr.name
+                - UID
               sourceType: attribute
               target: ocsf.actor.process.user.name
               targetFormat: string
-              preserveSource: true
+              preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
