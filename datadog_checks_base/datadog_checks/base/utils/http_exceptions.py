@@ -131,6 +131,10 @@ def from_httpx_exception(exc: Exception) -> HTTPError:
         This function is prepared for Phase 2+ when httpx is introduced.
         Currently returns generic HTTPError for non-httpx exceptions.
 
+        Coverage: This function is not covered by tests until Phase 2+ when
+        httpx integration is implemented. The try block and all exception
+        conversion logic will be tested during the httpx migration.
+
     Examples:
         >>> # Future usage in Phase 2+
         >>> import httpx
@@ -140,6 +144,8 @@ def from_httpx_exception(exc: Exception) -> HTTPError:
         ...     http_error = from_httpx_exception(e)
         ...     raise http_error
     """
+    # Coverage note: The following try block is Phase 2+ preparation code
+    # and will not be covered by tests until httpx integration begins.
     try:
         import httpx
     except ImportError:
