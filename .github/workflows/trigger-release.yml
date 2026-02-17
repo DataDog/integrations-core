@@ -32,6 +32,9 @@ jobs:
   trigger-release:
     name: Trigger wheel build
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC token generation (dd-octo-sts)
+      contents: read   # Required for repository_dispatch API call
 
     steps:
       - name: Extract inputs
