@@ -40,7 +40,6 @@
 - name: password
   description: Password to use when connecting to JMX.
   secret: true
-  fleet_formats: ["secret"]
   value:
     type: string
   fleet_configurable: true
@@ -102,7 +101,6 @@
     The password for your TrustStore.jks file.
     `trust_store_password` should be set if SSL is enabled.
   secret: true
-  fleet_formats: ["secret"]
   value:
     type: string
   fleet_configurable: true
@@ -121,7 +119,6 @@
     The password to your key store.
     `key_store_password` should be set if client authentication is enabled on the target JVM.
   secret: true
-  fleet_formats: ["secret"]
   value:
     type: string
   fleet_configurable: true
