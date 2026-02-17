@@ -1,0 +1,1 @@
+Accept metric type count as alias for counter in OpenMetrics v2 to fix "unknown type 'count'" errors.
