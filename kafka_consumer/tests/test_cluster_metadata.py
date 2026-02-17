@@ -795,3 +795,163 @@ def test_event_cache_ttl_not_reset_on_subsequent_calls(check):
     cache_dict = json.loads(cache_storage[cache_key])
     third_expire_at = cache_dict['item1']['expire_at']
     assert third_expire_at == 2201.0, f"Cache TTL should be updated when event is sent, got {third_expire_at}"
+
+
+def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
+    """Test that OIDC OAuth token is fetched and passed as Bearer header for Schema Registry."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'schema_registry_url': 'http://localhost:8081',
+        'schema_registry_oauth_token_provider': {
+            'url': 'https://idp.example.com/oauth/token',
+            'client_id': 'my-client-id',
+            'client_secret': 'my-client-secret',
+            'scope': 'schema-registry',
+        },
+        'monitor_unlisted_consumer_groups': True,
+    }
+
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    mock_schema_registry_methods(kafka_consumer_check.metadata_collector)
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=None)
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    # Mock the OIDC token request
+    mock_response = mock.Mock()
+    mock_response.json.return_value = {
+        'access_token': 'oidc-test-token-123',
+        'token_type': 'Bearer',
+        'expires_in': 3600,
+    }
+    mock_response.raise_for_status = mock.Mock()
+
+    with mock.patch('datadog_checks.kafka_consumer.cluster_metadata.requests.post', return_value=mock_response) as m:
+        dd_run_check(kafka_consumer_check)
+
+        # Verify token was requested with correct params
+        m.assert_called_once()
+        call_kwargs = m.call_args
+        assert call_kwargs[0][0] == 'https://idp.example.com/oauth/token'
+        assert call_kwargs[1]['data'] == {'grant_type': 'client_credentials', 'scope': 'schema-registry'}
+        assert call_kwargs[1]['auth'] == ('my-client-id', 'my-client-secret')
+
+    # Verify Bearer header was set on the HTTP client
+    headers = kafka_consumer_check.metadata_collector.http.options.get('headers', {})
+    assert headers.get('Authorization') == 'Bearer oidc-test-token-123'
+
+    # Verify schema registry still works (subjects metric emitted)
+    aggregator.assert_metric('kafka.schema_registry.subjects', value=1)
+
+
+def test_schema_registry_oauth_token_refresh_on_expiry(check, dd_run_check, aggregator):
+    """Test that expired OIDC token is refreshed on next check run."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'schema_registry_url': 'http://localhost:8081',
+        'schema_registry_oauth_token_provider': {
+            'url': 'https://idp.example.com/oauth/token',
+            'client_id': 'my-client-id',
+            'client_secret': 'my-client-secret',
+        },
+        'monitor_unlisted_consumer_groups': True,
+    }
+
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    mock_schema_registry_methods(kafka_consumer_check.metadata_collector)
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=None)
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    collector = kafka_consumer_check.metadata_collector
+
+    # Simulate an already-cached but expired token
+    collector._schema_registry_oauth_token = 'old-expired-token'
+    collector._schema_registry_oauth_token_expiry = time.time() - 100  # expired
+
+    mock_response = mock.Mock()
+    mock_response.json.return_value = {
+        'access_token': 'new-refreshed-token',
+        'token_type': 'Bearer',
+        'expires_in': 3600,
+    }
+    mock_response.raise_for_status = mock.Mock()
+
+    with mock.patch('datadog_checks.kafka_consumer.cluster_metadata.requests.post', return_value=mock_response) as m:
+        dd_run_check(kafka_consumer_check)
+        m.assert_called_once()
+
+    # Verify new token was set
+    headers = collector.http.options.get('headers', {})
+    assert headers.get('Authorization') == 'Bearer new-refreshed-token'
+    assert collector._schema_registry_oauth_token == 'new-refreshed-token'
+
+
+def test_schema_registry_oauth_token_not_refreshed_when_valid(check):
+    """Test that a valid (non-expired) token is not re-fetched."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'schema_registry_url': 'http://localhost:8081',
+        'schema_registry_oauth_token_provider': {
+            'url': 'https://idp.example.com/oauth/token',
+            'client_id': 'my-client-id',
+            'client_secret': 'my-client-secret',
+        },
+        'monitor_unlisted_consumer_groups': True,
+    }
+
+    kafka_consumer_check = check(instance)
+    collector = kafka_consumer_check.metadata_collector
+
+    # Simulate a valid cached token (expires far in the future)
+    collector._schema_registry_oauth_token = 'still-valid-token'
+    collector._schema_registry_oauth_token_expiry = time.time() + 3600
+
+    with mock.patch('datadog_checks.kafka_consumer.cluster_metadata.requests.post') as m:
+        collector._refresh_schema_registry_oauth_token()
+        m.assert_not_called()
+
+    assert collector._schema_registry_oauth_token == 'still-valid-token'
+
+
+@pytest.mark.parametrize(
+    'oauth_config, error_match',
+    [
+        pytest.param(
+            {'client_id': 'id', 'client_secret': 'secret'},
+            'url',
+            id='missing_url',
+        ),
+        pytest.param(
+            {'url': 'https://idp/token', 'client_secret': 'secret'},
+            'client_id',
+            id='missing_client_id',
+        ),
+        pytest.param(
+            {'url': 'https://idp/token', 'client_id': 'id'},
+            'client_secret',
+            id='missing_client_secret',
+        ),
+    ],
+)
+def test_schema_registry_oauth_validation_errors(check, dd_run_check, oauth_config, error_match):
+    """Test validation errors for schema_registry_oauth_token_provider."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'monitor_unlisted_consumer_groups': True,
+        'schema_registry_oauth_token_provider': oauth_config,
+    }
+
+    with pytest.raises(Exception, match=error_match):
+        dd_run_check(check(instance))

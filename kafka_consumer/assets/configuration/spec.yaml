@@ -303,3 +303,45 @@ files:
         value:
           type: string
           example: /path/to/client_key.pem
+      - name: schema_registry_oauth_token_provider
+        description: |
+          OAuth token provider settings for Schema Registry authentication.
+          When configured, the check will fetch an OAuth token and use it as a Bearer token
+          for Schema Registry HTTP requests.
+        fleet_configurable: true
+        options:
+        - name: url
+          fleet_configurable: true
+          required: true
+          description: |
+            The token endpoint.
+          value:
+            type: string
+        - name: client_id
+          fleet_configurable: true
+          required: true
+          description: |
+            The client identifier.
+          value:
+            type: string
+        - name: client_secret
+          fleet_configurable: true
+          secret: true
+          required: true
+          description: |
+            The client secret.
+          value:
+            type: string
+        - name: scope
+          enabled: false
+          description: |
+            The OAuth scope to request.
+          value:
+            type: string
+        - name: tls_ca_cert
+          enabled: false
+          description: |
+            Path to a CA certificate file used to verify the OIDC token endpoint's TLS certificate.
+          value:
+            type: string
+            example: /path/to/oauth_ca_cert.pem

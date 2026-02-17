@@ -39,6 +39,18 @@ class SaslOauthTokenProvider(BaseModel):
     url: Optional[str] = None
 
 
+class SchemaRegistryOauthTokenProvider(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    client_id: Optional[str] = None
+    client_secret: Optional[str] = None
+    scope: Optional[str] = None
+    tls_ca_cert: Optional[str] = None
+    url: Optional[str] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -68,6 +80,7 @@ class InstanceConfig(BaseModel):
     sasl_oauth_token_provider: Optional[SaslOauthTokenProvider] = None
     sasl_plain_password: Optional[str] = None
     sasl_plain_username: Optional[str] = None
+    schema_registry_oauth_token_provider: Optional[SchemaRegistryOauthTokenProvider] = None
     schema_registry_password: Optional[str] = None
     schema_registry_tls_ca_cert: Optional[str] = None
     schema_registry_tls_cert: Optional[str] = None
