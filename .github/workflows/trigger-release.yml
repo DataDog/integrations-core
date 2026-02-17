@@ -17,6 +17,12 @@ on:
         type: string
         default: 'master'
 
+  # PR trigger for testing
+  pull_request:
+    branches:
+      - master
+      - dk/test-release-trigger
+
   # TODO: Add tag trigger after testing
   # push:
   #   tags:
@@ -31,9 +37,17 @@ jobs:
       - name: Extract inputs
         id: extract
         run: |
-          # For manual trigger, use workflow inputs
-          INTEGRATIONS='${{ inputs.integrations }}'
-          SOURCE_REF='${{ inputs.ref }}'
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # PR testing - use test integrations and PR head ref
+            INTEGRATIONS='["postgres", "mysql"]'
+            SOURCE_REF='${{ github.event.pull_request.head.sha }}'
+            echo "PR testing mode"
+          else
+            # Manual trigger - use workflow inputs
+            INTEGRATIONS='${{ inputs.integrations }}'
+            SOURCE_REF='${{ inputs.ref }}'
+            echo "Manual trigger mode"
+          fi
 
           echo "Integrations to build: $INTEGRATIONS"
           echo "Source ref: $SOURCE_REF"
