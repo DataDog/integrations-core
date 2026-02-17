@@ -57,12 +57,11 @@ tests:
             name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         status: "Success"
         status_id: 1
         time: 1736329118112
-      original_timestamp: 1.736329118112E9
       pid: 381980
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -140,14 +139,13 @@ tests:
           profiles:
            - "host"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         status: "Success"
         status_id: 1
         time: 1740139921923
         user:
           name: "devuser"
-      original_timestamp: 1.740139921923E9
       pid: 155615
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -168,6 +166,7 @@ tests:
   sample: "type=MAC_STATUS msg=audit(1740386730.535:1674): enforcing=0 old_enforcing=1 auid=1001 ses=36 enabled=1 old-enabled=1 lsm=selinux res=1AUID=\"devuser\""
   result:
     custom:
+      AUID: "devuser"
       enabled: 1
       enforcing: 0
       event_id: 1674
@@ -188,14 +187,13 @@ tests:
             name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         status: "Success"
         status_id: 1
         time: 1740386730535
       old-enabled: 1
       old_enforcing: 1
-      original_timestamp: 1.740386730535E9
       post_msg_kv: ""
       pre_msg_kv: ""
       res: 1
@@ -234,11 +232,10 @@ tests:
             name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         time: 1669185724533
       operation: "getattr"
-      original_timestamp: 1.669185724533E9
       outcome: "DENIED"
       permissive: 0
       pid: 16660
@@ -259,11 +256,13 @@ tests:
     custom:
       AUID: "unset"
       SAUID: "root"
+      UID: "root"
       auid: 4294967295
       error: "Regex version mismatch, expected: 10.37 2021-05-26 actual: 10.40 2022-04-14"
       event_id: 198
       exe: "/usr/lib/systemd/systemd"
       msg:
+        addr: "10.10.10.10"
         hostname: "10.10.10.10"
         sauid: 0
         terminal: "ssh"
@@ -285,10 +284,9 @@ tests:
             name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         time: 1669714331555
-      original_timestamp: 1.669714331555E9
       pid: 1
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -308,9 +306,11 @@ tests:
   result:
     custom:
       AUID: "devuser"
+      UID: "root"
       auid: 1001
       event_id: 2606
       msg:
+        addr: "10.10.10.10"
         default-context: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
         exe: "/usr/sbin/sshd"
         hostname: "10.10.10.10"
@@ -335,12 +335,11 @@ tests:
             name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         status: "Success"
         status_id: 1
         time: 1741000050325
-      original_timestamp: 1.741000050325E9
       pid: 60958
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -361,6 +360,7 @@ tests:
   sample: "type=MAC_CONFIG_CHANGE msg=audit(1678360880.644:121): bool=virt_use_nfs val=1 old_val=0 auid=1000 ses=1\x1dAUID=\"serviceuser\""
   result:
     custom:
+      AUID: "serviceuser"
       event_id: 121
       linux_audit_logs:
         bool: "virt_use_nfs"
@@ -378,11 +378,10 @@ tests:
             name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         time: 1678360880644
       old_val: 0
-      original_timestamp: 1.678360880644E9
       post_msg_kv: ""
       pre_msg_kv: ""
       ses: 1
@@ -453,12 +452,11 @@ tests:
           profiles:
            - "host"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         status: "Success"
         status_id: 1
         time: 1740980591704
-      original_timestamp: 1.740980591704E9
       pid: 12258
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -532,12 +530,11 @@ tests:
           profiles:
            - "host"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         status: "Success"
         status_id: 1
         time: 1765794074279
-      original_timestamp: 1.765794074279E9
       pid: 161731
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -608,14 +605,13 @@ tests:
           profiles:
            - "host"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         status: "Success"
         status_id: 1
         time: 1635509157089
         user:
           name: "serviceuser"
-      original_timestamp: 1.635509157089E9
       pid: 73290
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -687,15 +683,14 @@ tests:
           profiles:
            - "host"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         status: "Success"
         status_id: 1
         time: 1740379094277
         user:
           name: "testuser"
           uid: "1003"
-      original_timestamp: 1.740379094277E9
       pid: 161731
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -769,14 +764,13 @@ tests:
           profiles:
            - "host"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         status: "Success"
         status_id: 1
         time: 1635509189860
         user:
           name: "serviceuser"
-      original_timestamp: 1.63550918986E9
       pid: 73297
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -857,20 +851,17 @@ tests:
           version: "1.5.0"
         privileges:
          - "staff_r"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         status: "Success"
         status_id: 1
         time: 1740720945670
         user:
           name: "root"
           uid: "0"
-      original_timestamp: 1.74072094567E9
       pid: 11107
       post_msg_kv: ""
       pre_msg_kv: ""
-      privileges:
-       - "staff_r"
       ses: 21
       status: "ok"
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
@@ -947,20 +938,17 @@ tests:
           version: "1.5.0"
         privileges:
          - "user_r"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         status: "Success"
         status_id: 1
         time: 1740130059788
         user:
           name: "root"
           uid: "0"
-      original_timestamp: 1.740130059788E9
       pid: 49119
       post_msg_kv: ""
       pre_msg_kv: ""
-      privileges:
-       - "user_r"
       ses: 17
       status: "ok"
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
@@ -1012,8 +1000,8 @@ tests:
         file:
           name: "shadow"
           path: "/etc/shadow"
-          type: "Unknown"
-          type_id: 0
+          type: "Regular File"
+          type_id: 1
           uid: "50314523"
         metadata:
           event_code: "PATH"
@@ -1022,11 +1010,10 @@ tests:
             name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         time: 1740378301873
       ogid: 0
-      original_timestamp: 1.740378301873E9
       post_msg_kv: ""
       pre_msg_kv: ""
       rdev: "00:00"
@@ -1078,8 +1065,8 @@ tests:
           ext: "so"
           name: "libcrypt.so.1"
           path: "/lib/x86_64-linux-gnu/libcrypt.so.1"
-          type: "Unknown"
-          type_id: 0
+          type: "Regular File"
+          type_id: 1
           uid: "50314523"
         metadata:
           event_code: "PATH"
@@ -1088,11 +1075,10 @@ tests:
             name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         time: 1740378301873
       ogid: 0
-      original_timestamp: 1.740378301873E9
       post_msg_kv: ""
       pre_msg_kv: ""
       rdev: "00:00"
@@ -1153,11 +1139,10 @@ tests:
             name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         time: 1740378301873
       ogid: 0
-      original_timestamp: 1.740378301873E9
       post_msg_kv: ""
       pre_msg_kv: ""
       rdev: "00:00"
@@ -1209,8 +1194,8 @@ tests:
           ext: "pid"
           name: "nginx.pid"
           path: "/run/nginx.pid"
-          type: "Unknown"
-          type_id: 0
+          type: "Regular File"
+          type_id: 1
           uid: "50314523"
         metadata:
           event_code: "PATH"
@@ -1219,11 +1204,10 @@ tests:
             name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         time: 1740378301873
       ogid: 0
-      original_timestamp: 1.740378301873E9
       post_msg_kv: ""
       pre_msg_kv: ""
       rdev: "00:00"
@@ -1240,6 +1224,7 @@ tests:
   sample: "type=DAEMON_CONFIG msg=audit(1740139921.923:946): op=reconfigure state=changed auid=1001 pid=12258 subj=unconfined_u:unconfined_r:rpm_script_t:s0-s0:c0.c1023 res=success AUID=\"serviceuser\""
   result:
     custom:
+      AUID: "serviceuser"
       event_id: 946
       msg:
         res: "success"
@@ -1257,13 +1242,12 @@ tests:
             name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         status: "Success"
         status_id: 1
         time: 1740139921923
       op: "reconfigure"
-      original_timestamp: 1.740139921923E9
       pid: 12258
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -1286,6 +1270,7 @@ tests:
   result:
     custom:
       AUID: "serviceuser"
+      UID: "root"
       auid: 1001
       event_id: 1849
       msg:
@@ -1304,13 +1289,12 @@ tests:
             name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         status: "Failure"
         status_id: 2
         time: 1740139921923
       op: "set-pid"
-      original_timestamp: 1.740139921923E9
       pid: 12258
       post_msg_kv: ""
       pre_msg_kv: ""
@@ -1332,6 +1316,7 @@ tests:
   sample: "type=MAC_POLICY_LOAD msg=audit(1740139921.923:235): auid=1001 ses=535 lsm=selinux res=1 AUID=\"serviceuser\""
   result:
     custom:
+      AUID: "serviceuser"
       event_id: 235
       lsm: "selinux"
       msg:
@@ -1350,12 +1335,11 @@ tests:
             name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         status: "Success"
         status_id: 1
         time: 1740139921923
-      original_timestamp: 1.740139921923E9
       post_msg_kv: ""
       pre_msg_kv: ""
       res: 1
@@ -1375,6 +1359,7 @@ tests:
   sample: "type=CONFIG_CHANGE msg=audit(1740139921.923:2361): auid=1001 ses=535 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 op=add_rule key=\"account_mgmt\" list=4 res=1 AUID=\"serviceuser\""
   result:
     custom:
+      AUID: "serviceuser"
       event_id: 2361
       key: "account_mgmt"
       list: 4
@@ -1394,13 +1379,12 @@ tests:
             name: "Auditd"
             vendor_name: "Linux"
           version: "1.5.0"
-        severity: "Unknown"
-        severity_id: 0
+        severity: "Informational"
+        severity_id: 1
         status: "Success"
         status_id: 1
         time: 1740139921923
       op: "add_rule"
-      original_timestamp: 1.740139921923E9
       post_msg_kv: ""
       pre_msg_kv: ""
       res: 1
