@@ -6,7 +6,6 @@ oracle.asm_diskgroup.total_mb,gauge,,,,"The total usable capacity of the disk gr
 oracle.buffer_cachehit_ratio,gauge,,percent,,Ratio of buffer cache hits,1,oracle_database,buff cache hit ratio,,
 oracle.cache_blocks_corrupt,gauge,,block,,Corrupt cache blocks,0,oracle_database,corrupt cache blocks,,
 oracle.cache_blocks_lost,gauge,,block,,Lost cache blocks,0,oracle_database,lost cache blocks,,
-oracle.cursor_cachehit_ratio,gauge,,percent,,Ratio of cursor cache hits,1,oracle_database,cursor cache hit ratio,,
 oracle.database_wait_time_ratio,gauge,,percent,,Memory sorts per second,0,oracle_database,db wait-time ratio,,
 oracle.disk_sorts,gauge,,operation,second,Disk sorts per second,0,oracle_database,disk sorts,,
 oracle.enqueue_timeouts,gauge,,timeout,second,Enqueue timeouts per sec,0,oracle_database,enqueue timeouts,,

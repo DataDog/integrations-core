@@ -1,4 +1,5 @@
 name: cloudgen_firewall
+fleet_configurable: true
 files:
 - name: cloudgen_firewall.yaml
   options:

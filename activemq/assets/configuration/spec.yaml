@@ -1,4 +1,5 @@
 name: ActiveMQ
+fleet_configurable: true
 files:
 - name: activemq.yaml
   options:

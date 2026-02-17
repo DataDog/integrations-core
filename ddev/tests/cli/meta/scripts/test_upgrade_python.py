@@ -5,6 +5,10 @@
 
 def test_update_python_version_success(fake_repo, ddev, mocker):
     """Test successful Python version update."""
+    # Mock the constants that get imported by the upgrade script
+    mocker.patch('ddev.repo.constants.PYTHON_VERSION_FULL', '3.13.7')
+    mocker.patch('ddev.repo.constants.PYTHON_VERSION', '3.13')
+
     # Mock network calls
     mocker.patch('ddev.cli.meta.scripts.upgrade_python.get_latest_python_version', return_value='3.13.9')
     mocker.patch(
@@ -12,6 +16,14 @@ def test_update_python_version_success(fake_repo, ddev, mocker):
         return_value={
             'linux_source_sha256': 'c4c066af19c98fb7835d473bebd7e23be84f6e9874d47db9e39a68ee5d0ce35c',
             'windows_amd64_sha256': '200ddff856bbff949d2cc1be42e8807c07538abd6b6966d5113a094cf628c5c5',
+        },
+    )
+    mocker.patch(
+        'ddev.cli.meta.scripts.upgrade_python.get_pbs_release_info',
+        return_value={
+            'release': '20251210',
+            'aarch64': 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
+            'x86_64': 'f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5',
         },
     )
 
@@ -42,14 +54,21 @@ def test_update_python_version_success(fake_repo, ddev, mocker):
     assert '-Hash \'200ddff856bbff949d2cc1be42e8807c07538abd6b6966d5113a094cf628c5c5\'' in contents
     assert 'ENV PYTHON_VERSION="3.13.7"' not in contents
 
-    # Verify macOS workflow was updated
+    # Verify macOS workflow was updated with PBS format
     workflow_file = fake_repo.path / '.github' / 'workflows' / 'resolve-build-deps.yaml'
     contents = workflow_file.read_text()
-    assert 'python-3.13.9-macos11.pkg' in contents
-    assert 'python-3.13.7-macos11.pkg' not in contents
+    assert 'PYTHON_PATCH: 9' in contents
+    assert 'PYTHON_PATCH: 7' not in contents
+    assert 'PBS_RELEASE: 20251210' in contents
+    assert 'PBS_SHA256__aarch64: a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2' in contents
+    assert 'PBS_SHA256__x86_64: f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5' in contents
 
 
 def test_update_python_version_already_latest(fake_repo, ddev, mocker):
+    # Mock the constants that get imported by the upgrade script
+    mocker.patch('ddev.repo.constants.PYTHON_VERSION_FULL', '3.13.7')
+    mocker.patch('ddev.repo.constants.PYTHON_VERSION', '3.13')
+
     mocker.patch('ddev.cli.meta.scripts.upgrade_python.get_latest_python_version', return_value='3.13.7')
 
     result = ddev('meta', 'scripts', 'upgrade-python-version')
@@ -68,6 +87,10 @@ def test_update_python_version_no_new_version_found(fake_repo, ddev, mocker):
 
 
 def test_update_python_version_invalid_hash_format(fake_repo, ddev, mocker):
+    # Mock the constants that get imported by the upgrade script
+    mocker.patch('ddev.repo.constants.PYTHON_VERSION_FULL', '3.13.7')
+    mocker.patch('ddev.repo.constants.PYTHON_VERSION', '3.13')
+
     mocker.patch('ddev.cli.meta.scripts.upgrade_python.get_latest_python_version', return_value='3.13.9')
     # Hash validation happens inside get_python_sha256_hashes, so it raises ValueError
     mocker.patch(

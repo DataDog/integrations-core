@@ -8,7 +8,7 @@ from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.kafka_consumer.constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
 
 # https://github.com/confluentinc/librdkafka/blob/e03d3bb91ed92a38f38d9806b8d8deffe78a1de5/src/rd.h#L78-L89
-LIBRDKAFKA_LOG_CRIT = 2
+LIBRDKAFKA_LOG_ERR = 3
 
 
 class KafkaConfig:
@@ -45,7 +45,7 @@ class KafkaConfig:
         self._request_timeout = init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT)
         self._request_timeout_ms = self._request_timeout * 1000
         self._librdkafka_log_level = instance.get(
-            'librdkafka_log_level', init_config.get('librdkafka_log_level', LIBRDKAFKA_LOG_CRIT)
+            'librdkafka_log_level', init_config.get('librdkafka_log_level', LIBRDKAFKA_LOG_ERR)
         )
         self._security_protocol = instance.get('security_protocol', 'PLAINTEXT')
         self._sasl_mechanism = instance.get('sasl_mechanism')
@@ -80,8 +80,41 @@ class KafkaConfig:
         ):
             self._tls_ca_cert = '/opt/datadog-agent/embedded/ssl/certs/cacert.pem'
 
+        self._sasl_oauth_tls_ca_cert = (
+            self._sasl_oauth_token_provider.get("tls_ca_cert") if self._sasl_oauth_token_provider else None
+        )
+
         # Data Streams live messages
         self.live_messages_configs = instance.get('live_messages_configs', [])
+
+        self._cluster_monitoring_enabled = is_affirmative(instance.get('enable_cluster_monitoring', False))
+
+        if self._cluster_monitoring_enabled:
+            self._monitor_unlisted_consumer_groups = True
+            if not is_affirmative(instance.get('monitor_unlisted_consumer_groups', False)):
+                self.log.debug(
+                    "Cluster monitoring is enabled. Automatically enabling consumer lag collection "
+                    "for all consumer groups (monitor_unlisted_consumer_groups)."
+                )
+
+            self._data_streams_enabled = True
+            if not is_affirmative(instance.get('data_streams_enabled', False)):
+                self.log.debug(
+                    "Cluster monitoring is enabled. Automatically enabling Data Streams monitoring "
+                    "(data_streams_enabled)."
+                )
+        else:
+            self._data_streams_enabled = is_affirmative(instance.get('data_streams_enabled', False))
+
+        self._collect_schema_registry = instance.get('schema_registry_url')
+
+        # Schema Registry authentication
+        self._schema_registry_username = instance.get('schema_registry_username')
+        self._schema_registry_password = instance.get('schema_registry_password')
+        self._schema_registry_tls_verify = is_affirmative(instance.get('schema_registry_tls_verify', True))
+        self._schema_registry_tls_cert = instance.get('schema_registry_tls_cert')
+        self._schema_registry_tls_key = instance.get('schema_registry_tls_key')
+        self._schema_registry_tls_ca_cert = instance.get('schema_registry_tls_ca_cert')
 
     def validate_config(self):
         if not self._kafka_connect_str:

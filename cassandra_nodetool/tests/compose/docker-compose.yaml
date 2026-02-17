@@ -20,9 +20,22 @@ services:
         -Djava.rmi.server.hostname=localhost
     expose:
       - ${CONTAINER_PORT}
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'SELECT now() FROM system.local'"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
 
   dd-test-cassandra2:
     image: cassandra:${CASSANDRA_VERSION}
     container_name: dd-test-cassandra2
     environment:
       CASSANDRA_SEEDS: ${CASSANDRA_SEEDS}
+      JVM_EXTRA_OPTS: "-Dcassandra.skip_schema_check=true"
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'SELECT now() FROM system.local'"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 60s

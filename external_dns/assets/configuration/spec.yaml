@@ -1,4 +1,5 @@
 name: External DNS
+fleet_configurable: true
 
 files:
   - name: external_dns.yaml

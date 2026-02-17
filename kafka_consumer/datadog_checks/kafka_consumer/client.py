@@ -20,13 +20,15 @@ class KafkaClient:
         if self._kafka_client is None:
             config = {
                 "bootstrap.servers": self.config._kafka_connect_str,
-                "socket.timeout.ms": self.config._request_timeout_ms,
+                # Set socket timeout higher than operation timeout to allow broker to return
+                # actual error messages (e.g., SASL auth errors) before the socket is closed
+                "socket.timeout.ms": self.config._request_timeout_ms + 2000,
                 "client.id": "dd-agent",
                 "log_level": self.config._librdkafka_log_level,
             }
             config.update(self.__get_authentication_config())
 
-            self._kafka_client = AdminClient(config)
+            self._kafka_client = AdminClient(config, logger=self.log)
 
         return self._kafka_client
 
@@ -75,6 +77,10 @@ class KafkaClient:
             extras_parameters["sasl.oauthbearer.client.secret"] = self.config._sasl_oauth_token_provider.get(
                 "client_secret"
             )
+            extras_parameters["sasl.oauthbearer.scope"] = self.config._sasl_oauth_token_provider.get("scope")
+            extras_parameters["sasl.oauthbearer.extensions"] = self.config._sasl_oauth_token_provider.get("extensions")
+            if self.config._sasl_oauth_tls_ca_cert:
+                extras_parameters["https.ca.location"] = self.config._sasl_oauth_tls_ca_cert
 
         for key, value in extras_parameters.items():
             # Do not add the value if it's not specified
@@ -93,11 +99,10 @@ class KafkaClient:
             return "", []
         return (cluster_id, [(name, list(metadata.partitions)) for name, metadata in cluster_metadata.topics.items()])
 
-    def consumer_offsets_for_times(self, partitions):
+    def consumer_offsets_for_times(self, partitions, offset=-1):
         topicpartitions_for_querying = [
-            # Setting offset to -1 will return the latest highwater offset while calling offsets_for_times
-            #   Reference: https://github.com/fede1024/rust-rdkafka/issues/460
-            TopicPartition(topic=topic, partition=partition, offset=-1)
+            # -1: latest; 0: earliest (timestamp 0)
+            TopicPartition(topic=topic, partition=partition, offset=offset)
             for topic, partition in partitions
         ]
         return [
@@ -148,7 +153,13 @@ class KafkaClient:
 
     def request_metadata_update(self):
         # https://github.com/confluentinc/confluent-kafka-python/issues/594
-        self._cluster_metadata = self.kafka_client.list_topics(None, timeout=self.config._request_timeout)
+        try:
+            self._cluster_metadata = self.kafka_client.list_topics(None, timeout=self.config._request_timeout)
+        except KafkaException:
+            # Flush pending log messages to surface the actual error details
+            # https://github.com/confluentinc/confluent-kafka-python/issues/1699
+            self.kafka_client.poll(1)
+            raise
 
     def list_consumer_groups(self):
         groups = []

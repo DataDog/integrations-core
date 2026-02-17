@@ -3,13 +3,12 @@
     "description": "This dashboard offers a comprehensive summary of key entities such as accounts, applications, browsers, employees, and findings to provide insight into your security environment.",
     "widgets": [
         {
-            "id": 8508816171812108,
+            "id": 4319665486602869,
             "definition": {
                 "type": "image",
-                "url": "https://lever-client-logos.s3.us-west-2.amazonaws.com/af1f06cb-5fe4-4956-b99d-89b489dc3de9-1749476979307.png",
-                "url_dark_theme": "https://lever-client-logos.s3.us-west-2.amazonaws.com/af1f06cb-5fe4-4956-b99d-89b489dc3de9-1749476979307.png",
+                "url": "https://static.datadoghq.com/static/images/logos/push-security_small.svg",
+                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/push-security_reversed_small.svg",
                 "sizing": "contain",
-                "margin": "md",
                 "has_background": true,
                 "has_border": true,
                 "vertical_align": "center",
@@ -18,7 +17,7 @@
             "layout": {
                 "x": 0,
                 "y": 0,
-                "width": 6,
+                "width": 5,
                 "height": 3
             }
         },
@@ -37,9 +36,9 @@
                 "has_padding": true
             },
             "layout": {
-                "x": 6,
+                "x": 5,
                 "y": 0,
-                "width": 6,
+                "width": 7,
                 "height": 3
             }
         },

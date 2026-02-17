@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 4.10.1 / 2025-10-31
+## 4.12.0 / 2026-02-11
+
+***Security***:
+
+* Bump `cryptography` to 46.0.5 ([#22607](https://github.com/DataDog/integrations-core/pull/22607))
+
+## 4.11.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 4.10.1 / 2025-10-31 / Agent 7.73.0
 
 ***Fixed***:
 

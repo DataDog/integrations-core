@@ -1,4 +1,5 @@
 name: Memcached
+fleet_configurable: true
 files:
 - name: mcache.yaml
   options:
@@ -12,6 +13,7 @@ files:
         Url used to connect to the memcached instance.
 
         Either `url` or `socket` configuration must be provided. If both are provided, `socket` is used.
+      fleet_configurable: true
       value:
         type: string
         example: localhost
@@ -20,25 +22,31 @@ files:
         The socket to use. 'dd-agent' user must have read/write permission.
 
         Either `url` or `socket` configuration must be provided. If both are provided, `socket` is used.
+      fleet_configurable: true
       value:
         type: string
     - name: port
       description: Port to use when connecting to `url`.
+      fleet_configurable: true
       value:
         type: integer
         example: 11211
     - name: username
       description: Username for the Mcache status endpoint authentication.
+      fleet_configurable: true
       value:
         type: string
     - name: password
       description: Password for the Mcache status endpoint authentication.
+      fleet_configurable: true
+      secret: true
       value:
         type: string
     - name: options
       description: |
         Set `items` to true if you wish to collect items Mcache stats.
         Set `slabs` to true if you wish to collect slabs Mcache stats.
+      fleet_configurable: true
       value:
         type: object
         example:

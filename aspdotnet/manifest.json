@@ -40,6 +40,10 @@
         "check": "aspdotnet.request.wait_time",
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "aspnet_wp",
+        "aspnet_state"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },

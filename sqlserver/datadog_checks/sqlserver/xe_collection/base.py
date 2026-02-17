@@ -12,6 +12,7 @@ from time import time
 from dateutil import parser
 from lxml import etree
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
@@ -158,7 +159,7 @@ class XESessionBase(DBMAsyncJob):
 
         super(XESessionBase, self).__init__(
             check,
-            run_sync=True,
+            run_sync=is_affirmative(xe_config.get('run_sync', False)),
             enabled=True,
             min_collection_interval=self._config.min_collection_interval,
             dbms="sqlserver",
@@ -204,8 +205,8 @@ class XESessionBase(DBMAsyncJob):
 
     def session_exists(self):
         """Check if this XE session exists and is running"""
-        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+        with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 # For Azure SQL Database support
                 level = ""
                 if self._is_azure_sql_database:
@@ -224,8 +225,8 @@ class XESessionBase(DBMAsyncJob):
         This avoids expensive server-side XML parsing for better performance.
         """
         raw_xml = None
-        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+        with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 # For Azure SQL Database support
                 level = ""
                 if self._is_azure_sql_database:

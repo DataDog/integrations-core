@@ -49,7 +49,7 @@ After running this command, you should see traffic from the CloudGen Firewall IP
       logs:
         - type: file
           path: /var/log/cloudgen_firewall.log
-          source: cloudgen_firewall
+          source: barracuda_cloudgen_logs
           service: <SERVICE_NAME>
     ```
 

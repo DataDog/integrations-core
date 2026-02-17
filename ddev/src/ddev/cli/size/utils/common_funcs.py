@@ -837,6 +837,7 @@ def draw_treemap_rects_with_labels(
 
 def send_metrics_to_dd(
     app: Application,
+    commit: str,
     modules: list[FileDataEntryPlatformVersion],
     org: str | None,
     key: str | None,
@@ -852,8 +853,7 @@ def send_metrics_to_dd(
     if "site" not in config_file_info:
         raise RuntimeError("No site found in config file")
 
-    message, tickets, prs = get_last_commit_data()
-    timestamp = get_last_commit_timestamp()
+    timestamp, message, tickets, prs = get_commit_data(commit)
 
     metrics = []
     n_integrations_metrics = []
@@ -965,24 +965,28 @@ def send_metrics_to_dd(
     api.Metric.send(metrics=n_dependencies_metrics)
 
 
-def get_last_commit_timestamp() -> int:
-    result = subprocess.run(["git", "log", "-1", "--format=%ct"], capture_output=True, text=True, check=True)
-    return int(result.stdout.strip())
+def get_commit_data(commit: str) -> tuple[int, str, list[str], list[str]]:
+    '''
+    Gets the timestamp, message, tickets and PRs of a given commit. If no commit is provided, it uses the last commit.
+    '''
+    result = subprocess.run(
+        ["git", "show", "-s", "--format=%ct,%s", commit],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
 
-
-def get_last_commit_data() -> tuple[str, list[str], list[str]]:
-    result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
+    timestamp, message = result.stdout.strip().split(',', 1)
     ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
     pr_pattern = r'#(\d+)'
 
-    message = result.stdout.strip()
     tickets = re.findall(ticket_pattern, message)
     prs = re.findall(pr_pattern, message)
     if not tickets:
         tickets = [""]
     if not prs:
         prs = [""]
-    return message, tickets, prs
+    return int(timestamp), message, tickets, prs
 
 
 @cache
@@ -1000,7 +1004,11 @@ def get_last_dependency_sizes_artifact(
     dep_sizes_json = get_dep_sizes_json(app, commit, platform, py_version)
     if not dep_sizes_json:
         app.display_debug("No dependency sizes in current commit, searching ancestors")
-        base_commit = app.repo.git.merge_base(commit, "origin/master")
+        try:
+            base_commit = app.repo.git.merge_base(commit, "origin/master")
+        except Exception as e:
+            app.display_error(f"Failed to find merge base for {commit}: {e}")
+            return None
         if base_commit != commit:
             app.display_debug(f"Found base commit: {base_commit}")
             previous_commit = base_commit
@@ -1033,11 +1041,6 @@ def get_dep_sizes_json(app: Application, current_commit: str, platform: str, py_
 def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
     app.display_debug(f"Fetching workflow run ID for {commit} ({os.path.basename(workflow)})")
 
-    if workflow == MEASURE_DISK_USAGE_WORKFLOW:
-        jq = f'.[] | select(.name == "Measure Disk Usage [{commit}]") | .databaseId'
-    else:
-        jq = '.[-1].databaseId'
-
     result = subprocess.run(
         [
             'gh',
@@ -1050,7 +1053,7 @@ def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
             '--json',
             'databaseId,name',
             '--jq',
-            jq,
+            '.[-1].databaseId',
         ],
         capture_output=True,
         text=True,
@@ -1062,6 +1065,46 @@ def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
         app.display_warning(f"No workflow run found for {commit} ({os.path.basename(workflow)})")
 
     return run_id
+
+
+@cache
+def get_run_id_measure_disk_usage(app: Application, commit: str) -> str | None:
+    workflow_name = os.path.basename(MEASURE_DISK_USAGE_WORKFLOW)
+    wanted_name = f"Measure Disk Usage [{commit}]"
+
+    app.display_debug(f"Fetching workflow run ID for {commit} ({workflow_name})")
+
+    per_page = 100
+    max_pages = 5
+
+    for page in range(1, max_pages + 1):
+        app.display_debug(f"Fetching workflow run ID for {commit} ({workflow_name}) - Page {page} of {max_pages}")
+        result = subprocess.run(
+            [
+                "gh",
+                "api",
+                f"repos/DataDog/integrations-core/actions/workflows/{workflow_name}/runs",
+                "-X",
+                "GET",
+                "-f",
+                f"per_page={per_page}",
+                "-f",
+                f"page={page}",
+                "--jq",
+                (f'[.workflow_runs[] | select(.name == "{wanted_name}") | .id] | first // empty'),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            app.display_warning(f"No workflow run found for {commit} ({workflow_name}) ")
+            return None
+
+        out = (result.stdout or "").strip()
+        if out:
+            app.display_debug(f"Workflow run ID: {out}")
+            return out
+    return None
 
 
 @cache
@@ -1143,7 +1186,7 @@ def get_previous_dep_sizes(
     Gets the dependency sizes for a given commit when dependencies were not resolved.
     '''
     with tempfile.TemporaryDirectory() as tmpdir:
-        if (run_id := get_run_id(app, base_commit, MEASURE_DISK_USAGE_WORKFLOW)) is None:
+        if (run_id := get_run_id_measure_disk_usage(app, base_commit)) is None:
             return None
 
         artifact_name = 'status_compressed.json' if compressed else 'status_uncompressed.json'

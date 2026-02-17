@@ -40,6 +40,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     enable_changelogs: Optional[bool] = None
     enable_extra_params: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     enable_lnetctl_detailed: Optional[bool] = None
     filesystems: Optional[tuple[str, ...]] = None
     lctl_path: Optional[str] = None

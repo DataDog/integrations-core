@@ -1,4 +1,6 @@
+{#- Template for rendering one release in the CHANGELOG. The template uses Jinja 2 templating language. -#}
 {% if sections[""] %}
+{#- We define the order of the fragment type sections (changed, added, fixed etc.) in towncrier.toml -#}
 {% for category, val in definitions.items() if category in sections[""] %}
 ***{{ definitions[category]['name'] }}***:
 

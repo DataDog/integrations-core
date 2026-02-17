@@ -2,18 +2,26 @@
 
 ## Overview
 
-The Cisco ACI Integration lets you:
+[Network Device Monitoring][11] for Cisco ACI provides visibility into the health and performance of application-centric data center networks. By collecting metrics from Cisco ACI fabrics, controllers, and network devices, this integration helps teams monitor fabric health, track endpoint and interface behavior, and identify issues that may impact application connectivity within the data center.
+Datadog brings ACI network telemetry into a unified observability platform, enabling teams to correlate network behavior with application and infrastructure signals.
 
-- Track the state and health of your network
-- Track the capacity of your ACI
-- Monitor the switches and controllers themselves
-- The ability to monitor devices with [Network Device Monitoring][11]
+### Fabric and device health monitoring
+
+This integration surfaces key health indicators from ACI components, including device availability, resource utilization, and interface status. Teams can quickly identify failing nodes, degraded interfaces, or abnormal resource usage that may affect fabric stability.
+
+### Interface and traffic analysis
+
+Cisco ACI environments handle large volumes of east-west and north-south traffic. Datadog tracks interface throughput, packet rates, errors, and utilization, helping teams detect congestion, packet loss, or misconfigurations that could impact application performance.
+
+### Correlating network and application impact
+
+By integrating ACI metrics with Datadog's infrastructure and application monitoring, teams gain a clearer picture of how network issues propagate to application behavior. This end-to-end visibility helps reduce mean time to resolution when troubleshooting complex data center incidents.
 
 **Minimum Agent version:** 6.3.2
 
 ## Setup
 
-<div class="alert alert-info">Enabling send_ndm_metadata to send metadata from this integration has potential billing implications. See the <a href="https://www.datadoghq.com/pricing/?product=network-monitoring&tab=ndm#products"> pricing page </a> for more information.</div>
+**The Cisco ACI integration is Generally Available. To learn more about billing implications, visit our [pricing page][19].**
 
 ### Installation
 
@@ -198,3 +206,4 @@ Contact [Datadog support][9].
 [16]: /logs
 [17]: https://docs.datadoghq.com/logs/log_collection/?tab=host#setup
 [18]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/tests/cisco_aci_query.py
+[19]: https://www.datadoghq.com/pricing/?product=network-monitoring&tab=network-device-monitoring#products
