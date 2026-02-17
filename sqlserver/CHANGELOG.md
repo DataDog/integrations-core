@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 22.12.4 / 2026-02-05
+## 22.12.4 / 2026-02-05 / Agent 7.76.0
 
 ***Fixed***:
 
