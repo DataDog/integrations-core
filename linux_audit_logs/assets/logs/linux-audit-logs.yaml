@@ -1762,10 +1762,6 @@ pipeline:
                   name: Create
                   id: 6
                 - filter:
-                    query: "@type:ADD_GROUP"
-                  name: Create
-                  id: 6
-                - filter:
                     query: "@type:DEL_GROUP"
                   name: Delete
                   id: 5
