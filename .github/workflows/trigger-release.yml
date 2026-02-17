@@ -2,6 +2,7 @@ name: Trigger Integration Release
 
 # This workflow triggers wheel builds in the private agent-integration-wheels-release repo
 # when new integration versions are ready to release
+# TRIGGER
 
 on:
   # Manual trigger for testing
@@ -12,10 +13,10 @@ on:
         required: true
         type: string
       ref:
-        description: 'Git reference to build from (commit SHA, branch, or tag)'
+        description: "Git reference to build from (commit SHA, branch, or tag)"
         required: false
         type: string
-        default: 'master'
+        default: "master"
 
   # PR trigger for testing
   pull_request:
@@ -33,8 +34,8 @@ jobs:
     name: Trigger wheel build
     runs-on: ubuntu-latest
     permissions:
-      id-token: write  # Required for OIDC token generation (dd-octo-sts)
-      contents: read   # Required for repository_dispatch API call
+      id-token: write # Required for OIDC token generation (dd-octo-sts)
+      contents: read # Required for repository_dispatch API call
 
     steps:
       - name: Extract inputs
