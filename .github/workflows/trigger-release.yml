@@ -44,26 +44,30 @@ jobs:
             # PR testing - use test integrations and PR head ref
             INTEGRATIONS='["postgres", "mysql"]'
             SOURCE_REF='${{ github.event.pull_request.head.sha }}'
+            POLICY_NAME="integrations-core.dispatch-wheel-builds-test"
             echo "PR testing mode"
           else
             # Manual trigger - use workflow inputs
             INTEGRATIONS='${{ inputs.integrations }}'
             SOURCE_REF='${{ inputs.ref }}'
+            POLICY_NAME="integrations-core.dispatch-wheel-builds"
             echo "Manual trigger mode"
           fi
 
           echo "Integrations to build: $INTEGRATIONS"
           echo "Source ref: $SOURCE_REF"
+          echo "Policy: $POLICY_NAME"
 
           echo "integrations=$INTEGRATIONS" >> $GITHUB_OUTPUT
           echo "source-ref=$SOURCE_REF" >> $GITHUB_OUTPUT
+          echo "policy=$POLICY_NAME" >> $GITHUB_OUTPUT
 
       - name: Get GitHub token via dd-octo-sts
         id: octo-sts
         uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
         with:
           scope: DataDog/agent-integration-wheels-release
-          policy: integrations-core.dispatch-wheel-builds
+          policy: ${{ steps.extract.outputs.policy }}
 
       - name: Trigger wheel build in agent-integration-wheels-release
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
