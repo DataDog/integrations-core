@@ -90,7 +90,6 @@
   fleet_configurable: true
 - name: password
   secret: true
-  fleet_formats: ["secret"]
   value:
     type: string
   description: The password to use if services are behind basic or NTLM auth.
