@@ -252,7 +252,7 @@ files:
           fleet_configurable: true
           secret: true
           description: |
-            The client secret. Required when method is 'oidc'.
+            The client secret. Required when method is `oidc`.
           value:
             type: string
         - name: scope
