@@ -33,7 +33,7 @@ def test_process_disappearing_during_scan(aggregator, caplog):
     # Create a mock process that will raise NoSuchProcess when cmdline() is called
     mock_process = mock.Mock()
     mock_process.cmdline.side_effect = psutil.NoSuchProcess(1234)  # 1234 is the pid
-    mock_process.name.return_value = "dd-test-gunicorn"  # For the debug log message
+    mock_process.pid = 1234
 
     check = GUnicornCheck(CHECK_NAME, {}, [INSTANCE])
     caplog.set_level(logging.DEBUG)
@@ -50,4 +50,4 @@ def test_process_disappearing_during_scan(aggregator, caplog):
         message="No gunicorn process with name {} found, skipping worker metrics".format(INSTANCE['proc_name']),
     )
 
-    assert "Process dd-test-gunicorn disappeared while scanning" in caplog.text
+    assert "Process 1234 disappeared while scanning" in caplog.text
