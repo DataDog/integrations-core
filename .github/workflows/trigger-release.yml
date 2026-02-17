@@ -43,11 +43,15 @@ jobs:
 
       - name: Trigger wheel build in agent-integration-wheels-release
         uses: actions/github-script@v7
+        env:
+          INTEGRATIONS_JSON: ${{ steps.extract.outputs.integrations }}
+          SOURCE_REF: ${{ steps.extract.outputs.source-ref }}
         with:
           github-token: ${{ secrets.INTEGRATION_RELEASE_TOKEN }}
           script: |
-            const integrations = ${{ steps.extract.outputs.integrations }};
-            const sourceRef = '${{ steps.extract.outputs.source-ref }}';
+            // Parse inputs from environment to prevent code injection
+            const integrations = JSON.parse(process.env.INTEGRATIONS_JSON);
+            const sourceRef = process.env.SOURCE_REF;
 
             console.log('🚀 Triggering build for:', integrations);
             console.log('📦 Source: integrations-core at', sourceRef);
