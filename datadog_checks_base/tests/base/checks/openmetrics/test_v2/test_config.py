@@ -233,9 +233,7 @@ class TestMetrics:
             oracledb_rts_total_records 2.610012e+06
             """
         )
-        check = get_check(
-            {'metrics': [{'oracledb_rts_total_records': {'type': 'count'}}]}
-        )
+        check = get_check({'metrics': [{'oracledb_rts_total_records': {'type': 'count'}}]})
         dd_run_check(check)
         aggregator.assert_metric(
             'test.oracledb_rts_total_records.count',
