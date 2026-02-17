@@ -27,26 +27,26 @@ class HTTPResponseProtocol(Protocol):
     # Methods
     def json(self, **kwargs: Any) -> Any:
         """Parse response body as JSON."""
-        ...
+        ...  # no cov
 
     def raise_for_status(self) -> None:
         """Raise exception for 4xx/5xx status codes."""
-        ...
+        ...  # no cov
 
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes]:
         """Iterate over response content in chunks."""
-        ...
+        ...  # no cov
 
     def iter_lines(
         self, chunk_size: int | None = None, decode_unicode: bool = False, delimiter: bytes | None = None
     ) -> Iterator[bytes]:
         """Iterate over response content line by line."""
-        ...
+        ...  # no cov
 
     # Context manager support
-    def __enter__(self) -> 'HTTPResponseProtocol': ...
+    def __enter__(self) -> 'HTTPResponseProtocol': ...  # no cov
 
-    def __exit__(self, *args: Any) -> None: ...
+    def __exit__(self, *args: Any) -> None: ...  # no cov
 
 
 @runtime_checkable
@@ -65,31 +65,31 @@ class HTTPClientProtocol(Protocol):
     # HTTP methods
     def get(self, url: str, **options: Any) -> HTTPResponseProtocol:
         """Perform HTTP GET request."""
-        ...
+        ...  # no cov
 
     def post(self, url: str, **options: Any) -> HTTPResponseProtocol:
         """Perform HTTP POST request."""
-        ...
+        ...  # no cov
 
     def head(self, url: str, **options: Any) -> HTTPResponseProtocol:
         """Perform HTTP HEAD request."""
-        ...
+        ...  # no cov
 
     def put(self, url: str, **options: Any) -> HTTPResponseProtocol:
         """Perform HTTP PUT request."""
-        ...
+        ...  # no cov
 
     def patch(self, url: str, **options: Any) -> HTTPResponseProtocol:
         """Perform HTTP PATCH request."""
-        ...
+        ...  # no cov
 
     def delete(self, url: str, **options: Any) -> HTTPResponseProtocol:
         """Perform HTTP DELETE request."""
-        ...
+        ...  # no cov
 
     def options_method(self, url: str, **options: Any) -> HTTPResponseProtocol:
         """Perform HTTP OPTIONS request.
 
         Note: Named 'options_method' to avoid conflict with Python keyword.
         """
-        ...
+        ...  # no cov
