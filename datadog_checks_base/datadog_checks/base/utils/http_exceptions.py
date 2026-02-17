@@ -157,6 +157,16 @@ def from_httpx_exception(exc: Exception) -> HTTPError:
     request = getattr(exc, 'request', None)
     message = str(exc)
 
+    # Check for SSL/TLS errors by examining the exception chain
+    # httpx doesn't have a dedicated SSLError, but ssl.SSLError appears in __cause__
+    import ssl
+
+    current_exc = exc
+    while current_exc is not None:
+        if isinstance(current_exc, ssl.SSLError):
+            return HTTPSSLError(message, response, request)
+        current_exc = current_exc.__cause__
+
     # Map to specific exception types
     if isinstance(exc, httpx.TimeoutException):
         return HTTPTimeoutError(message, response, request)
