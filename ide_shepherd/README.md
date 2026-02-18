@@ -12,7 +12,7 @@ Integrate IDE Shepherd with Datadog's pre-built dashboard visualizations for ins
 
 **1. Install and start Datadog Agent**
 
-First, verify the Datadog Agent is installed and running on your system with your organization API key configured. See [Datadog Agent Installation Guide](https://docs.datadoghq.com/agent/) for installation instructions.
+First, verify the Datadog Agent is installed and running on your system with your organization API key configured. See [Datadog Agent Installation Guide][2] for installation instructions.
 
 **2. Install IDE Shepherd extension**
 
@@ -47,7 +47,7 @@ launchctl stop com.datadoghq.agent
 launchctl start com.datadoghq.agent
 ```
 
-See [Datadog Agent Commands][2] for more details.
+See [Datadog Agent Commands][3] for more details.
 
 **5. Verify Telemetry Status**
 
@@ -63,11 +63,11 @@ You can verify the connection from the IDE Shepherd sidebar:
 
 ### Validation
 
-[Run the Agent's status subcommand][2] and look for `ide-shepherd` under the Logs Agent section. You can also verify in the IDE Shepherd sidebar that the **Agent Status** shows as connected.
+[Run the Agent's status subcommand][3] and look for `ide-shepherd` under the Logs Agent section. You can also verify in the IDE Shepherd sidebar that the **Agent Status** shows as connected.
 
 To view your logs in Datadog:
 
-1. Go to the [Log Explorer][3]
+1. Go to the [Log Explorer][4]
 2. Filter by `source:ide-shepherd service:ide-shepherd-telemetry`
 3. Explore security events, extension lifecycle events, and workspace task activities.
 
@@ -99,9 +99,10 @@ The IDE Shepherd integration does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][4].
+Need help? Contact [Datadog support][5].
 
 [1]: https://github.com/DataDog/IDE-SHEPHERD-extension
-[2]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[3]: https://app.datadoghq.com/logs
-[4]: https://docs.datadoghq.com/help/
+[2]: https://docs.datadoghq.com/agent/
+[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[4]: https://app.datadoghq.com/logs
+[5]: https://docs.datadoghq.com/help/
