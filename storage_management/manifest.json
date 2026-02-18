@@ -1,0 +1,66 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
+  "app_id": "storage_management",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Amazon S3 storage inventory, cost analysis, and optimization with prefix-level visibility.",
+    "title": "Storage Management",
+    "media": [],
+    "classifier_tags": [
+      "Category::Cloud",
+      "Category::Metrics",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/guide/storage-monitoring-setup/"
+      },
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/infrastructure/storage_management/amazon_s3/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/storage-monitoring/"
+      }
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "Storage Management",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "aws.s3.inventory.",
+        "check": [
+          "aws.s3.inventory.total_prefix_size",
+          "aws.s3.inventory.average_prefix_size",
+          "aws.s3.inventory.prefix_object_count",
+          "aws.s3.inventory.total_prefix_estimated_cost",
+          "aws.s3.inventory.prefix_age_days",
+          "aws.s3.inventory.access_logs.total_requests_by_method",
+          "aws.s3.inventory.access_logs.request_latency_by_method"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "auto_install": true
+    },
+    "dashboards": {
+      "Storage Management for Amazon S3": "assets/dashboards/storage_management_amazon_s3.json"
+    }
+  }
+}
