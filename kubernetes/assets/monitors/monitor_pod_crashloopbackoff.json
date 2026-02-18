@@ -8,7 +8,7 @@
   ],
   "description": "The status CrashloopBackOff means that a container in the Pod is started, crashes, and is restarted, over and over again. This monitor tracks when a pod is in a CrashloopBackOff state for your Kubernetes integration.",
   "definition": {
-    "message": "## What's happening?\nAt least one container is in a waiting state due to reason crashloopbackoff in the last 10 minutes.\n\npod {{pod_name.name}} is in CrashloopBackOff on {{kube_namespace.name}} \n This alert could generate several alerts for a bad deployment. Adjust the thresholds of the query to suit your infrastructure.",
+    "message": "{{#is_alert}}\n\n## What's happening?\nAt least one container is in a waiting state due to reason crashloopbackoff in the last 10 minutes.\n\n{{/is_alert}}\n\npod {{pod_name.name}} is in CrashloopBackOff on {{kube_namespace.name}} \n This alert could generate several alerts for a bad deployment. Adjust the thresholds of the query to suit your infrastructure.",
     "name": "[Kubernetes] Pod {{pod_name.name}} is CrashloopBackOff on namespace {{kube_namespace.name}}",
     "options": {
       "escalation_message": "",

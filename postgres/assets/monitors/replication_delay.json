@@ -8,7 +8,7 @@
   ],
   "description": "Replication lag is the delay between the time when data is written to the primary database and the time when it is replicated to the standby databases. This monitor tracks the replication lag of the postgres database.",
   "definition": {
-    "message": "## What's happening?\nAnomalies in replication delay for PostgreSQL have been detected above the expected range within the past 15 minutes, over the last hour.\n\nPlease check host {{host.name}}, as replication delay has been abnormally high.",
+    "message": "{{#is_alert}}\n\n## What's happening?\nAnomalies in replication delay for PostgreSQL have been detected above the expected range within the past 15 minutes, over the last hour.\n\n{{/is_alert}}\n\nPlease check host {{host.name}}, as replication delay has been abnormally high.",
     "name": "[Postgres] Replication delay is abnormally high on {{host.name}}",
     "options": {
       "escalation_message": "",

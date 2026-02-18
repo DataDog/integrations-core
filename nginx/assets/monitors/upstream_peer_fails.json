@@ -8,7 +8,7 @@
   ],
   "description": "NGINX can be configured to distribute incoming client requests to multiple upstream peers (individual web servers, application servers, or other backend services). This monitor tracks anomalies in the number of failed upstream peers to identify issues.",
   "definition": {
-    "message": "## What's happening?\nAnomalies detected in the average number of unsuccessful upstream attempts to communicate with the server over the last hour, using a 'basic' detection with a 15-minute alert window.\n\nNGINX upstream peer failures are higher than usual at {{value}}.",
+    "message": "{{#is_alert}}\n\n## What's happening?\nAnomalies detected in the average number of unsuccessful upstream attempts to communicate with the server over the last hour, using a 'basic' detection with a 15-minute alert window.\n\n{{/is_alert}}\n\nNGINX upstream peer failures are higher than usual at {{value}}.",
     "name": "[NGINX] Upstream peers fails",
     "options": {
       "escalation_message": "",

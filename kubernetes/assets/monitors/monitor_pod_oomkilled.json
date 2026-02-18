@@ -8,7 +8,7 @@
   ],
   "description": "The status OOMKilled means that a container was killed because it exceeded memory limits or the node ran out of available memory. This monitor tracks when a pod is in an OOMKilled state for your Kubernetes integration.",
   "definition": {
-    "message": "## What's happening?\nThere has been at least one container terminated with reason oomkilled in the last 10 minutes.\n\npod {{pod_name.name}} is in OOMKilled on {{kube_namespace.name}} \n This could happen for several reasons, for example insufficient memory limits, memory leaks in the application, or the node running out of available memory.",
+    "message": "{{#is_alert}}\n\n## What's happening?\nThere has been at least one container terminated with reason oomkilled in the last 10 minutes.\n\n{{/is_alert}}\n\npod {{pod_name.name}} is in OOMKilled on {{kube_namespace.name}} \n This could happen for several reasons, for example insufficient memory limits, memory leaks in the application, or the node running out of available memory.",
     "name": "[Kubernetes] Pod {{pod_name.name}} is OOMKilled on namespace {{kube_namespace.name}}",
     "options": {
       "escalation_message": "",

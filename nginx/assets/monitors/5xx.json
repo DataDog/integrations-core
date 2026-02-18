@@ -8,7 +8,7 @@
   ],
   "description": "“5xx upstream request errors” are indicating server issues from backend servers. This monitor tracks the count of 5xx responses from NGINX's upstream peers to identify server-related issues in your web or application infrastructure.",
   "definition": {
-    "message": "## What's happening?\nAnomalies in the number of 5xx status code responses from upstream servers have been detected above the expected range in the last hour.\n\nNumber of 5xx errors on NGINX upstreams is at {{value}} which is higher than usual.",
+    "message": "{{#is_alert}}\n\n## What's happening?\nAnomalies in the number of 5xx status code responses from upstream servers have been detected above the expected range in the last hour.\n\n{{/is_alert}}\n\nNumber of 5xx errors on NGINX upstreams is at {{value}} which is higher than usual.",
     "name": "[NGINX] 5xx Errors higher than usual",
     "options": {
       "escalation_message": "",
