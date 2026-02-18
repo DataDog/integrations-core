@@ -18,7 +18,7 @@
 
 * Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
 
-## 37.28.0 / 2026-02-04
+## 37.28.0 / 2026-02-04 / Agent 7.75.3
 
 ***Security***:
 
