@@ -2,7 +2,7 @@
 
 ## Overview
 
-[IDE Shepherd][1] is a real-time security monitoring and protection tool for IDE environments. It monitors extension and workspace task activities in VS Code and Cursor, actively blocking malicious behaviors to protect developer endpoints from supply chain attacks and compromised extensions. IDE Shepherd provides observability into observability into security and extension lifecycle events (installation, updates, and uninstallation), enabling security teams to detect and respond to threats in real-time.
+[IDE Shepherd][1] is a real-time security monitoring and protection tool for IDE environments. It monitors extension and workspace task activities in VS Code and Cursor, actively blocking malicious behaviors to protect developer endpoints from supply chain attacks and compromised extensions. IDE Shepherd provides observability into security and extension lifecycle events (installation, updates, and uninstallation), enabling security teams to detect and respond to threats in real-time.
 
 Integrate IDE Shepherd with Datadog's pre-built dashboard visualizations for insight into security alerts, extension activities, and workspace task monitoring. With Datadog's built-in log pipelines, you can parse and enrich these logs to facilitate search and detailed insights. The integration includes ready-to-use dashboards for monitoring security events, extension lifecycle, and activity patterns by IDE type and host.
 
@@ -99,7 +99,7 @@ The IDE Shepherd integration does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][4].
 
 [1]: https://github.com/DataDog/IDE-SHEPHERD-extension
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

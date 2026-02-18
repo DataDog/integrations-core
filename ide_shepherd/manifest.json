@@ -9,7 +9,8 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor VS Code and Cursor extensions and workspace tasks, and detect malicious activities in real time.",    "title": "IDE Shepherd",
+    "description": "Monitor VS Code and Cursor extensions and workspace tasks, and detect malicious activities in real time.",    
+    "title": "IDE Shepherd",
     "media": [
         {
             "media_type": "image",
@@ -38,7 +39,7 @@
       }
     },
     "dashboards": {
-        "ide-shepherd-events": "assets/dashboards/ide_shepherd_events.json"
+      "ide-shepherd-events": "assets/dashboards/ide_shepherd_events.json"
     },
     "logs": {
       "source": "ide-shepherd"
