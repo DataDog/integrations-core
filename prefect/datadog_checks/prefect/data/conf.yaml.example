@@ -16,7 +16,7 @@ instances:
     ## @param prefect_url - string - required
     ## The URL of the Prefect server.
     #
-  - prefect_url: http://localhost:4200
+  - prefect_url: http://localhost:4200/api
 
     ## @param work_pool_names - mapping - optional
     ## A mapping of work pool name patterns to include or exclude, with each entry being a regular expression.

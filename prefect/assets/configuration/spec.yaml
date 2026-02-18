@@ -12,7 +12,7 @@ files:
       description: The URL of the Prefect server.
       value:
         type: string
-        example: http://localhost:4200
+        example: http://localhost:4200/api
     - name: work_pool_names
       description: |
         A mapping of work pool name patterns to include or exclude, with each entry being a regular expression.

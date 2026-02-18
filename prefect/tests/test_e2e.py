@@ -4,6 +4,7 @@
 from typing import Callable
 
 import pytest
+
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.prefect import PrefectCheck
