@@ -1758,7 +1758,7 @@ pipeline:
             - name: ocsf.activity_id
               categories:
                 - filter:
-                    query: type:ADD_GROUP
+                    query: "@type:ADD_GROUP"
                   name: Create
                   id: 6
                 - filter:
