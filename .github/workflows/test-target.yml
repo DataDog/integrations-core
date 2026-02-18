@@ -133,13 +133,16 @@ jobs:
         ref: ${{ steps.ic-ref.outputs.ref }}
         fetch-depth: 1
         # Use a specific sub-folder
-        path: .core-cache
+        path: core-temp
 
-    - name: Debug Path Discovery
+    - name: DEBUG - List What Was Checked Out
+      if: inputs.repo != 'core'
       run: |
-        echo "Current Directory: $(pwd)"
-        echo "Looking for action.yml..."
-        find . -name "action.yml" | grep setup-test-target-scripts
+        echo "Checking root of checkout..."
+        ls -la core-temp/
+
+        echo "Checking for actions folder..."
+        ls -la core-temp/.github/actions || echo "Actions folder not found!"
 
     - name: Install workflow scripts (core)
       if: inputs.repo == 'core'
