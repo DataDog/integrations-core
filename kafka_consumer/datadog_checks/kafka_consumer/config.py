@@ -147,9 +147,7 @@ class KafkaConfig:
                 )
 
             if self._schema_registry_oauth_token_provider.get("url") is None:
-                raise ConfigurationError(
-                    "The `url` setting of `schema_registry_oauth_token_provider` is required"
-                )
+                raise ConfigurationError("The `url` setting of `schema_registry_oauth_token_provider` is required")
             if self._schema_registry_oauth_token_provider.get("client_id") is None:
                 raise ConfigurationError(
                     "The `client_id` setting of `schema_registry_oauth_token_provider` is required"
