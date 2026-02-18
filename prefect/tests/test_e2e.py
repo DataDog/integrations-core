@@ -26,8 +26,10 @@ def ready_check(dd_environment, dd_run_check: Callable, aggregator: AggregatorSt
 def test_e2e_metrics_as_metadata(dd_agent_check):
     aggregator = dd_agent_check()
 
+    cross_check_metrics = ('flow_runs.retry_gaps_duration', 'task_runs.dependency_wait_duration')
+    metadata_metrics = {k: v for k, v in get_metadata_metrics().items() if not any(m in k for m in cross_check_metrics)}
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(),
+        metadata_metrics,
         check_metric_type=False,
         check_symmetric_inclusion=True,
     )

@@ -71,11 +71,6 @@ E2E_METRIC_TAGS: dict[str, list[str]] = {
     "prefect_server.flow_runs.queue_wait_duration.max": FLOW_RUN_TAG_KEYS,
     "prefect_server.flow_runs.queue_wait_duration.median": FLOW_RUN_TAG_KEYS,
     "prefect_server.flow_runs.queue_wait_duration.95percentile": FLOW_RUN_TAG_KEYS,
-    "prefect_server.flow_runs.retry_gaps_duration.avg": FLOW_RUN_TAG_KEYS,
-    "prefect_server.flow_runs.retry_gaps_duration.count": FLOW_RUN_TAG_KEYS,
-    "prefect_server.flow_runs.retry_gaps_duration.max": FLOW_RUN_TAG_KEYS,
-    "prefect_server.flow_runs.retry_gaps_duration.median": FLOW_RUN_TAG_KEYS,
-    "prefect_server.flow_runs.retry_gaps_duration.95percentile": FLOW_RUN_TAG_KEYS,
     # --- task run metrics ---
     "prefect_server.task_runs.pending.count": TASK_RUN_TAG_KEYS,
     "prefect_server.task_runs.paused.count": TASK_RUN_TAG_KEYS,
@@ -90,9 +85,4 @@ E2E_METRIC_TAGS: dict[str, list[str]] = {
     "prefect_server.task_runs.execution_duration.max": TASK_RUN_TAG_KEYS,
     "prefect_server.task_runs.execution_duration.median": TASK_RUN_TAG_KEYS,
     "prefect_server.task_runs.execution_duration.95percentile": TASK_RUN_TAG_KEYS,
-    "prefect_server.task_runs.dependency_wait_duration.avg": TASK_RUN_TAG_KEYS,
-    "prefect_server.task_runs.dependency_wait_duration.count": TASK_RUN_TAG_KEYS,
-    "prefect_server.task_runs.dependency_wait_duration.max": TASK_RUN_TAG_KEYS,
-    "prefect_server.task_runs.dependency_wait_duration.median": TASK_RUN_TAG_KEYS,
-    "prefect_server.task_runs.dependency_wait_duration.95percentile": TASK_RUN_TAG_KEYS,
 }

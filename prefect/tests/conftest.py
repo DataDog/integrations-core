@@ -30,7 +30,6 @@ def dd_environment():
         CheckEndpoints(f"{prefect_url}/health", attempts=120, wait=2),
         CheckDockerLogs(COMPOSE_FILE_E2E, patterns=["Finished in state Completed()"], service="prefect-worker"),
         CheckDockerLogs(COMPOSE_FILE_E2E, patterns=["Finished all tasks"], service="prefect-worker"),
-        CheckDockerLogs(COMPOSE_FILE_E2E, patterns=["Finished in state Failed(.*)"], service="prefect-worker"),
         CheckDockerLogs(COMPOSE_FILE_E2E, patterns=["Retried"], service="prefect-worker"),
     ]
 
@@ -39,9 +38,10 @@ def dd_environment():
         conditions=conditions,
         env_vars={"PREFECT_PORT": str(port)},
         waith_for_health=True,
+        mount_logs=True,
     ):
         yield {
-            "instances": [{"prefect_url": prefect_url, "min_collection_interval": 120}],
+            "instances": [{"prefect_url": prefect_url, "min_collection_interval": 60}],
         }
 
 

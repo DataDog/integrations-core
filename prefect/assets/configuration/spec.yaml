@@ -118,4 +118,11 @@ files:
         example:
           Authorization: "Bearer <YOUR_TOKEN>"
           Custom-Header: "CustomValue"
+
     - template: instances/default
+
+  - template: logs
+    example:
+    - type: docker
+      source: prefect
+      service: <SERVICE>
