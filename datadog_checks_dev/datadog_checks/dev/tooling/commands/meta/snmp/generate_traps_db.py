@@ -112,8 +112,6 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
     from pysmi.searcher import AnyFileSearcher
     from pysmi.writer import FileWriter
 
-    print("Hey2")
-
     # pysmi's HttpReader decodes HTTP response as UTF-8 only; MIBs with non-UTF-8 bytes
     # (e.g. https://github.com/DataDog/mibs.snmplabs.com/blob/master/asn1/A3COM-HUAWEI-DEVICE-MIB#L593)
     # raise UnicodeDecodeError and are reported as "missing".
