@@ -47,6 +47,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+    restart: on-failure
 
   prefect-services:
     image: prefecthq/prefect:3.6.17-python3.13 #${PREFECT_VERSION}-python${PYTHON}
@@ -61,6 +62,7 @@ services:
       PREFECT_REDIS_MESSAGING_PORT: 6379
       PREFECT_REDIS_MESSAGING_DB: 0
     command: prefect server services start
+    restart: on-failure
 
   prefect-worker:
     image: prefecthq/prefect:3.6.17-python3.13 #${PREFECT_VERSION}-python${PYTHON}

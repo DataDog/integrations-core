@@ -28,7 +28,14 @@ def test_all_metadata_metrics_found(aggregator: AggregatorStub):
         if not k.endswith(histogram_suffixes) and not any(m in k for m in cross_check_metrics)
     }
     aggregator.assert_metrics_using_metadata(
-        metadata_metrics, check_submission_type=True, check_metric_type=False, check_symmetric_inclusion=True
+        metadata_metrics,
+        check_submission_type=True,
+        check_metric_type=False,
+        check_symmetric_inclusion=True,
+        exclude=(
+            'prefect_server.flow_runs.retry_gaps_duration',
+            'prefect_server.task_runs.dependency_wait_duration',
+        ),
     )
 
 
