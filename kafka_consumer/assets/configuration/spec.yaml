@@ -372,6 +372,7 @@ files:
         - name: url
           fleet_configurable: true
           required: true
+          enabled: false
           description: |
             The token endpoint.
           value:
@@ -379,6 +380,7 @@ files:
         - name: client_id
           fleet_configurable: true
           required: true
+          enabled: false
           description: |
             The client identifier.
           value:
@@ -387,6 +389,7 @@ files:
           fleet_configurable: true
           secret: true
           required: true
+          enabled: false
           description: |
             The client secret.
           value:

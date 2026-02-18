@@ -9,7 +9,6 @@ import json
 import random
 import time
 
-import requests
 from confluent_kafka.admin import ConfigResource, ResourceType
 
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, LOW_WATERMARK
@@ -107,17 +106,16 @@ class ClusterMetadataCollector:
         if scope:
             data["scope"] = scope
 
-        verify = True
+        options = {}
         tls_ca_cert = oauth_config.get("tls_ca_cert")
         if tls_ca_cert:
-            verify = tls_ca_cert
+            options["verify"] = tls_ca_cert
 
-        response = requests.post(
+        response = self.http.post(
             token_url,
             data=data,
             auth=(client_id, client_secret),
-            verify=verify,
-            timeout=10,
+            **options,
         )
         response.raise_for_status()
         token_data = response.json()

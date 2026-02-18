@@ -831,15 +831,22 @@ def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
     }
     mock_response.raise_for_status = mock.Mock()
 
-    with mock.patch('datadog_checks.kafka_consumer.cluster_metadata.requests.post', return_value=mock_response) as m:
-        dd_run_check(kafka_consumer_check)
+    collector = kafka_consumer_check.metadata_collector
+    original_get = collector.http.get
+    mock_http = mock.MagicMock(wraps=collector.http)
+    mock_http.post.return_value = mock_response
+    mock_http.get.side_effect = original_get
+    mock_http.options = collector.http.options
+    collector.http = mock_http
 
-        # Verify token was requested with correct params
-        m.assert_called_once()
-        call_kwargs = m.call_args
-        assert call_kwargs[0][0] == 'https://idp.example.com/oauth/token'
-        assert call_kwargs[1]['data'] == {'grant_type': 'client_credentials', 'scope': 'schema-registry'}
-        assert call_kwargs[1]['auth'] == ('my-client-id', 'my-client-secret')
+    dd_run_check(kafka_consumer_check)
+
+    # Verify token was requested with correct params
+    mock_http.post.assert_called_once()
+    call_args = mock_http.post.call_args
+    assert call_args[0][0] == 'https://idp.example.com/oauth/token'
+    assert call_args[1]['data'] == {'grant_type': 'client_credentials', 'scope': 'schema-registry'}
+    assert call_args[1]['auth'] == ('my-client-id', 'my-client-secret')
 
     # Verify Bearer header was set on the HTTP client
     headers = kafka_consumer_check.metadata_collector.http.options.get('headers', {})
@@ -887,9 +894,15 @@ def test_schema_registry_oauth_token_refresh_on_expiry(check, dd_run_check, aggr
     }
     mock_response.raise_for_status = mock.Mock()
 
-    with mock.patch('datadog_checks.kafka_consumer.cluster_metadata.requests.post', return_value=mock_response) as m:
-        dd_run_check(kafka_consumer_check)
-        m.assert_called_once()
+    original_get = collector.http.get
+    mock_http = mock.MagicMock(wraps=collector.http)
+    mock_http.post.return_value = mock_response
+    mock_http.get.side_effect = original_get
+    mock_http.options = collector.http.options
+    collector.http = mock_http
+
+    dd_run_check(kafka_consumer_check)
+    mock_http.post.assert_called_once()
 
     # Verify new token was set
     headers = collector.http.options.get('headers', {})
@@ -918,9 +931,12 @@ def test_schema_registry_oauth_token_not_refreshed_when_valid(check):
     collector._schema_registry_oauth_token = 'still-valid-token'
     collector._schema_registry_oauth_token_expiry = time.time() + 3600
 
-    with mock.patch('datadog_checks.kafka_consumer.cluster_metadata.requests.post') as m:
-        collector._refresh_schema_registry_oauth_token()
-        m.assert_not_called()
+    mock_http = mock.MagicMock(wraps=collector.http)
+    mock_http.options = collector.http.options
+    collector.http = mock_http
+
+    collector._refresh_schema_registry_oauth_token()
+    mock_http.post.assert_not_called()
 
     assert collector._schema_registry_oauth_token == 'still-valid-token'
 
