@@ -126,7 +126,6 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
                 readers.extend(get_readers_from_urls(src, fuzzy_matching=fuzzy_matching))
         return readers
 
-
     # This code is copied from https://github.com/lextudio/pysmi/blob/main/pysmi/reader/httpclient.py.
     # Except that it decodes the response content with errors='replace' for non-UTF-8 bytes.
     class _TolerantHttpReader(HttpReader):
@@ -156,9 +155,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
                 else:
                     url = self._url + mibfile
 
-                debug.logger & debug.FLAG_READER and debug.logger(
-                    f"trying to fetch MIB from {url}"
-                )
+                debug.logger & debug.FLAG_READER and debug.logger(f"trying to fetch MIB from {url}")
 
                 try:
                     response = self.session.get(url, headers=headers)
@@ -169,9 +166,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
                     )
                     continue
 
-                debug.logger & debug.FLAG_READER and debug.logger(
-                    f"HTTP response {response.status_code}"
-                )
+                debug.logger & debug.FLAG_READER and debug.logger(f"HTTP response {response.status_code}")
 
                 if response.status_code == 200:
                     try:
@@ -192,13 +187,11 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
                         f"fetching source MIB {url}, mtime {response.headers['Last-Modified']}"
                     )
 
-                    return MibInfo(
-                        path=url, file=mibfile, name=mibalias, mtime=mtime
-                    ), response.content.decode("utf-8", errors='replace')
+                    return MibInfo(path=url, file=mibfile, name=mibalias, mtime=mtime), response.content.decode(
+                        "utf-8", errors='replace'
+                    )
 
-            raise error.PySmiReaderFileNotFoundError(
-                f"source MIB {mibname} not found", reader=self
-            )
+            raise error.PySmiReaderFileNotFoundError(f"source MIB {mibname} not found", reader=self)
 
     if debug:
         set_debug()
