@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 22.12.4 / 2026-02-05
+
+***Fixed***:
+
+* Fixed an issue where schema collection thread connections could get abruptly closed from the main check loop ([#22471](https://github.com/DataDog/integrations-core/pull/22471))
+
 ## 22.12.3 / 2026-01-21
 
 ***Fixed***:
