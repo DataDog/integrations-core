@@ -112,6 +112,8 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
     from pysmi.searcher import AnyFileSearcher
     from pysmi.writer import FileWriter
 
+    print("Hey2")
+
     # pysmi's HttpReader decodes HTTP response as UTF-8 only; MIBs with non-UTF-8 bytes
     # (e.g. https://github.com/DataDog/mibs.snmplabs.com/blob/master/asn1/A3COM-HUAWEI-DEVICE-MIB#L593)
     # raise UnicodeDecodeError and are reported as "missing".
@@ -546,19 +548,20 @@ def get_mapping(var_name, mib_name, mapping_type: MappingType, search_locations=
 
         var_entry = file_content[var_key]
 
-        type_or_syntax = var_entry.get('syntax', {})
-        if not isinstance(type_or_syntax, dict):
-            type_or_syntax = {}
+        # Type-definition nodes store enum/bits under 'type'.
+        type_node = var_entry.get('type', {})
+        if not isinstance(type_node, dict):
+            type_node = {}
 
         if mapping_type == MappingType.INTEGER:
-            mapping = type_or_syntax.get('constraints', {}).get('enumeration', {})
+            mapping = type_node.get('constraints', {}).get('enumeration', {})
         elif mapping_type == MappingType.BITS:
-            mapping = type_or_syntax.get('bits', {})
+            mapping = type_node.get('bits', {})
         else:
             raise ValueError("invalid mapping type, must be INTEGER or BITS")
 
         # update variable to the type name in case we have to go another layer down
-        var_name = type_or_syntax.get('type', '')
+        var_name = type_node.get('type', '')
 
     return mapping
 
