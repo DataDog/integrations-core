@@ -25,7 +25,7 @@ jobs:
         # suzuki-shunsuke/commit-action@9faad521ea6a1e768439ffbe6b25b6cb3fc1b181
         # suzuki-shunsuke/github-token-action@350d7506222e3a0016491abe85b5c4dd475b67d1
         # tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a
-        uses: suzuki-shunsuke/pinact-action@3d49c6412901042473ffa78becddab1aea46bbea # v1.3.1
+        uses: suzuki-shunsuke/pinact-action@1081f5ad49ac904b7d977784f338145150a32112 # v1.4.0
         with:
           skip_push: true
 
