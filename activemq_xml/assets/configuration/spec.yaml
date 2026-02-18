@@ -11,7 +11,7 @@ files:
     options:
     - name: url
       fleet_configurable: true
-      fleet_formats: ["url"]
+      formats: ["url"]
       required: true
       description: |
         url to gather the stats from.

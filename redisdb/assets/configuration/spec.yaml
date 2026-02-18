@@ -18,7 +18,7 @@ files:
     - name: port
       required: true
       description: Enter the port of the host to connect to.
-      fleet_formats: ["port"]
+      formats: ["port"]
       value:
         type: integer
         example: 6379

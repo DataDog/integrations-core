@@ -14,7 +14,7 @@ files:
           - name: url
             description: URL to a VoltDB client endpoint.
             fleet_configurable: true
-            fleet_formats: ["url"]
+            formats: ["url"]
             required: true
             display_priority: 3
             value:

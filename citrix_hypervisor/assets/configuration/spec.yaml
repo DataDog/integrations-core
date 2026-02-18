@@ -12,7 +12,7 @@ files:
     - name: url
       description: Url of the hypervisor
       fleet_configurable: true
-      fleet_formats: ["url"]
+      formats: ["url"]
       required: true
       value:
         type: string

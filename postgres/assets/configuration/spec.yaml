@@ -28,7 +28,7 @@ files:
     - name: port
       description: The port to use when connecting to PostgreSQL.
       fleet_configurable: true
-      fleet_formats: ["port"]
+      formats: ["port"]
       value:
         type: integer
         display_default: 5432

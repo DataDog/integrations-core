@@ -17,7 +17,7 @@ files:
             https://doc.traefik.io/traefik/observability/metrics/prometheus/
       - name: traefik_proxy_api_endpoint
         fleet_configurable: true
-        fleet_formats: ["url"]
+        formats: ["url"]
         required: false
         description: URL of the Traefik Mesh proxy to query.
         value:

@@ -8,7 +8,7 @@ files:
     - name: api_url
       description: URL of the Cloud Controller API.
       fleet_configurable: true
-      fleet_formats: ["url"]
+      formats: ["url"]
       required: true
       value:
         type: string

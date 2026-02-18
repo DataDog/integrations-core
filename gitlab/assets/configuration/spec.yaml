@@ -10,7 +10,7 @@ files:
     options:
     - name: gitlab_url
       fleet_configurable: true
-      fleet_formats: ["url"]
+      formats: ["url"]
       display_priority: 2
       description: |
         The GitLab external URL to probe for service health status

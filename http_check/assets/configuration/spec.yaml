@@ -21,7 +21,7 @@ files:
         type: string
     - name: url
       fleet_configurable: true
-      fleet_formats: ["url"]
+      formats: ["url"]
       required: true
       description: |
         Url to check

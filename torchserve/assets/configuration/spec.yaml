@@ -57,7 +57,7 @@ files:
         options:
           - name: inference_api_url
             fleet_configurable: true
-            fleet_formats: ["url"]
+            formats: ["url"]
             required: false
             description: The TorchServe Inference API url to connect to.
             value:
@@ -70,7 +70,7 @@ files:
         options:
           - name: management_api_url
             fleet_configurable: true
-            fleet_formats: ["url"]
+            formats: ["url"]
             required: false
             description: The TorchServe Management API url to connect to.
             value:

@@ -12,7 +12,7 @@ files:
     - name: url
       description: coordinator url used to connect to the Druid instance.
       fleet_configurable: true
-      fleet_formats: ["url"]
+      formats: ["url"]
       required: true
       value:
         type: string

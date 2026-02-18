@@ -167,7 +167,7 @@
     See https://github.com/requests/requests-kerberos#explicit-principal
 - name: kerberos_keytab
   fleet_configurable: true
-  fleet_formats: ["path"]
+  formats: ["path"]
   value:
     example: <KEYTAB_FILE_PATH>
     type: string

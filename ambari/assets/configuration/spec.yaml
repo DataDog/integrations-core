@@ -21,7 +21,7 @@ files:
     options:
     - name: url
       fleet_configurable: true
-      fleet_formats: ["url"]
+      formats: ["url"]
       required: true
       description: The URL of the Ambari Server, include http:// or https://
       value:
