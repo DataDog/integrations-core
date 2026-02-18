@@ -131,7 +131,7 @@ jobs:
       with:
         repository: "DataDog/integrations-core"
         ref: ${{ steps.ic-ref.outputs.ref }}
-        sparse-checkout: .github/actions
+        fetch-depth: 1
         # Use a specific sub-folder
         path: .core-cache
 
