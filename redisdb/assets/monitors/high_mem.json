@@ -8,7 +8,7 @@
   ],
   "description": "Redis servers use RAM to store data and memory is a critical resource for its performance. This monitor tracks the percentage of used memory to avoid the risk of running out of memory, which can lead to performance issues.",
   "definition": {
-    "message": "{{#is_alert}}\n\n## What's happening?\nRedis memory usage has exceeded 90% of its allocated limit in the last 5 minutes.\n\nALERT: Redis is consuming {{value}}% of total memory allocated.\n\n{{/is_alert}} \n\n{{#is_warning}}\n\nWARNING: Redis is consuming {{value}}% of total memory allocated.\n\n{{/is_warning}} \n\n",
+    "message": "## What's happening?\n{{#is_alert}}\nRedis memory usage has exceeded 90% of its allocated limit in the last 5 minutes with current value of {{value}}.\n{{/is_alert}} \n\n{{#is_warning}}\nRedis memory usage has exceeded 70% of its allocated limit in the last 5 minutes with current value of {{value}}.\n{{/is_warning}}",
     "name": "[Redis] High memory consumption",
     "options": {
       "escalation_message": "",

@@ -8,7 +8,7 @@
   ],
   "description": "Kubernetes replicas are clones that facilitate self-healing for pods. Each pod has a desired number of replica Pods that should be running at any given time. This monitor tracks the number of replicas that are failing per deployment.",
   "definition": {
-    "message": "{{#is_alert}}\n\n## What's happening?\nThere are at least 2 more replicas desired than available per deployment over the last 15 minutes.\n\n{{/is_alert}}\n\nMore than one Deployments Replica's pods are down in Deployment {{kube_namespace.name}}/{{kube_deployment.name}}.",
+    "message": "{{#is_alert}}\n\n## What's happening?\nThere are at least 2 or more missing replicas for Deployment {{kube_namespace.name}}/{{kube_deployment.name}} over the last 15 minutes.\n\n{{/is_alert}}",
     "name": "[Kubernetes] Monitor Kubernetes Deployments Replica Pods",
     "options": {
       "escalation_message": "",
