@@ -10,9 +10,9 @@ files:
   - template: instances
     options:
     - name: url
+      description: Url of the hypervisor
       fleet_configurable: true
       fleet_formats: ["url"]
-      description: Url of the hypervisor
       required: true
       value:
         type: string

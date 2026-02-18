@@ -11,10 +11,10 @@ files:
       - template: instances
         options:
           - name: url
+            description: The API endpoint of your Marathon master.
             fleet_configurable: true
             fleet_formats: ["url"]
             required: True
-            description: The API endpoint of your Marathon master.
             value:
               example: https://<SERVER>:<PORT>
               type: string
