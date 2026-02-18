@@ -51,6 +51,28 @@ def test_host_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_g
         aggregator.assert_metric(metric, at_least=1, tags=expected_tags, hostname="10-0-0-9-aws-us-east-1a")
 
 
+def test_host_status_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
+    """Host fixture has nodeStatus=NORMAL which maps to status value 0 (OK)."""
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    expected_tags = [
+        'ntnx_type:host',
+        'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+        'ntnx_cluster_name:datadog-nutanix-dev',
+        'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+        'ntnx_host_type:HYPER_CONVERGED',
+        'ntnx_hypervisor_name:AHV 10.0.1.4',
+        'ntnx_hypervisor_type:AHV',
+        'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+        'ntnx_node_status:NORMAL',
+        'nutanix',
+        'prism_central:10.0.0.197',
+    ]
+
+    aggregator.assert_metric("nutanix.host.status", value=0, tags=expected_tags, hostname="10-0-0-9-aws-us-east-1a")
+
+
 def test_external_tags_for_host(dd_run_check, aggregator, mock_instance, mock_http_get, datadog_agent):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)

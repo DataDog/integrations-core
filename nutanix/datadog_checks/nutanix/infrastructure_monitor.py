@@ -428,6 +428,9 @@ class InfrastructureMonitor:
         # Report host metrics
         host_tags = cluster_tags + self._extract_host_tags(host)
         self.check.gauge("host.count", 1, hostname=host_name, tags=host_tags)
+
+        # Report host node status as a service check
+        self._report_host_status_metrics(host, host_name, host_tags)
         self._set_external_tags_for_host(host_name, host_tags)
 
         # Report host capacity metrics
@@ -475,6 +478,31 @@ class InfrastructureMonitor:
 
         # Accumulate for cluster totals
         self._cluster_capacity.add_host(cpu_cores, cpu_threads, memory_bytes)
+
+    def _report_host_status_metrics(self, host: dict, hostname: str, host_tags: list[str]) -> None:
+        """Report host node status as a gauge metric with status tags.
+
+        Metric value: 0 = OK, 1 = WARNING, 2 = CRITICAL/UNKNOWN
+
+        Args:
+            host: Host object from API
+            hostname: Host hostname
+            host_tags: Tags to apply to the metrics
+        """
+        node_status_ok = {"NORMAL", "NEW_NODE", "PREPROTECTED"}
+        node_status_warning = {"TO_BE_PREPROTECTED", "TO_BE_REMOVED", "OK_TO_BE_REMOVED"}
+
+        node_status = host.get("nodeStatus", "$UNKNOWN")
+
+        if node_status in node_status_ok:
+            status_value = 0
+        elif node_status in node_status_warning:
+            status_value = 1
+        else:
+            status_value = 2
+
+        status_tags = host_tags + [f"ntnx_node_status:{node_status}"]
+        self.check.gauge("host.status", status_value, hostname=hostname, tags=status_tags)
 
     def _extract_host_tags(self, host: dict) -> list[str]:
         """Extract tags from a host object.
