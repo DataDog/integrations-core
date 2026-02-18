@@ -135,6 +135,12 @@ jobs:
         # Use a specific sub-folder
         path: .core-cache
 
+    - name: Debug Path Discovery
+      run: |
+        echo "Current Directory: $(pwd)"
+        echo "Looking for action.yml..."
+        find . -name "action.yml" | grep setup-test-target-scripts
+
     - name: Install workflow scripts (core)
       if: inputs.repo == 'core'
       uses: ./.github/actions/setup-test-target-scripts
