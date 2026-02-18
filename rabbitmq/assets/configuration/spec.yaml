@@ -210,6 +210,10 @@ files:
           example:
             - <VHOST_NAME_1>
             - <VHOST_NAME_2>
+      - template: instances/http
+        overrides:
+          use_legacy_auth_encoding.value.example: false
+      - template: instances/default
   - template: logs
     example:
     - type: file
