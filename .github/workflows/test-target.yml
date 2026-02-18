@@ -123,6 +123,7 @@ jobs:
       shell: bash
       run: |
         # GITHUB_WORKFLOW_REF is available in the environment automatically
+        echo "GITHUB_WORKFLOW_REF: $GITHUB_WORKFLOW_REF"
         echo "ref=${GITHUB_WORKFLOW_REF##*@}" >> "$GITHUB_OUTPUT"
 
     - name: Checkout integrations-core actions
