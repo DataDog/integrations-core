@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 """Library-agnostic HTTP exception hierarchy.
 
 This module provides exception classes that abstract away the underlying
@@ -43,10 +46,7 @@ class HTTPRequestError(HTTPError):
 
 
 class HTTPStatusError(HTTPError):
-    """Exception raised for HTTP error status codes (4xx, 5xx).
-
-    Similar to requests.HTTPError and httpx.HTTPStatusError.
-    """
+    """Exception raised for HTTP error status codes (4xx, 5xx)."""
 
     pass
 
@@ -79,22 +79,7 @@ class HTTPSSLError(HTTPConnectionError):
 
 
 def from_requests_exception(exc: Exception) -> HTTPError:
-    """Convert requests library exception to HTTPError abstraction.
-
-    Args:
-        exc: Exception from requests library
-
-    Returns:
-        Corresponding HTTPError subclass
-
-    Examples:
-        >>> import requests
-        >>> try:
-        ...     requests.get('https://invalid-domain-12345.com', timeout=1)
-        ... except requests.exceptions.RequestException as e:
-        ...     http_error = from_requests_exception(e)
-        ...     raise http_error
-    """
+    """Convert requests library exception to HTTPError abstraction."""
     import requests.exceptions
 
     # Get response and request if available
@@ -121,12 +106,6 @@ def from_requests_exception(exc: Exception) -> HTTPError:
 def from_httpx_exception(exc: Exception) -> HTTPError:
     """Convert httpx library exception to HTTPError abstraction.
 
-    Args:
-        exc: Exception from httpx library
-
-    Returns:
-        Corresponding HTTPError subclass
-
     Note:
         This function is prepared for Phase 2+ when httpx is introduced.
         Currently returns generic HTTPError for non-httpx exceptions.
@@ -134,15 +113,6 @@ def from_httpx_exception(exc: Exception) -> HTTPError:
         Coverage: This function is not covered by tests until Phase 2+ when
         httpx integration is implemented. The try block and all exception
         conversion logic will be tested during the httpx migration.
-
-    Examples:
-        >>> # Future usage in Phase 2+
-        >>> import httpx
-        >>> try:
-        ...     httpx.get('https://invalid-domain-12345.com', timeout=1)
-        ... except httpx.RequestError as e:
-        ...     http_error = from_httpx_exception(e)
-        ...     raise http_error
     """
     # Coverage note: The following try block is Phase 2+ preparation code
     # and will not be covered by tests until httpx integration begins.

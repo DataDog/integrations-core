@@ -1,1 +1,1 @@
-Create library-agnostic exceptions that can wrap both requests and httpx exceptions
+Add library-agnostic HTTP exception hierarchy
