@@ -34,7 +34,7 @@ services:
       CASSANDRA_SEEDS: ${CASSANDRA_SEEDS}
       JVM_EXTRA_OPTS: "-Dcassandra.skip_schema_check=true"
     healthcheck:
-      test: ["CMD-SHELL", "cqlsh -e 'SELECT now() FROM system.local'"]
+      test: ["CMD-SHELL", "cqlsh -e 'SELECT now() FROM system.local' && test $(nodetool status | grep -c '^UN') -eq 2"]
       interval: 15s
       timeout: 10s
       retries: 20
