@@ -137,15 +137,6 @@ jobs:
         # Use a specific sub-folder
         path: core-temp
 
-    - name: DEBUG - List What Was Checked Out
-      if: inputs.repo != 'core'
-      run: |
-        echo "Checking root of checkout..."
-        ls -la core-temp/
-
-        echo "Checking for actions folder..."
-        ls -la core-temp/.github/actions || echo "Actions folder not found!"
-
     - name: Install workflow scripts (core)
       if: inputs.repo == 'core'
       uses: ./.github/actions/setup-test-target-scripts
