@@ -11,7 +11,7 @@
 		"query": "logs(\"source:adyen @evt.name:REFUND_FAILED\").index(\"*\").rollup(\"count\").by(\"@pspReference\").last(\"5m\") > 0",
 		"message": "{{#is_alert}}Failed refund due to a rejection by the card scheme refers to the failure of a refund transaction caused by an issue with the card scheme, which is the network that processes credit and debit card payments (such as Visa or Mastercard). This means the card network could not process the refund and further action is required\n\nPlease investigate the transaction details (pspReference: {{log.attributes.pspReference}}) and resolve the issue to ensure timely refunds and avoid potential customer dissatisfaction.{{/is_alert}}",
 		"tags": [
-			"source:adyen",
+			"source:adyen"
 		],
 		"options": {
 			"thresholds": {
