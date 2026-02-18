@@ -458,6 +458,7 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
         file_content = json.load(f)
 
     # pysmi 1.6+ uses trans_opers (dash -> underscore) for JSON symbol keys
+    # https://github.com/lextudio/pysmi/blob/main/pysmi/codegen/base.py#L318
     var_key = var_name if var_name in file_content else var_name.replace("-", "_")
     if var_key not in file_content or var_key in ('meta', 'imports'):
         raise VariableNotDefinedException()
@@ -540,6 +541,7 @@ def get_mapping(var_name, mib_name, mapping_type: MappingType, search_locations=
             file_content = json.load(f)
 
         # pysmi 1.6+ uses trans_opers (dash -> underscore) for JSON symbol keys
+        # https://github.com/lextudio/pysmi/blob/main/pysmi/codegen/base.py#L318
         var_key = var_name if var_name in file_content else var_name.replace("-", "_")
         if var_key not in file_content or var_key in ('meta', 'imports'):
             try:
