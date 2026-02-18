@@ -41,7 +41,7 @@ def dd_environment():
         waith_for_health=True,
     ):
         yield {
-            "instances": [{"prefect_url": prefect_url, "min_collection_interval": 60}],
+            "instances": [{"prefect_url": prefect_url, "min_collection_interval": 120}],
         }
 
 
