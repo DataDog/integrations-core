@@ -150,7 +150,7 @@ jobs:
 
     - name: Install workflow scripts (non-core)
       if: inputs.repo != 'core'
-      uses: ./.core-cache/.github/actions/setup-test-target-scripts
+      uses: ./core-temp/.github/actions/setup-test-target-scripts
 
     - name: Set environment variables
       # This step sets the following environment variables for the entire workflow via setup-test-env.sh:
