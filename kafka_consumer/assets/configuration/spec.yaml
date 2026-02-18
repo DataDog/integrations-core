@@ -231,7 +231,8 @@ files:
         - name: aws_region
           description: |
             AWS region for MSK IAM authentication. Required when method is `aws_msk_iam` and the region
-            cannot be automatically detected from the environment (for example, through `AWS_REGION` or instance metadata).
+            cannot be automatically detected from the environment
+            (for example, through `AWS_REGION` or instance metadata).
             If not specified, attempts to detect the region automatically.
           value:
             type: string
