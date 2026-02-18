@@ -293,7 +293,7 @@ def compile_and_report_status(mib_files, mib_compiler):
                     )
                 )
 
-            compiled_mibs = {k: v for k, v in mibs_status.items() if str(v) in ('compiled', 'untouched', 'borrowed')}
+            compiled_mibs = {k: v for k, v in mibs_status.items() if v == 'compiled'}
 
             for mib_name, mib_status in compiled_mibs.items():
                 all_compiled_mibs.append(mib_name)
