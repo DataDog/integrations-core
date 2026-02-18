@@ -84,10 +84,16 @@ class ClusterMetadataCollector:
 
         self._schema_registry_oauth_token = token
         self._schema_registry_oauth_token_expiry = expires_at
-        self.http.options['headers'] = {
+        headers = {
             **self.http.options.get('headers', {}),
             'Authorization': f'Bearer {token}',
         }
+
+        custom_headers = oauth_config.get("custom_headers")
+        if custom_headers:
+            headers.update(custom_headers)
+
+        self.http.options['headers'] = headers
         self.log.debug("Schema Registry OAuth token refreshed, expires at %s", expires_at)
 
     def _fetch_oidc_token(self, oauth_config: dict) -> tuple[str, float]:

@@ -410,6 +410,16 @@ instances:
         #
         # scope: <SCOPE>
 
+        ## @param custom_headers - mapping - optional
+        ## Additional HTTP headers to include in Schema Registry requests.
+        ## For Confluent Cloud, this typically includes the identity pool ID and
+        ## the Schema Registry cluster ID.
+        ## Example:
+        ##   Confluent-Identity-Pool-Id: pool-xxxxx
+        ##   target-sr-cluster: lsrc-xxxxx
+        #
+        # custom_headers: {}
+
         ## @param tls_ca_cert - string - optional - default: /path/to/oauth_ca_cert.pem
         ## Path to a CA certificate file used to verify the OIDC token endpoint's TLS certificate.
         #

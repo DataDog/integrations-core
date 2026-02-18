@@ -397,6 +397,19 @@ files:
             The OAuth scope to request.
           value:
             type: string
+        - name: custom_headers
+          enabled: false
+          description: |
+            Additional HTTP headers to include in Schema Registry requests.
+            For Confluent Cloud, this typically includes the identity pool ID and
+            the Schema Registry cluster ID.
+            Example:
+              Confluent-Identity-Pool-Id: pool-xxxxx
+              target-sr-cluster: lsrc-xxxxx
+          value:
+            type: object
+            additionalProperties:
+              type: string
         - name: tls_ca_cert
           enabled: false
           description: |

@@ -49,6 +49,7 @@ class SchemaRegistryOauthTokenProvider(BaseModel):
     )
     client_id: Optional[str] = None
     client_secret: Optional[str] = None
+    custom_headers: Optional[MappingProxyType[str, str]] = None
     scope: Optional[str] = None
     tls_ca_cert: Optional[str] = None
     url: Optional[str] = None
