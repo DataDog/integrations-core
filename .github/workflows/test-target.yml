@@ -112,9 +112,25 @@ jobs:
 
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    # The local composite action only works for core since it exists in the checkout.
-    - name: Install workflow scripts (core)
-      if: inputs.repo == 'core'
+    # Checkout the actions from integrations-core at the exact commit of the
+    # reusable workflow (github.workflow_sha) so they are available locally.
+    # This is needed because `uses: ./` resolves from the caller's repo, not
+    # from integrations-core, when this workflow is called as a reusable workflow.
+    - name: Checkout integrations-core actions
+      if: inputs.repo != 'core'
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        repository: DataDog/integrations-core
+        ref: ${{ github.workflow_sha }}
+        sparse-checkout: .github/actions
+        path: __integrations-core
+
+    - name: Install integrations-core actions
+      if: inputs.repo != 'core'
+      run: |
+        cp -r __integrations-core/.github/actions .github/actions
+
+    - name: Install workflow scripts
       uses: ./.github/actions/setup-test-target-scripts
 
     # Non-core repos don't have the composite action in their checkout, so we
