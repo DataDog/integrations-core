@@ -62,8 +62,11 @@ def dd_environment():
         with docker_run(os.path.join(COMPOSE_DIR, 'docker-compose.yaml'), env_vars=env, log_patterns="Listening at"):
             if SNMP_LISTENER_ENV == 'true':
                 instance_config = None
+                # Use a path under the repo (COMPOSE_DIR) so the file is host-visible when the Agent
+                # starts in CI (e.g. when the job runs in a container but Docker runs on the host).
+                datadog_yaml_path = create_datadog_conf_file(COMPOSE_DIR)
                 new_e2e_metadata['docker_volumes'].append(
-                    '{}:/etc/datadog-agent/datadog.yaml'.format(create_datadog_conf_file(tmp_dir)),
+                    '{}:/etc/datadog-agent/datadog.yaml'.format(datadog_yaml_path),
                 )
             else:
                 instance_config = generate_container_instance_config([])
@@ -97,7 +100,9 @@ def _autodiscovery_ready():
     assert len(autodiscovery_checks) == EXPECTED_AUTODISCOVERY_CHECKS, result.stdout
 
 
-def create_datadog_conf_file(tmp_dir):
+def create_datadog_conf_file(output_dir):
+    """Write datadog.yaml for the listener E2E env. Uses output_dir (e.g. COMPOSE_DIR) so the path
+    is under the repo and host-visible when the Agent container starts in CI."""
     container_ip = get_container_ip(SNMP_CONTAINER_NAME)
     prefix = ".".join(container_ip.split('.')[:3])
     datadog_conf = {
@@ -169,7 +174,7 @@ def create_datadog_conf_file(tmp_dir):
             }
         },
     }
-    datadog_conf_file = os.path.join(tmp_dir, 'datadog.yaml')
+    datadog_conf_file = os.path.join(output_dir, 'datadog_listener_e2e.yaml')
     with open(datadog_conf_file, 'w') as file:
         file.write(yaml.safe_dump(datadog_conf))
     return datadog_conf_file
