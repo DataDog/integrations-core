@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
 import time
 from collections.abc import Callable
 from pathlib import Path
@@ -33,6 +34,16 @@ def test_check_can_connect(
         'control_m.can_connect',
         value=1,
         tags=['control_m_instance:https://example.com/automation-api', 'auth_method:static_token'],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'control_m.server.up',
+        value=1,
+        tags=[
+            'control_m_instance:https://example.com/automation-api',
+            'ctm_server:workbench',
+            'state:up',
+        ],
         count=1,
     )
     aggregator.assert_all_metrics_covered()
@@ -121,3 +132,73 @@ def test_session_token_refresh_behavior() -> None:
     check._token_expiration = time.monotonic() + check._token_refresh_buffer - 1
     check._ensure_token()
     check._login.assert_called_once()
+
+
+def test_check_collects_core_job_telemetry(
+    dd_run_check: Callable[[AgentCheck, bool], None],
+    aggregator: AggregatorStub,
+    instance: dict[str, Any],
+    monkeypatch: MonkeyPatch,
+) -> None:
+    check = ControlMCheck('control_m', {}, [instance])
+
+    servers_payload = (FIXTURE_DIR / 'config_servers_response.txt').read_text()
+    jobs_payload = json.loads((FIXTURE_DIR / 'jobs_status_response.txt').read_text())
+
+    servers_response = Mock()
+    servers_response.status_code = 200
+    servers_response.raise_for_status = Mock()
+    servers_response.json.return_value = json.loads(servers_payload)
+
+    jobs_response = Mock()
+    jobs_response.status_code = 200
+    jobs_response.raise_for_status = Mock()
+    jobs_response.json.return_value = jobs_payload
+
+    def mocked_make_request(method: str, url: str, **kwargs: Any) -> Mock:
+        del method, kwargs
+        if url.endswith('/config/servers'):
+            return servers_response
+        if '/run/jobs/status' in url:
+            return jobs_response
+        raise AssertionError(f'Unexpected URL requested: {url}')
+
+    monkeypatch.setattr(check, '_make_request', mocked_make_request)
+
+    dd_run_check(check)
+
+    base_tags = ['control_m_instance:https://example.com/automation-api']
+    workbench_tags = ['control_m_instance:https://example.com/automation-api', 'ctm_server:workbench']
+
+    aggregator.assert_metric('control_m.jobs.active', value=2, tags=workbench_tags, count=1)
+    aggregator.assert_metric('control_m.jobs.waiting.total', value=1, tags=base_tags, count=1)
+    aggregator.assert_metric(
+        'control_m.jobs.by_status',
+        value=1,
+        tags=workbench_tags + ['status:ended_ok'],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'control_m.jobs.by_status',
+        value=1,
+        tags=workbench_tags + ['status:wait_condition'],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'control_m.jobs.by_status',
+        value=1,
+        tags=workbench_tags + ['status:executing'],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'control_m.job.run.count',
+        value=1,
+        tags=workbench_tags + ['job_name:job_ok', 'result:ok'],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'control_m.job.run.duration_ms',
+        value=60000,
+        tags=workbench_tags + ['job_name:job_ok', 'result:ok'],
+        count=1,
+    )
