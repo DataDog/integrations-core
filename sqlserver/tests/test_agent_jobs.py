@@ -338,12 +338,15 @@ VALUES (
 );
 """
 
+KEY_PREFIX = "dbm-test-"
+
 
 @pytest.fixture
 def agent_jobs_instance(instance_docker):
     instance_docker['dbm'] = True
     instance_docker['agent_jobs'] = {
         'enabled': True,
+        'run_sync': True,
         'collection_interval': 1.0,
         'history_row_limit': 10000,
     }
@@ -381,8 +384,8 @@ def test_connection_with_agent_history(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
 
-    with check.connection.open_managed_default_connection():
-        with check.connection.get_managed_cursor() as cursor:
+    with check.connection.open_managed_default_connection(KEY_PREFIX):
+        with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             last_collection_time_filter = "{last_collection_time}".format(last_collection_time=10000)
             history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=10000)
             query = AGENT_HISTORY_QUERY.format(
@@ -398,8 +401,8 @@ def test_connection_with_agent_activity_duration(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
 
-    with check.connection.open_managed_default_connection():
-        with check.connection.get_managed_cursor() as cursor:
+    with check.connection.open_managed_default_connection(KEY_PREFIX):
+        with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             cursor.execute(AGENT_ACTIVITY_DURATION_QUERY)
 
 
@@ -408,8 +411,8 @@ def test_connection_with_agent_activity_steps(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
 
-    with check.connection.open_managed_default_connection():
-        with check.connection.get_managed_cursor() as cursor:
+    with check.connection.open_managed_default_connection(KEY_PREFIX):
+        with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             cursor.execute(AGENT_ACTIVITY_STEPS_QUERY)
 
 
@@ -443,8 +446,8 @@ def test_history_output(instance_docker, sa_conn):
                 cursor.execute(query)
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
-    with check.connection.open_managed_default_connection():
-        with check.connection.get_managed_cursor() as cursor:
+    with check.connection.open_managed_default_connection(KEY_PREFIX):
+        with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             last_collection_time_filter = "{last_collection_time}".format(last_collection_time=now - 1)
             history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=10000)
             query = AGENT_HISTORY_QUERY.format(
