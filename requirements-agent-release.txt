@@ -103,7 +103,7 @@ datadog-ibm-ace==4.4.0
 datadog-ibm-db2==4.3.0
 datadog-ibm-i==4.4.0; sys_platform != 'win32'
 datadog-ibm-mq==8.8.0
-datadog-ibm-spectrum-lsf==1.2.0
+datadog-ibm-spectrum-lsf==1.3.0
 datadog-ibm-was==5.3.0
 datadog-iboss==1.2.0
 datadog-ignite==3.3.0
