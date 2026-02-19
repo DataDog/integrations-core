@@ -112,12 +112,38 @@ jobs:
 
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    # We run this for EVERYONE to ensure the scripts are moved
-    # from the action folder to the expected workspace path.
-    # It should cover all repos using this workflow and respect the context if the
-    # workflow is being called with a pinned version.
-    - name: Install workflow scripts
+    # When called as a reusable workflow from other repos, `uses: ./` resolves
+    # from the caller's repo where the actions don't exist. We checkout the
+    # actions from integrations-core so they are available locally.
+    # Note: github.workflow_sha/workflow_ref point to the caller, not to
+    # integrations-core, so we cannot dynamically pin the ref.
+    - name: Resolve integrations-core ref
+      if: inputs.repo != 'core'
+      id: ic-ref
+      shell: bash
+      run: |
+        # GITHUB_WORKFLOW_REF is available in the environment automatically
+        echo "GITHUB_WORKFLOW_REF: $GITHUB_WORKFLOW_REF"
+        echo "ref=${GITHUB_WORKFLOW_REF##*@}" >> "$GITHUB_OUTPUT"
+
+    - name: Checkout integrations-core actions
+      if: inputs.repo != 'core'
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        repository: "DataDog/integrations-core"
+        ref: master
+        fetch-depth: 1
+        sparse-checkout: .github/actions
+        # Use a specific sub-folder
+        path: core-temp
+
+    - name: Install workflow scripts (core)
+      if: inputs.repo == 'core'
       uses: ./.github/actions/setup-test-target-scripts
+
+    - name: Install workflow scripts (non-core)
+      if: inputs.repo != 'core'
+      uses: ./core-temp/.github/actions/setup-test-target-scripts
 
     - name: Set environment variables
       # This step sets the following environment variables for the entire workflow via setup-test-env.sh:
