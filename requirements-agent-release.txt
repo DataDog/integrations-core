@@ -77,7 +77,7 @@ datadog-external-dns==6.3.0
 datadog-falco==2.3.0
 datadog-flink==3.2.0
 datadog-fluentd==5.4.0
-datadog-fluxcd==3.2.0
+datadog-fluxcd==3.3.0
 datadog-fly-io==3.2.0
 datadog-forescout==1.0.0
 datadog-foundationdb==3.5.0
