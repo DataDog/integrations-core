@@ -142,6 +142,7 @@ def ci(app: Application, sync: bool):
             'agent-image': '${{ inputs.agent-image }}',
             'agent-image-py2': '${{ inputs.agent-image-py2 }}',
             'agent-image-windows': '${{ inputs.agent-image-windows }}',
+            'agent-image-windows-py2': '${{ inputs.agent-image-windows-py2 }}',
             'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
             'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
         }
@@ -205,6 +206,7 @@ def ci(app: Application, sync: bool):
         'agent-image',
         'agent-image-py2',
         'agent-image-windows',
+        'agent-image-windows-py2',
         'skip-ddev-tests',
     ):
         jobs_component = jobs_component.replace(f'${{{{ inputs.{field} }}}}', f'"${{{{ inputs.{field} }}}}"')

@@ -60,11 +60,15 @@ on:
         type: string
       agent-image-py2:
         required: false
-        default: "registry.datadoghq.com/agent:6-rc"
+        default: "datadog/agent-dev:master-py2"
         type: string
       agent-image-windows:
         required: false
-        default: "registry.datadoghq.com/agent:latest-servercore"
+        default: "registry.datadoghq.com/agent:7-rc-servercore"
+        type: string
+      agent-image-windows-py2:
+        required: false
+        default: "datadog/agent-dev:master-py2-win-servercore"
         type: string
       setup-env-vars:
         required: false
@@ -185,6 +189,7 @@ jobs:
         INPUT_AGENT_IMAGE: ${{ inputs.agent-image }}
         INPUT_AGENT_IMAGE_PY2: ${{ inputs.agent-image-py2 }}
         INPUT_AGENT_IMAGE_WINDOWS: ${{ inputs.agent-image-windows }}
+        INPUT_AGENT_IMAGE_WINDOWS_PY2: ${{ inputs.agent-image-windows-py2 }}
         INPUT_TARGET: ${{ inputs.target }}
         INPUT_TARGET_ENV: ${{ inputs.target-env }}
         INPUT_REPO: ${{ inputs.repo }}

@@ -43,7 +43,7 @@ DEFAULT_CONFIG = {
         'integrations-internal-core': os.path.join('~', 'dd', 'integrations-internal-core'),
     },
     'agents': {
-        'master': {'docker': 'registry.datadoghq.com/agent-dev:master-py3', 'local': 'latest'},
+        'master': {'docker': 'registry.datadoghq.com/agent-dev:master', 'local': 'latest'},
         '7': {'docker': 'registry.datadoghq.com/agent:7', 'local': '7'},
         '6': {'docker': 'registry.datadoghq.com/agent:6', 'local': '6'},
     },

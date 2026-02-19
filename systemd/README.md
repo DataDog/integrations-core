@@ -41,7 +41,7 @@ docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro \
               -v /sys/fs/cgroup/:/host/sys/fs/cgroup/:ro \
               -v /run/systemd/:/host/run/systemd/:ro \
               -e DD_API_KEY=<YOUR_API_KEY> \
-              registry.datadoghq.com/agent:latest
+              datadog/agent:latest
 ```
 
 #### Helm

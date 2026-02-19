@@ -41,7 +41,11 @@ on:
         type: string
       agent-image-windows:
         required: false
-        default: "registry.datadoghq.com/agent:latest-servercore"
+        default: "registry.datadoghq.com/agent:7-rc-servercore"
+        type: string
+      agent-image-windows-py2:
+        required: false
+        default: "datadog/agent-dev:master-py2-win-servercore"
         type: string
       pytest-args:
         description: "Arguments to pass to pytest"
@@ -72,6 +76,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -92,6 +97,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -111,6 +117,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -130,6 +137,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -149,6 +157,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -168,6 +177,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -187,6 +197,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -206,6 +217,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -225,6 +237,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -244,6 +257,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -263,6 +277,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -282,6 +297,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -301,6 +317,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -320,6 +337,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -339,6 +357,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -358,6 +377,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -377,6 +397,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -396,6 +417,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -415,6 +437,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -434,6 +457,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -453,6 +477,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -472,6 +497,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -491,6 +517,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -510,6 +537,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -529,6 +557,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -548,6 +577,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -567,6 +597,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -586,6 +617,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -605,6 +637,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -624,6 +657,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -643,6 +677,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -662,6 +697,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -681,6 +717,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -700,6 +737,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -719,6 +757,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -738,6 +777,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -757,6 +797,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -776,6 +817,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -795,6 +837,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -814,6 +857,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -833,6 +877,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -852,6 +897,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -871,6 +917,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -890,6 +937,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -909,6 +957,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -928,6 +977,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -947,6 +997,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -966,6 +1017,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -985,6 +1037,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1004,6 +1057,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1023,6 +1077,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1042,6 +1097,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1061,6 +1117,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1080,6 +1137,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1099,6 +1157,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1118,6 +1177,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1137,6 +1197,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1156,6 +1217,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1175,6 +1237,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1194,6 +1257,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1213,6 +1277,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1232,6 +1297,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1251,6 +1317,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1270,6 +1337,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1289,6 +1357,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1308,6 +1377,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1327,6 +1397,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1346,6 +1417,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1365,6 +1437,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1384,6 +1457,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1403,6 +1477,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1422,6 +1497,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1441,6 +1517,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1460,6 +1537,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1479,6 +1557,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1498,6 +1577,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1517,6 +1597,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1536,6 +1617,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1555,6 +1637,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1574,6 +1657,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1593,6 +1677,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1612,6 +1697,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1631,6 +1717,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1650,6 +1737,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1669,6 +1757,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1688,6 +1777,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1707,6 +1797,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1726,6 +1817,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1745,6 +1837,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1764,6 +1857,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1783,6 +1877,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1802,6 +1897,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1821,6 +1917,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1840,6 +1937,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1859,6 +1957,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1878,6 +1977,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1897,6 +1997,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1916,6 +2017,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1935,6 +2037,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1954,6 +2057,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1973,6 +2077,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -1992,6 +2097,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2011,6 +2117,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2030,6 +2137,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2049,6 +2157,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2068,6 +2177,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2087,6 +2197,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2106,6 +2217,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2125,6 +2237,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2144,6 +2257,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2163,6 +2277,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2182,6 +2297,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2201,6 +2317,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2220,6 +2337,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2239,6 +2357,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2258,6 +2377,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2277,6 +2397,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2296,6 +2417,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2315,6 +2437,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2334,6 +2457,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2353,6 +2477,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2372,6 +2497,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2391,6 +2517,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2410,6 +2537,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2429,6 +2557,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2448,6 +2577,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2467,6 +2597,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
@@ -2512,6 +2643,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
@@ -2548,6 +2680,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2567,6 +2700,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2586,6 +2720,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2605,6 +2740,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2624,6 +2760,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2643,6 +2780,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2662,6 +2800,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2681,6 +2820,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2700,6 +2840,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2719,6 +2860,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2738,6 +2880,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2757,6 +2900,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2776,6 +2920,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2795,6 +2940,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2814,6 +2960,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2833,6 +2980,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
@@ -2876,6 +3024,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2895,6 +3044,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2914,6 +3064,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2933,6 +3084,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2952,6 +3104,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2971,6 +3124,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -2990,6 +3144,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3009,6 +3164,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3028,6 +3184,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3047,6 +3204,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3066,6 +3224,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3085,6 +3244,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3104,6 +3264,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3123,6 +3284,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3142,6 +3304,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3161,6 +3324,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3180,6 +3344,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3199,6 +3364,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3218,6 +3384,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3237,6 +3404,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3256,6 +3424,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3275,6 +3444,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3294,6 +3464,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3313,6 +3484,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3332,6 +3504,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3351,6 +3524,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3370,6 +3544,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       target-env: ${{ matrix.target-env }}
@@ -3404,6 +3579,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3423,6 +3599,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3442,6 +3619,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3461,6 +3639,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3480,6 +3659,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3499,6 +3679,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3518,6 +3699,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3537,6 +3719,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3556,6 +3739,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3575,6 +3759,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3594,6 +3779,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3613,6 +3799,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3632,6 +3819,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3651,6 +3839,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3670,6 +3859,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3689,6 +3879,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3708,6 +3899,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3727,6 +3919,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3746,6 +3939,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3765,6 +3959,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3784,6 +3979,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3803,6 +3999,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3822,6 +4019,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3841,6 +4039,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3860,6 +4059,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3879,6 +4079,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3898,6 +4099,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3917,6 +4119,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3936,6 +4139,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3955,6 +4159,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3974,6 +4179,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -3993,6 +4199,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
@@ -4012,6 +4219,7 @@ jobs:
       agent-image: "${{ inputs.agent-image }}"
       agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
