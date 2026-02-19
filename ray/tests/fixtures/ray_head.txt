@@ -2003,3 +2003,6 @@ ray_serve_num_scheduling_tasks_in_backoff 12
 # HELP ray_serve_registered_multiplexed_model_id
 # TYPE ray_serve_registered_multiplexed_model_id gauge
 ray_serve_registered_multiplexed_model_id 12
+# HELP ray_serve_num_ongoing_requests_at_replicas The current number of requests to this deployment that have been submitted to a replica.
+# TYPE ray_serve_num_ongoing_requests_at_replicas gauge
+ray_serve_num_ongoing_requests_at_replicas{Component="core_worker",NodeAddress="10.0.24.226",SessionName="session_2024-08-21_19-09-59_660754_2281",Version="2.34.0",WorkerId="54680f1642b96193f440030fe7388ffada87bce191b3e5391b9efd1e",actor_id="7cf66ec2fbbd05f0224d541e01000000",application="default",deployment="FastAPIDeployment",handle="96pkj8iw"} 0.0  
