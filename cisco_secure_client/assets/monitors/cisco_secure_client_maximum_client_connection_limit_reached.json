@@ -8,7 +8,7 @@
 		"id": 243398329,
 		"name": "Maximum client connection limit reached",
 		"type": "log alert",
-		"query": "logs(\"source:cisco-secure-client service:cisco-secure-client @message_id:716060\").index(\"*\").rollup(\"count\").last(\"1d\") > 0",
+		"query": "logs(\"source:cisco-secure-client @message_id:716060\").index(\"*\").rollup(\"count\").last(\"1d\") > 0",
 		"message": "{{#is_alert}}\nCisco ASA has reported that the maximum AnyConnect client license limit has been reached.\n\nWhen this occurs, the firewall terminates an inactive VPN session to allow a new connection, which may cause unexpected disconnections for remote users. This behavior typically indicates that the ASA is running out of available VPN licenses or experiencing unusually high VPN usage.\n\n**Potential Impact**\n- User connections may end unexpectedly.\n- New VPN sessions may fail to establish.\n- Indicates license exhaustion or high VPN demand.\n\n**Current Metric Value:** **{{value}}**\n**Alert Threshold:** {{threshold}}\n\nImmediate review of AnyConnect license usage and active session count is recommended to prevent user disruption.\n{{/is_alert}}\n\n@example@test.com",
 		"tags": [
 			"integration:cisco-secure-client"
