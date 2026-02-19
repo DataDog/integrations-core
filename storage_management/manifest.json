@@ -1,7 +1,7 @@
 {
   "manifest_version": "2.0.0",
   "app_uuid": "a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
-  "app_id": "storage_management",
+  "app_id": "storage-management",
   "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
@@ -40,6 +40,7 @@
   },
   "assets": {
     "integration": {
+      "source_type_id": 0,
       "source_type_name": "Storage Management",
       "events": {
         "creates_events": false
