@@ -140,7 +140,7 @@ datadog-kuma==2.3.0
 datadog-kyototycoon==4.4.0
 datadog-kyverno==3.3.0
 datadog-lighttpd==5.4.0
-datadog-linkerd==7.2.0
+datadog-linkerd==7.3.0
 datadog-linux-audit-logs==1.2.0; sys_platform == 'linux2'
 datadog-linux-proc-extras==4.2.0; sys_platform == 'linux2'
 datadog-litellm==2.2.0
