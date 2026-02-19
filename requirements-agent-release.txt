@@ -186,7 +186,7 @@ datadog-process==5.4.0
 datadog-prometheus==6.3.0
 datadog-proxmox==2.4.0
 datadog-proxysql==7.6.0
-datadog-pulsar==3.4.0
+datadog-pulsar==3.5.0
 datadog-quarkus==2.2.0
 datadog-rabbitmq==8.4.0
 datadog-ray==3.2.0
