@@ -12,8 +12,8 @@ from datadog_checks.control_m.config_models import ConfigMixin
 _SERVICE_CHECK_CAN_LOGIN = "can_login"
 _SERVICE_CHECK_CAN_CONNECT = "can_connect"
 
-class ControlMCheck(AgentCheck, ConfigMixin):
 
+class ControlMCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = "control_m"
 
     def __init__(self, name, init_config, instances):
