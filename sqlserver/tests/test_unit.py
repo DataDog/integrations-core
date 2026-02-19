@@ -916,12 +916,12 @@ def test_only_custom_queries_validation_warnings(caplog):
     )
 
     assert dbm_warning_found, "Expected warning about only_custom_queries with DBM not found in all-conflicts test"
-    assert (
-        proc_warning_found
-    ), "Expected warning about only_custom_queries with stored_procedure not found in all-conflicts test"
-    assert (
-        no_queries_warning_found
-    ), "Expected warning about only_custom_queries with no custom queries not found in all-conflicts test"
+    assert proc_warning_found, (
+        "Expected warning about only_custom_queries with stored_procedure not found in all-conflicts test"
+    )
+    assert no_queries_warning_found, (
+        "Expected warning about only_custom_queries with no custom queries not found in all-conflicts test"
+    )
 
     # Test case 5: only_custom_queries with no conflicts (should emit no warnings)
     caplog.clear()
