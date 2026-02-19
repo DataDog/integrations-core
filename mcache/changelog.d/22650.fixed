@@ -1,1 +1,0 @@
-Handle malformed binary protocol responses from `bmemcached` gracefully. Instead of crashing with an unhandled `AssertionError`, the check now logs a warning and reports a `WARNING` service check, allowing the next check run to retry.
