@@ -136,7 +136,7 @@ datadog-kubernetes-state==10.4.0
 datadog-kubevirt-api==2.3.0
 datadog-kubevirt-controller==2.3.0
 datadog-kubevirt-handler==2.4.0
-datadog-kuma==2.2.0
+datadog-kuma==2.3.0
 datadog-kyototycoon==4.3.0
 datadog-kyverno==3.2.0
 datadog-lighttpd==5.3.0
