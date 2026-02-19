@@ -261,6 +261,47 @@ def instance_error():
     return {'host': common.HOST, 'username': 'unknown', 'password': common.PASS, 'disable_generic_tags': 'true'}
 
 
+@pytest.fixture
+def instance_hybrid_primary():
+    """Instance config for node1 in the hybrid topology (group primary with a traditional replica)."""
+    return {
+        'host': common.HOST,
+        'username': common.USER,
+        'password': common.PASS,
+        'port': common.PORTS_HYBRID_GROUP[0],
+        'disable_generic_tags': True,
+        'options': {
+            'replication': True,
+            'extra_status_metrics': True,
+            'extra_innodb_metrics': True,
+            'extra_performance_metrics': True,
+            'schema_size_metrics': False,
+            'galera_cluster': True,
+        },
+        'tags': tags.METRIC_TAGS,
+    }
+
+
+@pytest.fixture
+def instance_hybrid_traditional_replica():
+    """Instance config for the traditional replica in the hybrid topology."""
+    return {
+        'host': common.HOST,
+        'username': common.USER,
+        'password': common.PASS,
+        'port': common.PORT_HYBRID_TRADITIONAL_REPLICA,
+        'disable_generic_tags': True,
+        'options': {
+            'replication': True,
+            'extra_status_metrics': True,
+            'extra_innodb_metrics': True,
+            'extra_performance_metrics': True,
+            'schema_size_metrics': False,
+        },
+        'tags': tags.METRIC_TAGS,
+    }
+
+
 @pytest.fixture(scope='session')
 def version_metadata():
     parts = MYSQL_VERSION.split('-')
@@ -299,6 +340,15 @@ def _get_warmup_conditions():
             init_group_replication,
             populate_database,
         ]
+    if MYSQL_REPLICATION == 'hybrid':
+        return [
+            CheckDockerLogs('node1', "X Plugin ready for connections. Bind-address: '::' port: 33060"),
+            CheckDockerLogs('node2', "X Plugin ready for connections. Bind-address: '::' port: 33060"),
+            CheckDockerLogs('node3', "X Plugin ready for connections. Bind-address: '::' port: 33060"),
+            CheckDockerLogs('traditional-replica', "ready for connections"),
+            init_hybrid_replication,
+            populate_database,
+        ]
     return [
         WaitFor(init_master, wait=2),
         WaitFor(init_slave, wait=2),
@@ -333,6 +383,60 @@ def init_group_replication():
         cur = c.cursor()
         cur.execute("change master to master_user='repl' for channel 'group_replication_recovery';")
         cur.execute("START GROUP_REPLICATION;")
+
+
+def init_hybrid_replication():
+    """Initialize hybrid topology: group replication cluster (node1-3) + traditional replica of node1."""
+    logger.debug("initializing hybrid replication")
+    import time
+
+    time.sleep(5)
+
+    group_conns = [
+        pymysql.connect(host=common.HOST, port=p, user='root', password='mypass') for p in common.PORTS_HYBRID_GROUP
+    ]
+    _add_dog_user(group_conns[0])
+    _add_bob_user(group_conns[0])
+    _add_fred_user(group_conns[0])
+    _init_datadog_sample_collection(group_conns[0])
+
+    cur_primary = group_conns[0].cursor()
+    cur_primary.execute("SET @@GLOBAL.group_replication_bootstrap_group=1;")
+    cur_primary.execute("create user 'repl'@'%';")
+    cur_primary.execute("GRANT REPLICATION SLAVE ON *.* TO repl@'%';")
+    cur_primary.execute("flush privileges;")
+    cur_primary.execute("change master to master_user='root' for channel 'group_replication_recovery';")
+    cur_primary.execute("START GROUP_REPLICATION;")
+    cur_primary.execute("SET @@GLOBAL.group_replication_bootstrap_group=0;")
+    cur_primary.execute("SELECT * FROM performance_schema.replication_group_members;")
+
+    for c in group_conns[1:]:
+        cur = c.cursor()
+        cur.execute("change master to master_user='repl' for channel 'group_replication_recovery';")
+        cur.execute("START GROUP_REPLICATION;")
+
+    time.sleep(3)
+
+    # Set up the traditional replica to replicate from node1 (the group primary)
+    traditional_replica_conn = pymysql.connect(
+        host=common.HOST, port=common.PORT_HYBRID_TRADITIONAL_REPLICA, user='root', password='mypass'
+    )
+    _add_dog_user(traditional_replica_conn)
+
+    cur_replica = traditional_replica_conn.cursor()
+    cur_replica.execute(
+        """
+        CHANGE MASTER TO
+            MASTER_HOST='node1',
+            MASTER_PORT=3306,
+            MASTER_USER='repl',
+            MASTER_AUTO_POSITION=1
+        """
+    )
+    cur_replica.execute("START SLAVE;")
+
+    time.sleep(2)
+    logger.debug("hybrid replication initialized successfully")
 
 
 def _init_datadog_sample_collection(conn):
@@ -401,7 +505,7 @@ def _get_root_connection():
         host=common.HOST,
         port=common.PORT,
         user='root',
-        password='mypass' if MYSQL_FLAVOR == 'percona' or MYSQL_REPLICATION == 'group' else None,
+        password='mypass' if MYSQL_FLAVOR == 'percona' or MYSQL_REPLICATION in ('group', 'hybrid') else None,
     )
 
 
@@ -476,7 +580,7 @@ def populate_database():
         host=common.HOST,
         port=common.PORT,
         user='root',
-        password='mypass' if MYSQL_REPLICATION == 'group' or MYSQL_FLAVOR == 'percona' else None,
+        password='mypass' if MYSQL_REPLICATION in ('group', 'hybrid') or MYSQL_FLAVOR == 'percona' else None,
     )
 
     cur = conn.cursor()

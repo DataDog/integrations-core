@@ -305,6 +305,16 @@ class Memcache(AgentCheck):
                     server, port, e
                 )
             )
+        except AssertionError:
+            self.warning(
+                "Received malformed response from memcache instance %s:%s, skipping this check run", server, port
+            )
+            self.service_check(
+                self.SERVICE_CHECK,
+                AgentCheck.WARNING,
+                tags=service_check_tags,
+                message="Malformed binary protocol response",
+            )
         else:
             client.disconnect_all()
             self.log.debug("Disconnected from memcached")

@@ -80,6 +80,10 @@ class KafkaConfig:
         ):
             self._tls_ca_cert = '/opt/datadog-agent/embedded/ssl/certs/cacert.pem'
 
+        self._sasl_oauth_tls_ca_cert = (
+            self._sasl_oauth_token_provider.get("tls_ca_cert") if self._sasl_oauth_token_provider else None
+        )
+
         # Data Streams live messages
         self.live_messages_configs = instance.get('live_messages_configs', [])
 
