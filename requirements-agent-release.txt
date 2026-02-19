@@ -119,7 +119,7 @@ datadog-kafka-actions==2.3.0
 datadog-kafka-consumer==6.14.0
 datadog-kafka==4.3.0
 datadog-karpenter==3.3.0
-datadog-keda==2.2.0
+datadog-keda==2.3.0
 datadog-keycloak==1.2.0
 datadog-kong==6.2.0
 datadog-krakend==1.2.0
