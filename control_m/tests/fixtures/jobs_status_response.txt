@@ -1,0 +1,21 @@
+{
+  "statuses": [
+    {
+      "ctm": "workbench",
+      "name": "job_ok",
+      "status": "Ended OK",
+      "startTime": "20260210185342",
+      "endTime": "20260210185442"
+    },
+    {
+      "ctm": "workbench",
+      "name": "job_waiting",
+      "status": "Wait Condition"
+    },
+    {
+      "ctm": "workbench",
+      "name": "job_running",
+      "status": "Executing"
+    }
+  ]
+}
