@@ -159,7 +159,7 @@ datadog-milvus==2.4.0
 datadog-mongo==10.7.0
 datadog-mysql==15.13.0
 datadog-nagios==3.3.0
-datadog-network==5.5.0
+datadog-network==5.6.0
 datadog-nfsstat==3.3.0; sys_platform == 'linux2'
 datadog-nginx-ingress-controller==5.2.0
 datadog-nginx==9.2.0
