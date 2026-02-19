@@ -41,6 +41,7 @@
   "assets": {
     "integration": {
       "auto_install": true,
+      "source_type_id": 71534043,
       "source_type_name": "Storage Management",
       "events": {
         "creates_events": false
