@@ -1,0 +1,1 @@
+Don't force writing github uname and token to config file. We can just read it from envvars.
