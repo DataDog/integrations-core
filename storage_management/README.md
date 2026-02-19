@@ -2,7 +2,7 @@
 
 ## Overview
 
-Storage Management provides visibility into Amazon S3 storage inventory, cost analysis, and optimization with prefix-level visibility. When any S3 inventory metric is present in your account, the integration is auto-installed and the out-of-the-box dashboard becomes available.
+Storage Management provides visibility into Amazon S3 storage inventory, cost analysis, and optimization with prefix-level granularity. When any S3 inventory metric is detected in your account, the integration is automatically installed and the out-of-the-box dashboard becomes available.
 
 ## Setup
 
