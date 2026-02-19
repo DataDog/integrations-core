@@ -8,7 +8,7 @@
   ],
   "description": "The status ImagePullBackOff means that a container could not start because Kubernetes could not pull a container image. This monitor tracks when a pod is in an ImagePullBackOff state for your Kubernetes integration.",
   "definition": {
-    "message": "{{#is_alert}}\n\n## What's happening?\nAt least one container in pod {{pod_name.name} on namespace {{kube_namespace.name}} is in a waiting state due to an ImagePullBackOff error in the last 10 minutes.\n\n{{/is_alert}}\n\n This could happen for several reasons, for example a bad image path or tag or if the credentials for pulling images are not configured properly.",
+    "message": "{{#is_alert}}\n\n## What's happening?\nAt least one container in pod {{pod_name.name}} on namespace {{kube_namespace.name}} is in a waiting state due to an ImagePullBackOff error in the last 10 minutes.\n\n{{/is_alert}}\n\n This could happen for several reasons, for example a bad image path or tag or if the credentials for pulling images are not configured properly.",
     "name": "[Kubernetes] Pod {{pod_name.name}} is ImagePullBackOff on namespace {{kube_namespace.name}}",
     "options": {
       "escalation_message": "",
