@@ -35,10 +35,7 @@ def test_default():
                 'log_url': os.getenv('DD_LOGS_CONFIG_LOGS_DD_URL', ''),
             },
         },
-        'github': {
-            'user': get_github_user(),
-            'token': get_github_token(),
-        },
+        'github': {},
         'pypi': {
             'user': '',
             'auth': '',
@@ -714,10 +711,7 @@ class TestGitHub:
         assert config.github.user == config.github.user == get_github_user()
         assert config.github.token == config.github.token == get_github_token()
         assert config.raw_data == {
-            'github': {
-                'user': get_github_user(),
-                'token': get_github_token(),
-            },
+            'github': {},
         }
 
     def test_not_table(self, helpers):
@@ -1409,3 +1403,59 @@ class TestTerminal:
             ),
         ):
             _ = config.terminal.styles.spinner
+
+
+class TestGitHubConfig:
+    def test_default_github_config_empty_raw_data(self):
+        config = RootConfig({})
+        config.parse_fields()
+
+        # GitHub config should be empty in raw_data when not explicitly set
+        assert config.raw_data['github'] == {}
+
+        # But properties should still work via environment variables
+        assert config.github.user == get_github_user()
+        assert config.github.token == get_github_token()
+
+        # After accessing properties, raw_data should still be empty
+        assert config.raw_data['github'] == {}
+
+    def test_explicit_github_config_in_raw_data(self):
+        config = RootConfig({'github': {'user': 'explicit_user', 'token': 'explicit_token'}})
+
+        # When explicitly set, values should be in raw_data
+        assert config.raw_data['github']['user'] == 'explicit_user'
+        assert config.raw_data['github']['token'] == 'explicit_token'
+
+        # Properties should return explicit values
+        assert config.github.user == 'explicit_user'
+        assert config.github.token == 'explicit_token'
+
+    def test_partial_github_config(self):
+        config = RootConfig({'github': {'user': 'explicit_user'}})
+
+        # Only explicitly set field should be in raw_data
+        assert config.raw_data['github']['user'] == 'explicit_user'
+        assert 'token' not in config.raw_data['github']
+
+        # Properties should work - explicit user, env var token
+        assert config.github.user == 'explicit_user'
+        assert config.github.token == get_github_token()
+
+        # raw_data should still only have explicit field
+        assert config.raw_data['github']['user'] == 'explicit_user'
+        assert 'token' not in config.raw_data['github']
+
+    def test_github_config_with_environment_variables(self, monkeypatch):
+        # Mock environment variables
+        monkeypatch.setenv('DD_GITHUB_USER', 'env_user')
+        monkeypatch.setenv('DD_GITHUB_TOKEN', 'env_token')
+
+        config = RootConfig({})
+
+        # Properties should return environment variable values
+        assert config.github.user == 'env_user'
+        assert config.github.token == 'env_token'
+
+        # raw_data should still be empty
+        assert config.raw_data['github'] == {}
