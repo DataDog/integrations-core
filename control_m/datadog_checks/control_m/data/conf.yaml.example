@@ -80,6 +80,16 @@ instances:
     #
     # token_refresh_buffer_seconds: 300
 
+    ## @param job_status_limit - integer - optional - default: 200
+    ## Limit query parameter sent to `/run/jobs/status`.
+    #
+    # job_status_limit: 200
+
+    ## @param job_name_filter - string - optional - default: *
+    ## Job name filter sent to `/run/jobs/status` as the `jobname` query parameter.
+    #
+    # job_name_filter: '*'
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

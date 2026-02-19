@@ -36,6 +36,14 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_job_name_filter():
+    return '*'
+
+
+def instance_job_status_limit():
+    return 200
+
+
 def instance_kerberos_auth():
     return 'disabled'
 

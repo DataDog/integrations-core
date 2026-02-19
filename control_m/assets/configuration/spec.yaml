@@ -46,6 +46,20 @@ files:
       value:
         type: integer
         example: 300
+    - name: job_status_limit
+      required: false
+      description: |
+        Limit query parameter sent to `/run/jobs/status`.
+      value:
+        type: integer
+        example: 200
+    - name: job_name_filter
+      required: false
+      description: |
+        Job name filter sent to `/run/jobs/status` as the `jobname` query parameter.
+      value:
+        type: string
+        example: "*"
     - template: instances/http
       overrides:
         headers.display_priority: 1
