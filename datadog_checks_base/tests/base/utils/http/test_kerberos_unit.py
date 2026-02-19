@@ -9,8 +9,8 @@ import requests_kerberos
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.http import RequestsWrapper
-from datadog_checks.dev import EnvVars
 from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev import EnvVars
 
 pytestmark = [pytest.mark.unit]
 
@@ -148,7 +148,8 @@ def test_config_kerberos_cache_restores_rollback():
 
     with EnvVars({'KRB5CCNAME': 'old'}):
         with mock.patch(
-            'requests.Session.get', side_effect=lambda *args, **kwargs: MockHTTPResponse(os.environ.get('KRB5CCNAME', ''))
+            'requests.Session.get',
+            side_effect=lambda *args, **kwargs: MockHTTPResponse(os.environ.get('KRB5CCNAME', '')),
         ):
             response = http.get('https://www.google.com')
             assert response.text == '/test/file'

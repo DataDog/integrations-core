@@ -19,9 +19,9 @@ from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, Histo
 from prometheus_client.samples import Sample
 
 from datadog_checks.base import ensure_bytes
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
 
 text_content_type = 'text/plain; version=0.0.4'
 FIXTURE_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', '..', 'fixtures', 'prometheus'))
@@ -2672,7 +2672,10 @@ def test_ssl_verify_not_raise_warning(caplog, mocked_openmetrics_check_factory, 
     check = mocked_openmetrics_check_factory(instance)
     scraper_config = check.get_scraper_config(instance)
 
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockHTTPResponse('httpbin.org')):
+    with (
+        caplog.at_level(logging.DEBUG),
+        mock.patch('requests.Session.get', return_value=MockHTTPResponse('httpbin.org')),
+    ):
         resp = check.send_request('https://httpbin.org/get', scraper_config)
 
     assert "httpbin.org" in resp.content.decode('utf-8')
@@ -2696,7 +2699,10 @@ def test_send_request_with_dynamic_prometheus_url(caplog, mocked_openmetrics_che
     # `prometheus_url` changed just before calling `send_request`
     scraper_config['prometheus_url'] = 'https://www.example.com/foo/bar'
 
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockHTTPResponse('httpbin.org')):
+    with (
+        caplog.at_level(logging.DEBUG),
+        mock.patch('requests.Session.get', return_value=MockHTTPResponse('httpbin.org')),
+    ):
         resp = check.send_request('https://httpbin.org/get', scraper_config)
 
     assert "httpbin.org" in resp.content.decode('utf-8')
@@ -2995,7 +3001,9 @@ def test_refresh_bearer_token(text_data, mocked_openmetrics_check_factory):
 
     with patch.object(OpenMetricsBaseCheck, 'KUBERNETES_TOKEN_PATH', os.path.join(TOKENS_PATH, 'default_token')):
         check = mocked_openmetrics_check_factory(instance)
-        check.poll = mock.MagicMock(return_value=MockHTTPResponse(text_data, headers={'Content-Type': text_content_type}))
+        check.poll = mock.MagicMock(
+            return_value=MockHTTPResponse(text_data, headers={'Content-Type': text_content_type})
+        )
         instance = check.get_scraper_config(instance)
         assert instance['_bearer_token'] == 'my default token'
         time.sleep(1.5)
