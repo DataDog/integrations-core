@@ -20,7 +20,15 @@ def instance_collect_alerts():
     return True
 
 
+def instance_collect_audits():
+    return True
+
+
 def instance_collect_events():
+    return True
+
+
+def instance_collect_tasks():
     return True
 
 
