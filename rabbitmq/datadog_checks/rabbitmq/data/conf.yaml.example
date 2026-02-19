@@ -677,7 +677,7 @@ instances:
     #   - <EXCLUDE_REGEX>
 
     ## RabbitMQ Management Plugin Example
-  -
+ # -
     ## @param rabbitmq_api_url - string - optional - default: http://localhost:15672/api/
     ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
     ## url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
