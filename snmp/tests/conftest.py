@@ -49,6 +49,7 @@ EXPECTED_AUTODISCOVERY_CHECKS = 6
 @pytest.fixture(scope='session')
 def dd_environment():
     a = 1
+    assert a == 1
 
     new_e2e_metadata = deepcopy(E2E_METADATA)
     with TempDir('snmp') as tmp_dir:
