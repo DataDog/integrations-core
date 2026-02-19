@@ -193,7 +193,7 @@ datadog-ray==3.3.0
 datadog-redisdb==8.5.0
 datadog-rethinkdb==5.4.0
 datadog-riak==5.4.0
-datadog-riakcs==4.10.0
+datadog-riakcs==4.11.0
 datadog-sap-hana==5.3.0
 datadog-scylla==5.2.0
 datadog-sidekiq==3.2.0
