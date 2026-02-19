@@ -503,6 +503,8 @@ class PrefectCheck(AgentCheck):
             )
             for e in events:
                 event_manager = EventManager(e)
+                if not self.filter_metrics.is_event_included(event_manager):
+                    continue
 
                 self._check_retry_gaps(event_manager)
                 self._check_dependency_wait(event_manager)
@@ -515,8 +517,6 @@ class PrefectCheck(AgentCheck):
         """
         Emits event metrics.
         """
-        if not self.filter_metrics.is_event_included(event_manager):
-            return
 
         self.event(
             {

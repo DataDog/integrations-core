@@ -108,18 +108,30 @@ class PrefectFilterMetrics:
         )
 
     def is_event_included(self, event: EventManager) -> bool:
-        if event.event_type in self.event_cache:
-            return self.event_cache[event.event_type]
+        fields: dict[str, str] = {}
+        caches: dict[str, tuple[dict[str, bool], bool, Fallback | None]] = {}
+        fields["event_type"] = event.event_type
+        caches["event_type"] = (self.event_cache, True, None)
+        work_pool_name = event.event_related.get("work-pool", {}).get("name")
+        if work_pool_name:
+            fields["work_pool_name"] = work_pool_name
+            caches["work_pool_name"] = (self.work_pool_cache, False, None)
+        work_queue_name = event.event_related.get("work-queue", {}).get("name")
+        if work_queue_name:
+            fields["work_queue_name"] = work_queue_name
+            caches["work_queue_name"] = (self.work_queue_cache, False, None)
+        deployment_name = event.event_related.get("deployment", {}).get("name")
+        if deployment_name:
+            fields["deployment_name"] = deployment_name
+            caches["deployment_name"] = (self.deployment_cache, False, None)
 
-        included = bool(
-            pattern_filter(
-                [event.event_type],
-                whitelist=self.event_names.get("include", []),
-                blacklist=self.event_names.get("exclude", []),
+        return bool(
+            self._filter_metric(
+                self.event_names,
+                [fields],
+                caches,
             )
         )
-        self.event_cache[event.event_type] = included
-        return included
 
     def _filter_metric(
         self,

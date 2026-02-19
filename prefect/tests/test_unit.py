@@ -267,41 +267,144 @@ def test_filter_metrics():
     assert filtered_task_runs[0]["id"] == "tr1"
 
 
-def test_filter_events():
-    filter_metrics = PrefectFilterMetrics(
+@pytest.fixture
+def filter_metrics():
+    """Fixture to initialize PrefectFilterMetrics with standard rules and pre-populated caches."""
+    f = PrefectFilterMetrics(
+        work_pool_names={"include": ["^production-"], "exclude": ["^staging-"]},
+        work_queue_names={"include": ["^high-"]},
+        deployment_names={"include": ["^api-"], "exclude": ["^worker-"]},
         event_names={
             "include": [r"^prefect\.flow-run\.", r"^prefect\.task-run\."],
             "exclude": [r"^prefect\.flow-run\.Failed"],
         },
     )
-    fr_completed = EventManager(
-        {
-            "occurred": "2026-01-20T15:00:00.000000Z",
-            "id": "e1",
-            "event": "prefect.flow-run.Completed",
-            "resource": {"prefect.resource.id": "prefect.flow-run.1234567890"},
-        },
-    )
-    tr_completed = EventManager(
-        {
-            "occurred": "2026-01-20T15:00:00.000000Z",
-            "id": "e2",
-            "event": "prefect.task-run.Completed",
-            "resource": {"prefect.resource.id": "prefect.task-run.1234567890"},
-        },
-    )
-    fr_failed = EventManager(
-        {
-            "occurred": "2026-01-20T15:00:00.000000Z",
-            "id": "e3",
-            "event": "prefect.flow-run.Failed",
-            "resource": {"prefect.resource.id": "prefect.flow-run.1234567890"},
-        },
-    )
-    assert filter_metrics.is_event_included(fr_completed)
-    assert filter_metrics.is_event_included(tr_completed)
-    assert not filter_metrics.is_event_included(fr_failed)
 
-    assert filter_metrics.event_cache["prefect.flow-run.Completed"] is True
-    assert filter_metrics.event_cache["prefect.task-run.Completed"] is True
-    assert filter_metrics.event_cache["prefect.flow-run.Failed"] is False
+    # Pre-populate caches
+    f.filter_work_pools([{"id": "wp1", "name": "production-pool"}])
+    f.filter_work_pools([{"id": "wp2", "name": "staging-pool"}])
+    f.filter_work_queues(
+        [
+            {"id": "wq1", "name": "high-priority", "work_pool_name": "production-pool"},
+            {"id": "wq2", "name": "low-priority", "work_pool_name": "production-pool"},
+        ]
+    )
+    f.filter_deployments(
+        [
+            {
+                "id": "dep1",
+                "name": "api-deployment",
+                "work_pool_name": "production-pool",
+                "work_queue_name": "high-priority",
+            },
+            {
+                "id": "dep2",
+                "name": "worker-deployment",
+                "work_pool_name": "production-pool",
+                "work_queue_name": "high-priority",
+            },
+        ]
+    )
+    return f
+
+
+@pytest.mark.parametrize(
+    "event_data, expected_included, description",
+    [
+        # 1. Basic event type filtering
+        ({"id": "e1", "event": "prefect.flow-run.Completed"}, True, "Included event type"),
+        ({"id": "e3", "event": "prefect.flow-run.Failed"}, False, "Excluded event type (failed)"),
+        # 2. Work Pool filtering
+        (
+            {
+                "id": "e4",
+                "event": "prefect.flow-run.Completed",
+                "related": [{"role": "work-pool", "id": "prefect.work-pool.wp1", "name": "production-pool"}],
+            },
+            True,
+            "Included work pool",
+        ),
+        (
+            {
+                "id": "e5",
+                "event": "prefect.flow-run.Completed",
+                "related": [{"role": "work-pool", "id": "prefect.work-pool.wp2", "name": "staging-pool"}],
+            },
+            False,
+            "Excluded work pool",
+        ),
+        # 3. Work Queue filtering
+        (
+            {
+                "id": "e6",
+                "event": "prefect.flow-run.Completed",
+                "related": [
+                    {"role": "work-pool", "id": "prefect.work-pool.wp1", "name": "production-pool"},
+                    {"role": "work-queue", "id": "prefect.work-queue.wq1", "name": "high-priority"},
+                ],
+            },
+            True,
+            "Included work queue",
+        ),
+        (
+            {
+                "id": "e7",
+                "event": "prefect.flow-run.Completed",
+                "related": [
+                    {"role": "work-pool", "id": "prefect.work-pool.wp1", "name": "production-pool"},
+                    {"role": "work-queue", "id": "prefect.work-queue.wq2", "name": "low-priority"},
+                ],
+            },
+            False,
+            "Excluded work queue",
+        ),
+        # 4. Deployment filtering
+        (
+            {
+                "id": "e8",
+                "event": "prefect.flow-run.Completed",
+                "related": [
+                    {"role": "work-pool", "id": "prefect.work-pool.wp1", "name": "production-pool"},
+                    {"role": "work-queue", "id": "prefect.work-queue.wq1", "name": "high-priority"},
+                    {"role": "deployment", "id": "prefect.deployment.dep1", "name": "api-deployment"},
+                ],
+            },
+            True,
+            "Included deployment",
+        ),
+        (
+            {
+                "id": "e9",
+                "event": "prefect.flow-run.Completed",
+                "related": [
+                    {"role": "work-pool", "id": "prefect.work-pool.wp1", "name": "production-pool"},
+                    {"role": "work-queue", "id": "prefect.work-queue.wq1", "name": "high-priority"},
+                    {"role": "deployment", "id": "prefect.deployment.dep2", "name": "worker-deployment"},
+                ],
+            },
+            False,
+            "Excluded deployment",
+        ),
+    ],
+)
+def test_filter_events(filter_metrics, event_data, expected_included, description):
+    payload = {
+        "occurred": "2026-01-20T15:00:00.000000Z",
+        "id": event_data["id"],
+        "event": event_data["event"],
+        "resource": {"prefect.resource.id": f"prefect.flow-run.{event_data['id']}"},
+    }
+
+    if "related" in event_data:
+        payload["related"] = [
+            {
+                "prefect.resource.role": r["role"],
+                "prefect.resource.id": r["id"],
+                "prefect.resource.name": r["name"],
+            }
+            for r in event_data["related"]
+        ]
+
+    event = EventManager(payload)
+
+    assert filter_metrics.is_event_included(event) is expected_included
