@@ -57,7 +57,7 @@ instances:
     #   - <DEPLOYMENT_NAME_REGEX_1>
     #   - <DEPLOYMENT_NAME_REGEX_2>
 
-    ## @param event_names - mapping - optional
+    ## @param event_names - mapping - optional - default: {'include': ['^prefect\\.task-run\\..*$', '^prefect\\.flow-run\\..*$', '^prefect\\.[a-z-]+\\.(ready|not-ready)$']}
     ## A mapping of event name patterns to include or exclude, with each entry being a regular expression.
     ##
     ## Patterns defined in `exclude` will take precedence in case of overlap.
