@@ -221,7 +221,7 @@ datadog-system-core==4.3.0
 datadog-system-swap==3.3.0
 datadog-tcp-check==6.3.0
 datadog-teamcity==7.3.0
-datadog-tekton==3.2.0
+datadog-tekton==3.3.0
 datadog-teleport==3.2.0
 datadog-temporal==4.2.0
 datadog-tenable==3.2.0
