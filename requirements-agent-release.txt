@@ -129,7 +129,7 @@ datadog-kube-dns==7.3.0
 datadog-kube-metrics-server==6.3.0
 datadog-kube-proxy==9.3.0
 datadog-kube-scheduler==7.3.0
-datadog-kubeflow==2.2.0
+datadog-kubeflow==2.3.0
 datadog-kubelet==10.2.0
 datadog-kubernetes-cluster-autoscaler==3.2.0
 datadog-kubernetes-state==10.3.0
