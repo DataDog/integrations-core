@@ -328,7 +328,7 @@ pipeline:
           sourceType: attribute
           target: usr.id
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
     - type: attribute-remapper
       name: Map `uid`, `ouid` to `usr.id`
@@ -339,7 +339,7 @@ pipeline:
       sourceType: attribute
       target: usr.id
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: pipeline
       name: Parsing Mac Config Change Logs
@@ -598,7 +598,7 @@ pipeline:
         - type: string-builder-processor
           name: Set ocsf.actor.user.uid attribute
           enabled: true
-          template: "%{usr.id}"
+          template: "%{ouid}"
           target: ocsf.actor.user.uid
           replaceMissing: true
         - type: schema-processor
@@ -810,7 +810,7 @@ pipeline:
         - type: string-builder-processor
           name: Set ocsf.actor.process.user.uid attribute
           enabled: true
-          template: "%{usr.id}"
+          template: "%{uid}"
           target: ocsf.actor.process.user.uid
           replaceMissing: false
         - type: string-builder-processor
@@ -1062,7 +1062,7 @@ pipeline:
         - type: string-builder-processor
           name: Set ocsf.actor.process.user.uid attribute
           enabled: true
-          template: "%{usr.id}"
+          template: "%{uid}"
           target: ocsf.actor.process.user.uid
           replaceMissing: false
         - type: string-builder-processor
@@ -1355,7 +1355,7 @@ pipeline:
         - type: string-builder-processor
           name: Set ocsf.actor.process.user.uid attribute
           enabled: true
-          template: "%{usr.id}"
+          template: "%{uid}"
           target: ocsf.actor.process.user.uid
           replaceMissing: false
         - type: string-builder-processor
@@ -1612,7 +1612,7 @@ pipeline:
         - type: string-builder-processor
           name: Set ocsf.actor.process.user.uid attribute
           enabled: true
-          template: "%{usr.id}"
+          template: "%{uid}"
           target: ocsf.actor.process.user.uid
           replaceMissing: false
         - type: string-builder-processor
@@ -1859,7 +1859,7 @@ pipeline:
         - type: string-builder-processor
           name: Set ocsf.actor.process.user.uid attribute
           enabled: true
-          template: "%{usr.id}"
+          template: "%{uid}"
           target: ocsf.actor.process.user.uid
           replaceMissing: false
         - type: string-builder-processor
