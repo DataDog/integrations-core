@@ -22,7 +22,7 @@ datadog-azure-iot-edge==6.4.0
 datadog-barracuda-secure-edge==1.1.0
 datadog-bentoml==1.4.0
 datadog-beyondtrust-password-safe==1.2.0
-datadog-boundary==4.2.0
+datadog-boundary==4.3.0
 datadog-btrfs==4.2.0; sys_platform != 'win32'
 datadog-cacti==4.3.0; sys_platform == 'linux2'
 datadog-calico==5.2.0
