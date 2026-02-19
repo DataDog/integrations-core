@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
+from datetime import datetime
+from urllib.parse import urlencode
 
 from requests.exceptions import HTTPError, RequestException
 
@@ -11,6 +13,28 @@ from datadog_checks.control_m.config_models import ConfigMixin
 
 _SERVICE_CHECK_CAN_LOGIN = "can_login"
 _SERVICE_CHECK_CAN_CONNECT = "can_connect"
+_STATUS_NORMALIZATION = {
+    "ended ok": "ended_ok",
+    "ended not ok": "ended_not_ok",
+    "executing": "executing",
+    "wait condition": "wait_condition",
+    "waiting for condition": "wait_condition",
+    "wait event": "wait_event",
+    "waiting for event": "wait_event",
+    "wait user": "wait_user",
+    "waiting for user": "wait_user",
+    "wait resource": "wait_resource",
+    "waiting for resource": "wait_resource",
+    "wait host": "wait_host",
+    "waiting for host": "wait_host",
+    "wait workload": "wait_workload",
+    "waiting for workload": "wait_workload",
+    "canceled": "canceled",
+    "cancelled": "canceled",
+}
+_TERMINAL_STATUSES = {"ended_ok", "ended_not_ok", "canceled"}
+_WAITING_STATUSES = {"wait_condition", "wait_event", "wait_user", "wait_resource", "wait_host", "wait_workload"}
+_UP_STATES = {"up", "available", "connected", "active"}
 
 
 class ControlMCheck(AgentCheck, ConfigMixin):
@@ -19,6 +43,14 @@ class ControlMCheck(AgentCheck, ConfigMixin):
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
 
+        self._configure_auth()
+        self._configure_collection()
+
+        self._base_tags = [f"control_m_instance:{self._api_endpoint}"]
+        self._token = None
+        self._token_expiration = 0.0
+
+    def _configure_auth(self):
         self._api_endpoint = self.instance.get("control_m_api_endpoint", "").rstrip("/")
         if not self._api_endpoint:
             raise ConfigurationError("`control_m_api_endpoint` is required")
@@ -44,7 +76,6 @@ class ControlMCheck(AgentCheck, ConfigMixin):
             )
 
         self._use_session_login = not self._has_static_token and self._has_credentials
-
         self._token_lifetime = self.instance.get("token_lifetime_seconds", 1800)
         self._token_refresh_buffer = self.instance.get("token_refresh_buffer_seconds", 300)
         if self._token_refresh_buffer >= self._token_lifetime:
@@ -54,12 +85,9 @@ class ControlMCheck(AgentCheck, ConfigMixin):
                 self._token_refresh_buffer,
             )
 
-        self._base_tags = [f"control_m_instance:{self._api_endpoint}"]
-
-        self._token = None
-        self._token_expiration = 0.0
-        self._static_token_retry_after = 0.0
-        self._static_token_retry_interval = 300.0
+    def _configure_collection(self):
+        self._job_status_limit = int(self.instance.get("job_status_limit", 200))
+        self._job_name_filter = self.instance.get("job_name_filter", "*")
 
     def _login(self):
         # Used in session login mode only. Retrieve a new token from the API to use for subsequent requests.
@@ -138,12 +166,26 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         return response
 
     def _auth_method_tag(self):
+        # Added to keep track of which authentication method is being used.
         if self._use_session_login:
             return "auth_method:session_login"
         return "auth_method:static_token"
 
     def _auth_tags(self):
         return self._base_tags + [self._auth_method_tag()]
+
+    def _collect_server_health(self, servers):
+        # Collect server health from the Control-M API. 1 is up, 0 is down.
+        if not isinstance(servers, list):
+            return
+
+        for server in servers:
+            ctm_server = server.get("name") or server.get("ctm") or server.get("server") or "unknown"
+            raw_state = str(server.get("state", "unknown"))
+            state_tag = raw_state.lower().replace(" ", "_")
+            is_up = 1 if state_tag in _UP_STATES else 0
+            tags = self._base_tags + [f"ctm_server:{ctm_server}", f"state:{state_tag}"]
+            self.gauge("server.up", is_up, tags=tags)
 
     def check(self, _):
         auth_tags = self._auth_tags()
@@ -187,7 +229,155 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         self.service_check(_SERVICE_CHECK_CAN_CONNECT, self.OK, tags=auth_tags)
         self.gauge("can_connect", 1, tags=auth_tags)
 
+        self._collect_server_health(servers)
         self._collect_metadata(servers)
+        self._collect_job_statuses()
+
+    def _collect_job_statuses(self):
+        url = self._build_jobs_status_url()
+        try:
+            response = self._make_request("get", url)
+            response.raise_for_status()
+            payload = response.json()
+        except Exception as e:
+            self.log.debug("Unable to collect job statuses from /run/jobs/status: %s", e)
+            return
+
+        statuses = payload.get("statuses", []) if isinstance(payload, dict) else []
+        if not statuses:
+            return
+
+        status_counts = {}
+        active_by_server = {}
+        waiting_by_server = {}
+
+        for job in statuses:
+            if not isinstance(job, dict):
+                continue
+
+            normalized_status = self._normalize_status(job.get("status"))
+            ctm_server = str(job.get("ctm") or job.get("server") or "unknown")
+
+            self._increment_count(status_counts, (ctm_server, normalized_status))
+            if normalized_status not in _TERMINAL_STATUSES:
+                self._increment_count(active_by_server, ctm_server)
+            if normalized_status in _WAITING_STATUSES:
+                self._increment_count(waiting_by_server, ctm_server)
+
+            if normalized_status in _TERMINAL_STATUSES:
+                result = self._result_from_status(normalized_status)
+                metric_tags = self._job_metric_tags(job)
+                completion_tags = metric_tags + [f"result:{result}"]
+                self.count("job.run.count", 1, tags=completion_tags)
+                duration_ms = self._duration_ms(job)
+                if duration_ms is not None:
+                    self.histogram("job.run.duration_ms", duration_ms, tags=completion_tags)
+
+        for (ctm_server, normalized_status), count in status_counts.items():
+            tags = self._base_tags + [f"ctm_server:{ctm_server}", f"status:{normalized_status}"]
+            self.gauge("jobs.by_status", count, tags=tags)
+
+        for ctm_server, count in active_by_server.items():
+            tags = self._base_tags + [f"ctm_server:{ctm_server}"]
+            self.gauge("jobs.active", count, tags=tags)
+
+        global_waiting_total = sum(waiting_by_server.values())
+        self.gauge("jobs.waiting.total", global_waiting_total, tags=self._base_tags)
+        for ctm_server, count in waiting_by_server.items():
+            tags = self._base_tags + [f"ctm_server:{ctm_server}"]
+            self.gauge("jobs.waiting.total", count, tags=tags)
+
+    def _build_jobs_status_url(self):
+        query = {
+            "limit": self._job_status_limit,
+            "jobname": self._job_name_filter,
+        }
+        return f"{self._api_endpoint}/run/jobs/status?{urlencode(query)}"
+
+    def _increment_count(self, counter, key):
+        counter[key] = counter.get(key, 0) + 1
+
+    def _normalize_status(self, status):
+        # Normalize the status to a known value.
+        if not status:
+            return "unknown"
+        normalized = _STATUS_NORMALIZATION.get(str(status).strip().lower())
+        if normalized:
+            return normalized
+        return "unknown"
+
+    def _result_from_status(self, status):
+        # Map the normalized status to a known result after job run completion.
+        if status == "ended_ok":
+            return "ok"
+        if status == "ended_not_ok":
+            return "failed"
+        if status == "canceled":
+            return "canceled"
+        return "unknown"
+
+    def _job_metric_tags(self, job):
+        # Build tags for the job.
+        ctm_server = job.get("ctm") or "unknown"
+        tags = self._base_tags + [f"ctm_server:{ctm_server}"]
+
+        job_name = job.get("name")
+        if job_name:
+            tags.append(f"job_name:{job_name}")
+
+        folder = job.get("folder")
+        if folder:
+            tags.append(f"folder:{folder}")
+
+        job_type = job.get("type")
+        if job_type:
+            tags.append(f"type:{str(job_type).lower()}")
+
+        return tags
+
+    def _duration_ms(self, job):
+        # Calculate the job duration in milliseconds from start/end timestamps.
+        start = self._parse_datetime(job.get("startTime"))
+        end = self._parse_datetime(job.get("endTime"))
+        if start is None or end is None:
+            return None
+        delta_ms = int((end - start).total_seconds() * 1000)
+        if delta_ms < 0:
+            return None
+        return delta_ms
+
+    def _parse_datetime(self, value):
+        # Parse datetime values from compact Control-M format or human-readable fallback.
+        timestamp = self._timestamp_string(value)
+        if not timestamp:
+            return None
+
+        compact = timestamp.strip()
+        if compact.isdigit() and len(compact) == 14:
+            try:
+                return datetime.strptime(compact, "%Y%m%d%H%M%S")
+            except ValueError:
+                return None
+
+        try:
+            return datetime.strptime(compact, "%b %d, %Y, %I:%M:%S %p")
+        except ValueError:
+            return None
+
+    def _timestamp_string(self, value):
+        # Estimated times can sometimes be a list...
+        if isinstance(value, list):
+            if not value:
+                return None
+            first = value[0]
+            if first is None:
+                return None
+            return str(first)
+
+        if value is None:
+            return None
+
+        return str(value)
 
     @AgentCheck.metadata_entrypoint
     def _collect_metadata(self, servers):
