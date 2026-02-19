@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 37.31.0 / 2026-02-19
+
+***Security***:
+
+* Bump `orjson` to 3.11.7 to address CVE ([#22556](https://github.com/DataDog/integrations-core/pull/22556))
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Bump ddtrace to version 3.19.5 ([#22482](https://github.com/DataDog/integrations-core/pull/22482))
+
 ## 37.30.0 / 2026-02-11
 
 ***Security***:
