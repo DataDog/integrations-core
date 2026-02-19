@@ -1,0 +1,32 @@
+[
+    {
+        "agent_version": "7.78.0",
+        "integration": "Control-M",
+        "check": "control_m.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "control_m_instance",
+            "auth_method"
+        ],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent cannot reach the Control-M API endpoint. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.78.0",
+        "integration": "Control-M",
+        "check": "control_m.can_login",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "control_m_instance",
+            "auth_method"
+        ],
+        "name": "Can Login",
+        "description": "Returns `CRITICAL` if session authentication to Control-M fails. Returns `OK` when authentication succeeds."
+    }
+]
