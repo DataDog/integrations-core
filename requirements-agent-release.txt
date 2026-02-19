@@ -230,7 +230,7 @@ datadog-tibco-ems==2.4.0; sys_platform != 'win32'
 datadog-tls==5.5.0
 datadog-tokumx==3.5.0
 datadog-tomcat==4.2.0
-datadog-torchserve==4.2.0
+datadog-torchserve==4.3.0
 datadog-traefik-mesh==3.2.0
 datadog-traffic-server==3.4.0
 datadog-twemproxy==3.2.0
