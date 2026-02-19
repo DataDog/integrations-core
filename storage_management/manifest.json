@@ -1,8 +1,8 @@
 {
   "manifest_version": "2.0.0",
-  "app_uuid": "a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
+  "app_uuid": "3a48ff0b-4627-4b24-9eb6-7fb68da9f4c9",
   "app_id": "storage-management",
-  "owner": "agent-integrations",
+  "owner": "new-workloads",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -40,7 +40,7 @@
   },
   "assets": {
     "integration": {
-      "source_type_id": 0,
+      "auto_install": true,
       "source_type_name": "Storage Management",
       "events": {
         "creates_events": false
@@ -58,7 +58,9 @@
         ],
         "metadata_path": "metadata.csv"
       },
-      "auto_install": true
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Storage Management for Amazon S3": "assets/dashboards/storage_management_amazon_s3.json"
