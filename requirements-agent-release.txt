@@ -50,7 +50,7 @@ datadog-cloudgen-firewall==1.1.0
 datadog-cockroachdb==6.3.0
 datadog-confluent-platform==3.2.0
 datadog-consul==5.3.0
-datadog-coredns==6.2.0; sys_platform == 'linux2'
+datadog-coredns==6.3.0; sys_platform == 'linux2'
 datadog-couch==9.2.0
 datadog-couchbase==6.3.0
 datadog-crio==5.2.0
