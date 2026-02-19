@@ -19,8 +19,8 @@ ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN' -Wl,--strip-debug"
 RUN yum install -y perl-IPC-Cmd perl-CPANPLUS perl-core && \
  cpanp -i List::Util 1.66 && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
- VERSION="3.5.4" \
- SHA256="967311f84955316969bdb1d8d4b983718ef42338639c621ec4c34fddef355e99" \
+ VERSION="3.6.1" \
+ SHA256="b1bfedcd5b289ff22aee87c9d600f515767ebf45f77168cb6d64f231f518a82e" \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \
@@ -36,11 +36,11 @@ RUN yum install -y perl-IPC-Cmd perl-CPANPLUS perl-core && \
  ldconfig
 
 # Compile and install Python 3
-ENV PYTHON3_VERSION=3.13.11
+ENV PYTHON3_VERSION=3.13.12
 RUN yum install -y libffi-devel && \
  DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
  VERSION="${PYTHON3_VERSION}" \
- SHA256="03cfedbe06ce21bc44ce09245e091a77f2fee9ec9be5c52069048a181300b202" \
+ SHA256="12e7cb170ad2d1a69aee96a1cc7fc8de5b1e97a2bdac51683a3db016ec9a2996" \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh \
  --prefix=/opt/python/${PYTHON3_VERSION} \
@@ -154,8 +154,8 @@ RUN \
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
- VERSION="8.16.0" \
- SHA256="a21e20476e39eca5a4fc5cfb00acf84bbc1f5d8443ec3853ad14c26b3c85b970" \
+ VERSION="8.18.0" \
+ SHA256="e9274a5f8ab5271c0e0e6762d2fce194d5f98acc568e4ce816845b2dcc0cf88f" \
  RELATIVE_PATH="curl-{{version}}" \
   bash install-from-source.sh \
     --disable-manual \

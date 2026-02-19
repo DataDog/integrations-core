@@ -1,4 +1,5 @@
 name: Impala
+fleet_configurable: true
 files:
   - name: impala.yaml
     options:
@@ -8,6 +9,7 @@ files:
       - template: instances
         options:
           - name: service_type
+            fleet_configurable: true
             required: true
             description: |
               The Impala service you want to monitor. Possible values are `daemon`, `statestore`, and `catalog`.

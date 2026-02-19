@@ -1,4 +1,5 @@
 name: Marathon
+fleet_configurable: true
 
 files:
   - name: marathon.yaml
@@ -11,6 +12,7 @@ files:
         options:
           - name: url
             description: The API endpoint of your Marathon master.
+            fleet_configurable: true
             required: True
             value:
               example: https://<SERVER>:<PORT>

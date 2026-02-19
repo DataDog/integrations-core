@@ -469,9 +469,7 @@ class MySql(DatabaseCheck):
         if self.global_variables.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
             if not self.is_mariadb and self.version.version_compatible((8, 0, 0)) and self._config.dbm_enabled:
-                error_query = QUERY_ERRORS_RAISED.copy()
-                error_query['query'] = error_query['query'].format(user=self._config.user)
-                queries.extend([error_query])
+                queries.extend([QUERY_ERRORS_RAISED])
         if self._index_metrics.include_index_metrics:
             queries.extend(self._index_metrics.queries)
         self._runtime_queries_cached = self._new_query_executor(queries)
@@ -688,15 +686,16 @@ class MySql(DatabaseCheck):
             metrics.update(TABLE_VARS)
 
         if self._config.replication_enabled:
+            with tracked_query(self, operation="replication_metrics"):
+                replication_metrics = self._collect_replication_metrics(db, results, above_560)
+            if replication_metrics:
+                metrics.update(replication_metrics)
+                self._check_replication_status(results)
+
             if self.global_variables.performance_schema_enabled and self._group_replication_active:
                 self.log.debug('Collecting group replication metrics.')
                 with tracked_query(self, operation="group_replication_metrics"):
                     self._collect_group_replica_metrics(db, results)
-            else:
-                with tracked_query(self, operation="replication_metrics"):
-                    replication_metrics = self._collect_replication_metrics(db, results, above_560)
-                metrics.update(replication_metrics)
-                self._check_replication_status(results)
 
         if len(self._config.additional_status) > 0:
             additional_status_dict = {}
@@ -768,10 +767,19 @@ class MySql(DatabaseCheck):
                 )
 
     def _collect_replication_metrics(self, db, results, above_560):
-        # Get replica stats
-        results.update(self._get_replica_stats(db))
-        results.update(self._get_replicas_connected_count(db, above_560))
-        return REPLICA_VARS
+        replica_stats = self._get_replica_stats(db)
+        replicas_connected = self._get_replicas_connected_count(db, above_560)
+
+        # When group replication is not active, always report traditional replication metrics
+        # so _check_replication_status can emit WARNING for sources with 0 replicas.
+        has_traditional_replication = (
+            replica_stats or replicas_connected.get('Replicas_connected', 0) > 0 or not self._group_replication_active
+        )
+        if has_traditional_replication:
+            results.update(replica_stats)
+            results.update(replicas_connected)
+            return REPLICA_VARS
+        return {}
 
     def _collect_group_replica_metrics(self, db, results):
         try:

@@ -1,4 +1,5 @@
 name: Gearman
+fleet_configurable: true
 files:
 - name: gearmand.yaml
   options:
@@ -9,11 +10,13 @@ files:
     options:
       - name: server
         description: Server to connect to.
+        fleet_configurable: true
         value:
           example: "127.0.0.1"
           type: string
       - name: port
         description: Port to use when connecting to "server".
+        fleet_configurable: true
         value:
           example: 4730
           type: integer
@@ -23,6 +26,7 @@ files:
           collect metrics on (up to 200 tasks).
           If you have fewer than 200 tasks, you don't have to set this parameter,
           the metrics are collected on all the tasks by default.
+        fleet_configurable: true
         value:
           type: array
           items:

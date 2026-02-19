@@ -1,0 +1,1 @@
+Support collecting both group replication and traditional primary/replica replication metrics simultaneously. This enables monitoring of hybrid MySQL topologies where a server participates in group replication while also having traditional replicas connected.

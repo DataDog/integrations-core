@@ -11,6 +11,7 @@ datadog-ambari==6.3.0; sys_platform != 'win32'
 datadog-apache==7.2.0
 datadog-appgate-sdp==2.2.0; sys_platform != 'win32'
 datadog-arangodb==4.2.0
+datadog-arctic-wolf-aurora-endpoint-security==1.0.0
 datadog-argo-rollouts==3.2.0
 datadog-argo-workflows==3.2.0
 datadog-argocd==4.2.0
@@ -32,11 +33,13 @@ datadog-ceph==4.3.0; sys_platform != 'win32'
 datadog-cert-manager==6.2.0
 datadog-checkpoint-harmony-endpoint==1.1.0
 datadog-checkpoint-quantum-firewall==1.2.0
-datadog-checks-base==37.26.1
+datadog-checks-base==37.30.0
 datadog-checks-dependency-provider==3.2.0
 datadog-checks-downloader==9.0.0
 datadog-cilium==6.2.0
-datadog-cisco-aci==4.11.0
+datadog-cisco-aci==4.12.0
+datadog-cisco-asa==1.0.0
+datadog-cisco-secure-client==1.0.0
 datadog-cisco-secure-firewall==1.2.0
 datadog-cisco-secure-web-appliance==1.3.0
 datadog-citrix-hypervisor==6.2.0
@@ -92,7 +95,7 @@ datadog-hdfs-datanode==7.2.0; sys_platform != 'win32'
 datadog-hdfs-namenode==7.2.0; sys_platform != 'win32'
 datadog-hive==2.3.0
 datadog-hivemq==2.3.0
-datadog-http-check==12.3.0
+datadog-http-check==12.4.0
 datadog-hudi==4.2.0
 datadog-hugging-face-tgi==1.3.0
 datadog-hyperv==3.2.0; sys_platform == 'win32'
@@ -100,7 +103,7 @@ datadog-ibm-ace==4.3.0
 datadog-ibm-db2==4.2.0
 datadog-ibm-i==4.3.0; sys_platform != 'win32'
 datadog-ibm-mq==8.7.0
-datadog-ibm-spectrum-lsf==1.1.0
+datadog-ibm-spectrum-lsf==1.2.0
 datadog-ibm-was==5.3.0
 datadog-iboss==1.2.0
 datadog-ignite==3.3.0
@@ -112,8 +115,8 @@ datadog-ivanti-connect-secure==1.2.0
 datadog-jboss-wildfly==3.3.0
 datadog-journald==3.2.0
 datadog-juniper-srx-firewall==1.2.0
-datadog-kafka-actions==2.0.1
-datadog-kafka-consumer==6.10.2
+datadog-kafka-actions==2.2.0
+datadog-kafka-consumer==6.13.0
 datadog-kafka==4.3.0
 datadog-karpenter==3.2.0
 datadog-keda==2.2.0
@@ -154,7 +157,7 @@ datadog-microsoft-dns==1.2.0; sys_platform == 'win32'
 datadog-microsoft-sysmon==1.2.0; sys_platform == 'win32'
 datadog-milvus==2.3.0
 datadog-mongo==10.6.0
-datadog-mysql==15.11.1
+datadog-mysql==15.12.0
 datadog-nagios==3.2.0
 datadog-network==5.5.0
 datadog-nfsstat==3.3.0; sys_platform == 'linux2'
@@ -168,7 +171,6 @@ datadog-openmetrics==7.2.0
 datadog-openstack-controller==9.3.0
 datadog-openstack==4.2.0
 datadog-openvpn==1.2.0
-datadog-oracle==6.2.0
 datadog-ossec-security==2.2.0
 datadog-palo-alto-panorama==1.2.0
 datadog-pan-firewall==3.2.0
@@ -177,7 +179,7 @@ datadog-pgbouncer==8.7.0; sys_platform != 'win32'
 datadog-php-fpm==6.2.0
 datadog-ping-federate==2.2.0
 datadog-postfix==3.2.0; sys_platform != 'win32'
-datadog-postgres==23.3.3
+datadog-postgres==23.3.4
 datadog-powerdns-recursor==5.2.0
 datadog-presto==3.3.0
 datadog-process==5.3.0
@@ -200,13 +202,13 @@ datadog-silverstripe-cms==1.6.0
 datadog-singlestore==4.4.0
 datadog-slurm==2.2.0; sys_platform == 'linux2'
 datadog-snmp==12.2.0
-datadog-snowflake==7.9.0
+datadog-snowflake==7.10.0
 datadog-solr==2.3.0
 datadog-sonarqube==5.5.0
 datadog-sonatype-nexus==2.2.0; sys_platform != 'darwin'
 datadog-sonicwall-firewall==1.3.0
-datadog-spark==7.3.1
-datadog-sqlserver==22.12.1
+datadog-spark==7.4.0
+datadog-sqlserver==22.12.4
 datadog-squid==5.2.0
 datadog-ssh-check==4.5.0
 datadog-statsd==3.2.0
@@ -225,7 +227,7 @@ datadog-temporal==4.2.0
 datadog-tenable==3.2.0
 datadog-teradata==4.2.0; sys_platform != 'darwin'
 datadog-tibco-ems==2.3.0; sys_platform != 'win32'
-datadog-tls==5.3.0
+datadog-tls==5.4.0
 datadog-tokumx==3.4.0
 datadog-tomcat==4.2.0
 datadog-torchserve==4.2.0

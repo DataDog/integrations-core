@@ -1,4 +1,5 @@
 name: Amazon Fargate
+fleet_configurable: true
 files:
   - name: ecs_fargate.yaml
     options:
@@ -11,7 +12,7 @@ files:
           - template: instances/http
           - template: instances/default
             overrides:
-              min_collection_interval.display_default: 20
+              min_collection_interval.value.display_default: 20
               min_collection_interval.value.example: 20
               min_collection_interval.enabled: true
   - name: default.yaml
@@ -34,6 +35,6 @@ files:
           - template: instances/http
           - template: instances/default
             overrides:
-              min_collection_interval.display_default: 20
+              min_collection_interval.value.display_default: 20
               min_collection_interval.value.example: 20
               min_collection_interval.enabled: true

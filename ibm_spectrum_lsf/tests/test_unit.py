@@ -17,6 +17,7 @@ from .common import (
     ALL_DEFAULT_METRICS,
     ALL_METRICS,
     BADMIN_PERFMON_METRICS,
+    BHIST_DETAILS_METRICS,
     BHIST_METRICS,
     BJOBS_METRICS,
     CLUSTER_METRICS,
@@ -70,6 +71,7 @@ def test_check_gpu_enabled(mock_client, dd_run_check, aggregator, instance):
         'bhist',
         'lsload_gpu',
         'bhosts_gpu',
+        'bhist_details',
     ]
     check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
     check.client = mock_client
@@ -95,6 +97,7 @@ def test_check_all_metric_sources(mock_client, dd_run_check, aggregator, instanc
         'lsload_gpu',
         'bhosts_gpu',
         'badmin_perfmon',
+        'bhist_details',
     ]
     check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
     check.client = mock_client
@@ -169,7 +172,7 @@ def test_bjobs_no_output(mock_client, dd_run_check, aggregator, instance, caplog
 
     assert_metrics(ALL_DEFAULT_METRICS, BJOBS_METRICS, aggregator)
 
-    assert "Skipping bjobs metrics; unexpected cli command output. Number of columns: 1, expected: 13" in caplog.text
+    assert "Skipping bjobs metrics; unexpected cli command output. Number of columns: 1, expected: 14" in caplog.text
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -212,6 +215,16 @@ def test_check_metric_sources_invalid(mock_client, dd_run_check, instance):
     check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
     check.client = mock_client
     with pytest.raises(Exception, match="Invalid metric source: test"):
+        dd_run_check(check)
+
+
+def test_check_bhist_details_requires_bhist(mock_client, dd_run_check, instance):
+    instance["metric_sources"] = ['bhist_details']
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    with pytest.raises(
+        Exception, match="bhist_details is dependent on bhist, please enable bhist to collect bhist_details metrics"
+    ):
         dd_run_check(check)
 
 
@@ -332,6 +345,7 @@ def test_badmin_perfmon_start_only_called_once(mock_client, dd_run_check, aggreg
                 'bhist',
                 'lsload_gpu',
                 'bhosts_gpu',
+                'bhist_details',
             ],
             1,
             [call(60)],
@@ -515,3 +529,182 @@ def test_bhist_correct_time_intervals(mock_client, dd_run_check, aggregator, ins
         ]
         assert_metrics(BHIST_METRICS + LSID_METRICS, [], aggregator)
         aggregator.assert_all_metrics_covered()
+
+
+def test_bhist_details(mock_client, dd_run_check, aggregator, instance):
+    instance['metric_sources'] = ['bhist', 'bhist_details']
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    dd_run_check(check)
+    assert_metrics(BHIST_METRICS + BHIST_DETAILS_METRICS + LSID_METRICS, [], aggregator)
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize(
+    "bhist_output,expected_log_message",
+    [
+        pytest.param(
+            ("", "Failed to execute bhist command", 1),
+            "Failed to get bhist output: Failed to execute bhist command. No completed job IDs will be tracked.",
+            id="non_zero_exit_code",
+        ),
+        pytest.param(
+            ("", "", 0),
+            "No jobs found in bhist output. No completed job IDs will be tracked.",
+            id="empty_output",
+        ),
+        pytest.param(
+            ("Summary line only", "", 0),
+            "No jobs found in bhist output. No completed job IDs will be tracked.",
+            id="insufficient_lines",
+        ),
+        pytest.param(
+            (
+                "Summary of time in seconds spent in various states:\n"
+                "JOBID   USER    JOB_NAME  PEND    PSUSP   RUN     USUSP   SSUSP   UNKWN   TOTAL\n   \nsdfsdf",
+                "",
+                0,
+            ),
+            "Skipping empty job line with missing job ID:",
+            id="empty_job_line",
+        ),
+    ],
+)
+def test_bhist_get_completed_job_ids_error(
+    mock_client, dd_run_check, aggregator, instance, caplog, bhist_output, expected_log_message
+):
+    instance['metric_sources'] = ['bhist', 'bhist_details']
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    mock_client.bhist.return_value = bhist_output
+
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    assert_metrics(LSID_METRICS, [], aggregator)
+    assert expected_log_message in caplog.text
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize(
+    "bhist_output,bhist_l_return_value,expected_log_message",
+    [
+        pytest.param(
+            (
+                "Summary of time in seconds spent in various states:\n"
+                "JOBID   USER    JOB_NAME  PEND    PSUSP   RUN     USUSP   SSUSP   UNKWN   TOTAL",
+                "",
+                0,
+            ),
+            ("", "", 0),
+            "No completed job IDs in registry",
+            id="empty_registry",
+        ),
+        pytest.param(
+            (
+                "Summary of time in seconds spent in various states:\n"
+                "JOBID   USER    JOB_NAME  PEND    PSUSP   RUN     USUSP   SSUSP   UNKWN   TOTAL\n"
+                "9999    test-user test-job 0       0       56      0       0       0       56",
+                "",
+                0,
+            ),
+            ("", "Job <9999> not found", 1),
+            "Failed to get details for job 9999: Job <9999> not found",
+            id="bhist_l_not_found",
+        ),
+        pytest.param(
+            (
+                "Summary of time in seconds spent in various states:\n"
+                "JOBID   USER    JOB_NAME  PEND    PSUSP   RUN     USUSP   SSUSP   UNKWN   TOTAL\n"
+                "8888    test-user test-job 0       0       56      0       0       0       56\n"
+                "7777    test-user test-job1 1       0       57      0       0       0       58",
+                "",
+                0,
+            ),
+            ("", "Failed to execute bhist_l", 1),
+            "Failed to get details for job 8888: Failed to execute bhist_l",
+            id="bhist_l_error",
+        ),
+        pytest.param(
+            (
+                "Summary of time in seconds spent in various states:\n"
+                "JOBID   USER    JOB_NAME  PEND    PSUSP   RUN     USUSP   SSUSP   UNKWN   TOTAL\n"
+                "6666    test-user test-job 0       0       56      0       0       0       56",
+                "",
+                0,
+            ),
+            ("----------", "", 0),
+            "Skipping empty job section",
+            id="empty_job_section",
+        ),
+    ],
+)
+def test_bhist_details_get_bhist_details_error(
+    mock_client,
+    dd_run_check,
+    aggregator,
+    instance,
+    caplog,
+    bhist_output,
+    bhist_l_return_value,
+    expected_log_message,
+):
+    instance['metric_sources'] = ['bhist', 'bhist_details']
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+
+    mock_client.bhist.return_value = bhist_output
+    mock_client.bhist_l.side_effect = None
+    mock_client.bhist_l.return_value = bhist_l_return_value
+
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    assert_metrics(LSID_METRICS, [], aggregator)
+    assert expected_log_message in caplog.text
+
+
+@pytest.mark.parametrize(
+    "metric_sources,populate_completed_job_ids",
+    [
+        pytest.param(
+            ['bhist'],
+            False,
+            id="bhist_details_disabled",
+        ),
+        pytest.param(
+            ['bhist', 'bhist_details'],
+            True,
+            id="bhist_details_enabled",
+        ),
+    ],
+)
+def test_populate_completed_job_ids_only_when_bhist_details_enabled(
+    mock_client,
+    dd_run_check,
+    aggregator,
+    instance,
+    metric_sources,
+    populate_completed_job_ids,
+):
+    instance['metric_sources'] = metric_sources
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+
+    with (
+        patch(
+            'datadog_checks.ibm_spectrum_lsf.processors.BHistProcessor.get_completed_job_ids'
+        ) as mock_get_completed_job_ids,
+        patch.object(check.completed_job_ids, 'set') as mock_set_job_ids,
+    ):
+        dd_run_check(check)
+
+        if populate_completed_job_ids:
+            assert mock_get_completed_job_ids.call_count == 1
+            assert mock_set_job_ids.call_count == 1
+        else:
+            assert mock_get_completed_job_ids.call_count == 0
+            assert mock_set_job_ids.call_count == 0
+
+    assert_metrics(BHIST_METRICS + LSID_METRICS, [], aggregator)
+    aggregator.assert_all_metrics_covered()

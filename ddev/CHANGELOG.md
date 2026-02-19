@@ -2,6 +2,40 @@
 
 <!-- towncrier release notes start -->
 
+## 14.3.0 / 2026-02-13
+
+***Added***:
+
+* Add EventBusOrchestrator to ddev toolset ([#22394](https://github.com/DataDog/integrations-core/pull/22394))
+* Add --recreate/-r flag to ddev env test command to recreate environments from scratch before running tests ([#22521](https://github.com/DataDog/integrations-core/pull/22521))
+* Update datadog_checks_dev pin ([#22637](https://github.com/DataDog/integrations-core/pull/22637))
+
+***Fixed***:
+
+* Ignore upgrade check in dev versions and also fix windows cache location ([#22359](https://github.com/DataDog/integrations-core/pull/22359))
+* Update ddev build commands ([#22414](https://github.com/DataDog/integrations-core/pull/22414))
+* Fix type checking in `ddev test -s` by analyzing all files when none are explicitly specified. ([#22421](https://github.com/DataDog/integrations-core/pull/22421))
+* Ignore deleted news fragments during release when validating changelog in PRs ([#22506](https://github.com/DataDog/integrations-core/pull/22506))
+* Improve license parsing in validation ([#22559](https://github.com/DataDog/integrations-core/pull/22559))
+
+## 14.2.0 / 2026-01-28
+
+***Added***:
+
+* Add option to periodically check for new version of ddev from PyPi ([#20658](https://github.com/DataDog/integrations-core/pull/20658))
+* Added feature to track new integrations released ([#22057](https://github.com/DataDog/integrations-core/pull/22057))
+* Automatically check for agent branch existence before updating build_agent.yaml during release branch creation and tagging. ([#22241](https://github.com/DataDog/integrations-core/pull/22241))
+* Add watt-hour as valid metric units ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Add DynamicD tool for generating realistic fake telemetry data using AI ([#22328](https://github.com/DataDog/integrations-core/pull/22328))
+
+***Fixed***:
+
+* Improve logging and UX for Docker Agent lifecycle commands (start-up, local packages, post-install, stop) in E2E testing ([#22042](https://github.com/DataDog/integrations-core/pull/22042))
+* Ensure ddtrace is used with pytest for every package to emit CI visibility tracking by updating the hatch plugin and `ddev env test` command. ([#22355](https://github.com/DataDog/integrations-core/pull/22355))
+* Handle missing merge base commits in `ddev size status` by falling back to local lockfiles. ([#22357](https://github.com/DataDog/integrations-core/pull/22357))
+* Add pagination when fetching previous sizes in `ddev size status` ([#22361](https://github.com/DataDog/integrations-core/pull/22361))
+* Update ddev validate labeler to work with labeler v5+ ([#22436](https://github.com/DataDog/integrations-core/pull/22436))
+
 ## 14.1.0 / 2025-12-18
 
 ***Added***:

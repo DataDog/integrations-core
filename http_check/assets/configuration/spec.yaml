@@ -1,4 +1,5 @@
 name: HTTP
+fleet_configurable: true
 files:
 - name: http_check.yaml
   options:
@@ -9,6 +10,7 @@ files:
   - template: instances
     options:
     - name: name
+      fleet_configurable: true
       required: true
       description: |
         Name of your HTTP check instance.
@@ -18,6 +20,7 @@ files:
         example: My first service
         type: string
     - name: url
+      fleet_configurable: true
       required: true
       description: |
         Url to check
@@ -27,6 +30,7 @@ files:
         example: http://some.url.example.com
     - name: method
       description: The method parameter allows you to change the HTTP method used in the request.
+      fleet_configurable: true
       value:
         type: string
         example: get
@@ -35,11 +39,12 @@ files:
         If any one of the POST, PUT, DELETE, or PATCH method is specified, you can choose to send data in the body of the
         request with the data parameter.
         SOAP requests are supported if you use the POST method and supply an XML string as the data parameter.
+      fleet_configurable: true
+      enabled: false
       value:
         anyOf:
         - type: object
         - type: string
-        enabled: false
         example:
           <KEY>: <VALUE>
     - name: content_match
@@ -56,6 +61,7 @@ files:
         Examples:
         content_match: 'In Stock'
         content_match: '^(Bread|Apples|Very small rocks|Cider|Gravy|Cherries|Mud|Churches|Lead) float(s)? in water'
+      fleet_configurable: true
       value:
         type: string
         example: '<REGEX>'
@@ -64,6 +70,7 @@ files:
         The reverse_content_match parameter will allow the content_match
         to work the other way around. That means that the check will report
         as DOWN if the string is found.
+      fleet_configurable: true
       value:
         type: boolean
         example: false
@@ -74,6 +81,7 @@ files:
         a set of possible status codes.
         The check will report as DOWN if status code returned differs.
         This defaults to 1xx, 2xx and 3xx HTTP status code.
+      fleet_configurable: true
       value:
         anyOf:
           - type: string
@@ -87,6 +95,7 @@ files:
         in notifications sent by this plugin. This is best used with
         "healthcheck"-type URLs, where the body contains a brief, human-
         readable summary of failure reasons in the case of errors.
+      fleet_configurable: true
       value:
         type: boolean
         example: false
@@ -95,6 +104,7 @@ files:
         Set collect_response_time parameter to true to instruct the check to
         create a metric 'network.http.response_time', tagged with
         the url, reporting the response time in seconds.
+      fleet_configurable: true
       value:
         type: boolean
         example: true
@@ -113,6 +123,7 @@ files:
 
         By default, for the expiration check, the Agent validates the SSL certificate
         hostname against the host of the provided url.
+      fleet_configurable: true
       value:
         type: boolean
         example: true
@@ -122,6 +133,7 @@ files:
         when the `check_certificate_expiration` option is enabled. This connection happens
         after the HTTP(S) request. When this option is enabled, the check instead uses the
         certificate from the original response to check the expiration.
+      fleet_configurable: true
       value:
         type: boolean
         example: true
@@ -132,16 +144,19 @@ files:
         certificate to be examined for an expiration date in either case.
 
         This option has no effect if `use_cert_from_response` is enabled.
+      fleet_configurable: true
       value:
         type: boolean
         example: false
     - name: days_warning
       description: Express warning threshold for the HTTP check in days
+      fleet_configurable: true
       value:
         type: integer
         example: 14
     - name: days_critical
       description: Express critical threshold for the HTTP check in days
+      fleet_configurable: true
       value:
         type: integer
         example: 7
@@ -161,6 +176,7 @@ files:
       description: |
         If necessary and check_hostname is set to true,
         override the hostname to match with ssl_server_name.
+      fleet_configurable: true
       value:
         type: string
     - name: stream
@@ -175,6 +191,7 @@ files:
         The (optional) include_default_headers parameter instructs the check to include the default headers.
         Default headers can be found at:
         https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/utils/headers.py
+      fleet_configurable: true
       value:
         type: boolean
         example: true

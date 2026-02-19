@@ -2,11 +2,27 @@
 
 ## Overview
 
-The Versa integration lets you monitor your Versa environment within [Network Device Monitoring][1]. Gain comprehensive insights into the performance and health of your SD-WAN infrastructure, including sites, tunnels, and devices.
+[Network Device Monitoring][1] for Versa SD-WAN provides deep visibility into the health, performance, and traffic patterns of distributed SD-WAN environments managed by Versa. By collecting metrics from Versa controllers, appliances, tunnels, and links, this integration helps teams monitor WAN reliability, validate SLA performance, and understand how applications and users consume network resources across sites.
+
+With built-in device discovery and rich metadata, you can analyze Versa SD-WAN performance by site, appliance, tunnel, and access circuit, and quickly identify issues such as degraded paths, overloaded interfaces, or underperforming tunnels that may impact user experience.
+
+### WAN edge and controller health
+
+This integration surfaces key health and resource metrics for Versa appliances and control plane components, allowing teams to detect failures or capacity constraints early. You can track device availability, CPU, memory, disk usage, and uptime across branch and data center deployments to ensure SD-WAN infrastructure remains stable and responsive.
+
+### Link, tunnel, and path SLA monitoring
+
+Versa SD-WAN relies on SLA-based routing decisions to steer traffic across multiple transports. Datadog monitors latency, jitter, packet loss, utilization, and error rates across links, tunnels, and paths, helping you verify SLA compliance and troubleshoot degraded connectivity between sites.
+
+Historical SLA data makes it easier to understand whether performance issues are transient or persistent and whether routing decisions are behaving as expected.
+
+### Application, user, and QoS visibility
+
+This integration provides insight into how applications and users consume bandwidth across the WAN. You can identify top applications and users by site, track direct internet access (DIA) usage, and analyze QoS metrics such as traffic volume and drop rates to understand congestion, prioritization effectiveness, and traffic shaping behavior.
 
 ## Setup
 
-**The Versa NDM integration is in Preview and will not be billed until it is Generally Available.**
+**The Versa NDM integration is Generally Available. To learn more about billing implications, visit our [pricing page][10].**
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
@@ -55,3 +71,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/versa/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/versa/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/pricing/?product=network-monitoring&tab=network-device-monitoring#products

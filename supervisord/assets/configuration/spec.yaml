@@ -1,4 +1,5 @@
 name: Supervisord
+fleet_configurable: true
 files:
 - name: supervisord.yaml
   options:
@@ -8,6 +9,7 @@ files:
     - template: instances
       options: 
         - name: name
+          fleet_configurable: true
           required: true
           description: An arbitrary name to identify the supervisord server.
           value:
@@ -15,6 +17,7 @@ files:
             example: <SUPERVISORD_SERVER_NAME>
         - name: host
           description: The host where supervisord server is running.
+          fleet_configurable: true
           value: 
             type: string
             example: localhost
@@ -23,6 +26,7 @@ files:
             The TCP port value that supervisor is listening on for HTTP/XML-RPC requests.
 
             See: http://supervisord.org/configuration.html#inet-http-server-section-settings
+          fleet_configurable: true
           value:
             type: integer
             example: 9001
@@ -31,22 +35,26 @@ files:
             The path to a UNIX domain socket that supervisor is listening on for HTTP/XML-RPC requests.
 
             See: http://supervisord.org/configuration.html#unix-http-server-section-settings
+          fleet_configurable: true
           value:
             type: string
             example: <SOCKETFILE_PATH>
         - name: username
           description: Required only if a username is configured.
+          fleet_configurable: true
           value:
             type: string
             example: <USERNAME>
         - name: password
           description: Required only if a password is configured.
+          fleet_configurable: true
           secret: true
           value:
             type: string
             example: <PASSWORD>
         - name: proc_regex
           description: Regex pattern[s] matching the names of processes to monitor.
+          fleet_configurable: true
           value:
             type: array
             items:
@@ -56,6 +64,7 @@ files:
           description: |
             The process to monitor within this supervisord instance.
             If not specified, the check will monitor all processes.
+          fleet_configurable: true
           value:
             type: array
             items:
