@@ -248,7 +248,7 @@ datadog-weaviate==4.3.0
 datadog-weblogic==3.2.0
 datadog-win32-event-log==5.6.0; sys_platform == 'win32'
 datadog-windows-performance-counters==3.4.0; sys_platform == 'win32'
-datadog-windows-service==6.6.0; sys_platform == 'win32'
+datadog-windows-service==6.7.0; sys_platform == 'win32'
 datadog-wmi-check==4.0.0; sys_platform == 'win32'
 datadog-yarn==8.2.0
 datadog-zeek==1.2.0; sys_platform != 'win32'
