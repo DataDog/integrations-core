@@ -1,1 +1,2 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+control_m.can_connect,gauge,0,,,"Control-M API connectivity status (1 when API is reachable, 0 otherwise).",0,control_m,can connect,,
