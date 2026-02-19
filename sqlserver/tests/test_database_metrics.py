@@ -878,9 +878,9 @@ def test_sqlserver_index_usage_metrics(
         },
     }
     if index_usage_stats_interval:
-        instance_docker_metrics['database_metrics']['index_usage_metrics'][
-            'collection_interval'
-        ] = index_usage_stats_interval
+        instance_docker_metrics['database_metrics']['index_usage_metrics']['collection_interval'] = (
+            index_usage_stats_interval
+        )
 
     mocked_results_non_tempdb = [
         [
@@ -979,9 +979,9 @@ def test_sqlserver_db_fragmentation_metrics(
         },
     }
     if db_fragmentation_metrics_interval:
-        instance_docker_metrics['database_metrics']['db_fragmentation_metrics'][
-            'collection_interval'
-        ] = db_fragmentation_metrics_interval
+        instance_docker_metrics['database_metrics']['db_fragmentation_metrics']['collection_interval'] = (
+            db_fragmentation_metrics_interval
+        )
     mocked_results = [
         [
             ('master', 'spt_fallback_db', 'dbo', 0, None, 0, 0.0, 0, 0.0),
@@ -1533,9 +1533,9 @@ def test_sqlserver_database_backup_metrics(
         'db_backup_metrics': {'enabled': include_database_backup_metrics},
     }
     if database_backup_metrics_interval:
-        instance_docker_metrics['database_metrics']['db_backup_metrics'][
-            'collection_interval'
-        ] = database_backup_metrics_interval
+        instance_docker_metrics['database_metrics']['db_backup_metrics']['collection_interval'] = (
+            database_backup_metrics_interval
+        )
 
     mocked_results = [
         ('master', 'master', 0),

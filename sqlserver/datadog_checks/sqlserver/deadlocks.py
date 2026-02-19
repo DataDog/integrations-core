@@ -224,9 +224,7 @@ class Deadlocks(DBMAsyncJob):
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting SQLServer deadlocks.
-                        One of the deadlock XMLs couldn't be parsed. The error: {}. XML: {}""".format(
-                        e, row
-                    )
+                        One of the deadlock XMLs couldn't be parsed. The error: {}. XML: {}""".format(e, row)
                 )
                 continue
             query_signatures = {}

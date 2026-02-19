@@ -299,9 +299,7 @@ def test_activity_nested_blocking_transactions(
             id int,
             name varchar(10),
             city varchar(20)
-        )""".format(
-            TABLE_NAME
-        ),
+        )""".format(TABLE_NAME),
         "INSERT INTO {} VALUES (1001, 'tire', 'sfo')".format(TABLE_NAME),
         "INSERT INTO {} VALUES (1002, 'wisth', 'nyc')".format(TABLE_NAME),
         "INSERT INTO {} VALUES (1003, 'tire', 'aus')".format(TABLE_NAME),

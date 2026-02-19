@@ -156,9 +156,9 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str, x
     dbm_instance['dbm_enabled'] = True
     deadlock_payloads = _run_check_and_get_deadlock_payloads(dd_run_check, check, aggregator)
     try:
-        assert (
-            len(deadlock_payloads) == 1
-        ), f"Should have collected one deadlock payload, but collected: {len(deadlock_payloads)}"
+        assert len(deadlock_payloads) == 1, (
+            f"Should have collected one deadlock payload, but collected: {len(deadlock_payloads)}"
+        )
     except AssertionError as e:
         raise e
     deadlocks = deadlock_payloads[0]['sqlserver_deadlocks']
@@ -176,9 +176,9 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str, x
             if process.find('inputbuf').text == "UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;":
                 found += 1
     try:
-        assert (
-            found == 1
-        ), "Should have collected the UPDATE statement in deadlock exactly once, but collected: {}.".format(found)
+        assert found == 1, (
+            "Should have collected the UPDATE statement in deadlock exactly once, but collected: {}.".format(found)
+        )
     except AssertionError as e:
         logging.error("deadlock payload: %s", str(deadlocks))
         raise e
@@ -192,9 +192,9 @@ def test_no_empty_deadlocks_payloads(dd_run_check, init_config, dbm_instance, ag
         '_query_deadlocks',
         return_value=[],
     ):
-        assert not _run_check_and_get_deadlock_payloads(
-            dd_run_check, check, aggregator
-        ), "shouldn't have sent an empty payload"
+        assert not _run_check_and_get_deadlock_payloads(dd_run_check, check, aggregator), (
+            "shouldn't have sent an empty payload"
+        )
 
 
 @pytest.mark.usefixtures('dd_environment')
