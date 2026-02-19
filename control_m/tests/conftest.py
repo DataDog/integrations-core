@@ -11,4 +11,7 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return {}
+    return {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test-token'},
+    }
