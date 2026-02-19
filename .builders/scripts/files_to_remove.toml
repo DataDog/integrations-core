@@ -50,6 +50,10 @@ excluded_paths = [
   # - postres
   # - mysql
   "!botocore/data/sts",
+  # amazon_msk also needs the kafka client.
+  "!botocore/data/kafka",
+  # postgres and mysql also need the rds.
+  "!botocore/data/rds",
   # Riakcs integration monitors s3.
   "!botocore/data/s3",
 ]
