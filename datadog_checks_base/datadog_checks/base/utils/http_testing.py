@@ -45,14 +45,14 @@ class MockHTTPResponse:
         self.status_code = status_code
         self.headers = headers or {}
         self.cookies = cookies or {}
+        self.encoding: str | None = None
 
         from datetime import timedelta
 
         self.elapsed = timedelta(seconds=elapsed_seconds)
         self._stream = BytesIO(self._content)
-        self._stream_consumed = False
 
-        def mock_getpeercert(self, binary_form=False):
+        def mock_getpeercert(_self, binary_form=False):
             return b'mock-cert' if binary_form else {}
 
         self.raw = type(
@@ -88,12 +88,10 @@ class MockHTTPResponse:
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]:
         # chunk_size=None means return the entire content as a single chunk (matches requests behavior)
         chunk_size = chunk_size if chunk_size is not None else len(self._content) or 1
-        if not self._stream_consumed:
-            self._stream.seek(0)
+        self._stream.seek(0)
         while chunk := self._stream.read(chunk_size):
             # Decode to string when decode_unicode=True (matches requests behavior)
             yield chunk.decode('utf-8') if decode_unicode else chunk
-        self._stream_consumed = True
 
     def iter_lines(
         self, chunk_size: int | None = None, decode_unicode: bool = False, delimiter: bytes | str | None = None
@@ -103,9 +101,7 @@ class MockHTTPResponse:
             delimiter = delimiter.encode('utf-8')
         delimiter = delimiter or b'\n'
 
-        if not self._stream_consumed:
-            self._stream.seek(0)
-
+        self._stream.seek(0)
         lines = self._stream.read().split(delimiter)
         # bytes.split() produces a trailing empty element when content ends with the
         # delimiter (e.g. b'a\nb\n'.split(b'\n') == [b'a', b'b', b'']). requests uses
@@ -117,11 +113,14 @@ class MockHTTPResponse:
             # Decode to string when decode_unicode=True (matches requests behavior)
             yield line.decode('utf-8') if decode_unicode else line
 
-        self._stream_consumed = True
+    def close(self) -> None:
+        # No-op: requests.Response.close() releases the network connection, but
+        # content is already buffered in memory. Matching that behaviour here
+        # so the same instance can be returned by a mock multiple times.
+        pass
 
     def __enter__(self) -> 'MockHTTPResponse':
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> bool | None:
-        self._stream.close()
         return None
