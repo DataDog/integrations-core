@@ -95,7 +95,7 @@ datadog-hdfs-datanode==7.3.0; sys_platform != 'win32'
 datadog-hdfs-namenode==7.3.0; sys_platform != 'win32'
 datadog-hive==2.3.0
 datadog-hivemq==2.3.0
-datadog-http-check==12.4.0
+datadog-http-check==12.5.0
 datadog-hudi==4.2.0
 datadog-hugging-face-tgi==1.3.0
 datadog-hyperv==3.2.0; sys_platform == 'win32'
