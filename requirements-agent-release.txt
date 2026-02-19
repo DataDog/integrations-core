@@ -166,7 +166,7 @@ datadog-nginx==9.3.0
 datadog-nvidia-nim==2.3.0
 datadog-nvidia-triton==3.3.0
 datadog-octopus-deploy==2.3.0
-datadog-openldap==3.2.0
+datadog-openldap==3.3.0
 datadog-openmetrics==7.2.0
 datadog-openstack-controller==9.3.0
 datadog-openstack==4.2.0
