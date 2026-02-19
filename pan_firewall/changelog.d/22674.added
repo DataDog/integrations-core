@@ -1,0 +1,1 @@
+Add ndm_syslog:true tag to log configuration to enable NDM device syslog correlation.
