@@ -164,7 +164,9 @@ class ProcessCheck(AgentCheck):
                             found = True
                         if exact_match:
                             if os.name == 'nt':
-                                if proc.name().lower() == string.lower():
+                                lproc_name = proc.name().lower()
+                                lstring = string.lower()
+                                if lproc_name == lstring or lproc_name == lstring + ".exe":
                                     found = True
                             else:
                                 if proc.name() == string:
