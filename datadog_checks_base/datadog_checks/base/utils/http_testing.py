@@ -10,6 +10,35 @@ from typing import Any, Iterator
 __all__ = ['MockHTTPResponse']
 
 
+class _CaseInsensitiveDict(dict):
+    """Case-insensitive dict for HTTP headers per RFC 7230 §3.2.
+
+    Stores keys lowercased so lookup works regardless of the casing used by the
+    caller or by production code (e.g. 'Content-Type' vs 'content-type').
+    """
+
+    def __init__(self, data: dict[str, str] | None = None) -> None:
+        super().__init__()
+        if data:
+            for key, value in data.items():
+                self[key] = value
+
+    def __setitem__(self, key: str, value: str) -> None:
+        super().__setitem__(key.lower(), value)
+
+    def __getitem__(self, key: str) -> str:
+        return super().__getitem__(key.lower())
+
+    def __contains__(self, key: object) -> bool:
+        return super().__contains__(key.lower() if isinstance(key, str) else key)
+
+    def get(self, key: str, default: str | None = None) -> str | None:  # type: ignore[override]
+        return super().get(key.lower(), default)
+
+    def setdefault(self, key: str, default: str = '') -> str:  # type: ignore[override]
+        return super().setdefault(key.lower(), default)
+
+
 class MockHTTPResponse:
     """Library-agnostic mock HTTP response implementing HTTPResponseProtocol."""
 
@@ -26,8 +55,8 @@ class MockHTTPResponse:
     ):
         if json_data is not None:
             content = json.dumps(json_data)
-            if headers is None:
-                headers = {}
+            # Copy to avoid mutating the caller's dict
+            headers = dict(headers) if headers is not None else {}
             headers.setdefault('Content-Type', 'application/json')
         elif file_path is not None:
             # Open in binary mode to handle both text and binary files correctly
@@ -43,7 +72,7 @@ class MockHTTPResponse:
 
         self._content = content.encode('utf-8') if isinstance(content, str) else content
         self.status_code = status_code
-        self.headers = headers or {}
+        self.headers = _CaseInsensitiveDict(headers or {})
         self.cookies = cookies or {}
         self.encoding: str | None = None
 

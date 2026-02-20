@@ -39,6 +39,21 @@ class TestMockHTTPResponseJSON:
         assert response.headers['Content-Type'] == 'application/json'
         assert response.headers['X-Custom'] == 'value'
 
+    def test_json_does_not_mutate_caller_headers(self):
+        """json_data path must not modify the caller's headers dict."""
+        headers = {'X-Custom': 'value'}
+        MockHTTPResponse(json_data={'key': 'value'}, headers=headers)
+
+        assert list(headers.keys()) == ['X-Custom']
+
+    def test_headers_are_case_insensitive(self):
+        """Header lookup works regardless of key casing (RFC 7230 §3.2)."""
+        response = MockHTTPResponse(content='ok', headers={'Content-Type': 'text/plain'})
+
+        assert response.headers['content-type'] == 'text/plain'
+        assert response.headers['CONTENT-TYPE'] == 'text/plain'
+        assert 'content-type' in response.headers
+
 
 class TestMockHTTPResponseStatus:
     """Test raise_for_status functionality."""
