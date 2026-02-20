@@ -55,6 +55,8 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    alerts_filter_severity: Optional[tuple[str, ...]] = None
+    alerts_filter_type: Optional[tuple[str, ...]] = None
     allow_redirects: Optional[bool] = None
     auth_token: Optional[AuthToken] = None
     auth_type: Optional[str] = None

@@ -92,6 +92,25 @@ instances:
     #
     # collect_alerts: true
 
+    ## @param alerts_filter_severity - list of strings - optional
+    ## List of alert severities to collect. When set, only alerts matching one of
+    ## these severities are forwarded to Datadog. When empty or unset, all alerts
+    ## are collected.
+    ## Valid values: INFO, WARNING, CRITICAL, $UNKNOWN, $REDACTED.
+    #
+    # alerts_filter_severity:
+    #   - WARNING
+    #   - CRITICAL
+
+    ## @param alerts_filter_type - list of strings - optional
+    ## List of alert types to collect. When set, only alerts whose type
+    ## matches one of these values are forwarded to Datadog. When empty or unset,
+    ## all alerts are collected.
+    ## Alert types are dynamically generated strings (e.g. A1031, A130172).
+    #
+    # alerts_filter_type:
+    #   - A1031
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

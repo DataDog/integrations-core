@@ -104,6 +104,31 @@ files:
             value:
               type: boolean
               example: true
+          - name: alerts_filter_severity
+            description: |
+              List of alert severities to collect. When set, only alerts matching one of
+              these severities are forwarded to Datadog. When empty or unset, all alerts
+              are collected.
+              Valid values: INFO, WARNING, CRITICAL, $UNKNOWN, $REDACTED.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - WARNING
+                - CRITICAL
+          - name: alerts_filter_type
+            description: |
+              List of alert types to collect. When set, only alerts whose type
+              matches one of these values are forwarded to Datadog. When empty or unset,
+              all alerts are collected.
+              Alert types are dynamically generated strings (e.g. A1031, A130172).
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - A1031
           - template: instances/http
           - template: instances/default
             overrides:
