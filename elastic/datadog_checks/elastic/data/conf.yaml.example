@@ -116,6 +116,16 @@ instances:
     #
     # cat_allocation_stats: false
 
+    ## @param detailed_shard_metrics - boolean - optional - default: false
+    ## Enable to collect detailed shard placement metrics with `index` and `prirep` (primary/replica) tags.
+    ## Requires `cat_allocation_stats` to be enabled.
+    ## When disabled (default), reports aggregated shard counts per node.
+    ## When enabled, reports shard counts per node-index-prirep combination for detailed placement reporting.
+    ## Enabling this increases metric cardinality (node_count * index_count).
+    ## Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-shards.html.
+    #
+    # detailed_shard_metrics: false
+
     ## @param admin_forwarder - boolean - optional - default: false
     ## Specifies a URL that includes a context root
     ## needed for a forwarder application to access Elasticsearch REST services, for example:
