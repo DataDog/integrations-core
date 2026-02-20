@@ -27,6 +27,7 @@ from .common import (
     STORAGE_RESOURCE_METRICS,
     VM_PERF_METRICS,
 )
+from .conftest import get_url_path
 
 
 @pytest.mark.usefixtures('mock_http_get')
@@ -483,6 +484,26 @@ def test_perf_metrics(dd_run_check, aggregator, instance):
     for metric in PERF_METRICS:
         aggregator.assert_metric(metric, count=0, tags=sdn_tags)
         aggregator.assert_metric(metric, count=0, tags=pool_tags)
+
+
+def test_performance_metrics_endpoint_unavailable(dd_run_check, aggregator, instance, mock_http_get):
+    response = MockResponse(status_code=501)
+    response.json = lambda: None
+
+    original_get = mock_http_get.side_effect
+    mock_http_get.side_effect = lambda url, *args, **kwargs: (
+        response if get_url_path(url) == '/api2/json/cluster/metrics/export' else original_get(url, *args, **kwargs)
+    )
+
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        "proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json', 'proxmox_status:up', 'testing']
+    )
+    aggregator.assert_metric("proxmox.node.up", 1, tags=[], hostname='ip-122-82-3-112')
+    aggregator.assert_metric("proxmox.vm.up", 1, tags=[], hostname="debian")
+    aggregator.assert_metric("proxmox.ha.quorum", hostname='ip-122-82-3-112', tags=['node_status:OK'])
 
 
 @pytest.mark.usefixtures('mock_http_get')
