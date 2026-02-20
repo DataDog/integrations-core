@@ -538,6 +538,9 @@ class ESCheck(AgentCheck):
                 if node is None or node == 'UNASSIGNED':
                     continue
 
+                if index is None or prirep_raw is None:
+                    continue
+
                 # better readability: p->primary and r->replica
                 prirep = 'primary' if prirep_raw == 'p' else 'replica'
 
