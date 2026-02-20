@@ -1381,3 +1381,19 @@ def test_profile_memory_when_enabled(should_profile_value, expected_calls):
 
     assert check.should_profile_memory.call_count == 1
     assert check.profile_memory.call_count == expected_calls
+
+
+def test_http_uses_requests_by_default():
+    from datadog_checks.base.utils.http import RequestsWrapper
+
+    check = AgentCheck('test', {}, [{}])
+
+    assert isinstance(check.http, RequestsWrapper)
+
+
+def test_http_uses_httpx_when_flag_set():
+    from datadog_checks.base.utils.http_httpx import HTTPXWrapper
+
+    check = AgentCheck('test', {}, [{'use_httpx': True}])
+
+    assert isinstance(check.http, HTTPXWrapper)
