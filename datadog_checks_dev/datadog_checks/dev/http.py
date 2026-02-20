@@ -7,11 +7,6 @@ from textwrap import dedent
 
 from requests import Response
 
-# Re-export MockHTTPResponse for protocol-based testing
-from datadog_checks.base.utils.http_testing import MockHTTPResponse  # noqa: F401
-
-__all__ = ['MockResponse', 'MockHTTPResponse']
-
 
 class MockResponse(Response):
     def __init__(
