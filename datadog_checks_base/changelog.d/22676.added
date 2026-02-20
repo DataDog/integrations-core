@@ -1,1 +1,1 @@
-Add HTTP library agnostic protocols and exceptions.
+Add library-agnostic HTTP protocol types, exception hierarchy, and `MockHTTPResponse` test helper.
