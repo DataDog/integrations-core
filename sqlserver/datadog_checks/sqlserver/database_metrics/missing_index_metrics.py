@@ -59,8 +59,4 @@ class SqlserverMissingIndexMetrics(SqlserverDatabaseMetricsBase):
         return [query]
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}("
-            f"enabled={self.enabled}, "
-            f"collection_interval={self.collection_interval})"
-        )
+        return f"{self.__class__.__name__}(enabled={self.enabled}, collection_interval={self.collection_interval})"
