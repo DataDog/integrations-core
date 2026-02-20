@@ -550,10 +550,14 @@ class ESCheck(AgentCheck):
                         if source_node and ' ' not in source_node:
                             node = source_node
                         else:
-                            self.log.debug("invalid source node for RELOCATING shard, got: %s, parsed: %s", node, source_node)
+                            self.log.debug(
+                                "invalid source node for RELOCATING shard, got: %s, parsed: %s", node, source_node
+                            )
                             continue
                     else:
-                        self.log.debug("unexpected format for RELOCATING shard (expected 'source -> target'), got: %s", node)
+                        self.log.debug(
+                            "unexpected format for RELOCATING shard (expected 'source -> target'), got: %s", node
+                        )
                         continue
                 elif state != 'STARTED':
                     continue
