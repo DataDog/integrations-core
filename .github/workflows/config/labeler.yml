@@ -186,6 +186,10 @@ integration/beyondtrust_password_safe:
 - changed-files:
   - any-glob-to-any-file:
     - beyondtrust_password_safe/**/*
+integration/beyondtrust_privileged_remote_access:
+- changed-files:
+  - any-glob-to-any-file:
+    - beyondtrust_privileged_remote_access/**/*
 integration/bitdefender:
 - changed-files:
   - any-glob-to-any-file:
