@@ -1,1 +1,0 @@
-Add MockHTTPResponse for library-agnostic HTTP response mocking in tests.
