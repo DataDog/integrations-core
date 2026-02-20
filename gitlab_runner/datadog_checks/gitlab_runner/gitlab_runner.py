@@ -10,6 +10,8 @@ import requests
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
 
+from .metrics import METRICS_LIST
+
 
 class GitlabRunnerCheck(OpenMetricsBaseCheck):
     """
@@ -66,8 +68,10 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
         """
         Set up the gitlab_runner instance so it can be used in OpenMetricsBaseCheck
         """
-        # Mapping from Prometheus metrics names to Datadog ones
-        # For now it's a 1:1 mapping
+        # Hardcoded metrics that are always collected
+        metrics = list(METRICS_LIST)
+
+        # Add user-configured allowed_metrics
         allowed_metrics = init_config.get('allowed_metrics')
         if allowed_metrics is None:
             raise CheckException("At least one metric must be whitelisted in `allowed_metrics`.")
@@ -77,6 +81,9 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
         if 'ci_runner_version_info' in allowed_metrics:
             allowed_metrics.remove('ci_runner_version_info')
 
+        metrics.extend(allowed_metrics)
+        metrics = list(set(metrics))
+
         gitlab_runner_instance = deepcopy(instance)
 
         # gitlab_runner uses 'prometheus_endpoint' and not 'prometheus_url', so we have to rename the key
@@ -85,7 +92,7 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
         gitlab_runner_instance.update(
             {
                 'namespace': 'gitlab_runner',
-                'metrics': allowed_metrics,
+                'metrics': metrics,
                 # Defaults that were set when gitlab_runner was based on PrometheusCheck
                 'send_monotonic_counter': instance.get('send_monotonic_counter', False),
                 'health_service_check': instance.get('health_service_check', False),
