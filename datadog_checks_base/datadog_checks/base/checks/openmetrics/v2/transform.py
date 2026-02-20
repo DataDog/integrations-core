@@ -96,6 +96,11 @@ class MetricTransformer:
         if not isinstance(metric_type, str):
             raise TypeError('field `type` must be a string')
 
+        metric_type = metric_type.strip().lower()
+        # Accept 'count' as alias for 'counter' (e.g. federate/untyped handling)
+        if metric_type == 'count':
+            metric_type = 'counter'
+
         factory = TRANSFORMERS.get(metric_type)
         if factory is None:
             raise ValueError(f'unknown type `{metric_type}`')
