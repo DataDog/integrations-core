@@ -116,11 +116,9 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                     'device_id': device_id,
                     'id_tags': ['interface:/Common/internal'],
                     'index': 112,
-                    'is_physical': True,
                     'mac_address': '42:01:0a:a4:00:33',
                     'name': '/Common/internal',
                     'oper_status': 1,
-                    'type': 6,
                 },
                 {
                     'admin_status': 1,
@@ -129,11 +127,9 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                     'device_id': device_id,
                     'id_tags': ['interface:mgmt'],
                     'index': 32,
-                    'is_physical': True,
                     'mac_address': '42:01:0a:a4:00:33',
                     'name': 'mgmt',
                     'oper_status': 1,
-                    'type': 6,
                 },
                 {
                     'admin_status': 1,
@@ -142,11 +138,9 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                     'device_id': device_id,
                     'id_tags': ['interface:1.0'],
                     'index': 48,
-                    'is_physical': True,
                     'mac_address': '42:01:0a:a4:00:33',
                     'name': '1.0',
                     'oper_status': 1,
-                    'type': 6,
                 },
                 {
                     'admin_status': 1,
@@ -155,11 +149,9 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                     'device_id': device_id,
                     'id_tags': ['interface:/Common/http-tunnel'],
                     'index': 80,
-                    'is_physical': False,
                     'mac_address': '42:01:0a:a4:00:34',
                     'name': '/Common/http-tunnel',
                     'oper_status': 4,
-                    'type': 1,
                 },
                 {
                     'admin_status': 1,
@@ -254,11 +246,9 @@ def test_e2e_core_metadata_cisco_3850(dd_agent_check):
         'device_id': 'default:' + device_ip,
         'id_tags': ['interface:Gi0/0'],
         'index': 1,
-        'is_physical': True,
         'mac_address': '00:00:00:00:00:00',
         'name': 'Gi0/0',
         'oper_status': 2,
-        'type': 6,
     }
     assert interface == actual_interface
 
