@@ -20,9 +20,11 @@ files:
         - ci_runner_errors
         - ci_ssh_docker_machines_provider_machine_creation_duration_seconds
         - ci_ssh_docker_machines_provider_machine_states
+        - gitlab_runner_api_request_duration_seconds
         - gitlab_runner_autoscaling_machine_creation_duration_seconds
         - gitlab_runner_autoscaling_machine_states
         - gitlab_runner_errors_total
+        - gitlab_runner_job_queue_duration_seconds
         - gitlab_runner_jobs
         - gitlab_runner_version_info
         - go_gc_duration_seconds

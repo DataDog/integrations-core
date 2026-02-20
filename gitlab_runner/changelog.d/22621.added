@@ -1,0 +1,1 @@
+Add default metrics list to automatically collect all standard GitLab Runner metrics. Add `gitlab_runner_job_queue_duration_seconds` and `gitlab_runner_api_request_duration_seconds` metrics.
