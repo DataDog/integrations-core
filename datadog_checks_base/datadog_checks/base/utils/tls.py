@@ -120,7 +120,7 @@ def _load_ca_certs(context, config):
 def create_ssl_context(config):
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
     # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
-    context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
+    context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_CLIENT)
 
     LOGGER.debug('Creating SSL context with config: %s', config)
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
