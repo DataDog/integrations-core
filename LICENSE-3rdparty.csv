@@ -4,6 +4,7 @@ PyMySQL,PyPI,MIT,"Copyright (c) 2010, 2013 PyMySQL contributors"
 PySocks,PyPI,BSD-3-Clause,Copyright 2006 Dan-Haim. All rights reserved.
 PyYAML,PyPI,MIT,Copyright (c) 2017-2021 Ingy döt Net
 aerospike,PyPI,Apache-2.0,"Copyright Aerospike, Inc."
+aws-msk-iam-sasl-signer-python,PyPI,Apache-2.0,Copyright 2023 Amazon Managed Streaming for Apache Kafka
 aws-requests-auth,PyPI,BSD-3-Clause,Copyright (c) David Muller.
 azure-identity,PyPI,MIT,Copyright (c) Microsoft Corporation.
 beautifulsoup4,PyPI,MIT,Copyright (c) Leonard Richardson

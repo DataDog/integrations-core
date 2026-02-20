@@ -1,4 +1,5 @@
 aerospike==7.1.1; sys_platform != 'win32' and sys_platform != 'darwin'
+aws-msk-iam-sasl-signer-python==1.0.2
 aws-requests-auth==0.4.3
 azure-identity==1.24.0
 beautifulsoup4==4.13.5
