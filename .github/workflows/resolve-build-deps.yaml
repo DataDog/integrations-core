@@ -136,7 +136,7 @@ jobs:
       run: pip install -r .builders/deps/host_dependencies.txt
 
     - name: Log in to GitHub Packages
-      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
@@ -232,7 +232,7 @@ jobs:
 
     - name: Cache builder root
       id: cache-builder-root
-      uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: ~/builder_root
         key: macos-${{ matrix.job.arch }}-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py', './.github/workflows/resolve-build-deps.yml') }}
