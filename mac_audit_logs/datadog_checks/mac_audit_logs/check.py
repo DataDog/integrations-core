@@ -60,6 +60,12 @@ class MacAuditLogsCheck(AgentCheck):
             if file_name == "current":
                 continue
 
+            # Skip directories
+            file_path = os.path.join(self.audit_logs_dir_path, file_name)
+            if not os.path.isfile(file_path):
+                self.log.debug(constants.LOG_TEMPLATE.format(message=f"Skipping non-file entry: {file_name}"))
+                continue
+
             if file_name.count(".") == 1:
                 start_time_str, end_time_str = file_name.split(".")
 
