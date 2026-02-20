@@ -235,25 +235,6 @@ class ResponseWrapper(ObjectProxy):
 
 
 class RequestsWrapper(object):
-    """HTTP client wrapper for requests library.
-
-    Implements HTTPClientProtocol for compatibility with protocol-based code.
-    This allows the same HTTP client interface to work with different implementations
-    (requests, httpx, or custom clients).
-
-    Args:
-        instance: Integration instance configuration
-        init_config: Integration init configuration
-        remapper: Optional config key remapper
-        logger: Optional logger instance
-        session: Optional pre-existing requests.Session
-
-    Example:
-        >>> http = RequestsWrapper({'timeout': 10}, {})
-        >>> response = http.get('https://api.example.com/status')
-        >>> data = response.json()
-    """
-
     __slots__ = (
         '_session',
         '_https_adapters',
