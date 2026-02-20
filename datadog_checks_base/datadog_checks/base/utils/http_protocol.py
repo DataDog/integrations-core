@@ -7,13 +7,6 @@ from typing import Any, Iterator, Protocol
 
 
 class HTTPResponseProtocol(Protocol):
-    # iter_content and iter_lines return bytes by default, but return str when
-    # decode_unicode=True. The precise typing would use @overload with Literal[True]/
-    # Literal[False], but that adds significant verbosity to a Protocol stub with no
-    # practical benefit at this stage. Iterator[bytes | str] is the honest union: it
-    # correctly reflects both runtime cases and avoids false type errors at call sites
-    # that pass decode_unicode=True (e.g. the openmetrics mixin). Do not narrow this
-    # back to Iterator[bytes] — that annotation is wrong for the decode_unicode=True case.
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]: ...
     def iter_lines(
         self,
