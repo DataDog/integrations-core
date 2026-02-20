@@ -1,1 +1,1 @@
-Add HTTPClientProtocol & HTTPResponseProtocol definitions and library agnostic HTTP exception hierarchy
+Add HTTP library agnostic protocols and exceptions.
