@@ -323,14 +323,23 @@ class ActivityMonitor:
                 self.check.log.debug("[PC:%s:%s] No new alerts after filtering", self.check.pc_ip, self.check.pc_port)
                 return 0
 
+            # Track the most recent timestamp before field filtering so we don't re-fetch filtered-out alerts
+            most_recent_time_str = self._find_max_timestamp(alerts, "creationTime")
+
+            alerts = self._apply_filters(
+                alerts,
+                [
+                    ("severity", self.check.alerts_filter_severity),
+                    ("alertType", self.check.alerts_filter_type),
+                ],
+            )
+
             self.check.log.debug(
                 "[PC:%s:%s] Processing %d alerts after filtering", self.check.pc_ip, self.check.pc_port, len(alerts)
             )
 
             for alert in alerts:
                 self._process_alert(alert)
-
-            most_recent_time_str = self._find_max_timestamp(alerts, "creationTime")
             if most_recent_time_str:
                 self.last_alert_collection_time = most_recent_time_str
                 self.check.log.debug(
@@ -663,6 +672,14 @@ class ActivityMonitor:
                 "[PC:%s:%s] Failed to parse timestamp: %s", self.check.pc_ip, self.check.pc_port, timestamp_str
             )
             return None
+
+    def _apply_filters(self, items: list[dict], filters: list[tuple[str, set[str]]]) -> list[dict]:
+        """Keep only items whose field values are in the corresponding allowed sets (AND across filters)."""
+        for field_name, allowed_values in filters:
+            if not allowed_values:
+                continue
+            items = [item for item in items if item.get(field_name) in allowed_values]
+        return items
 
     def _filter_after_time(self, items: list[dict], last_time_str: str | None, field_name: str) -> list[dict]:
         """Filter items to those strictly after the last submitted time.

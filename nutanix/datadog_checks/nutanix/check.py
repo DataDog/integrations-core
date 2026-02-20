@@ -47,6 +47,9 @@ class NutanixCheck(AgentCheck):
         self.collect_audits_enabled = is_affirmative(self.instance.get("collect_audits", True))
         self.collect_alerts_enabled = is_affirmative(self.instance.get("collect_alerts", True))
 
+        self.alerts_filter_severity = {s.upper() for s in self.instance.get("alerts_filter_severity", []) or []}
+        self.alerts_filter_type = set(self.instance.get("alerts_filter_type", []) or [])
+
     def _initialize_check_attributes(self):
         self.base_url = f"{self.pc_ip}:{self.pc_port}"
         if not self.base_url.startswith("http"):
