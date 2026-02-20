@@ -510,6 +510,8 @@ Microsoft SQL Server 2019 (RTM-CU12) (KB5004524) - 15.0.4153.1 (X64)
     Standard Edition (64-bit) on Windows Server 2016 Datacenter 10.0 <X64> (Build 14393: ) (Hypervisor)
 """
 
+SQL_AZURE_VERSION_EXAMPLE = "Microsoft SQL Azure (RTM) - 12.0.2000.8"
+
 
 @pytest.mark.parametrize(
     "version,expected_year", [(SQL_SERVER_2012_VERSION_EXAMPLE, 2012), (SQL_SERVER_2019_VERSION_EXAMPLE, 2019)]
@@ -519,7 +521,12 @@ def test_parse_sqlserver_year(version, expected_year):
 
 
 @pytest.mark.parametrize(
-    "version,expected_major_version", [(SQL_SERVER_2012_VERSION_EXAMPLE, 11), (SQL_SERVER_2019_VERSION_EXAMPLE, 15)]
+    "version,expected_major_version",
+    [
+        (SQL_SERVER_2012_VERSION_EXAMPLE, 11),
+        (SQL_SERVER_2019_VERSION_EXAMPLE, 15),
+        (SQL_AZURE_VERSION_EXAMPLE, 12),
+    ],
 )
 def test_parse_sqlserver_major_version(version, expected_major_version):
     assert parse_sqlserver_major_version(version) == expected_major_version
