@@ -18,6 +18,9 @@ if TYPE_CHECKING:
 
 COMPOSE_FILE_E2E = Path(__file__).parent / "docker" / "docker-compose.yml"
 PREFECT_URL = "http://localhost:4200/api"
+E2E_METADATA = {
+    'env_vars': {'DD_LOGS_ENABLED': 'true'},
+}
 
 
 @pytest.fixture(scope='session')
@@ -40,9 +43,12 @@ def dd_environment():
         waith_for_health=True,
         mount_logs=True,
     ):
-        yield {
-            "instances": [{"prefect_url": prefect_url, "min_collection_interval": 60}],
-        }
+        yield (
+            {
+                "instances": [{"prefect_url": prefect_url, "min_collection_interval": 60}],
+            },
+            E2E_METADATA,
+        )
 
 
 @pytest.fixture

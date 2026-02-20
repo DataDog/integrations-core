@@ -133,6 +133,7 @@ instances:
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
 # logs:
-#   - type: docker
+#   - type: file
 #     source: prefect
-#     service: <SERVICE>
+#     service: prefect
+#     path: /var/log/prefect/dd_log_1

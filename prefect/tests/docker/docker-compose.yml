@@ -75,7 +75,8 @@ services:
     volumes:
       - ./sample_flow.py:/app/sample_flow.py
       - ./failing_flow.py:/app/failing_flow.py
-    command: prefect worker start --pool local-pool --with-healthcheck
+      - ${DD_LOG_1:-/tmp/dd_log_1}:/var/log/prefect/dd_log_1
+    command: sh -c "prefect worker start --pool local-pool --with-healthcheck 2>&1 | tee -a /var/log/prefect/dd_log_1"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
       interval: 10s

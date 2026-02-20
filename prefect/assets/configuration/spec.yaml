@@ -123,6 +123,7 @@ files:
 
   - template: logs
     example:
-    - type: docker
+    - type: file
       source: prefect
-      service: <SERVICE>
+      service: prefect
+      path: /var/log/prefect/dd_log_1
