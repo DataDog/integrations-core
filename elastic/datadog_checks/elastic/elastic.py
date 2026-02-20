@@ -533,12 +533,29 @@ class ESCheck(AgentCheck):
                 node = shard.get('node')
                 index = shard.get('index')
                 prirep_raw = shard.get('prirep')
+                state = shard.get('state')
 
                 # skip unassigned shards (they have no node)
                 if node is None or node == 'UNASSIGNED':
                     continue
 
                 if index is None or prirep_raw is None:
+                    continue
+
+                # when in RELOCATING state, the reported node is: "source-node -> ip uuid target-node"
+                # try extracting the source node to count the shard towards it until relocation is over
+                if state == 'RELOCATING':
+                    if ' -> ' in node:
+                        source_node = node.split(' -> ')[0].strip()
+                        if source_node and ' ' not in source_node:
+                            node = source_node
+                        else:
+                            self.log.debug("invalid source node for RELOCATING shard, got: %s, parsed: %s", node, source_node)
+                            continue
+                    else:
+                        self.log.debug("unexpected format for RELOCATING shard (expected 'source -> target'), got: %s", node)
+                        continue
+                elif state != 'STARTED':
                     continue
 
                 # better readability: p->primary and r->replica
