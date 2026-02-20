@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Testing utilities for HTTP client mocking."""
-
 import json
 from io import BytesIO
 from typing import Any, Iterator
