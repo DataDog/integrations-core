@@ -11,6 +11,7 @@ files:
     options:
     - name: url
       fleet_configurable: true
+      formats: ["url"]
       required: true
       description: The Prisma Cloud url to connect to.
       value:

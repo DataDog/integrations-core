@@ -166,10 +166,11 @@ files:
             example: <CLOUD_NAME>
             type: string
         - name: keystone_server_url
+          fleet_configurable: true
+          formats: ["url"]
           description: |
            URL of your identity server. NOTE: The server must support Identity API v3.
            This parameter is required if openstack_config_file_path or openstack_cloud_name are not specified.
-          fleet_configurable: true
           value:
             example: https://<KEYSTONE_ENDPOINT>:<PORT>/
             type: string
