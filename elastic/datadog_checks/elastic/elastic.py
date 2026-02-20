@@ -489,8 +489,6 @@ class ESCheck(AgentCheck):
             return
 
         self.log.debug("Collecting cat allocation metrics")
-
-        # Collect disk metrics from /_cat/allocation
         cat_allocation_url = self._join_url(self.CAT_ALLOC_PATH, admin_forwarder)
         try:
             cat_allocation_data = self._get_data(cat_allocation_url)
@@ -498,28 +496,26 @@ class ESCheck(AgentCheck):
             self.log.error("Timed out reading cat allocation stats from servers (%s) - stats will be missing", e)
             return
 
-        # Process metrics from /_cat/allocation
+        # we need to remap metric names because the ones from elastic
+        # contain dots and that would confuse `_process_metric()` (sic)
         if self._config.detailed_shard_metrics:
-            # When detailed metrics are enabled, only collect disk metrics from allocation
+            # when detailed metrics are enabled, only collect disk metrics from _cat/allocation
             data_to_collect = {'disk.indices', 'disk.used', 'disk.avail', 'disk.total', 'disk.percent'}
         else:
-            # When detailed metrics are disabled, collect both disk and aggregated shard metrics
             data_to_collect = {'disk.indices', 'disk.used', 'disk.avail', 'disk.total', 'disk.percent', 'shards'}
 
-        # We need to remap metric names because the ones from elastic contain dots and that would confuse `_process_metric()`
         for dic in cat_allocation_data:
             cat_allocation_dic = {
                 k.replace('.', '_'): v for k, v in dic.items() if k in data_to_collect and v is not None
             }
             tags = base_tags + ['node_name:' + dic.get('node').lower()]
             for metric in CAT_ALLOCATION_METRICS:
-                # Skip shards metric if detailed metrics are enabled (we'll get it from /_cat/shards)
+                # skip shards metric if detailed metrics are enabled (we'll get it from _cat/shards)
                 if metric == 'elasticsearch.shards' and self._config.detailed_shard_metrics:
                     continue
                 desc = CAT_ALLOCATION_METRICS[metric]
                 self._process_metric(cat_allocation_dic, metric, *desc, tags=tags)
 
-        # If detailed_shard_metrics is enabled, collect detailed shard placement from /_cat/shards
         if self._config.detailed_shard_metrics:
             self.log.debug("Collecting detailed shard placement metrics")
             cat_shards_url = self._join_url(self.CAT_SHARDS_PATH, admin_forwarder)
@@ -538,17 +534,16 @@ class ESCheck(AgentCheck):
                 index = shard.get('index')
                 prirep_raw = shard.get('prirep')
 
-                # Skip unassigned shards (they have no node)
+                # skip unassigned shards (they have no node)
                 if node is None or node == 'UNASSIGNED':
                     continue
 
-                # Map p/r to primary/replica for better readability
+                # better readability: p->primary and r->replica
                 prirep = 'primary' if prirep_raw == 'p' else 'replica'
 
                 key = (node, index, prirep)
                 shard_counts[key] += 1
 
-            # Submit metrics with tags
             for (node, index, prirep), count in shard_counts.items():
                 tags = base_tags + [
                     'node_name:{}'.format(node.lower()),
