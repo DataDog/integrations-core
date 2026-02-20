@@ -40,7 +40,11 @@ def http_client(request):
         with patch.object(requests.Session, "get", return_value=_requests_response(_BODY)):
             yield RequestsWrapper({}, {})
     else:
-        yield HTTPXWrapper(httpx.Client(transport=_httpx_transport(_BODY)))
+        with patch(
+            'datadog_checks.base.utils.http_httpx._build_httpx_client',
+            return_value=httpx.Client(transport=_httpx_transport(_BODY)),
+        ):
+            yield HTTPXWrapper({}, {})
 
 
 def test_status_code(http_client):

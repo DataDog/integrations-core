@@ -88,6 +88,43 @@ def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
         r.get.assert_called_with('http://localhost:8080/nginx_status', **http_wargs)
 
 
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected',
+    [
+        ("legacy auth config", {'user': 'legacy_foo', 'password': 'legacy_bar'}, {'auth_is_basic': True}),
+        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth_is_basic': True}),
+        ("legacy ssl config True", {'ssl_validation': True}, {'verify': True}),
+        ("legacy ssl config False", {'ssl_validation': False}, {'verify': False}),
+    ],
+)
+def test_config_httpx(check, instance, test_case, extra_config, expected):
+    import httpx as _httpx
+
+    instance = deepcopy(instance)
+    instance.update(extra_config)
+    instance['use_httpx'] = True
+
+    c = check(instance)
+
+    client_kwargs = {}
+
+    def spy_httpx_client(**kwargs):
+        client_kwargs.update(kwargs)
+        return mock.MagicMock()
+
+    with mock.patch('datadog_checks.base.utils.http_httpx.httpx.Client', side_effect=spy_httpx_client):
+        _ = c.http
+
+    if expected.get('auth_is_basic'):
+        assert isinstance(client_kwargs.get('auth'), _httpx.BasicAuth), (
+            f"{test_case}: expected BasicAuth, got {client_kwargs.get('auth')!r}"
+        )
+    if 'verify' in expected:
+        assert client_kwargs.get('verify') == expected['verify'], (
+            f"{test_case}: verify expected {expected['verify']!r}, got {client_kwargs.get('verify')!r}"
+        )
+
+
 def test_no_version(check, instance, caplog):
     c = check(instance)
 
