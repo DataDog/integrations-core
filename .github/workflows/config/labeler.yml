@@ -682,6 +682,10 @@ integration/iboss:
 - changed-files:
   - any-glob-to-any-file:
     - iboss/**/*
+integration/ide_shepherd:
+- changed-files:
+  - any-glob-to-any-file:
+    - ide_shepherd/**/*
 integration/ignite:
 - changed-files:
   - any-glob-to-any-file:
