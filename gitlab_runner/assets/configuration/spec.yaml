@@ -14,19 +14,83 @@ files:
         items:
           type: string
         example:
+        - acceptable_job_queuing_duration_exceeded_total
+        - api_request_duration_seconds_bucket
+        - api_request_duration_seconds_count
+        - api_request_duration_seconds_sum
+        - api_request_statuses_total
+        - autoscaling_machine_creation_duration_seconds_bucket
+        - autoscaling_machine_creation_duration_seconds_count
+        - autoscaling_machine_creation_duration_seconds_sum
+        - autoscaling_machine_failed_creation_duration_seconds_bucket
+        - autoscaling_machine_failed_creation_duration_seconds_count
+        - autoscaling_machine_failed_creation_duration_seconds_sum
+        - autoscaling_machine_removal_duration_seconds_bucket
+        - autoscaling_machine_removal_duration_seconds_count
+        - autoscaling_machine_removal_duration_seconds_sum
+        - autoscaling_machine_states
+        - autoscaling_machine_stopping_duration_seconds_bucket
+        - autoscaling_machine_stopping_duration_seconds_count
+        - autoscaling_machine_stopping_duration_seconds_sum
         - ci_docker_machines_provider_machine_creation_duration_seconds
+        - ci_docker_machines_provider_machine_creation_duration_seconds_bucket
+        - ci_docker_machines_provider_machine_creation_duration_seconds_count
+        - ci_docker_machines_provider_machine_creation_duration_seconds_sum
         - ci_docker_machines_provider_machine_states
         - ci_runner_builds
         - ci_runner_errors
+        - ci_runner_version_info
         - ci_ssh_docker_machines_provider_machine_creation_duration_seconds
+        - ci_ssh_docker_machines_provider_machine_creation_duration_seconds_bucket
+        - ci_ssh_docker_machines_provider_machine_creation_duration_seconds_count
+        - ci_ssh_docker_machines_provider_machine_creation_duration_seconds_sum
         - ci_ssh_docker_machines_provider_machine_states
+        - concurrent
+        - configuration_loaded_total
+        - configuration_loading_error_total
+        - configuration_saved_total
+        - configuration_saving_error_total
+        - errors_total
+        - failed_jobs_total
+        - fleeting_provisioner_instance_creation_time_seconds_bucket
+        - fleeting_provisioner_instance_creation_time_seconds_count
+        - fleeting_provisioner_instance_creation_time_seconds_sum
+        - fleeting_provisioner_instance_deletion_time_seconds_bucket
+        - fleeting_provisioner_instance_deletion_time_seconds_count
+        - fleeting_provisioner_instance_deletion_time_seconds_sum
+        - fleeting_provisioner_instance_is_running_time_seconds_bucket
+        - fleeting_provisioner_instance_is_running_time_seconds_count
+        - fleeting_provisioner_instance_is_running_time_seconds_sum
+        - fleeting_provisioner_instance_life_duration_seconds_bucket
+        - fleeting_provisioner_instance_life_duration_seconds_count
+        - fleeting_provisioner_instance_life_duration_seconds_sum
+        - fleeting_provisioner_instance_operations_total
+        - fleeting_provisioner_instances
+        - fleeting_provisioner_internal_operations_total
+        - fleeting_provisioner_max_instances
+        - fleeting_provisioner_missed_updates_total
+        - fleeting_taskscaler_desired_instances
+        - fleeting_taskscaler_max_tasks_per_instance
+        - fleeting_taskscaler_max_use_count_per_instance
+        - fleeting_taskscaler_scale_operations_total
+        - fleeting_taskscaler_task_instance_readiness_time_seconds_bucket
+        - fleeting_taskscaler_task_instance_readiness_time_seconds_count
+        - fleeting_taskscaler_task_instance_readiness_time_seconds_sum
+        - fleeting_taskscaler_task_operations_total
+        - fleeting_taskscaler_tasks
         - gitlab_runner_autoscaling_machine_creation_duration_seconds
         - gitlab_runner_autoscaling_machine_states
         - gitlab_runner_errors_total
         - gitlab_runner_jobs
+        - gitlab_runner_jobs_total
         - gitlab_runner_version_info
         - go_gc_duration_seconds
+        - go_gc_duration_seconds_count
+        - go_gc_duration_seconds_sum
+        - go_gc_gogc_percent
+        - go_gc_gomemlimit_bytes
         - go_goroutines
+        - go_info
         - go_memstats_alloc_bytes
         - go_memstats_alloc_bytes_total
         - go_memstats_buck_hash_sys_bytes
@@ -36,6 +100,7 @@ files:
         - go_memstats_heap_idle_bytes
         - go_memstats_heap_inuse_bytes
         - go_memstats_heap_objects
+        - go_memstats_heap_released_bytes
         - go_memstats_heap_released_bytes_total
         - go_memstats_heap_sys_bytes
         - go_memstats_last_gc_time_seconds
@@ -50,12 +115,38 @@ files:
         - go_memstats_stack_inuse_bytes
         - go_memstats_stack_sys_bytes
         - go_memstats_sys_bytes
+        - go_sched_gomaxprocs_threads
+        - go_threads
+        - job_duration_seconds_bucket
+        - job_duration_seconds_count
+        - job_duration_seconds_sum
+        - job_queue_duration_seconds_bucket
+        - job_queue_duration_seconds_count
+        - job_queue_duration_seconds_sum
+        - jobs
+        - jobs_total
+        - limit
         - process_cpu_seconds_total
         - process_max_fds
+        - process_network_receive_bytes_total
+        - process_network_transmit_bytes_total
         - process_open_fds
         - process_resident_memory_bytes
         - process_start_time_seconds
         - process_virtual_memory_bytes
+        - process_virtual_memory_max_bytes
+        - request_concurrency
+        - request_concurrency_adaptive_limit
+        - request_concurrency_exceeded_total
+        - request_concurrency_hard_limit
+        - request_concurrency_used_limit
+        - version_info
+        - worker_feed_failures_total
+        - worker_feeds_total
+        - worker_health_check_failures_total
+        - worker_processing_failures_total
+        - worker_slot_operations_total
+        - worker_slots_number
     - template: init_config/http
     - template: init_config/default
   - template: instances
