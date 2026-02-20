@@ -151,11 +151,19 @@ class AerospikeCheck(AgentCheck):
             )
 
             # https://www.aerospike.com/docs/reference/info/#sindex
-            sindex = self.get_info('sindex/{}'.format(ns))
+            # https://aerospike.com/docs/database/reference/info?search=sindex-list
+            # https://aerospike.com/docs/database/reference/info?search=sindex-stat
+
+            # sindex = self.get_info('sindex/{}'.format(ns))
+            # sindex-list introduced in 3.3x so will safely work in 4x and above server versions
+            sindex = self.get_info('sindex-list:')
+
             for idx in parse_namespace(sindex, ns, 'indexname'):
                 sindex_tags = ['sindex:{}'.format(idx)]
                 sindex_tags.extend(namespace_tags)
-                self.collect_info('sindex/{}/{}'.format(ns, idx), SINDEX_METRIC_TYPE, tags=sindex_tags)
+                # self.collect_info('sindex/{}/{}'.format(ns, idx), SINDEX_METRIC_TYPE, tags=sindex_tags)
+                # sindex-stat introduced in 3.3x so will safely work in 4x and above server versions
+                self.collect_info('sindex-stat:ns={};indexname={}'.format(ns, idx), SINDEX_METRIC_TYPE, tags=sindex_tags)
 
             # https://www.aerospike.com/docs/reference/info/#sets
             sets = self.get_info('sets/{}'.format(ns))
