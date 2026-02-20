@@ -45,7 +45,7 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             # PR testing - use test integrations, PR head ref, and test policy
-            INTEGRATIONS='["postgres", "mysql", "redis", "nginx"]'
+            INTEGRATIONS='["postgres", "mysql", "redisdb", "nginx"]'
             SOURCE_REF='${{ github.event.pull_request.head.sha }}'
             POLICY="integrations-core.dispatch-wheel-builds-test"
             echo "PR testing mode"
