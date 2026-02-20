@@ -237,6 +237,7 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
     )
     aggregator.assert_metric(
         "kafka.consumer_lag",
+        value=0,
         count=1,
         tags=[
             'consumer_group:consumer_group1',
