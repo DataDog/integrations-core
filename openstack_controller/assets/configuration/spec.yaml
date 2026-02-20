@@ -50,6 +50,7 @@ files:
             type: string
         - name: user
           hidden: true
+          fleet_configurable: true
           description: |
            Password authentication is the only auth method supported
            User expects username, password, and user domain id
@@ -246,6 +247,7 @@ files:
             display_default: true
             type: boolean
         - name: collect_network_metrics
+          fleet_configurable: true
           hidden: true
           description: |
            Collects network metrics.
@@ -262,6 +264,7 @@ files:
             display_default: true
             type: boolean
         - name: collect_server_diagnostic_metrics
+          fleet_configurable: true
           hidden: true
           description: |
            Collect server diagnostic metrics. Enabling this may result in performance decrease.
@@ -280,6 +283,7 @@ files:
             display_default: false
             type: boolean
         - name: endpoint_interface
+          fleet_configurable: true
           description: |
            Indicates the visibility scope of the component's endpoints to use. The possible values are:
              public: This endpoint is accessible from outside the cloud and typically denotes a public-facing URL or 
@@ -295,6 +299,7 @@ files:
             display_default: "public"
             type: string
         - name: endpoint_region_id
+          fleet_configurable: true
           description: |
            The region_id that will be used to filter the endpoints to use for each component.
           value:
@@ -302,11 +307,13 @@ files:
         - name: all_projects
           description: |
            List compute servers across all projects (admin only).
+          fleet_configurable: true
           value:
             example: false
             display_default: false
             type: boolean
         - name: components
+          fleet_configurable: true
           description: |
             General configuration that we want to apply to each of the components and their different metric blocks.
           value:
@@ -700,6 +707,7 @@ files:
             example:
               compute: false
         - name: projects
+          fleet_configurable: true
           description: |
             Optional configuration to indicate the projects that we want to be processed. If not configured,
             all projects will be processed.
