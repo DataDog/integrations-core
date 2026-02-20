@@ -1,11 +1,13 @@
 [env.collectors.datadog-checks]
 
-[envs.default.env-vars]
-CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
-
+# https://clickhouse.com/docs/faq/operations/production#how-to-choose-between-clickhouse-releases
+# https://github.com/ClickHouse/ClickHouse/blob/master/SECURITY.md
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["18", "19", "20", "21.8", "22.7"]
+version = ["18", "19", "20", "21.8", "22.7", "24.8", "25.3", "25.8"]
+
+[envs.default.env-vars]
+CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
 
 [envs.default.overrides]
 matrix.version.env-vars = [
@@ -16,3 +18,15 @@ matrix.version.env-vars = [
 [envs.latest.env-vars]
 CLICKHOUSE_VERSION = "latest"
 CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
+
+[envs.metrics]
+dependencies = [
+    "requests==2.32.5"
+]
+
+[envs.metrics.env-vars]
+# keep in sync with default version matrix
+VERSIONS = "24.8,25.3,25.8"
+
+[envs.metrics.scripts]
+generate = "python scripts/generate_metrics.py"
