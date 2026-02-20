@@ -1,7 +1,7 @@
 # Spark Check
 
 <div class="alert alert-warning">
-<a href="https://docs.datadoghq.com/data_observability/jobs_monitoring/">Data Observability Jobs Monitoring</a> helps you observe, troubleshoot, and cost-optimize your Spark and Databricks jobs and clusters.<br/><br/>
+<a href="https://docs.datadoghq.com/data_observability/jobs_monitoring/">Data Observability: Jobs Monitoring</a> helps you observe, troubleshoot, and cost-optimize your Spark and Databricks jobs and clusters.<br/><br/>
 This page only documents how to ingest Spark metrics and logs. 
 </div>
 
