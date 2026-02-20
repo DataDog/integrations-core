@@ -1,0 +1,1 @@
+Fix NDM tagging: use only device_id in device id_tags to prevent collisions when devices are unreachable, and add interface:{name} tag to interface metrics for proper metadata-to-metrics linking

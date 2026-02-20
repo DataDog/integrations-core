@@ -1,4 +1,5 @@
 name: Cacti
+fleet_configurable: true
 files:
   - name: cacti.yaml
     options:
@@ -8,6 +9,7 @@ files:
       - template: instances
         options:
           - name: mysql_host
+            fleet_configurable: true
             required: true
             description: URL of your MySQL database
             value:
@@ -19,12 +21,15 @@ files:
               example: 3306
               type: integer
           - name: mysql_user
+            fleet_configurable: true
             required: true
             description: User to use to connect to MySQL in order to gather metrics.
             value:
               type: string
           - name: mysql_password
             description: Password to use to connect to MySQL in order to gather metrics.
+            fleet_configurable: true
+            secret: true
             value:
               type: string
           - name: mysql_db
@@ -33,6 +38,7 @@ files:
               example: cacti
               type: string
           - name: rrd_path
+            fleet_configurable: true
             required: true
             description: |
               The Cacti checks requires access to the Cacti DB in MySQL and to the RRD

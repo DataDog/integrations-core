@@ -1,4 +1,5 @@
 name: Kube metrics server
+fleet_configurable: true
 files:
 - name: kube_metrics_server.yaml
   options:
@@ -23,6 +24,7 @@ files:
     - name: health_url
       description: |
         URL for the kube-metrics-server health endpoint.
+      fleet_configurable: true
       value:
         type: string
         example: http://localhost:443/livez
