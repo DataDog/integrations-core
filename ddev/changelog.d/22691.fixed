@@ -1,1 +1,1 @@
-Don't force writing github uname and token to config file. We can just read it from envvars.
+Stop writing the GitHub username and token to the config file. Read them directly from environment variables instead.
