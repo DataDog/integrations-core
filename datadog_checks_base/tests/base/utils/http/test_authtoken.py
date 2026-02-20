@@ -10,10 +10,13 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.http import DEFAULT_EXPIRATION, RequestsWrapper
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.base.utils.time import get_timestamp
+
+# Note: MockHTTPResponse is a drop-in replacement for dev.http.MockResponse
+# with protocol compliance and httpx compatibility
 from datadog_checks.dev import TempDir
 from datadog_checks.dev.fs import read_file, write_file
-from datadog_checks.dev.http import MockResponse
 
 from .common import DEFAULT_OPTIONS, FIXTURE_PATH
 
@@ -607,14 +610,14 @@ class TestAuthTokenDCOS:
                 assert isinstance(decoded['exp'], int)
                 assert abs(decoded['exp'] - (get_timestamp() + exp)) < 10
 
-                return MockResponse(json_data={'token': 'auth-token'})
-            return MockResponse(status_code=404)
+                return MockHTTPResponse(json_data={'token': 'auth-token'})
+            return MockHTTPResponse(status_code=404)
 
         def auth(*args, **kwargs):
             if args[0] == 'https://leader.mesos/service/some-service':
                 assert kwargs['headers']['Authorization'] == 'token=auth-token'
-                return MockResponse(json_data={})
-            return MockResponse(status_code=404)
+                return MockHTTPResponse(json_data={})
+            return MockHTTPResponse(status_code=404)
 
         with mock.patch('requests.post', side_effect=login), mock.patch('requests.Session.get', side_effect=auth):
             http = RequestsWrapper(instance, init_config)
@@ -726,7 +729,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                 if counter['errors'] <= 1:
                     raise Exception
 
-                return MockResponse()
+                return MockHTTPResponse()
 
             expected_headers = {'Authorization': 'Bearer secret2'}
             expected_headers.update(DEFAULT_OPTIONS['headers'])
