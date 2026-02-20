@@ -5,6 +5,8 @@ mypy-args = [
   "--check-untyped-defs",
   "--follow-imports",
   "silent",
+]
+mypy-files = [
   "datadog_checks/mysql/statements.py",
 ]
 mypy-deps = [
@@ -25,6 +27,11 @@ version = [
 python = ["3.13"]
 version = ["8.0"]
 replication = ["group"]
+
+[[envs.default.matrix]]
+python = ["3.13"]
+version = ["8.0"]
+replication = ["hybrid"]
 
 [[envs.default.matrix]]
 python = ["3.13"]
@@ -51,6 +58,9 @@ matrix.version.env-vars = [
 ]
 name."8.0-group".env-vars = [
   { key = "COMPOSE_FILE", value = "mysql8-group.yaml" },
+]
+name."8.0-hybrid".env-vars = [
+  { key = "COMPOSE_FILE", value = "mysql8-hybrid.yaml" },
 ]
 
 

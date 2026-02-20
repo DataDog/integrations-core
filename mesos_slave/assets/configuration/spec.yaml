@@ -1,4 +1,5 @@
 name: Mesos
+fleet_configurable: true
 
 files:
   - name: mesos_slave.yaml
@@ -11,12 +12,14 @@ files:
         options:
           - name: url
             description: URL used to connect to the Mesos instance.
+            fleet_configurable: true
             required: True
             value:
               example: http://localhost:5051
               type: string
           - name: master_port
             description: Port of your Mesos Master instance.
+            fleet_configurable: true
             value:
               example: 5050
               type: integer
@@ -24,10 +27,12 @@ files:
             description: |
               This is used as the value of the `mesos_cluster` tag. If not provided it is retrieved from the
               `/state-summary` endpoint. Use this if you are experiencing load issues and you know the cluster_name.
+            fleet_configurable: true
             value:
               type: string
           - name: tasks
             description: Specify the tasks from which you want to send metrics to Datadog.
+            fleet_configurable: true
             value:
               type: array
               items:

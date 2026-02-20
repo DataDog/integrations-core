@@ -1,1 +1,0 @@
-Avoid holding onto Postgres settings data between checks to free up memory

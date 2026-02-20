@@ -1,4 +1,5 @@
 name: SonarQube
+fleet_configurable: true
 files:
 - name: sonarqube.yaml
   options:
@@ -23,6 +24,7 @@ files:
 
           Note: This only takes effect when `is_jmx` is set to `false` and is required for all
           API metrics.
+        fleet_configurable: true
         value:
           type: string
       - name: default_tag
@@ -30,6 +32,7 @@ files:
           The tag name to use for `components` by default.
 
           Note: This only takes effect when `is_jmx` is set to `false`.
+        fleet_configurable: true
         value:
           type: string
           example: component
@@ -90,6 +93,7 @@ files:
                   - security.
                 exclude:
                   - issues.(false_positive_issues|reopened_issues)
+        fleet_configurable: true
         value:
           type: object
           additionalProperties: true
