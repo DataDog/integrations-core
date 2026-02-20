@@ -1,1 +1,0 @@
-Stop writing the GitHub username and token to the config file. Read them directly from environment variables instead.
