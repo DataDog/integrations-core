@@ -63,7 +63,6 @@ if TYPE_CHECKING:
     import unicodedata as _module_unicodedata
 
     from datadog_checks.base.utils.diagnose import Diagnosis
-    from datadog_checks.base.utils.http import RequestsWrapper
     from datadog_checks.base.utils.http_protocol import HTTPClientProtocol
     from datadog_checks.base.utils.metadata import MetadataManager
 
