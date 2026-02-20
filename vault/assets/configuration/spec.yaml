@@ -26,6 +26,7 @@ files:
         type: boolean
     - name: api_url
       fleet_configurable: true
+      formats: ["url"]
       required: true
       description: URL of the Vault to query.
       value:

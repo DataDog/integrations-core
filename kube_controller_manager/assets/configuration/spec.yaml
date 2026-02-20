@@ -32,6 +32,7 @@ files:
       description: |
         The URL for the kube-controller-manager health endpoint.
       fleet_configurable: true
+      formats: ["url"]
       value:
         type: string
         example: http://localhost:10252/healthz
