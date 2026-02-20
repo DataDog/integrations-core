@@ -70,7 +70,6 @@ tests:
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
       timestamp: 1.736329118112E12
       type: "USER_MAC_CONFIG_CHANGE"
-      uid: 0
       usr:
         id: 0
         name: "root"
@@ -155,7 +154,6 @@ tests:
       subj: "system_u:system_r:sshd_t:s0-s0:c0.c1023"
       timestamp: 1.740139921923E12
       type: "USER_AUTH"
-      uid: 0
       usr:
         id: 0
         name: "root"
@@ -471,7 +469,6 @@ tests:
       subj: "unconfined"
       timestamp: 1.740980591704E12
       type: "ADD_GROUP"
-      uid: 0
       usr:
         id: 0
         name: "root"
@@ -550,7 +547,6 @@ tests:
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
       timestamp: 1.765794074279E12
       type: "DEL_GROUP"
-      uid: 0
       usr:
         id: 0
         name: "root"
@@ -628,7 +624,6 @@ tests:
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
       timestamp: 1.635509157089E12
       type: "ADD_USER"
-      uid: 0
       usr:
         id: 0
         name: "root"
@@ -708,7 +703,6 @@ tests:
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
       timestamp: 1.740379094277E12
       type: "DEL_USER"
-      uid: 0
       usr:
         id: 0
         name: "root"
@@ -789,7 +783,6 @@ tests:
       subj: "unconfined_u:unconfined_r:passwd_t:s0-s0:c0.c1023"
       timestamp: 1.63550918986E12
       type: "USER_CHAUTHTOK"
-      uid: 0
       usr:
         id: 0
         name: "root"
@@ -878,7 +871,6 @@ tests:
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
       timestamp: 1.74072094567E12
       type: "ROLE_ASSIGN"
-      uid: 0
       usr:
         id: 0
         name: "root"
@@ -966,7 +958,6 @@ tests:
       subj: "unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023"
       timestamp: 1.740130059788E12
       type: "ROLE_REMOVE"
-      uid: 0
       usr:
         id: 0
         name: "root"
@@ -1027,7 +1018,6 @@ tests:
         severity_id: 1
         time: 1740378301873
       ogid: 0
-      ouid: 0
       post_msg_kv: ""
       pre_msg_kv: ""
       rdev: "00:00"
@@ -1093,7 +1083,6 @@ tests:
         severity_id: 1
         time: 1740378301873
       ogid: 0
-      ouid: 0
       post_msg_kv: ""
       pre_msg_kv: ""
       rdev: "00:00"
@@ -1158,7 +1147,6 @@ tests:
         severity_id: 1
         time: 1740378301873
       ogid: 0
-      ouid: 0
       post_msg_kv: ""
       pre_msg_kv: ""
       rdev: "00:00"
@@ -1224,7 +1212,6 @@ tests:
         severity_id: 1
         time: 1740378301873
       ogid: 0
-      ouid: 0
       post_msg_kv: ""
       pre_msg_kv: ""
       rdev: "00:00"
