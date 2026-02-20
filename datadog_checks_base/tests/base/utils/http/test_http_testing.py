@@ -1,17 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Tests for HTTP testing utilities.
-
-Verifies MockHTTPResponse implementation details:
-- Default status_code=200
-- json_data auto-sets Content-Type header
-- raise_for_status() logic for 4xx/5xx codes
-- iter_lines() preserves empty lines (matches requests behavior)
-- Raw response mock structure for certificate access
-- Leading newline normalization
-"""
-
 import pytest
 
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
