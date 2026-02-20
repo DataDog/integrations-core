@@ -224,6 +224,15 @@ class MasterFilesMetrics(BaseModel):
     enabled: Optional[bool] = Field(None, examples=[False])
 
 
+class MissingIndexMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[int] = Field(None, examples=[600])
+    enabled: Optional[bool] = Field(None, examples=[True])
+
+
 class PrimaryLogShippingMetrics(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -296,6 +305,7 @@ class DatabaseMetrics(BaseModel):
     index_usage_metrics: Optional[IndexUsageMetrics] = None
     instance_metrics: Optional[InstanceMetrics] = None
     master_files_metrics: Optional[MasterFilesMetrics] = None
+    missing_index_metrics: Optional[MissingIndexMetrics] = None
     primary_log_shipping_metrics: Optional[PrimaryLogShippingMetrics] = None
     secondary_log_shipping_metrics: Optional[SecondaryLogShippingMetrics] = None
     server_state_metrics: Optional[ServerStateMetrics] = None
@@ -454,7 +464,6 @@ class InstanceConfig(BaseModel):
     driver: Optional[str] = None
     dsn: Optional[str] = None
     empty_default_hostname: Optional[bool] = None
-    enable_legacy_tags_normalization: Optional[bool] = None
     exclude_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
     host: str

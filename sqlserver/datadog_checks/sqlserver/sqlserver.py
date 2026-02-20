@@ -41,6 +41,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverFileStatsMetrics,
     SqlserverIndexUsageMetrics,
     SqlserverMasterFilesMetrics,
+    SqlserverMissingIndexMetrics,
     SqlserverOsSchedulersMetrics,
     SqlserverOsTasksMetrics,
     SqlserverPrimaryLogShippingMetrics,
@@ -944,6 +945,7 @@ class SQLServer(DatabaseCheck):
             SqlserverDatabaseBackupMetrics,
             SqlserverAgentMetrics,
             SQLServerXESessionMetrics,
+            SqlserverMissingIndexMetrics,
         ]
 
     @property
