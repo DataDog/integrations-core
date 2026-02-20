@@ -487,11 +487,6 @@ def test_perf_metrics(dd_run_check, aggregator, instance):
 
 
 def test_performance_metrics_endpoint_unavailable(dd_run_check, aggregator, instance, mock_http_get):
-    """
-    Test that the check handles /cluster/metrics/export returning 501 (Not Implemented).
-    When Proxmox Metric Server is not configured, the endpoint returns 501 with empty/null body.
-    Without proper handling, this causes AttributeError: 'NoneType' object has no attribute 'get'.
-    """
     response = MockResponse(status_code=501)
     response.json = lambda: None
 
@@ -503,13 +498,11 @@ def test_performance_metrics_endpoint_unavailable(dd_run_check, aggregator, inst
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
 
-    # Check should complete without crashing - other metrics should still be collected
     aggregator.assert_metric(
         "proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json', 'proxmox_status:up', 'testing']
     )
     aggregator.assert_metric("proxmox.node.up", 1, tags=[], hostname='ip-122-82-3-112')
     aggregator.assert_metric("proxmox.vm.up", 1, tags=[], hostname="debian")
-    # Performance metrics from the unavailable endpoint should be skipped (no crash)
     aggregator.assert_metric("proxmox.ha.quorum", hostname='ip-122-82-3-112', tags=['node_status:OK'])
 
 
