@@ -32,107 +32,49 @@ on:
 
 jobs:
   trigger-release:
-    name: Trigger wheel build
+    name: Extract inputs and prepare dispatch
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write # Required for OIDC token generation (dd-octo-sts)
-      contents: read # Required for repository_dispatch API call
+    outputs:
+      integrations: ${{ steps.extract.outputs.integrations }}
+      source-ref: ${{ steps.extract.outputs.source-ref }}
+      sts-policy: ${{ steps.extract.outputs.sts-policy }}
 
     steps:
       - name: Extract inputs
         id: extract
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            # PR testing - use test integrations and PR head ref
+            # PR testing - use test integrations, PR head ref, and test policy
             INTEGRATIONS='["postgres", "mysql"]'
             SOURCE_REF='${{ github.event.pull_request.head.sha }}'
-            POLICY_NAME="integrations-core.dispatch-wheel-builds-test"
+            POLICY="integrations-core.dispatch-wheel-builds-test"
             echo "PR testing mode"
           else
-            # Manual trigger - use workflow inputs
+            # Manual trigger - use workflow inputs and production policy
             INTEGRATIONS='${{ inputs.integrations }}'
             SOURCE_REF='${{ inputs.ref }}'
-            POLICY_NAME="integrations-core.dispatch-wheel-builds"
+            POLICY="integrations-core.dispatch-wheel-builds"
             echo "Manual trigger mode"
           fi
 
           echo "Integrations to build: $INTEGRATIONS"
           echo "Source ref: $SOURCE_REF"
-          echo "Policy: $POLICY_NAME"
+          echo "Policy: $POLICY"
 
           echo "integrations=$INTEGRATIONS" >> $GITHUB_OUTPUT
           echo "source-ref=$SOURCE_REF" >> $GITHUB_OUTPUT
-          echo "policy=$POLICY_NAME" >> $GITHUB_OUTPUT
+          echo "sts-policy=$POLICY" >> $GITHUB_OUTPUT
 
-      - name: Get GitHub token via dd-octo-sts
-        id: octo-sts
-        uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
-        with:
-          scope: DataDog/agent-integration-wheels-release
-          policy: ${{ steps.extract.outputs.policy }}
-
-      - name: Trigger wheel build in agent-integration-wheels-release
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
-        env:
-          INTEGRATIONS_JSON: ${{ steps.extract.outputs.integrations }}
-          SOURCE_REF: ${{ steps.extract.outputs.source-ref }}
-          EVENT_NAME: ${{ github.event_name }}
-        with:
-          github-token: ${{ steps.octo-sts.outputs.token }}
-          script: |
-            // Parse inputs from environment to prevent code injection
-            const integrations = JSON.parse(process.env.INTEGRATIONS_JSON);
-            const sourceRef = process.env.SOURCE_REF;
-            const eventName = process.env.EVENT_NAME;
-
-            console.log('🚀 Triggering build for:', integrations);
-            console.log('📦 Source: integrations-core at', sourceRef);
-
-            try {
-              let workflowUrl;
-
-              if (eventName === 'pull_request') {
-                // For PRs: use workflow_dispatch to target the feature branch
-                console.log('📋 Using workflow_dispatch for PR testing');
-
-                const response = await github.rest.actions.createWorkflowDispatch({
-                  owner: 'DataDog',
-                  repo: 'agent-integration-wheels-release',
-                  workflow_id: 'release-integrations.yml',
-                  ref: '01-28-add_release_workflow',
-                  inputs: {
-                    integrations: JSON.stringify(integrations),
-                    'source-repo': 'integrations-core',
-                    'source-repo-ref': sourceRef,
-                    'release-cli-ref': '01-28-add_release_workflow'
-                  }
-                });
-
-                workflowUrl = `https://github.com/DataDog/agent-integration-wheels-release/actions/workflows/release-integrations.yml`;
-              } else {
-                // For manual triggers: use repository_dispatch (will work once workflow is on main)
-                console.log('📋 Using repository_dispatch for production');
-
-                await github.rest.repos.createDispatchEvent({
-                  owner: 'DataDog',
-                  repo: 'agent-integration-wheels-release',
-                  event_type: 'build-integrations',
-                  client_payload: {
-                    integrations: integrations,
-                    source_repo: 'integrations-core',
-                    source_repo_ref: sourceRef,
-                    triggered_by_repo: context.repo.repo,
-                    triggered_by_ref: context.ref,
-                    triggered_by_sha: context.sha
-                  }
-                });
-
-                workflowUrl = 'https://github.com/DataDog/agent-integration-wheels-release/actions';
-              }
-
-              console.log('✅ Build triggered successfully');
-              console.log(`📊 Check build status at: ${workflowUrl}`);
-            } catch (error) {
-              console.error('❌ Failed to trigger build:', error.message);
-              throw error;
-            }
+  dispatch-release:
+    name: Dispatch release workflow runs
+    needs: trigger-release
+    permissions:
+      id-token: write # Required for OIDC token generation (dd-octo-sts)
+      contents: read
+    uses: ./.github/workflows/dispatch-release.yml
+    with:
+      integrations: ${{ needs.trigger-release.outputs.integrations }}
+      source-repo: integrations-core
+      source-repo-ref: ${{ needs.trigger-release.outputs.source-ref }}
+      release-workflow-ref: ${{ github.event_name == 'pull_request' && '01-28-add_release_workflow' || 'main' }}
+      sts-policy: ${{ needs.trigger-release.outputs.sts-policy }}
