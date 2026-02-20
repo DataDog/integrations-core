@@ -45,7 +45,7 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             # PR testing - use test integrations, PR head ref, and test policy
-            INTEGRATIONS='["postgres", "mysql"]'
+            INTEGRATIONS='["postgres", "mysql", "redis", "nginx"]'
             SOURCE_REF='${{ github.event.pull_request.head.sha }}'
             POLICY="integrations-core.dispatch-wheel-builds-test"
             echo "PR testing mode"
@@ -78,3 +78,4 @@ jobs:
       source-repo-ref: ${{ needs.trigger-release.outputs.source-ref }}
       release-workflow-ref: ${{ github.event_name == 'pull_request' && '01-28-add_release_workflow' || 'main' }}
       sts-policy: ${{ needs.trigger-release.outputs.sts-policy }}
+      chunk-size: ${{ github.event_name == 'pull_request' && 2 || 200 }}
