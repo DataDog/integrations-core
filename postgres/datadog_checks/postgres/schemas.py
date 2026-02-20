@@ -133,18 +133,6 @@ FROM   pg_inherits
 GROUP BY inhparent
 """
 
-PARTITION_ACTIVITY_QUERY = """
-SELECT pi.inhparent :: regclass         AS parent_table_name,
-       SUM(COALESCE(psu.seq_scan, 0) + COALESCE(psu.idx_scan, 0)) AS total_activity,
-       pi.inhparent as table_id
-FROM   pg_catalog.pg_stat_user_tables psu
-       join pg_class pc
-         ON psu.relname = pc.relname
-       join pg_inherits pi
-         ON pi.inhrelid = pc.oid
-GROUP BY pi.inhparent
-"""
-
 
 class TableObject(TypedDict):
     id: str
@@ -230,7 +218,7 @@ class PostgresSchemaCollector(SchemaCollector):
                         query += " AND datname IN ({})".format(", ".join(f"'{db}'" for db in autodiscovery_databases))
 
                 cursor.execute(query)
-                return cursor.fetchall()
+                return [dict(row) for row in cursor.fetchall()]
 
     @contextlib.contextmanager
     def _get_cursor(self, database_name):

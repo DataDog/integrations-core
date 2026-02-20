@@ -1,4 +1,5 @@
 name: Prometheus
+fleet_configurable: true
 files:
   - name: prometheus.yaml
     options:
@@ -8,18 +9,22 @@ files:
     - template: instances
       options:
       - name: prometheus_url
+        fleet_configurable: true
+        formats: ["url"]
         required: true
         description: The URL where your application metrics are exposed by Prometheus.
         value:
           type: string
           example: http://localhost:10055/metrics
       - name: namespace
+        fleet_configurable: true
         required: true
         description: The namespace to be prepended to all metrics.
         value:
           type: string
           example: <SERVICE_NAME>
       - name: metrics
+        fleet_configurable: true
         required: true
         description: |
           List of `<METRIC_TO_FETCH>: <NEW_METRIC_NAME>` for metrics to be fetched from the Prometheus endpoint.
@@ -38,6 +43,7 @@ files:
             - <METRIC_TO_FETCH>
       - name: prometheus_metrics_prefix
         description: Prefix for exposed Prometheus metrics.
+        fleet_configurable: true
         value:
           type: string
           example: <PREFIX>_
@@ -46,6 +52,7 @@ files:
         description: |
           Send a service check reporting about the health of the Prometheus endpoint.
           The service check is named `<NAMESPACE>.prometheus.health`.
+        fleet_configurable: true
         value:
           type: boolean
           example: true
@@ -92,17 +99,20 @@ files:
           type: object
       - name: send_histograms_buckets
         description: Set send_histograms_buckets to true to send the histograms bucket.
+        fleet_configurable: true
         value:
           example: true
           type: boolean
       - name: send_monotonic_counter
         description: Set send_monotonic_counter to true to send counters as monotonic counter.
+        fleet_configurable: true
         value:
           example: true
           type: boolean
       - name: exclude_labels
         description: |
           A list of labels to be excluded.
+        fleet_configurable: true
         value:
           example:
             - timestamp
@@ -114,6 +124,7 @@ files:
           If your Prometheus endpoint is secured, here are the settings to configure it:
           Can either be only the path to the certificate where you specify the private key
           or it can be the path to a file containing both the certificate and the private key.
+        fleet_configurable: true
         value:
           example: <CERT_PATH>
           type: string
@@ -121,6 +132,7 @@ files:
         description: |
           Needed if the certificate does not include the private key.
           WARNING: The private key to your local certificate must be unencrypted.
+        fleet_configurable: true
         value:
           example: <KEY_PATH>
           type: string
@@ -128,6 +140,7 @@ files:
         description: |
           The path to the trusted CA used for generating custom certificates. Set this to false to disable SSL
           certificate verification.
+        fleet_configurable: true
         value:
           example: <CA_CERT_PATH>
           type: string
@@ -139,6 +152,7 @@ files:
       - name: max_returned_metrics
         description: |
           The check limits itself to 2000 metrics by default, increase this limit if needed.
+        fleet_configurable: true
         value:
           example: 2000
           type: integer

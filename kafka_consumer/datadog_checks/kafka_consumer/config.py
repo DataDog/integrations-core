@@ -8,7 +8,7 @@ from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.kafka_consumer.constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
 
 # https://github.com/confluentinc/librdkafka/blob/e03d3bb91ed92a38f38d9806b8d8deffe78a1de5/src/rd.h#L78-L89
-LIBRDKAFKA_LOG_CRIT = 2
+LIBRDKAFKA_LOG_ERR = 3
 
 
 class KafkaConfig:
@@ -45,7 +45,7 @@ class KafkaConfig:
         self._request_timeout = init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT)
         self._request_timeout_ms = self._request_timeout * 1000
         self._librdkafka_log_level = instance.get(
-            'librdkafka_log_level', init_config.get('librdkafka_log_level', LIBRDKAFKA_LOG_CRIT)
+            'librdkafka_log_level', init_config.get('librdkafka_log_level', LIBRDKAFKA_LOG_ERR)
         )
         self._security_protocol = instance.get('security_protocol', 'PLAINTEXT')
         self._sasl_mechanism = instance.get('sasl_mechanism')
@@ -79,6 +79,10 @@ class KafkaConfig:
             and os.path.exists('/opt/datadog-agent/embedded/ssl/certs/cacert.pem')
         ):
             self._tls_ca_cert = '/opt/datadog-agent/embedded/ssl/certs/cacert.pem'
+
+        self._sasl_oauth_tls_ca_cert = (
+            self._sasl_oauth_token_provider.get("tls_ca_cert") if self._sasl_oauth_token_provider else None
+        )
 
         # Data Streams live messages
         self.live_messages_configs = instance.get('live_messages_configs', [])

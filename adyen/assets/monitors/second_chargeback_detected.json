@@ -8,11 +8,10 @@
 		"id": 154586409,
 		"name": "Second Chargeback detected",
 		"type": "log alert",
-		"query": "logs(\"source:adyen service:dispute @evt.name:SECOND_CHARGEBACK\").index(\"*\").rollup(\"count\").by(\"@pspReference\").last(\"5m\") > 0",
+		"query": "logs(\"source:adyen @evt.name:SECOND_CHARGEBACK\").index(\"*\").rollup(\"count\").by(\"@pspReference\").last(\"5m\") > 0",
 		"message": "{{#is_alert}}\nSecond chargeback refers to an alert from Adyen indicating that the issuer declined the defense, or Adyen accepted their pre-arbitration case. Defense documents can not be uploaded as this is the final stage.\n\nA second chargeback has been initiated for pspReference {{log.attributes.pspReference}}. Please take necessary action accordingly.\n{{/is_alert}}",
 		"tags": [
-			"source:adyen",
-			"service:dispute"
+			"source:adyen"
 		],
 		"options": {
 			"thresholds": {

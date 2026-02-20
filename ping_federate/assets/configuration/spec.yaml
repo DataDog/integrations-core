@@ -1,4 +1,5 @@
 name: PingFederate
+fleet_configurable: true
 files:
 - name: ping_federate.yaml
   options:

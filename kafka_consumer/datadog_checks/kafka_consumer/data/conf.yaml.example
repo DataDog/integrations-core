@@ -203,6 +203,27 @@ instances:
         #
         # client_secret: <CLIENT_SECRET>
 
+        ## @param scope - string - optional
+        ## The OAuth scope to request. Required by most identity providers.
+        ## For example, a custom scope like 'kafka' or 'api://default'.
+        #
+        # scope: <SCOPE>
+
+        ## @param extensions - string - optional
+        ## SASL/OAUTHBEARER extensions to pass to the broker.
+        ## For Confluent Cloud, this typically includes the logical cluster ID
+        ## and optionally the identity pool ID.
+        ## Format: 'logicalCluster=lkc-xxxxx' or 'logicalCluster=lkc-xxxxx,identityPoolId=pool-xxxxx'
+        #
+        # extensions: <EXTENSIONS>
+
+        ## @param tls_ca_cert - string - optional - default: /path/to/oauth_ca_cert.pem
+        ## Path to a CA certificate file used to verify the OIDC token endpoint's TLS certificate.
+        ## This maps to librdkafka's `https.ca.location` property, which is separate from
+        ## the broker connection's `ssl.ca.location` (configured through the top-level `tls_ca_cert`).
+        #
+        # tls_ca_cert: /path/to/oauth_ca_cert.pem
+
     ## @param tls_verify - boolean - optional - default: true
     ## Instructs the check to validate the TLS certificate(s) of the service(s).
     #

@@ -1,4 +1,5 @@
 name: Kubernetes State
+fleet_configurable: true
 files:
   - name: conf.yaml.example
     options:
@@ -8,6 +9,7 @@ files:
       - template: instances
         options:
           - name: collectors
+            fleet_configurable: true
             required: false
             description: |
               A list of resource types to collect
@@ -21,6 +23,7 @@ files:
                 - nodes
                 - pods
           - name: label_joins
+            fleet_configurable: true
             required: false
             description: |
               label_joins allows adding the tags to join from other KSM metrics.
@@ -38,6 +41,7 @@ files:
                   labels_to_get:
                     - label_addonmanager_kubernetes_io_mode
           - name: labels_as_tags
+            fleet_configurable: true
             required: false
             description: |
               labels_as_tags allows to specify custom labels of kubernetes resources to be turned into Datadog tags attached the corresponding metrics.
@@ -50,6 +54,7 @@ files:
                   node:
                     topology.kubernetes.io/region: kube_region
           - name: annotations_as_tags
+            fleet_configurable: true
             required: false
             description: |
               annotations_as_tags allows to specify custom annotations of kubernetes resources to be turned into Datadog tags attached the corresponding metrics.
@@ -60,6 +65,7 @@ files:
                   pod:
                     my_pod_annotation: my_pod_tag
           - name: labels_mapper
+            fleet_configurable: true
             required: false
             description: |
               LabelsMapper can be used to translate kube-state-metrics labels to other tags.
@@ -69,6 +75,7 @@ files:
               example:
                 namespace: kube_namespace
           - name: tags
+            fleet_configurable: true
             required: false
             description: |
               A list of tags to attach to every metric and service check emitted by this instance.
@@ -82,6 +89,7 @@ files:
                 - <KEY_1>:<VALUE_1>
                 - <KEY_2>:<VALUE_2>
           - name: disable_global_tags
+            fleet_configurable: true
             required: false
             description: |
               disable_global_tags disables adding the global host tags defined via tags/DD_TAG in the Agent config, default false.
@@ -89,6 +97,7 @@ files:
               type: boolean
               example: false
           - name: namespaces
+            fleet_configurable: true
             required: false
             description: |
               namespaces contains the namespaces from which we collect metrics
@@ -102,6 +111,7 @@ files:
                 - prod
                 - kube-system
           - name: resync_period
+            fleet_configurable: true
             required: false
             description: |
               resync_period is the frequency of resync'ing the metrics cache in seconds, default 5 minutes (kubernetes_informers_resync_period).
@@ -109,6 +119,7 @@ files:
               type: integer
               example: 300
           - name: telemetry
+            fleet_configurable: true
             required: false
             description: |
               enables telemetry check's metrics, default false.
@@ -117,6 +128,7 @@ files:
               type: boolean
               example: false
           - name: skip_leader_election
+            fleet_configurable: true
             required: false
             description: |
               skip_leader_election forces ignoring the leader election when running the check

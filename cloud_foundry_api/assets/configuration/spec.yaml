@@ -1,4 +1,5 @@
 name: Cloud Foundry API
+fleet_configurable: true
 files:
 - name: cloud_foundry_api.yaml
   options:
@@ -6,6 +7,8 @@ files:
     options:
     - name: api_url
       description: URL of the Cloud Controller API.
+      fleet_configurable: true
+      formats: ["url"]
       required: true
       value:
         type: string
@@ -13,6 +16,7 @@ files:
       description: |
         `client_id` used to authenticate with UAA and obtain an oauth token
         for communication with the Cloud Controller API.
+      fleet_configurable: true
       required: true
       value:
         type: string
@@ -20,14 +24,16 @@ files:
       description: |
         `client_secret` used to authenticate with UAA and obtain an oauth token
         for communication with the Cloud Controller API.
+      fleet_configurable: true
       required: true
+      secret: true
       value:
         type: string
-      secret: true
     - name: event_filter
       description: |
         A list of the types of audit events to fetch.
         See https://docs.cloudfoundry.org/running/managing-cf/audit-events.html#types for detailed information.
+      fleet_configurable: true
       value:
         type: array
         items:
@@ -40,6 +46,7 @@ files:
     - name: results_per_page
       description: |
         Maximum number of event results per request to the API. Maximum is 5000 for v3, and 100 for v2.
+      fleet_configurable: true
       value:
         type: integer
         maximum: 5000
