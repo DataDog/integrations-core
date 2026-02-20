@@ -95,6 +95,17 @@ files:
       value:
         type: boolean
         example: false
+    - name: detailed_shard_metrics
+      description: |
+        Enable to collect detailed shard placement metrics with `index` and `prirep` (primary/replica) tags.
+        Requires `cat_allocation_stats` to be enabled.
+        When disabled (default), reports aggregated shard counts per node.
+        When enabled, reports shard counts per node-index-prirep combination for detailed placement reporting.
+        Enabling this increases metric cardinality (node_count * index_count).
+        Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-shards.html.
+      value:
+        type: boolean
+        example: false
     - name: admin_forwarder
       description: |
         Specifies a URL that includes a context root
