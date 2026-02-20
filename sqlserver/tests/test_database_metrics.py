@@ -29,6 +29,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverFileStatsMetrics,
     SqlserverIndexUsageMetrics,
     SqlserverMasterFilesMetrics,
+    SqlserverMissingIndexMetrics,
     SqlserverOsSchedulersMetrics,
     SqlserverOsTasksMetrics,
     SqlserverPrimaryLogShippingMetrics,
@@ -1621,6 +1622,81 @@ def test_sqlserver_xe_session_metrics(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_missing_index_metrics', [True, False])
+@pytest.mark.parametrize('collection_interval', [None, 600])
+def test_sqlserver_missing_index_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    include_missing_index_metrics,
+    collection_interval,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'missing_index_metrics': {'enabled': include_missing_index_metrics},
+    }
+    if collection_interval:
+        instance_docker_metrics['database_metrics']['missing_index_metrics']['collection_interval'] = (
+            collection_interval
+        )
+
+    mocked_results = [
+        ('master', 'dbo', 'Orders', 'CustomerID', '', 'OrderDate', 500, 10, 85.5, 12.3),
+        ('msdb', 'dbo', 'JobHistory', 'job_id, step_id', '', '', 200, 50, 60.0, 5.7),
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(query, db=None):
+        return mocked_results
+
+    missing_index_metrics = SqlserverMissingIndexMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+    )
+
+    expected_collection_interval = collection_interval or missing_index_metrics.collection_interval
+    assert missing_index_metrics.queries[0]['collection_interval'] == expected_collection_interval
+
+    sqlserver_check._database_metrics = [missing_index_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    if not include_missing_index_metrics:
+        assert missing_index_metrics.enabled is False
+    else:
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+        ]
+        for result in mocked_results:
+            db, schema, table, equality_columns, inequality_columns, included_columns, *metric_values = result
+            metrics = zip(missing_index_metrics.metric_names()[0], metric_values)
+            expected_tags = [
+                f'db:{db}',
+                f'schema:{schema}',
+                f'table:{table}',
+                f'equality_columns:{equality_columns}',
+                f'inequality_columns:{inequality_columns}',
+                f'included_columns:{included_columns}',
+            ] + tags
+            for metric_name, metric_value in metrics:
+                aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+
+    # missing_index_metrics should not be collected because the collection interval is not reached
+    aggregator.reset()
+    dd_run_check(sqlserver_check)
+    for metric_name in missing_index_metrics.metric_names()[0]:
+        aggregator.assert_metric(metric_name, count=0)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_sqlserver_database_metrics_defaults(
     aggregator,
     dd_run_check,
@@ -1640,6 +1716,7 @@ def test_sqlserver_database_metrics_defaults(
         SqlserverFileStatsMetrics: True,
         SqlserverIndexUsageMetrics: True,
         SqlserverMasterFilesMetrics: False,
+        SqlserverMissingIndexMetrics: True,
         SqlserverOsSchedulersMetrics: False,
         SqlserverOsTasksMetrics: False,
         SqlserverPrimaryLogShippingMetrics: False,
