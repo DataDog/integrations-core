@@ -13,7 +13,6 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.proxmox import ProxmoxCheck
 
-from .conftest import get_url_path
 from .common import (
     ALL_EVENTS,
     ALL_METRICS,
@@ -28,6 +27,7 @@ from .common import (
     STORAGE_RESOURCE_METRICS,
     VM_PERF_METRICS,
 )
+from .conftest import get_url_path
 
 
 @pytest.mark.usefixtures('mock_http_get')
