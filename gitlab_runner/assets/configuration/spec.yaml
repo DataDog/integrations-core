@@ -62,6 +62,7 @@ files:
     options:
       - name: gitlab_url
         fleet_configurable: true
+        formats: ["url"]
         required: true
         description: |
           Master URL to probe for service health status.
@@ -71,6 +72,7 @@ files:
           type: string
       - name: prometheus_endpoint
         fleet_configurable: true
+        formats: ["url"]
         required: true
         description: URL of the metrics endpoint of prometheus
         value:
