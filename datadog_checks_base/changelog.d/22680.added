@@ -1,0 +1,1 @@
+Re-export HTTP protocol abstractions and exceptions for library-agnostic HTTP client usage.
