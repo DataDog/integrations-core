@@ -1,0 +1,32 @@
+-- Minimal MIB to test dash-to-underscore symbol lookup (pysmi 1.6+ trans_opers).
+-- Defines a NOTIFICATION-TYPE whose OBJECTS use a hyphenated name.
+TEST-DASH-MIB DEFINITIONS ::= BEGIN
+IMPORTS
+    MODULE-IDENTITY, NOTIFICATION-TYPE, OBJECT-TYPE, Integer32, enterprises
+    FROM SNMPv2-SMI;
+
+testDashMib MODULE-IDENTITY
+    LAST-UPDATED "202501010000Z"
+    ORGANIZATION ""
+    CONTACT-INFO ""
+    DESCRIPTION "Test MIB for dash-to-underscore symbol lookup"
+    REVISION "202501010000Z"
+    DESCRIPTION ""
+    ::= { enterprises 99999 }
+
+testDashMibObjects OBJECT IDENTIFIER ::= { testDashMib 1 }
+
+test-symbol-with-dash OBJECT-TYPE
+    SYNTAX Integer32
+    MAX-ACCESS read-only
+    STATUS current
+    DESCRIPTION "Test var with dash in name"
+    ::= { testDashMibObjects 1 }
+
+testTrap NOTIFICATION-TYPE
+    OBJECTS { test-symbol-with-dash }
+    STATUS current
+    DESCRIPTION "Test trap for dash symbol"
+    ::= { testDashMibObjects 2 }
+
+END

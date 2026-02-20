@@ -105,10 +105,92 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
     """
     from pysmi.codegen import JsonCodeGen
     from pysmi.compiler import MibCompiler
+    from pysmi.mibinfo import MibInfo
     from pysmi.parser import SmiV1CompatParser
-    from pysmi.reader import getReadersFromUrls
+    from pysmi.reader import get_readers_from_urls
+    from pysmi.reader.httpclient import HttpReader
     from pysmi.searcher import AnyFileSearcher
     from pysmi.writer import FileWriter
+
+    # pysmi's HttpReader decodes HTTP response as UTF-8 only; MIBs with non-UTF-8 bytes
+    # (e.g. https://github.com/DataDog/mibs.snmplabs.com/blob/master/asn1/A3COM-HUAWEI-DEVICE-MIB#L593)
+    # raise UnicodeDecodeError and are reported as "missing".
+    # Use a tolerant reader for HTTP(S) URLs that decodes with errors='replace'.
+
+    def _make_readers(sources, fuzzy_matching=True):
+        readers = []
+        for src in sources:
+            if src.startswith('http://') or src.startswith('https://'):
+                readers.append(_TolerantHttpReader(src, fuzzy_matching=fuzzy_matching))
+            else:
+                readers.extend(get_readers_from_urls(src, fuzzy_matching=fuzzy_matching))
+        return readers
+
+    # This code is copied from https://github.com/lextudio/pysmi/blob/main/pysmi/reader/httpclient.py.
+    # Except that it decodes the response content with errors='replace' for non-UTF-8 bytes.
+    class _TolerantHttpReader(HttpReader):
+        """HttpReader that decodes response content with errors='replace' for non-UTF-8 bytes."""
+
+        def __init__(self, url, fuzzy_matching=True):
+            super().__init__(url)
+            self.set_options(fuzzy_matching=fuzzy_matching)
+
+        def get_data(self, mibname, **options):
+            import sys
+            import time
+
+            from pysmi import debug, error
+            from pysmi.compat import decode
+
+            headers = {"Accept": "text/plain", "User-Agent": self._user_agent}
+
+            mibname = decode(mibname)
+
+            debug.logger & debug.FLAG_READER and debug.logger(f"looking for MIB {mibname}")
+
+            for mibalias, mibfile in self.get_mib_variants(mibname, **options):
+                if self.MIB_MAGIC in self._url:
+                    url = self._url.replace(self.MIB_MAGIC, mibfile)
+                else:
+                    url = self._url + mibfile
+
+                debug.logger & debug.FLAG_READER and debug.logger(f"trying to fetch MIB from {url}")
+
+                try:
+                    response = self.session.get(url, headers=headers)
+
+                except Exception:
+                    debug.logger & debug.FLAG_READER and debug.logger(
+                        f"failed to fetch MIB from {url}: {sys.exc_info()[1]}"
+                    )
+                    continue
+
+                debug.logger & debug.FLAG_READER and debug.logger(f"HTTP response {response.status_code}")
+
+                if response.status_code == 200:
+                    try:
+                        mtime = time.mktime(
+                            time.strptime(
+                                response.headers["Last-Modified"],
+                                "%a, %d %b %Y %H:%M:%S %Z",
+                            )
+                        )
+
+                    except Exception:
+                        debug.logger & debug.FLAG_READER and debug.logger(
+                            f"malformed HTTP headers: {sys.exc_info()[1]}"
+                        )
+                        mtime = time.time()
+
+                    debug.logger & debug.FLAG_READER and debug.logger(
+                        f"fetching source MIB {url}, mtime {response.headers['Last-Modified']}"
+                    )
+
+                    return MibInfo(path=url, file=mibfile, name=mibalias, mtime=mtime), response.content.decode(
+                        "utf-8", errors='replace'
+                    )
+
+            raise error.PySmiReaderFileNotFoundError(f"source MIB {mibname} not found", reader=self)
 
     if debug:
         set_debug()
@@ -143,13 +225,15 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
 
         mib_sources = sorted({pathlib.Path(x).parent.as_uri() for x in mib_files if os.path.sep in x}) + mib_sources
 
-        mib_files = [os.path.basename(x) for x in mib_files]
-        searchers = [AnyFileSearcher(compiled_mibs_sources).setOptions(exts=['.json'])]
+        # Normalize to module names (no path, no extension) so we match pysmi compiler output.
+        mib_files = [os.path.splitext(os.path.basename(x))[0] for x in mib_files]
+
+        searchers = [AnyFileSearcher(compiled_mibs_sources).set_options(exts=['.json'])]
         code_generator = JsonCodeGen()
-        file_writer = FileWriter(compiled_mibs_sources).setOptions(suffix='.json')
+        file_writer = FileWriter(compiled_mibs_sources).set_options(suffix='.json')
         mib_compiler = MibCompiler(SmiV1CompatParser(tempdir=''), code_generator, file_writer)
-        mib_compiler.addSources(*getReadersFromUrls(*mib_sources, **{'fuzzyMatching': True}))
-        mib_compiler.addSearchers(*searchers)
+        mib_compiler.add_sources(*_make_readers(mib_sources, fuzzy_matching=True))
+        mib_compiler.add_searchers(*searchers)
 
         compiled_mibs, compiled_dependencies_mibs = compile_and_report_status(mib_files, mib_compiler)
 
@@ -185,6 +269,7 @@ def compile_and_report_status(mib_files, mib_compiler):
     :param mib_compiler: A pysnmp compiler object
     :return: A list of the compiled MIBs and a list of dependant MIBs that had to be compiled as well.
     """
+    requested_bases = set(mib_files)
     child_compiled_mibs = []
     all_compiled_mibs = []  # Name of all compiled mibs including the parents recursively
     with click.progressbar(mib_files, label="Compiling MIBs: ", show_eta=True, item_show_func=lambda x: x) as pb:
@@ -210,8 +295,7 @@ def compile_and_report_status(mib_files, mib_compiler):
 
             for mib_name, mib_status in compiled_mibs.items():
                 all_compiled_mibs.append(mib_name)
-                if mib_status.file == mib_file:
-                    # Let's keep this file in the output directory
+                if mib_name in requested_bases or getattr(mib_status, 'file', None) == mib_file:
                     child_compiled_mibs.append(mib_name)
 
     # These MIBs were compiled but where not explicitly requested by the user. They will be moved
@@ -302,7 +386,7 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
         file_mib_name = file_content['meta']['module']
         trap_db = {"traps": {}, "vars": {}}
 
-        traps = {k: v for k, v in file_content.items() if v.get('class') == NOTIFICATION_TYPE}
+        traps = {k: v for k, v in file_content.items() if isinstance(v, dict) and v.get('class') == NOTIFICATION_TYPE}
         for trap in traps.values():
             trap_name = trap['name']
             trap_oid = trap['oid']
@@ -312,7 +396,8 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
                 trap_db["traps"][trap_oid]["descr"] = trap_descr
             for trap_var in trap.get('objects', []):
                 try:
-                    var_name, mib_name = trap_var['object'], trap_var['module']
+                    var_name = trap_var['object']
+                    mib_name = trap_var['module']
                     var_metadata = get_var_metadata(
                         var_name,
                         mib_name,
@@ -331,7 +416,6 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
                         "Ignoring this variable.".format(trap_name, var_name, mib_name)
                     )
                     continue
-                var_name = trap_var['object']
                 trap_db["vars"][var_metadata.oid] = {"name": var_name}
                 if not no_descr:
                     trap_db["vars"][var_metadata.oid]["descr"] = var_metadata.description
@@ -365,15 +449,23 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
     with open(file_name, 'r') as f:
         file_content = json.load(f)
 
-    if var_name not in file_content:
+    # pysmi 1.6+ uses trans_opers (dash -> underscore) for JSON symbol keys
+    # https://github.com/lextudio/pysmi/blob/main/pysmi/codegen/base.py#L318
+    var_key = var_name if var_name in file_content else var_name.replace("-", "_")
+    if var_key not in file_content or var_key in ('meta', 'imports'):
         raise VariableNotDefinedException()
 
-    # grab enum if it exists in-line
-    enum = file_content[var_name].get('syntax', {}).get('constraints', {}).get('enumeration', {})
+    var_entry = file_content[var_key]
+
+    syntax = var_entry.get('syntax', {})
+    if not isinstance(syntax, dict):
+        syntax = {}
+
+    enum = syntax.get('constraints', {}).get('enumeration', {})
 
     # if there is no enum in-line, check for type definition and enum in the same MIB and its imports
     if not enum:
-        var_type = file_content[var_name].get('syntax', {}).get('type', '')
+        var_type = syntax.get('type', '')
         if var_type:
             try:
                 enum = get_mapping(var_type, mib_name, MappingType.INTEGER, search_locations)
@@ -389,10 +481,10 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
                 )
 
     # grab bits if they exist in-line
-    bits = file_content[var_name].get('syntax', {}).get('bits', {})
+    bits = syntax.get('bits', {})
 
     if not bits:
-        var_type = file_content[var_name].get('syntax', {}).get('type', '')
+        var_type = syntax.get('type', '')
         if var_type:
             try:
                 bits = get_mapping(var_type, mib_name, MappingType.BITS, search_locations)
@@ -417,9 +509,7 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
     for k, v in bits.items():
         parsed_bits[v] = k
 
-    return VarMetadata(
-        file_content[var_name]['oid'], file_content[var_name].get('description', ''), parsed_enum, parsed_bits
-    )
+    return VarMetadata(var_entry['oid'], var_entry.get('description', ''), parsed_enum, parsed_bits)
 
 
 @lru_cache(maxsize=None)
@@ -442,9 +532,10 @@ def get_mapping(var_name, mib_name, mapping_type: MappingType, search_locations=
         with open(file_name, 'r') as f:
             file_content = json.load(f)
 
-        # if the variable name is not defined in the file
-        # we expect it to be, search imports for another MIB
-        if var_name not in file_content:
+        # pysmi 1.6+ uses trans_opers (dash -> underscore) for JSON symbol keys
+        # https://github.com/lextudio/pysmi/blob/main/pysmi/codegen/base.py#L318
+        var_key = var_name if var_name in file_content else var_name.replace("-", "_")
+        if var_key not in file_content or var_key in ('meta', 'imports'):
             try:
                 mib_name = get_import_mib(var_name, mib_name, search_locations)
             except MultipleTypeDefintionsException:
@@ -453,15 +544,22 @@ def get_mapping(var_name, mib_name, mapping_type: MappingType, search_locations=
                 raise MissingMIBException()
             continue
 
+        var_entry = file_content[var_key]
+
+        # Type-definition nodes store enum/bits under 'type'.
+        type_node = var_entry.get('type', {})
+        if not isinstance(type_node, dict):
+            type_node = {}
+
         if mapping_type == MappingType.INTEGER:
-            mapping = file_content[var_name].get('type', {}).get('constraints', {}).get('enumeration', {})
+            mapping = type_node.get('constraints', {}).get('enumeration', {})
         elif mapping_type == MappingType.BITS:
-            mapping = file_content[var_name].get('type', {}).get('bits', {})
+            mapping = type_node.get('bits', {})
         else:
             raise ValueError("invalid mapping type, must be INTEGER or BITS")
 
         # update variable to the type name in case we have to go another layer down
-        var_name = file_content[var_name].get('type', {}).get('type', '')
+        var_name = type_node.get('type', '')
 
     return mapping
 
