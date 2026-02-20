@@ -234,3 +234,73 @@ def test_events_no_duplicates_on_subsequent_runs(
     events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
 
     assert len(events) == 0, "Expected no events when there are no new events since last collection"
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_events_filter_by_single_type(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
+    """Test that only events matching the configured type filter are collected."""
+    instance = mock_instance.copy()
+    instance["collect_events"] = True
+    instance["events_filter_type"] = ["PasswordAudit"]
+
+    get_current_datetime.return_value = MOCK_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
+
+    assert len(events) > 0
+    assert all(e['msg_title'] == 'PasswordAudit' for e in events)
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_events_filter_by_multiple_types(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
+    """Test that events matching any of the configured types are collected."""
+    instance = mock_instance.copy()
+    instance["collect_events"] = True
+    instance["events_filter_type"] = ["PasswordAudit", "PulseAudit"]
+
+    get_current_datetime.return_value = MOCK_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
+
+    assert len(events) > 0
+    assert all(e['msg_title'] in {"PasswordAudit", "PulseAudit"} for e in events)
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_events_filter_no_match(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
+    """Test that no events are collected when the type filter excludes everything."""
+    instance = mock_instance.copy()
+    instance["collect_events"] = True
+    instance["events_filter_type"] = ["NonExistentType"]
+
+    get_current_datetime.return_value = MOCK_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
+
+    assert len(events) == 0
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_events_filter_empty_list(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
+    """Test that an empty filter list collects all events (no filtering)."""
+    instance = mock_instance.copy()
+    instance["collect_events"] = True
+    instance["events_filter_type"] = []
+
+    get_current_datetime.return_value = MOCK_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
+
+    assert len(events) == 10

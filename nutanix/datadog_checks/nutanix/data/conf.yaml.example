@@ -74,6 +74,14 @@ instances:
     #
     # collect_events: true
 
+    ## @param events_filter_type - list of strings - optional
+    ## List of event types to collect. When set, only events whose eventType
+    ## matches one of these values are forwarded to Datadog. When empty or unset,
+    ## all events are collected.
+    #
+    # events_filter_type:
+    #   - PasswordAudit
+
     ## @param collect_tasks - boolean - optional - default: true
     ## Whether to collect tasks from Prism Central.
     ## Default is true.

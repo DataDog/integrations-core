@@ -64,14 +64,17 @@ class ActivityMonitor:
                 self.check.log.debug("[PC:%s:%s] No new events after filtering", self.check.pc_ip, self.check.pc_port)
                 return 0
 
+            # Track the most recent timestamp before field filtering so we don't re-fetch filtered-out events
+            most_recent_time_str = self._find_max_timestamp(events, "creationTime")
+
+            events = self._apply_filters(events, [("eventType", self.check.events_filter_type)])
+
             self.check.log.debug(
                 "[PC:%s:%s] Processing %d events after filtering", self.check.pc_ip, self.check.pc_port, len(events)
             )
 
             for event in events:
                 self._process_event(event)
-
-            most_recent_time_str = self._find_max_timestamp(events, "creationTime")
             if most_recent_time_str:
                 self.last_event_collection_time = most_recent_time_str
                 self.check.log.debug(

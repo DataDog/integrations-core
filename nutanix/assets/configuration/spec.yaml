@@ -83,6 +83,17 @@ files:
             value:
               type: boolean
               example: true
+          - name: events_filter_type
+            description: |
+              List of event types to collect. When set, only events whose eventType
+              matches one of these values are forwarded to Datadog. When empty or unset,
+              all events are collected.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - PasswordAudit
           - name: collect_tasks
             description: |
               Whether to collect tasks from Prism Central.
