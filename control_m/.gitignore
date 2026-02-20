@@ -1,0 +1,6 @@
+# Ignore scripts directory
+scripts/
+
+# Ignore specific files
+controlm-prodlike-demo.json
+proposal.md
