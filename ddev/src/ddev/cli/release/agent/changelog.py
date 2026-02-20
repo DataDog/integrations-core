@@ -23,6 +23,9 @@ DISPLAY_NAME_MAPPING = {
     'Mesos': 'Mesos Slave'
 }
 
+# These integrations are restricted from public distribution.
+# The CloudFront distribution blocks access to their wheels:
+# https://datadoghq.atlassian.net/wiki/spaces/AI/pages/6261571609
 REMOVED_INTEGRATIONS = {
     # name --> display name
     'kaspersky': 'Kaspersky',
