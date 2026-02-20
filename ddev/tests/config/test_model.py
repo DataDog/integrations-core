@@ -1445,12 +1445,12 @@ class TestGitHubConfig:
         # raw_data should still only have explicit field
         assert config.raw_data['github']['user'] == 'explicit_user'
         assert 'token' not in config.raw_data['github']
-        
+
     def test_partial_github_config_explicit_token_only(self):
         config = RootConfig({'github': {'token': 'explicit_token'}})
 
         # Only explicitly set field should be in raw_data
-        assert 'user' not in config.raw_data['github'] 
+        assert 'user' not in config.raw_data['github']
         assert config.raw_data['github']['token'] == 'explicit_token'
 
         # Properties should work - env var user, explicit token
