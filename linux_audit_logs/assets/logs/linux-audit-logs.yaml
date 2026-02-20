@@ -433,12 +433,6 @@ pipeline:
           expression: timestamp/1000
           target: original_timestamp
           replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.metadata.original_time attribute
-          enabled: true
-          template: "%{original_timestamp}"
-          target: original_timestamp
-          replaceMissing: false
     - type: pipeline
       name: OCSF sub pipeline for class Base Event [0]
       enabled: true
@@ -588,18 +582,6 @@ pipeline:
           enabled: true
           template: "%{folder_name}%{file_name}"
           target: ocsf.file.name
-          replaceMissing: true
-        - type: string-builder-processor
-          name: Set ocsf.file.uid attribute
-          enabled: true
-          template: "%{inode}"
-          target: ocsf.file.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.user.uid attribute
-          enabled: true
-          template: "%{ouid}"
-          target: ocsf.actor.user.uid
           replaceMissing: true
         - type: schema-processor
           name: Apply OCSF schema for 1001
@@ -766,18 +748,18 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.file.uid` to `ocsf.file.uid`
+            - name: Map `inode` to `ocsf.file.uid`
               sources:
-                - ocsf.file.uid
+                - inode
               sourceType: attribute
               target: ocsf.file.uid
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
+            - name: Map `ouid` to `ocsf.actor.user.uid`
               sources:
-                - ocsf.actor.user.uid
+                - ouid
               sourceType: attribute
               target: ocsf.actor.user.uid
               targetFormat: string
@@ -801,30 +783,6 @@ pipeline:
       filter:
         query: "@type:(ADD_USER OR DEL_USER OR USER_CHAUTHTOK)"
       processors:
-        - type: string-builder-processor
-          name: Set ocsf.actor.session.uid attribute
-          enabled: true
-          template: "%{ses}"
-          target: ocsf.actor.session.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.process.user.uid attribute
-          enabled: true
-          template: "%{uid}"
-          target: ocsf.actor.process.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.user.uid attribute
-          enabled: true
-          template: "%{auid}"
-          target: ocsf.actor.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.user.uid attribute
-          enabled: true
-          template: "%{msg.id}"
-          target: ocsf.user.uid
-          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3001
           enabled: true
@@ -879,28 +837,31 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
+            - name: Map `uid` to `ocsf.actor.process.user.uid`
               sources:
-                - ocsf.actor.process.user.uid
+                - uid
               sourceType: attribute
               target: ocsf.actor.process.user.uid
+              targetFormat: string
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
+            - name: Map `auid` to `ocsf.actor.user.uid`
               sources:
-                - ocsf.actor.user.uid
+                - auid
               sourceType: attribute
               target: ocsf.actor.user.uid
-              preserveSource: false
+              targetFormat: string
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
+            - name: Map `ses` to `ocsf.actor.session.uid`
               sources:
-                - ocsf.actor.session.uid
+                - ses
               sourceType: attribute
               target: ocsf.actor.session.uid
-              preserveSource: false
+              targetFormat: string
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `AUID` to `ocsf.actor.user.name`
@@ -929,12 +890,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.user.uid` to `ocsf.user.uid`
+            - name: Map `msg.id` to `ocsf.user.uid`
               sources:
-                - ocsf.user.uid
+                - msg.id
               sourceType: attribute
               target: ocsf.user.uid
-              preserveSource: false
+              targetFormat: string
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
@@ -1053,30 +1015,6 @@ pipeline:
       filter:
         query: "@type:USER_AUTH"
       processors:
-        - type: string-builder-processor
-          name: Set ocsf.actor.session.uid attribute
-          enabled: true
-          template: "%{ses}"
-          target: ocsf.actor.session.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.process.user.uid attribute
-          enabled: true
-          template: "%{uid}"
-          target: ocsf.actor.process.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.user.uid attribute
-          enabled: true
-          template: "%{auid}"
-          target: ocsf.actor.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.user.uid attribute
-          enabled: true
-          template: "%{msg.id}"
-          target: ocsf.user.uid
-          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3002
           enabled: true
@@ -1187,20 +1125,22 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
+            - name: Map `auid` to `ocsf.actor.user.uid`
               sources:
-                - ocsf.actor.user.uid
+                - auid
               sourceType: attribute
               target: ocsf.actor.user.uid
-              preserveSource: false
+              targetFormat: string
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
+            - name: Map `ses` to `ocsf.actor.session.uid`
               sources:
-                - ocsf.actor.session.uid
+                - ses
               sourceType: attribute
               target: ocsf.actor.session.uid
-              preserveSource: false
+              targetFormat: string
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `AUID` to `ocsf.actor.user.name`
@@ -1255,11 +1195,12 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
+            - name: Map `uid` to `ocsf.actor.process.user.uid`
               sources:
-                - ocsf.actor.process.user.uid
+                - uid
               sourceType: attribute
               target: ocsf.actor.process.user.uid
+              targetFormat: string
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
@@ -1272,13 +1213,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.user.uid` to `ocsf.user.uid`
+            - name: Map `msg.id` to `ocsf.user.uid`
               sources:
-                - ocsf.user.uid
+                - msg.id
               sourceType: attribute
               target: ocsf.user.uid
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `msg.hostname` to `ocsf.device.hostname`
@@ -1346,30 +1287,6 @@ pipeline:
       filter:
         query: "@type:(ROLE_ASSIGN OR ROLE_REMOVE)"
       processors:
-        - type: string-builder-processor
-          name: Set ocsf.actor.session.uid attribute
-          enabled: true
-          template: "%{ses}"
-          target: ocsf.actor.session.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.process.user.uid attribute
-          enabled: true
-          template: "%{uid}"
-          target: ocsf.actor.process.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.user.uid attribute
-          enabled: true
-          template: "%{auid}"
-          target: ocsf.actor.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.user.uid attribute
-          enabled: true
-          template: "%{msg.id}"
-          target: ocsf.user.uid
-          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3005
           enabled: true
@@ -1436,13 +1353,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
+            - name: Map `uid` to `ocsf.actor.process.user.uid`
               sources:
-                - ocsf.actor.process.user.uid
+                - uid
               sourceType: attribute
               target: ocsf.actor.process.user.uid
               targetFormat: string
-              preserveSource: true
+              preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `UID` to `ocsf.actor.process.user.name`
@@ -1454,13 +1371,13 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
+            - name: Map `auid` to `ocsf.actor.user.uid`
               sources:
-                - ocsf.actor.user.uid
+                - auid
               sourceType: attribute
               target: ocsf.actor.user.uid
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `AUID` to `ocsf.actor.user.name`
@@ -1586,13 +1503,22 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.user.uid` to `ocsf.user.uid`
+            - name: Map `msg.id` to `ocsf.user.uid`
               sources:
-                - ocsf.user.uid
+                - msg.id
               sourceType: attribute
               target: ocsf.user.uid
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ses` to `ocsf.actor.session.uid`
+              sources:
+                - ses
+              sourceType: attribute
+              target: ocsf.actor.session.uid
+              targetFormat: string
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
     - type: pipeline
@@ -1603,30 +1529,6 @@ pipeline:
       filter:
         query: "@type:(ADD_GROUP OR DEL_GROUP)"
       processors:
-        - type: string-builder-processor
-          name: Set ocsf.actor.session.uid attribute
-          enabled: true
-          template: "%{ses}"
-          target: ocsf.actor.session.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.process.user.uid attribute
-          enabled: true
-          template: "%{uid}"
-          target: ocsf.actor.process.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.user.uid attribute
-          enabled: true
-          template: "%{auid}"
-          target: ocsf.actor.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.group.uid attribute
-          enabled: true
-          template: "%{msg.id}"
-          target: ocsf.group.uid
-          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3006
           enabled: true
@@ -1690,28 +1592,31 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
+            - name: Map `uid` to `ocsf.actor.process.user.uid`
               sources:
-                - ocsf.actor.process.user.uid
+                - uid
               sourceType: attribute
               target: ocsf.actor.process.user.uid
+              targetFormat: string
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
+            - name: Map `auid` to `ocsf.actor.user.uid`
               sources:
-                - ocsf.actor.user.uid
+                - auid
               sourceType: attribute
               target: ocsf.actor.user.uid
-              preserveSource: false
+              targetFormat: string
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
+            - name: Map `ses` to `ocsf.actor.session.uid`
               sources:
-                - ocsf.actor.session.uid
+                - ses
               sourceType: attribute
               target: ocsf.actor.session.uid
-              preserveSource: false
+              targetFormat: string
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `AUID` to `ocsf.actor.user.name`
@@ -1730,12 +1635,13 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.group.uid` to `ocsf.group.uid`
+            - name: Map `msg.id` to `ocsf.group.uid`
               sources:
-                - ocsf.group.uid
+                - msg.id
               sourceType: attribute
               target: ocsf.group.uid
-              preserveSource: false
+              targetFormat: string
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `msg.terminal` to `ocsf.actor.session.terminal`
@@ -1850,24 +1756,6 @@ pipeline:
       filter:
         query: "@type:USER_MAC_CONFIG_CHANGE"
       processors:
-        - type: string-builder-processor
-          name: Set ocsf.actor.session.uid attribute
-          enabled: true
-          template: "%{ses}"
-          target: ocsf.actor.session.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.process.user.uid attribute
-          enabled: true
-          template: "%{uid}"
-          target: ocsf.actor.process.user.uid
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Set ocsf.actor.user.uid attribute
-          enabled: true
-          template: "%{auid}"
-          target: ocsf.actor.user.uid
-          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 5019
           enabled: true
@@ -1980,27 +1868,27 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.session.uid` to `ocsf.actor.session.uid`
+            - name: Map `ses` to `ocsf.actor.session.uid`
               sources:
-                - ocsf.actor.session.uid
+                - ses
               sourceType: attribute
               target: ocsf.actor.session.uid
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.user.uid` to `ocsf.actor.user.uid`
+            - name: Map `auid` to `ocsf.actor.user.uid`
               sources:
-                - ocsf.actor.user.uid
+                - auid
               sourceType: attribute
               target: ocsf.actor.user.uid
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.actor.process.user.uid` to `ocsf.actor.process.user.uid`
+            - name: Map `uid` to `ocsf.actor.process.user.uid`
               sources:
-                - ocsf.actor.process.user.uid
+                - uid
               sourceType: attribute
               target: ocsf.actor.process.user.uid
               targetFormat: string
