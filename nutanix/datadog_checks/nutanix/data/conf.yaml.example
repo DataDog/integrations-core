@@ -88,6 +88,16 @@ instances:
     #
     # collect_tasks: true
 
+    ## @param tasks_filter_status - list of strings - optional
+    ## List of task statuses to collect. When set, only tasks whose status
+    ## matches one of these values are forwarded to Datadog. When empty or unset,
+    ## all tasks are collected.
+    ## Valid values: FAILED, QUEUED, RUNNING, SUSPENDED, SUCCEEDED, CANCELED, CANCELING, $UNKNOWN, $REDACTED.
+    #
+    # tasks_filter_status:
+    #   - FAILED
+    #   - SUCCEEDED
+
     ## @param collect_audits - boolean - optional - default: true
     ## Whether to collect audits from Prism Central.
     ## Default is true.

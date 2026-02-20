@@ -202,14 +202,17 @@ class ActivityMonitor:
                 self.check.log.debug("[PC:%s:%s] No new tasks after filtering", self.check.pc_ip, self.check.pc_port)
                 return 0
 
+            # Track the most recent timestamp before field filtering so we don't re-fetch filtered-out tasks
+            most_recent_time_str = self._find_max_timestamp(tasks, "createdTime")
+
+            tasks = self._apply_filters(tasks, [("status", self.check.tasks_filter_status)])
+
             self.check.log.debug(
                 "[PC:%s:%s] Processing %d tasks after filtering", self.check.pc_ip, self.check.pc_port, len(tasks)
             )
 
             for task in tasks:
                 self._process_task(task)
-
-            most_recent_time_str = self._find_max_timestamp(tasks, "createdTime")
             if most_recent_time_str:
                 self.last_task_collection_time = most_recent_time_str
                 self.check.log.debug(

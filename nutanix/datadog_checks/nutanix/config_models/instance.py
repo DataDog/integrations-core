@@ -101,6 +101,7 @@ class InstanceConfig(BaseModel):
     service: Optional[str] = None
     skip_proxy: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
+    tasks_filter_status: Optional[tuple[str, ...]] = None
     timeout: Optional[float] = None
     tls_ca_cert: Optional[str] = None
     tls_cert: Optional[str] = None

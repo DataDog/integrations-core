@@ -50,6 +50,7 @@ class NutanixCheck(AgentCheck):
         self.alerts_filter_severity = {s.upper() for s in self.instance.get("alerts_filter_severity", []) or []}
         self.alerts_filter_type = set(self.instance.get("alerts_filter_type", []) or [])
         self.events_filter_type = set(self.instance.get("events_filter_type", []) or [])
+        self.tasks_filter_status = {s.upper() for s in self.instance.get("tasks_filter_status", []) or []}
 
     def _initialize_check_attributes(self):
         self.base_url = f"{self.pc_ip}:{self.pc_port}"
