@@ -756,6 +756,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /cato_networks/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /cato_networks/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/cyberark_endpoint_privilege_manager/                                @DataDog/saas-integrations
+/cyberark_endpoint_privilege_manager/*.md                            @DataDog/saas-integrations @DataDog/documentation
+/cyberark_endpoint_privilege_manager/manifest.json                   @DataDog/saas-integrations @DataDog/documentation
+/cyberark_endpoint_privilege_manager/assets/logs/                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 /arctic_wolf_aurora_endpoint_security/                               @DataDog/agent-integrations
 /arctic_wolf_aurora_endpoint_security/*.md                           @DataDog/agent-integrations @DataDog/documentation
 /arctic_wolf_aurora_endpoint_security/manifest.json                  @DataDog/agent-integrations @DataDog/documentation
