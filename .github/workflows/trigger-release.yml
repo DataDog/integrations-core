@@ -23,7 +23,7 @@ on:
     branches:
       - master
     paths:
-      - '.github/workflows/trigger-release.yml'
+      - ".github/workflows/trigger-release.yml"
 
   # TODO: Add tag trigger after testing
   # push:
@@ -66,7 +66,7 @@ jobs:
           echo "sts-policy=$POLICY" >> $GITHUB_OUTPUT
 
   dispatch-release:
-    name: Dispatch release workflow runs
+    name: Dispatch releases
     needs: trigger-release
     permissions:
       id-token: write # Required for OIDC token generation (dd-octo-sts)
