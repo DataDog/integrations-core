@@ -381,12 +381,21 @@ class AgentCheck(object):
         Provides logic to yield consistent network behavior based on user configuration.
 
         Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
+
+        Set ``use_httpx: true`` in the instance config to use an httpx-backed client.
         """
         if not hasattr(self, '_http'):
             # See Performance Optimizations in this package's README.md.
-            from datadog_checks.base.utils.http import RequestsWrapper
+            if is_affirmative((self.instance or {}).get('use_httpx', False)):
+                import httpx
 
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+                from datadog_checks.base.utils.http_httpx import HTTPXWrapper
+
+                self._http = HTTPXWrapper(httpx.Client())
+            else:
+                from datadog_checks.base.utils.http import RequestsWrapper
+
+                self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
 
