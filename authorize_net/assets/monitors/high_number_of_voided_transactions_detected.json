@@ -8,7 +8,7 @@
 		"id": 156177451,
 		"name": "High number of voided transactions detected",
 		"type": "log alert",
-		"query": "logs(\"source:authorize-net service:transaction @log.transactionStatus:voided\").index(\"*\").rollup(\"cardinality\", \"@log.transId\").last(\"1d\") > 15",
+		"query": "logs(\"source:authorize-net @log.transactionStatus:voided\").index(\"*\").rollup(\"cardinality\", \"@log.transId\").last(\"1d\") > 15",
 		"message": "{{#is_alert}}\nVoiding a transaction cancels the authorization process and prevents it from being submitted to the processor for settlement.\n\nA high number of voided transactions has been detected. This issue requires immediate attention to ensure proper resolution and avoid customer dissatisfaction.\n{{/is_alert}}",
 		"tags": [
 			"integration:authorize-net"
