@@ -33,15 +33,15 @@ on:
         type: boolean
       agent-image:
         required: false
-        default: "datadog/agent-dev:master-py3"
+        default: "registry.datadoghq.com/agent-dev:master-py3"
         type: string
       agent-image-py2:
         required: false
-        default: "datadog/agent-dev:master-py2"
+        default: "registry.datadoghq.com/agent:6-rc"
         type: string
       agent-image-windows:
         required: false
-        default: "datadog/agent-dev:master-py3-win-servercore"
+        default: "registry.datadoghq.com/agent:7-rc-servercore"
         type: string
       agent-image-windows-py2:
         required: false
