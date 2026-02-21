@@ -27,6 +27,7 @@
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
+      "Category::Network",
       "Submitted Data Type::Logs",
       "Offering::Integration"
     ]
