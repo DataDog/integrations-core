@@ -73,6 +73,9 @@ class HTTPXWrapper:
             return HTTPXResponseAdapter(self._client.request(method, url, **options))
         except httpx.HTTPError as e:
             raise _translate_httpx_error(e) from e
+        except httpx.InvalidURL as e:
+            # InvalidURL is not a subclass of httpx.HTTPError; catch it separately.
+            raise HTTPRequestError(str(e)) from e
 
     def get(self, url: str, **options: Any) -> HTTPXResponseAdapter:
         return self._request("GET", url, **options)
