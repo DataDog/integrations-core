@@ -68,6 +68,12 @@ class HTTPXWrapper:
     def __init__(self, client: httpx.Client) -> None:
         self._client = client
 
+    def __del__(self) -> None:  # no cov
+        try:
+            self._client.close()
+        except AttributeError:
+            pass
+
     def _request(self, method: str, url: str, **options: Any) -> HTTPXResponseAdapter:
         try:
             return HTTPXResponseAdapter(self._client.request(method, url, **options))
