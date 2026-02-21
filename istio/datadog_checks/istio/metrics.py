@@ -52,8 +52,10 @@ CITADEL_METRICS = {
     'citadel_server_csr_parsing_err_count': 'server.csr_parsing_err_count',
     'citadel_server_id_extraction_err_count': 'server.id_extraction_err_count',
     'citadel_server_cert_chain_expiry_timestamp': 'server.cert_chain_expiry_timestamp',
+    'citadel_server_cert_chain_expiry_seconds': 'server.cert_chain_expiry_seconds',
     'citadel_server_success_cert_issuance_count': 'server.success_cert_issuance_count',
     'citadel_server_root_cert_expiry_timestamp': 'server.root_cert_expiry_timestamp',
+    'citadel_server_root_cert_expiry_seconds': 'server.root_cert_expiry_seconds',
 }
 
 
