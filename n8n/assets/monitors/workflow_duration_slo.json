@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "created_at": "2026-02-03",
+  "last_updated_at": "2026-02-03",
+  "title": "Workflow Duration Exceeds SLO (p95)",
+  "tags": [
+    "integration:n8n"
+  ],
+  "description": "This monitor tracks the p95 duration of n8n workflow executions against defined SLO thresholds. Workflows exceeding duration SLOs may indicate performance issues requiring optimization.",
+  "definition": {
+    "name": "[n8n] Workflow Duration Exceeds SLO (p95)",
+    "type": "query alert",
+    "query": "percentile(last_15m):p95:n8n.workflow.executions.duration.seconds{*} by {workflow,host} > 30",
+    "message": "{{#is_alert}}Workflow {{workflow.name}} on {{host.name}} p95 duration exceeds SLO: {{value}}s (threshold: {{threshold}}s). Check slowest nodes in execution logs.{{/is_alert}}{{#is_warning}}Workflow {{workflow.name}} p95 duration approaching SLO: {{value}}s.{{/is_warning}}{{#is_recovery}}Workflow {{workflow.name}} p95 duration back within SLO.{{/is_recovery}}",
+    "tags": [
+      "integration:n8n",
+      "service:n8n",
+      "category:workflow",
+      "category:performance",
+      "category:slo"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 30,
+        "warning": 20,
+        "critical_recovery": 25,
+        "warning_recovery": 15
+      },
+      "notify_audit": false,
+      "require_full_window": true,
+      "notify_no_data": false,
+      "no_data_timeframe": null,
+      "renotify_interval": 30,
+      "include_tags": true,
+      "evaluation_delay": 120,
+      "new_group_delay": 300,
+      "escalation_message": "Workflow duration still exceeding SLO. Performance optimization required.",
+      "renotify_statuses": ["alert"]
+    },
+    "priority": 2,
+    "restricted_roles": null
+  }
+}

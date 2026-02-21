@@ -1,0 +1,71 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "4775a4f7-3e41-49db-8a3f-846d18f1a4c8",
+  "app_id": "n8n",
+  "owner": "agent-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of n8n.",
+    "title": "n8n",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Metrics",
+      "Category::Log Collection",
+      "Offering::Integration",
+      "Queried Data Type::Metrics",
+      "Queried Data Type::Logs",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 61226509,
+      "source_type_name": "n8n",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "n8n.",
+        "check": "n8n.active.workflow.count",
+        "metadata_path": "metadata.csv"
+      },
+      "process_signatures": [
+        "/bin/n8n"
+      ]
+    },
+    "dashboards": {
+        "N8N overview": "assets/dashboards/n8n_overview.json"
+    },
+    "monitors": {
+        "Combined Queue Health (Backlog OR Wait Time)": "assets/monitors/combined_queue_health.json",
+        "High Queue Backlog Size": "assets/monitors/high_queue_backlog.json",
+        "High Queue Wait Time (Oldest Queued Age)": "assets/monitors/high_queue_wait_time.json",
+        "High Job Failure Rate (Queue Jobs)": "assets/monitors/job_failure_rate.json",
+        "Queue Processing Stalled (No Dequeues)": "assets/monitors/queue_processing_stalled.json",
+        "Stale Queue Consumer (No Dequeue Activity)": "assets/monitors/stale_queue_consumer.json",
+        "Worker Heartbeat Stale (No Recent Activity)": "assets/monitors/worker_heartbeat_stale.json",
+        "Workflow Duration Exceeds SLO (p95)": "assets/monitors/workflow_duration_slo.json",
+        "Workflow Execution Failures Anomaly": "assets/monitors/workflow_execution_anomaly.json",
+        "High Workflow Failure Rate": "assets/monitors/workflow_failure_rate.json"
+    },
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

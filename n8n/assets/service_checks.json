@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "7.75.0",
+        "integration": "n8n",
+        "check": "n8n.openmetrics.health",
+        "statuses": ["ok", "critical"],
+        "groups": [],
+        "name": "n8n OpenMetrics Health",
+        "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint. Returns `OK` otherwise."
+      }
+]

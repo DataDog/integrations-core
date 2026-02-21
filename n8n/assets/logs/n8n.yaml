@@ -1,0 +1,256 @@
+# bypass-global-grok-parser-rules-checks
+id: n8n
+metric_id: n8n
+backend_only: false
+facets:
+  - groups:
+      - Error
+    name: Error Message
+    path: error.message
+    source: log
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+pipeline:
+  type: pipeline
+  name: N8N
+  enabled: true
+  filter:
+    query: source:n8n
+  processors:
+    - type: grok-parser
+      name: Parse N8N text logs
+      enabled: true
+      source: message
+      samples:
+        - '2026-01-12T09:15:03.214Z | info  | n8n ready on 0.0.0.0, port 5678'
+        - '2026-01-12T09:15:03.219Z | info  | Version: 1.25.2'
+        - '2026-01-12T09:16:11.402Z | debug | Executing workflow "Order Webhook"'
+        - '2026-01-12T09:20:44.112Z | error | Node "HTTP Request" failed Error: Request failed with status code 401'
+      grok:
+        supportRules: ''
+        matchRules: |
+          n8n_text_log %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):timestamp} \| %{word:level}\s+\| %{data:message}
+    - type: grok-parser
+      name: Parse N8N JSON logs
+      enabled: true
+      source: message
+      samples:
+        - '{"level":"warn","message":"Permissions 0755 for n8n settings file /home/node/.n8n/config are too wide. This is ignored for now, but in the future n8n will attempt to change the permissions automatically. To automatically enforce correct permissions now set N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true (recommended), or turn this check off set N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false.","metadata":{"file":"instance-settings.js","function":"ensureSettingsFilePermissions","timestamp":"2026-01-12T14:54:21.727Z"}}'
+        - '{"level":"info","message":"n8n ready on ::, port 5678","metadata":{"file":"abstract-server.js","function":"init","timestamp":"2026-01-12T14:54:22.248Z"}}'
+        - '{"level":"debug","message":"User settings loaded from: /home/node/.n8n/config","metadata":{"file":"instance-settings.js","function":"loadOrCreate","timestamp":"2026-01-12T14:54:21.730Z"}}'
+        - '{"__type":"$$EventMessageAudit","id":"5fc5a070-c466-464d-bb74-aea49d1cc188","ts":"2026-02-10T13:52:09.642+00:00","eventName":"n8n.audit.user.login.failed","message":"n8n.audit.user.login.failed","payload":{"authenticationMethod":"email","userEmail":"user@example.com","reason":"wrong credentials"}}'
+        - '{"__type":"$$EventMessageWorkflow","id":"78c6f458-a6da-48cb-97c7-c1423e929ff9","ts":"2026-02-10T13:56:48.856+00:00","eventName":"n8n.workflow.started","message":"n8n.workflow.started","payload":{"executionId":"1","workflowId":"zfrNWGdkvgMkbASXocI4M","isManual":false,"workflowName":"My workflow"}}'
+        - '{"__type":"$$EventMessageWorkflow","id":"b8e362ed-0866-49b9-aaaf-765d1d26b08c","ts":"2026-02-10T14:04:09.052+00:00","eventName":"n8n.workflow.failed","message":"n8n.workflow.failed","payload":{"userId":"2418b79a-bbc5-4c77-9af4-2cbd1da13bce","executionId":"3","success":false,"isManual":true,"workflowId":"zfrNWGdkvgMkbASXocI4M","workflowName":"My workflow","lastNodeExecuted":"Code in Python","errorMessage":"Python runner unavailable: Python 3 is missing from this system"}}'
+        - '{"__type":"$$EventMessageNode","id":"bd2e741a-b34b-4321-955c-0db2a8441c7b","ts":"2026-02-10T13:56:48.858+00:00","eventName":"n8n.node.started","message":"n8n.node.started","payload":{"workflowId":"zfrNWGdkvgMkbASXocI4M","workflowName":"My workflow","executionId":"1","nodeType":"n8n-nodes-base.manualTrigger","nodeName":"When clicking Execute workflow","nodeId":"d1dc7423-e925-4d74-8e7d-a94f15383156"}}'
+        - '{"__type":"$$EventMessageRunner","id":"4ce6b554-5c71-4eae-b354-6bd07add38d8","ts":"2026-02-10T14:04:15.806+00:00","eventName":"n8n.runner.task.requested","message":"n8n.runner.task.requested","payload":{"taskId":"a6y1eLnD","nodeId":"ece1a8d5-ed64-434d-9f4b-e026482d2f3f","workflowId":"zfrNWGdkvgMkbASXocI4M","executionId":"4"}}'
+      grok:
+        supportRules: ''
+        matchRules: |
+          n8n_json_log %{data::json}
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+        - metadata.timestamp
+        - ts
+    - type: message-remapper
+      name: Define `message` as the official message of the log
+      enabled: true
+      sources:
+        - message
+    - type: status-remapper
+      name: Define `level` as the official status of the log
+      enabled: true
+      sources:
+        - level
+    - type: attribute-remapper
+      name: Map metadata.file to n8n.file
+      enabled: true
+      sources:
+        - metadata.file
+      sourceType: attribute
+      target: n8n.file
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map metadata.function to n8n.function
+      enabled: true
+      sources:
+        - metadata.function
+      sourceType: attribute
+      target: n8n.function
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map metadata.scopes to n8n.scopes
+      enabled: true
+      sources:
+        - metadata.scopes
+      sourceType: attribute
+      target: n8n.scopes
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.errorMessage to error.message
+      enabled: true
+      sources:
+        - payload.errorMessage
+      sourceType: attribute
+      target: error.message
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.userEmail and payload._email to usr.email
+      enabled: true
+      sources:
+        - payload.userEmail
+        - payload._email
+      sourceType: attribute
+      target: usr.email
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.userId to usr.id
+      enabled: true
+      sources:
+        - payload.userId
+      sourceType: attribute
+      target: usr.id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map eventName to n8n.event_name
+      enabled: true
+      sources:
+        - eventName
+      sourceType: attribute
+      target: n8n.event_name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map __type to n8n.event_type
+      enabled: true
+      sources:
+        - __type
+      sourceType: attribute
+      target: n8n.event_type
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.executionId to n8n.execution_id
+      enabled: true
+      sources:
+        - payload.executionId
+      sourceType: attribute
+      target: n8n.execution_id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.isManual to n8n.is_manual
+      enabled: true
+      sources:
+        - payload.isManual
+      sourceType: attribute
+      target: n8n.is_manual
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.nodeId to n8n.node_id
+      enabled: true
+      sources:
+        - payload.nodeId
+      sourceType: attribute
+      target: n8n.node_id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.nodeName to n8n.node_name
+      enabled: true
+      sources:
+        - payload.nodeName
+      sourceType: attribute
+      target: n8n.node_name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.nodeType to n8n.node_type
+      enabled: true
+      sources:
+        - payload.nodeType
+      sourceType: attribute
+      target: n8n.node_type
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.success to n8n.success
+      enabled: true
+      sources:
+        - payload.success
+      sourceType: attribute
+      target: n8n.success
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.taskId to n8n.task_id
+      enabled: true
+      sources:
+        - payload.taskId
+      sourceType: attribute
+      target: n8n.task_id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.workflowId to n8n.workflow_id
+      enabled: true
+      sources:
+        - payload.workflowId
+      sourceType: attribute
+      target: n8n.workflow_id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map payload.workflowName to n8n.workflow_name
+      enabled: true
+      sources:
+        - payload.workflowName
+      sourceType: attribute
+      target: n8n.workflow_name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: category-processor
+      name: Set status based on eventName for event bus logs
+      enabled: true
+      categories:
+        - filter:
+            query: '@eventName:*failed OR @eventName:*error OR @n8n.success:false'
+          name: error
+        - filter:
+            query: '@eventName:*success'
+          name: info
+      target: level
