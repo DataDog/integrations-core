@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.base.utils.http_exceptions import (
     HTTPConnectionError,
+    HTTPRequestError,
     HTTPStatusError,
     HTTPTimeoutError,
 )
@@ -97,6 +98,14 @@ class TestHTTPXWrapper:
 
         with pytest.raises(HTTPConnectionError):
             wrapper.get("http://example.com")
+
+    def test_invalid_url_raises_http_request_error(self):
+        client = MagicMock(spec=httpx.Client)
+        client.request.side_effect = httpx.InvalidURL("Invalid URL")
+        wrapper = HTTPXWrapper(client)
+
+        with pytest.raises(HTTPRequestError):
+            wrapper.get("not a url")
 
     def test_all_http_methods_delegate_to_client(self):
         client = MagicMock(spec=httpx.Client)
