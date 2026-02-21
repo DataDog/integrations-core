@@ -157,11 +157,12 @@ files:
         irc, postgres, mysql, lmtp, nntp, sieve, and ldap.
 
         Currently this checks supports only the below protocols:
-          postgres, mysql
+          postgres, mysql, smtp
       value:
         type: string
         enum:
         - postgres
         - mysql
+        - smtp
     - template: instances/default
     - template: instances/tls
