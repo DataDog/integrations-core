@@ -25,7 +25,6 @@ from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, comput
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
     RateLimitingTTLCache,
-    default_json_event_encoding,
     obfuscate_sql_with_metadata,
 )
 from datadog_checks.base.utils.serialization import json
@@ -642,7 +641,7 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
             self._tags + ["events_statements_table:{}".format(events_statements_table)] + self._check._get_debug_tags()
         )
         for e in events:
-            self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
+            self._check.database_monitoring_query_sample(e)
             submitted_count += 1
         self._check.histogram(
             "dd.mysql.collect_statement_samples.time",
