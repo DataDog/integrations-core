@@ -8,7 +8,7 @@
 		"id": 156179619,
 		"name": "High number of suspicious fraud transactions detected",
 		"type": "log alert",
-		"query": "logs(\"source:authorize-net service:transaction @log.transactionStatus:(FDSPendingReview OR FDSAuthorizedPendingReview)\").index(\"*\").rollup(\"cardinality\", \"@log.transId\").last(\"1d\") > 10",
+		"query": "logs(\"source:authorize-net @log.transactionStatus:(FDSPendingReview OR FDSAuthorizedPendingReview)\").index(\"*\").rollup(\"cardinality\", \"@log.transId\").last(\"1d\") > 10",
 		"message": "{{#is_alert}}\nAuthorize.Net includes a built-in fraud tool, the advanced fraud detection suite, with configurable filters for transaction thresholds, payment velocity, country restrictions, and more to prevent fraudulent transactions.\n\nA high number of suspicious fraud transactions has been detected. This issue requires immediate attention to ensure proper resolution and avoid customer dissatisfaction.\n{{/is_alert}}",
 		"tags": [
 			"integration:authorize-net"
