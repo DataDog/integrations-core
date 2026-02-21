@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import fnmatch
 import re
 import weakref
 
@@ -165,6 +166,23 @@ class PerfObject:
                 f'Option `duplicate_instances_exist` for performance object `{self.name}` must be an true or false'
             )
 
+        # Per-instance collection mode provides a workaround for counters where the bulk array
+        # retrieval API (PdhGetFormattedCounterArrayW) returns incorrect values (typically zeros)
+        # while per-instance retrieval via GetFormattedCounterValue works correctly.
+        #
+        # Known affected counters include:
+        #   - SQLServer:Workload Group Stats\CPU usage %
+        #   - MSSQL$<instance>:Workload Group Stats\CPU usage %
+        #
+        # When enabled, instead of using a wildcard path and bulk retrieval, instances are
+        # enumerated via EnumObjectItems and individual counter handles are created, then
+        # collected using GetFormattedCounterValue.
+        self.use_per_instance_collection = config.get('use_per_instance_collection', False)
+        if not isinstance(self.use_per_instance_collection, bool):
+            raise ConfigTypeError(
+                f'Option `use_per_instance_collection` for performance object `{self.name}` must be true or false'
+            )
+
         # We'll configure on the first run because it's necessary to figure out whether the
         # object contains single or multi-instance counters, see:
         # https://docs.microsoft.com/en-us/windows/win32/perfctrs/object-and-counter-design
@@ -296,6 +314,8 @@ class PerfObject:
                 or self.instance_count_unique_metric
             ):
                 self._log_multi_instance_option_defined('instance_counts')
+            if self.use_per_instance_collection:
+                self._log_multi_instance_option_defined('use_per_instance_collection')
 
         custom_transformers = self.get_custom_transformers()
         counters = {}
@@ -344,6 +364,7 @@ class PerfObject:
                         self.include_wildcards,
                         self.duplicate_instances_exist,
                         self,
+                        self.use_per_instance_collection,
                     )
 
         self.counters.extend(counters.values())
@@ -547,6 +568,7 @@ class MultiCounter(CounterBase):
         include_wildcards,
         duplicate_instances_exist,
         perf_obj,
+        use_per_instance_collection=False,
     ):
         super().__init__(
             name, config, check, connection, object_name, metric_prefix, counter_selector, tags, custom_transformer
@@ -591,6 +613,10 @@ class MultiCounter(CounterBase):
         # All monitored counter handles keyed by the instance name
         self.instances = []
 
+        # Per-instance collection mode configuration and storage
+        self.use_per_instance_collection = use_per_instance_collection
+        self.per_instance_handles = {}
+
     def collect(self):
         # Instance tracking is conducted for each counter although collected only from one.
         # This counting is cheap but making it conditional here will only complicate this method
@@ -599,6 +625,40 @@ class MultiCounter(CounterBase):
         self.unique_instance_count = 0
 
         total = 0
+
+        if self.use_per_instance_collection:
+            # Per-instance mode: iterate over individual handles and use GetFormattedCounterValue
+            for instance_name, counter_handle in self.per_instance_handles.items():
+                self.total_instance_count += 1
+
+                if self._instance_excluded(instance_name):
+                    continue
+
+                self.unique_instance_count += 1
+
+                try:
+                    value = get_counter_value(counter_handle)
+                except pywintypes.error as error:
+                    self.handle_counter_value_error(error)
+                    continue
+
+                self.monitored_instance_count += 1
+                total += value
+
+                if self.aggregate != 'only':
+                    tags = [f'{self.tag_name}:{instance_name}']
+                    tags.extend(self.tags)
+                    self.transformer(value, tags=tags)
+
+            if self.monitored_instance_count > 0 and self.aggregate is not False:
+                if self.average:
+                    self.aggregate_transformer(total / self.monitored_instance_count, tags=self.tags)
+                else:
+                    self.aggregate_transformer(total, tags=self.tags)
+
+            return
+
+        # Original bulk collection path using wildcard counters
         for counter_handle in self.instances:
             try:
                 instance_items = get_counter_values(counter_handle, self.duplicate_instances_exist)
@@ -655,6 +715,94 @@ class MultiCounter(CounterBase):
                 self.aggregate_transformer(total, tags=self.tags)
 
     def refresh(self):
+        if self.use_per_instance_collection:
+            # Per-instance mode: enumerate instances and create individual handles
+            if self.per_instance_handles:
+                return
+
+            self.per_instance_handles = {}
+
+            try:
+                # EnumObjectItems returns (counters_list, instances_list)
+                # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectitemsa
+                # https://mhammond.github.io/pywin32/win32pdh__EnumObjectItems_meth.html
+                _, instances = win32pdh.EnumObjectItems(
+                    None,
+                    self.connection.server,
+                    self.object_name,
+                    win32pdh.PERF_DETAIL_WIZARD,
+                )
+            except pywintypes.error as e:
+                self.logger.error(
+                    'Failed to enumerate instances for counter `%s` of performance object `%s`: %s',
+                    self.name,
+                    self.object_name,
+                    e,
+                )
+                return
+
+            if not instances:
+                self.logger.warning(
+                    'No instances found for counter `%s` of performance object `%s` in per-instance mode',
+                    self.name,
+                    self.object_name,
+                )
+                return
+
+            self.logger.debug(
+                'Per-instance mode: found %d instances for object `%s`: %s',
+                len(instances),
+                self.object_name,
+                instances,
+            )
+
+            for instance_name in instances:
+                # Apply include_wildcards filtering if specified
+                if self.include_wildcards is not None:
+                    matched = False
+                    for pattern in self.include_wildcards:
+                        if pattern == '*' or pattern == instance_name:
+                            matched = True
+                            break
+                        if '*' in pattern and fnmatch.fnmatch(instance_name, pattern):
+                            matched = True
+                            break
+                    if not matched:
+                        continue
+
+                path = construct_counter_path(
+                    machine_name=self.connection.server,
+                    object_name=self.object_name,
+                    counter_name=self.name,
+                    instance_name=instance_name,
+                )
+
+                try:
+                    counter_handle = self.counter_selector(self.connection.query_handle, path)
+                    self.per_instance_handles[instance_name] = counter_handle
+                    self.logger.debug(
+                        'Per-instance mode: created handle for instance `%s` of counter `%s`',
+                        instance_name,
+                        self.name,
+                    )
+                except pywintypes.error as e:
+                    self.logger.warning(
+                        'Failed to add counter for instance `%s` of counter `%s` object `%s`: %s',
+                        instance_name,
+                        self.name,
+                        self.object_name,
+                        e,
+                    )
+
+            self.logger.info(
+                'Per-instance mode: created %d handles for counter `%s` of object `%s`',
+                len(self.per_instance_handles),
+                self.name,
+                self.object_name,
+            )
+            return
+
+        # Original wildcard/bulk path
         # No need to create a counter handle or handles if they already exist. And since new
         # counters for a performance object can be detected (without PdhEnumObjects(refresh=True))
         # there is no point to make sure that all counters are available.
@@ -677,6 +825,26 @@ class MultiCounter(CounterBase):
             self.instances.append(counter_handle)
 
     def clear(self):
+        if self.use_per_instance_collection:
+            if not self.per_instance_handles:
+                return
+
+            for instance_name, counter_handle in self.per_instance_handles.items():
+                try:
+                    win32pdh.RemoveCounter(counter_handle)
+                except Exception as e:
+                    self.logger.warning(
+                        'Unable to remove handle for instance `%s` of counter `%s` object `%s`: %s',
+                        instance_name,
+                        self.name,
+                        self.object_name,
+                        e,
+                    )
+
+            self.per_instance_handles.clear()
+            return
+
+        # Original clear path
         if not self.instances:
             return
 
