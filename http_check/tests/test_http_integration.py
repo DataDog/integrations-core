@@ -404,7 +404,8 @@ def test_service_check_instance_name_normalization(aggregator, http_check):
     http_check.check(CONFIG_UNORMALIZED_INSTANCE_NAME['instances'][0])
 
     # Assess instance name normalization
-    normalized_tags = ['url:https://valid.mock', 'instance:need_to_be_normalized']
+    # With the fix, minuses are preserved: "_need-to__be_normalized-" -> "need-to_be_normalized-"
+    normalized_tags = ['url:https://valid.mock', 'instance:need-to_be_normalized-']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=normalized_tags, count=1)
     aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.OK, tags=normalized_tags, count=1)
 
