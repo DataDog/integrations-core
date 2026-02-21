@@ -18,6 +18,7 @@ class PostgresHealthEvent(Enum):
     Enum representing the health events for PostgreSQL monitoring.
     """
 
+    SETUP_ERROR = 'setup_error'
     EXPLAIN_PLAN_ERROR = 'explain_plan_error'
 
 
