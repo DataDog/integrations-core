@@ -19,11 +19,21 @@ pipeline:
   filter:
     query: source:have-i-been-pwned
   processors:
-    - type: service-remapper
-      name: Define `service` as the official service of the log
+    - type: attribute-remapper
+      name: Extract origin endpoint from the service attribute, stored by the crawler
       enabled: true
       sources:
         - service
+      sourceType: attribute
+      target: origin_endpoint
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: service-remapper
+      name: Use the integration source as the service
+      enabled: true
+      sources:
+        - source
     - type: attribute-remapper
       name: Remapping user_details.user_name value to usr.name attribute
       enabled: true
@@ -49,7 +59,7 @@ pipeline:
       name: Processing of Latest Breach
       enabled: true
       filter:
-        query: service:latest-breach
+        query: @origin_endpoint:latest-breach
       processors:
         - type: date-remapper
           name: Defining AddedDate as the official timestamp of log
