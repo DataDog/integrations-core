@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import json
 import re
 import time
 
@@ -22,7 +21,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.config_models import InstanceConfig
 
@@ -167,7 +166,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "cloud_metadata": self._check.cloud_metadata,
                 "metadata": extensions,
             }
-            self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            self._check.database_monitoring_metadata(event)
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_extensions(self):
@@ -204,7 +203,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "cloud_metadata": self._check.cloud_metadata,
                 "metadata": settings,
             }
-            self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            self._check.database_monitoring_metadata(event)
 
         if (
             self._collect_schemas_enabled

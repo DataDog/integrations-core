@@ -7,8 +7,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, TypedDict
 
-from datadog_checks.base.utils.serialization import json
-
 from .utils import now_ms
 
 if TYPE_CHECKING:
@@ -143,7 +141,7 @@ class SchemaCollector(ABC):
                 # For the last payload, we need to include the total number of payloads collected
                 # This is used for snapshotting to ensure that all payloads have been received
                 event["collection_payloads_count"] = self._collection_payloads_count
-            self._check.database_monitoring_metadata(json.dumps(event))
+            self._check.database_monitoring_metadata(event)
 
             self._queued_rows = []
 
