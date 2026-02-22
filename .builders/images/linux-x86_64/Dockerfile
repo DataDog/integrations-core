@@ -108,11 +108,11 @@ RUN \
  --without-debugger \
  --disable-static
 
-# libpq and pg_config as needed by psycopg2
+# libpq and pg_config as needed by psycopg
 RUN yum install -y flex && \
  DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
- VERSION="16.9" \
- SHA256="07c00fb824df0a0c295f249f44691b86e3266753b380c96f633c3311e10bd005" \
+ VERSION="18.1" \
+ SHA256="ff86675c336c46e98ac991ebb306d1b67621ece1d06787beaade312c2c915d54" \
  RELATIVE_PATH="postgresql-{{version}}" \
  bash install-from-source.sh --without-readline --with-openssl --without-icu
 # Add paths to pg_config and to the library
