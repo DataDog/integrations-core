@@ -168,7 +168,7 @@ Depending on your Kafka cluster's Kerberos setup, you may need to configure the 
 [14]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [15]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
 [17]: https://docs.datadoghq.com/containers/kubernetes/integrations/
-[18]: /data-streams
+[18]: https://docs.datadoghq.com/data_streams/
 [19]: /integrations/kafka?search=kafka
 [20]: /containers/cluster_agent/clusterchecks/
-[21]: /data_streams/messages/
+[21]: https://docs.datadoghq.com/data_streams/messages/
