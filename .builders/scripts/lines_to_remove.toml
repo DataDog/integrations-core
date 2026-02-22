@@ -1,0 +1,21 @@
+# Rules for stripping specific lines from wheel contents
+# Each rule specifies a package pattern and line patterns to remove
+
+# Example: add another rule like this
+# [[rules]]
+# package_pattern = "some_foo*"
+# file_pattern = "*.py"
+# line_patterns = [
+#     "^\\s*# bar:",
+#     "^\\s*baz\\(",
+# ]
+
+
+[[rules]]
+# pysnmp_mibs contains many MIB definition files with debug/documentation.
+# These lines are not need because we never set loadTexts to True.
+package_pattern = "pysnmp_mibs*"
+file_pattern = "*.py"
+line_patterns = [
+    "^\\s*if mibBuilder\\.loadTexts:",
+]

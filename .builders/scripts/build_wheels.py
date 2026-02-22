@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import email
+import fnmatch
 import json
 import os
 import re
@@ -245,6 +246,103 @@ def is_excluded_from_wheel(path: str | Path) -> bool:
     return False
 
 
+@cache
+def _load_line_removal_rules() -> list[dict]:
+    '''
+    Load the line removal rules from the toml file and compile the regex patterns.
+    '''
+
+    config_p = Path(__file__).parent / "lines_to_remove.toml"
+    with open(config_p, "rb") as f:
+        config = tomllib.load(f)
+
+    rules = config.get("rules", [])
+    for rule in rules:
+        rule['_compiled_patterns'] = [re.compile(p) for p in rule.get('line_patterns', [])]
+    return rules
+
+
+def _get_matching_rules(wheel_name: str) -> list[dict]:
+    '''
+    Match the rules in the toml to the wheel name.
+    '''
+    rules = _load_line_removal_rules()
+    matching = []
+    for rule in rules:
+        pattern = rule.get('package_pattern', '*')
+        if fnmatch.fnmatch(wheel_name, pattern):
+            matching.append(rule)
+    return matching
+
+
+def strip_lines_from_wheel(wheel_path: Path) -> bool:
+    '''
+    Create a temp dir and then unpack the wheel. Iterate over the contents of the wheel. 
+    Find the files matching the file pattern and iterate over the contents of each file.
+    Use regex to find all lines of the matching lines and filter them out.
+    Rewrite the unfiltered lines back to the file.
+    Repack the wheel to the original directory.
+    '''
+
+    rules = _get_matching_rules(wheel_path.name)
+    if not rules:
+        return False
+
+    modified = False
+
+    with TemporaryDirectory() as temp_dir:
+        temp_dir_path = Path(temp_dir)
+
+        # Unpack the wheel into temp dir
+        unpack(wheel_path, dest=temp_dir_path)
+        unpacked_dir = next(temp_dir_path.iterdir())
+
+        # Process files according to rules
+        for rule in rules:
+            file_pattern = rule.get('file_pattern', '*.py')
+            compiled_patterns = rule['_compiled_patterns']
+
+            for py_file in unpacked_dir.rglob(file_pattern):
+                if not py_file.is_file():
+                    continue
+
+                try:
+                    original_content = py_file.read_text(encoding='utf-8')
+                except UnicodeDecodeError:
+                    continue
+
+                lines = original_content.splitlines(keepends=True)
+                # Keep lines that don't match regex patterns
+                kept_lines = []
+                for line in lines:
+                    if not any(pattern.search(line) for pattern in compiled_patterns):
+                        kept_lines.append(line)
+
+                if len(kept_lines) != len(lines):
+                    py_file.write_text(''.join(kept_lines), encoding='utf-8')
+                    modified = True
+
+        if not modified:
+            return False
+
+        print(f'Stripped lines from {wheel_path.name}')
+
+        dest_dir = wheel_path.parent
+        before = set()
+        for p in dest_dir.glob("*.whl"):
+            before.add(p.resolve())
+        pack(unpacked_dir, dest_dir=dest_dir, build_number=None)
+
+        after = set()
+        for p in wheel_path.parent.glob("*.whl"):
+            after.add(p.resolve())
+        new_files = sorted(after - before, key=lambda p: p.stat().st_mtime, reverse=True)
+
+        if new_files:
+            shutil.move(str(new_files[0]), str(wheel_path))
+
+    return True
+
 def add_dependency(dependencies: dict[str, str], sizes: dict[str, WheelSizes], wheel: Path) -> None:
     project_metadata = extract_metadata(wheel)
     project_name = normalize_project_name(project_metadata['Name'])
@@ -362,9 +460,16 @@ def main():
     dependencies: dict[str, tuple[str, str]] = {}
     sizes: dict[str, WheelSizes] = {}
 
+    # Handle wheels already in the built directory
+    for wheel in iter_wheels(built_wheels_dir):
+        remove_test_files(wheel)
+        strip_lines_from_wheel(wheel)
+        add_dependency(dependencies, sizes, wheel)
+
     # Handle wheels currently in the external directory and move them to the built directory if they were modified
     for wheel in iter_wheels(external_wheels_dir):
         was_modified = remove_test_files(wheel)
+        was_modified = strip_lines_from_wheel(wheel) or was_modified
         if was_modified:
             # A modified wheel is no longer external → move it to built directory
             new_path = built_wheels_dir / wheel.name
@@ -372,11 +477,6 @@ def main():
             wheel = new_path
             print(f'Moved {wheel.name} to built directory')
 
-        add_dependency(dependencies, sizes, wheel)
-
-    # Handle wheels already in the built directory
-    for wheel in iter_wheels(built_wheels_dir):
-        remove_test_files(wheel)
         add_dependency(dependencies, sizes, wheel)
 
     output_path = MOUNT_DIR / 'sizes.json'
