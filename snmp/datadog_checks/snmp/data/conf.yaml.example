@@ -13,6 +13,16 @@ init_config:
     #
     loader: core
 
+    ## @param namespace - string - optional - default: default
+    ## Optional namespace override for this instance.
+    ## Namespace can be used to disambiguate devices with the same IP.
+    ## Changing namespace will cause devices being recreated in NDM app.
+    ## It should contain less than 100 characters and should not contain any of
+    ## `<`, `>`, `\n`, `\t`, `\r` characters.
+    ## This field is used by NDM features (SNMP check, SNMP Traps listener, etc).
+    #
+    # namespace: default
+
     ## @param use_device_id_as_hostname - boolean - optional - default: false
     ## Use `device:<DEVICE_ID>` (device_id is composed of `<NAMESPACE>:<DEVICE_IP_ADDRESS>`) as `hostname`
     ## for metrics and service checks (meaning that metrics and services checks will have
