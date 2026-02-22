@@ -798,6 +798,8 @@ def test_statement_samples_collect(
                 assert 'Plan' in json.loads(raw_plan_event['db']['plan']['definition']), "invalid json execution plan"
                 assert raw_plan_event['db']['plan']['raw_signature'] is not None, "missing raw plan signature"
                 assert event['db']['plan']['raw_signature'] is not None, "missing raw plan signature"
+                assert event['db']['plan']['source'] is not None, "missing plan source"
+                assert event['db']['plan']['type'] is not None, "missing plan type"
         else:
             assert len(raw_plan_events) == 0
     finally:
