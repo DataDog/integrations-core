@@ -169,7 +169,6 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
             _increase_txid(cur)
 
     aggregator.reset()
-    check = integration_check(pg_instance)
     check.run()
     aggregator.assert_metric('postgresql.snapshot.xmin', count=1, tags=expected_tags)
     assert aggregator.metrics('postgresql.snapshot.xmin')[0].value > xmin
@@ -407,7 +406,7 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     # Forth: connection health check failed
     with pytest.raises(DatabaseHealthCheckError):
         db = mock.MagicMock()
-        db.cursor().__enter__().execute.side_effect = psycopg.OperationalError('foo')
+        db.cursor().__enter__().execute.side_effect = psycopg.OperationalError('bar')
 
         @contextlib.contextmanager
         def mock_db():
@@ -831,6 +830,9 @@ def test_correct_hostname(
 )
 def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, reported_hostname, integration_check):
     pg_instance['dbm'] = dbm_enabled
+    pg_instance['query_samples'] = {'enabled': False}
+    pg_instance['query_activity'] = {'enabled': False}
+    pg_instance['query_metrics'] = {'enabled': False}
     pg_instance['collect_settings'] = {'collection_interval': 1, 'run_sync': True}
 
     expected_database_hostname = expected_database_instance = expected_host = "stubbed.hostname"
