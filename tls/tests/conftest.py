@@ -311,3 +311,14 @@ def instance_remote_mysql_valid():
         'start_tls': 'mysql',
         'tls_ca_cert': CA_CERT,
     }
+
+
+@pytest.fixture
+def instance_remote_smtp_valid():
+    return {
+        'server': 'localhost',
+        'port': 1025,
+        'server_hostname': 'valid.mock',
+        'start_tls': 'smtp',
+        'tls_ca_cert': CA_CERT,
+    }
