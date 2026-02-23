@@ -19,7 +19,7 @@ prefect = "Prefect"
 [overrides.metrics-prefix]
 krakend = "krakend.api."
 lustre = "lustre."
-prefect = "prefect_server."
+prefect = "prefect.server."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]

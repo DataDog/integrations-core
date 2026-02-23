@@ -33,8 +33,8 @@ def test_all_metadata_metrics_found(aggregator: AggregatorStub):
         check_metric_type=False,
         check_symmetric_inclusion=True,
         exclude=(
-            'prefect_server.flow_runs.retry_gaps_duration',
-            'prefect_server.task_runs.dependency_wait_duration',
+            'prefect.server.flow_runs.retry_gaps_duration',
+            'prefect.server.task_runs.dependency_wait_duration',
         ),
     )
 
