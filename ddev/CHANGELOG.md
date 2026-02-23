@@ -2,6 +2,28 @@
 
 <!-- towncrier release notes start -->
 
+## 14.3.1 / 2026-02-20
+
+***Fixed***:
+
+* Stop writing the GitHub username and token to the config file. Read them directly from environment variables instead. ([#22691](https://github.com/DataDog/integrations-core/pull/22691))
+
+## 14.3.0 / 2026-02-13
+
+***Added***:
+
+* Add EventBusOrchestrator to ddev toolset ([#22394](https://github.com/DataDog/integrations-core/pull/22394))
+* Add --recreate/-r flag to ddev env test command to recreate environments from scratch before running tests ([#22521](https://github.com/DataDog/integrations-core/pull/22521))
+* Update datadog_checks_dev pin ([#22637](https://github.com/DataDog/integrations-core/pull/22637))
+
+***Fixed***:
+
+* Ignore upgrade check in dev versions and also fix windows cache location ([#22359](https://github.com/DataDog/integrations-core/pull/22359))
+* Update ddev build commands ([#22414](https://github.com/DataDog/integrations-core/pull/22414))
+* Fix type checking in `ddev test -s` by analyzing all files when none are explicitly specified. ([#22421](https://github.com/DataDog/integrations-core/pull/22421))
+* Ignore deleted news fragments during release when validating changelog in PRs ([#22506](https://github.com/DataDog/integrations-core/pull/22506))
+* Improve license parsing in validation ([#22559](https://github.com/DataDog/integrations-core/pull/22559))
+
 ## 14.2.0 / 2026-01-28
 
 ***Added***:
