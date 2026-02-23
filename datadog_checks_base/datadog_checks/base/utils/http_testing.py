@@ -4,6 +4,7 @@
 import json
 from io import BytesIO
 from typing import Any, Iterator
+from unittest.mock import MagicMock
 
 __all__ = ['MockHTTPResponse']
 
@@ -79,18 +80,8 @@ class MockHTTPResponse:
         self.elapsed = timedelta(seconds=elapsed_seconds)
         self._stream = BytesIO(self._content)
 
-        def mock_getpeercert(_self, binary_form=False):
-            return b'mock-cert' if binary_form else {}
-
-        self.raw = type(
-            'MockRaw',
-            (),
-            {
-                'connection': type(
-                    'MockConnection', (), {'sock': type('MockSocket', (), {'getpeercert': mock_getpeercert})()}
-                )()
-            },
-        )()
+        self.raw = MagicMock()
+        self.raw.connection.sock.getpeercert.side_effect = lambda binary_form=False: b'mock-cert' if binary_form else {}
 
     @property
     def content(self) -> bytes:
