@@ -30,6 +30,11 @@ NOTIFICATION_TYPE = 'notificationtype'
 ALLOWED_EXTENSIONS_BY_FORMAT = {"json": [".json"], "yaml": [".yml", ".yaml"]}
 
 
+def _name_for_output(name: str) -> str:
+    """Normalize trap/variable name for output: hyphens to underscores (pysmi 0.3 compatibility)."""
+    return name.replace("-", "_")
+
+
 class MappingType(Enum):
     INTEGER = 0
     BITS = 1
@@ -307,7 +312,7 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
             trap_name = trap['name']
             trap_oid = trap['oid']
             trap_descr = trap.get('description', '')
-            trap_db["traps"][trap_oid] = {"name": trap_name, "mib": file_mib_name}
+            trap_db["traps"][trap_oid] = {"name": _name_for_output(trap_name), "mib": file_mib_name}
             if not no_descr:
                 trap_db["traps"][trap_oid]["descr"] = trap_descr
             for trap_var in trap.get('objects', []):
@@ -332,7 +337,7 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
                         "Ignoring this variable.".format(trap_name, var_name, mib_name)
                     )
                     continue
-                trap_db["vars"][var_metadata.oid] = {"name": var_name}
+                trap_db["vars"][var_metadata.oid] = {"name": _name_for_output(var_name)}
                 if not no_descr:
                     trap_db["vars"][var_metadata.oid]["descr"] = var_metadata.description
                 if var_metadata.enum:
