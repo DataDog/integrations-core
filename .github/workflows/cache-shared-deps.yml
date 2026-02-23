@@ -28,7 +28,7 @@ jobs:
         python-version: "${{ env.PYTHON_VERSION }}"
 
     - name: Check cache
-      uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       id: cache
       with:
         path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
@@ -68,7 +68,7 @@ jobs:
       run: pip install ./datadog_checks_base[deps] ./datadog_checks_dev
 
     - name: Cache dependencies
-      uses: actions/cache/save@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+      uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       if: steps.cache.outputs.cache-hit != 'true'
       with:
         path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
