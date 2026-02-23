@@ -127,3 +127,8 @@ files:
       source: prefect
       service: prefect
       path: /var/log/prefect/dd_log_1
+      log_processing_rules:
+      - type: multi_line
+        name: python_stack_trace
+        pattern: '^\d{2}:\d{2}:\d{2}\.\d{3} \|'
+

@@ -19,7 +19,7 @@ class PrefectCheck(AgentCheck):
     PrefectCheck monitors a Prefect control plane.
     """
 
-    __NAMESPACE__ = 'prefect_server'
+    __NAMESPACE__ = 'prefect.server'
 
     LAST_CHECK_TIME_CACHE_KEY = f'{__NAMESPACE__}.last_check_time'
 
