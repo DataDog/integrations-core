@@ -27,7 +27,6 @@ from .common import (
     STORAGE_RESOURCE_METRICS,
     VM_PERF_METRICS,
 )
-from .conftest import get_url_path
 
 
 @pytest.mark.usefixtures('mock_http_get')
@@ -485,15 +484,12 @@ def test_perf_metrics(dd_run_check, aggregator, instance):
         aggregator.assert_metric(metric, count=0, tags=sdn_tags)
         aggregator.assert_metric(metric, count=0, tags=pool_tags)
 
+
 @pytest.mark.parametrize(
     ('mock_http_get'),
     [
         pytest.param(
-            {
-                'http_error': {
-                    '/api2/json/cluster/metrics/export': MockResponse(status_code=501)
-                }
-            },
+            {'http_error': {'/api2/json/cluster/metrics/export': MockResponse(status_code=501)}},
             id='501',
         ),
     ],
