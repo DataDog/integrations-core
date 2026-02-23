@@ -72,6 +72,28 @@ N8N_LOG_OUTPUT=console
 N8N_LOG_FILE_LOCATION=/var/log/n8n/n8n.log
 ```
 
+#### Structured event logs
+
+n8n can output structured JSON logs to `n8nEventLog.log` containing detailed workflow execution events. Enable this by setting the log output to file:
+
+```bash
+N8N_LOG_OUTPUT=file
+N8N_LOG_FILE_LOCATION=/var/log/n8n/
+```
+
+The event log includes the following event types:
+
+| Event Type | Description |
+|------------|-------------|
+| `n8n.workflow.started` | Workflow execution has begun |
+| `n8n.workflow.success` | Workflow completed successfully |
+| `n8n.workflow.failed` | Workflow execution failed |
+| `n8n.node.started` | Individual node started execution |
+| `n8n.node.finished` | Individual node completed execution |
+| `n8n.audit.workflow.executed` | Audit trail for workflow execution |
+
+Each event contains rich metadata including `executionId`, `workflowId`, `workflowName`, `nodeType`, `nodeName`, and timestamps for correlation with metrics.
+
 #### Configure the Datadog Agent to collect logs
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
