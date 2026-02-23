@@ -112,6 +112,10 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
     from pysmi.searcher import AnyFileSearcher
     from pysmi.writer import FileWriter
 
+    import pysmi
+
+    print(pysmi.__version__)
+
     # pysmi's HttpReader decodes HTTP response as UTF-8 only; MIBs with non-UTF-8 bytes
     # (e.g. https://github.com/DataDog/mibs.snmplabs.com/blob/master/asn1/A3COM-HUAWEI-DEVICE-MIB#L593)
     # raise UnicodeDecodeError and are reported as "missing".
@@ -449,13 +453,10 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
     with open(file_name, 'r') as f:
         file_content = json.load(f)
 
-    # pysmi 1.6+ uses trans_opers (dash -> underscore) for JSON symbol keys
-    # https://github.com/lextudio/pysmi/blob/main/pysmi/codegen/base.py#L318
-    var_key = var_name if var_name in file_content else var_name.replace("-", "_")
-    if var_key not in file_content or var_key in ('meta', 'imports'):
+    if var_name not in file_content:
         raise VariableNotDefinedException()
 
-    var_entry = file_content[var_key]
+    var_entry = file_content[var_name]
 
     syntax = var_entry.get('syntax', {})
     if not isinstance(syntax, dict):
@@ -520,8 +521,14 @@ def get_mapping(var_name, mib_name, mapping_type: MappingType, search_locations=
     :param search_locations: Tuple of path to directories containing json-compiled MIB files
     :return: The oid and the description of the variable.
     """
+    visited = set()  # Guard against circular type references (would cause infinite loop)
     mapping = {}
     while mib_name and var_name and not mapping:
+        key = (var_name, mib_name)
+        if key in visited:
+            break
+        visited.add(key)
+
         for location in search_locations:
             file_name = os.path.join(location, mib_name + '.json')
             if os.path.isfile(file_name):
@@ -532,10 +539,7 @@ def get_mapping(var_name, mib_name, mapping_type: MappingType, search_locations=
         with open(file_name, 'r') as f:
             file_content = json.load(f)
 
-        # pysmi 1.6+ uses trans_opers (dash -> underscore) for JSON symbol keys
-        # https://github.com/lextudio/pysmi/blob/main/pysmi/codegen/base.py#L318
-        var_key = var_name if var_name in file_content else var_name.replace("-", "_")
-        if var_key not in file_content or var_key in ('meta', 'imports'):
+        if var_name not in file_content:
             try:
                 mib_name = get_import_mib(var_name, mib_name, search_locations)
             except MultipleTypeDefintionsException:
@@ -544,9 +548,8 @@ def get_mapping(var_name, mib_name, mapping_type: MappingType, search_locations=
                 raise MissingMIBException()
             continue
 
-        var_entry = file_content[var_key]
+        var_entry = file_content[var_name]
 
-        # Type-definition nodes store enum/bits under 'type'.
         type_node = var_entry.get('type', {})
         if not isinstance(type_node, dict):
             type_node = {}
@@ -579,7 +582,7 @@ def get_import_mib(var_name, mib_name, search_locations=None):
         if os.path.isfile(file_name):
             break
     else:
-        return MissingMIBException
+        raise MissingMIBException()
 
     with open(file_name, 'r') as f:
         file_content = json.load(f)
