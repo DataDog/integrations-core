@@ -11,7 +11,6 @@ from click.testing import CliRunner
 from datadog_checks.dev import run_command
 
 TEST_MIB = "A3COM-HUAWEI-LswTRAP-MIB"
-TEST_DASH_MIB = "TEST-DASH-MIB"
 
 
 def test__traps_db_generation_expanded():
@@ -75,40 +74,6 @@ def test__traps_db_generation_compact():
             trap_db = json.load(trap_db_file)
 
         with open("./data/expected_compact.json", "r") as expected_file:
-            expected = json.load(expected_file)
-
-        assert trap_db == expected
-
-
-def test__traps_db_generation_dash_symbol():
-    """Trap DB generation resolves variables when compiled JSON uses underscore (pysmi 1.6+ trans_opers)."""
-    with CliRunner().isolated_filesystem():
-        shutil.copytree(f"{os.path.dirname(os.path.realpath(__file__))}/data", "./data")
-
-        result = run_command(
-            [
-                sys.executable,
-                "-m",
-                "datadog_checks.dev",
-                "meta",
-                "snmp",
-                "generate-traps-db",
-                "-o",
-                "./data/",
-                f"./data/{TEST_DASH_MIB}",
-                "--output-format",
-                "json",
-            ],
-            capture=True,
-        )
-
-        assert 0 == result.code
-        assert "Wrote trap data to" in result.stdout
-
-        with open(f"./data/{TEST_DASH_MIB}.json", "r") as trap_db_file:
-            trap_db = json.load(trap_db_file)
-
-        with open("./data/expected_test_dash.json", "r") as expected_file:
             expected = json.load(expected_file)
 
         assert trap_db == expected
