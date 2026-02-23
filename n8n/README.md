@@ -24,15 +24,82 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-The `/metrics` endpoint is disabled by default and must be enabled by setting `N8N_METRICS`=`true`. You can also customize the metric prefix using `N8N_METRICS_PREFIX` (default is `n8n_`).
+#### Enable the n8n metrics endpoint
 
-Note that the `/metrics` endpoint is only available for self-hosted instances and is not available on n8n Cloud.
+The `/metrics` endpoint is disabled by default and must be enabled in your n8n configuration. Note that the `/metrics` endpoint is only available for self-hosted instances and is not available on n8n Cloud.
 
-For the Datadog Agent to collect metrics, follow the instructions to [enable Prometheus metrics][10].
+Set the following environment variables to enable metrics:
+
+```bash
+# Required: Enable the metrics endpoint
+N8N_METRICS=true
+
+# Optional: Include additional metric categories
+N8N_METRICS_INCLUDE_DEFAULT_METRICS=true
+N8N_METRICS_INCLUDE_CACHE_METRICS=true
+N8N_METRICS_INCLUDE_MESSAGE_EVENT_BUS_METRICS=true
+N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL=true
+N8N_METRICS_INCLUDE_API_ENDPOINTS=true
+
+# Optional: Customize the metric prefix (default is 'n8n_')
+N8N_METRICS_PREFIX=n8n_
+```
+
+For more details, see the n8n documentation on [enabling Prometheus metrics][10].
+
+#### Configure the Datadog Agent
 
 1. Edit the `n8n.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your n8n performance data. See the [sample n8n.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
+
+### Log collection
+
+_Available for Agent versions >6.0_
+
+#### Enable n8n logging
+
+Configure n8n to output logs by setting the following environment variables:
+
+```bash
+# Set the log level (error, warn, info, debug)
+N8N_LOG_LEVEL=info
+
+# Output logs to console (for containerized environments) or file
+N8N_LOG_OUTPUT=console
+
+# If using file output, specify the log file location
+N8N_LOG_FILE_LOCATION=/var/log/n8n/n8n.log
+```
+
+#### Configure the Datadog Agent to collect logs
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `n8n.d/conf.yaml` file to start collecting your n8n logs:
+
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/n8n/*.log
+       source: n8n
+       service: n8n
+   ```
+
+   For containerized environments using Docker, use the following configuration instead:
+
+   ```yaml
+   logs:
+     - type: docker
+       source: n8n
+       service: n8n
+   ```
+
+3. [Restart the Agent][5].
 
 ### Validation
 
