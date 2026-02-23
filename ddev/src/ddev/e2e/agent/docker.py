@@ -213,8 +213,9 @@ class DockerAgent(AgentInterface):
         volumes = []
 
         if not self._is_windows_container:
-            volumes.append('/proc:/host/proc')
-
+            volumes.extend(
+                ('/proc:/host/proc', '/var/run/docker.sock:/var/run/docker.sock')
+            )
         ensure_local_pkg: Type[AbstractContextManager] | Callable[[], AbstractContextManager] = nullcontext
         # Only mount the volume if the initial configuration is not set to `None`.
         # As an example, the way SNMP does autodiscovery is that the Agent writes what its listener detects
@@ -282,6 +283,8 @@ class DockerAgent(AgentInterface):
 
         if dogstatsd_port := env_vars.get(AgentEnvVars.DOGSTATSD_PORT):
             command.extend(['-p', f'{dogstatsd_port}:{dogstatsd_port}/udp'])
+
+        command.extend(['-p', '31415:31415'])
 
         # The chosen tag
         command.append(agent_build)
