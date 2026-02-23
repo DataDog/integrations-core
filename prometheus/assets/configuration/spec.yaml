@@ -149,11 +149,9 @@ files:
         value:
           example: 10
           type: integer
-      - name: max_returned_metrics
-        description: |
-          The check limits itself to 2000 metrics by default, increase this limit if needed.
-        fleet_configurable: true
-        value:
-          example: 2000
-          type: integer
       - template: instances/default
+        overrides:
+          max_returned_metrics.hidden: false
+          max_returned_metrics.description: |
+            The check limits itself to 2000 metrics by default, increase this limit if needed.
+          max_returned_metrics.value.display_default: 2000
