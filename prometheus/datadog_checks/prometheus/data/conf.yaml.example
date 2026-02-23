@@ -112,11 +112,6 @@ instances:
     #
     # prometheus_timeout: 10
 
-    ## @param max_returned_metrics - integer - optional - default: 2000
-    ## The check limits itself to 2000 metrics by default, increase this limit if needed.
-    #
-    # max_returned_metrics: 2000
-
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -156,3 +151,8 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+    ## @param max_returned_metrics - integer - optional - default: 2000
+    ## The check limits itself to 2000 metrics by default, increase this limit if needed.
+    #
+    # max_returned_metrics: 2000
