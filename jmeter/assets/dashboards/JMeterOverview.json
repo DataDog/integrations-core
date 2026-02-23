@@ -136,7 +136,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Failed",
+                      "alias": "Failed Requests",
                       "formula": "default_zero(query1)"
                     }
                   ],
@@ -172,7 +172,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Failed",
+                      "alias": "Failed Assertions",
                       "formula": "default_zero(query1)"
                     }
                   ],
@@ -300,7 +300,8 @@
                   "response_format": "scalar",
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "alias": "Count"
                     }
                   ],
                   "sort": {
@@ -610,7 +611,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -691,7 +693,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -772,7 +775,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -874,7 +878,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -955,7 +960,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -1036,7 +1042,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -1134,7 +1141,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Passed",
+                      "alias": "Passed Assertions",
                       "formula": "default_zero(query1) - default_zero(query2) - default_zero(query3)"
                     }
                   ],
@@ -1167,7 +1174,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -1223,7 +1231,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Total",
+                      "alias": "Total Assertions",
                       "formula": "default_zero(query1)"
                     }
                   ],
@@ -1246,7 +1254,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -1321,7 +1330,8 @@
                   "response_format": "scalar",
                   "formulas": [
                     {
-                      "formula": "default_zero(query1) - default_zero(query2) - default_zero(query3)"
+                      "formula": "default_zero(query1) - default_zero(query2) - default_zero(query3)",
+                      "alias": "Passed Assertions"
                     }
                   ],
                   "sort": {
@@ -1371,7 +1381,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Failed",
+                      "alias": "Failed Assertions",
                       "formula": "default_zero(query1)"
                     }
                   ],
@@ -1394,7 +1404,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -1450,7 +1461,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "default_zero(query1) / default_zero(query2) * 100"
+                      "formula": "default_zero(query1) / default_zero(query2) * 100",
+                      "alias": "Failure Rate %"
                     }
                   ],
                   "queries": [
@@ -1477,7 +1489,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -1545,7 +1558,7 @@
                   "response_format": "scalar",
                   "formulas": [
                     {
-                      "alias": "Failed",
+                      "alias": "Failed Assertions",
                       "formula": "default_zero(query1)"
                     }
                   ],
@@ -1596,7 +1609,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Error",
+                      "alias": "Error Assertions",
                       "formula": "default_zero(query1)"
                     }
                   ],
@@ -1619,7 +1632,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -1675,7 +1689,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "default_zero(query1) / default_zero(query2) * 100"
+                      "formula": "default_zero(query1) / default_zero(query2) * 100",
+                      "alias": "Error Rate %"
                     }
                   ],
                   "queries": [
@@ -1702,7 +1717,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -1770,7 +1786,8 @@
                   "response_format": "scalar",
                   "formulas": [
                     {
-                      "formula": "default_zero(query1)"
+                      "formula": "default_zero(query1)",
+                      "alias": "Error Assertions"
                     }
                   ],
                   "sort": {
@@ -1860,7 +1877,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Total",
+                      "alias": "Total Samples/s",
                       "formula": "query"
                     }
                   ],
@@ -1882,7 +1899,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -1941,7 +1959,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "OK",
+                      "alias": "OK Samples/s",
                       "formula": "query"
                     }
                   ],
@@ -1963,7 +1981,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -2022,7 +2041,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "KO",
+                      "alias": "KO Samples/s",
                       "formula": "default_zero(query)"
                     }
                   ],
@@ -2044,7 +2063,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -2142,7 +2162,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -2220,7 +2241,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -2298,7 +2320,8 @@
                 {
                   "formulas": [
                     {
-                      "formula": "events_query"
+                      "formula": "events_query",
+                      "alias": "Lifecycle events"
                     }
                   ],
                   "queries": [
@@ -2499,7 +2522,8 @@
                   },
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "alias": "Count"
                     }
                   ]
                 }
