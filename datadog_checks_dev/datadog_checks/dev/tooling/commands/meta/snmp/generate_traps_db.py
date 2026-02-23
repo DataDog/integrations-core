@@ -225,9 +225,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
 
         mib_sources = sorted({pathlib.Path(x).parent.as_uri() for x in mib_files if os.path.sep in x}) + mib_sources
 
-        # Normalize to module names (no path, no extension) so we match pysmi compiler output.
-        mib_files = [os.path.splitext(os.path.basename(x))[0] for x in mib_files]
-
+        mib_files = [os.path.basename(x) for x in mib_files]
         searchers = [AnyFileSearcher(compiled_mibs_sources).set_options(exts=['.json'])]
         code_generator = JsonCodeGen()
         file_writer = FileWriter(compiled_mibs_sources).set_options(suffix='.json')
@@ -269,7 +267,6 @@ def compile_and_report_status(mib_files, mib_compiler):
     :param mib_compiler: A pysnmp compiler object
     :return: A list of the compiled MIBs and a list of dependant MIBs that had to be compiled as well.
     """
-    requested_bases = set(mib_files)
     child_compiled_mibs = []
     all_compiled_mibs = []  # Name of all compiled mibs including the parents recursively
     with click.progressbar(mib_files, label="Compiling MIBs: ", show_eta=True, item_show_func=lambda x: x) as pb:
@@ -295,7 +292,8 @@ def compile_and_report_status(mib_files, mib_compiler):
 
             for mib_name, mib_status in compiled_mibs.items():
                 all_compiled_mibs.append(mib_name)
-                if mib_name in requested_bases or getattr(mib_status, 'file', None) == mib_file:
+                if mib_status.file == mib_file:
+                    # Let's keep this file in the output directory
                     child_compiled_mibs.append(mib_name)
 
     # These MIBs were compiled but where not explicitly requested by the user. They will be moved
@@ -386,7 +384,7 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
         file_mib_name = file_content['meta']['module']
         trap_db = {"traps": {}, "vars": {}}
 
-        traps = {k: v for k, v in file_content.items() if isinstance(v, dict) and v.get('class') == NOTIFICATION_TYPE}
+        traps = {k: v for k, v in file_content.items() if v.get('class') == NOTIFICATION_TYPE}
         for trap in traps.values():
             trap_name = trap['name']
             trap_oid = trap['oid']
@@ -452,17 +450,12 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
     if var_name not in file_content:
         raise VariableNotDefinedException()
 
-    var_entry = file_content[var_name]
-
-    syntax = var_entry.get('syntax', {})
-    if not isinstance(syntax, dict):
-        syntax = {}
-
-    enum = syntax.get('constraints', {}).get('enumeration', {})
+    # grab enum if it exists in-line
+    enum = file_content[var_name].get('syntax', {}).get('constraints', {}).get('enumeration', {})
 
     # if there is no enum in-line, check for type definition and enum in the same MIB and its imports
     if not enum:
-        var_type = syntax.get('type', '')
+        var_type = file_content[var_name].get('syntax', {}).get('type', '')
         if var_type:
             try:
                 enum = get_mapping(var_type, mib_name, MappingType.INTEGER, search_locations)
@@ -478,10 +471,10 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
                 )
 
     # grab bits if they exist in-line
-    bits = syntax.get('bits', {})
+    bits = file_content[var_name].get('syntax', {}).get('bits', {})
 
     if not bits:
-        var_type = syntax.get('type', '')
+        var_type = file_content[var_name].get('syntax', {}).get('type', '')
         if var_type:
             try:
                 bits = get_mapping(var_type, mib_name, MappingType.BITS, search_locations)
@@ -506,7 +499,9 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
     for k, v in bits.items():
         parsed_bits[v] = k
 
-    return VarMetadata(var_entry['oid'], var_entry.get('description', ''), parsed_enum, parsed_bits)
+    return VarMetadata(
+        file_content[var_name]['oid'], file_content[var_name].get('description', ''), parsed_enum, parsed_bits
+    )
 
 
 @lru_cache(maxsize=None)
@@ -535,6 +530,8 @@ def get_mapping(var_name, mib_name, mapping_type: MappingType, search_locations=
         with open(file_name, 'r') as f:
             file_content = json.load(f)
 
+        # if the variable name is not defined in the file
+        # we expect it to be, search imports for another MIB
         if var_name not in file_content:
             try:
                 mib_name = get_import_mib(var_name, mib_name, search_locations)
@@ -544,21 +541,15 @@ def get_mapping(var_name, mib_name, mapping_type: MappingType, search_locations=
                 raise MissingMIBException()
             continue
 
-        var_entry = file_content[var_name]
-
-        type_node = var_entry.get('type', {})
-        if not isinstance(type_node, dict):
-            type_node = {}
-
         if mapping_type == MappingType.INTEGER:
-            mapping = type_node.get('constraints', {}).get('enumeration', {})
+            mapping = file_content[var_name].get('type', {}).get('constraints', {}).get('enumeration', {})
         elif mapping_type == MappingType.BITS:
-            mapping = type_node.get('bits', {})
+            mapping = file_content[var_name].get('type', {}).get('bits', {})
         else:
             raise ValueError("invalid mapping type, must be INTEGER or BITS")
 
         # update variable to the type name in case we have to go another layer down
-        var_name = type_node.get('type', '')
+        var_name = file_content[var_name].get('type', {}).get('type', '')
 
     return mapping
 
