@@ -227,6 +227,7 @@ def mock_http_get(mocker):
             if 'creationTime gt' in filter_param:
                 from datetime import datetime
 
+                # Extract the timestamp from filter
                 filter_time_str = filter_param.split('creationTime gt ')[-1].strip()
                 filter_time = datetime.fromisoformat(filter_time_str.replace('Z', '+00:00'))
 

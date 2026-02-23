@@ -136,11 +136,20 @@ def test_tasks_no_duplicates_on_subsequent_runs(
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_tasks_filter_by_status(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
-    """Test that only tasks matching the configured status filter are collected."""
+def test_tasks_filtered_by_resource_filters_exclude_cluster(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test that tasks for excluded clusters are not collected."""
     instance = mock_instance.copy()
     instance["collect_tasks"] = True
-    instance["tasks_filter_status"] = ["SUCCEEDED"]
+    instance["resource_filters"] = [
+        {
+            "resource": "cluster",
+            "property": "id",
+            "type": "exclude",
+            "patterns": ["^0006411c-0286-bc71-9f02-191e334d457b$"],
+        },
+    ]
 
     get_current_datetime.return_value = MOCK_TASK_DATETIME + timedelta(
         seconds=instance.get("min_collection_interval", 120)
@@ -150,56 +159,19 @@ def test_tasks_filter_by_status(get_current_datetime, dd_run_check, aggregator, 
     dd_run_check(check)
 
     tasks = [t for t in aggregator.events if "ntnx_type:task" in t.get('tags', [])]
-
-    assert len(tasks) > 0
-    assert all("ntnx_task_status:SUCCEEDED" in t["tags"] for t in tasks)
-
-
-@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_tasks_filter_case_insensitive(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
-    """Test that task status filter accepts lowercase values."""
-    instance = mock_instance.copy()
-    instance["collect_tasks"] = True
-    instance["tasks_filter_status"] = ["succeeded"]
-
-    get_current_datetime.return_value = MOCK_TASK_DATETIME + timedelta(
-        seconds=instance.get("min_collection_interval", 120)
-    )
-
-    check = NutanixCheck('nutanix', {}, [instance])
-    dd_run_check(check)
-
-    tasks = [t for t in aggregator.events if "ntnx_type:task" in t.get('tags', [])]
-
-    assert len(tasks) > 0
-    assert all("ntnx_task_status:SUCCEEDED" in t["tags"] for t in tasks)
-
-
-@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_tasks_filter_no_match(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
-    """Test that no tasks are collected when the status filter excludes everything."""
-    instance = mock_instance.copy()
-    instance["collect_tasks"] = True
-    instance["tasks_filter_status"] = ["INVALID_STATUS"]
-
-    get_current_datetime.return_value = MOCK_TASK_DATETIME + timedelta(
-        seconds=instance.get("min_collection_interval", 120)
-    )
-
-    check = NutanixCheck('nutanix', {}, [instance])
-    dd_run_check(check)
-
-    tasks = [t for t in aggregator.events if "ntnx_type:task" in t.get('tags', [])]
-
     assert len(tasks) == 0
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_tasks_filter_empty_list(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
-    """Test that an empty filter list collects all tasks (no filtering)."""
+def test_tasks_filtered_by_resource_filters_include_cluster(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test that only tasks for included clusters are collected."""
     instance = mock_instance.copy()
     instance["collect_tasks"] = True
-    instance["tasks_filter_status"] = []
+    instance["resource_filters"] = [
+        {"resource": "cluster", "property": "id", "patterns": ["^0006411c-0286-bc71-9f02-191e334d457b$"]},
+    ]
 
     get_current_datetime.return_value = MOCK_TASK_DATETIME + timedelta(
         seconds=instance.get("min_collection_interval", 120)
@@ -209,5 +181,49 @@ def test_tasks_filter_empty_list(get_current_datetime, dd_run_check, aggregator,
     dd_run_check(check)
 
     tasks = [t for t in aggregator.events if "ntnx_type:task" in t.get('tags', [])]
-
     assert len(tasks) == 3
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_tasks_filtered_by_activity_filter_status_exclude(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test that tasks with excluded status are not collected."""
+    instance = mock_instance.copy()
+    instance["collect_tasks"] = True
+    instance["resource_filters"] = [
+        {"resource": "task", "property": "status", "type": "exclude", "patterns": ["^SUCCEEDED$"]},
+    ]
+
+    get_current_datetime.return_value = MOCK_TASK_DATETIME + timedelta(
+        seconds=instance.get("min_collection_interval", 120)
+    )
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    tasks = [t for t in aggregator.events if "ntnx_type:task" in t.get('tags', [])]
+    assert len(tasks) == 0
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_tasks_filtered_by_activity_filter_status_include(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test that only tasks matching the status filter are collected."""
+    instance = mock_instance.copy()
+    instance["collect_tasks"] = True
+    instance["resource_filters"] = [
+        {"resource": "task", "property": "status", "patterns": ["^SUCCEEDED$"]},
+    ]
+
+    get_current_datetime.return_value = MOCK_TASK_DATETIME + timedelta(
+        seconds=instance.get("min_collection_interval", 120)
+    )
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    tasks = [t for t in aggregator.events if "ntnx_type:task" in t.get('tags', [])]
+    assert len(tasks) == 3
+    assert all("ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b" in t["tags"] for t in tasks)

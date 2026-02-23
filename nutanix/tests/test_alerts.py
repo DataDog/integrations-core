@@ -127,11 +127,20 @@ def test_alerts_no_duplicates_on_subsequent_runs(
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_alerts_filter_by_severity(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
-    """Test that only alerts matching the configured severity filter are collected."""
+def test_alerts_filtered_by_resource_filters_exclude_cluster(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test that alerts for excluded clusters are not collected."""
     instance = mock_instance.copy()
     instance["collect_alerts"] = True
-    instance["alerts_filter_severity"] = ["WARNING"]
+    instance["resource_filters"] = [
+        {
+            "resource": "cluster",
+            "property": "id",
+            "type": "exclude",
+            "patterns": ["^00064715-c043-5d8f-ee4b-176ec875554d$"],
+        },
+    ]
 
     get_current_datetime.return_value = MOCK_ALERT_DATETIME
 
@@ -139,37 +148,61 @@ def test_alerts_filter_by_severity(get_current_datetime, dd_run_check, aggregato
     dd_run_check(check)
 
     alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    assert len(alerts) == 0
 
-    assert len(alerts) > 0
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alerts_filtered_by_resource_filters_include_cluster(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test that only alerts for included clusters are collected."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    instance["resource_filters"] = [
+        {"resource": "cluster", "property": "id", "patterns": ["^00064715-c043-5d8f-ee4b-176ec875554d$"]},
+    ]
+
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    assert len(alerts) == 3
+    assert all("ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d" in e["tags"] for e in alerts)
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alerts_filtered_by_activity_filter_severity(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test that only alerts matching the severity filter are collected."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    instance["resource_filters"] = [
+        {"resource": "alert", "property": "severity", "patterns": ["^WARNING$"]},
+    ]
+
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    assert len(alerts) == 2
     assert all("ntnx_alert_severity:WARNING" in e["tags"] for e in alerts)
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_alerts_filter_by_type(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
-    """Test that only alerts matching the configured type filter are collected."""
-    instance = mock_instance.copy()
-    instance["collect_alerts"] = True
-    instance["alerts_filter_type"] = ["A130172"]
-
-    get_current_datetime.return_value = MOCK_ALERT_DATETIME
-
-    check = NutanixCheck('nutanix', {}, [instance])
-    dd_run_check(check)
-
-    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
-
-    assert len(alerts) > 0
-    assert all("ntnx_alert_type:A130172" in e["tags"] for e in alerts)
-
-
-@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_alerts_filter_by_multiple_severities(
+def test_alerts_filtered_by_inexistent_property_nothing_collected(
     get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
 ):
-    """Test that alerts matching any of the configured severities are collected."""
+    """Test that filtering by an inexistent property collects no alerts."""
     instance = mock_instance.copy()
     instance["collect_alerts"] = True
-    instance["alerts_filter_severity"] = ["WARNING", "INFO"]
+    instance["resource_filters"] = [
+        {"resource": "alert", "property": "nonexistentField", "patterns": [".*"]},
+    ]
 
     get_current_datetime.return_value = MOCK_ALERT_DATETIME
 
@@ -177,57 +210,22 @@ def test_alerts_filter_by_multiple_severities(
     dd_run_check(check)
 
     alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
-    allowed = {"ntnx_alert_severity:WARNING", "ntnx_alert_severity:INFO"}
-
-    assert len(alerts) > 0
-    assert all(allowed & set(e["tags"]) for e in alerts)
-
-
-@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_alerts_filter_by_multiple_types(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
-    """Test that alerts matching any of the configured types are collected."""
-    instance = mock_instance.copy()
-    instance["collect_alerts"] = True
-    instance["alerts_filter_type"] = ["A1031", "A130172"]
-
-    get_current_datetime.return_value = MOCK_ALERT_DATETIME
-
-    check = NutanixCheck('nutanix', {}, [instance])
-    dd_run_check(check)
-
-    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
-    allowed = {"ntnx_alert_type:A1031", "ntnx_alert_type:A130172"}
-
-    assert len(alerts) > 0
-    assert all(allowed & set(e["tags"]) for e in alerts)
-
-
-@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_alerts_filter_no_match(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
-    """Test that no alerts are collected when filters exclude everything."""
-    instance = mock_instance.copy()
-    instance["collect_alerts"] = True
-    instance["alerts_filter_severity"] = ["CRITICAL"]
-
-    get_current_datetime.return_value = MOCK_ALERT_DATETIME
-
-    check = NutanixCheck('nutanix', {}, [instance])
-    dd_run_check(check)
-
-    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
-
     assert len(alerts) == 0
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_alerts_filter_severity_and_type_no_overlap(
+def test_alerts_filtered_by_activity_filter_alertType(
     get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
 ):
-    """Test that severity and type filters apply with AND logic, yielding no results when there is no overlap."""
+    """Test that only alerts matching the alertType filter are collected.
+
+    Uses property 'alertType' to match the Nutanix API field name.
+    """
     instance = mock_instance.copy()
     instance["collect_alerts"] = True
-    instance["alerts_filter_severity"] = ["WARNING"]
-    instance["alerts_filter_type"] = ["A130172"]
+    instance["resource_filters"] = [
+        {"resource": "alert", "property": "alertType", "patterns": ["^A130172$"]},
+    ]
 
     get_current_datetime.return_value = MOCK_ALERT_DATETIME
 
@@ -235,5 +233,5 @@ def test_alerts_filter_severity_and_type_no_overlap(
     dd_run_check(check)
 
     alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
-
-    assert len(alerts) == 0
+    assert len(alerts) == 1
+    assert "ntnx_alert_type:A130172" in alerts[0]["tags"]

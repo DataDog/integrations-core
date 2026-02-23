@@ -156,3 +156,51 @@ def test_audits_no_duplicates_on_subsequent_runs(
 
     audits = [e for e in aggregator.events if "ntnx_type:audit" in e.get("tags", [])]
     assert len(audits) == 0, "Expected no audits when there are no new audits since last collection"
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_audits_filtered_by_resource_filters_exclude_cluster(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test that audits for excluded clusters are not collected."""
+    instance = mock_instance.copy()
+    instance["collect_audits"] = True
+    instance["resource_filters"] = [
+        {
+            "resource": "cluster",
+            "property": "id",
+            "type": "exclude",
+            "patterns": ["^00064715-c043-5d8f-ee4b-176ec875554d$"],
+        },
+    ]
+    get_current_datetime.return_value = MOCK_AUDIT_DATETIME + timedelta(
+        seconds=instance.get("min_collection_interval", 120)
+    )
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    audits = [e for e in aggregator.events if "ntnx_type:audit" in e.get("tags", [])]
+    assert len(audits) == 0
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_audits_filtered_by_resource_filters_include_cluster(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test that only audits for included clusters are collected."""
+    instance = mock_instance.copy()
+    instance["collect_audits"] = True
+    instance["resource_filters"] = [
+        {"resource": "cluster", "property": "id", "patterns": ["^00064715-c043-5d8f-ee4b-176ec875554d$"]},
+    ]
+    get_current_datetime.return_value = MOCK_AUDIT_DATETIME + timedelta(
+        seconds=instance.get("min_collection_interval", 120)
+    )
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    audits = [e for e in aggregator.events if "ntnx_type:audit" in e.get("tags", [])]
+    assert len(audits) == 4
+    assert all("ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d" in e["tags"] for e in audits)

@@ -68,66 +68,89 @@ instances:
     #
     # pc_max_backoff_seconds: 30
 
+    ## @param resource_filters - list of mappings - optional
+    ## Filter infrastructure metrics and activity data (events, tasks, alerts, audits)
+    ## by cluster, host, VM, or activity attributes. Each filter: 'resource', 'patterns' (regex list),
+    ## 'type' (include default, or exclude). Exclude wins over include. No filters = collect all.
+    ##
+    ## Infrastructure filters (cluster|host|vm): 'property' name (default) or id.
+    ##
+    ## Activity filters:
+    ## - Event: resource 'event', property 'type' (eventType) or 'classification'
+    ## - Task: resource 'task', property 'status' (e.g. SUCCEEDED, FAILED, RUNNING)
+    ## - Alert: resource 'alert', property 'severity' (INFO, WARNING, CRITICAL) or 'alertType' (e.g. A1031)
+    ##
+    ## Examples:
+    ## - Filter by cluster name:
+    ##   - resource: cluster
+    ##     property: name
+    ##     patterns: ['^prod-.*']
+    ## - Filter by host name (exclude):
+    ##   - resource: host
+    ##     property: name
+    ##     type: exclude
+    ##     patterns: ['^standby-.*']
+    ## - Filter events by type (include only PasswordAudit, LicenseAudit):
+    ##   - resource: event
+    ##     property: type
+    ##     patterns: ['^PasswordAudit$', '^LicenseAudit$']
+    ## - Filter tasks by status (exclude failed/canceled):
+    ##   - resource: task
+    ##     property: status
+    ##     type: exclude
+    ##     patterns: ['^FAILED$', '^CANCELED$']
+    ## - Filter alerts by severity (include WARNING and CRITICAL):
+    ##   - resource: alert
+    ##     property: severity
+    ##     patterns: ['^WARNING$', '^CRITICAL$']
+    ## - Filter alerts by alert type (API field alertType):
+    ##   - resource: alert
+    ##     property: alertType
+    ##     patterns: ['^A1031$', '^A130172$']
+    #
+    # resource_filters:
+    #   - resource: cluster
+    #     property: name
+    #     patterns:
+    #     - ^prod-.*
+    #   - resource: host
+    #     property: name
+    #     type: exclude
+    #     patterns:
+    #     - ^standby-.*
+    #   - resource: event
+    #     property: type
+    #     patterns:
+    #     - ^PasswordAudit$
+    #     - ^LicenseAudit$
+    #   - resource: task
+    #     property: status
+    #     type: exclude
+    #     patterns:
+    #     - ^FAILED$
+    #     - ^CANCELED$
+    #   - resource: alert
+    #     property: severity
+    #     patterns:
+    #     - ^WARNING$
+    #     - ^CRITICAL$
+    #   - resource: alert
+    #     property: alertType
+    #     patterns:
+    #     - ^A1031$
+    #     - ^A130172$
+
     ## @param collect_events - boolean - optional - default: true
     ## Whether to collect events from Prism Central.
     ## Default is true.
     #
     # collect_events: true
 
-    ## @param events_filter_type - list of strings - optional
-    ## List of event types to collect. When set, only events whose eventType
-    ## matches one of these values are forwarded to Datadog. When empty or unset,
-    ## all events are collected.
-    #
-    # events_filter_type:
-    #   - PasswordAudit
-
-    ## @param collect_tasks - boolean - optional - default: true
-    ## Whether to collect tasks from Prism Central.
-    ## Default is true.
-    #
-    # collect_tasks: true
-
-    ## @param tasks_filter_status - list of strings - optional
-    ## List of task statuses to collect. When set, only tasks whose status
-    ## matches one of these values are forwarded to Datadog. When empty or unset,
-    ## all tasks are collected.
-    ## Valid values: FAILED, QUEUED, RUNNING, SUSPENDED, SUCCEEDED, CANCELED, CANCELING, $UNKNOWN, $REDACTED.
-    #
-    # tasks_filter_status:
-    #   - FAILED
-    #   - SUCCEEDED
-
-    ## @param collect_audits - boolean - optional - default: true
-    ## Whether to collect audits from Prism Central.
-    ## Default is true.
-    #
-    # collect_audits: true
-
     ## @param collect_alerts - boolean - optional - default: true
     ## Whether to collect alerts from Prism Central.
     ## Default is true.
     #
     # collect_alerts: true
-
-    ## @param alerts_filter_severity - list of strings - optional
-    ## List of alert severities to collect. When set, only alerts matching one of
-    ## these severities are forwarded to Datadog. When empty or unset, all alerts
-    ## are collected.
-    ## Valid values: INFO, WARNING, CRITICAL, $UNKNOWN, $REDACTED.
-    #
-    # alerts_filter_severity:
-    #   - WARNING
-    #   - CRITICAL
-
-    ## @param alerts_filter_type - list of strings - optional
-    ## List of alert types to collect. When set, only alerts whose type
-    ## matches one of these values are forwarded to Datadog. When empty or unset,
-    ## all alerts are collected.
-    ## Alert types are dynamically generated strings (e.g. A1031, A130172).
-    #
-    # alerts_filter_type:
-    #   - A1031
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.

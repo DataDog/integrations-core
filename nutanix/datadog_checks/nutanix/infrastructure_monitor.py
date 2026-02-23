@@ -8,6 +8,7 @@ from typing import Literal
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.nutanix.metrics import CLUSTER_STATS_METRICS, HOST_STATS_METRICS, VM_STATS_METRICS
+from datadog_checks.nutanix.resource_filters import should_collect_resource
 
 # Entity types for metrics counting
 EntityType = Literal['cluster', 'host', 'vm']
@@ -99,6 +100,12 @@ class InfrastructureMonitor:
                     skipped += 1
                     continue
 
+                if not should_collect_resource(
+                    "cluster", cluster.get("extId"), cluster.get("name"), self.check.resource_filters
+                ):
+                    skipped += 1
+                    continue
+
                 self.check.log.info("[%s][%s] Processing cluster", pc_label, cluster_name)
 
                 # Reset capacity accumulator for this cluster
@@ -164,6 +171,8 @@ class InfrastructureMonitor:
         """
         vm_id = vm.get("extId", "unknown")
         hostname = vm.get("name")
+        if not should_collect_resource("vm", vm_id, hostname, self.check.resource_filters):
+            return
         vm_tags = self.check.base_tags + self._extract_vm_tags(vm)
 
         self._set_external_tags_for_host(hostname, vm_tags)
@@ -419,6 +428,9 @@ class InfrastructureMonitor:
 
         if not host_id:
             self.check.log.warning("[%s][%s] Host %s has no extId, skipping", pc_label, cluster_name, host_name)
+            return 0
+
+        if not should_collect_resource("host", host_id, host_name, self.check.resource_filters):
             return 0
 
         # Cache host name for VM tagging

@@ -49,14 +49,23 @@ class Proxy(BaseModel):
     no_proxy: Optional[tuple[str, ...]] = None
 
 
+class ResourceFilter(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    patterns: Optional[tuple[str, ...]] = None
+    property: Optional[str] = None
+    resource: Optional[str] = None
+    type: Optional[str] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    alerts_filter_severity: Optional[tuple[str, ...]] = None
-    alerts_filter_type: Optional[tuple[str, ...]] = None
     allow_redirects: Optional[bool] = None
     auth_token: Optional[AuthToken] = None
     auth_type: Optional[str] = None
@@ -64,14 +73,11 @@ class InstanceConfig(BaseModel):
     aws_region: Optional[str] = None
     aws_service: Optional[str] = None
     collect_alerts: Optional[bool] = None
-    collect_audits: Optional[bool] = None
     collect_events: Optional[bool] = None
-    collect_tasks: Optional[bool] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
-    events_filter_type: Optional[tuple[str, ...]] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
     kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
@@ -98,10 +104,10 @@ class InstanceConfig(BaseModel):
     proxy: Optional[Proxy] = None
     read_timeout: Optional[float] = None
     request_size: Optional[float] = None
+    resource_filters: Optional[tuple[ResourceFilter, ...]] = None
     service: Optional[str] = None
     skip_proxy: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
-    tasks_filter_status: Optional[tuple[str, ...]] = None
     timeout: Optional[float] = None
     tls_ca_cert: Optional[str] = None
     tls_cert: Optional[str] = None

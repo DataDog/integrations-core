@@ -6,6 +6,7 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.nutanix.activity_monitor import ActivityMonitor
 from datadog_checks.nutanix.infrastructure_monitor import InfrastructureMonitor
+from datadog_checks.nutanix.resource_filters import parse_resource_filters
 from datadog_checks.nutanix.utils import retry_on_rate_limit
 
 
@@ -47,10 +48,7 @@ class NutanixCheck(AgentCheck):
         self.collect_audits_enabled = is_affirmative(self.instance.get("collect_audits", True))
         self.collect_alerts_enabled = is_affirmative(self.instance.get("collect_alerts", True))
 
-        self.alerts_filter_severity = {s.upper() for s in self.instance.get("alerts_filter_severity", []) or []}
-        self.alerts_filter_type = set(self.instance.get("alerts_filter_type", []) or [])
-        self.events_filter_type = set(self.instance.get("events_filter_type", []) or [])
-        self.tasks_filter_status = {s.upper() for s in self.instance.get("tasks_filter_status", []) or []}
+        self.resource_filters = parse_resource_filters(self.instance.get("resource_filters") or [])
 
     def _initialize_check_attributes(self):
         self.base_url = f"{self.pc_ip}:{self.pc_port}"

@@ -76,47 +76,95 @@ files:
             value:
               type: number
               example: 30
+          - name: resource_filters
+            description: |
+              Filter infrastructure metrics and activity data (events, tasks, alerts, audits)
+              by cluster, host, VM, or activity attributes. Each filter: 'resource', 'patterns' (regex list),
+              'type' (include default, or exclude). Exclude wins over include. No filters = collect all.
+
+              Infrastructure filters (cluster|host|vm): 'property' name (default) or id.
+
+              Activity filters:
+              - Event: resource 'event', property 'type' (eventType) or 'classification'
+              - Task: resource 'task', property 'status' (e.g. SUCCEEDED, FAILED, RUNNING)
+              - Alert: resource 'alert', property 'severity' (INFO, WARNING, CRITICAL) or 'alertType' (e.g. A1031)
+
+              Examples:
+              - Filter by cluster name:
+                - resource: cluster
+                  property: name
+                  patterns: ['^prod-.*']
+              - Filter by host name (exclude):
+                - resource: host
+                  property: name
+                  type: exclude
+                  patterns: ['^standby-.*']
+              - Filter events by type (include only PasswordAudit, LicenseAudit):
+                - resource: event
+                  property: type
+                  patterns: ['^PasswordAudit$', '^LicenseAudit$']
+              - Filter tasks by status (exclude failed/canceled):
+                - resource: task
+                  property: status
+                  type: exclude
+                  patterns: ['^FAILED$', '^CANCELED$']
+              - Filter alerts by severity (include WARNING and CRITICAL):
+                - resource: alert
+                  property: severity
+                  patterns: ['^WARNING$', '^CRITICAL$']
+              - Filter alerts by alert type (API field alertType):
+                - resource: alert
+                  property: alertType
+                  patterns: ['^A1031$', '^A130172$']
+            value:
+              type: array
+              items:
+                type: object
+                properties:
+                  - name: resource
+                    type: string
+                  - name: patterns
+                    type: array
+                    items:
+                      type: string
+                  - name: type
+                    type: string
+                  - name: property
+                    type: string
+              example:
+                - resource: cluster
+                  property: name
+                  patterns:
+                    - '^prod-.*'
+                - resource: host
+                  property: name
+                  type: exclude
+                  patterns:
+                    - '^standby-.*'
+                - resource: event
+                  property: type
+                  patterns:
+                    - '^PasswordAudit$'
+                    - '^LicenseAudit$'
+                - resource: task
+                  property: status
+                  type: exclude
+                  patterns:
+                    - '^FAILED$'
+                    - '^CANCELED$'
+                - resource: alert
+                  property: severity
+                  patterns:
+                    - '^WARNING$'
+                    - '^CRITICAL$'
+                - resource: alert
+                  property: alertType
+                  patterns:
+                    - '^A1031$'
+                    - '^A130172$'
           - name: collect_events
             description: |
               Whether to collect events from Prism Central.
-              Default is true.
-            value:
-              type: boolean
-              example: true
-          - name: events_filter_type
-            description: |
-              List of event types to collect. When set, only events whose eventType
-              matches one of these values are forwarded to Datadog. When empty or unset,
-              all events are collected.
-            value:
-              type: array
-              items:
-                type: string
-              example:
-                - PasswordAudit
-          - name: collect_tasks
-            description: |
-              Whether to collect tasks from Prism Central.
-              Default is true.
-            value:
-              type: boolean
-              example: true
-          - name: tasks_filter_status
-            description: |
-              List of task statuses to collect. When set, only tasks whose status
-              matches one of these values are forwarded to Datadog. When empty or unset,
-              all tasks are collected.
-              Valid values: FAILED, QUEUED, RUNNING, SUSPENDED, SUCCEEDED, CANCELED, CANCELING, $UNKNOWN, $REDACTED.
-            value:
-              type: array
-              items:
-                type: string
-              example:
-                - FAILED
-                - SUCCEEDED
-          - name: collect_audits
-            description: |
-              Whether to collect audits from Prism Central.
               Default is true.
             value:
               type: boolean
@@ -128,31 +176,6 @@ files:
             value:
               type: boolean
               example: true
-          - name: alerts_filter_severity
-            description: |
-              List of alert severities to collect. When set, only alerts matching one of
-              these severities are forwarded to Datadog. When empty or unset, all alerts
-              are collected.
-              Valid values: INFO, WARNING, CRITICAL, $UNKNOWN, $REDACTED.
-            value:
-              type: array
-              items:
-                type: string
-              example:
-                - WARNING
-                - CRITICAL
-          - name: alerts_filter_type
-            description: |
-              List of alert types to collect. When set, only alerts whose type
-              matches one of these values are forwarded to Datadog. When empty or unset,
-              all alerts are collected.
-              Alert types are dynamically generated strings (e.g. A1031, A130172).
-            value:
-              type: array
-              items:
-                type: string
-              example:
-                - A1031
           - template: instances/http
           - template: instances/default
             overrides:

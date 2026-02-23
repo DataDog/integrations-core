@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from requests.exceptions import HTTPError
 
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
+from datadog_checks.nutanix.resource_filters import should_collect_activity, should_collect_resource
 
 
 class ActivityMonitor:
@@ -67,7 +68,7 @@ class ActivityMonitor:
             # Track the most recent timestamp before field filtering so we don't re-fetch filtered-out events
             most_recent_time_str = self._find_max_timestamp(events, "creationTime")
 
-            events = self._apply_filters(events, [("eventType", self.check.events_filter_type)])
+            events = [e for e in events if self._should_collect_activity_item(e, "event")]
 
             self.check.log.debug(
                 "[PC:%s:%s] Processing %d events after filtering", self.check.pc_ip, self.check.pc_port, len(events)
@@ -205,7 +206,7 @@ class ActivityMonitor:
             # Track the most recent timestamp before field filtering so we don't re-fetch filtered-out tasks
             most_recent_time_str = self._find_max_timestamp(tasks, "createdTime")
 
-            tasks = self._apply_filters(tasks, [("status", self.check.tasks_filter_status)])
+            tasks = [t for t in tasks if self._should_collect_activity_item(t, "task")]
 
             self.check.log.debug(
                 "[PC:%s:%s] Processing %d tasks after filtering", self.check.pc_ip, self.check.pc_port, len(tasks)
@@ -266,6 +267,8 @@ class ActivityMonitor:
             if not audits:
                 self.check.log.debug("[PC:%s:%s] No new audits after filtering", self.check.pc_ip, self.check.pc_port)
                 return 0
+
+            audits = [a for a in audits if self._should_collect_activity_item(a, "audit")]
 
             self.check.log.debug(
                 "[PC:%s:%s] Processing %d audits after filtering", self.check.pc_ip, self.check.pc_port, len(audits)
@@ -332,13 +335,7 @@ class ActivityMonitor:
             # Track the most recent timestamp before field filtering so we don't re-fetch filtered-out alerts
             most_recent_time_str = self._find_max_timestamp(alerts, "creationTime")
 
-            alerts = self._apply_filters(
-                alerts,
-                [
-                    ("severity", self.check.alerts_filter_severity),
-                    ("alertType", self.check.alerts_filter_type),
-                ],
-            )
+            alerts = [a for a in alerts if self._should_collect_activity_item(a, "alert")]
 
             self.check.log.debug(
                 "[PC:%s:%s] Processing %d alerts after filtering", self.check.pc_ip, self.check.pc_port, len(alerts)
@@ -679,13 +676,52 @@ class ActivityMonitor:
             )
             return None
 
-    def _apply_filters(self, items: list[dict], filters: list[tuple[str, set[str]]]) -> list[dict]:
-        """Keep only items whose field values are in the corresponding allowed sets (AND across filters)."""
-        for field_name, allowed_values in filters:
-            if not allowed_values:
-                continue
-            items = [item for item in items if item.get(field_name) in allowed_values]
-        return items
+    def _should_collect_activity_item(self, item: dict, item_kind: str) -> bool:
+        """Return True if the activity item should be collected per resource_filters."""
+        filters = self.check.resource_filters
+        resources = []
+        if item_kind == "event":
+            cid = item.get("sourceClusterUUID") or item.get("clusterUUID")
+            if cid:
+                resources.append(("cluster", cid, self.check.cluster_names.get(cid, "")))
+            if se := item.get("sourceEntity"):
+                rtype = se.get("type")
+                if rtype in ("cluster", "host", "vm"):
+                    resources.append((rtype, se.get("extId"), se.get("name") or ""))
+        elif item_kind == "task":
+            for cid in item.get("clusterExtIds") or []:
+                resources.append(("cluster", cid, self.check.cluster_names.get(cid, "")))
+            for ent in item.get("entitiesAffected") or []:
+                rel = ent.get("rel", "")
+                rtype = "cluster" if "cluster" in rel else "host" if "host" in rel else "vm" if "vm" in rel else None
+                if rtype:
+                    resources.append((rtype, ent.get("extId"), ent.get("name") or ""))
+        elif item_kind == "alert":
+            if cid := item.get("clusterUUID"):
+                resources.append(("cluster", cid, self.check.cluster_names.get(cid, "")))
+            if se := item.get("sourceEntity"):
+                rtype = se.get("type")
+                if rtype in ("cluster", "host", "vm"):
+                    resources.append((rtype, se.get("extId"), se.get("name") or ""))
+        elif item_kind == "audit":
+            if cr := item.get("clusterReference"):
+                cid, cname = cr.get("extId"), cr.get("name") or ""
+                if cid:
+                    resources.append(("cluster", cid, cname or self.check.cluster_names.get(cid, "")))
+            if se := item.get("sourceEntity"):
+                rtype = se.get("type")
+                if rtype in ("cluster", "host", "vm"):
+                    resources.append((rtype, se.get("extId"), se.get("name") or ""))
+
+        # Infrastructure filters: cluster/host/vm
+        if filters:
+            if resources:
+                if not all(should_collect_resource(rt, eid, ename, filters) for rt, eid, ename in resources):
+                    return False
+            # Activity filters: event/task/alert (by type, classification, status, severity)
+            if item_kind in ("event", "task", "alert") and not should_collect_activity(item_kind, item, filters):
+                return False
+        return True
 
     def _filter_after_time(self, items: list[dict], last_time_str: str | None, field_name: str) -> list[dict]:
         """Filter items to those strictly after the last submitted time.
