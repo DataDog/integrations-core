@@ -38,6 +38,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
     field_names: Optional[tuple[str, ...]] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     mysql_db: Optional[str] = None

@@ -46,6 +46,7 @@ class InstanceConfig(BaseModel):
     lctl_path: Optional[str] = None
     lfs_path: Optional[str] = None
     lnetctl_path: Optional[str] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     node_type: Optional[Literal['client', 'mds', 'oss']] = None

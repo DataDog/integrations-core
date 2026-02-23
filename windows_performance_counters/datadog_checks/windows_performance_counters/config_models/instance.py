@@ -92,6 +92,7 @@ class InstanceConfig(BaseModel):
     enable_health_service_check: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
     extra_metrics: Optional[MappingProxyType[str, ExtraMetrics]] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: MappingProxyType[str, Metrics]
     min_collection_interval: Optional[float] = None

@@ -47,6 +47,7 @@ class InstanceConfig(BaseModel):
     follow_symlinks: Optional[bool] = None
     ignore_missing: Optional[bool] = None
     max_filegauge_count: Optional[int] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     name: Optional[str] = None

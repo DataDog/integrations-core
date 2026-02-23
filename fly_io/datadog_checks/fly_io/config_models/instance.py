@@ -121,6 +121,7 @@ class InstanceConfig(BaseModel):
     log_requests: Optional[bool] = None
     machines_api_endpoint: Optional[str] = None
     match_string: Optional[str] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]] = None
     min_collection_interval: Optional[float] = None

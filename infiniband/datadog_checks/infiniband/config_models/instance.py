@@ -44,6 +44,7 @@ class InstanceConfig(BaseModel):
     exclude_devices: Optional[tuple[str, ...]] = None
     exclude_hw_counters: Optional[tuple[str, ...]] = None
     infiniband_path: Optional[str] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     service: Optional[str] = None

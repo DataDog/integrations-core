@@ -164,6 +164,7 @@ class InstanceConfig(BaseModel):
     include_events: Optional[tuple[IncludeEvent, ...]] = None
     infrastructure_mode: Optional[str] = None
     max_historical_metrics: Optional[int] = None
+    max_returned_metrics: Optional[int] = None
     metric_filters: Optional[MetricFilters] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics_per_query: Optional[int] = None
