@@ -485,16 +485,22 @@ def test_perf_metrics(dd_run_check, aggregator, instance):
         aggregator.assert_metric(metric, count=0, tags=sdn_tags)
         aggregator.assert_metric(metric, count=0, tags=pool_tags)
 
-
+@pytest.mark.parametrize(
+    ('mock_http_get'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/metrics/export': MockResponse(status_code=501)
+                }
+            },
+            id='501',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
 def test_performance_metrics_endpoint_unavailable(dd_run_check, aggregator, instance, mock_http_get):
-    response = MockResponse(status_code=501)
-    response.json = lambda: None
-
-    original_get = mock_http_get.side_effect
-    mock_http_get.side_effect = lambda url, *args, **kwargs: (
-        response if get_url_path(url) == '/api2/json/cluster/metrics/export' else original_get(url, *args, **kwargs)
-    )
-
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
 
