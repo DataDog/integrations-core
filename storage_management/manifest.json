@@ -64,7 +64,8 @@
       }
     },
     "dashboards": {
-      "Storage Management for Amazon S3": "assets/dashboards/storage_management_amazon_s3.json"
+      "Storage Management for Amazon S3": "assets/dashboards/storage_management_amazon_s3.json",
+      "Storage Management — Summary": "assets/dashboards/storage_management_amazon_s3_summary.json"
     }
   }
 }
