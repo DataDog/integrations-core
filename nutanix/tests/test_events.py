@@ -246,7 +246,7 @@ def test_events_filtered_by_resource_filters_exclude_cluster(
     instance["resource_filters"] = [
         {
             "resource": "cluster",
-            "property": "id",
+            "property": "extId",
             "type": "exclude",
             "patterns": ["^0006411c-0286-bc71-9f02-191e334d457b$"],
         },
@@ -269,7 +269,7 @@ def test_events_filtered_by_resource_filters_include_cluster(
     instance = mock_instance.copy()
     instance["collect_events"] = True
     instance["resource_filters"] = [
-        {"resource": "cluster", "property": "id", "patterns": ["^0006411c-0286-bc71-9f02-191e334d457b$"]},
+        {"resource": "cluster", "property": "extId", "patterns": ["^0006411c-0286-bc71-9f02-191e334d457b$"]},
     ]
 
     get_current_datetime.return_value = MOCK_DATETIME
@@ -290,7 +290,7 @@ def test_events_filtered_by_activity_filter_type(
     instance = mock_instance.copy()
     instance["collect_events"] = True
     instance["resource_filters"] = [
-        {"resource": "event", "property": "type", "patterns": ["^PasswordAudit$"]},
+        {"resource": "event", "property": "eventType", "patterns": ["^PasswordAudit$"]},
     ]
 
     get_current_datetime.return_value = MOCK_DATETIME

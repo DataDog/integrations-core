@@ -168,7 +168,7 @@ def test_audits_filtered_by_resource_filters_exclude_cluster(
     instance["resource_filters"] = [
         {
             "resource": "cluster",
-            "property": "id",
+            "property": "extId",
             "type": "exclude",
             "patterns": ["^00064715-c043-5d8f-ee4b-176ec875554d$"],
         },
@@ -192,7 +192,7 @@ def test_audits_filtered_by_resource_filters_include_cluster(
     instance = mock_instance.copy()
     instance["collect_audits"] = True
     instance["resource_filters"] = [
-        {"resource": "cluster", "property": "id", "patterns": ["^00064715-c043-5d8f-ee4b-176ec875554d$"]},
+        {"resource": "cluster", "property": "extId", "patterns": ["^00064715-c043-5d8f-ee4b-176ec875554d$"]},
     ]
     get_current_datetime.return_value = MOCK_AUDIT_DATETIME + timedelta(
         seconds=instance.get("min_collection_interval", 120)
@@ -204,3 +204,47 @@ def test_audits_filtered_by_resource_filters_include_cluster(
     audits = [e for e in aggregator.events if "ntnx_type:audit" in e.get("tags", [])]
     assert len(audits) == 4
     assert all("ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d" in e["tags"] for e in audits)
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_audit_filter_by_type(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
+    """Test that audits are filtered by auditType."""
+    instance = mock_instance.copy()
+    instance["collect_audits"] = True
+    instance["resource_filters"] = [
+        {"resource": "audit", "property": "auditType", "patterns": ["^LoginInfoAudit$"]},
+    ]
+    get_current_datetime.return_value = MOCK_AUDIT_DATETIME + timedelta(
+        seconds=instance.get("min_collection_interval", 120)
+    )
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    # Verify only LoginInfoAudit events are collected
+    audits = [e for e in aggregator.events if "ntnx_type:audit" in e.get("tags", [])]
+    assert len(audits) == 4
+    for audit in audits:
+        assert "ntnx_audit_type:LoginInfoAudit" in audit["tags"]
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_audit_filter_by_username_exclude(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
+    """Test that audits are filtered by username with exclude using nested property access."""
+    instance = mock_instance.copy()
+    instance["collect_audits"] = True
+    instance["resource_filters"] = [
+        {"resource": "audit", "property": "userReference/name", "type": "exclude", "patterns": ["^admin$"]},
+    ]
+    get_current_datetime.return_value = MOCK_AUDIT_DATETIME + timedelta(
+        seconds=instance.get("min_collection_interval", 120)
+    )
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    # Verify no admin user audits
+    audits = [e for e in aggregator.events if "ntnx_type:audit" in e.get("tags", [])]
+    assert len(audits) == 0  # All mock audits are from admin user
+    for audit in audits:
+        assert "ntnx_user_name:admin" not in audit["tags"]

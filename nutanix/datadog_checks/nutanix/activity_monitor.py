@@ -683,43 +683,53 @@ class ActivityMonitor:
         if item_kind == "event":
             cid = item.get("sourceClusterUUID") or item.get("clusterUUID")
             if cid:
-                resources.append(("cluster", cid, self.check.cluster_names.get(cid, "")))
+                cluster_entity = {"extId": cid, "name": self.check.cluster_names.get(cid, "")}
+                resources.append(("cluster", cluster_entity))
             if se := item.get("sourceEntity"):
                 rtype = se.get("type")
                 if rtype in ("cluster", "host", "vm"):
-                    resources.append((rtype, se.get("extId"), se.get("name") or ""))
+                    entity = {"extId": se.get("extId"), "name": se.get("name") or ""}
+                    resources.append((rtype, entity))
         elif item_kind == "task":
             for cid in item.get("clusterExtIds") or []:
-                resources.append(("cluster", cid, self.check.cluster_names.get(cid, "")))
+                cluster_entity = {"extId": cid, "name": self.check.cluster_names.get(cid, "")}
+                resources.append(("cluster", cluster_entity))
             for ent in item.get("entitiesAffected") or []:
                 rel = ent.get("rel", "")
                 rtype = "cluster" if "cluster" in rel else "host" if "host" in rel else "vm" if "vm" in rel else None
                 if rtype:
-                    resources.append((rtype, ent.get("extId"), ent.get("name") or ""))
+                    entity = {"extId": ent.get("extId"), "name": ent.get("name") or ""}
+                    resources.append((rtype, entity))
         elif item_kind == "alert":
             if cid := item.get("clusterUUID"):
-                resources.append(("cluster", cid, self.check.cluster_names.get(cid, "")))
+                cluster_entity = {"extId": cid, "name": self.check.cluster_names.get(cid, "")}
+                resources.append(("cluster", cluster_entity))
             if se := item.get("sourceEntity"):
                 rtype = se.get("type")
                 if rtype in ("cluster", "host", "vm"):
-                    resources.append((rtype, se.get("extId"), se.get("name") or ""))
+                    entity = {"extId": se.get("extId"), "name": se.get("name") or ""}
+                    resources.append((rtype, entity))
         elif item_kind == "audit":
             if cr := item.get("clusterReference"):
                 cid, cname = cr.get("extId"), cr.get("name") or ""
                 if cid:
-                    resources.append(("cluster", cid, cname or self.check.cluster_names.get(cid, "")))
+                    cluster_entity = {"extId": cid, "name": cname or self.check.cluster_names.get(cid, "")}
+                    resources.append(("cluster", cluster_entity))
             if se := item.get("sourceEntity"):
                 rtype = se.get("type")
                 if rtype in ("cluster", "host", "vm"):
-                    resources.append((rtype, se.get("extId"), se.get("name") or ""))
+                    entity = {"extId": se.get("extId"), "name": se.get("name") or ""}
+                    resources.append((rtype, entity))
 
         # Infrastructure filters: cluster/host/vm
         if filters:
             if resources:
-                if not all(should_collect_resource(rt, eid, ename, filters) for rt, eid, ename in resources):
+                if not all(should_collect_resource(rt, entity, filters) for rt, entity in resources):
                     return False
-            # Activity filters: event/task/alert (by type, classification, status, severity)
-            if item_kind in ("event", "task", "alert") and not should_collect_activity(item_kind, item, filters):
+            # Activity filters: event/task/alert/audit
+            if item_kind in ("event", "task", "alert", "audit") and not should_collect_activity(
+                item_kind, item, filters
+            ):
                 return False
         return True
 
