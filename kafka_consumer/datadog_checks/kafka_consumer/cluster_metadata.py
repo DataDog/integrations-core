@@ -862,6 +862,8 @@ class ClusterMetadataCollector:
         for subject, versions in version_responses.items():
             if not versions:
                 continue
+            subject_tags = self._get_tags(cluster_id) + [f'subject:{subject}']
+            self.check.gauge('schema_registry.versions', len(versions), tags=subject_tags)
             max_version = max(versions)
             cached = latest_version_cache.get(subject)
             cached_version = cached.get('version', 0) if isinstance(cached, dict) else (cached or 0)
@@ -900,9 +902,6 @@ class ClusterMetadataCollector:
             schema_id = latest_schema.get('id')
             schema_version = latest_schema.get('version')
             schema_type = latest_schema.get('schemaType', 'AVRO')
-
-            subject_tags = self._get_tags(cluster_id) + [f'subject:{subject}']
-            self.check.gauge('schema_registry.versions', schema_version, tags=subject_tags)
 
             # Update the latest version cache with version and schema_id
             latest_version_cache[subject] = {'version': schema_version, 'schema_id': schema_id}
