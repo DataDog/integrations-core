@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 1.1.0 / 2025-12-22
+## 1.3.0 / 2026-02-19
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Add support for log collection. ([#22416](https://github.com/DataDog/integrations-core/pull/22416))
+* Add support for bhist details metrics. ([#22483](https://github.com/DataDog/integrations-core/pull/22483))
+
+***Fixed***:
+
+* Update conf.yaml to display 'default' field defined in spec.yaml ([#21744](https://github.com/DataDog/integrations-core/pull/21744))
+
+## 1.2.0 / 2026-01-21
+
+***Added***:
+
+* Add project tag to in progress jobs metrics. ([#22083](https://github.com/DataDog/integrations-core/pull/22083))
+
+## 1.1.0 / 2025-12-22 / Agent 7.75.0
 
 ***Added***:
 

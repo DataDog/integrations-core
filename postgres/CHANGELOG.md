@@ -2,6 +2,32 @@
 
 <!-- towncrier release notes start -->
 
+## 23.4.0 / 2026-02-19
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+***Fixed***:
+
+* Update conf.yaml to display 'default' field defined in spec.yaml ([#21744](https://github.com/DataDog/integrations-core/pull/21744))
+* Fixes collect_wal_metrics config default on 9.6 and below to correctly default to disabled ([#22377](https://github.com/DataDog/integrations-core/pull/22377))
+* Avoid holding onto Postgres settings data between checks to free up memory ([#22469](https://github.com/DataDog/integrations-core/pull/22469))
+* Exclude system and cloud provider admin databases from schema collection by default ([#22470](https://github.com/DataDog/integrations-core/pull/22470))
+* Fix `replication_role` tag not updating correctly after a PostgreSQL failover or promotion. ([#22538](https://github.com/DataDog/integrations-core/pull/22538))
+* Fix relations index metrics query to correctly exclude pg_toast tables and system catalog indexes, reducing unnecessary metric submissions and tag cardinality. ([#22597](https://github.com/DataDog/integrations-core/pull/22597))
+* Remove unused PARTITION_ACTIVITY_QUERY that was never called in the schema collector. ([#22608](https://github.com/DataDog/integrations-core/pull/22608))
+* Updates collect_raw_query_statements config description ([#22611](https://github.com/DataDog/integrations-core/pull/22611))
+* Fix a truthy check on AWS authentication fallback logic ([#22614](https://github.com/DataDog/integrations-core/pull/22614))
+
+## 23.3.4 / 2026-01-21
+
+***Fixed***:
+
+* Correct postgres Unix socket path example in conf.yaml.example ([#22200](https://github.com/DataDog/integrations-core/pull/22200))
+* Fix KeyError in statement metrics when available metric columns change between collection cycles. ([#22318](https://github.com/DataDog/integrations-core/pull/22318))
+  Optimize StatementMetrics cache to only store fields we need to compute statement metrics. ([#22358](https://github.com/DataDog/integrations-core/pull/22358)) ([#22376](https://github.com/DataDog/integrations-core/pull/22376))
+
 ## 23.3.3 / 2025-12-16 / Agent 7.74.0
 
 ***Fixed***:

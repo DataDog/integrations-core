@@ -163,7 +163,18 @@ def get_noncore_repo_changelog_errors(git_diff: str, suffix: str, private: bool 
     return errors
 
 
-def extract_filenames(git_diff: str) -> Iterator[str]:
+def extract_filenames(git_diff: str) -> Iterator[tuple[str, bool]]:
+    """
+    Extract filenames from a git diff.
+
+    Yields tuples of (filename, is_deleted) where is_deleted is True if the file
+    was removed in the diff.
+    """
+    # Binary files in the diff are shown different from non-binary files.
+    # Example:
+    # Binary files /dev/null and b/foo/archive.tar.gz differ
+    binary_indicator = 'Binary files '
+
     for modification in re.split(r'^diff --git ', git_diff, flags=re.MULTILINE):
         if not modification:
             continue
@@ -176,26 +187,31 @@ def extract_filenames(git_diff: str) -> Iterator[str]:
         metadata, *_ = re.split(r'^@@ ', modification, flags=re.MULTILINE)
         *_, before, after = metadata.strip().splitlines()
 
-        # Binary files /dev/null and b/foo/archive.tar.gz differ
-        binary_indicator = 'Binary files '
         if after.startswith(binary_indicator):
             line = after[len(binary_indicator) :].rsplit(maxsplit=1)[0]
             if line.startswith('/dev/null and '):
+                # New binary file
                 filename = line.split(maxsplit=2)[-1][2:]
+                is_deleted = False
             elif line.endswith(' and /dev/null'):
+                # Deleted binary file
                 filename = line.split(maxsplit=2)[0][2:]
+                is_deleted = True
             else:
+                # Modified binary file
                 _, _, filename = line.partition(' and b/')
+                is_deleted = False
 
-            yield filename
+            yield filename, is_deleted
             continue
 
         # --- a/file
         # +++ /dev/null
         before = before.split(maxsplit=1)[1]
         after = after.split(maxsplit=1)[1]
-        filename = before[2:] if after == '/dev/null' else after[2:]
-        yield filename
+        is_deleted = after == '/dev/null'
+        filename = before[2:] if is_deleted else after[2:]
+        yield filename, is_deleted
 
 
 def gh_annotation(fpath, linenum, msg):
@@ -208,36 +224,47 @@ def get_core_repo_changelog_errors(git_diff: str, pr_number: int) -> list[str]:
 
     The validation reflects this so it's different from extras and marketplace.
     '''
-    targets: defaultdict[str, list[str]] = defaultdict(list)
-    for filename in extract_filenames(git_diff):
+    targets: defaultdict[str, list[tuple[str, bool]]] = defaultdict(list)
+    for filename, is_deleted in extract_filenames(git_diff):
         target, _, path = filename.partition('/')
         if path:
-            targets[target].append(path)
+            targets[target].append((path, is_deleted))
 
-    fragments_dir = 'changelog.d'
     errors: list[str] = []
+    fragments_dir = 'changelog.d'
     for target, files in sorted(targets.items()):
-        changelog_needed = requires_changelog(target, iter(files))
-        changelog_entries = [f for f in files if f.startswith(fragments_dir)]
-        if not changelog_entries and not changelog_needed:
-            continue
-        if not changelog_entries and changelog_needed:
+        # All files (including deleted) count toward requiring a changelog
+        changelog_needed = requires_changelog(target, (f for f, _ in files))
+        changelog_entries = [(f, deleted) for f, deleted in files if f.startswith(fragments_dir)]
+        # Only added (not deleted) changelog entries satisfy the changelog requirement
+        added_changelog_entries = [f for f, deleted in changelog_entries if not deleted]
+        if not added_changelog_entries:
+            if not changelog_needed:
+                continue
+
             msg = (
                 f'Package "{target}" has changes that require a changelog. '
-                + 'Please run `ddev release changelog new` to add it.'
+                'Please run `ddev release changelog new` to add it.'
             )
-            errors.append(msg)
-            errors.append(gh_annotation(f'{target}/changelog.d/{pr_number}.fixed', 0, msg))
+            errors.extend(
+                (
+                    msg,
+                    gh_annotation(f'{target}/changelog.d/{pr_number}.fixed', 0, msg),
+                )
+            )
             continue
-        for entry_path in changelog_entries:
+
+        for entry_path, is_deleted in changelog_entries:
+            # Skip validation for deleted changelog entries (e.g., during releases)
+            if is_deleted:
+                continue
             full_entry_path = f'{target}/{entry_path}'
             if not changelog_needed:
                 msg = (
                     "You added a changelog, but it's not needed for this change. To fix this please run:\n"
                     + f'rm {full_entry_path}'
                 )
-                errors.append(msg)
-                errors.append(gh_annotation(full_entry_path, 0, msg))
+                errors.extend((msg, gh_annotation(full_entry_path, 0, msg)))
             entry_parents, entry_fname = os.path.split(entry_path)
             entry_pr_num, _, entry_fname_rest = entry_fname.partition(".")
             if int(entry_pr_num) != pr_number:
@@ -246,17 +273,14 @@ def get_core_repo_changelog_errors(git_diff: str, pr_number: int) -> list[str]:
                     'Your changelog entry has the wrong PR number. To fix this please run:\n'
                     + f'mv {full_entry_path} {target}/{correct_entry_path}'
                 )
-                errors.append(msg)
-                errors.append(gh_annotation(full_entry_path, 0, msg))
+                errors.extend((msg, gh_annotation(full_entry_path, 0, msg)))
             change_type, _, _ = entry_fname_rest.partition(".")
             if change_type not in VALID_CHANGE_TYPES:
                 msg = (
                     f'Your changelog entry "{full_entry_path}" has an invalid change type, please rename the file. '
                     f'Valid types are:\n{" ".join(VALID_CHANGE_TYPES)}'
                 )
-                errors.append(msg)
-                errors.append(gh_annotation(full_entry_path, 0, msg))
-
+                errors.extend((msg, gh_annotation(full_entry_path, 0, msg)))
     return errors
 
 

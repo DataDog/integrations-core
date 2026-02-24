@@ -5,6 +5,30 @@ from io import StringIO
 
 import yaml
 
+from datadog_checks.dev.tooling.configuration.constants import OPENAPI_SCHEMA_PROPERTIES
+
+ALLOWED_OPTION_FIELDS = {
+    'name',
+    'description',
+    'required',
+    'hidden',
+    'display_priority',
+    'deprecation',
+    'legacy',
+    'multiple',
+    'multiple_instances_defined',
+    'metadata_tags',
+    'options',
+    'value',
+    'secret',
+    'enabled',
+    'example',
+    'template',
+    'overrides',
+    'fleet_configurable',
+    'formats',
+}
+ALLOWED_VALUE_FIELDS = OPENAPI_SCHEMA_PROPERTIES | {'example', 'display_default', 'compact_example'}
 DESCRIPTION_LINE_LENGTH_LIMIT = 120
 
 
@@ -66,6 +90,18 @@ def option_enabled(option):
     return option['required']
 
 
+def validate_fields(
+    fields_dict: dict[str, any], option_name: str, allowed_fields: set[str], field_level: str, writer: OptionWriter
+):
+    invalid_fields = [field for field in fields_dict if field not in allowed_fields]
+
+    if invalid_fields:
+        invalid_fields_str = '\n'.join(f"    - {field!r}" for field in invalid_fields)
+        writer.new_error(
+            f"Option name {option_name!r} contains the following invalid {field_level} fields:\n{invalid_fields_str}"
+        )
+
+
 def write_description(option, writer, indent, option_type):
     description = option['description']
     deprecation = option['deprecation']
@@ -103,6 +139,9 @@ def write_description(option, writer, indent, option_type):
 
 def write_option(option, writer, indent='', start_list=False):
     option_name = option['name']
+
+    validate_fields(option, option_name, ALLOWED_OPTION_FIELDS, 'option-level', writer)
+
     if 'value' in option:
         value = option['value']
         required = option['required']
@@ -116,11 +155,13 @@ def write_option(option, writer, indent='', start_list=False):
             'required' if required else 'optional',
         )
 
+        validate_fields(value, option_name, ALLOWED_VALUE_FIELDS, 'value-level', writer)
+
         example = value.get('example')
         example_type = type(example)
         if not required:
-            if 'display_default' in value:
-                default = value['display_default']
+            default = value.get('display_default', value.get('default'))
+            if default is not None:
                 default_type = type(default)
                 if default is not None and str(default).lower() != 'none':
                     if default_type is str:
@@ -129,7 +170,7 @@ def write_option(option, writer, indent='', start_list=False):
                         writer.write(' - default: ', 'true' if default else 'false')
                     else:
                         writer.write(' - default: ', repr(default))
-            else:
+            elif 'display_default' not in value or 'default' in value:
                 if example_type is bool:
                     writer.write(' - default: ', 'true' if example else 'false')
                 elif example_type in (int, float):
@@ -260,6 +301,24 @@ class ExampleConsumer(object):
                     # No new line necessary after the last option
                     if i != num_options:
                         writer.write('\n')
+
+                if writer.errors:
+                    has_option_level_errors = any('option-level' in error for error in writer.errors)
+                    has_value_level_errors = any('value-level' in error for error in writer.errors)
+
+                    if has_option_level_errors or has_value_level_errors:
+                        valid_fields = []
+
+                        if has_option_level_errors:
+                            fields_list = '\n'.join(f"    - {field!r}" for field in sorted(ALLOWED_OPTION_FIELDS))
+                            valid_fields.append(f"Option-level fields must be one of the following:\n{fields_list}")
+
+                        if has_value_level_errors:
+                            fields_list = '\n'.join(f"    - {field!r}" for field in sorted(ALLOWED_VALUE_FIELDS))
+                            valid_fields.append(f"Value-level fields must be one of the following:\n{fields_list}")
+
+                        if valid_fields:
+                            writer.errors.append('\n'.join(valid_fields))
 
                 files[file['example_name']] = (writer.contents, writer.errors)
 

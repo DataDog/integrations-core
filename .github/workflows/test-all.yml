@@ -2532,6 +2532,7 @@ jobs:
         - py3.13-8.0.36
         - py3.13-8.4.0
         - py3.13-8.0-group
+        - py3.13-8.0-hybrid
         - py3.13-mariadb-10.5
         - py3.13-mariadb-10.6
         - py3.13-mariadb-10.11

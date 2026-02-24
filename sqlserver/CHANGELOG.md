@@ -2,6 +2,41 @@
 
 <!-- towncrier release notes start -->
 
+## 22.13.0 / 2026-02-19
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Require key_prefix for SQLServer connections to avoid unsafely sharing connections across threads ([#22557](https://github.com/DataDog/integrations-core/pull/22557))
+
+***Fixed***:
+
+* Clarifies the default ADO provider in conf.yaml.example ([#21364](https://github.com/DataDog/integrations-core/pull/21364))
+* Updates collect_raw_query_statements config description ([#22611](https://github.com/DataDog/integrations-core/pull/22611))
+* Fix AgentJobs, Deadlocks and XE collections to run async by default ([#22633](https://github.com/DataDog/integrations-core/pull/22633))
+
+## 22.12.4 / 2026-02-05
+
+***Fixed***:
+
+* Fixed an issue where schema collection thread connections could get abruptly closed from the main check loop ([#22471](https://github.com/DataDog/integrations-core/pull/22471))
+
+## 22.12.3 / 2026-01-21
+
+***Fixed***:
+
+* Improve SQL Server USE stmt identifier escaping ([#22277](https://github.com/DataDog/integrations-core/pull/22277))
+* Fix STRING_AGG truncation error for tables with many columns by casting to NVARCHAR(MAX) ([#22338](https://github.com/DataDog/integrations-core/pull/22338))
+* Fix KeyError in statement metrics when available metric columns change between collection cycles. ([#22318](https://github.com/DataDog/integrations-core/pull/22318))
+  Optimize StatementMetrics cache to only store fields we need to compute statement metrics. ([#22358](https://github.com/DataDog/integrations-core/pull/22358)) ([#22376](https://github.com/DataDog/integrations-core/pull/22376))
+
+## 22.12.2 / 2026-01-09 / Agent 7.75.0
+
+***Fixed***:
+
+* Replace SQLServer checks for year with checks for major version. ([#22285](https://github.com/DataDog/integrations-core/pull/22285))
+* Fix default check in SQL Server major version ([#22291](https://github.com/DataDog/integrations-core/pull/22291))
+
 ## 22.12.1 / 2025-12-22
 
 ***Fixed***:

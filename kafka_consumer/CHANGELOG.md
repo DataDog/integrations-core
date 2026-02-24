@@ -2,7 +2,38 @@
 
 <!-- towncrier release notes start -->
 
-## 6.10.2 / 2026-01-06
+## 6.14.0 / 2026-02-19
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Support oauth scope and extensions ([#22560](https://github.com/DataDog/integrations-core/pull/22560))
+* Kafka consumer connects to oauth provider with ca certificate in custom path ([#22602](https://github.com/DataDog/integrations-core/pull/22602))
+* Bump confluent-kafka to 2.13.0 ([#22630](https://github.com/DataDog/integrations-core/pull/22630))
+
+## 6.13.0 / 2026-02-04
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
+## 6.12.0 / 2026-02-04 / Agent 7.75.3
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
+## 6.11.0 / 2026-01-21
+
+***Added***:
+
+* Collect kafka configuration events. ([#22378](https://github.com/DataDog/integrations-core/pull/22378))
+
+***Fixed***:
+
+* Fix caching logic when collecting cluster monitoring events ([#22375](https://github.com/DataDog/integrations-core/pull/22375))
+
+## 6.10.2 / 2026-01-06 / Agent 7.75.0
 
 ***Fixed***:
 

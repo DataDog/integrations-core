@@ -9,6 +9,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: true
     - name: tag_sid
       description: |
         This instructs the check to add an `sid` tag to events in the form
@@ -16,6 +17,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: true
     - name: event_priority
       description: |
         Set priority level in event stream for all events created by the check.
@@ -26,6 +28,7 @@ files:
         enum:
         - normal
         - low
+      fleet_configurable: true
     - name: interpret_messages
       description: |
         Whether or not to interpret event messages for unknown sources or sources that have not been registered
@@ -36,6 +39,7 @@ files:
       value:
         type: boolean
         example: true
+      fleet_configurable: true
     - name: default_event_priority
       description: |
         Set priority level in event stream for all events created by the check.
@@ -45,6 +49,7 @@ files:
       value:
         type: string
         example: normal
+      fleet_configurable: true
     - name: legacy_mode
       description: |
         Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
@@ -59,6 +64,7 @@ files:
         type: boolean
         display_default: true
         example: false
+      fleet_configurable: true
     - name: legacy_mode_v2
       description: |
         Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
@@ -67,6 +73,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: true
     - template: init_config/default
   - template: instances
     overrides:
@@ -84,6 +91,7 @@ files:
         The `path` option cannot be used with the `dd_security_events` option.
       value:
         type: string
+      fleet_configurable: true
     - name: dd_security_events
       description: |
         Starting with Agent 7.54, you can automatically send Security Events to Datadog as Logs
@@ -101,6 +109,7 @@ files:
         enum:
         - high
         - low
+      fleet_configurable: true
     - name: start
       description: |
         The point at which to start the event subscription.
@@ -119,6 +128,7 @@ files:
         enum:
         - now
         - oldest
+      fleet_configurable: true
     - name: query
       description: |
         A raw XPath or structured XML query used to filter events.
@@ -136,6 +146,7 @@ files:
         This overrides any selected `filters`.
       value:
         type: string
+      fleet_configurable: true
     - name: filters
       description: |
         A mapping of properties to allowed values. Every filter (equivalent to the `and` operator)
@@ -189,6 +200,7 @@ files:
            - Failure Audit
           id:
            - 9000
+      fleet_configurable: true
     - name: included_messages
       description: |
         This instructs the check to only capture events with messages that match at least one of the
@@ -197,6 +209,7 @@ files:
         type: array
         items:
           type: string
+      fleet_configurable: true
     - name: excluded_messages
       description: |
         This instructs the check to ignore events with messages that match at least one of the
@@ -207,6 +220,7 @@ files:
         type: array
         items:
           type: string
+      fleet_configurable: true
     - name: interpret_messages
       description: |
         Whether or not to interpret event messages for unknown sources or sources
@@ -220,6 +234,7 @@ files:
       value:
         type: boolean
         example: true
+      fleet_configurable: true
     - name: tag_event_id
       description: |
         This instructs the check to add an `event_id` tag to events.
@@ -228,6 +243,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: true
     - name: tag_sid
       description: |
         This instructs the check to add an `sid` tag to events in the form
@@ -235,6 +251,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: true
     - name: event_priority
       description: |
         Set priority level in event stream for all events created by the instance.
@@ -247,6 +264,7 @@ files:
         enum:
         - normal
         - low
+      fleet_configurable: true
     - name: auth_type
       description: |
         The type of authentication to use. The available types are:
@@ -266,6 +284,7 @@ files:
         - negotiate
         - kerberos
         - ntlm
+      fleet_configurable: true
     - name: server
       description: |
         The name of the remote computer to connect to.
@@ -275,6 +294,7 @@ files:
       value:
         type: string
         example: localhost
+      fleet_configurable: true
     - name: user
       description: |
         The user name to use to connect to the remote computer.
@@ -283,6 +303,7 @@ files:
         of the current user will be used.
       value:
         type: string
+      fleet_configurable: true
     - name: password
       description: |
         The password for the user account.
@@ -292,6 +313,7 @@ files:
       secret: true
       value:
         type: string
+      fleet_configurable: true
     - name: domain
       description: |
         The domain to which the user account belongs.
@@ -300,6 +322,7 @@ files:
         of the current user will be used.
       value:
         type: string
+      fleet_configurable: true
     - name: payload_size
       description: |
         The number of events to request at a time.
@@ -308,6 +331,7 @@ files:
       value:
         type: integer
         example: 10
+      fleet_configurable: true
     - name: bookmark_frequency
       description: |
         How often to save the last seen event as a factor of the number of seen events.
@@ -316,6 +340,7 @@ files:
         This is useful for preventing duplicate events being sent as a consequence of Agent restarts.
       value:
         type: integer
+      fleet_configurable: true
     - name: legacy_mode_v2
       description: |
         Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
@@ -324,6 +349,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: true
     - name: timeout
       description: |
         The number of seconds to wait for new event signals.
@@ -333,6 +359,7 @@ files:
       value:
         type: integer
         example: 5
+      fleet_configurable: true
     - name: legacy_mode
       description: |
         Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
@@ -346,6 +373,7 @@ files:
         type: boolean
         display_default: true
         example: true
+      fleet_configurable: true
     - name: host
       description: |
         By default, the local machine's event logs are captured. To capture a remote
@@ -357,6 +385,7 @@ files:
         type: string
         example: <REMOTE_HOSTNAME>
         display_default: localhost
+      fleet_configurable: true
     - name: log_file
       description: |
         The `log_file` filter instructs the check to only capture events
@@ -368,6 +397,7 @@ files:
         type: array
         items:
           type: string
+      fleet_configurable: true
     - name: source_name
       description: |
         The `source_name` filter instructs the check to only capture events
@@ -378,6 +408,7 @@ files:
         type: array
         items:
           type: string
+      fleet_configurable: true
     - name: type
       description: |
         The `type` filter instructs the check to only capture events
@@ -393,6 +424,7 @@ files:
           - information
         example:
           - information
+      fleet_configurable: true
     - name: event_id
       description: |
         The `event_id` filter instructs the check to only capture events
@@ -407,6 +439,7 @@ files:
           type: string
         example: 
           - '1101'
+      fleet_configurable: true
     - name: message_filters
       description: |
         The `message_filters` filter instructs the check to only capture
@@ -423,6 +456,7 @@ files:
         items:
           type:
             string
+      fleet_configurable: true
     - name: event_format
       description: |
         The `event_format` parameter instructs the check to generate
@@ -439,6 +473,7 @@ files:
           - Message
         example:
           - Message
+      fleet_configurable: true
     - template: instances/default
   - template: logs
     example:
