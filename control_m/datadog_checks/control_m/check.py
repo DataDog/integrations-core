@@ -20,6 +20,8 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         super().__init__(name, init_config, instances)
 
         self._api_endpoint = self.instance.get("control_m_api_endpoint", "").rstrip("/")
+        if not self._api_endpoint:
+            raise ConfigurationError("`control_m_api_endpoint` is required")
 
         # Static tokens can be created that have no expiration. This is the ideal approach for production.
         # But we can support both. The logic here is that we'll try first with a static token and if it fails,
@@ -43,14 +45,21 @@ class ControlMCheck(AgentCheck, ConfigMixin):
 
         self._use_session_login = not self._has_static_token and self._has_credentials
 
-        # Tokens last 30 minutes by default. We can try refreshing them before they expire to interruptions.
         self._token_lifetime = self.instance.get("token_lifetime_seconds", 1800)
         self._token_refresh_buffer = self.instance.get("token_refresh_buffer_seconds", 300)
+        if self._token_refresh_buffer >= self._token_lifetime:
+            self._token_refresh_buffer = self._token_lifetime // 6
+            self.log.warning(
+                "token_refresh_buffer_seconds >= token_lifetime_seconds; clamping refresh buffer to %d seconds",
+                self._token_refresh_buffer,
+            )
 
         self._base_tags = [f"control_m_instance:{self._api_endpoint}"]
 
         self._token = None
         self._token_expiration = 0.0
+        self._static_token_retry_after = 0.0
+        self._static_token_retry_interval = 300.0
 
     def _login(self):
         # Used in session login mode only. Retrieve a new token from the API to use for subsequent requests.
@@ -93,7 +102,11 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         request_fn = getattr(self.http, method)
 
         if self._use_session_login:
-            return self._make_session_request(request_fn, url, **kwargs)
+            if self._has_static_token and time.monotonic() >= self._static_token_retry_after:
+                self.log.info("Retrying static token after cooldown")
+                self._use_session_login = False
+            else:
+                return self._make_session_request(request_fn, url, **kwargs)
 
         response = request_fn(url, **kwargs)
 
@@ -106,6 +119,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
 
         self.log.warning("Token auth returned 401; falling back to session login")
         self._use_session_login = True
+        self._static_token_retry_after = time.monotonic() + self._static_token_retry_interval
         return self._make_session_request(request_fn, url, **kwargs)
 
     def _make_session_request(self, request_fn, url, **kwargs):
