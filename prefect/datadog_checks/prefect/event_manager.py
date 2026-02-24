@@ -140,8 +140,10 @@ class EventManager:
         else:
             return "info"
 
-    def _parse_time(self, ts: str) -> datetime:
+    def _parse_time(self, ts: str | None) -> datetime | None:
+        if not ts or ts == "null":
+            return None
         try:
             return datetime.fromisoformat(ts.replace('Z', '+00:00'))
         except ValueError:
-            raise ValueError(f"Could not parse timestamp: {ts}")
+            return None

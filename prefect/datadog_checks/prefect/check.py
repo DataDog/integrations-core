@@ -1,11 +1,14 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 import json
 from datetime import datetime, timedelta, timezone
+from json import JSONDecodeError
 from typing import Any, Literal
 
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
@@ -35,7 +38,9 @@ class PrefectCheck(AgentCheck):
         self.url = self.url.rstrip('/')
         self.http.options['headers'].update(self.instance.get("custom_headers", {}))
 
-        self.base_tags = self.instance.get("tags", [])
+        self.base_tags = []
+        for k, v in self.instance.get("tags", {}).items():
+            self.base_tags.append(f"{k}:{v}")
 
         self.metrics_spec = METRICS_SPEC
 
@@ -93,13 +98,14 @@ class PrefectCheck(AgentCheck):
 
         limit = 200
         offset = 0
-        all_results = []
+        all_results: list[dict] = []
 
         while True:
             payload['limit'] = limit
             payload['offset'] = offset
             results = self.api_post(endpoint, payload)
-            all_results.extend(results)
+
+            all_results.extend(results if isinstance(results, list) else [results])
             if len(results) < limit:
                 break
             offset += limit
@@ -146,8 +152,10 @@ class PrefectCheck(AgentCheck):
             else:
                 removed_tags.append(tag)
 
+        filtered_tags.extend(self.base_tags)
+
         if removed_tags:
-            self.log.error("Tags %s were not found for metric %s", removed_tags, name)
+            self.log.warning("Tags %s were not found for metric %s", removed_tags, name)
 
         if mtype == "gauge":
             self.gauge(name, value, tags=list(filtered_tags))
@@ -215,120 +223,115 @@ class PrefectCheck(AgentCheck):
         """
         try:
             health = self.api_get("/health")
-            self._emit_metric("health", 1.0 if health is True else 0.0, self.base_tags[:])
+            self._emit_metric("health", 1.0 if health is True else 0.0, [])
         except Exception:
-            self._emit_metric("health", 0.0, self.base_tags[:])
+            self._emit_metric("health", 0.0, [])
 
         try:
             self.api_get("/ready")
-            self._emit_metric("ready", 1.0, self.base_tags[:])
+            self._emit_metric("ready", 1.0, [])
         except Exception:
-            self._emit_metric("ready", 0.0, self.base_tags[:])
+            self._emit_metric("ready", 0.0, [])
 
     def _collect_work_pool_metrics(self, now: datetime):
         """
         Collects work_pool.is_ready, is_not_ready, and is_paused metrics.
         """
-        try:
-            pools = self.paginate_filter("/work_pools/filter")
-            pools = self.filter_metrics.filter_work_pools(pools)
 
-            for p in pools:
-                pname = p['name']
-                ptags = self.base_tags + [
-                    f"work_pool_id:{p['id']}",
-                    f"work_pool_name:{pname}",
-                    f"work_pool_type:{p.get('type', '')}",
-                ]
-                status = p.get('status', None)
-                self.pools_by_name[pname] = {'id': p['id']}
-                self._emit_metric("work_pool.is_ready", 1.0 if status == 'READY' else 0.0, ptags)
-                self._emit_metric("work_pool.is_not_ready", 1.0 if status == 'NOT_READY' else 0.0, ptags)
-                self._emit_metric("work_pool.is_paused", 1.0 if status == 'PAUSED' else 0.0, ptags)
+        pools = self.paginate_filter("/work_pools/filter")
+        pools = self.filter_metrics.filter_work_pools(pools)
 
-                self._collect_worker_metrics(now, p)
-        except Exception as e:
-            self.log.error("Failed to collect work pool metrics: %s", e)
+        for p in pools:
+            pname = p['name']
+            pid = p.get('id', '')
+            ptags = [
+                f"work_pool_id:{pid}",
+                f"work_pool_name:{pname}",
+                f"work_pool_type:{p.get('type', '')}",
+            ]
+            status = p.get('status', '')
+            self.pools_by_name[pname] = {'id': pid}
+            self._emit_metric("work_pool.is_ready", 1.0 if status == 'READY' else 0.0, ptags)
+            self._emit_metric("work_pool.is_not_ready", 1.0 if status == 'NOT_READY' else 0.0, ptags)
+            self._emit_metric("work_pool.is_paused", 1.0 if status == 'PAUSED' else 0.0, ptags)
+
+            self._collect_worker_metrics(now, p)
 
     def _collect_work_queue_metrics(self, now: datetime):
         """
         Collects work_queue.is_ready, is_not_ready, is_paused, and last_polled_age_seconds metrics.
         Populates self.queues_by_name.
         """
-        try:
-            queues = self.paginate_filter("/work_queues/filter")
-            queues = self.filter_metrics.filter_work_queues(queues)
+        queues = self.paginate_filter("/work_queues/filter")
+        queues = self.filter_metrics.filter_work_queues(queues)
 
-            for q in queues:
-                qid = q.get('id', '')
-                pid = q.get('work_pool_id', '')
-                qtags = self.base_tags + [
-                    f"work_queue_id:{qid}",
-                    f"work_queue_name:{q.get('name', '')}",
-                    f"work_pool_id:{pid}",
-                    f"work_pool_name:{q.get('work_pool_name', '')}",
-                    f"work_queue_priority:{q.get('priority', '')}",
-                ]
+        for q in queues:
+            qid = q.get('id', '')
+            pid = q.get('work_pool_id', '')
+            pname = q.get('work_pool_name', '')
+            qname = q.get('name', '')
+            qtags = [
+                f"work_queue_id:{qid}",
+                f"work_queue_name:{qname}",
+                f"work_pool_id:{pid}",
+                f"work_pool_name:{pname}",
+                f"work_queue_priority:{q.get('priority', '')}",
+            ]
 
-                status = q.get('status', None)
-                qtags_status = qtags + [f"work_queue_status:{status}"]
+            status = q.get('status', None)
+            qtags_status = qtags + [f"work_queue_status:{status}"]
 
-                self._emit_metric("work_queue.is_ready", 1.0 if status == 'READY' else 0.0, qtags)
-                self._emit_metric("work_queue.is_not_ready", 1.0 if status == 'NOT_READY' else 0.0, qtags)
-                self._emit_metric("work_queue.is_paused", 1.0 if status == 'PAUSED' else 0.0, qtags)
+            self._emit_metric("work_queue.is_ready", 1.0 if status == 'READY' else 0.0, qtags)
+            self._emit_metric("work_queue.is_not_ready", 1.0 if status == 'NOT_READY' else 0.0, qtags)
+            self._emit_metric("work_queue.is_paused", 1.0 if status == 'PAUSED' else 0.0, qtags)
 
-                self._add_queue_last_polled_age_seconds(q, now, qtags_status)
+            self._add_queue_last_polled_age_seconds(q, now, qtags_status)
 
-                self.queues_by_name[(q['work_pool_name'], q['name'])] = {'tags': qtags_status, 'id': qid}
-
-        except Exception as e:
-            self.log.error("Failed to collect work queue metrics: %s", e)
+            if pname and qname:
+                self.queues_by_name[(pname, qname)] = {'tags': qtags_status, 'id': qid}
 
     def _collect_worker_metrics(self, now: datetime, pool: dict):
         """
         Collects work_pool.worker.is_online and heartbeat_age_seconds metrics.
         """
         pname = pool['name']
-        try:
-            workers = self.paginate_filter(f"/work_pools/{pname}/workers/filter")
-            for w in workers:
-                wtags = self.base_tags + [
-                    f"work_pool_id:{pool.get('id', '')}",
-                    f"worker_id:{w.get('id', '')}",
-                    f"worker_name:{w.get('name', '')}",
-                ]
 
-                self._emit_metric("work_pool.worker.is_online", 1.0 if w.get('status') == 'ONLINE' else 0.0, wtags)
-                self._add_worker_heartbeat_age_seconds(w, now, wtags)
-        except Exception as e:
-            self.log.debug("Could not fetch workers for pool %s: %s", pname, e)
+        workers = self.paginate_filter(f"/work_pools/{pname}/workers/filter")
+        for w in workers:
+            wtags = [
+                f"work_pool_id:{pool.get('id', '')}",
+                f"worker_id:{w.get('id', '')}",
+                f"worker_name:{w.get('name', '')}",
+            ]
+
+            self._emit_metric("work_pool.worker.is_online", 1.0 if w.get('status') == 'ONLINE' else 0.0, wtags)
+            self._add_worker_heartbeat_age_seconds(w, now, wtags)
 
     def _collect_deployment_metrics(self):
         """
         Collects deployment.is_ready metric.
         """
-        try:
-            deployments = self.paginate_filter("/deployments/filter")
-            deployments = self.filter_metrics.filter_deployments(deployments)
 
-            for d in deployments:
-                dtags = self.base_tags + [
-                    f"deployment_id:{d.get('id', '')}",
-                    f"deployment_name:{d.get('name', '')}",
-                    f"flow_id:{d.get('flow_id', '')}",
-                    f"work_pool_name:{d.get('work_pool_name', '')}",
-                    f"work_pool_id:{self.pools_by_name[d.get('work_pool_name', '')]['id']}",
-                    f"work_queue_name:{d.get('work_queue_name', '')}",
-                    f"work_queue_id:{
-                        self.queues_by_name[(d.get('work_pool_name', ''), d.get('work_queue_name', ''))]['id']
-                    }",
-                    f"is_paused:{d.get('paused', '')}",
-                ]
+        deployments = self.paginate_filter("/deployments/filter")
+        deployments = self.filter_metrics.filter_deployments(deployments)
 
-                self._emit_metric("deployment.is_ready", 1.0 if d['status'] == 'READY' else 0.0, dtags)
+        for d in deployments:
+            dtags = [
+                f"deployment_id:{d.get('id', '')}",
+                f"deployment_name:{d.get('name', '')}",
+                f"flow_id:{d.get('flow_id', '')}",
+                f"work_pool_name:{d.get('work_pool_name', '')}",
+                f"work_pool_id:{self.pools_by_name.get(d.get('work_pool_name', ''), {}).get('id', '')}",
+                f"work_queue_name:{d.get('work_queue_name', '')}",
+                f"work_queue_id:{
+                    self.queues_by_name.get((d.get('work_pool_name', ''), d.get('work_queue_name', '')), {}).get(
+                        'id', ''
+                    )
+                }",
+                f"is_paused:{d.get('paused', '')}",
+            ]
 
-        except Exception as e:
-            self.log.error("Failed to collect deployment metrics: %s", e)
+            self._emit_metric("deployment.is_ready", 1.0 if d['status'] == 'READY' else 0.0, dtags)
 
     def _get_runs(self, type: Literal["flow_runs"] | Literal["task_runs"], now_iso: str) -> list[dict]:
         runs = []
@@ -354,13 +357,13 @@ class PrefectCheck(AgentCheck):
         return runs
 
     def _define_flow_run_tags(self, fr: dict[str, str]) -> list[str]:
-        return self.base_tags + [
+        return [
             f"work_pool_id:{fr.get('work_pool_id', '')}",
             f"work_pool_name:{fr.get('work_pool_name', '')}",
             f"work_queue_id:{fr.get('work_queue_id', '')}",
             f"work_queue_name:{fr.get('work_queue_name', '')}",
             f"deployment_id:{fr.get('deployment_id', '')}",
-            f"flow_id:{fr['flow_id']}",
+            f"flow_id:{fr.get('flow_id', '')}",
         ]
 
     def _collect_flow_run_metrics(self, now_iso: str, now: datetime):
@@ -379,7 +382,7 @@ class PrefectCheck(AgentCheck):
             start_time = self._parse_time(fr.get('start_time', None))
             end_time = self._parse_time(fr.get('end_time', None))
 
-            self.flow_runs_tags[fr['id']] = tuple(sorted(fr_tags))
+            self.flow_runs_tags[fr.get('id', '')] = tuple(sorted(fr_tags))
 
             if expected_start_time:
                 self._aggregate_queue_backlog_metrics(
@@ -423,100 +426,95 @@ class PrefectCheck(AgentCheck):
         Collects work_queue.backlog.size and work_queue.backlog.age metrics.
         """
         for _, q in self.queues_by_name.items():
-            qtags = q.get('tags')
+            qtags = q.get('tags', [])
 
-            age = (now - q.get('backlog_oldest')).total_seconds() if q.get('backlog_oldest') else 0.0
+            backlog_oldest = q.get('backlog_oldest')
+            age = (now - backlog_oldest).total_seconds() if backlog_oldest is not None else 0.0
 
             self._emit_metric("work_queue.backlog.age", max(0, age), qtags)
-            self._emit_metric("work_queue.backlog.size", float(q.get('backlog_count', 0)), qtags)
+            self._emit_metric("work_queue.backlog.size", q.get('backlog_count', 0.0), qtags)
 
     def _collect_task_run_metrics(self, now_iso: str):
         """
         Collects task_runs.* metrics.
         """
-        try:
-            task_runs = self._get_runs("task_runs", now_iso)
-            task_tags = set[tuple[str, ...]]()
-            for tr in task_runs:
-                state_type = tr.get('state_type')
-                start_time, end_time = self._parse_time(tr.get('start_time')), self._parse_time(tr.get('end_time'))
-                expected_start_time = self._parse_time(tr.get('expected_start_time'))
 
-                tr_tags_list = sorted(
-                    [
-                        *self.flow_runs_tags.get(tr['flow_run_id'], ()),
-                        f"task_key:{tr.get('task_key', '')}",
-                    ]
-                )
-                task_tags.add(tuple(tr_tags_list))
+        task_runs = self._get_runs("task_runs", now_iso)
+        task_tags = set[tuple[str, ...]]()
+        for tr in task_runs:
+            state_type = tr.get('state_type', '')
+            start_time, end_time = self._parse_time(tr.get('start_time')), self._parse_time(tr.get('end_time'))
+            expected_start_time = self._parse_time(tr.get('expected_start_time'))
 
-                self._aggregate_metric("task_runs.pending.count", 1.0 if state_type == 'PENDING' else 0.0, tr_tags_list)
-                self._aggregate_metric("task_runs.paused.count", 1.0 if state_type == 'PAUSED' else 0.0, tr_tags_list)
-                self._aggregate_metric(
-                    "task_runs.cancelled.count", 1.0 if state_type in ['CANCELLING', 'CANCELLED'] else 0.0, tr_tags_list
-                )
-                self._aggregate_metric(
-                    "task_runs.completed.count", 1.0 if state_type == 'COMPLETED' else 0.0, tr_tags_list
-                )
-                self._aggregate_metric("task_runs.failed.count", 1.0 if state_type == 'FAILED' else 0.0, tr_tags_list)
-                self._aggregate_metric("task_runs.crashed.count", 1.0 if state_type == 'CRASHED' else 0.0, tr_tags_list)
+            tr_tags_list = sorted(
+                [
+                    *self.flow_runs_tags.get(tr.get('flow_run_id', ''), ()),
+                    f"task_key:{tr.get('task_key', '')}",
+                ]
+            )
+            task_tags.add(tuple(tr_tags_list))
 
-                if start_time and end_time:
-                    self._emit_metric(
-                        "task_runs.execution_duration", (end_time - start_time).total_seconds(), tr_tags_list
-                    )
+            self._aggregate_metric("task_runs.pending.count", 1.0 if state_type == 'PENDING' else 0.0, tr_tags_list)
+            self._aggregate_metric("task_runs.paused.count", 1.0 if state_type == 'PAUSED' else 0.0, tr_tags_list)
+            self._aggregate_metric(
+                "task_runs.cancelled.count", 1.0 if state_type in ['CANCELLING', 'CANCELLED'] else 0.0, tr_tags_list
+            )
+            self._aggregate_metric("task_runs.completed.count", 1.0 if state_type == 'COMPLETED' else 0.0, tr_tags_list)
+            self._aggregate_metric("task_runs.failed.count", 1.0 if state_type == 'FAILED' else 0.0, tr_tags_list)
+            self._aggregate_metric("task_runs.crashed.count", 1.0 if state_type == 'CRASHED' else 0.0, tr_tags_list)
 
-                self._aggregate_metric(
-                    "task_runs.late_start.count",
-                    1.0
-                    if start_time
-                    and expected_start_time
-                    and start_time > self.last_check_time
-                    and expected_start_time < start_time
-                    else 0.0,
-                    tr_tags_list,
-                )
-                self._aggregate_metric(
-                    "task_runs.throughput",
-                    1.0 if start_time and start_time > self.last_check_time else 0.0,
-                    tr_tags_list,
-                )
-        except Exception as e:
-            self.log.error("Failed to collect task run metrics: %s", e)
+            if start_time and end_time:
+                self._emit_metric("task_runs.execution_duration", (end_time - start_time).total_seconds(), tr_tags_list)
+
+            self._aggregate_metric(
+                "task_runs.late_start.count",
+                1.0
+                if start_time
+                and expected_start_time
+                and start_time > self.last_check_time
+                and expected_start_time < start_time
+                else 0.0,
+                tr_tags_list,
+            )
+            self._aggregate_metric(
+                "task_runs.throughput",
+                1.0 if start_time and start_time > self.last_check_time else 0.0,
+                tr_tags_list,
+            )
 
     def _collect_event_metrics(self, now_iso: str):
         """
         Collects event metrics.
         """
-        try:
-            events = self.paginate_events(
-                "/events/filter",
-                payload={
-                    "filter": {
-                        "occurred": {
-                            "since": self.last_check_time_iso,
-                            "until": now_iso,
-                        },
-                        "order": "ASC",
-                    }
-                },
-            )
-            for e in events:
-                event_manager = EventManager(e)
-                if not self.filter_metrics.is_event_included(event_manager):
-                    continue
 
-                self._check_retry_gaps(event_manager)
-                self._check_dependency_wait(event_manager)
-                self._emit_event_metrics(event_manager)
+        events = self.paginate_events(
+            "/events/filter",
+            payload={
+                "filter": {
+                    "occurred": {
+                        "since": self.last_check_time_iso,
+                        "until": now_iso,
+                    },
+                    "order": "ASC",
+                }
+            },
+        )
+        for e in events:
+            event_manager = EventManager(e)
+            if not self.filter_metrics.is_event_included(event_manager):
+                continue
 
-        except Exception as exc:
-            self.log.error("Failed to collect event metrics: %s", exc)
+            self._check_retry_gaps(event_manager)
+            self._check_dependency_wait(event_manager)
+            self._emit_event_metrics(event_manager)
 
     def _emit_event_metrics(self, event_manager: EventManager):
         """
         Emits event metrics.
         """
+        if event_manager.occurred is None:
+            self.log.warning("Could not find occurred timestamp for event %s", event_manager.id)
+            return
 
         self.event(
             {
@@ -531,6 +529,9 @@ class PrefectCheck(AgentCheck):
         )
 
     def _check_retry_gaps(self, event_manager: EventManager) -> None:
+        if event_manager.occurred is None:
+            self.log.error("Could not find occurred timestamp for flow run %s", event_manager.follows)
+            return
         if event_manager.event_type == 'prefect.flow-run.AwaitingRetry':
             self.flows_awaiting_retry[event_manager.id] = event_manager.occurred.isoformat()
 
@@ -543,12 +544,9 @@ class PrefectCheck(AgentCheck):
             if not await_retry_timestamp:
                 self.log.error("Could not find await retry timestamp for flow run %s", event_manager.follows)
                 return
-            if not event_manager.occurred:
-                self.log.error("Could not find occurred timestamp for flow run %s", event_manager.follows)
-                return
             retry_gap = (event_manager.occurred - await_retry_timestamp).total_seconds()
 
-            flow_run_tags = self.base_tags + event_manager.flow_tags
+            flow_run_tags = event_manager.flow_tags
             self._emit_metric("flow_runs.retry_gaps_duration", retry_gap, flow_run_tags)
 
     def _check_dependency_wait(self, event_manager: EventManager) -> None:
@@ -563,12 +561,15 @@ class PrefectCheck(AgentCheck):
             self.dependency_wait.pop(flow_run_id, None)
 
         # When a task run is completed, add its finished time to the dependency wait for the flow run
-        elif (
-            event_manager.event_type == 'prefect.task-run.Completed'
-        ):  # should it be ['COMPLETED', 'CANCELLED', 'CRASHED', 'FAILED']?
+        elif event_manager.event_type in [
+            'prefect.task-run.Completed',
+            'prefect.task-run.Cancelled',
+            'prefect.task-run.Crashed',
+            'prefect.task-run.Failed',
+        ]:
             task_run_id = event_manager.resource_id
             flow_run_id = event_manager.event_related.get("flow-run", {}).get("id")
-            if flow_run_id and task_run_id:
+            if flow_run_id and task_run_id and event_manager.occurred:
                 self.dependency_wait[flow_run_id][task_run_id] = event_manager.occurred.isoformat()
 
         # When a task run is running, emit the dependency wait metric
@@ -587,7 +588,7 @@ class PrefectCheck(AgentCheck):
 
                 last_dep_finished = max(parsed_times) if parsed_times else None
 
-                task_tags = self.base_tags + event_manager.task_tags
+                task_tags = event_manager.task_tags
                 if last_dep_finished and event_manager.occurred:
                     self._emit_metric(
                         "task_runs.dependency_wait_duration",
@@ -604,7 +605,7 @@ class PrefectCheck(AgentCheck):
         Emits metrics that needed to be aggregated.
         """
         for (name, tags), val in self.collected_metrics.items():
-            self._emit_metric(name, val, tags)
+            self._emit_metric(name, val, list(tags))
 
     def _add_queue_last_polled_age_seconds(self, queue: dict, now: datetime, tags: list[str]):
         last_polled = self._parse_time(queue.get('last_polled'))
@@ -621,12 +622,15 @@ class PrefectCheck(AgentCheck):
     def _aggregate_queue_backlog_metrics(
         self, state_type: str, expected_start_time: datetime, pname: str, qname: str, now: datetime
     ):
+        queue = self.queues_by_name.get((pname, qname), {})
+        if not queue:
+            self.log.warning("Could not find queue for pool %s and queue %s", pname, qname)
+            return
         if (
             state_type in ['SCHEDULED', 'PENDING']
             and expected_start_time > self.last_check_time
             and expected_start_time <= now
         ):
-            queue = self.queues_by_name.get((pname, qname), {})
             queue['backlog_count'] = queue.get('backlog_count', 0) + 1
             backlog_oldest = queue.get("backlog_oldest")
             if expected_start_time and (backlog_oldest is None or expected_start_time < backlog_oldest):
@@ -636,8 +640,3 @@ class PrefectCheck(AgentCheck):
                 not queue.get('backlog_oldest') or expected_start_time < queue.get('backlog_oldest')
             ):
                 queue['backlog_oldest'] = expected_start_time
-
-    def _aggregate_duration_metrics(self, run_type: str, run_tags: set[tuple[str, ...]]):
-        for tags in run_tags:
-            duration = self.collected_metrics.get((f"{run_type}.execution_duration", tags), [])
-            self._emit_metric(f"{run_type}.execution_duration.avg", duration, list(tags))
