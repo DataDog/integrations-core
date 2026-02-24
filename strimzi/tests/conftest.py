@@ -8,15 +8,13 @@ from contextlib import ExitStack
 
 import pytest
 
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse, mock_http_client  # noqa: F401
 from datadog_checks.dev import run_command
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.strimzi import StrimziCheck
 
 from .common import HERE, KUBERNETES_VERSION, STRIMZI_VERSION
-
-pytest_plugins = ['datadog_checks.base.utils.http_testing']
 
 
 def setup_strimzi():
