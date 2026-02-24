@@ -166,7 +166,6 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
 def mock_schema_registry_methods(metadata_collector):
     """Mock Schema Registry methods on the metadata collector."""
     metadata_collector._get_schema_registry_subjects = mock.Mock(return_value=['test-topic-value'])
-    metadata_collector._get_schema_registry_versions = mock.Mock(return_value=[1, 2])
 
     # Mock a realistic minimal Avro schema for a user event
     avro_schema = json.dumps(
@@ -182,6 +181,10 @@ def mock_schema_registry_methods(metadata_collector):
         }
     )
 
+    # Tier 1: lightweight version list (returns just version numbers)
+    metadata_collector._get_schema_registry_versions = mock.Mock(return_value=[1, 2])
+
+    # Tier 2: full schema fetch (only called when version changes)
     metadata_collector._get_schema_registry_latest_version = mock.Mock(
         return_value={
             'id': 1,
@@ -795,6 +798,338 @@ def test_event_cache_ttl_not_reset_on_subsequent_calls(check):
     cache_dict = json.loads(cache_storage[cache_key])
     third_expire_at = cache_dict['item1']['expire_at']
     assert third_expire_at == 2201.0, f"Cache TTL should be updated when event is sent, got {third_expire_at}"
+
+
+def test_schema_registry_batching(check, dd_run_check, aggregator):
+    """Test that schema registry version checking is batched to SCHEMA_VERSION_CHECK_BATCH_SIZE per run.
+
+    With thousands of subjects, only a limited batch should be checked per check run
+    to avoid overwhelming the registry.
+    """
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'schema_registry_url': 'http://localhost:8081',
+        'monitor_unlisted_consumer_groups': True,
+    }
+
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+
+    collector = kafka_consumer_check.metadata_collector
+    # Set a small batch size for testing
+    collector.SCHEMA_VERSION_CHECK_BATCH_SIZE = 2
+
+    # Create 5 subjects
+    all_subjects = [f'topic-{i}-value' for i in range(5)]
+    collector._get_schema_registry_subjects = mock.Mock(return_value=all_subjects)
+
+    # Tier 1: lightweight version list — all subjects return version [1]
+    collector._get_schema_registry_versions = mock.Mock(return_value=[1])
+
+    avro_schema = json.dumps({"type": "string"})
+    collector._get_schema_registry_latest_version = mock.Mock(
+        return_value={'id': 1, 'version': 1, 'schema': avro_schema, 'schemaType': 'AVRO'}
+    )
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=None)
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    # Only SCHEMA_VERSION_CHECK_BATCH_SIZE subjects should have version lists fetched
+    assert collector._get_schema_registry_versions.call_count == 2
+
+    # All 2 checked subjects have new versions (no prior cache), so full fetch for all 2
+    assert collector._get_schema_registry_latest_version.call_count == 2
+
+    # Total subjects metric should still report all 5
+    aggregator.assert_metric('kafka.schema_registry.subjects', value=5)
+
+
+def test_schema_registry_schema_id_cache(check, dd_run_check, aggregator):
+    """Test that schema content is cached by schema ID and reused across runs.
+
+    Schema IDs in the registry are immutable, so once we fetch the content for a
+    given ID we should never need to fetch it again.
+    """
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'schema_registry_url': 'http://localhost:8081',
+        'monitor_unlisted_consumer_groups': True,
+    }
+
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+
+    collector = kafka_consumer_check.metadata_collector
+
+    collector._get_schema_registry_subjects = mock.Mock(return_value=['my-topic-value'])
+
+    # Tier 1: version list
+    collector._get_schema_registry_versions = mock.Mock(return_value=[1, 2, 3])
+
+    avro_schema = json.dumps({"type": "string"})
+    collector._get_schema_registry_latest_version = mock.Mock(
+        return_value={'id': 42, 'version': 3, 'schema': avro_schema, 'schemaType': 'AVRO'}
+    )
+
+    cache_storage = {}
+
+    def mock_read(key):
+        return cache_storage.get(key)
+
+    def mock_write(key, value):
+        cache_storage[key] = value
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
+    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    # Verify schema ID cache was written
+    schema_id_cache_str = cache_storage.get('kafka_schema_id_cache')
+    assert schema_id_cache_str is not None
+    schema_id_cache = json.loads(schema_id_cache_str)
+    assert '42' in schema_id_cache
+    assert schema_id_cache['42']['schema'] == avro_schema
+    assert schema_id_cache['42']['schema_type'] == 'AVRO'
+
+
+def test_schema_registry_two_tier_ttl(check):
+    """Test that schema version checks reuse CONFIGS_REFRESH_INTERVAL and event emission uses longer TTL."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'schema_registry_url': 'http://localhost:8081',
+    }
+
+    kafka_consumer_check = check(instance)
+    collector = kafka_consumer_check.metadata_collector
+
+    # Schema version checks reuse the same refresh interval as broker/topic configs
+    assert collector.CONFIGS_REFRESH_INTERVAL == 180  # default 3 min
+
+    # Schema event emission TTL should be 2 hours (vs 10 min for broker/topic)
+    assert collector.SCHEMA_EVENT_CACHE_TTL == 7200
+    assert collector.SCHEMA_EVENT_CACHE_TTL > collector.EVENT_CACHE_TTL
+
+
+def test_schema_registry_two_tier_no_fetch_when_unchanged(check, dd_run_check, aggregator):
+    """Test that no full schema fetch happens when version numbers haven't changed.
+
+    The two-tier approach checks version numbers first (lightweight). If the max version
+    matches what's cached, no full fetch (/versions/latest) should be made.
+    """
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'schema_registry_url': 'http://localhost:8081',
+        'monitor_unlisted_consumer_groups': True,
+    }
+
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+
+    collector = kafka_consumer_check.metadata_collector
+
+    collector._get_schema_registry_subjects = mock.Mock(return_value=['my-topic-value', 'other-topic-key'])
+    collector._get_schema_registry_versions = mock.Mock(return_value=[1, 2])
+
+    avro_schema = json.dumps({"type": "string"})
+    collector._get_schema_registry_latest_version = mock.Mock(
+        return_value={'id': 10, 'version': 2, 'schema': avro_schema, 'schemaType': 'AVRO'}
+    )
+
+    # Pre-populate the latest version cache so both subjects show max version = 2
+    # This simulates a previous run that already fetched these versions.
+    latest_version_cache = {
+        'my-topic-value': {'version': 2, 'schema_id': 10},
+        'other-topic-key': {'version': 2, 'schema_id': 11},
+    }
+
+    cache_storage = {
+        'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
+    }
+
+    def mock_read(key):
+        return cache_storage.get(key)
+
+    def mock_write(key, value):
+        cache_storage[key] = value
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
+    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    # Version lists should have been fetched (lightweight tier 1)
+    assert collector._get_schema_registry_versions.call_count == 2
+
+    # Full schema fetch should NOT have been called (versions unchanged)
+    assert collector._get_schema_registry_latest_version.call_count == 0
+
+    # Subjects metric should still be emitted
+    aggregator.assert_metric('kafka.schema_registry.subjects', value=2)
+
+
+def test_schema_registry_two_tier_fetch_on_new_version(check, dd_run_check, aggregator):
+    """Test that a full schema fetch happens only for subjects with new versions.
+
+    When a subject has a new version (e.g., max goes from 2 to 3), only that subject
+    should trigger a full /versions/latest fetch.
+    """
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'schema_registry_url': 'http://localhost:8081',
+        'monitor_unlisted_consumer_groups': True,
+    }
+
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+
+    collector = kafka_consumer_check.metadata_collector
+
+    collector._get_schema_registry_subjects = mock.Mock(return_value=['unchanged-topic-value', 'changed-topic-value'])
+
+    # Subject "unchanged" returns [1, 2], "changed" returns [1, 2, 3]
+    def mock_versions(subject):
+        if subject == 'changed-topic-value':
+            return [1, 2, 3]
+        return [1, 2]
+
+    collector._get_schema_registry_versions = mock.Mock(side_effect=mock_versions)
+
+    avro_schema = json.dumps({"type": "string"})
+    collector._get_schema_registry_latest_version = mock.Mock(
+        return_value={'id': 99, 'version': 3, 'schema': avro_schema, 'schemaType': 'AVRO'}
+    )
+
+    # Pre-populate: both subjects were last seen at version 2
+    latest_version_cache = {
+        'unchanged-topic-value': {'version': 2, 'schema_id': 50},
+        'changed-topic-value': {'version': 2, 'schema_id': 50},
+    }
+
+    cache_storage = {
+        'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
+    }
+
+    def mock_read(key):
+        return cache_storage.get(key)
+
+    def mock_write(key, value):
+        cache_storage[key] = value
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
+    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    # Both subjects should have version lists checked
+    assert collector._get_schema_registry_versions.call_count == 2
+
+    # Only the changed subject should trigger a full fetch
+    assert collector._get_schema_registry_latest_version.call_count == 1
+    collector._get_schema_registry_latest_version.assert_called_with('changed-topic-value')
+
+    # Latest version cache should be updated for the changed subject
+    updated_cache = json.loads(cache_storage['kafka_schema_latest_version_cache'])
+    assert updated_cache['changed-topic-value'] == {'version': 3, 'schema_id': 99}
+    assert updated_cache['unchanged-topic-value'] == {'version': 2, 'schema_id': 50}  # unchanged
+
+
+def test_kafka_configs_refresh_interval_default(check):
+    """Test that kafka_configs_refresh_interval defaults to 180s and drives broker/topic TTLs."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+    }
+
+    kafka_consumer_check = check(instance)
+    collector = kafka_consumer_check.metadata_collector
+
+    assert collector.CONFIGS_REFRESH_INTERVAL == 180
+    assert collector.CONFIGS_REFRESH_JITTER == 18  # 10% of 180
+
+
+def test_kafka_configs_refresh_interval_custom(check):
+    """Test that kafka_configs_refresh_interval can be overridden."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'kafka_configs_refresh_interval': 600,
+    }
+
+    kafka_consumer_check = check(instance)
+    collector = kafka_consumer_check.metadata_collector
+
+    assert collector.CONFIGS_REFRESH_INTERVAL == 600
+    assert collector.CONFIGS_REFRESH_JITTER == 60  # 10% of 600
+
+
+
+def test_topic_config_metrics_cached_between_runs(check, dd_run_check, aggregator):
+    """Test that topic config metrics are re-emitted from cache on runs where the topic is not freshly fetched."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'monitor_unlisted_consumer_groups': True,
+        'tags': ['test_tag:test_value'],
+    }
+
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    mock_schema_registry_methods(kafka_consumer_check.metadata_collector)
+
+    cache_storage = {}
+
+    def mock_read(key):
+        return cache_storage.get(key)
+
+    def mock_write(key, value):
+        cache_storage[key] = value
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
+    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    # First run: topics are freshly fetched and metrics emitted
+    dd_run_check(kafka_consumer_check)
+
+    topic_tags = ['test_tag:test_value', 'kafka_cluster_id:test-cluster-id', 'topic:test-topic']
+    aggregator.assert_metric('kafka.topic.config.retention_ms', value=604800000, tags=topic_tags)
+    aggregator.assert_metric('kafka.topic.config.max_message_bytes', value=1048588, tags=topic_tags)
+
+    # Verify metrics cache was populated
+    assert 'kafka_topic_config_metrics_cache' in cache_storage
+    metrics_cache = json.loads(cache_storage['kafka_topic_config_metrics_cache'])
+    assert 'test-topic' in metrics_cache
+
+    aggregator.reset()
+
+    # Second run: topic config fetch cache is still valid (not expired),
+    # so no describe_configs call, but metrics should still be emitted from cache.
+    dd_run_check(kafka_consumer_check)
+
+    aggregator.assert_metric('kafka.topic.config.retention_ms', value=604800000, tags=topic_tags)
+    aggregator.assert_metric('kafka.topic.config.max_message_bytes', value=1048588, tags=topic_tags)
 
 
 def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):

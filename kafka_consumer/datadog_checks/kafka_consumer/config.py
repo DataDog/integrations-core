@@ -106,6 +106,16 @@ class KafkaConfig:
         else:
             self._data_streams_enabled = is_affirmative(instance.get('data_streams_enabled', False))
 
+        kafka_configs_refresh = int(instance.get('kafka_configs_refresh_interval', 180))
+        if kafka_configs_refresh < 60:
+            self.log.warning(
+                "kafka_configs_refresh_interval is set to %d, which is below the minimum of 60 seconds. "
+                "Using 60 seconds.",
+                kafka_configs_refresh,
+            )
+            kafka_configs_refresh = 60
+        self._kafka_configs_refresh_interval = kafka_configs_refresh
+
         self._collect_schema_registry = instance.get('schema_registry_url')
 
         # Schema Registry authentication
