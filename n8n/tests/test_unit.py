@@ -36,29 +36,6 @@ def test_metrics_custom_prefx(dd_run_check, aggregator, mock_http_response):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_version_metadata(datadog_agent, instance):
-    # Mock the HTTP responses for version metadata collection only
-    with mock.patch(
-        'requests.Session.get',
-        side_effect=[
-            mock.Mock(ok=True, status_code=200, json=lambda: {'versionCli': '1.117.2'}),
-        ],
-    ):
-        check = N8nCheck('n8n', {}, [instance])
-        check.check_id = 'test:123'
-
-        check._submit_version_metadata()
-
-    version_metadata = {
-        'version.scheme': 'semver',
-        'version.major': '1',
-        'version.minor': '117',
-        'version.patch': '2',
-        'version.raw': '1.117.2',
-    }
-    datadog_agent.assert_metadata('test:123', version_metadata)
-
-
 def test_readiness_check_ready(aggregator, instance):
     with mock.patch(
         'requests.Session.get',
