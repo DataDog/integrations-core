@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+from ddev.config.command_resolver import CommandExecutionError, run_command
+
 FIELD_TO_PARSE = object()
 
 
@@ -424,6 +426,36 @@ class AgentConfig(LazilyParsedConfig):
         self._field_config = FIELD_TO_PARSE
 
 
+class _CommandResolvingDict(dict):
+    """A dict subclass that resolves ``<key>_fetch_command`` entries on read.
+
+    For keys that have a corresponding ``<key>_fetch_command`` sibling entry, the command
+    is executed once (with caching) and its stdout is returned as the value.  The
+    plain ``<key>`` value is used as a fallback when the command is absent.
+    """
+
+    _COMMAND_KEYS: frozenset[str] = frozenset({'api_key', 'app_key'})
+
+    def _resolve(self, key: str):
+        """Return the resolved value for *key*, handling ``<key>_fetch_command`` if present."""
+        if key in self._COMMAND_KEYS:
+            cmd_key = f'{key}_fetch_command'
+            if cmd_key in self:
+                cmd = dict.__getitem__(self, cmd_key)
+                if isinstance(cmd, str):
+                    return run_command(cmd)
+        return dict.__getitem__(self, key)
+
+    def __getitem__(self, key):
+        return self._resolve(key)
+
+    def get(self, key, default=None):
+        try:
+            return self._resolve(key)
+        except KeyError:
+            return default
+
+
 class OrgConfig(LazilyParsedConfig):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -458,7 +490,7 @@ class OrgConfig(LazilyParsedConfig):
                 if not isinstance(config, dict):
                     self.raise_error('must be a table')
 
-                self._field_config = config
+                self._field_config = _CommandResolvingDict(config)
             else:
                 self.raise_error('required field')
 
@@ -480,11 +512,21 @@ class GitHubConfig(LazilyParsedConfig):
     @property
     def user(self):
         if self._field_user is FIELD_TO_PARSE:
-            if 'user' in self.raw_data:
+            if 'user_fetch_command' in self.raw_data:
+                cmd = self.raw_data['user_fetch_command']
+                if not isinstance(cmd, str):
+                    self.raise_error('must be a string', extra_steps=('user_fetch_command',))
+                try:
+                    self._field_user = run_command(cmd)
+                except CommandExecutionError as e:
+                    self.raise_error(
+                        e.to_user_message('github.user_fetch_command'),
+                        extra_steps=('user_fetch_command',),
+                    )
+            elif 'user' in self.raw_data:
                 user = self.raw_data['user']
                 if not isinstance(user, str):
                     self.raise_error('must be a string')
-
                 self._field_user = user
             else:
                 self._field_user = get_github_user()
@@ -499,11 +541,21 @@ class GitHubConfig(LazilyParsedConfig):
     @property
     def token(self):
         if self._field_token is FIELD_TO_PARSE:
-            if 'token' in self.raw_data:
+            if 'token_fetch_command' in self.raw_data:
+                cmd = self.raw_data['token_fetch_command']
+                if not isinstance(cmd, str):
+                    self.raise_error('must be a string', extra_steps=('token_fetch_command',))
+                try:
+                    self._field_token = run_command(cmd)
+                except CommandExecutionError as e:
+                    self.raise_error(
+                        e.to_user_message('github.token_fetch_command'),
+                        extra_steps=('token_fetch_command',),
+                    )
+            elif 'token' in self.raw_data:
                 token = self.raw_data['token']
                 if not isinstance(token, str):
                     self.raise_error('must be a string')
-
                 self._field_token = token
             else:
                 self._field_token = get_github_token()
@@ -545,11 +597,18 @@ class PyPIConfig(LazilyParsedConfig):
     @property
     def auth(self):
         if self._field_auth is FIELD_TO_PARSE:
-            if 'auth' in self.raw_data:
+            if 'auth_fetch_command' in self.raw_data:
+                cmd = self.raw_data['auth_fetch_command']
+                if not isinstance(cmd, str):
+                    self.raise_error('must be a string', extra_steps=('auth_fetch_command',))
+                try:
+                    self._field_auth = run_command(cmd)
+                except CommandExecutionError as e:
+                    self.raise_error(e.to_user_message('pypi.auth_fetch_command'), extra_steps=('auth_fetch_command',))
+            elif 'auth' in self.raw_data:
                 auth = self.raw_data['auth']
                 if not isinstance(auth, str):
                     self.raise_error('must be a string')
-
                 self._field_auth = auth
             else:
                 self._field_auth = self.raw_data['auth'] = ''
@@ -572,11 +631,18 @@ class TrelloConfig(LazilyParsedConfig):
     @property
     def key(self):
         if self._field_key is FIELD_TO_PARSE:
-            if 'key' in self.raw_data:
+            if 'key_fetch_command' in self.raw_data:
+                cmd = self.raw_data['key_fetch_command']
+                if not isinstance(cmd, str):
+                    self.raise_error('must be a string', extra_steps=('key_fetch_command',))
+                try:
+                    self._field_key = run_command(cmd)
+                except CommandExecutionError as e:
+                    self.raise_error(e.to_user_message('trello.key_fetch_command'), extra_steps=('key_fetch_command',))
+            elif 'key' in self.raw_data:
                 key = self.raw_data['key']
                 if not isinstance(key, str):
                     self.raise_error('must be a string')
-
                 self._field_key = key
             else:
                 self._field_key = self.raw_data['key'] = ''
@@ -591,11 +657,21 @@ class TrelloConfig(LazilyParsedConfig):
     @property
     def token(self):
         if self._field_token is FIELD_TO_PARSE:
-            if 'token' in self.raw_data:
+            if 'token_fetch_command' in self.raw_data:
+                cmd = self.raw_data['token_fetch_command']
+                if not isinstance(cmd, str):
+                    self.raise_error('must be a string', extra_steps=('token_fetch_command',))
+                try:
+                    self._field_token = run_command(cmd)
+                except CommandExecutionError as e:
+                    self.raise_error(
+                        e.to_user_message('trello.token_fetch_command'),
+                        extra_steps=('token_fetch_command',),
+                    )
+            elif 'token' in self.raw_data:
                 token = self.raw_data['token']
                 if not isinstance(token, str):
                     self.raise_error('must be a string')
-
                 self._field_token = token
             else:
                 self._field_token = self.raw_data['token'] = ''

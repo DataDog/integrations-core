@@ -237,3 +237,26 @@ def test_verbose_output_with_local_file(ddev, config_file, helpers, overrides_co
     result = ddev("-v", "config", "show")
     assert result.exit_code == 0
     assert "Local override config file found" in result.output
+
+
+def test_scrubbed_output_includes_dynamicd_llm_api_key(ddev, config_file):
+    """config show must scrub dynamicd.llm_api_key."""
+    config_file.model.raw_data.setdefault('dynamicd', {})['llm_api_key'] = 'supersecret'
+    config_file.save()
+
+    result = ddev('config', 'show')
+
+    assert result.exit_code == 0, result.output
+    assert 'supersecret' not in result.output
+    assert '*****' in result.output
+
+
+def test_non_scrubbed_output_shows_dynamicd_llm_api_key(ddev, config_file):
+    """config show -a must show plain dynamicd.llm_api_key."""
+    config_file.model.raw_data.setdefault('dynamicd', {})['llm_api_key'] = 'supersecret'
+    config_file.save()
+
+    result = ddev('config', 'show', '-a')
+
+    assert result.exit_code == 0, result.output
+    assert 'supersecret' in result.output

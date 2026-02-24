@@ -8,6 +8,13 @@ from ddev.config.file import (
     build_line_index_with_multiple_entries,
     deep_merge_with_list_handling,
 )
+from ddev.config.override_trust import (
+    get_override_trust_state,
+    upsert_trust_entry,
+)
+from ddev.config.override_trust import (
+    strip_fetch_command_fields as _strip_fetch_command_fields,
+)
 from ddev.utils.fs import Path
 
 
@@ -405,3 +412,186 @@ def test_overrides_path_permission_error(tmp_path: PathLibPath, monkeypatch):
 
         # Assert that the returned path is the one where PermissionError occurred
         assert result_path == parent_dir
+
+
+# ---------------------------------------------------------------------------
+# Tests for _strip_fetch_command_fields
+# ---------------------------------------------------------------------------
+
+class TestStripFetchCommandFields:
+    def test_strips_top_level_fetch_command_key(self):
+        data = {'token_fetch_command': 'secret-tool', 'token': 'plain'}
+        stripped = _strip_fetch_command_fields(data)
+        assert 'token_fetch_command' not in data
+        assert 'token' in data
+        assert stripped == ['token_fetch_command']
+
+    def test_strips_nested_fetch_command_key(self):
+        data = {'github': {'user_fetch_command': 'cmd', 'user': 'plain'}}
+        stripped = _strip_fetch_command_fields(data)
+        assert 'user_fetch_command' not in data['github']
+        assert stripped == ['github.user_fetch_command']
+
+    def test_strips_multiple_nested_fetch_command_keys(self):
+        data = {
+            'github': {'user_fetch_command': 'c1', 'token_fetch_command': 'c2'},
+            'trello': {'key_fetch_command': 'c3'},
+        }
+        stripped = _strip_fetch_command_fields(data)
+        assert not any(k.endswith('_fetch_command') for k in data['github'])
+        assert not any(k.endswith('_fetch_command') for k in data['trello'])
+        assert set(stripped) == {'github.user_fetch_command', 'github.token_fetch_command', 'trello.key_fetch_command'}
+
+    def test_no_fetch_command_fields_returns_empty(self):
+        data = {'github': {'user': 'plain'}, 'pypi': {'auth': 'secret'}}
+        stripped = _strip_fetch_command_fields(data)
+        assert stripped == []
+
+    def test_non_fetch_command_keys_preserved(self):
+        data = {'github': {'user': 'plain', 'user_fetch_command': 'cmd'}}
+        _strip_fetch_command_fields(data)
+        assert data == {'github': {'user': 'plain'}}
+
+
+# ---------------------------------------------------------------------------
+# Tests for trust store helpers
+# ---------------------------------------------------------------------------
+
+class TestTrustStore:
+    def test_unknown_when_no_store(self, tmp_path):
+        tmp_path = Path(tmp_path)
+        override_file = tmp_path / DDEV_TOML
+        override_file.write_text('[github]\nuser = "x"\n')
+        global_dir = tmp_path / 'cfg'
+        global_dir.mkdir()
+
+        state, _ = get_override_trust_state(override_file, global_dir)
+        assert state == 'unknown'
+
+    def test_upsert_and_read_allowed(self, tmp_path):
+        tmp_path = Path(tmp_path)
+        override_file = tmp_path / DDEV_TOML
+        override_file.write_text('[github]\nuser = "x"\n')
+        global_dir = tmp_path / 'cfg'
+        global_dir.mkdir()
+
+        upsert_trust_entry(override_file, global_dir, 'allowed')
+        state, _ = get_override_trust_state(override_file, global_dir)
+        assert state == 'allowed'
+
+    def test_upsert_and_read_denied(self, tmp_path):
+        tmp_path = Path(tmp_path)
+        override_file = tmp_path / DDEV_TOML
+        override_file.write_text('[github]\nuser = "x"\n')
+        global_dir = tmp_path / 'cfg'
+        global_dir.mkdir()
+
+        upsert_trust_entry(override_file, global_dir, 'denied')
+        state, _ = get_override_trust_state(override_file, global_dir)
+        assert state == 'denied'
+
+    def test_hash_mismatch_returns_unknown(self, tmp_path):
+        tmp_path = Path(tmp_path)
+        override_file = tmp_path / DDEV_TOML
+        override_file.write_text('[github]\nuser = "x"\n')
+        global_dir = tmp_path / 'cfg'
+        global_dir.mkdir()
+
+        upsert_trust_entry(override_file, global_dir, 'allowed')
+        # Modify the file to change its hash
+        override_file.write_text('[github]\nuser = "changed"\n')
+
+        state, _ = get_override_trust_state(override_file, global_dir)
+        assert state == 'unknown'
+
+    def test_upsert_is_idempotent(self, tmp_path):
+        tmp_path = Path(tmp_path)
+        override_file = tmp_path / DDEV_TOML
+        override_file.write_text('x = 1\n')
+        global_dir = tmp_path / 'cfg'
+        global_dir.mkdir()
+
+        upsert_trust_entry(override_file, global_dir, 'denied')
+        upsert_trust_entry(override_file, global_dir, 'denied')
+        state, _ = get_override_trust_state(override_file, global_dir)
+        assert state == 'denied'
+
+
+# ---------------------------------------------------------------------------
+# Tests for load() trust-aware stripping
+# ---------------------------------------------------------------------------
+
+class TestLoadTrustAwareStripping:
+    def _make_config_file(self, tmp_path: Path) -> ConfigFileWithOverrides:
+        global_path = tmp_path / 'config.toml'
+        global_path.write_text('[github]\nuser = "global"\n')
+        return ConfigFileWithOverrides(global_path)
+
+    def test_unknown_trust_strips_fetch_command_fields_and_adds_warning(self, tmp_path, monkeypatch):
+        tmp_path = Path(tmp_path)
+        cfg = self._make_config_file(tmp_path)
+
+        override_file = tmp_path / DDEV_TOML
+        override_file.write_text('[github]\nuser_fetch_command = "echo override"\n')
+        monkeypatch.chdir(tmp_path)
+
+        cfg.load()
+
+        assert 'user_fetch_command' not in cfg.combined_model.raw_data.get('github', {})
+        assert len(cfg.load_warnings) == 1
+        assert 'untrusted' in cfg.load_warnings[0].lower()
+
+    def test_allowed_trust_keeps_fetch_command_fields_no_warning(self, tmp_path, monkeypatch):
+        tmp_path = Path(tmp_path)
+        cfg = self._make_config_file(tmp_path)
+
+        override_file = tmp_path / DDEV_TOML
+        override_file.write_text('[github]\nuser_fetch_command = "echo override_user"\n')
+        monkeypatch.chdir(tmp_path)
+
+        upsert_trust_entry(override_file, tmp_path / 'cfg', 'allowed')
+        # Point the config file's global dir to tmp_path/cfg so trust store is found
+        cfg.global_path = tmp_path / 'cfg' / 'config.toml'
+        (tmp_path / 'cfg').mkdir(exist_ok=True)
+        (tmp_path / 'cfg' / 'config.toml').write_text('[github]\nuser = "global"\n')
+
+        cfg.load()
+
+        assert cfg.combined_model.raw_data.get('github', {}).get('user_fetch_command') == 'echo override_user'
+        assert cfg.load_warnings == []
+
+    def test_denied_trust_strips_silently_no_warning(self, tmp_path, monkeypatch):
+        tmp_path = Path(tmp_path)
+        cfg = self._make_config_file(tmp_path)
+
+        override_file = tmp_path / DDEV_TOML
+        override_file.write_text('[github]\nuser_fetch_command = "echo override_user"\n')
+        monkeypatch.chdir(tmp_path)
+
+        global_dir = tmp_path
+        upsert_trust_entry(override_file, global_dir, 'denied')
+        cfg.global_path = tmp_path / 'config.toml'
+
+        cfg.load()
+
+        assert 'user_fetch_command' not in cfg.combined_model.raw_data.get('github', {})
+        assert cfg.load_warnings == []
+
+    def test_hash_mismatch_strips_and_warns(self, tmp_path, monkeypatch):
+        tmp_path = Path(tmp_path)
+        cfg = self._make_config_file(tmp_path)
+
+        override_file = tmp_path / DDEV_TOML
+        override_file.write_text('[github]\nuser_fetch_command = "echo v1"\n')
+        monkeypatch.chdir(tmp_path)
+
+        global_dir = tmp_path
+        upsert_trust_entry(override_file, global_dir, 'allowed')
+        # Modify file so hash no longer matches
+        override_file.write_text('[github]\nuser_fetch_command = "echo v2"\n')
+
+        cfg.load()
+
+        assert 'user_fetch_command' not in cfg.combined_model.raw_data.get('github', {})
+        assert len(cfg.load_warnings) == 1
+        assert 'untrusted' in cfg.load_warnings[0].lower()

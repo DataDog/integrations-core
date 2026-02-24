@@ -66,7 +66,8 @@ def set_value(app: Application, key: str, value: str | None, overrides: bool):
 
     import tomlkit
 
-    from ddev.config.utils import SCRUBBED_GLOBS, create_toml_document, save_toml_document, scrub_config
+    from ddev.config.scrubber import SCRUBBED_GLOBS, scrub_config
+    from ddev.config.utils import create_toml_document, save_toml_document
 
     scrubbing = any(fnmatch(key, glob) for glob in SCRUBBED_GLOBS)
     if value is None:

@@ -4,6 +4,8 @@
 
 import click
 
+from ddev.cli.config.allow import allow
+from ddev.cli.config.deny import deny
 from ddev.cli.config.edit import edit
 from ddev.cli.config.explore import explore
 from ddev.cli.config.find import find
@@ -18,6 +20,8 @@ def config():
     pass
 
 
+config.add_command(allow)
+config.add_command(deny)
 config.add_command(edit)
 config.add_command(explore)
 config.add_command(find)

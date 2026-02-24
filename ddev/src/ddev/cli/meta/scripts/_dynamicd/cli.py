@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 import click
 
 from ddev.cli.meta.scripts._dynamicd.constants import SCENARIOS
+from ddev.config.command_resolver import CommandExecutionError, run_command
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -78,8 +79,20 @@ def _get_api_keys(app: Application) -> tuple[str, str]:
 
     Returns (llm_api_key, dd_api_key) or aborts if not configured.
     """
-    # Get LLM API key from config or environment variable
-    llm_api_key = app.config.raw_data.get("dynamicd", {}).get("llm_api_key")
+    dynamicd_cfg = app.config.raw_data.get("dynamicd", {})
+
+    # Resolve LLM API key: command > plain value > env var
+    llm_api_key = None
+    if "llm_api_key_fetch_command" in dynamicd_cfg:
+        cmd = dynamicd_cfg["llm_api_key_fetch_command"]
+        try:
+            llm_api_key = run_command(cmd)
+        except CommandExecutionError as e:
+            app.display_error(e.to_user_message('dynamicd.llm_api_key_fetch_command'))
+            app.abort()
+
+    if not llm_api_key:
+        llm_api_key = dynamicd_cfg.get("llm_api_key")
     if not llm_api_key:
         llm_api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not llm_api_key:
