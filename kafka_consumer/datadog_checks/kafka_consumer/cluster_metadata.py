@@ -8,6 +8,7 @@ import hashlib
 import json
 import random
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from confluent_kafka.admin import ConfigResource, ResourceType
 
@@ -24,9 +25,17 @@ class ClusterMetadataCollector:
         self.log = log
         self.http = check.http
 
-        self.EVENT_CACHE_TTL = 600  # 10 minutes in seconds
-        self.CONFIG_FETCH_CACHE_TTL_BASE = 45  # Base TTL in seconds for config fetch caching
-        self.CONFIG_FETCH_CACHE_TTL_JITTER = 15  # Jitter range in seconds (total: 45-60s)
+        self.EVENT_CACHE_TTL = 3600  # 1 hour in seconds
+
+        # Broker/topic config refresh interval (configurable, default 3 min)
+        configs_refresh = self.config._kafka_configs_refresh_interval
+        self.CONFIGS_REFRESH_INTERVAL = configs_refresh
+        self.CONFIGS_REFRESH_JITTER = max(15, configs_refresh // 10)  # 10% jitter, min 15s
+        self.BROKER_CONFIG_BATCH_SIZE = 5  # Max brokers to describe_configs per run (one per call, Kafka limitation)
+        self.TOPIC_CONFIG_BATCH_SIZE = 100  # Max topics to describe_configs per check run
+
+        self.SCHEMA_VERSION_CHECK_BATCH_SIZE = 200  # Lightweight calls, can do more per run
+        self.SCHEMA_FETCH_CONCURRENCY = 10  # Parallel HTTP requests
 
         self.BROKER_CONFIG_CACHE_KEY = 'kafka_broker_config_cache'
         self.BROKER_CONFIG_FETCH_CACHE_KEY = 'kafka_broker_config_fetch_cache'
@@ -34,7 +43,9 @@ class ClusterMetadataCollector:
         self.TOPIC_CONFIG_FETCH_CACHE_KEY = 'kafka_topic_config_fetch_cache'
         self.TOPIC_HWM_SUM_CACHE_KEY = 'kafka_topic_hwm_sum_cache'
         self.SCHEMA_CACHE_KEY = 'kafka_schema_cache'
-        self.SCHEMA_FETCH_CACHE_KEY = 'kafka_schema_fetch_cache'
+        self.SCHEMA_VERSION_CHECK_CACHE_KEY = 'kafka_schema_version_check_cache'
+        self.SCHEMA_LATEST_VERSION_CACHE_KEY = 'kafka_schema_latest_version_cache'
+        self.SCHEMA_ID_CACHE_KEY = 'kafka_schema_id_cache'
 
         self._schema_registry_oauth_token = None
         self._schema_registry_oauth_token_expiry = 0
@@ -132,7 +143,8 @@ class ClusterMetadataCollector:
         response.raise_for_status()
         return response.json()
 
-    def _get_schema_registry_versions(self, subject):
+    def _get_schema_registry_versions(self, subject: str) -> list[int]:
+        """Fetch the list of version numbers for a subject (lightweight call)."""
         base_url = self.config._collect_schema_registry
         response = self.http.get(f"{base_url}/subjects/{subject}/versions")
         response.raise_for_status()
@@ -175,12 +187,17 @@ class ClusterMetadataCollector:
         """
         Check which items need fetching based on cache expiration.
 
+        Returns items sorted oldest-first (earliest expiry first) so that
+        when combined with batch limits, the least recently fetched items
+        are prioritized.
+
         Args:
             cache_key_prefix: Cache key to load
             item_keys: List of item keys to check
 
         Returns:
-            List of item keys that need fetching (not cached or expired)
+            List of item keys that need fetching (not cached or expired),
+            sorted by expiry time ascending (oldest first)
         """
         current_time = time.time()
         items_to_fetch = []
@@ -196,18 +213,33 @@ class ClusterMetadataCollector:
             expire_at = cache_dict.get(item_key, 0)
 
             if current_time >= expire_at:
-                items_to_fetch.append(item_key)
+                items_to_fetch.append((expire_at, item_key))
 
-        return items_to_fetch
+        # Sort by expiry time ascending — items that expired longest ago are fetched first.
+        items_to_fetch.sort()
+        return [item_key for _, item_key in items_to_fetch]
 
-    def _mark_items_fetched(self, cache_key_prefix: str, item_keys: list[str]):
+    def _mark_items_fetched(
+        self,
+        cache_key_prefix: str,
+        item_keys: list[str],
+        ttl_base: float | None = None,
+        ttl_jitter: float | None = None,
+    ):
         """
         Mark items as fetched in cache with jittered TTL.
 
         Args:
             cache_key_prefix: Cache key to update
             item_keys: List of item keys that were fetched
+            ttl_base: Base TTL in seconds (defaults to CONFIGS_REFRESH_INTERVAL)
+            ttl_jitter: Jitter range in seconds (defaults to CONFIGS_REFRESH_JITTER)
         """
+        if ttl_base is None:
+            ttl_base = self.CONFIGS_REFRESH_INTERVAL
+        if ttl_jitter is None:
+            ttl_jitter = self.CONFIGS_REFRESH_JITTER
+
         current_time = time.time()
 
         try:
@@ -218,7 +250,7 @@ class ClusterMetadataCollector:
             cache_dict = {}
 
         for item_key in item_keys:
-            ttl = self.CONFIG_FETCH_CACHE_TTL_BASE + random.uniform(0, self.CONFIG_FETCH_CACHE_TTL_JITTER)
+            ttl = ttl_base + random.uniform(0, ttl_jitter)
             cache_dict[item_key] = current_time + ttl
 
         try:
@@ -240,6 +272,7 @@ class ClusterMetadataCollector:
         if not items:
             return []
 
+        event_cache_ttl = self.EVENT_CACHE_TTL
         current_time = time.time()
         events_to_send = []
 
@@ -263,13 +296,14 @@ class ClusterMetadataCollector:
                 events_to_send.append(item_key)
                 cache_dict[item_key] = {
                     'hash': current_hash,
-                    'expire_at': current_time + self.EVENT_CACHE_TTL,
+                    'expire_at': current_time + event_cache_ttl,
                 }
 
-        try:
-            self.check.write_persistent_cache(cache_key_prefix, json.dumps(cache_dict))
-        except Exception as e:
-            self.log.debug("Could not write cache %s: %s", cache_key_prefix, e)
+        if events_to_send:
+            try:
+                self.check.write_persistent_cache(cache_key_prefix, json.dumps(cache_dict))
+            except Exception as e:
+                self.log.debug("Could not write cache %s: %s", cache_key_prefix, e)
 
         return events_to_send
 
@@ -318,34 +352,44 @@ class ClusterMetadataCollector:
                     if replica in broker_partition_count:
                         broker_partition_count[replica] += 1
 
+        # Emit per-broker metrics (fast, in-memory only)
+        for broker_id, broker_metadata in brokers.items():
+            tags = self._get_tags(cluster_id) + [
+                f'broker_id:{broker_id}',
+                f'broker_host:{broker_metadata.host}',
+                f'broker_port:{broker_metadata.port}',
+            ]
+            self.check.gauge('broker.leader_count', broker_leader_count.get(broker_id, 0), tags=tags)
+            self.check.gauge('broker.partition_count', broker_partition_count.get(broker_id, 0), tags=tags)
+
         broker_ids_to_fetch = self._get_items_to_fetch(
             self.BROKER_CONFIG_FETCH_CACHE_KEY, [str(bid) for bid in brokers.keys()]
         )
         fetched_broker_configs = {}
 
-        for broker_id, broker_metadata in brokers.items():
-            broker_host = broker_metadata.host
-            broker_port = broker_metadata.port
+        if broker_ids_to_fetch:
+            broker_ids_batch = broker_ids_to_fetch[: self.BROKER_CONFIG_BATCH_SIZE]
+            self.log.debug(
+                "Fetching configs for %d/%d brokers",
+                len(broker_ids_batch),
+                len(broker_ids_to_fetch),
+            )
 
-            tags = self._get_tags(cluster_id) + [
-                f'broker_id:{broker_id}',
-                f'broker_host:{broker_host}',
-                f'broker_port:{broker_port}',
-            ]
+            for broker_id_str in broker_ids_batch:
+                broker_meta = brokers.get(int(broker_id_str))
+                if not broker_meta:
+                    continue
 
-            self.check.gauge('broker.leader_count', broker_leader_count.get(broker_id, 0), tags=tags)
-            self.check.gauge('broker.partition_count', broker_partition_count.get(broker_id, 0), tags=tags)
+                tags = self._get_tags(cluster_id) + [
+                    f'broker_id:{broker_id_str}',
+                    f'broker_host:{broker_meta.host}',
+                    f'broker_port:{broker_meta.port}',
+                ]
 
-            if str(broker_id) not in broker_ids_to_fetch:
-                self.log.debug("Skipping config fetch for broker %s (cache still valid)", broker_id)
-                continue
-
-            try:
-                resources = [ConfigResource(ResourceType.BROKER, str(broker_id))]
-                futures = self.client.kafka_client.describe_configs(resources)
-
-                for _resource, future in futures.items():
-                    config_entries = future.result(timeout=self.config._request_timeout)
+                try:
+                    resources = [ConfigResource(ResourceType.BROKER, broker_id_str)]
+                    futures = self.client.kafka_client.describe_configs(resources)
+                    config_entries = futures[resources[0]].result(timeout=self.config._request_timeout)
 
                     config_data = {}
                     for config_name, config_entry in config_entries.items():
@@ -372,17 +416,21 @@ class ClusterMetadataCollector:
                     truncated_config = self._truncate_config_for_event(config_data, max_configs=50)
                     event_text = json.dumps(truncated_config, indent=2, sort_keys=True)
 
-                    fetched_broker_configs[str(broker_id)] = {
+                    fetched_broker_configs[broker_id_str] = {
                         'event_text': event_text,
                         'tags': tags,
-                        'broker_host': broker_host,
-                        'broker_port': broker_port,
+                        'broker_host': broker_meta.host,
+                        'broker_port': broker_meta.port,
                     }
+                except Exception as e:
+                    self.log.warning("Failed to describe configs for broker %s: %s", broker_id_str, e)
 
-            except Exception as e:
-                self.log.warning("Failed to describe configs for broker %s: %s", broker_id, e)
-
-        self._mark_items_fetched(self.BROKER_CONFIG_FETCH_CACHE_KEY, list(fetched_broker_configs.keys()))
+        self._mark_items_fetched(
+            self.BROKER_CONFIG_FETCH_CACHE_KEY,
+            list(fetched_broker_configs.keys()),
+            ttl_base=self.CONFIGS_REFRESH_INTERVAL,
+            ttl_jitter=self.CONFIGS_REFRESH_JITTER,
+        )
 
         broker_contents = {bid: info['event_text'] for bid, info in fetched_broker_configs.items()}
         brokers_to_emit = self._get_events_to_send(self.BROKER_CONFIG_CACHE_KEY, broker_contents)
@@ -444,12 +492,6 @@ class ClusterMetadataCollector:
             self.log.debug("Could not read topic HWM cache: %s", e)
 
         current_partition_offsets = {}
-
-        topic_names_to_fetch = self._get_items_to_fetch(
-            self.TOPIC_CONFIG_FETCH_CACHE_KEY,
-            [name for name in topic_partitions.keys() if name not in KAFKA_INTERNAL_TOPICS],
-        )
-        fetched_topic_configs = {}
 
         for topic_name, partitions in topic_partitions.items():
             if topic_name in KAFKA_INTERNAL_TOPICS:
@@ -554,45 +596,69 @@ class ClusterMetadataCollector:
                 message_rate = (sum_latest - sum_previous) / (now_ts - prev_ts)
                 self.check.gauge('topic.message_rate', message_rate, tags=topic_tags)
 
-            if topic_name not in topic_names_to_fetch:
-                self.log.debug("Skipping config fetch for topic %s (cache still valid)", topic_name)
-                continue
+        # --- Topic config fetching (batched describe_configs) ---
+        all_topic_names = [name for name in topic_partitions.keys() if name not in KAFKA_INTERNAL_TOPICS]
+        topic_names_to_fetch = self._get_items_to_fetch(self.TOPIC_CONFIG_FETCH_CACHE_KEY, all_topic_names)
 
-            resources = [ConfigResource(ResourceType.TOPIC, topic_name)]
+        # Batch: cap the number of topic configs fetched per check run.
+        if len(topic_names_to_fetch) > self.TOPIC_CONFIG_BATCH_SIZE:
+            topic_names_to_fetch = topic_names_to_fetch[: self.TOPIC_CONFIG_BATCH_SIZE]
+
+        fetched_topic_configs = {}
+
+        if topic_names_to_fetch:
+            self.log.debug("Fetching configs for %d topics", len(topic_names_to_fetch))
+
+            # Single batched describe_configs call for all topics at once
+            resources = [ConfigResource(ResourceType.TOPIC, name) for name in topic_names_to_fetch]
             futures = self.client.kafka_client.describe_configs(resources)
-            config_result = futures[resources[0]].result(timeout=self.config._request_timeout)
 
-            if not config_result:
-                continue
+            for resource, future in futures.items():
+                topic_name = resource.name
+                topic_tags = self._get_tags(cluster_id) + [f'topic:{topic_name}']
 
-            topic_config = {}
-            for config_name, config_entry in config_result.items():
-                topic_config[config_name] = config_entry.value
+                try:
+                    config_result = future.result(timeout=self.config._request_timeout)
+                except Exception as e:
+                    self.log.warning("Failed to describe configs for topic %s: %s", topic_name, e)
+                    continue
 
-            if not topic_config:
-                continue
+                if not config_result:
+                    continue
 
-            if 'retention.ms' in topic_config and topic_config['retention.ms'] != '-1':
-                retention_ms = int(topic_config['retention.ms'])
-                self.check.gauge('topic.config.retention_ms', retention_ms, tags=topic_tags)
+                topic_config = {}
+                for config_name, config_entry in config_result.items():
+                    topic_config[config_name] = config_entry.value
 
-            if 'retention.bytes' in topic_config and topic_config['retention.bytes'] != '-1':
-                retention_bytes = int(topic_config['retention.bytes'])
-                self.check.gauge('topic.config.retention_bytes', retention_bytes, tags=topic_tags)
+                if not topic_config:
+                    continue
 
-            if 'max.message.bytes' in topic_config:
-                max_bytes = int(topic_config['max.message.bytes'])
-                self.check.gauge('topic.config.max_message_bytes', max_bytes, tags=topic_tags)
+                if 'retention.ms' in topic_config and topic_config['retention.ms'] != '-1':
+                    retention_ms = int(topic_config['retention.ms'])
+                    self.check.gauge('topic.config.retention_ms', retention_ms, tags=topic_tags)
 
-            truncated_config = self._truncate_config_for_event(topic_config, max_configs=30)
-            event_text = json.dumps(truncated_config, indent=2, sort_keys=True)
+                if 'retention.bytes' in topic_config and topic_config['retention.bytes'] != '-1':
+                    retention_bytes = int(topic_config['retention.bytes'])
+                    self.check.gauge('topic.config.retention_bytes', retention_bytes, tags=topic_tags)
 
-            fetched_topic_configs[topic_name] = {
-                'event_text': event_text,
-                'tags': topic_tags,
-            }
+                if 'max.message.bytes' in topic_config:
+                    max_bytes = int(topic_config['max.message.bytes'])
+                    self.check.gauge('topic.config.max_message_bytes', max_bytes, tags=topic_tags)
 
-        self._mark_items_fetched(self.TOPIC_CONFIG_FETCH_CACHE_KEY, list(fetched_topic_configs.keys()))
+                truncated_config = self._truncate_config_for_event(topic_config, max_configs=30)
+                event_text = json.dumps(truncated_config, indent=2, sort_keys=True)
+
+                fetched_topic_configs[topic_name] = {
+                    'event_text': event_text,
+                    'tags': topic_tags,
+                }
+
+        self._mark_items_fetched(
+            self.TOPIC_CONFIG_FETCH_CACHE_KEY,
+            list(fetched_topic_configs.keys()),
+            ttl_base=self.CONFIGS_REFRESH_INTERVAL,
+            ttl_jitter=self.CONFIGS_REFRESH_JITTER,
+        )
 
         topic_contents = {name: info['event_text'] for name, info in fetched_topic_configs.items()}
         topics_to_emit = self._get_events_to_send(self.TOPIC_CONFIG_CACHE_KEY, topic_contents)
@@ -691,6 +757,46 @@ class ClusterMetadataCollector:
                     for tp in member.assignment.topic_partitions:
                         topics_for_group.add(tp.topic)
 
+    def _load_schema_id_cache(self) -> dict[str, dict]:
+        """Load the permanent schema ID cache from persistent storage.
+
+        Schema IDs in Confluent Schema Registry are immutable: once a schema is
+        registered with a given ID, that ID always maps to the same content.
+        This cache avoids re-fetching schema content for already-seen IDs.
+
+        Returns:
+            Dict mapping schema_id (str) -> {schema, schema_type}
+        """
+        try:
+            cached_str = self.check.read_persistent_cache(self.SCHEMA_ID_CACHE_KEY)
+            return json.loads(cached_str) if cached_str else {}
+        except Exception as e:
+            self.log.debug("Could not read schema ID cache: %s", e)
+            return {}
+
+    def _save_schema_id_cache(self, cache: dict[str, dict]):
+        """Persist the schema ID cache."""
+        try:
+            self.check.write_persistent_cache(self.SCHEMA_ID_CACHE_KEY, json.dumps(cache))
+        except Exception as e:
+            self.log.debug("Could not write schema ID cache: %s", e)
+
+    def _load_latest_version_cache(self) -> dict[str, int]:
+        """Load cache mapping subject -> last known max version number."""
+        try:
+            cached_str = self.check.read_persistent_cache(self.SCHEMA_LATEST_VERSION_CACHE_KEY)
+            return json.loads(cached_str) if cached_str else {}
+        except Exception as e:
+            self.log.debug("Could not read schema latest version cache: %s", e)
+            return {}
+
+    def _save_latest_version_cache(self, cache: dict[str, int]):
+        """Persist the latest version cache."""
+        try:
+            self.check.write_persistent_cache(self.SCHEMA_LATEST_VERSION_CACHE_KEY, json.dumps(cache))
+        except Exception as e:
+            self.log.debug("Could not write schema latest version cache: %s", e)
+
     def _collect_schema_registry_info(self, metadata):
         if not self.config._collect_schema_registry:
             return
@@ -711,37 +817,192 @@ class ClusterMetadataCollector:
 
         cluster_id = metadata.cluster_id if hasattr(metadata, 'cluster_id') else 'unknown'
 
-        self.log.debug("Found %s schemas in schema registry", len(subjects))
+        self.log.debug("Found %d subjects in schema registry", len(subjects))
 
         self.check.gauge('schema_registry.subjects', len(subjects), tags=self._get_tags(cluster_id))
 
-        subjects_to_fetch = self._get_items_to_fetch(self.SCHEMA_FETCH_CACHE_KEY, subjects)
+        # --- Tier 1: Lightweight version checks ---
+        # GET /subjects/{subject}/versions returns just [1, 2, 3] — very cheap.
+        # We use this to detect if a subject has a new version without fetching schema content.
+        subjects_to_check = self._get_items_to_fetch(self.SCHEMA_VERSION_CHECK_CACHE_KEY, subjects)
+
+        if len(subjects_to_check) > self.SCHEMA_VERSION_CHECK_BATCH_SIZE:
+            subjects_to_check = subjects_to_check[: self.SCHEMA_VERSION_CHECK_BATCH_SIZE]
+
+        self.log.debug("Checking versions for %d/%d subjects", len(subjects_to_check), len(subjects))
+
+        # Load the cache of last known max version per subject
+        latest_version_cache = self._load_latest_version_cache()
+
+        # Fetch version lists in parallel (lightweight calls)
+        version_responses = {}
+        if subjects_to_check:
+            with ThreadPoolExecutor(max_workers=self.SCHEMA_FETCH_CONCURRENCY) as executor:
+                future_to_subject = {
+                    executor.submit(self._get_schema_registry_versions, subject): subject
+                    for subject in subjects_to_check
+                }
+                for future in as_completed(future_to_subject):
+                    subject = future_to_subject[future]
+                    try:
+                        version_responses[subject] = future.result()
+                    except Exception as e:
+                        self.log.warning("Error getting version list for %s: %s", subject, e)
+
+        # Mark all checked subjects as fetched (even if they didn't change)
+        self._mark_items_fetched(
+            self.SCHEMA_VERSION_CHECK_CACHE_KEY,
+            list(version_responses.keys()),
+        )
+
+        # --- Tier 2: Full fetch only for subjects with new versions ---
+        # Compare the max version number to what we've seen before.
+        # New subjects (not in cache) also need a full fetch.
+        subjects_needing_full_fetch = []
+        for subject, versions in version_responses.items():
+            if not versions:
+                continue
+            max_version = max(versions)
+            cached = latest_version_cache.get(subject)
+            cached_version = cached.get('version', 0) if isinstance(cached, dict) else (cached or 0)
+            if max_version > cached_version:
+                subjects_needing_full_fetch.append(subject)
+
+        self.log.debug(
+            "%d/%d checked subjects have new versions",
+            len(subjects_needing_full_fetch),
+            len(version_responses),
+        )
+
+        # Load permanent schema ID cache — schema IDs are immutable in the registry,
+        # so once we have the content for a given ID we never need to fetch it again.
+        schema_id_cache = self._load_schema_id_cache()
+        schema_id_cache_updated = False
+
+        # Fetch latest versions in parallel for subjects that changed
+        schema_responses = {}
+        if subjects_needing_full_fetch:
+            with ThreadPoolExecutor(max_workers=self.SCHEMA_FETCH_CONCURRENCY) as executor:
+                future_to_subject = {
+                    executor.submit(self._get_schema_registry_latest_version, subject): subject
+                    for subject in subjects_needing_full_fetch
+                }
+                for future in as_completed(future_to_subject):
+                    subject = future_to_subject[future]
+                    try:
+                        schema_responses[subject] = future.result()
+                    except Exception as e:
+                        self.log.warning("Error getting schema details for %s: %s", subject, e)
+
         fetched_schemas = {}
 
-        for subject in subjects:
-            subject_tags = self._get_tags(cluster_id) + [f'subject:{subject}']
+        for subject, latest_schema in schema_responses.items():
+            schema_id = latest_schema.get('id')
+            schema_version = latest_schema.get('version')
+            schema_type = latest_schema.get('schemaType', 'AVRO')
 
-            if subject not in subjects_to_fetch:
-                self.log.debug("Skipping schema fetch for subject %s (cache still valid)", subject)
+            subject_tags = self._get_tags(cluster_id) + [f'subject:{subject}']
+            self.check.gauge('schema_registry.versions', schema_version, tags=subject_tags)
+
+            # Update the latest version cache with version and schema_id
+            latest_version_cache[subject] = {'version': schema_version, 'schema_id': schema_id}
+
+            # Use permanent schema ID cache to avoid processing unchanged schemas.
+            schema_id_str = str(schema_id)
+            cached_entry = schema_id_cache.get(schema_id_str)
+            if cached_entry:
+                schema_content = cached_entry['schema']
+                schema_type = cached_entry.get('schema_type', schema_type)
+            else:
+                schema_content = latest_schema.get('schema', '')
+                schema_id_cache[schema_id_str] = {
+                    'schema': schema_content,
+                    'schema_type': schema_type,
+                }
+                schema_id_cache_updated = True
+
+            # Extract topic name and schema type (key/value) from subject
+            # Subjects follow patterns: "topic-key", "topic-value"
+            topic_name = subject
+            schema_for = 'unknown'
+
+            if subject.endswith('-value'):
+                topic_name = subject[:-6]  # Remove '-value'
+                schema_for = 'value'
+            elif subject.endswith('-key'):
+                topic_name = subject[:-4]  # Remove '-key'
+                schema_for = 'key'
+
+            event_tags = subject_tags + [
+                f'schema_id:{schema_id}',
+                f'schema_version:{schema_version}',
+                f'schema_type:{schema_type}',
+                f'topic:{topic_name}',
+                f'schema_for:{schema_for}',
+                'event_type:schema_registry',
+            ]
+
+            cache_content = f"{schema_id}:{schema_version}:{schema_content}"
+
+            fetched_schemas[subject] = {
+                'cache_content': cache_content,
+                'schema_content': schema_content,
+                'topic_name': topic_name,
+                'schema_for': schema_for,
+                'schema_version': schema_version,
+                'schema_id': schema_id,
+                'schema_type': schema_type,
+                'event_tags': event_tags,
+            }
+
+        # Persist caches
+        self._save_latest_version_cache(latest_version_cache)
+        if schema_id_cache_updated:
+            self._save_schema_id_cache(schema_id_cache)
+
+        # Build lightweight cache_content strings for all known subjects (from cache, no extra HTTP calls).
+        # This allows re-emission of unchanged schemas when the event cache TTL expires.
+        all_schema_cache_contents = {subject: info['cache_content'] for subject, info in fetched_schemas.items()}
+        for subject in subjects:
+            if subject in all_schema_cache_contents:
                 continue
 
-            try:
-                versions = self._get_schema_registry_versions(subject)
+            cached_info = latest_version_cache.get(subject)
+            if not isinstance(cached_info, dict):
+                continue
 
-                self.check.gauge('schema_registry.versions', len(versions), tags=subject_tags)
+            version = cached_info.get('version')
+            schema_id = cached_info.get('schema_id')
+            if version is None or schema_id is None:
+                continue
 
-                latest_schema = self._get_schema_registry_latest_version(subject)
+            schema_id_str = str(schema_id)
+            id_entry = schema_id_cache.get(schema_id_str)
+            if not id_entry:
+                continue
 
-                schema_id = latest_schema.get('id')
-                schema_version = latest_schema.get('version')
-                schema_type = latest_schema.get('schemaType', 'AVRO')
-                schema_content = latest_schema.get('schema', '')
+            all_schema_cache_contents[subject] = f"{schema_id}:{version}:{id_entry['schema']}"
+
+        # Determine which subjects need event emission (changed or TTL expired)
+        schemas_to_emit = self._get_events_to_send(self.SCHEMA_CACHE_KEY, all_schema_cache_contents)
+
+        # Build full payloads only for subjects that need emission
+        for subject in schemas_to_emit:
+            if subject in fetched_schemas:
+                info = fetched_schemas[subject]
+            else:
+                # Reconstruct from caches
+                cached_info = latest_version_cache.get(subject, {})
+                version = cached_info.get('version')
+                schema_id = cached_info.get('schema_id')
+                id_entry = schema_id_cache.get(str(schema_id), {})
+                schema_content = id_entry.get('schema', '')
+                schema_type = id_entry.get('schema_type', 'AVRO')
 
                 # Extract topic name and schema type (key/value) from subject
                 # Subjects follow patterns: "topic-key", "topic-value"
                 topic_name = subject
                 schema_for = 'unknown'
-
                 if subject.endswith('-value'):
                     topic_name = subject[:-6]  # Remove '-value'
                     schema_for = 'value'
@@ -749,38 +1010,26 @@ class ClusterMetadataCollector:
                     topic_name = subject[:-4]  # Remove '-key'
                     schema_for = 'key'
 
+                subject_tags = self._get_tags(cluster_id) + [f'subject:{subject}']
                 event_tags = subject_tags + [
                     f'schema_id:{schema_id}',
-                    f'schema_version:{schema_version}',
+                    f'schema_version:{version}',
                     f'schema_type:{schema_type}',
                     f'topic:{topic_name}',
                     f'schema_for:{schema_for}',
                     'event_type:schema_registry',
                 ]
 
-                cache_content = f"{schema_id}:{schema_version}:{schema_content}"
-
-                fetched_schemas[subject] = {
-                    'cache_content': cache_content,
+                info = {
                     'schema_content': schema_content,
                     'topic_name': topic_name,
                     'schema_for': schema_for,
-                    'schema_version': schema_version,
+                    'schema_version': version,
                     'schema_id': schema_id,
                     'schema_type': schema_type,
                     'event_tags': event_tags,
                 }
 
-            except Exception as e:
-                self.log.warning("Error getting schema details for %s: %s", subject, e)
-
-        self._mark_items_fetched(self.SCHEMA_FETCH_CACHE_KEY, list(fetched_schemas.keys()))
-
-        schema_contents = {subject: info['cache_content'] for subject, info in fetched_schemas.items()}
-        schemas_to_emit = self._get_events_to_send(self.SCHEMA_CACHE_KEY, schema_contents)
-
-        for subject in schemas_to_emit:
-            info = fetched_schemas[subject]
             self.check.event(
                 {
                     'timestamp': int(time.time()),
