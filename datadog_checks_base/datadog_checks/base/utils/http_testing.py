@@ -6,7 +6,30 @@ from io import BytesIO
 from typing import Any, Iterator
 from unittest.mock import MagicMock
 
-__all__ = ['MockHTTPResponse']
+import pytest
+
+__all__ = ['MockHTTPResponse', 'mock_http']
+
+
+@pytest.fixture
+def mock_http(mocker):
+    """Intercept HTTP calls made through RequestsWrapper; import into integration conftest.py to use.
+
+    Patches get/post/put/delete/head/patch at the RequestsWrapper class level so all three
+    HTTP paths are intercepted (AgentCheck.http, OpenMetrics V2 scraper, and health-check
+    handlers that create their own wrappers). Real RequestsWrapper instances are still
+    created, so check.http.options is populated and available for config assertions.
+    """
+    from datadog_checks.base.utils.http import RequestsWrapper
+
+    container = MagicMock()
+    mocker.patch.object(RequestsWrapper, 'get', container.get)
+    mocker.patch.object(RequestsWrapper, 'post', container.post)
+    mocker.patch.object(RequestsWrapper, 'put', container.put)
+    mocker.patch.object(RequestsWrapper, 'delete', container.delete)
+    mocker.patch.object(RequestsWrapper, 'head', container.head)
+    mocker.patch.object(RequestsWrapper, 'patch', container.patch)
+    return container
 
 
 class MockHTTPResponse:
@@ -17,7 +40,7 @@ class MockHTTPResponse:
         content: str | bytes = '',
         status_code: int = 200,
         headers: dict[str, str] | None = None,
-        json_data: dict[str, Any] | None = None,
+        json_data: Any = None,
         file_path: str | None = None,
         cookies: dict[str, str] | None = None,
         elapsed_seconds: float = 0.1,
