@@ -16,8 +16,8 @@ from .common import PIPELINES_METRICS, TRIGGERS_METRICS, check, mock_http_respon
         pytest.param('triggers_instance', TRIGGERS_METRICS, 'triggers_controller', id='triggers'),
     ],
 )
-def test_check(dd_run_check, aggregator, mocker, instance, metrics, request, namespace):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_check(dd_run_check, aggregator, mock_http_client, instance, metrics, request, namespace):
+    mock_http_client.get.side_effect = mock_http_responses
     dd_run_check(check(request.getfixturevalue(instance)))
 
     for expected_metric in metrics:
@@ -30,10 +30,10 @@ def test_check(dd_run_check, aggregator, mocker, instance, metrics, request, nam
     assert len(aggregator.service_check_names) == 1
 
 
-def test_invalid_url(dd_run_check, aggregator, pipelines_instance, mocker):
+def test_invalid_url(dd_run_check, aggregator, pipelines_instance, mock_http_client):
     pipelines_instance["pipelines_controller_endpoint"] = "http://unknowwn"
 
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+    mock_http_client.get.side_effect = mock_http_responses
     with pytest.raises(Exception):
         dd_run_check(check(pipelines_instance))
 
