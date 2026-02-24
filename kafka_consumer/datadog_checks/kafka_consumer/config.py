@@ -115,6 +115,7 @@ class KafkaConfig:
         self._schema_registry_tls_cert = instance.get('schema_registry_tls_cert')
         self._schema_registry_tls_key = instance.get('schema_registry_tls_key')
         self._schema_registry_tls_ca_cert = instance.get('schema_registry_tls_ca_cert')
+        self._schema_registry_oauth_token_provider = instance.get('schema_registry_oauth_token_provider')
 
     def validate_config(self):
         if not self._kafka_connect_str:
@@ -172,6 +173,24 @@ class KafkaConfig:
             else:
                 raise ConfigurationError(
                     f"Invalid method '{method}' for sasl_oauth_token_provider. Must be 'aws_msk_iam' or 'oidc'"
+                )
+
+        if self._schema_registry_oauth_token_provider is not None:
+            if not isinstance(self._schema_registry_oauth_token_provider, dict):
+                raise ConfigurationError(
+                    "schema_registry_oauth_token_provider must be a dictionary. "
+                    f"Got: {type(self._schema_registry_oauth_token_provider)}"
+                )
+
+            if self._schema_registry_oauth_token_provider.get("url") is None:
+                raise ConfigurationError("The `url` setting of `schema_registry_oauth_token_provider` is required")
+            if self._schema_registry_oauth_token_provider.get("client_id") is None:
+                raise ConfigurationError(
+                    "The `client_id` setting of `schema_registry_oauth_token_provider` is required"
+                )
+            if self._schema_registry_oauth_token_provider.get("client_secret") is None:
+                raise ConfigurationError(
+                    "The `client_secret` setting of `schema_registry_oauth_token_provider` is required"
                 )
 
         # If `monitor_unlisted_consumer_groups` is set to true and
