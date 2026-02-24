@@ -1,0 +1,26 @@
+From 581f0ca50171b2981b81ca04479f1d1fa9eb3dcf Mon Sep 17 00:00:00 2001
+From: Alex Lopez <alex.lopez@datadoghq.com>
+Date: Tue, 3 Feb 2026 11:46:29 +0100
+Subject: [PATCH] Avoid includes intended to bring getentropy() in when we know
+ it'll fail
+
+---
+ src/rdrand.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/rdrand.c b/src/rdrand.c
+index 77d02cfc..64ddfc9f 100644
+--- a/src/rdrand.c
++++ b/src/rdrand.c
+@@ -31,7 +31,7 @@
+ #include "rdtime.h"
+ #include "tinycthread.h"
+ #include "rdmurmur2.h"
+-#ifndef _WIN32
++#if HAVE_GETENTROPY
+ /* getentropy() can be present in one of these two */
+ #include <unistd.h>
+ #include <sys/random.h>
+-- 
+2.52.0
+

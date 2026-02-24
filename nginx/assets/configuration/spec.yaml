@@ -13,6 +13,7 @@ files:
       fleet_configurable: true
       required: true
       display_priority: 2
+      formats: ["url"]
       description: |
         For every instance, you need an `nginx_status_url` and can optionally
         supply a list of tags.  This plugin requires nginx to be compiled with
