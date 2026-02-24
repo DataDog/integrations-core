@@ -47,8 +47,6 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         self._configure_collection()
 
         self._base_tags = [f"control_m_instance:{self._api_endpoint}"]
-        self._token = None
-        self._token_expiration = 0.0
 
     def _configure_auth(self):
         self._api_endpoint = self.instance.get("control_m_api_endpoint", "").rstrip("/")
@@ -84,6 +82,11 @@ class ControlMCheck(AgentCheck, ConfigMixin):
                 "token_refresh_buffer_seconds >= token_lifetime_seconds; clamping refresh buffer to %d seconds",
                 self._token_refresh_buffer,
             )
+
+        self._token = None
+        self._token_expiration = 0.0
+        self._static_token_retry_after = 0.0
+        self._static_token_retry_interval = 300.0
 
     def _configure_collection(self):
         self._job_status_limit = int(self.instance.get("job_status_limit", 200))
