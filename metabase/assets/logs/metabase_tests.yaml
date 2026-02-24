@@ -36,10 +36,12 @@ tests:
       entity_id: 11
       entity_qualified_id: "dashboard_11"
       entity_type: "dashboard"
+      evt:
+        name: "dashboard-add-cards"
       id: "178"
       timestamp: "2024-09-30T11:47:26.247269+05:30"
-      topic: "dashboard-add-cards"
-      user_id: 1
+      usr:
+        id: 1
       vendor:
         endpoint: "activity-events"
     message: |-
@@ -66,6 +68,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1727677046247
  -
   sample: |-
     {
@@ -90,10 +93,12 @@ tests:
         new-value: "UTC"
         previous-value: "UCT"
       entity_type: "setting"
+      evt:
+        name: "setting-update"
       id: "188"
       timestamp: "2024-09-30T12:37:04.133904+05:30"
-      topic: "setting-update"
-      user_id: 1
+      usr:
+        id: 1
       vendor:
         endpoint: "activity-events"
     message: |-
@@ -114,6 +119,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1727680024133
  -
   sample: |-
     {
@@ -139,18 +145,19 @@ tests:
     custom:
       database_description: "Some example data for you to play around with."
       database_name: "Sample Database"
+      entity_description: "Information on customer accounts registered with Piespace. Each account represents a new organization signing up for on-demand pies."
+      entity_display_name: "Accounts"
       entity_id: 1
+      entity_name: "ACCOUNTS"
       entity_qualified_id: "dashboard_1"
       entity_type: "table"
       id: "12"
-      table_description: "Information on customer accounts registered with Piespace. Each account represents a new organization signing up for on-demand pies."
-      table_display_name: "Accounts"
-      table_name: "ACCOUNTS"
       timestamp: "2024-09-05T11:59:10.181879Z"
-      user_email: "abc.xyz@something.com"
-      user_full_name: "Abc Xyz"
-      user_id: 1
       user_type: "personal"
+      usr:
+        email: "abc.xyz@something.com"
+        id: 1
+        name: "Abc Xyz"
       vendor:
         endpoint: "view-logs"
     message: |-
@@ -175,6 +182,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1725537550181
  -
   sample: |-
     {
@@ -244,10 +252,11 @@ tests:
       result_rows: 2
       running_time_seconds: 0.169
       started_at: "2024-09-10T10:37:35.965619Z"
-      user_email: "abc.xyz@something.com"
-      user_full_name: "Abc Xyz"
-      user_id: "1"
       user_type: "personal"
+      usr:
+        email: "abc.xyz@something.com"
+        id: "1"
+        name: "Abc Xyz"
       vendor:
         endpoint: "query-logs"
     message: |-
@@ -291,3 +300,4 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1725964655965
