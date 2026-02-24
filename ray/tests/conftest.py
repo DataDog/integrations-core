@@ -38,6 +38,8 @@ from .common import (
     WORKER3_OPENMETRICS_ENDPOINT,
 )
 
+pytest_plugins = ['datadog_checks.base.utils.http_testing']
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
