@@ -10,7 +10,7 @@ from copy import deepcopy
 import pytest
 import requests
 
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse, mock_http_client  # noqa: F401
 from datadog_checks.couchbase import Couchbase
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.docker import get_container_ip
@@ -32,8 +32,6 @@ from .common import (
     URL,
     USER,
 )
-
-pytest_plugins = ['datadog_checks.base.utils.http_testing']
 
 
 @pytest.fixture

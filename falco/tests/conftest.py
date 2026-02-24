@@ -5,12 +5,11 @@ import copy
 
 import pytest
 
+from datadog_checks.base.utils.http_testing import mock_http_client  # noqa: F401
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 
 from .common import COMPOSE_FILE, INSTANCE
-
-pytest_plugins = ['datadog_checks.base.utils.http_testing']
 
 # Needed to mount volume for logging
 E2E_METADATA = {'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro']}
