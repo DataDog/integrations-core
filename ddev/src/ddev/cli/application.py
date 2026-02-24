@@ -100,13 +100,13 @@ class Application(Terminal):
             'token': self.config.github.token,
         }
         # Make sure that envvar overrides of repo make it into config.
-        self.__config['repo'] = self.repo.name
-        # Transfer the -x/--here flag to the old CLI.
-        # In the new CLI that flag turns into a repo named "local" but the old CLI expects a bool kwarg "here".
-        kwargs = {}
-        if self.repo.name == 'local':
-            kwargs['here'] = True
-        initialize_root(self.__config, **kwargs)
+        # The local (`-x/--here`) mode should preserve the configured repo identity and only remap root to cwd.
+        repo_name = self.repo.name
+        if repo_name == 'local':
+            repo_name = self.config.repo.name
+            self.__config.setdefault('repos', {})[repo_name] = str(Path.cwd())
+        self.__config['repo'] = repo_name
+        initialize_root(self.__config)
 
     def copy(self):
         return self.__config.copy()
