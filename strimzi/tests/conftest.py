@@ -14,9 +14,9 @@ from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.strimzi import StrimziCheck
 
-pytest_plugins = ['datadog_checks.base.utils.http_testing']
-
 from .common import HERE, KUBERNETES_VERSION, STRIMZI_VERSION
+
+pytest_plugins = ['datadog_checks.base.utils.http_testing']
 
 
 def setup_strimzi():
