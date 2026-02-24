@@ -487,7 +487,7 @@ class GitHubConfig(LazilyParsedConfig):
 
                 self._field_user = user
             else:
-                self._field_user = self.raw_data['user'] = get_github_user()
+                self._field_user = get_github_user()
 
         return self._field_user
 
@@ -506,7 +506,7 @@ class GitHubConfig(LazilyParsedConfig):
 
                 self._field_token = token
             else:
-                self._field_token = self.raw_data['token'] = get_github_token()
+                self._field_token = get_github_token()
 
         return self._field_token
 
