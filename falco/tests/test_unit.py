@@ -1,12 +1,10 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from unittest import mock
-
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.falco import FalcoCheck
 
@@ -22,13 +20,11 @@ def test_empty_instance(dd_run_check):
         dd_run_check(check)
 
 
-def test_check_falco(dd_run_check, aggregator, instance):
-    mock_responses = [
-        MockResponse(file_path=get_fixture_path("falco_metrics.txt")),
+def test_check_falco(dd_run_check, aggregator, instance, mock_http):
+    mock_http.get.side_effect = [
+        MockHTTPResponse(file_path=get_fixture_path("falco_metrics.txt")),
     ]
-
-    with mock.patch('requests.Session.get', side_effect=mock_responses):
-        dd_run_check(FalcoCheck('falco', {}, [instance]))
+    dd_run_check(FalcoCheck('falco', {}, [instance]))
 
     for metric in METRICS:
         aggregator.assert_metric(metric)

@@ -8,6 +8,8 @@ import pytest
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 
+pytest_plugins = ['datadog_checks.base.utils.http_testing']
+
 from .common import COMPOSE_FILE, INSTANCE
 
 # Needed to mount volume for logging
