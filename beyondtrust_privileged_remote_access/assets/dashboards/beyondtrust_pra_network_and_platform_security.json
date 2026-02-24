@@ -88,7 +88,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:(network-activity OR api-and-integration-risk) $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:(network-activity OR api-and-integration-risk) $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -158,7 +158,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:(network-activity OR api-and-integration-risk) $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:(network-activity OR api-and-integration-risk) $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -212,7 +212,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:(network-activity OR api-and-integration-risk) $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:(network-activity OR api-and-integration-risk) $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -288,7 +288,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:(network-activity OR api-and-integration-risk) $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:(network-activity OR api-and-integration-risk) $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -364,7 +364,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:(network-activity OR api-and-integration-risk) $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:(network-activity OR api-and-integration-risk) $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -431,7 +431,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:beyondtrust-privileged-remote-access service:(network-activity OR api-and-integration-risk) $event_name $user_name $source_ip",
+                                        "query_string": "source:beyondtrust-privileged-remote-access @event_category:(network-activity OR api-and-integration-risk) $event_name $user_name $source_ip",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -522,7 +522,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:network-activity @evt.name:network_changed $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:network-activity @evt.name:network_changed $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -592,7 +592,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:network-activity @evt.name:network_changed $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:network-activity @evt.name:network_changed $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -635,7 +635,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:network-activity @evt.name:network_changed $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:network-activity @evt.name:network_changed $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -726,7 +726,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:network-activity @evt.name:(network_address_added OR network_address_changed OR network_address_removed) $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:network-activity @evt.name:(network_address_added OR network_address_changed OR network_address_removed) $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -780,7 +780,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:network-activity @evt.name:(network_address_added OR network_address_removed) $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:network-activity @evt.name:(network_address_added OR network_address_removed) $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -856,7 +856,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:network-activity @evt.name:(network_address_added OR network_address_removed) $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:network-activity @evt.name:(network_address_added OR network_address_removed) $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -932,7 +932,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:network-activity @evt.name:(network_address_added OR network_address_removed) $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:network-activity @evt.name:(network_address_added OR network_address_removed) $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1005,7 +1005,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:beyondtrust-privileged-remote-access service:network-activity @evt.name:network_address_added $event_name $user_name $source_ip",
+                                        "query_string": "source:beyondtrust-privileged-remote-access @event_category:network-activity @evt.name:network_address_added $event_name $user_name $source_ip",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1057,7 +1057,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:beyondtrust-privileged-remote-access service:network-activity @evt.name:SNMP_changed $event_name $user_name $source_ip",
+                                        "query_string": "source:beyondtrust-privileged-remote-access @event_category:network-activity @evt.name:SNMP_changed $event_name $user_name $source_ip",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1105,7 +1105,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:network-activity @evt.name:network_route_changed $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:network-activity @evt.name:network_route_changed $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1175,7 +1175,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:network-activity @evt.name:network_route_changed $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:network-activity @evt.name:network_route_changed $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1219,7 +1219,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:network-activity @evt.name:syslog_server_changed $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:network-activity @evt.name:syslog_server_changed $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1274,7 +1274,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:network-activity @evt.name:syslog_server_changed $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:network-activity @evt.name:syslog_server_changed $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1365,7 +1365,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:network-activity @evt.name:syslog_server_changed $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:network-activity @evt.name:syslog_server_changed $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1405,7 +1405,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:beyondtrust-privileged-remote-access service:network-activity $event_name $user_name $source_ip",
+                                        "query_string": "source:beyondtrust-privileged-remote-access @event_category:network-activity $event_name $user_name $source_ip",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1496,7 +1496,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:api-and-integration-risk @evt.name:api_account_added $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:api-and-integration-risk @evt.name:api_account_added $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1551,7 +1551,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:api-and-integration-risk @evt.name:api_account_removed $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:api-and-integration-risk @evt.name:api_account_removed $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1620,7 +1620,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:api-and-integration-risk @evt.name:(api_account_added OR api_account_changed OR api_account_removed) $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:api-and-integration-risk @evt.name:(api_account_added OR api_account_changed OR api_account_removed) $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1674,7 +1674,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:api-and-integration-risk @evt.name:(api_account_added OR api_account_changed OR api_account_removed) $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:api-and-integration-risk @evt.name:(api_account_added OR api_account_changed OR api_account_removed) $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1749,7 +1749,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:api-and-integration-risk @evt.name:(api_account_added OR api_account_changed OR api_account_removed) $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:api-and-integration-risk @evt.name:(api_account_added OR api_account_changed OR api_account_removed) $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1820,7 +1820,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:api-and-integration-risk @evt.name:security_provider_added $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:api-and-integration-risk @evt.name:security_provider_added $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1875,7 +1875,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:api-and-integration-risk @evt.name:security_provider_removed $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:api-and-integration-risk @evt.name:security_provider_removed $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1944,7 +1944,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:api-and-integration-risk @evt.name:(security_provider_added OR security_provider_changed OR security_provider_removed) $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:api-and-integration-risk @evt.name:(security_provider_added OR security_provider_changed OR security_provider_removed) $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1999,7 +1999,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:api-and-integration-risk @evt.name:security_provider_setting_removed $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:api-and-integration-risk @evt.name:security_provider_setting_removed $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2054,7 +2054,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:api-and-integration-risk @evt.name:security_provider_setting_added $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:api-and-integration-risk @evt.name:security_provider_setting_added $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2123,7 +2123,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:api-and-integration-risk @evt.name:(security_provider_setting_added OR security_provider_setting_changed OR security_provider_setting_removed) $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:api-and-integration-risk @evt.name:(security_provider_setting_added OR security_provider_setting_changed OR security_provider_setting_removed) $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2177,7 +2177,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-privileged-remote-access service:api-and-integration-risk @evt.name:(security_provider_setting_added OR security_provider_setting_changed OR security_provider_setting_removed) $event_name $user_name $source_ip"
+                                                "query": "source:beyondtrust-privileged-remote-access @event_category:api-and-integration-risk @evt.name:(security_provider_setting_added OR security_provider_setting_changed OR security_provider_setting_removed) $event_name $user_name $source_ip"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2250,7 +2250,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:beyondtrust-privileged-remote-access service:api-and-integration-risk @evt.name:security_provider_setting_added $event_name $user_name $source_ip",
+                                        "query_string": "source:beyondtrust-privileged-remote-access @event_category:api-and-integration-risk @evt.name:security_provider_setting_added $event_name $user_name $source_ip",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2294,7 +2294,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:beyondtrust-privileged-remote-access service:api-and-integration-risk $event_name $user_name $source_ip",
+                                        "query_string": "source:beyondtrust-privileged-remote-access @event_category:api-and-integration-risk $event_name $user_name $source_ip",
                                         "indexes": [],
                                         "storage": "hot"
                                     },

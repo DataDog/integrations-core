@@ -7,7 +7,6 @@ files:
     - type: tcp
       port: <PORT>
       source: beyondtrust-privileged-remote-access
-      service: beyondtrust-privileged-remote-access
       log_processing_rules:
         - type: include_at_match
           name: include_pra_logs

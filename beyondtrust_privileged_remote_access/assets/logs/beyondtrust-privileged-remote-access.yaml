@@ -185,11 +185,6 @@ pipeline:
               security_provider_setting_removed)"
           name: api-and-integration-risk
       target: event_category
-    - type: service-remapper
-      name: Define `event_category` as the official service of the log
-      enabled: true
-      sources:
-        - event_category
     - type: pipeline
       name: Parse FIDO2  logs
       enabled: true

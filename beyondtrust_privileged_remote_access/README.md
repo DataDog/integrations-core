@@ -160,7 +160,6 @@ sudo chmod -R 500 /etc/rsyslog.d/certs
       - type: tcp
         port: <PORT>
         source: beyondtrust-privileged-remote-access
-        service: beyondtrust-privileged-remote-access
         log_processing_rules:
           - type: include_at_match
             name: include_pra_logs
@@ -172,7 +171,7 @@ sudo chmod -R 500 /etc/rsyslog.d/certs
     ```
     See the sample configuration file ([beyondtrust_privileged_remote_access.d/conf.yaml][5]) for available options.
 
-    **Note**: Do not change the `source` and `service` values, as these parameters are integral to the pipeline's operation.
+    **Note**: Do not change the `source` value, as this parameter is integral to the pipeline's operation.
 
 3. [Restart the Agent][2].
 
