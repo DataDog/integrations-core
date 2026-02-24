@@ -110,10 +110,93 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
     """
     from pysmi.codegen import JsonCodeGen
     from pysmi.compiler import MibCompiler
+    from pysmi.mibinfo import MibInfo
     from pysmi.parser import SmiV1CompatParser
     from pysmi.reader import get_readers_from_urls
+    from pysmi.reader.httpclient import HttpReader
     from pysmi.searcher import AnyFileSearcher
     from pysmi.writer import FileWriter
+
+    # pysmi's HttpReader decodes HTTP response as UTF-8 only; MIBs with non-UTF-8 bytes
+    # (e.g. https://github.com/DataDog/mibs.snmplabs.com/blob/master/asn1/A3COM-HUAWEI-DEVICE-MIB#L593)
+    # raise UnicodeDecodeError and are reported as "missing".
+    # Use a tolerant reader for HTTP(S) URLs that decodes with errors='replace'.
+
+    def _make_readers(sources, fuzzy_matching=True):
+        readers = []
+        for src in sources:
+            if src.startswith('http://') or src.startswith('https://'):
+                readers.append(_TolerantHttpReader(src, fuzzy_matching=fuzzy_matching))
+            else:
+                readers.extend(get_readers_from_urls(src, fuzzy_matching=fuzzy_matching))
+        return readers
+
+    # This code is copied from https://github.com/lextudio/pysmi/blob/main/pysmi/reader/httpclient.py.
+    # Except that it decodes the response content with errors='replace' for non-UTF-8 bytes.
+    class _TolerantHttpReader(HttpReader):
+        """HttpReader that decodes response content with errors='replace' for non-UTF-8 bytes."""
+
+        def __init__(self, url, fuzzy_matching=True):
+            super().__init__(url)
+            self.set_options(fuzzy_matching=fuzzy_matching)
+
+        def get_data(self, mibname, **options):
+            import sys
+            import time
+
+            from pysmi import debug, error
+            from pysmi.compat import decode
+
+            headers = {"Accept": "text/plain", "User-Agent": self._user_agent}
+
+            mibname = decode(mibname)
+
+            debug.logger & debug.FLAG_READER and debug.logger(f"looking for MIB {mibname}")
+
+            for mibalias, mibfile in self.get_mib_variants(mibname, **options):
+                if self.MIB_MAGIC in self._url:
+                    url = self._url.replace(self.MIB_MAGIC, mibfile)
+                else:
+                    url = self._url + mibfile
+
+                debug.logger & debug.FLAG_READER and debug.logger(f"trying to fetch MIB from {url}")
+
+                try:
+                    response = self.session.get(url, headers=headers)
+
+                except Exception:
+                    debug.logger & debug.FLAG_READER and debug.logger(
+                        f"failed to fetch MIB from {url}: {sys.exc_info()[1]}"
+                    )
+                    continue
+
+                debug.logger & debug.FLAG_READER and debug.logger(f"HTTP response {response.status_code}")
+
+                if response.status_code == 200:
+                    try:
+                        mtime = time.mktime(
+                            time.strptime(
+                                response.headers["Last-Modified"],
+                                "%a, %d %b %Y %H:%M:%S %Z",
+                            )
+                        )
+
+                    except Exception:
+                        debug.logger & debug.FLAG_READER and debug.logger(
+                            f"malformed HTTP headers: {sys.exc_info()[1]}"
+                        )
+                        mtime = time.time()
+
+                    debug.logger & debug.FLAG_READER and debug.logger(
+                        f"fetching source MIB {url}, mtime {response.headers['Last-Modified']}"
+                    )
+
+                    return MibInfo(path=url, file=mibfile, name=mibalias, mtime=mtime), response.content.decode(
+                        "utf-8", errors='replace'
+                    )
+
+            raise error.PySmiReaderFileNotFoundError(f"source MIB {mibname} not found", reader=self)
+
 
     if debug:
         set_debug()
@@ -153,7 +236,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
         code_generator = JsonCodeGen()
         file_writer = FileWriter(compiled_mibs_sources).set_options(suffix='.json')
         mib_compiler = MibCompiler(SmiV1CompatParser(tempdir=''), code_generator, file_writer)
-        mib_compiler.add_sources(*get_readers_from_urls(*mib_sources, fuzzy_matching=True))
+        mib_compiler.add_sources(*_make_readers(mib_sources, fuzzy_matching=True))
         mib_compiler.add_searchers(*searchers)
 
         compiled_mibs, compiled_dependencies_mibs = compile_and_report_status(mib_files, mib_compiler)
