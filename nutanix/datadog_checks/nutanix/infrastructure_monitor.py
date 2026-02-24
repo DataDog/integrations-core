@@ -53,6 +53,7 @@ class InfrastructureMonitor:
         self.external_tags = []
         self.cluster_names = {}  # cluster_id -> cluster_name
         self.host_names = {}  # host_id -> host_name
+        self._categories = {}  # category_id -> category object
         self.collection_time_window = None
         # Metrics counters
         self.cluster_metrics_count = 0
@@ -65,6 +66,7 @@ class InfrastructureMonitor:
         """Reset all caches and counters for a new collection run."""
         self.cluster_names = {}
         self.host_names = {}
+        self._categories = {}
         self.external_tags = []
         self.collection_time_window = None
         self.cluster_metrics_count = 0
@@ -77,6 +79,14 @@ class InfrastructureMonitor:
         pc_label = f"PC:{self.check.pc_ip}"
 
         try:
+            # Fetch and cache categories for VM tagging
+            categories = self._list_categories()
+            self.check.log.info("[%s] Found %d categories", pc_label, len(categories))
+            for category in categories:
+                category_id = category.get("extId")
+                if category_id:
+                    self._categories[category_id] = category
+
             clusters = self._list_clusters()
             if not clusters:
                 self.check.log.warning("[%s] No clusters found", pc_label)
@@ -656,6 +666,15 @@ class InfrastructureMonitor:
         """
         clusters = self.check._get_paginated_request_data("api/clustermgmt/v4.0/config/clusters")
         return clusters
+
+    def _list_categories(self) -> list[dict]:
+        """Fetch all categories from Prism Central.
+
+        Returns:
+            List of category objects
+        """
+        categories = self.check._get_paginated_request_data("api/prism/v4.0/config/categories")
+        return categories
 
     def _list_vms_by_host(self, host_id: str) -> list[dict]:
         """Fetch all VMs for a specific host.
