@@ -8,11 +8,11 @@ from unittest.mock import MagicMock
 
 import pytest
 
-__all__ = ['MockHTTPResponse', 'mock_http']
+__all__ = ['MockHTTPResponse', 'mock_http_client']
 
 
 @pytest.fixture
-def mock_http(mocker):
+def mock_http_client(mocker):
     """Intercept HTTP calls made through RequestsWrapper; import into integration conftest.py to use.
 
     Patches get/post/put/delete/head/patch at the RequestsWrapper class level so all three
