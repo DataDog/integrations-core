@@ -27,26 +27,21 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         headers = self.instance.get("headers", {})
         self._has_static_token = any(k.lower() == "authorization" for k in headers)
 
-        auth_token_config = self.instance.get("auth_token")
-        self._has_auth_token = isinstance(auth_token_config, dict) and bool(auth_token_config)
-
         self._username = self.instance.get("control_m_username")
         self._password = self.instance.get("control_m_password")
         self._has_credentials = bool(self._username and self._password)
 
-        has_token_auth = self._has_static_token or self._has_auth_token
-        if not has_token_auth and not self._has_credentials:
+        if not self._has_static_token and not self._has_credentials:
             if self._username or self._password:
                 raise ConfigurationError(
                     "`control_m_username` and `control_m_password` must both be set or both be omitted"
                 )
             raise ConfigurationError(
-                "No authentication configured. Provide `headers` with an API token, "
-                "configure `auth_token` for dynamic token rotation, "
-                "or set both `control_m_username` and `control_m_password`"
+                "No authentication configured. Provide `headers` with an API token "
+                "or both `control_m_username` and `control_m_password`"
             )
 
-        self._use_session_login = not has_token_auth and self._has_credentials
+        self._use_session_login = not self._has_static_token and self._has_credentials
 
         # Tokens last 30 minutes by default. We can try refreshing them before they expire to interruptions.
         self._token_lifetime = self.instance.get("token_lifetime_seconds", 1800)
@@ -131,8 +126,6 @@ class ControlMCheck(AgentCheck, ConfigMixin):
     def _auth_method_tag(self):
         if self._use_session_login:
             return "auth_method:session_login"
-        if self._has_auth_token:
-            return "auth_method:auth_token"
         return "auth_method:static_token"
 
     def _auth_tags(self):
