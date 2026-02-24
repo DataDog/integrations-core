@@ -75,6 +75,7 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     kafka_client_api_version: Optional[str] = None
     kafka_cluster_id_override: Optional[str] = None
+    kafka_configs_refresh_interval: Optional[int] = None
     kafka_connect_str: Union[str, tuple[str, ...]]
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
