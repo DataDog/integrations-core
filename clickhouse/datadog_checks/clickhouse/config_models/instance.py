@@ -94,7 +94,7 @@ class InstanceConfig(BaseModel):
     compression: Optional[str] = None
     connect_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
-    database_instance_collection_interval: Optional[float] = None
+    database_identifier: Optional[DatabaseIdentifier] = None
     db: Optional[str] = None
     dbm: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
