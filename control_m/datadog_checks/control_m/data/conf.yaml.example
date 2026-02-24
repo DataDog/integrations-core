@@ -50,6 +50,14 @@ instances:
     #
   - control_m_api_endpoint: https://example.com:8443/automation-api
 
+    ## @param headers - mapping - optional
+    ## Optional HTTP headers to send with every request.
+    ## Use this for static token authentication, for example:
+    ##   Authorization: Bearer <your_token>
+    #
+    headers:
+      Authorization: Bearer <your_token>
+
     ## @param control_m_username - string - optional - default: workbench
     ## Control-M username used for session-login authentication.
     ## Must be set together with `control_m_password`.
@@ -327,14 +335,6 @@ instances:
     #   - TLS_AES_256_GCM_SHA384
     #   - TLS_CHACHA20_POLY1305_SHA256
     #   - TLS_AES_128_GCM_SHA256
-
-    ## @param headers - mapping - optional
-    ## Optional HTTP headers to send with every request.
-    ## Use this for static token authentication, for example:
-    ##   Authorization: Bearer <your_token>
-    #
-    headers:
-      Authorization: Bearer <your_token>
 
     ## @param extra_headers - mapping - optional
     ## Additional headers to send with every request.
