@@ -15,6 +15,7 @@ files:
       value:
         type: string
         example: https://example.com:8443/automation-api
+      display_priority: 2
     - name: control_m_username
       required: false
       description: |
@@ -47,6 +48,7 @@ files:
         example: 300
     - template: instances/http
       overrides:
+        headers.display_priority: 1
         headers.enabled: true
         headers.description: |
           Optional HTTP headers to send with every request.
