@@ -810,6 +810,213 @@ def test_option_metadata_tags_ok():
     assert spec.data['files'][0]['options'][0]['options'][0]['metadata_tags'] == ['test:foo']
 
 
+def test_option_formats_not_array():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              formats: nope
+              value:
+                type: string
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, instances, foo: Attribute `formats` must be an array' in spec.errors
+
+
+def test_option_formats_entry_not_string():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              formats:
+              - url
+              - 123
+              value:
+                type: string
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, instances, foo: Attribute `formats` must only contain strings' in spec.errors
+
+
+def test_option_formats_empty_array():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              formats: []
+              value:
+                type: string
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, instances, foo: Attribute `formats` must contain at least one entry' in spec.errors
+
+
+def test_option_formats_unknown_value():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              formats:
+              - url
+              - made_up_format
+              value:
+                type: string
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, instances, foo: Attribute `formats` contains unknown value(s): '
+        'made_up_format, valid values are java_jvm_options | path | port | url'
+    ) in spec.errors
+
+
+def test_option_formats_duplicate_values():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              formats:
+              - url
+              - url
+              value:
+                type: string
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, instances, foo: Attribute `formats` contains duplicate entries: url'
+    ) in spec.errors
+
+
+def test_option_formats_valid():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              formats:
+              - url
+              value:
+                type: string
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
+def test_value_type_object_property_formats_invalid():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                type: object
+                properties:
+                - name: bar
+                  type: string
+                  formats:
+                  - unknown
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, instances, foo: Attribute `formats` for property `bar` contains unknown value(s): '
+        'unknown, valid values are java_jvm_options | path | port | url'
+    ) in spec.errors
+
+
+def test_value_type_object_property_formats_valid():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              value:
+                type: object
+                properties:
+                - name: bar
+                  type: string
+                  formats:
+                  - path
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
 def test_option_no_value_nor_options():
     spec = get_spec(
         """

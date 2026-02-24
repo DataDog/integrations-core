@@ -40,3 +40,11 @@ OPENAPI_SCHEMA_PROPERTIES = {
     'title',
     'type',
 }
+
+# Allowed metadata values for integration `formats` annotations in spec options/properties.
+ALLOWED_FLEET_FORMATS = {
+    'java_jvm_options',
+    'path',
+    'port',
+    'url',
+}
