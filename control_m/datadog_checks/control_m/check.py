@@ -27,21 +27,26 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         headers = self.instance.get("headers", {})
         self._has_static_token = any(k.lower() == "authorization" for k in headers)
 
+        auth_token_config = self.instance.get("auth_token")
+        self._has_auth_token = isinstance(auth_token_config, dict) and bool(auth_token_config)
+
         self._username = self.instance.get("control_m_username")
         self._password = self.instance.get("control_m_password")
         self._has_credentials = bool(self._username and self._password)
 
-        if not self._has_static_token and not self._has_credentials:
+        has_token_auth = self._has_static_token or self._has_auth_token
+        if not has_token_auth and not self._has_credentials:
             if self._username or self._password:
                 raise ConfigurationError(
                     "`control_m_username` and `control_m_password` must both be set or both be omitted"
                 )
             raise ConfigurationError(
-                "No authentication configured. Provide either instance `headers` with an API token "
-                "or both `control_m_username` and `control_m_password`"
+                "No authentication configured. Provide `headers` with an API token, "
+                "configure `auth_token` for dynamic token rotation, "
+                "or set both `control_m_username` and `control_m_password`"
             )
 
-        self._use_session_login = not self._has_static_token and self._has_credentials
+        self._use_session_login = not has_token_auth and self._has_credentials
 
         # Tokens last 30 minutes by default. We can try refreshing them before they expire to interruptions.
         self._token_lifetime = self.instance.get("token_lifetime_seconds", 1800)
@@ -90,7 +95,6 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         self._login()
 
     def _make_request(self, method, url, **kwargs):
-        # Used in static token mode only. Make a request to the API using the static token.
         request_fn = getattr(self.http, method)
 
         if self._use_session_login:
@@ -102,10 +106,10 @@ class ControlMCheck(AgentCheck, ConfigMixin):
             return response
 
         if not self._has_credentials:
-            self.log.error("Static token returned 401 and no credentials are configured for fallback")
+            self.log.error("Token auth returned 401 and no credentials are configured for fallback")
             return response
 
-        self.log.warning("Static token returned 401; falling back to session login")
+        self.log.warning("Token auth returned 401; falling back to session login")
         self._use_session_login = True
         return self._make_session_request(request_fn, url, **kwargs)
 
@@ -127,6 +131,8 @@ class ControlMCheck(AgentCheck, ConfigMixin):
     def _auth_method_tag(self):
         if self._use_session_login:
             return "auth_method:session_login"
+        if self._has_auth_token:
+            return "auth_method:auth_token"
         return "auth_method:static_token"
 
     def _auth_tags(self):
