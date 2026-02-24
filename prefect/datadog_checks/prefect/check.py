@@ -550,13 +550,7 @@ class PrefectCheck(AgentCheck):
             self._emit_metric("flow_runs.retry_gaps_duration", retry_gap, flow_run_tags)
 
     def _check_dependency_wait(self, event_manager: EventManager) -> None:
-        # Initialize dependency wait for flow run
-        if event_manager.event_type == 'prefect.flow-run.Pending':
-            flow_run_id = event_manager.resource_id
-            self.dependency_wait[flow_run_id] = {}
-
-        # When a flow run is completed, remove the dependency wait for it
-        elif event_manager.event_type == 'prefect.flow-run.Completed':
+        if event_manager.event_type == 'prefect.flow-run.Completed':
             flow_run_id = event_manager.resource_id
             self.dependency_wait.pop(flow_run_id, None)
 
@@ -570,7 +564,7 @@ class PrefectCheck(AgentCheck):
             task_run_id = event_manager.resource_id
             flow_run_id = event_manager.event_related.get("flow-run", {}).get("id")
             if flow_run_id and task_run_id and event_manager.occurred:
-                self.dependency_wait[flow_run_id][task_run_id] = event_manager.occurred.isoformat()
+                self.dependency_wait.setdefault(flow_run_id, {})[task_run_id] = event_manager.occurred.isoformat()
 
         # When a task run is running, emit the dependency wait metric
         elif event_manager.event_type == 'prefect.task-run.Running':
