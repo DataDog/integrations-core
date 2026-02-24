@@ -197,7 +197,6 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
 
             raise error.PySmiReaderFileNotFoundError(f"source MIB {mibname} not found", reader=self)
 
-
     if debug:
         set_debug()
         from pysmi import debug
