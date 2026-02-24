@@ -8,7 +8,8 @@ from operator import attrgetter
 import pymysql
 
 from datadog_checks.mysql.cursor import CommenterDictCursor
-from datadog_checks.mysql.databases_data import DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL, DatabasesData
+from datadog_checks.mysql.schemas import MySqlSchemaCollector
+from datadog_checks.mysql.schemas_legacy import MySqlSchemaCollectorLegacy
 
 from .util import ManagedAuthConnectionMixin, connect_with_session_variables
 
@@ -27,6 +28,7 @@ from datadog_checks.base.utils.tracking import tracked_method
 
 # default pg_settings collection interval in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
+DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
 
 MARIADB_TABLE_NAME = "information_schema.GLOBAL_VARIABLES"
 MYSQL_TABLE_NAME = "performance_schema.global_variables"
@@ -48,24 +50,23 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
     """
 
     def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
-        self._databases_data_enabled = is_affirmative(config.schemas_config.get("enabled", False))
-        self._databases_data_collection_interval = config.schemas_config.get(
-            "collection_interval", DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL
-        )
         self._settings_enabled = is_affirmative(config.settings_config.get('enabled', True))
+        self._schemas_enabled = is_affirmative(config.schemas_config.get('enabled', False))
 
         self._settings_collection_interval = float(
             config.settings_config.get('collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL)
         )
+        self._schemas_collection_interval = float(
+            config.schemas_config.get('collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
+        )
 
-        if self._databases_data_enabled and not self._settings_enabled:
-            self.collection_interval = self._databases_data_collection_interval
-        elif not self._databases_data_enabled and self._settings_enabled:
+        if self._schemas_enabled and not self._settings_enabled:
+            self.collection_interval = self._schemas_collection_interval
+        elif not self._schemas_enabled and self._settings_enabled:
             self.collection_interval = self._settings_collection_interval
         else:
-            self.collection_interval = min(self._databases_data_collection_interval, self._settings_collection_interval)
-
-        self.enabled = self._databases_data_enabled or self._settings_enabled
+            self.collection_interval = min(self._settings_collection_interval, self._schemas_collection_interval)
+        self.enabled = self._settings_enabled or self._schemas_enabled
 
         super(MySQLMetadata, self).__init__(
             check,
@@ -85,9 +86,37 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
         self._uses_managed_auth = uses_managed_auth
         self._db_created_at = 0
         self._db = None
-        self._databases_data = DatabasesData(self, check, config)
+
+        # Lazy instantiation: Schema collector will be created on first use
+        self._schemas_collector = None
+
         self._last_settings_collection_time = 0
-        self._last_databases_collection_time = 0
+        self._last_schemas_collection_time = 0
+
+    def _get_schemas_collector(self):
+        """
+        Lazily instantiate the appropriate schema collector based on MySQL version.
+        Uses new collector with JSON aggregation for MySQL 8.0.19+ and MariaDB 10.5.0+,
+        falls back to legacy collector for older versions.
+        """
+        if self._schemas_collector is None:
+            # Check version to decide which collector to use
+            supports_json_aggregation = False
+            if self._check.version:
+                if self._check.is_mariadb:
+                    supports_json_aggregation = self._check.version.version_compatible((10, 5, 0))
+                else:
+                    # MySQL 8.0.19+ supports json_arrayagg
+                    supports_json_aggregation = self._check.version.version_compatible((8, 0, 19))
+
+            if supports_json_aggregation:
+                self._log.debug("Using new schema collector with JSON aggregation")
+                self._schemas_collector = MySqlSchemaCollector(self._check)
+            else:
+                self._log.debug("Using legacy schema collector")
+                self._schemas_collector = MySqlSchemaCollectorLegacy(self, self._check, self._config)
+
+        return self._schemas_collector
 
     def get_db_connection(self):
         """
@@ -147,11 +176,12 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
                                 These may be unavailable until the error is resolved. The error - {}""".format(e)
                 )
 
-        elapsed_time_databases = time.time() - self._last_databases_collection_time
-        if self._databases_data_enabled and elapsed_time_databases >= self._databases_data_collection_interval:
-            self._last_databases_collection_time = time.time()
+        elapsed_time_schemas = time.time() - self._last_schemas_collection_time
+        if self._schemas_enabled and elapsed_time_schemas >= self._schemas_collection_interval:
+            self._last_schemas_collection_time = time.time()
             try:
-                self._databases_data.collect_databases_data(self._tags)
+                collector = self._get_schemas_collector()
+                collector.collect_schemas()
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting schema data.
@@ -159,7 +189,9 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
                 )
 
     def shut_down(self):
-        self._databases_data.shut_down()
+        # Only legacy collector needs explicit shutdown
+        if self._schemas_collector and hasattr(self._schemas_collector, 'shut_down'):
+            self._schemas_collector.shut_down()
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def report_mysql_metadata(self):
@@ -184,7 +216,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
             "dbms": "mysql",
             "kind": "mysql_variables",
             "collection_interval": self.collection_interval,
-            'dbms_version': self._check.version.version + '+' + self._check.version.build,
+            'dbms_version': self._check.dbms_version,
             "tags": self._tags,
             "timestamp": time.time() * 1000,
             "cloud_metadata": self._config.cloud_metadata,
