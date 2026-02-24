@@ -2674,6 +2674,7 @@ jobs:
       matrix:
         target-env:
         - py3.13-5.7
+        - py3.13-8.0.18
         - py3.13-8.0.36
         - py3.13-8.4.0
         - py3.13-8.0-group
