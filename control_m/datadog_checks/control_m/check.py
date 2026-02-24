@@ -318,7 +318,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
 
     def _job_metric_tags(self, job):
         # Build tags for the job.
-        ctm_server = job.get("ctm") or "unknown"
+        ctm_server = str(job.get("ctm") or job.get("server") or "unknown")
         tags = self._base_tags + [f"ctm_server:{ctm_server}"]
 
         job_name = job.get("name")
