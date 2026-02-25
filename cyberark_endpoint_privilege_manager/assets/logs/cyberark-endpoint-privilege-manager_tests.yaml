@@ -16,6 +16,9 @@ tests:
       "lastEventDate" : "2025-11-26T08:41:25.753Z",
       "modificationTime" : "2025-10-27T08:41:26.729Z",
       "arrivalTime" : "2025-11-26T08:41:26.791Z",
+      "vendor" : {
+        "endpoint" : "raw-events"
+      },
       "fileQualifier" : "-3678878233479348326",
       "packageName" : "MicrosoftWindows.Client.WebExperience",
       "firstEventDate" : "2025-11-26T08:41:25.753Z",
@@ -39,10 +42,7 @@ tests:
       "publisher" : "Microsoft Windows",
       "winEventType" : 0,
       "sourceName" : "Microsoft Windows",
-      "hash" : "237859BAE41E8DD34F54F2E42DC3A788059D1E00",
-      "vendor": {
-        "endpoint": "raw-events"
-      }
+      "hash" : "237859BAE41E8DD34F54F2E42DC3A788059D1E00"
     }
   result:
     custom:
@@ -104,6 +104,9 @@ tests:
         "lastEventDate" : "2025-11-26T08:41:25.753Z",
         "modificationTime" : "2025-10-27T08:41:26.729Z",
         "arrivalTime" : "2025-11-26T08:41:26.791Z",
+        "vendor" : {
+          "endpoint" : "raw-events"
+        },
         "fileQualifier" : "-3678878233479348326",
         "packageName" : "MicrosoftWindows.Client.WebExperience",
         "firstEventDate" : "2025-11-26T08:41:25.753Z",
@@ -127,10 +130,7 @@ tests:
         "publisher" : "Microsoft Windows",
         "winEventType" : 0,
         "sourceName" : "Microsoft Windows",
-        "hash" : "237859BAE41E8DD34F54F2E42DC3A788059D1E00",
-        "vendor": {
-          "endpoint": "raw-events"
-        }
+        "hash" : "237859BAE41E8DD34F54F2E42DC3A788059D1E00"
       }
     tags:
      - "source:LOGS_SOURCE"
@@ -153,6 +153,9 @@ tests:
       "lastEventDate" : "2025-11-28T10:57:07.844Z",
       "modificationTime" : "2025-10-29T10:59:39.411Z",
       "arrivalTime" : "2025-11-28T10:59:39.425Z",
+      "vendor" : {
+        "endpoint" : "policy-audit-events"
+      },
       "fileQualifier" : "-8416518788975661649",
       "company" : "Google LLC",
       "packageName" : "Google Updater (x64) (updater.exe)",
@@ -182,10 +185,7 @@ tests:
       "arguments" : "--wake-all --system",
       "justificationEmail" : "",
       "sourceName" : "Old Application",
-      "hash" : "AFF8851C5B8C5A5A9E3086A842F04716B9CFB98B",
-      "vendor": {
-        "endpoint": "policy-audit-events"
-      }
+      "hash" : "AFF8851C5B8C5A5A9E3086A842F04716B9CFB98B"
     }
   result:
     custom:
@@ -255,6 +255,9 @@ tests:
         "lastEventDate" : "2025-11-28T10:57:07.844Z",
         "modificationTime" : "2025-10-29T10:59:39.411Z",
         "arrivalTime" : "2025-11-28T10:59:39.425Z",
+        "vendor" : {
+          "endpoint" : "policy-audit-events"
+        },
         "fileQualifier" : "-8416518788975661649",
         "company" : "Google LLC",
         "packageName" : "Google Updater (x64) (updater.exe)",
@@ -284,10 +287,7 @@ tests:
         "arguments" : "--wake-all --system",
         "justificationEmail" : "",
         "sourceName" : "Old Application",
-        "hash" : "AFF8851C5B8C5A5A9E3086A842F04716B9CFB98B",
-        "vendor": {
-          "endpoint": "raw-events"
-        }
+        "hash" : "AFF8851C5B8C5A5A9E3086A842F04716B9CFB98B"
       }
     tags:
      - "source:LOGS_SOURCE"
@@ -299,15 +299,15 @@ tests:
       "Description" : "API Get Admin audit data /API/Sets/1e97a613-w243-4f53-9a8d-d36081212de6/AdminAudit?DateFrom=2025-12-08T08:10:06.5Z&limit=500 GET DateFrom: 2025-12-08T08:10:06.5Z, DateTo: , offset: 0, limit: 500",
       "Administrator" : "user.name@example.com",
       "EventTime" : "2025-12-09T11:51:54.56Z",
+      "vendor" : {
+        "endpoint" : "set-admin-audit-events"
+      },
       "SetName" : "Test - 1",
       "LoggedFrom" : "10.10.10.10",
       "InternalSessionId" : 3023922,
       "Feature" : "Public API",
       "LoggedAt" : "2025-12-09T08:14:21.78Z",
-      "PermissionDescription" : "None",
-      "vendor": {
-        "endpoint": "set-admin-audit-events"
-      }
+      "PermissionDescription" : "None"
     }
   result:
     custom:
@@ -333,15 +333,15 @@ tests:
         "Description" : "API Get Admin audit data /API/Sets/1e97a613-w243-4f53-9a8d-d36081212de6/AdminAudit?DateFrom=2025-12-08T08:10:06.5Z&limit=500 GET DateFrom: 2025-12-08T08:10:06.5Z, DateTo: , offset: 0, limit: 500",
         "Administrator" : "user.name@example.com",
         "EventTime" : "2025-12-09T11:51:54.56Z",
+        "vendor" : {
+          "endpoint" : "set-admin-audit-events"
+        },
         "SetName" : "Test - 1",
         "LoggedFrom" : "10.10.10.10",
         "InternalSessionId" : 3023922,
         "Feature" : "Public API",
         "LoggedAt" : "2025-12-09T08:14:21.78Z",
-        "PermissionDescription" : "None",
-        "vendor": {
-          "endpoint": "raw-events"
-        }
+        "PermissionDescription" : "None"
       }
     tags:
      - "source:LOGS_SOURCE"
@@ -353,15 +353,15 @@ tests:
       "Description" : "Create Admin \"test.user@example.com\" started",
       "Administrator" : "test.user@example.com",
       "EventTime" : "2025-11-25T10:36:24.82Z",
+      "vendor" : {
+        "endpoint" : "account-admin-audit-events"
+      },
       "LoggedFrom" : "163.116.205.114",
       "InternalSessionId" : 2982762,
       "Feature" : "Account Mgmt",
       "LoggedAt" : "2025-11-25T10:15:51.207Z",
       "AccountName" : "Test Account",
-      "PermissionDescription" : "Create Administrator",
-      "vendor": {
-        "endpoint": "account-admin-audit-events"
-      }
+      "PermissionDescription" : "Create Administrator"
     }
   result:
     custom:
@@ -387,15 +387,15 @@ tests:
         "Description" : "Create Admin \"test.user@example.com\" started",
         "Administrator" : "test.user@example.com",
         "EventTime" : "2025-11-25T10:36:24.82Z",
+        "vendor" : {
+          "endpoint" : "account-admin-audit-events"
+        },
         "LoggedFrom" : "163.116.205.114",
         "InternalSessionId" : 2982762,
         "Feature" : "Account Mgmt",
         "LoggedAt" : "2025-11-25T10:15:51.207Z",
         "AccountName" : "Test Account",
-        "PermissionDescription" : "Create Administrator",
-        "vendor": {
-          "endpoint": "raw-events"
-        }
+        "PermissionDescription" : "Create Administrator"
       }
     tags:
      - "source:LOGS_SOURCE"
