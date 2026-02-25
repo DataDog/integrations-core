@@ -6,6 +6,8 @@ import os
 import subprocess
 
 import pytest
+
+from datadog_checks.base.utils.http_testing import http_client_session  # noqa: F401
 import requests
 
 from datadog_checks.dev import docker_run, temp_dir
