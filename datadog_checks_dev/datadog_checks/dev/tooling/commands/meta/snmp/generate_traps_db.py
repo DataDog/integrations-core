@@ -184,7 +184,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
                         echo_debug(f"malformed HTTP headers: {sys.exc_info()[1]}")
                         mtime = time.time()
 
-                    echo_debug(f"fetching source MIB {url}, mtime {response.headers['Last-Modified']}")
+                    echo_debug(f"fetching source MIB {url}, mtime {response.headers.get('Last-Modified', '')}")
 
                     return MibInfo(path=url, file=mibfile, name=mibalias, mtime=mtime), response.content.decode(
                         "utf-8", errors='replace'
