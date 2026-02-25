@@ -6,7 +6,6 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.base.utils.http_testing import http_client_session  # noqa: F401
 from datadog_checks.dev import get_here
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.ecs_fargate import FargateCheck
