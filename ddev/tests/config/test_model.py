@@ -1067,6 +1067,71 @@ class TestTrello:
             _ = config.trello.token
 
 
+class TestDynamicD:
+    def test_default(self):
+        config = RootConfig({})
+
+        assert config.dynamicd.llm_api_key is None
+        assert config.dynamicd.llm_api_key_fetch_command is None
+        assert 'dynamicd' not in config.raw_data
+
+    def test_not_table(self, helpers):
+        config = RootConfig({'dynamicd': 9000})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                dynamicd
+                  must be a table"""
+            ),
+        ):
+            _ = config.dynamicd
+
+    def test_parse_fields_does_not_execute_fetch_command(self, mocker):
+        run_command_mock = mocker.patch('ddev.config.model.run_command')
+        config = RootConfig({'dynamicd': {'llm_api_key_fetch_command': 'echo from-command'}})
+
+        config.parse_fields()
+
+        run_command_mock.assert_not_called()
+
+    def test_parse_fields_validates_fetch_command_type(self, helpers):
+        config = RootConfig({'dynamicd': {'llm_api_key_fetch_command': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                dynamicd -> llm_api_key_fetch_command
+                  must be a string"""
+            ),
+        ):
+            config.parse_fields()
+
+    def test_resolve_llm_api_key_fetch_command_takes_precedence(self, monkeypatch):
+        monkeypatch.setenv('ANTHROPIC_API_KEY', 'env-key')
+        config = RootConfig(
+            {'dynamicd': {'llm_api_key': 'plain-key', 'llm_api_key_fetch_command': 'echo command-key'}}
+        )
+
+        assert config.dynamicd.resolve_llm_api_key() == 'command-key'
+
+    def test_resolve_llm_api_key_plain_fallback(self, monkeypatch):
+        monkeypatch.setenv('ANTHROPIC_API_KEY', 'env-key')
+        config = RootConfig({'dynamicd': {'llm_api_key': 'plain-key'}})
+
+        assert config.dynamicd.resolve_llm_api_key() == 'plain-key'
+
+    def test_resolve_llm_api_key_env_fallback(self, monkeypatch):
+        monkeypatch.setenv('ANTHROPIC_API_KEY', 'env-key')
+        config = RootConfig({'dynamicd': {}})
+
+        assert config.dynamicd.resolve_llm_api_key() == 'env-key'
+
+
 class TestTerminal:
     def test_default(self):
         config = RootConfig({})

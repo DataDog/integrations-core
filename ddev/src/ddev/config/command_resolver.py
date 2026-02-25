@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2022-present
+# (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Per-process command resolver with deterministic caching for `*_fetch_command` secret fields."""

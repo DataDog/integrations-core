@@ -72,6 +72,7 @@ class RootConfig(LazilyParsedConfig):
         self._field_github = FIELD_TO_PARSE
         self._field_pypi = FIELD_TO_PARSE
         self._field_trello = FIELD_TO_PARSE
+        self._field_dynamicd = FIELD_TO_PARSE
         self._field_terminal = FIELD_TO_PARSE
         self._field_upgrade_check = FIELD_TO_PARSE
 
@@ -311,6 +312,26 @@ class RootConfig(LazilyParsedConfig):
     def trello(self, value):
         self.raw_data['trello'] = value
         self._field_trello = FIELD_TO_PARSE
+
+    @property
+    def dynamicd(self):
+        if self._field_dynamicd is FIELD_TO_PARSE:
+            if 'dynamicd' in self.raw_data:
+                dynamicd = self.raw_data['dynamicd']
+                if not isinstance(dynamicd, dict):
+                    self.raise_error('must be a table')
+
+                self._field_dynamicd = DynamicDConfig(dynamicd, ('dynamicd',))
+            else:
+                # Keep this section implicit unless explicitly configured.
+                self._field_dynamicd = DynamicDConfig({}, ('dynamicd',))
+
+        return self._field_dynamicd
+
+    @dynamicd.setter
+    def dynamicd(self, value):
+        self.raw_data['dynamicd'] = value
+        self._field_dynamicd = FIELD_TO_PARSE
 
     @property
     def terminal(self):
@@ -682,6 +703,70 @@ class TrelloConfig(LazilyParsedConfig):
     def token(self, value):
         self.raw_data['token'] = value
         self._field_token = FIELD_TO_PARSE
+
+
+class DynamicDConfig(LazilyParsedConfig):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._field_llm_api_key = FIELD_TO_PARSE
+        self._field_llm_api_key_fetch_command = FIELD_TO_PARSE
+        self._resolved_llm_api_key = FIELD_TO_PARSE
+
+    @property
+    def llm_api_key(self):
+        if self._field_llm_api_key is FIELD_TO_PARSE:
+            if 'llm_api_key' in self.raw_data:
+                llm_api_key = self.raw_data['llm_api_key']
+                if not isinstance(llm_api_key, str):
+                    self.raise_error('must be a string')
+                self._field_llm_api_key = llm_api_key
+            else:
+                self._field_llm_api_key = None
+        return self._field_llm_api_key
+
+    @llm_api_key.setter
+    def llm_api_key(self, value):
+        self.raw_data['llm_api_key'] = value
+        self._field_llm_api_key = FIELD_TO_PARSE
+        self._resolved_llm_api_key = FIELD_TO_PARSE
+
+    @property
+    def llm_api_key_fetch_command(self):
+        if self._field_llm_api_key_fetch_command is FIELD_TO_PARSE:
+            if 'llm_api_key_fetch_command' in self.raw_data:
+                command = self.raw_data['llm_api_key_fetch_command']
+                if not isinstance(command, str):
+                    self.raise_error('must be a string')
+                self._field_llm_api_key_fetch_command = command
+            else:
+                self._field_llm_api_key_fetch_command = None
+        return self._field_llm_api_key_fetch_command
+
+    @llm_api_key_fetch_command.setter
+    def llm_api_key_fetch_command(self, value):
+        self.raw_data['llm_api_key_fetch_command'] = value
+        self._field_llm_api_key_fetch_command = FIELD_TO_PARSE
+        self._resolved_llm_api_key = FIELD_TO_PARSE
+
+    def resolve_llm_api_key(self) -> str:
+        """Resolve LLM key lazily: fetch_command > plain value > environment."""
+        if self._resolved_llm_api_key is FIELD_TO_PARSE:
+            command = self.llm_api_key_fetch_command
+            if command is not None:
+                try:
+                    llm_api_key = run_command(command)
+                except CommandExecutionError as e:
+                    raise ConfigurationError(
+                        e.to_user_message('dynamicd.llm_api_key_fetch_command'),
+                        location=' -> '.join([*self.steps, 'llm_api_key_fetch_command']),
+                    )
+            else:
+                llm_api_key = self.llm_api_key or os.environ.get('ANTHROPIC_API_KEY', '')
+
+            self._resolved_llm_api_key = llm_api_key
+
+        return self._resolved_llm_api_key
 
 
 class TerminalConfig(LazilyParsedConfig):
