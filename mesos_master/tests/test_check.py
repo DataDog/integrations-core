@@ -158,7 +158,6 @@ def test_can_connect_service_check(
     expected_tags,
     expect_exception,
 ):
-    mock_http.options = {'verify': True}
     check = MesosMaster('mesos_master', {}, [instance])
 
     mock_http.get.side_effect = request_mock_side_effects
