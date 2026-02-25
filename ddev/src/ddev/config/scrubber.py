@@ -8,6 +8,7 @@ SCRUBBED_GLOBS = (
     'github.token_fetch_command',
     'pypi.auth',
     'pypi.auth_fetch_command',
+    'trello.key',
     'trello.token',
     'trello.key_fetch_command',
     'trello.token_fetch_command',
@@ -21,7 +22,7 @@ SCRUBBED_GLOBS = (
 TOP_LEVEL_SCRUB_KEYS = {
     'github': ('token', 'user_fetch_command', 'token_fetch_command'),
     'pypi': ('auth', 'auth_fetch_command'),
-    'trello': ('token', 'key_fetch_command', 'token_fetch_command'),
+    'trello': ('key', 'token', 'key_fetch_command', 'token_fetch_command'),
     'dynamicd': ('llm_api_key', 'llm_api_key_fetch_command'),
 }
 ORG_SCRUB_KEYS = ('api_key', 'app_key', 'api_key_fetch_command', 'app_key_fetch_command')

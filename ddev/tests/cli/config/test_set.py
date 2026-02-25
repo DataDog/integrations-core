@@ -102,6 +102,88 @@ def test_prompt_hidden(ddev, config_file, helpers):
     assert config_file.model.orgs['foo'] == {'api_key': 'bar'}
 
 
+def test_standard_hidden_trello_key(ddev, config_file, helpers):
+    result = ddev('config', 'set', 'trello.key', 'bar')
+
+    assert result.exit_code == 0, result.output
+    assert result.output == helpers.dedent(
+        """
+        New setting:
+        [trello]
+        key = "*****"
+        """
+    )
+
+    config_file.load()
+    assert config_file.model.trello.key == 'bar'
+
+
+def test_prompt_hidden_trello_key(ddev, config_file, helpers):
+    result = ddev('config', 'set', 'trello.key', input='bar')
+
+    assert result.exit_code == 0, result.output
+    assert result.output == helpers.dedent(
+        f"""
+        Value for `trello.key`:{" "}
+        New setting:
+        [trello]
+        key = "*****"
+        """
+    )
+
+    config_file.load()
+    assert config_file.model.trello.key == 'bar'
+
+
+def test_standard_hidden_dynamicd_llm_api_key(ddev, config_file, helpers):
+    result = ddev('config', 'set', 'dynamicd.llm_api_key', 'supersecret')
+
+    assert result.exit_code == 0, result.output
+    assert result.output == helpers.dedent(
+        """
+        New setting:
+        [dynamicd]
+        llm_api_key = "*****"
+        """
+    )
+
+    config_file.load()
+    assert config_file.model.dynamicd.llm_api_key == 'supersecret'
+
+
+def test_prompt_hidden_dynamicd_llm_api_key(ddev, config_file, helpers):
+    result = ddev('config', 'set', 'dynamicd.llm_api_key', input='supersecret')
+
+    assert result.exit_code == 0, result.output
+    assert result.output == helpers.dedent(
+        f"""
+        Value for `dynamicd.llm_api_key`:{" "}
+        New setting:
+        [dynamicd]
+        llm_api_key = "*****"
+        """
+    )
+
+    config_file.load()
+    assert config_file.model.dynamicd.llm_api_key == 'supersecret'
+
+
+def test_standard_hidden_dynamicd_llm_api_key_fetch_command(ddev, config_file, helpers):
+    result = ddev('config', 'set', 'dynamicd.llm_api_key_fetch_command', 'echo key')
+
+    assert result.exit_code == 0, result.output
+    assert result.output == helpers.dedent(
+        """
+        New setting:
+        [dynamicd]
+        llm_api_key_fetch_command = "*****"
+        """
+    )
+
+    config_file.load()
+    assert config_file.model.dynamicd.llm_api_key_fetch_command == 'echo key'
+
+
 def test_prevent_invalid_config(ddev, config_file, helpers):
     original_repo = config_file.model.repo.name
     result = ddev('config', 'set', 'repo', '["foo"]')

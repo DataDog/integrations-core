@@ -1132,6 +1132,77 @@ class TestDynamicD:
         assert config.dynamicd.resolve_llm_api_key() == 'env-key'
 
 
+class TestLazySecretCommandParsing:
+    def test_parse_fields_does_not_execute_fetch_commands_for_all_sections(self, mocker):
+        run_command_mock = mocker.patch('ddev.config.model.run_command')
+        config = RootConfig(
+            {
+                'github': {
+                    'user_fetch_command': 'echo gh-user',
+                    'token_fetch_command': 'echo gh-token',
+                },
+                'pypi': {'auth_fetch_command': 'echo pypi-auth'},
+                'trello': {
+                    'key_fetch_command': 'echo trello-key',
+                    'token_fetch_command': 'echo trello-token',
+                },
+                'orgs': {
+                    'default': {
+                        'api_key_fetch_command': 'echo dd-api',
+                        'app_key_fetch_command': 'echo dd-app',
+                    }
+                },
+                'dynamicd': {'llm_api_key_fetch_command': 'echo llm-key'},
+            }
+        )
+
+        config.parse_fields()
+
+        run_command_mock.assert_not_called()
+
+    def test_parse_fields_validates_github_fetch_command_type(self, helpers):
+        config = RootConfig({'github': {'user_fetch_command': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                github -> user_fetch_command
+                  must be a string"""
+            ),
+        ):
+            config.parse_fields()
+
+    def test_parse_fields_validates_pypi_fetch_command_type(self, helpers):
+        config = RootConfig({'pypi': {'auth_fetch_command': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                pypi -> auth_fetch_command
+                  must be a string"""
+            ),
+        ):
+            config.parse_fields()
+
+    def test_parse_fields_validates_trello_fetch_command_type(self, helpers):
+        config = RootConfig({'trello': {'key_fetch_command': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                trello -> key_fetch_command
+                  must be a string"""
+            ),
+        ):
+            config.parse_fields()
+
+
 class TestTerminal:
     def test_default(self):
         config = RootConfig({})
