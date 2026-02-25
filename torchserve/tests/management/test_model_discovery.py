@@ -95,7 +95,9 @@ pytestmark = pytest.mark.unit
         ),
     ],
 )
-def test_get_models(check, mocked_management_instance, expected_models, fixture_folder, status_codes, http_client_session):
+def test_get_models(
+    check, mocked_management_instance, expected_models, fixture_folder, status_codes, http_client_session
+):
     # Build all the responses our mock will return
     responses = []
     full_path = get_fixture_path(os.path.join("management", "pagination", fixture_folder))
