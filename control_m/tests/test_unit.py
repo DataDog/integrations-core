@@ -23,11 +23,14 @@ def _make_check(instance: dict[str, Any]) -> ControlMCheck:
     return ControlMCheck('control_m', {}, [instance])
 
 
-def _mock_job_response(check, monkeypatch, statuses):
+def _mock_job_response(check, monkeypatch, statuses, total=None):
+    payload = {'statuses': statuses}
+    if total is not None:
+        payload['total'] = total
     response = Mock()
     response.status_code = 200
     response.raise_for_status = Mock()
-    response.json.return_value = {'statuses': statuses}
+    response.json.return_value = payload
     monkeypatch.setattr(check, '_make_request', Mock(return_value=response))
 
 
@@ -180,6 +183,7 @@ def test_jobs_no_terminal_emits_only_rollups(
     monkeypatch: MonkeyPatch,
 ) -> None:
     check = _make_check(instance)
+    base = ['control_m_instance:https://example.com/automation-api']
     _mock_job_response(
         check,
         monkeypatch,
@@ -187,9 +191,12 @@ def test_jobs_no_terminal_emits_only_rollups(
             {'ctm': 'srv1', 'status': 'Executing'},
             {'ctm': 'srv1', 'status': 'Executing'},
         ],
+        total=10,
     )
     check._collect_job_statuses()
 
+    aggregator.assert_metric('control_m.jobs.total', value=10, tags=base, count=1)
+    aggregator.assert_metric('control_m.jobs.returned', value=2, tags=base, count=1)
     aggregator.assert_metric('control_m.jobs.active', value=2, count=1)
     aggregator.assert_metric('control_m.job.run.count', count=0)
     aggregator.assert_metric('control_m.job.run.duration_ms', count=0)
@@ -199,6 +206,8 @@ def test_jobs_no_terminal_emits_only_rollups(
     _mock_job_response(check, monkeypatch, [])
     check._collect_job_statuses()
 
+    aggregator.assert_metric('control_m.jobs.returned', value=0, tags=base, count=1)
+    aggregator.assert_metric('control_m.jobs.total', count=0)
     aggregator.assert_metric('control_m.jobs.active', count=0)
     aggregator.assert_metric('control_m.jobs.by_status', count=0)
     aggregator.assert_metric('control_m.job.run.count', count=0)
@@ -465,6 +474,8 @@ def test_check_collects_core_job_telemetry(
     base_tags = ['control_m_instance:https://example.com/automation-api']
     workbench_tags = base_tags + ['ctm_server:workbench']
 
+    aggregator.assert_metric('control_m.jobs.total', value=3, tags=base_tags, count=1)
+    aggregator.assert_metric('control_m.jobs.returned', value=3, tags=base_tags, count=1)
     aggregator.assert_metric('control_m.jobs.active', value=2, tags=workbench_tags, count=1)
     aggregator.assert_metric('control_m.jobs.waiting.total', value=1, tags=base_tags, count=1)
     aggregator.assert_metric('control_m.jobs.by_status', value=1, tags=workbench_tags + ['status:ended_ok'], count=1)
