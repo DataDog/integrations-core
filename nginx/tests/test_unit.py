@@ -163,10 +163,10 @@ def test_no_version(check, instance, caplog):
         ),
     ],
 )
-def test_get_enabled_endpoints(check, instance_plus_v7, version, use_stream, expected_endpoints, caplog):
+def test_get_enabled_endpoints(check, instance_plus_v7_backends, version, use_stream, expected_endpoints, caplog):
     caplog.clear()
     caplog.set_level(logging.DEBUG)
-    instance = deepcopy(instance_plus_v7)
+    instance = deepcopy(instance_plus_v7_backends)
     instance['use_plus_api_stream'] = use_stream
     instance['plus_api_version'] = version
     check = check(instance)
@@ -193,8 +193,8 @@ def test_get_enabled_endpoints(check, instance_plus_v7, version, use_stream, exp
 
 
 @pytest.mark.parametrize("only_query_enabled_endpoints", [(True), (False)])
-def test_only_query_enabled_endpoints(check, dd_run_check, instance_plus_v7, only_query_enabled_endpoints):
-    instance = deepcopy(instance_plus_v7)
+def test_only_query_enabled_endpoints(check, dd_run_check, instance_plus_v7_backends, only_query_enabled_endpoints):
+    instance = deepcopy(instance_plus_v7_backends)
     instance['only_query_enabled_endpoints'] = only_query_enabled_endpoints
     check = check(instance)
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
