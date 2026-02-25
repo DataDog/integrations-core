@@ -68,6 +68,51 @@ facets:
     name: Client IP
     path: network.client.ip
     source: log
+  - groups:
+      - OCSF
+    name: Activity ID
+    path: ocsf.activity_id
+    source: log
+  - groups:
+      - OCSF
+    name: Category ID
+    path: ocsf.category_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Category
+    path: ocsf.category_name
+    source: log
+  - groups:
+      - OCSF
+    name: Class ID
+    path: ocsf.class_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Class
+    path: ocsf.class_name
+    source: log
+  - groups:
+      - OCSF
+    name: Source IP Address
+    path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Status
+    path: ocsf.status
+    source: log
+  - groups:
+      - OCSF
+    name: Status ID
+    path: ocsf.status_id
+    source: log
+  - groups:
+      - OCSF
+    name: Request URL String
+    path: ocsf.http_request.url.url_string
+    source: log
 pipeline:
   type: pipeline
   name: Haproxy
@@ -164,3 +209,396 @@ pipeline:
       enabled: true
       sources:
         - http.status_category
+    - type: pipeline
+      name: OCSF pre transformations
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "*"
+      processors:
+        - type: string-builder-processor
+          name: Add product name
+          enabled: true
+          template: "HAProxy"
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add product vendor
+          enabled: true
+          template: "HAProxy"
+          target: ocsf.metadata.product.vendor_name
+          replaceMissing: false
+    - type: pipeline
+      name: OCSF sub pipeline for class Network Activity [4001]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "-@http.method:* @load_balancer.service_name:*"
+      processors:
+        - type: schema-processor
+          name: Apply OCSF schema for 4001
+          enabled: true
+          mappers:
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Traffic
+                  id: 6
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-category-mapper
+              name: ocsf.connection_info.direction_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Inbound
+                  id: 1
+              targets:
+                name: ocsf.connection_info.direction
+                id: ocsf.connection_info.direction_id
+            - type: schema-remapper
+              name: Map `network.client.ip` to `ocsf.src_endpoint.ip`
+              sources:
+                - network.client.ip
+              target: ocsf.src_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.port` to `ocsf.src_endpoint.port`
+              sources:
+                - network.client.port
+              target: ocsf.src_endpoint.port
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `load_balancer.service_name` to `ocsf.dst_endpoint.svc_name`
+              sources:
+                - load_balancer.service_name
+              target: ocsf.dst_endpoint.svc_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.bytes_written` to `ocsf.traffic.bytes`
+              sources:
+                - network.bytes_written
+              target: ocsf.traffic.bytes
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `date_access` to `ocsf.time`
+              sources:
+                - date_access
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Network Activity
+            classUid: 4001
+            extensions: []
+            profiles: []
+    - type: pipeline
+      name: OCSF sub pipeline for class HTTP Activity [4002]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@http.method:* OR @haproxy.mode:HTTP"
+      processors:
+        - type: grok-parser
+          name: Parse `ocsf.http_request.url.query_string` from `http.url`
+          enabled: true
+          source: http.url
+          samples:
+            - /api/v1/check_run/?api_key=test
+          grok:
+            supportRules: ""
+            matchRules: |
+              extract_query_string %{regex("[^?]+")}\?%{regex(".*"):ocsf.http_request.url.query_string}
+        - type: string-builder-processor
+          name: Add ocsf.connection_info.protocol_name
+          enabled: true
+          template: "HTTP"
+          target: ocsf.connection_info.protocol_name
+          replaceMissing: false
+        - type: schema-processor
+          name: Apply OCSF schema for 4002
+          enabled: true
+          mappers:
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@http.method:CONNECT OR @haproxy.mode:HTTP"
+                  name: Connect
+                  id: 1
+                - filter:
+                    query: "@http.method:DELETE"
+                  name: Delete
+                  id: 2
+                - filter:
+                    query: "@http.method:GET"
+                  name: Get
+                  id: 3
+                - filter:
+                    query: "@http.method:HEAD"
+                  name: Head
+                  id: 4
+                - filter:
+                    query: "@http.method:OPTIONS"
+                  name: Options
+                  id: 5
+                - filter:
+                    query: "@http.method:POST"
+                  name: Post
+                  id: 6
+                - filter:
+                    query: "@http.method:PUT"
+                  name: Put
+                  id: 7
+                - filter:
+                    query: "@http.method:TRACE"
+                  name: Trace
+                  id: 8
+                - filter:
+                    query: "@http.method:PATCH"
+                  name: Patch
+                  id: 9
+                - filter:
+                    query: "@http.method:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-category-mapper
+              name: ocsf.connection_info.direction_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Inbound
+                  id: 1
+              targets:
+                name: ocsf.connection_info.direction
+                id: ocsf.connection_info.direction_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@http.status_code:[200 TO 399]"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@http.status_code:[400 TO 599]"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-remapper
+              name: Map `network.client.ip` to `ocsf.src_endpoint.ip`
+              sources:
+                - network.client.ip
+              target: ocsf.src_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.port` to `ocsf.src_endpoint.port`
+              sources:
+                - network.client.port
+              target: ocsf.src_endpoint.port
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.destination.ip` to `ocsf.dst_endpoint.ip`
+              sources:
+                - network.destination.ip
+              target: ocsf.dst_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.destination.port` to `ocsf.dst_endpoint.port`
+              sources:
+                - network.destination.port
+              target: ocsf.dst_endpoint.port
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `haproxy.frontend_name` to `ocsf.app_name`
+              sources:
+                - haproxy.frontend_name
+              target: ocsf.app_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `http.method` to `ocsf.http_request.http_method`
+              sources:
+                - http.method
+              target: ocsf.http_request.http_method
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.http_request.url.url_string` to `ocsf.http_request.url.url_string`
+              sources:
+                - ocsf.http_request.url.url_string
+              target: ocsf.http_request.url.url_string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `http.url` to `ocsf.http_request.url.url_string`
+              sources:
+                - http.url
+              target: ocsf.http_request.url.url_string
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `http.url_details.path` to `ocsf.http_request.url.path`
+              sources:
+                - http.url_details.path
+              target: ocsf.http_request.url.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.http_request.url.query_string` to `ocsf.http_request.url.query_string`
+              sources:
+                - ocsf.http_request.url.query_string
+              target: ocsf.http_request.url.query_string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `http.version` to `ocsf.http_request.version`
+              sources:
+                - http.version
+              target: ocsf.http_request.version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.connection_info.protocol_name` to `ocsf.connection_info.protocol_name`
+              sources:
+                - ocsf.connection_info.protocol_name
+              target: ocsf.connection_info.protocol_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `http.version` to `ocsf.connection_info.protocol_ver`
+              sources:
+                - http.version
+              target: ocsf.connection_info.protocol_ver
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `http.status_code` to `ocsf.http_response.code`
+              sources:
+                - http.status_code
+              target: ocsf.http_response.code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `http.status_category` to `ocsf.http_response.status`
+              sources:
+                - http.status_category
+              target: ocsf.http_response.status
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.bytes_written` to `ocsf.traffic.bytes`
+              sources:
+                - network.bytes_written
+              target: ocsf.traffic.bytes
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `duration` to `ocsf.duration`
+              sources:
+                - duration
+              target: ocsf.duration
+              preserveSource: true
+              targetFormat: double
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `http.status_code` to `ocsf.status_code`
+              sources:
+                - http.status_code
+              target: ocsf.status_code
+              preserveSource: true
+              targetFormat: string
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `date_access` to `ocsf.time`
+              sources:
+                - date_access
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `syslog.date` to `ocsf.time`
+              sources:
+                - syslog.date
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: false
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: HTTP Activity
+            classUid: 4002
+            extensions: []
+            profiles: []
