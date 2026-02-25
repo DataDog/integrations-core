@@ -52,6 +52,7 @@
       "Supported OS::Windows",
       "Category::Log Collection",
       "Category::Security",
+      "Category::OS & System",
       "Offering::Integration",
       "Submitted Data Type::Logs"
     ]

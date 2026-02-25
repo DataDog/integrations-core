@@ -30,6 +30,7 @@
       ],
       "classifier_tags": [
           "Category::Log Collection",
+          "Category::Security",
           "Submitted Data Type::Logs",
           "Submitted Data Type::Metrics",
           "Offering::Integration"

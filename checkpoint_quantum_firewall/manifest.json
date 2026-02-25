@@ -58,6 +58,7 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Category::Security",
+      "Category::Log Collection",
       "Category::Network",
       "Offering::Integration",
       "Submitted Data Type::Logs"

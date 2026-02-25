@@ -38,6 +38,7 @@
       "Category::Log Collection",
       "Category::Security",
       "Category::Network",
+      "Category::OS & System",
       "Offering::Integration",
       "Submitted Data Type::Logs"
     ]
