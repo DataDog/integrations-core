@@ -4,10 +4,9 @@
 import os
 
 import pytest
-
-from datadog_checks.base.utils.http_testing import http_client_session  # noqa: F401
 import requests
 
+from datadog_checks.base.utils.http_testing import http_client_session  # noqa: F401
 from datadog_checks.dev import WaitFor, docker_run
 
 from . import common
