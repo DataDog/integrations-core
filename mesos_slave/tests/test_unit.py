@@ -186,7 +186,6 @@ def test_can_connect_service_check_state(
     expect_exception,
     expected_status,
 ):
-    mock_http.options = {'verify': True}
     check = MesosSlave('mesos_slave', {}, [instance])
     mock_http.get.side_effect = request_mock_effects
     try:
@@ -204,7 +203,6 @@ def test_can_connect_service_with_instance_cluster_name(instance, aggregator, mo
     instance['cluster_name'] = 'test-cluster'
     expected_tags = ['url:http://hello.com/state'] + cluster_name_tag + additional_tags
     expected_status = AgentCheck.OK
-    mock_http.options = {'verify': True}
     check = MesosSlave('mesos_slave', {}, [instance])
     mock_http.get.side_effect = [mock.MagicMock(status_code=200, content='{}')]
     try:
@@ -229,7 +227,6 @@ def test_can_connect_service_check_stats(
     expect_exception,
     expected_status,
 ):
-    mock_http.options = {'verify': True}
     check = MesosSlave('mesos_slave', {}, [instance])
     mock_http.get.side_effect = request_mock_effects
     try:
