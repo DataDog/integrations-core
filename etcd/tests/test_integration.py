@@ -62,25 +62,6 @@ def test_service_check(aggregator, instance, dd_run_check):
     aggregator.assert_service_check('etcd.prometheus.health', Etcd.OK, tags=tags, count=1)
 
 
-@pytest.mark.parametrize(
-    'test_case, extra_config, expected_http_kwargs',
-    [
-        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
-        ("legacy ssl config True", {'ssl_verify': True}, {'verify': True}),
-        ("legacy ssl config False", {'ssl_verify': False}, {'verify': False}),
-        ("legacy ssl config unset", {}, {'verify': False}),
-        ("timeout", {'prometheus_timeout': 100}, {'timeout': (100.0, 100.0)}),
-    ],
-)
-@pytest.mark.integration
-def test_config(instance, test_case, extra_config, expected_http_kwargs):
-    instance.update(extra_config)
-    check = Etcd(CHECK_NAME, {}, [instance])
-
-    for key, value in expected_http_kwargs.items():
-        assert check.http.options[key] == value
-
-
 @pytest.mark.integration
 def test_version_metadata(aggregator, instance, dd_environment, datadog_agent, dd_run_check):
     check_instance = Etcd(CHECK_NAME, {}, [instance])

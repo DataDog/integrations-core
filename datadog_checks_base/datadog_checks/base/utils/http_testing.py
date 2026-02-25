@@ -2,11 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+from datetime import timedelta
 from io import BytesIO
 from typing import Any, Iterator
 from unittest.mock import MagicMock
 
 import pytest
+
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 
 __all__ = ['MockHTTPResponse', 'mock_http']
 
@@ -60,9 +63,6 @@ class MockHTTPResponse:
         self.headers = {k.lower(): v for k, v in (headers or {}).items()}
         self.cookies = cookies or {}
         self.encoding: str | None = None
-
-        from datetime import timedelta
-
         self.elapsed = timedelta(seconds=elapsed_seconds)
         self._stream = BytesIO(self._content)
 
@@ -82,8 +82,6 @@ class MockHTTPResponse:
 
     def raise_for_status(self) -> None:
         if self.status_code >= 400:
-            from datadog_checks.base.utils.http_exceptions import HTTPStatusError
-
             message = (
                 f'{self.status_code} Client Error' if self.status_code < 500 else f'{self.status_code} Server Error'
             )
