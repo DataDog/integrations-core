@@ -19,6 +19,323 @@ from datadog_checks.control_m import ControlMCheck
 FIXTURE_DIR = Path(__file__).parent / 'fixtures'
 
 
+def _make_check(instance: dict[str, Any]) -> ControlMCheck:
+    return ControlMCheck('control_m', {}, [instance])
+
+
+def _mock_job_response(check, monkeypatch, statuses):
+    response = Mock()
+    response.status_code = 200
+    response.raise_for_status = Mock()
+    response.json.return_value = {'statuses': statuses}
+    monkeypatch.setattr(check, '_make_request', Mock(return_value=response))
+
+
+@pytest.mark.parametrize(
+    'raw, expected',
+    [
+        ('Ended OK', 'ended_ok'),
+        ('ended ok', 'ended_ok'),
+        ('ENDED OK', 'ended_ok'),
+        ('Ended Not OK', 'ended_not_ok'),
+        ('Executing', 'executing'),
+        ('Wait Condition', 'wait_condition'),
+        ('Waiting for Resource', 'wait_resource'),
+        ('Cancelled', 'canceled'),
+        ('canceled', 'canceled'),
+        ('Waiting for Host', 'wait_host'),
+        ('Wait Workload', 'wait_workload'),
+        (None, 'unknown'),
+        ('', 'unknown'),
+        ('SomethingNew', 'unknown'),
+    ],
+)
+def test_normalize_status(instance: dict[str, Any], raw: str | None, expected: str) -> None:
+    assert _make_check(instance)._normalize_status(raw) == expected
+
+
+@pytest.mark.parametrize(
+    'status, expected',
+    [
+        ('ended_ok', 'ok'),
+        ('ended_not_ok', 'failed'),
+        ('canceled', 'canceled'),
+        ('executing', 'unknown'),
+        ('wait_condition', 'unknown'),
+    ],
+)
+def test_result_from_status(instance: dict[str, Any], status: str, expected: str) -> None:
+    assert _make_check(instance)._result_from_status(status) == expected
+
+
+@pytest.mark.parametrize(
+    'job, expected',
+    [
+        ({'startTime': '20260115100000', 'endTime': '20260115103000'}, 1_800_000),
+        ({'startTime': 'Jan 15, 2026, 10:00:00 AM', 'endTime': 'Jan 15, 2026, 10:30:00 AM'}, 1_800_000),
+        ({'startTime': '20260115100000', 'endTime': '20260115100000'}, 0),
+        ({'startTime': ['20260115100000'], 'endTime': ['20260115103000']}, 1_800_000),
+    ],
+)
+def test_duration_ms_valid(instance: dict[str, Any], job: dict, expected: int) -> None:
+    assert _make_check(instance)._duration_ms(job) == expected
+
+
+@pytest.mark.parametrize(
+    'job',
+    [
+        {'endTime': '20260115103000'},
+        {'startTime': '20260115100000'},
+        {'startTime': '20260115103000', 'endTime': '20260115100000'},
+        {'startTime': [], 'endTime': '20260115103000'},
+    ],
+)
+def test_duration_ms_returns_none(instance: dict[str, Any], job: dict) -> None:
+    assert _make_check(instance)._duration_ms(job) is None
+
+
+def test_job_metric_tags_full(instance: dict[str, Any], aggregator: AggregatorStub) -> None:
+    check = _make_check(instance)
+    tags = check._job_metric_tags({'ctm': 'srv1', 'name': 'my_job', 'folder': 'my_folder', 'type': 'Command'})
+    check.gauge('_test', 1, tags=tags)
+
+    aggregator.assert_metric_has_tags(
+        'control_m._test',
+        [
+            'ctm_server:srv1',
+            'job_name:my_job',
+            'folder:my_folder',
+            'type:command',
+        ],
+    )
+
+
+def test_job_metric_tags_minimal_and_server_fallback(instance: dict[str, Any], aggregator: AggregatorStub) -> None:
+    check = _make_check(instance)
+
+    check.gauge('_test', 1, tags=check._job_metric_tags({}))
+    aggregator.assert_metric_has_tag('control_m._test', 'ctm_server:unknown')
+    with pytest.raises(AssertionError):
+        aggregator.assert_metric_has_tag_prefix('control_m._test', 'job_name:')
+
+    aggregator.reset()
+
+    check.gauge('_test', 1, tags=check._job_metric_tags({'server': 'alt_srv'}))
+    aggregator.assert_metric_has_tag('control_m._test', 'ctm_server:alt_srv')
+
+    aggregator.reset()
+
+    check.gauge('_test', 1, tags=check._job_metric_tags({'ctm': 'primary', 'server': 'secondary'}))
+    aggregator.assert_metric_has_tag('control_m._test', 'ctm_server:primary')
+
+
+def test_server_health_mixed_states(instance: dict[str, Any], aggregator: AggregatorStub) -> None:
+    check = _make_check(instance)
+    check._collect_server_health(
+        [
+            {'name': 'srv_up', 'state': 'Up'},
+            {'name': 'srv_down', 'state': 'Disconnected'},
+            {'name': 'srv_no_state'},
+        ]
+    )
+
+    base = ['control_m_instance:https://example.com/automation-api']
+    aggregator.assert_metric('control_m.server.up', value=1, tags=base + ['ctm_server:srv_up', 'state:up'])
+    aggregator.assert_metric('control_m.server.up', value=0, tags=base + ['ctm_server:srv_down', 'state:disconnected'])
+    aggregator.assert_metric('control_m.server.up', value=0, tags=base + ['ctm_server:srv_no_state', 'state:unknown'])
+
+
+@pytest.mark.parametrize(
+    'server_entry, expected_tag',
+    [
+        ({'name': 'by_name', 'state': 'Up'}, 'ctm_server:by_name'),
+        ({'ctm': 'by_ctm', 'state': 'Up'}, 'ctm_server:by_ctm'),
+        ({'server': 'by_server', 'state': 'Up'}, 'ctm_server:by_server'),
+        ({'state': 'Up'}, 'ctm_server:unknown'),
+    ],
+)
+def test_server_health_name_fallback(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    server_entry: dict,
+    expected_tag: str,
+) -> None:
+    check = _make_check(instance)
+    check._collect_server_health([server_entry])
+
+    aggregator.assert_metric('control_m.server.up', count=1)
+    aggregator.assert_metric_has_tag('control_m.server.up', expected_tag)
+
+
+def test_server_health_non_list_is_noop(instance: dict[str, Any], aggregator: AggregatorStub) -> None:
+    check = _make_check(instance)
+    check._collect_server_health({'error': 'not a list'})
+
+    aggregator.assert_metric('control_m.server.up', count=0)
+
+
+def test_jobs_no_terminal_emits_only_rollups(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    check = _make_check(instance)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [
+            {'ctm': 'srv1', 'status': 'Executing'},
+            {'ctm': 'srv1', 'status': 'Executing'},
+        ],
+    )
+    check._collect_job_statuses()
+
+    aggregator.assert_metric('control_m.jobs.active', value=2, count=1)
+    aggregator.assert_metric('control_m.job.run.count', count=0)
+    aggregator.assert_metric('control_m.job.run.duration_ms', count=0)
+
+    aggregator.reset()
+
+    _mock_job_response(check, monkeypatch, [])
+    check._collect_job_statuses()
+
+    aggregator.assert_metric('control_m.jobs.active', count=0)
+    aggregator.assert_metric('control_m.jobs.by_status', count=0)
+    aggregator.assert_metric('control_m.job.run.count', count=0)
+
+
+def test_jobs_terminal_without_timestamps_emits_count_only(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    check = _make_check(instance)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [
+            {'ctm': 'srv1', 'name': 'no_times', 'status': 'Ended OK'},
+        ],
+    )
+    check._collect_job_statuses()
+
+    aggregator.assert_metric('control_m.job.run.count', value=1, count=1)
+    aggregator.assert_metric('control_m.job.run.duration_ms', count=0)
+
+
+def test_jobs_all_terminal_statuses_and_result_tags(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    check = _make_check(instance)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [
+            {'ctm': 'srv1', 'name': 'job_fail', 'status': 'Ended Not OK'},
+            {'ctm': 'srv1', 'name': 'job_cancel', 'status': 'Cancelled'},
+            {'server': 'alt_server', 'name': 'job_ok', 'status': 'Ended OK'},
+        ],
+    )
+    check._collect_job_statuses()
+
+    aggregator.assert_metric('control_m.job.run.count', count=3)
+    aggregator.assert_metric_has_tag('control_m.job.run.count', 'result:failed')
+    aggregator.assert_metric_has_tag('control_m.job.run.count', 'result:canceled')
+    aggregator.assert_metric_has_tag('control_m.job.run.count', 'result:ok')
+    aggregator.assert_metric_has_tag('control_m.job.run.count', 'ctm_server:alt_server')
+
+
+def test_jobs_multiple_servers_rollup(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    check = _make_check(instance)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [
+            {'ctm': 'srv_a', 'status': 'Executing'},
+            {'ctm': 'srv_a', 'status': 'Wait Condition'},
+            {'ctm': 'srv_b', 'status': 'Executing'},
+        ],
+    )
+    check._collect_job_statuses()
+
+    base = ['control_m_instance:https://example.com/automation-api']
+    aggregator.assert_metric('control_m.jobs.active', value=2, tags=base + ['ctm_server:srv_a'], count=1)
+    aggregator.assert_metric('control_m.jobs.active', value=1, tags=base + ['ctm_server:srv_b'], count=1)
+    aggregator.assert_metric('control_m.jobs.waiting.total', value=1, tags=base, count=1)
+    aggregator.assert_metric('control_m.jobs.waiting.total', value=1, tags=base + ['ctm_server:srv_a'], count=1)
+
+
+def test_jobs_api_failure_and_bad_entries_handled_gracefully(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    check = _make_check(instance)
+
+    response = Mock(status_code=500)
+    response.raise_for_status = Mock(side_effect=Exception("server error"))
+    monkeypatch.setattr(check, '_make_request', Mock(return_value=response))
+    check._collect_job_statuses()
+    aggregator.assert_metric('control_m.job.run.count', count=0)
+
+    aggregator.reset()
+
+    _mock_job_response(check, monkeypatch, ["not a dict", None, {'ctm': 'srv1', 'status': 'Executing'}])
+    check._collect_job_statuses()
+    aggregator.assert_metric('control_m.jobs.active', value=1, count=1)
+
+
+def test_metadata_version_from_first_server(instance: dict[str, Any], datadog_agent: Any) -> None:
+    check = _make_check(instance)
+    check._collect_metadata(
+        [
+            {'name': 's1', 'version': '9.0.21.080'},
+            {'name': 's2', 'version': '9.1.00.000'},
+        ]
+    )
+    datadog_agent.assert_metadata(check.check_id, {'version.raw': '9.0.21.080'})
+
+
+@pytest.mark.parametrize(
+    'servers',
+    [
+        [{'name': 's1'}],
+        [],
+        {'error': 'unexpected'},
+    ],
+)
+def test_metadata_no_version_found(instance: dict[str, Any], datadog_agent: Any, servers: Any) -> None:
+    check = _make_check(instance)
+    check._collect_metadata(servers)
+    datadog_agent.assert_metadata(check.check_id, {})
+
+
+def test_session_token_refresh_behavior() -> None:
+    instance = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'control_m_username': 'workbench',
+        'control_m_password': 'workbench',
+        'token_refresh_buffer_seconds': 300,
+    }
+    check = _make_check(instance)
+    check._login = Mock()
+    check._token = 'existing-token'
+
+    check._token_expiration = time.monotonic() + check._token_refresh_buffer + 10
+    check._ensure_token()
+    check._login.assert_not_called()
+
+    check._token_expiration = time.monotonic() + check._token_refresh_buffer - 1
+    check._ensure_token()
+    check._login.assert_called_once()
+
+
 def test_check_can_connect(
     dd_run_check: Callable[[AgentCheck, bool], None],
     aggregator: AggregatorStub,
@@ -26,7 +343,7 @@ def test_check_can_connect(
     mock_http_response: Callable[..., Any],
 ) -> None:
     mock_http_response((FIXTURE_DIR / 'config_servers_response.txt').read_text())
-    check = ControlMCheck('control_m', {}, [instance])
+    check = _make_check(instance)
     dd_run_check(check)
 
     aggregator.assert_service_check('control_m.can_connect', status=AgentCheck.OK, count=1)
@@ -56,7 +373,7 @@ def test_check_connectivity_failure_reports_critical(
     mock_http_response: Callable[..., Any],
 ) -> None:
     mock_http_response(status_code=500)
-    check = ControlMCheck('control_m', {}, [instance])
+    check = _make_check(instance)
 
     with pytest.raises(Exception):
         dd_run_check(check)
@@ -80,7 +397,7 @@ def test_check_session_login_mode(
         'control_m_username': 'workbench',
         'control_m_password': 'workbench',
     }
-    check = ControlMCheck('control_m', {}, [instance])
+    check = _make_check(instance)
 
     response = Mock()
     response.status_code = 200
@@ -112,35 +429,13 @@ def test_check_session_login_mode(
     )
 
 
-def test_session_token_refresh_behavior() -> None:
-    instance = {
-        'control_m_api_endpoint': 'https://example.com/automation-api',
-        'control_m_username': 'workbench',
-        'control_m_password': 'workbench',
-        'token_refresh_buffer_seconds': 300,
-    }
-    check = ControlMCheck('control_m', {}, [instance])
-    check._login = Mock()
-    check._token = 'existing-token'
-
-    # Token has plenty of remaining lifetime; no refresh should occur.
-    check._token_expiration = time.monotonic() + check._token_refresh_buffer + 10
-    check._ensure_token()
-    check._login.assert_not_called()
-
-    # Token is within the refresh buffer; refresh should occur.
-    check._token_expiration = time.monotonic() + check._token_refresh_buffer - 1
-    check._ensure_token()
-    check._login.assert_called_once()
-
-
 def test_check_collects_core_job_telemetry(
     dd_run_check: Callable[[AgentCheck, bool], None],
     aggregator: AggregatorStub,
     instance: dict[str, Any],
     monkeypatch: MonkeyPatch,
 ) -> None:
-    check = ControlMCheck('control_m', {}, [instance])
+    check = _make_check(instance)
 
     servers_payload = (FIXTURE_DIR / 'config_servers_response.txt').read_text()
     jobs_payload = json.loads((FIXTURE_DIR / 'jobs_status_response.txt').read_text())
@@ -168,37 +463,18 @@ def test_check_collects_core_job_telemetry(
     dd_run_check(check)
 
     base_tags = ['control_m_instance:https://example.com/automation-api']
-    workbench_tags = ['control_m_instance:https://example.com/automation-api', 'ctm_server:workbench']
+    workbench_tags = base_tags + ['ctm_server:workbench']
 
     aggregator.assert_metric('control_m.jobs.active', value=2, tags=workbench_tags, count=1)
     aggregator.assert_metric('control_m.jobs.waiting.total', value=1, tags=base_tags, count=1)
+    aggregator.assert_metric('control_m.jobs.by_status', value=1, tags=workbench_tags + ['status:ended_ok'], count=1)
     aggregator.assert_metric(
-        'control_m.jobs.by_status',
-        value=1,
-        tags=workbench_tags + ['status:ended_ok'],
-        count=1,
+        'control_m.jobs.by_status', value=1, tags=workbench_tags + ['status:wait_condition'], count=1
+    )
+    aggregator.assert_metric('control_m.jobs.by_status', value=1, tags=workbench_tags + ['status:executing'], count=1)
+    aggregator.assert_metric(
+        'control_m.job.run.count', value=1, tags=workbench_tags + ['job_name:job_ok', 'result:ok'], count=1
     )
     aggregator.assert_metric(
-        'control_m.jobs.by_status',
-        value=1,
-        tags=workbench_tags + ['status:wait_condition'],
-        count=1,
-    )
-    aggregator.assert_metric(
-        'control_m.jobs.by_status',
-        value=1,
-        tags=workbench_tags + ['status:executing'],
-        count=1,
-    )
-    aggregator.assert_metric(
-        'control_m.job.run.count',
-        value=1,
-        tags=workbench_tags + ['job_name:job_ok', 'result:ok'],
-        count=1,
-    )
-    aggregator.assert_metric(
-        'control_m.job.run.duration_ms',
-        value=60000,
-        tags=workbench_tags + ['job_name:job_ok', 'result:ok'],
-        count=1,
+        'control_m.job.run.duration_ms', value=60000, tags=workbench_tags + ['job_name:job_ok', 'result:ok'], count=1
     )
