@@ -6,7 +6,7 @@ from collections import ChainMap
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
-from .constants import ISTIOD_NAMESPACE, WAYPOINT_NAMESPACE, ZTUNNEL_NAMESPACE
+from .constants import ISTIOD_NAMESPACE
 from .metrics import (
     ISTIOD_METRICS,
     ISTIOD_VERSION,
@@ -64,12 +64,14 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
             )
 
         # Ztunnel provides L4 TCP metrics for ambient mesh
+        ztunnel_namespace = istiod_namespace + ".ztunnel"
         if ztunnel_endpoint:
-            self.scraper_configs.append(self._generate_config(ztunnel_endpoint, ZTUNNEL_METRICS, ZTUNNEL_NAMESPACE))
+            self.scraper_configs.append(self._generate_config(ztunnel_endpoint, ZTUNNEL_METRICS, ztunnel_namespace))
 
         # Waypoint provides L7 HTTP/gRPC metrics (optional in ambient mode)
+        waypoint_namespace = istiod_namespace + ".waypoint"
         if waypoint_endpoint:
-            self.scraper_configs.append(self._generate_config(waypoint_endpoint, WAYPOINT_METRICS, WAYPOINT_NAMESPACE))
+            self.scraper_configs.append(self._generate_config(waypoint_endpoint, WAYPOINT_METRICS, waypoint_namespace))
 
         # Control plane metrics are the same for both modes
         if istiod_endpoint:
@@ -84,6 +86,8 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
             'namespace': namespace,
         }
         config.update(self.instance)
+        # Restore per-scraper namespace so custom ztunnel/waypoint/mesh namespaces are not overwritten by instance
+        config['namespace'] = namespace
         return config
 
     def create_scraper(self, config):

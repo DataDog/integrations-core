@@ -1,0 +1,21 @@
+# Minimal ztunnel Prometheus metrics for Istio ambient mode (v1.24+)
+# TYPE istio_tcp_connections_opened_total counter
+istio_tcp_connections_opened_total{} 100
+# TYPE istio_tcp_connections_closed_total counter
+istio_tcp_connections_closed_total{} 98
+# TYPE istio_tcp_sent_bytes_total counter
+istio_tcp_sent_bytes_total{} 1024
+# TYPE istio_tcp_received_bytes_total counter
+istio_tcp_received_bytes_total{} 2048
+# TYPE istio_dns_requests_total counter
+istio_dns_requests_total{} 50
+# TYPE istio_dns_upstream_requests_total counter
+istio_dns_upstream_requests_total{} 48
+# TYPE istio_dns_upstream_failures_total counter
+istio_dns_upstream_failures_total{} 0
+# TYPE istio_connection_opens_total counter
+istio_connection_opens_total{} 100
+# TYPE istio_connection_closes_total counter
+istio_connection_closes_total{} 98
+# TYPE istio_build gauge
+istio_build{component="ztunnel",tag="1.24.0"} 1
