@@ -114,24 +114,19 @@ class VSphereAPI(object):
         Docs for vim.ServiceInstance:
             https://vdc-download.vmware.com/vmwb-repository/dcr-public/b525fb12-61bb-4ede-b9e3-c4a1f8171510/99ba073a-60e9-4933-8690-149860ce8754/doc/vim.ServiceInstance.html
         """
+        tls_ciphers = self.config.tls_ciphers or []
         context = None
         if not self.config.ssl_verify:
-            context = create_ssl_context({"tls_verify": False, "tls_ciphers": self.config.tls_ciphers or []})
-        elif self.config.ssl_capath or self.config.ssl_cafile:
+            context = create_ssl_context({"tls_verify": False, "tls_ciphers": tls_ciphers})
+        elif self.config.ssl_capath or self.config.ssl_cafile or tls_ciphers:
             # `check_hostname` must be enabled as well to verify the authenticity of a cert.
             context = create_ssl_context(
-                {"tls_verify": True, "tls_check_hostname": True, "tls_ciphers": self.config.tls_ciphers or []}
+                {"tls_verify": True, "tls_check_hostname": True, "tls_ciphers": tls_ciphers}
             )
             if self.config.ssl_capath:
                 context.load_verify_locations(cafile=None, capath=self.config.ssl_capath)
-            else:
+            elif self.config.ssl_cafile:
                 context.load_verify_locations(cafile=self.config.ssl_cafile, capath=None)
-        elif self.config.tls_ciphers:
-            # ssl_verify=True, no custom CA, but tls_ciphers is configured.
-            # Must create a context to apply cipher configuration.
-            context = create_ssl_context(
-                {"tls_verify": True, "tls_check_hostname": True, "tls_ciphers": self.config.tls_ciphers}
-            )
         try:
             # Object returned by SmartConnect is a ServerInstance
             # https://www.vmware.com/support/developer/vc-sdk/visdk2xpubs/ReferenceGuide/vim.ServiceInstance.html
