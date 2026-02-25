@@ -4,7 +4,7 @@
 import json
 from io import BytesIO
 from typing import Any, Iterator
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, PropertyMock, create_autospec
 
 import pytest
 
@@ -12,24 +12,20 @@ __all__ = ['MockHTTPResponse', 'mock_http']
 
 
 @pytest.fixture
-def mock_http(mocker):
-    """Intercept HTTP calls made through RequestsWrapper; import into integration conftest.py to use.
+def mock_http(mocker: Any) -> Any:
+    """Intercept HTTP calls made through AgentCheck.http; import into integration conftest.py to use.
 
-    Patches get/post/put/delete/head/patch at the RequestsWrapper class level so all three
-    HTTP paths are intercepted (AgentCheck.http, OpenMetrics V2 scraper, and health-check
-    handlers that create their own wrappers). Real RequestsWrapper instances are still
-    created, so check.http.options is populated and available for config assertions.
+    Patches AgentCheck.http with a create_autospec(HTTPClientProtocol) mock, constraining it
+    to the protocol interface and enforcing call signatures. Because the OM V2 scraper is
+    changed to use check.http directly, this single patch covers both AgentCheck.http and
+    the scraper HTTP path.
     """
-    from datadog_checks.base.utils.http import RequestsWrapper
+    from datadog_checks.base.checks.base import AgentCheck
+    from datadog_checks.base.utils.http_protocol import HTTPClientProtocol
 
-    container = MagicMock()
-    mocker.patch.object(RequestsWrapper, 'get', container.get)
-    mocker.patch.object(RequestsWrapper, 'post', container.post)
-    mocker.patch.object(RequestsWrapper, 'put', container.put)
-    mocker.patch.object(RequestsWrapper, 'delete', container.delete)
-    mocker.patch.object(RequestsWrapper, 'head', container.head)
-    mocker.patch.object(RequestsWrapper, 'patch', container.patch)
-    return container
+    client = create_autospec(HTTPClientProtocol)
+    mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
+    return client
 
 
 class MockHTTPResponse:
