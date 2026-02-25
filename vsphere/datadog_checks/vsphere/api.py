@@ -120,9 +120,7 @@ class VSphereAPI(object):
             context = create_ssl_context({"tls_verify": False, "tls_ciphers": tls_ciphers})
         elif self.config.ssl_capath or self.config.ssl_cafile or tls_ciphers:
             # `check_hostname` must be enabled as well to verify the authenticity of a cert.
-            context = create_ssl_context(
-                {"tls_verify": True, "tls_check_hostname": True, "tls_ciphers": tls_ciphers}
-            )
+            context = create_ssl_context({"tls_verify": True, "tls_check_hostname": True, "tls_ciphers": tls_ciphers})
             if self.config.ssl_capath:
                 context.load_verify_locations(cafile=None, capath=self.config.ssl_capath)
             elif self.config.ssl_cafile:
