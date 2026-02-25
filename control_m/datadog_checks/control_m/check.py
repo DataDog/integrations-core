@@ -209,10 +209,11 @@ class ControlMCheck(AgentCheck, ConfigMixin):
                     tags=auth_tags,
                     message=f"Failed to authenticate to Control-M API: {e}",
                 )
+                self.gauge("can_login", 0, tags=auth_tags)
                 self.gauge("can_connect", 0, tags=auth_tags)
                 raise
             self.service_check(_SERVICE_CHECK_CAN_LOGIN, self.OK, tags=auth_tags)
-
+            self.gauge("can_login", 1, tags=auth_tags)
         try:
             response = self._make_request("get", f"{self._api_endpoint}/config/servers")
             response.raise_for_status()
