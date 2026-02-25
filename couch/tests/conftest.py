@@ -8,6 +8,7 @@ from copy import deepcopy
 import pytest
 import requests
 
+from datadog_checks.base.utils.http_testing import mock_http_client  # noqa: F401
 from datadog_checks.couch import CouchDb
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitFor
