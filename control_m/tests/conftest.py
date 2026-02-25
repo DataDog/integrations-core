@@ -15,3 +15,12 @@ def instance():
         'control_m_api_endpoint': 'https://example.com/automation-api',
         'headers': {'Authorization': 'Bearer test-token'},
     }
+
+
+@pytest.fixture
+def session_instance():
+    return {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'control_m_username': 'workbench',
+        'control_m_password': 'workbench',
+    }
