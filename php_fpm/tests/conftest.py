@@ -7,6 +7,7 @@ from copy import deepcopy
 
 import pytest
 
+from datadog_checks.base.utils.http_testing import mock_http  # noqa: F401
 from datadog_checks.dev import docker_run, get_docker_hostname
 from datadog_checks.php_fpm import PHPFPMCheck
 
