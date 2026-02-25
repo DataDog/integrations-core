@@ -54,9 +54,9 @@ def test_check_unique_operator(
     instance,
     metrics,
     tag,
-    mock_http_client,
+    mock_http,
 ):
-    mock_http_client.get.side_effect = mock_http_responses
+    mock_http.get.side_effect = mock_http_responses
     dd_run_check(check(instance))
 
     for expected_metric in metrics:
@@ -75,8 +75,8 @@ def test_check_unique_operator(
     assert len(aggregator.service_check_names) == 1
 
 
-def test_check_all_operators(dd_run_check, aggregator, check, mock_http_client):
-    mock_http_client.get.side_effect = mock_http_responses
+def test_check_all_operators(dd_run_check, aggregator, check, mock_http):
+    mock_http.get.side_effect = mock_http_responses
     dd_run_check(
         check(
             {

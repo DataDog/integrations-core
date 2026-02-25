@@ -3,7 +3,7 @@ import os
 import pytest
 import requests
 
-from datadog_checks.base.utils.http_testing import mock_http_client  # noqa: F401
+from datadog_checks.base.utils.http_testing import mock_http  # noqa: F401
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev import TempDir, docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor

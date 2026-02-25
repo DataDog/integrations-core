@@ -20,8 +20,8 @@ def test_empty_instance(dd_run_check):
         dd_run_check(check)
 
 
-def test_check_falco(dd_run_check, aggregator, instance, mock_http_client):
-    mock_http_client.get.side_effect = [
+def test_check_falco(dd_run_check, aggregator, instance, mock_http):
+    mock_http.get.side_effect = [
         MockHTTPResponse(file_path=get_fixture_path("falco_metrics.txt")),
     ]
     dd_run_check(FalcoCheck('falco', {}, [instance]))
