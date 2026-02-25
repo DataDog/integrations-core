@@ -161,3 +161,5 @@ sqlserver.transactions.version_generation_rate,gauge,,kibibyte,second,The genera
 sqlserver.transactions.version_store_size,gauge,,kibibyte,,The size of the version store in tempdb. (Perf. Counter: `Transactions - Version Store Size (KB)`),0,sql_server,version store size,,
 sqlserver.xe.events_not_in_xml,gauge,,event,,Number of generated events that are missing in the XML representation of the ring buffer. Tags: `session_name`,0,sql_server,xe events not in xml,,
 sqlserver.xe.session_status,gauge,,,,Status of the node in a SQL Server failover cluster instance. Tags: `session_name`,0,sql_server,xe session status,,
+sqlserver.database.buffer_pool.size,gauge,,mebibyte,,Total size of buffer pool usage for a specific database in MB. Tags: `db` `database` `database_name` `database_id`,0,sql_server,database buffer pool size,,
+sqlserver.database.buffer_pool.dirty_pages,gauge,,mebibyte,,Size of modified (dirty) pages in the buffer pool for a specific database in MB. Tags: `db` `database` `database_name` `database_id`,0,sql_server,database buffer pool dirty pages,,
