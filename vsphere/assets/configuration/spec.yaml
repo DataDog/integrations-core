@@ -145,6 +145,25 @@ files:
         value:
           type: boolean
           example: false
+      - name: tls_ciphers
+        description: |
+          A list of TLS cipher suites to use when connecting to vCenter via the SOAP API (pyVmomi).
+          If not specified, the default ciphers from the system's OpenSSL configuration are used.
+
+          This is useful for connecting to older vCenter servers (e.g. 6.5 or 6.7) that may
+          require legacy cipher suites not enabled by default in OpenSSL 3.x.
+
+          Note: This setting only affects the SOAP/pyVmomi connection. For the REST API connection
+          used by tag collection, configure ciphers through `rest_api_options`.
+        fleet_configurable: true
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - 'TLS_AES_256_GCM_SHA384'
+            - 'TLS_CHACHA20_POLY1305_SHA256'
+            - 'TLS_AES_128_GCM_SHA256'
       - name: resource_filters
         description: |
           Each filter in the list is composed of three parameters.

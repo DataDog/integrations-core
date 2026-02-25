@@ -100,6 +100,78 @@ def test_ssl_capath(realtime_instance):
         load_verify_locations.assert_called_with(cafile='/dummy/path/cafile.pem', capath=None)
 
 
+def test_tls_ciphers_with_ssl_verify_false(realtime_instance):
+    realtime_instance['ssl_verify'] = False
+    realtime_instance['tls_ciphers'] = ['AES256-SHA', 'AES128-SHA']
+
+    with (
+        patch('datadog_checks.vsphere.api.connect') as connect,
+        patch('ssl.SSLContext.set_ciphers') as set_ciphers,
+    ):
+        smart_connect = connect.SmartConnect
+
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
+        VSphereAPI(config, MagicMock())
+
+        actual_context = smart_connect.call_args.kwargs['sslContext']  # type: ssl.SSLContext
+        assert actual_context.verify_mode == ssl.CERT_NONE
+        set_ciphers.assert_called_once_with('AES256-SHA:AES128-SHA')
+
+
+def test_tls_ciphers_with_ssl_capath(realtime_instance):
+    realtime_instance['ssl_verify'] = True
+    realtime_instance['ssl_capath'] = '/dummy/path'
+    realtime_instance['tls_ciphers'] = ['AES256-SHA', 'AES128-SHA']
+
+    with (
+        patch('datadog_checks.vsphere.api.connect') as connect,
+        patch('ssl.SSLContext.load_verify_locations') as load_verify_locations,
+        patch('ssl.SSLContext.set_ciphers') as set_ciphers,
+    ):
+        smart_connect = connect.SmartConnect
+
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
+        VSphereAPI(config, MagicMock())
+
+        actual_context = smart_connect.call_args.kwargs['sslContext']  # type: ssl.SSLContext
+        assert actual_context.verify_mode == ssl.CERT_REQUIRED
+        assert actual_context.check_hostname is True
+        load_verify_locations.assert_called_with(cafile=None, capath='/dummy/path')
+        set_ciphers.assert_called_once_with('AES256-SHA:AES128-SHA')
+
+
+def test_tls_ciphers_with_ssl_verify_default(realtime_instance):
+    realtime_instance['ssl_verify'] = True
+    realtime_instance['tls_ciphers'] = ['AES256-SHA', 'AES128-SHA']
+
+    with (
+        patch('datadog_checks.vsphere.api.connect') as connect,
+        patch('ssl.SSLContext.set_ciphers') as set_ciphers,
+    ):
+        smart_connect = connect.SmartConnect
+
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
+        VSphereAPI(config, MagicMock())
+
+        actual_context = smart_connect.call_args.kwargs['sslContext']  # type: ssl.SSLContext
+        assert actual_context.verify_mode == ssl.CERT_REQUIRED
+        assert actual_context.check_hostname is True
+        set_ciphers.assert_called_once_with('AES256-SHA:AES128-SHA')
+
+
+def test_no_tls_ciphers_default_behavior(realtime_instance):
+    realtime_instance['ssl_verify'] = True
+
+    with patch('datadog_checks.vsphere.api.connect') as connect:
+        smart_connect = connect.SmartConnect
+
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
+        VSphereAPI(config, MagicMock())
+
+        actual_context = smart_connect.call_args.kwargs['sslContext']
+        assert actual_context is None
+
+
 def test_connect_success(realtime_instance):
     with patch('datadog_checks.vsphere.api.connect') as connect:
         connection = MagicMock()

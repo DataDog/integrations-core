@@ -116,16 +116,22 @@ class VSphereAPI(object):
         """
         context = None
         if not self.config.ssl_verify:
-            # Remove type ignore when this is merged https://github.com/python/typeshed/pull/3855
-            context = create_ssl_context({"tls_verify": False})  # type: ignore
+            context = create_ssl_context({"tls_verify": False, "tls_ciphers": self.config.tls_ciphers or []})
         elif self.config.ssl_capath or self.config.ssl_cafile:
-            # Remove type ignore when this is merged https://github.com/python/typeshed/pull/3855
             # `check_hostname` must be enabled as well to verify the authenticity of a cert.
-            context = create_ssl_context({"tls_verify": True, 'tls_check_hostname': True})  # type: ignore
+            context = create_ssl_context(
+                {"tls_verify": True, "tls_check_hostname": True, "tls_ciphers": self.config.tls_ciphers or []}
+            )
             if self.config.ssl_capath:
                 context.load_verify_locations(cafile=None, capath=self.config.ssl_capath)
             else:
                 context.load_verify_locations(cafile=self.config.ssl_cafile, capath=None)
+        elif self.config.tls_ciphers:
+            # ssl_verify=True, no custom CA, but tls_ciphers is configured.
+            # Must create a context to apply cipher configuration.
+            context = create_ssl_context(
+                {"tls_verify": True, "tls_check_hostname": True, "tls_ciphers": self.config.tls_ciphers}
+            )
         try:
             # Object returned by SmartConnect is a ServerInstance
             # https://www.vmware.com/support/developer/vc-sdk/visdk2xpubs/ReferenceGuide/vim.ServiceInstance.html

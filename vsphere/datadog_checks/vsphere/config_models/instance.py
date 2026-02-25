@@ -180,6 +180,7 @@ class InstanceConfig(BaseModel):
     tags: Optional[tuple[str, ...]] = None
     tags_prefix: Optional[str] = None
     threads_count: Optional[int] = None
+    tls_ciphers: Optional[tuple[str, ...]] = None
     tls_ignore_warning: Optional[bool] = None
     use_collect_events_fallback: Optional[bool] = None
     use_guest_hostname: Optional[bool] = None
