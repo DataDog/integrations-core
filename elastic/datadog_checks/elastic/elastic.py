@@ -571,7 +571,7 @@ class ESCheck(AgentCheck):
             for (node, index, prirep), count in shard_counts.items():
                 tags = base_tags + [
                     'node_name:{}'.format(node.lower()),
-                    'index:{}'.format(index),
+                    'index_name:{}'.format(index),
                     'prirep:{}'.format(prirep),
                 ]
                 self.gauge('elasticsearch.shards', count, tags=tags)

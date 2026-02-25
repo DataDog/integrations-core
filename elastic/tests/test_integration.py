@@ -392,21 +392,21 @@ def test_cat_allocation_detailed_shard_metrics(dd_environment, aggregator, insta
     # Check detailed shard placement metrics
     aggregator.assert_metric('elasticsearch.shards')
 
-    # Verify tags are present - we should have index and prirep tags
+    # Verify tags are present - we should have index_name and prirep tags
     metrics = aggregator.metrics('elasticsearch.shards')
     assert metrics, "Expected at least one elasticsearch.shards metric"
 
-    # Check that at least one metric has both index and prirep tags
+    # Check that at least one metric has both index_name and prirep tags
     has_index_tag = False
     has_prirep_tag = False
     for metric in metrics:
         tags = metric.tags
-        if any(tag.startswith('index:') for tag in tags):
+        if any(tag.startswith('index_name:') for tag in tags):
             has_index_tag = True
         if any(tag.startswith('prirep:') for tag in tags):
             has_prirep_tag = True
 
-    assert has_index_tag, "Expected index tag on elasticsearch.shards metric"
+    assert has_index_tag, "Expected index_name tag on elasticsearch.shards metric"
     assert has_prirep_tag, "Expected prirep tag on elasticsearch.shards metric"
 
 
