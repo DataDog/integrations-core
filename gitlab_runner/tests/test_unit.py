@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from copy import deepcopy
+from unittest.mock import ANY, MagicMock
 
 import pytest
 
@@ -21,14 +22,26 @@ from . import common
         ("default timeout", {}, (5, 15)),
     ],
 )
-def test_timeout(test_case, timeout_config, expected_timeout):
+def test_timeout(test_case, timeout_config, expected_timeout, http_client_session):
     config = deepcopy(common.CONFIG)
 
     config['instances'][0].update(timeout_config)
 
     gitlab_runner = GitlabRunnerCheck('gitlab_runner', common.CONFIG['init_config'], instances=config['instances'])
 
-    assert gitlab_runner.http.options['timeout'] == expected_timeout
+    http_client_session.get.return_value = MagicMock(status_code=200)
+    gitlab_runner.check(config['instances'][0])
+
+    http_client_session.get.assert_called_with(
+        '{}/ci'.format(common.GITLAB_MASTER_URL),
+        auth=ANY,
+        cert=ANY,
+        headers=ANY,
+        proxies=ANY,
+        timeout=expected_timeout,
+        verify=ANY,
+        allow_redirects=ANY,
+    )
 
 
 @pytest.mark.unit
