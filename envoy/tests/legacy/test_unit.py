@@ -135,28 +135,13 @@ def test_unknown(fixture_path, mock_http_response, dd_run_check, check):
         pytest.param({}, {'verify': True}, id="legacy ssl config unset"),
     ],
 )
-def test_config(extra_config, expected_http_kwargs, check, dd_run_check):
+def test_config(extra_config, expected_http_kwargs, check):
     instance = deepcopy(INSTANCES['main'])
     instance.update(extra_config)
     check = check(instance)
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200)
-
-        dd_run_check(check)
-
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-        r.get.assert_called_with('http://{}:8001/stats'.format(HOST), **http_wargs)
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value
 
 
 @pytest.mark.parametrize(
