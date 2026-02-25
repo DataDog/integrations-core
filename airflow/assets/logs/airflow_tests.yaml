@@ -215,6 +215,59 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1577381689039
  -
+  sample: "[2025-04-10T17:15:01.220+0000] {logging_mixin.py:188} INFO - Running task"
+  result:
+    custom:
+      filename: "logging_mixin.py"
+      level: "INFO"
+      lineno: 188
+      timestamp: 1744305301220
+    message: "Running task"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1744305301220
+ -
+  sample: "[2025-04-10T17:15:01.220+0000] {base_task_runner.py:115} INFO - Job 12: Subtask my_task [2025-04-10T17:15:01.450+0000] {settings.py:211} INFO - Setting up DB connection pool (PID 42)"
+  result:
+    custom:
+      filename: "settings.py"
+      jobid: 12
+      level: "INFO"
+      lineno: 211
+      subtask: "my_task"
+      timestamp: 1744305301450
+    message: "Setting up DB connection pool (PID 42)"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1744305301450
+ -
+  sample: |
+    [2025-04-10T17:15:01.220+0000] {taskinstance.py:1058} ERROR - Task failed!
+    Traceback (most recent call last):
+      File "/usr/local/lib/python3.11/site-packages/airflow/operators/python.py", line 118, in execute_callable
+      return self.python_callable(*self.op_args, **self.op_kwargs)
+    Exception: Task failed!
+  result:
+    custom:
+      error:
+        kind: "Exception"
+        message: "Task failed!"
+        stack: |2-
+            File "/usr/local/lib/python3.11/site-packages/airflow/operators/python.py", line 118, in execute_callable
+            return self.python_callable(*self.op_args, **self.op_kwargs)
+          Exception: Task failed!
+      filename: "taskinstance.py"
+      level: "ERROR"
+      lineno: 1058
+      timestamp: 1744305301220
+    message: "Task failed!"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1744305301220
+ -
   sample: "[2025-02-18 14:46:00,123] {{python_operator.py:105}} INFO - Task started"
   tags:
     - "dirname:path/to/airflow/logs/dag_id_airflow_dag_0/run_id_scheduled__2025-02-18T14_46_00+00_00/task_id_print_task_0"
