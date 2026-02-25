@@ -13,13 +13,7 @@ __all__ = ['MockHTTPResponse', 'mock_http']
 
 @pytest.fixture
 def mock_http(mocker: Any) -> Any:
-    """Intercept HTTP calls made through AgentCheck.http; import into integration conftest.py to use.
-
-    Patches AgentCheck.http with a create_autospec(HTTPClientProtocol) mock, constraining it
-    to the protocol interface and enforcing call signatures. Because the OM V2 scraper is
-    changed to use check.http directly, this single patch covers both AgentCheck.http and
-    the scraper HTTP path.
-    """
+    # Intercept HTTP calls made through AgentCheck.http, import into integration conftest.py to use
     from datadog_checks.base.checks.base import AgentCheck
     from datadog_checks.base.utils.http_protocol import HTTPClientProtocol
 
