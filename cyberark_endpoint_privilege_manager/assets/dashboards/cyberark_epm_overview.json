@@ -6,9 +6,8 @@
             "id": 7582074758442394,
             "definition": {
                 "type": "image",
-                "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Cyberark-logo-dark.svg/1024px-Cyberark-logo-dark.svg.png",
-                "sizing": "contain",
-                "margin": "md",
+                "url": "https://static.datadoghq.com/static/images/logos/cyberark-endpoint-privilege-manager_large.svg",
+                "sizing": "cover",
                 "has_background": true,
                 "has_border": true,
                 "vertical_align": "center",
@@ -55,7 +54,7 @@
                         "id": 1707950224220122,
                         "definition": {
                             "type": "note",
-                            "content": "This group enables monitoring of trends over time, identification of top users and source IPs, analysis by service, and detailed event investigation to support security oversight and compliance.",
+                            "content": "This group enables monitoring of trends over time, identification of top users and source IPs, analysis by vendor endpoints, and detailed event investigation to support security oversight and compliance.",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",
@@ -88,7 +87,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:raw-events $service $user_name $client_ip $set_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -160,7 +159,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:raw-events $service $user_name $client_ip $set_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -206,7 +205,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:policy-audit-events $service $user_name $client_ip $set_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -277,7 +276,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:policy-audit-events $service $user_name $client_ip $set_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -323,7 +322,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $service $user_name $client_ip $set_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:set-admin-audit-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -393,7 +392,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:set-admin-audit-events $service $user_name $client_ip $set_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:set-admin-audit-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -438,7 +437,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $service $user_name $client_ip $set_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:account-admin-audit-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -508,7 +507,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:account-admin-audit-events $service $user_name $client_ip $set_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:account-admin-audit-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -541,7 +540,7 @@
                     {
                         "id": 7809541485529504,
                         "definition": {
-                            "title": "Events by service",
+                            "title": "Events by vendor endpoint",
                             "title_size": "16",
                             "title_align": "left",
                             "time": {},
@@ -552,14 +551,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:(raw-events OR policy-audit-events OR set-admin-audit-events OR account-admin-audit-events) $service $user_name $client_ip $set_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:(raw-events OR policy-audit-events OR set-admin-audit-events OR account-admin-audit-events) $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "service",
+                                                    "facet": "@vendor.endpoint",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -623,7 +622,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager -@usr.name:\"\" $service $user_name $client_ip $set_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager -@usr.name:\"\" $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -693,7 +692,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager $service $user_name $client_ip $set_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -762,7 +761,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager $service $user_name $client_ip $set_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -829,7 +828,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cyberark-endpoint-privilege-manager $service $user_name $client_ip $set_name",
+                                        "query_string": "source:cyberark-endpoint-privilege-manager $vendor_endpoint $user_name $client_ip $set_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -839,7 +838,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "service",
+                                            "field": "vendor.endpoint",
                                             "width": "auto"
                                         },
                                         {
@@ -1408,8 +1407,8 @@
             "default": "*"
         },
         {
-            "name": "service",
-            "prefix": "service",
+            "name": "vendor_endpoint",
+            "prefix": "@vendor.endpoint",
             "available_values": [],
             "default": "*"
         }

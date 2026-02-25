@@ -69,7 +69,7 @@ pipeline:
       name: Processing Raw Events
       enabled: true
       filter:
-        query: service:raw-events
+        query: "@vendor.endpoint:raw-events"
       processors:
         - type: attribute-remapper
           name: Map `eventType` to `evt.name`
@@ -176,7 +176,7 @@ pipeline:
       name: Processing Policy Audit Events
       enabled: true
       filter:
-        query: service:policy-audit-events
+        query: "@vendor.endpoint:policy-audit-events"
       processors:
         - type: attribute-remapper
           name: Map `eventType` to `evt.name`
@@ -202,7 +202,7 @@ pipeline:
       name: Processing Set Admin and Account Admin Audit Events
       enabled: true
       filter:
-        query: service:(set-admin-audit-events OR account-admin-audit-events)
+        query: "@vendor.endpoint:(set-admin-audit-events OR account-admin-audit-events)"
       processors:
         - type: attribute-remapper
           name: Map `Administrator` to `usr.name`

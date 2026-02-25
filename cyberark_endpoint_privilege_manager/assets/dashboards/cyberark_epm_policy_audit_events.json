@@ -6,9 +6,8 @@
             "id": 8633208420690333,
             "definition": {
                 "type": "image",
-                "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Cyberark-logo-dark.svg/1024px-Cyberark-logo-dark.svg.png",
-                "sizing": "contain",
-                "margin": "md",
+                "url": "https://static.datadoghq.com/static/images/logos/cyberark-endpoint-privilege-manager_large.svg",
+                "sizing": "cover",
                 "has_background": true,
                 "has_border": true,
                 "vertical_align": "center",
@@ -87,7 +86,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:policy-audit-events $event_name $source_type $user_name $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events $event_name $source_type $user_name $set_name $computer_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -158,7 +157,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:policy-audit-events $event_name $source_type $user_name $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events $event_name $source_type $user_name $set_name $computer_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -212,7 +211,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:policy-audit-events $event_name $source_type $user_name $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events $event_name $source_type $user_name $set_name $computer_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -283,7 +282,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:policy-audit-events $event_name $source_type $user_name $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events $event_name $source_type $user_name $set_name $computer_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -354,7 +353,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:policy-audit-events $event_name $source_type $user_name $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events $event_name $source_type $user_name $set_name $computer_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -425,7 +424,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:policy-audit-events @userIsAdmin:true -@usr.name:\"\" $event_name $source_type $user_name $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events @userIsAdmin:true -@usr.name:\"\" $event_name $source_type $user_name $set_name $computer_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -496,7 +495,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:policy-audit-events -@usr.name:\"\" $event_name $source_type $user_name $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events -@usr.name:\"\" $event_name $source_type $user_name $set_name $computer_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -567,7 +566,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:policy-audit-events -@fileName:\"\" $event_name $source_type $user_name $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events -@fileName:\"\" $event_name $source_type $user_name $set_name $computer_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -638,7 +637,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:policy-audit-events @userIsAdmin:true -@productName:\"\" $event_name $source_type $user_name $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events @userIsAdmin:true -@productName:\"\" $event_name $source_type $user_name $set_name $computer_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -706,7 +705,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cyberark-endpoint-privilege-manager service:policy-audit-events -(@fileName:\"\" @filePath:\"\" @fileDescription:\"\" @fileVersion:\"\") $event_name $source_type $user_name $set_name $computer_name",
+                                        "query_string": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events -(@fileName:\"\" @filePath:\"\" @fileDescription:\"\" @fileVersion:\"\") $event_name $source_type $user_name $set_name $computer_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -761,7 +760,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:policy-audit-events -@policyName:\"\" $event_name $source_type $user_name $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events -@policyName:\"\" $event_name $source_type $user_name $set_name $computer_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -833,7 +832,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager service:policy-audit-events -(@justificationEmail:\"\" @justification:\"\") $event_name $source_type $user_name $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events -(@justificationEmail:\"\" @justification:\"\") $event_name $source_type $user_name $set_name $computer_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -899,7 +898,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cyberark-endpoint-privilege-manager service:policy-audit-events $source_type $user_name $event_name $set_name $computer_name",
+                                        "query_string": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events $source_type $user_name $event_name $set_name $computer_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
