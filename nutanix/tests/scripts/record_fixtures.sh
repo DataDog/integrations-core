@@ -2,14 +2,17 @@
 # Script to record all API fixtures from the Nutanix API
 # Uses AWS_INSTANCE credentials and matches endpoints used in check.py
 #
-# Usage: ./record_fixtures.sh [PAGE_LIMIT] [MAX_PAGES]
-#   PAGE_LIMIT: Number of items per page (default: 2)
+# Usage: ./record_fixtures.sh [PAGE_LIMIT] [MAX_PAGES] [--force]
+#   PAGE_LIMIT: Number of items per page (default: 50)
 #   MAX_PAGES: Maximum number of pages to fetch (default: 20)
+#   --force: Re-record all fixtures even if they exist
 #
 # Examples:
-#   ./record_fixtures.sh          # Use defaults (limit=2, max=20 pages)
-#   ./record_fixtures.sh 10       # Use limit=10, max=20 pages
-#   ./record_fixtures.sh 2 5      # Use limit=2, max=5 pages
+#   ./record_fixtures.sh          # Use defaults (limit=50, max=20 pages), skip existing
+#   ./record_fixtures.sh 10       # Use limit=10, max=20 pages, skip existing
+#   ./record_fixtures.sh 2 5      # Use limit=2, max=5 pages, skip existing
+#   ./record_fixtures.sh --force  # Use defaults, re-record all fixtures
+#   ./record_fixtures.sh 50 20 --force  # Custom limits, re-record all
 #
 # Retry Configuration:
 #   MAX_RETRIES: 3 attempts with exponential backoff (2s, 4s, 8s)
@@ -18,11 +21,33 @@
 # Activity Collection:
 #   Tasks, events, audits, and alerts are fetched ordered by their time field ascending (oldest first)
 
-set -e
+# Don't exit on error - we want to continue recording other fixtures
+# set -e
 
 # Parse arguments
-PAGE_LIMIT=${1:-50}
-MAX_PAGES=${2:-20}
+PAGE_LIMIT=50
+MAX_PAGES=20
+FORCE_RECORD=false
+POSITIONAL_ARGS=()
+
+for arg in "$@"; do
+    case $arg in
+        --force)
+            FORCE_RECORD=true
+            ;;
+        *)
+            POSITIONAL_ARGS+=("$arg")
+            ;;
+    esac
+done
+
+# Set PAGE_LIMIT and MAX_PAGES from positional arguments
+if [ ${#POSITIONAL_ARGS[@]} -ge 1 ]; then
+    PAGE_LIMIT="${POSITIONAL_ARGS[0]}"
+fi
+if [ ${#POSITIONAL_ARGS[@]} -ge 2 ]; then
+    MAX_PAGES="${POSITIONAL_ARGS[1]}"
+fi
 
 # Retry Configuration
 MAX_RETRIES=3
@@ -55,6 +80,7 @@ echo "Base URL: ${BASE_URL}"
 echo "Fixtures directory: ${FIXTURES_DIR}"
 echo "Page limit: ${PAGE_LIMIT}"
 echo "Max pages: ${MAX_PAGES}"
+echo "Force re-record: ${FORCE_RECORD}"
 echo ""
 if [ "${ONLY_ALERTS}" = "1" ]; then
     echo -e "${BLUE}ONLY_ALERTS=1 detected; recording alerts only${NC}"
@@ -64,10 +90,33 @@ fi
 # Create fixtures directory if it doesn't exist
 mkdir -p "${FIXTURES_DIR}"
 
+# Function to check if a fixture should be skipped
+should_skip_fixture() {
+    local fixture_file=$1
+
+    if [ "${FORCE_RECORD}" = true ]; then
+        return 1  # Don't skip, always record
+    fi
+
+    if [ -f "${fixture_file}" ]; then
+        echo -e "${YELLOW}⊘ Skipping (already exists): ${fixture_file}${NC}"
+        echo -e "${YELLOW}  Use --force to re-record${NC}"
+        echo ""
+        return 0  # Skip
+    fi
+
+    return 1  # Don't skip
+}
+
 # Function to make API request and save response (with retry logic)
 fetch_and_save() {
     local endpoint=$1
     local output_file=$2
+
+    # Check if fixture already exists and should be skipped
+    if should_skip_fixture "${output_file}"; then
+        return 0
+    fi
 
     echo -e "${YELLOW}Fetching: ${endpoint}${NC}"
 
@@ -132,6 +181,12 @@ fetch_paginated() {
     local base_name=$2
     local limit=$3
     local max_pages=$4
+
+    # Check if consolidated fixture already exists and should be skipped
+    local consolidated="${FIXTURES_DIR}/${base_name}.json"
+    if should_skip_fixture "${consolidated}"; then
+        return 0
+    fi
 
     echo -e "${BLUE}Fetching paginated: ${endpoint} (limit=${limit}, max_pages=${max_pages})${NC}"
 
@@ -221,7 +276,6 @@ fetch_paginated() {
     done
 
     # consolidate pages into a single fixture file (array of page responses)
-    local consolidated="${FIXTURES_DIR}/${base_name}.json"
     if ls "${FIXTURES_DIR}/${base_name}_limit${limit}_page"*.json >/dev/null 2>&1; then
         jq -s '.' "${FIXTURES_DIR}/${base_name}_limit${limit}_page"*.json >"${consolidated}"
         echo -e "${GREEN}✓ Saved consolidated: ${consolidated}${NC}"
@@ -264,8 +318,8 @@ fetch_paginated "api/clustermgmt/v4.0/config/clusters" "clusters" "${PAGE_LIMIT}
 
 # Get cluster ID for later use
 CLUSTER_ID=""
-if [ -f "${FIXTURES_DIR}/clusters_limit${PAGE_LIMIT}_page0.json" ]; then
-    CLUSTER_ID=$(jq -r '.data[0].extId // empty' "${FIXTURES_DIR}/clusters_limit${PAGE_LIMIT}_page0.json")
+if [ -f "${FIXTURES_DIR}/clusters.json" ]; then
+    CLUSTER_ID=$(jq -r '.[0].data[0].extId // empty' "${FIXTURES_DIR}/clusters.json")
     echo "Found cluster ID: ${CLUSTER_ID}"
     echo ""
 fi
@@ -273,7 +327,11 @@ fi
 # 2. Hosts (api/clustermgmt/v4.0/config/clusters/{cluster_id}/hosts)
 echo -e "${BLUE}=== 2. Hosts ===${NC}"
 if [ -n "$CLUSTER_ID" ]; then
-    fetch_paginated "api/clustermgmt/v4.0/config/clusters/${CLUSTER_ID}/hosts" "hosts" "${PAGE_LIMIT}" "${MAX_PAGES}"
+    if ! fetch_paginated "api/clustermgmt/v4.0/config/clusters/${CLUSTER_ID}/hosts" "hosts" "${PAGE_LIMIT}" "${MAX_PAGES}"; then
+        echo -e "${RED}⚠ Failed to fetch hosts. Cluster ID may be stale.${NC}"
+        echo -e "${YELLOW}  Tip: Delete clusters.json and re-run, or use --force${NC}"
+        echo ""
+    fi
 else
     echo -e "${YELLOW}No cluster ID found, skipping hosts${NC}"
     echo ""
@@ -283,32 +341,44 @@ fi
 echo -e "${BLUE}=== 3. VMs ===${NC}"
 fetch_paginated "api/vmm/v4.0/ahv/config/vms" "vms" "${PAGE_LIMIT}" "${MAX_PAGES}"
 
-# 4. Cluster Stats (api/clustermgmt/v4.0/stats/clusters/{cluster_id})
-echo -e "${BLUE}=== 4. Cluster Stats ===${NC}"
+# 4. Categories (api/prism/v4.0/config/categories)
+echo -e "${BLUE}=== 4. Categories ===${NC}"
+fetch_paginated "api/prism/v4.0/config/categories" "categories" "${PAGE_LIMIT}" "${MAX_PAGES}"
+
+# 5. Cluster Stats (api/clustermgmt/v4.0/stats/clusters/{cluster_id})
+echo -e "${BLUE}=== 5. Cluster Stats ===${NC}"
 if [ -n "$CLUSTER_ID" ]; then
     # URL encode the time parameters
     start_time_encoded=$(printf '%s' "$start_time" | jq -sRr @uri)
     end_time_encoded=$(printf '%s' "$end_time" | jq -sRr @uri)
     params="\$startTime=${start_time_encoded}&\$endTime=${end_time_encoded}&\$statType=AVG&\$samplingInterval=120"
-    fetch_and_save "api/clustermgmt/v4.0/stats/clusters/${CLUSTER_ID}?${params}" \
-        "${FIXTURES_DIR}/cluster_stats.json"
+    if ! fetch_and_save "api/clustermgmt/v4.0/stats/clusters/${CLUSTER_ID}?${params}" \
+        "${FIXTURES_DIR}/cluster_stats.json"; then
+        echo -e "${RED}⚠ Failed to fetch cluster stats. Cluster ID may be stale.${NC}"
+        echo -e "${YELLOW}  Tip: Delete clusters.json and re-run, or use --force${NC}"
+        echo ""
+    fi
 else
     echo -e "${YELLOW}No cluster ID found, skipping${NC}"
     echo ""
 fi
 
-# 5. Host Stats (api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id})
-echo -e "${BLUE}=== 5. Host Stats ===${NC}"
-if [ -n "$CLUSTER_ID" ] && [ -f "${FIXTURES_DIR}/hosts_limit${PAGE_LIMIT}_page0.json" ]; then
-    HOST_ID=$(jq -r '.data[0].extId // empty' "${FIXTURES_DIR}/hosts_limit${PAGE_LIMIT}_page0.json")
+# 6. Host Stats (api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id})
+echo -e "${BLUE}=== 6. Host Stats ===${NC}"
+if [ -n "$CLUSTER_ID" ] && [ -f "${FIXTURES_DIR}/hosts.json" ]; then
+    HOST_ID=$(jq -r '.[0].data[0].extId // empty' "${FIXTURES_DIR}/hosts.json")
     if [ -n "$HOST_ID" ]; then
         echo "Using host ID: ${HOST_ID}"
         # URL encode the time parameters
         start_time_encoded=$(printf '%s' "$start_time" | jq -sRr @uri)
         end_time_encoded=$(printf '%s' "$end_time" | jq -sRr @uri)
         params="\$startTime=${start_time_encoded}&\$endTime=${end_time_encoded}&\$statType=AVG&\$samplingInterval=120"
-        fetch_and_save "api/clustermgmt/v4.0/stats/clusters/${CLUSTER_ID}/hosts/${HOST_ID}?${params}" \
-            "${FIXTURES_DIR}/host_stats.json"
+        if ! fetch_and_save "api/clustermgmt/v4.0/stats/clusters/${CLUSTER_ID}/hosts/${HOST_ID}?${params}" \
+            "${FIXTURES_DIR}/host_stats.json"; then
+            echo -e "${RED}⚠ Failed to fetch host stats. Host/Cluster ID may be stale.${NC}"
+            echo -e "${YELLOW}  Tip: Delete clusters.json and hosts.json, then re-run or use --force${NC}"
+            echo ""
+        fi
     else
         echo -e "${YELLOW}No host ID found, skipping${NC}"
         echo ""
@@ -318,45 +388,45 @@ else
     echo ""
 fi
 
-# 6. VM Stats (api/vmm/v4.0/ahv/stats/vms/)
-echo -e "${BLUE}=== 6. VM Stats ===${NC}"
+# 7. VM Stats (api/vmm/v4.0/ahv/stats/vms/)
+echo -e "${BLUE}=== 7. VM Stats ===${NC}"
 # URL encode the time parameters and $select=*
 start_time_encoded=$(printf '%s' "$start_time" | jq -sRr @uri)
 end_time_encoded=$(printf '%s' "$end_time" | jq -sRr @uri)
 params="\$startTime=${start_time_encoded}&\$endTime=${end_time_encoded}&\$statType=AVG&\$samplingInterval=120&\$select=%2A"
 fetch_paginated "api/vmm/v4.0/ahv/stats/vms/?${params}" "vms_stats" "${PAGE_LIMIT}" "${MAX_PAGES}"
 
-# 7. Tasks (api/prism/v4.0/config/tasks)
+# 8. Tasks (api/prism/v4.0/config/tasks)
 # Fetch tasks ordered by createdTime ascending (oldest first)
-echo -e "${BLUE}=== 7. Tasks ===${NC}"
+echo -e "${BLUE}=== 8. Tasks ===${NC}"
 echo -e "${YELLOW}Ordering by createdTime asc${NC}"
 tasks_params="\$orderBy=createdTime%20asc"
 fetch_paginated "api/prism/v4.0/config/tasks?${tasks_params}" "tasks" "${PAGE_LIMIT}" "${MAX_PAGES}"
 
-# 8. Events (api/monitoring/v4.0/serviceability/events)
+# 9. Events (api/monitoring/v4.0/serviceability/events)
 # Fetch events ordered by creationTime ascending (oldest first)
-echo -e "${BLUE}=== 8. Events ===${NC}"
+echo -e "${BLUE}=== 9. Events ===${NC}"
 echo -e "${YELLOW}Ordering by creationTime asc${NC}"
 events_params="\$orderBy=creationTime%20asc"
 fetch_paginated "api/monitoring/v4.0/serviceability/events?${events_params}" "events" "${PAGE_LIMIT}" "${MAX_PAGES}"
 
-# 9. Audits (api/monitoring/v4.0/serviceability/audits)
+# 10. Audits (api/monitoring/v4.0/serviceability/audits)
 # Fetch audits ordered by creationTime ascending (oldest first)
-echo -e "${BLUE}=== 9. Audits ===${NC}"
+echo -e "${BLUE}=== 10. Audits ===${NC}"
 echo -e "${YELLOW}Ordering by creationTime asc${NC}"
 audits_params="\$orderBy=creationTime%20asc"
 fetch_paginated "api/monitoring/v4.0/serviceability/audits?${audits_params}" "audits" "${PAGE_LIMIT}" "${MAX_PAGES}"
 
-# 10. Alerts (api/monitoring/v4.2/serviceability/alerts)
+# 11. Alerts (api/monitoring/v4.2/serviceability/alerts)
 # Fetch alerts ordered by creationTime ascending (oldest first)
-echo -e "${BLUE}=== 10. Alerts ===${NC}"
+echo -e "${BLUE}=== 11. Alerts ===${NC}"
 echo -e "${YELLOW}Ordering by creationTime asc${NC}"
 alerts_params="\$orderBy=creationTime%20asc"
 fetch_paginated "api/monitoring/v4.2/serviceability/alerts?${alerts_params}" "alerts" "${PAGE_LIMIT}" "${MAX_PAGES}"
 
 echo ""
 echo -e "${GREEN}============================================${NC}"
-echo -e "${GREEN}✓ All fixtures recorded successfully!${NC}"
+echo -e "${GREEN}✓ Recording completed!${NC}"
 echo -e "${GREEN}============================================${NC}"
 echo ""
 echo "Summary:"
@@ -364,7 +434,11 @@ echo "  Page limit: ${PAGE_LIMIT}"
 echo "  Cluster ID: ${CLUSTER_ID:-N/A}"
 echo "  Fixtures directory: ${FIXTURES_DIR}"
 echo ""
-echo "Recorded fixtures:"
+echo "Available fixtures:"
 ls -lh "${FIXTURES_DIR}"/*.json 2>/dev/null | awk '{print "  " $9, "(" $5 ")"}' | tail -20
 echo ""
 echo "Total fixtures: $(ls -1 "${FIXTURES_DIR}"/*.json 2>/dev/null | wc -l | tr -d ' ')"
+echo ""
+echo -e "${YELLOW}Note: If you saw 404 errors for cluster-dependent resources (hosts, stats),${NC}"
+echo -e "${YELLOW}      run: rm ${FIXTURES_DIR}/clusters.json && ./record_fixtures.sh${NC}"
+echo -e "${YELLOW}      or use: ./record_fixtures.sh --force${NC}"

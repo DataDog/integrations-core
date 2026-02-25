@@ -48,6 +48,8 @@ class NutanixCheck(AgentCheck):
         self.collect_audits_enabled = is_affirmative(self.instance.get("collect_audits", True))
         self.collect_alerts_enabled = is_affirmative(self.instance.get("collect_alerts", True))
 
+        self.prefix_category_tags = is_affirmative(self.instance.get("prefix_category_tags", False))
+
         self.resource_filters = parse_resource_filters(self.instance.get("resource_filters") or [])
 
     def _initialize_check_attributes(self):

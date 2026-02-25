@@ -614,7 +614,15 @@ class InfrastructureMonitor:
         if categories:
             for c in categories:
                 category_id = c.get("extId")
-                tags.append(f"ntnx_category_id:{category_id}")
+                if category_id and category_id in self._categories:
+                    category = self._categories[category_id]
+                    key = category.get("key")
+                    value = category.get("value")
+                    if key and value:
+                        if self.check.prefix_category_tags:
+                            tags.append(f"ntnx_{key}:{value}")
+                        else:
+                            tags.append(f"{key}:{value}")
 
         owner_id = vm.get("ownershipInfo", {}).get("owner", {}).get("extId")
         if owner_id:

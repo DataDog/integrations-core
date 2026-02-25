@@ -140,6 +140,12 @@ def mock_http_get(mocker):
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
+        # Categories endpoint - paginated
+        if '/api/prism/v4.0/config/categories' in url:
+            response_data = load_fixture_page("categories.json", page)
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
+
         # VM stats endpoint - paginated
         if 'api/vmm/v4.0/ahv/stats/vms' in url:
             response_data = load_fixture_page("vms_stats.json", page)
