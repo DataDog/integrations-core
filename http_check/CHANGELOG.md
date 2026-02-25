@@ -8,7 +8,7 @@
 
 * Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
 
-## 12.4.0 / 2026-02-11
+## 12.4.0 / 2026-02-11 / Agent 7.76.0
 
 ***Security***:
 

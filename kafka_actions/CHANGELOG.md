@@ -9,7 +9,7 @@
 * Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
 * Bump confluent-kafka to 2.13.0 ([#22630](https://github.com/DataDog/integrations-core/pull/22630))
 
-## 2.2.0 / 2026-02-04
+## 2.2.0 / 2026-02-04 / Agent 7.76.0
 
 ***Security***:
 
