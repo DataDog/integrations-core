@@ -153,14 +153,14 @@ instances:
     # tls_ignore_warning: false
 
     ## @param tls_ciphers - list of strings - optional
-    ## A list of TLS cipher suites to use when connecting to vCenter via the SOAP API (pyVmomi).
+    ## A list of TLS cipher suites to use when connecting to vCenter.
     ## If not specified, the default ciphers from the system's OpenSSL configuration are used.
     ##
-    ## This is useful for connecting to older vCenter servers (e.g. 6.5 or 6.7) that may
-    ## require legacy cipher suites not enabled by default in OpenSSL 3.x.
+    ## This is useful for connecting to older vCenter servers that may require legacy cipher
+    ## suites not enabled by default in newer versions of OpenSSL.
     ##
-    ## Note: This setting only affects the SOAP/pyVmomi connection. For the REST API connection
-    ## used by tag collection, configure ciphers through `rest_api_options`.
+    ## Note: This setting only affects the SOAP connection. To configure ciphers for the
+    ## REST API connection, use `rest_api_options`.
     #
     # tls_ciphers:
     #   - TLS_AES_256_GCM_SHA384
