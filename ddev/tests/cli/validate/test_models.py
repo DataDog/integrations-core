@@ -15,7 +15,5 @@ def test_validate_models_preserves_core_license_headers(ddev, repository_as_cwd,
     assert result.exit_code == 0, result.output
     assert 'All 5 data model files are in sync!' in result.output
 
-    instance = (
-        repository_as_cwd.path / 'zk' / 'datadog_checks' / 'zk' / 'config_models' / 'instance.py'
-    ).read_text()
+    instance = (repository_as_cwd.path / 'zk' / 'datadog_checks' / 'zk' / 'config_models' / 'instance.py').read_text()
     assert instance.startswith('# (C) Datadog, Inc.')
