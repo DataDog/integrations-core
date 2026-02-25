@@ -372,14 +372,104 @@ def test_metadata_no_version_found(instance: dict[str, Any], datadog_agent: Any,
     datadog_agent.assert_metadata(check.check_id, {})
 
 
-def test_session_token_refresh_behavior() -> None:
-    instance = {
-        'control_m_api_endpoint': 'https://example.com/automation-api',
-        'control_m_username': 'workbench',
-        'control_m_password': 'workbench',
-        'token_refresh_buffer_seconds': 300,
-    }
+@pytest.mark.parametrize(
+    'bad_instance, match',
+    [
+        ({'control_m_api_endpoint': ''}, 'control_m_api_endpoint.*required'),
+        ({'control_m_api_endpoint': 'https://x/api'}, 'No authentication configured'),
+        ({'control_m_api_endpoint': 'https://x/api', 'control_m_username': 'user'}, 'must both be set'),
+        ({'control_m_api_endpoint': 'https://x/api', 'control_m_password': 'pass'}, 'must both be set'),
+    ],
+)
+def test_config_validation_errors(bad_instance: dict, match: str) -> None:
+    with pytest.raises(Exception, match=match):
+        _make_check(bad_instance)
+
+
+def test_token_refresh_buffer_clamped_when_exceeds_lifetime(session_instance: dict[str, Any]) -> None:
+    session_instance['token_lifetime_seconds'] = 60
+    session_instance['token_refresh_buffer_seconds'] = 120
+    check = _make_check(session_instance)
+    assert check._token_refresh_buffer == 10
+
+
+def test_static_token_401_falls_back_to_session(instance: dict[str, Any], monkeypatch: MonkeyPatch) -> None:
+    instance['control_m_username'] = 'user'
+    instance['control_m_password'] = 'pass'
     check = _make_check(instance)
+    assert check._use_session_login is False
+
+    response_401 = Mock(status_code=401)
+    monkeypatch.setattr(type(check.http), 'get', lambda self, url, **kwargs: response_401)
+    monkeypatch.setattr(check, '_make_session_request', Mock(return_value=Mock(status_code=200)))
+
+    result = check._make_request('get', 'https://example.com/automation-api/config/servers')
+
+    assert check._use_session_login is True
+    assert check._static_token_retry_after > time.monotonic()
+    assert result.status_code == 200
+    check._make_session_request.assert_called_once()
+
+
+def test_static_token_401_no_credentials_returns_401(instance: dict[str, Any], monkeypatch: MonkeyPatch) -> None:
+    check = _make_check(instance)
+    assert check._has_credentials is False
+
+    response_401 = Mock(status_code=401)
+    monkeypatch.setattr(type(check.http), 'get', lambda self, url, **kwargs: response_401)
+
+    result = check._make_request('get', 'https://example.com/automation-api/config/servers')
+
+    assert result.status_code == 401
+    assert check._use_session_login is False
+
+
+def test_static_token_retried_after_cooldown(instance: dict[str, Any], monkeypatch: MonkeyPatch) -> None:
+    instance['control_m_username'] = 'user'
+    instance['control_m_password'] = 'pass'
+    check = _make_check(instance)
+    check._use_session_login = True
+    check._static_token_retry_after = time.monotonic() - 1
+
+    response_ok = Mock(status_code=200)
+    monkeypatch.setattr(type(check.http), 'get', lambda self, url, **kwargs: response_ok)
+
+    result = check._make_request('get', 'https://example.com/automation-api/config/servers')
+
+    assert check._use_session_login is False
+    assert result.status_code == 200
+
+
+def test_session_token_401_triggers_refresh_and_retry(
+    session_instance: dict[str, Any],
+    monkeypatch: MonkeyPatch,
+) -> None:
+    check = _make_check(session_instance)
+    check._token = 'stale-token'
+    check._token_expiration = time.monotonic() + 9999
+
+    call_count = 0
+
+    def fake_get(self, url, extra_headers=None, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            return Mock(status_code=401)
+        return Mock(status_code=200)
+
+    monkeypatch.setattr(type(check.http), 'get', fake_get)
+    monkeypatch.setattr(check, '_login', Mock(side_effect=lambda: setattr(check, '_token', 'fresh-token')))
+
+    result = check._make_session_request(check.http.get, 'https://example.com/automation-api/config/servers')
+
+    assert result.status_code == 200
+    assert call_count == 2
+    check._login.assert_called_once()
+
+
+def test_session_token_refresh_behavior(session_instance: dict[str, Any]) -> None:
+    session_instance['token_refresh_buffer_seconds'] = 300
+    check = _make_check(session_instance)
     check._login = Mock()
     check._token = 'existing-token'
 
@@ -395,14 +485,10 @@ def test_session_token_refresh_behavior() -> None:
 def test_session_login_failure_emits_critical_and_gauges(
     dd_run_check: Callable[[AgentCheck, bool], None],
     aggregator: AggregatorStub,
+    session_instance: dict[str, Any],
     monkeypatch: MonkeyPatch,
 ) -> None:
-    instance = {
-        'control_m_api_endpoint': 'https://example.com/automation-api',
-        'control_m_username': 'workbench',
-        'control_m_password': 'workbench',
-    }
-    check = _make_check(instance)
+    check = _make_check(session_instance)
     monkeypatch.setattr(check, '_ensure_token', Mock(side_effect=RuntimeError("auth failed")))
 
     with pytest.raises(Exception):
@@ -469,14 +555,10 @@ def test_check_connectivity_failure_reports_critical(
 def test_check_session_login_mode(
     dd_run_check: Callable[[AgentCheck, bool], None],
     aggregator: AggregatorStub,
+    session_instance: dict[str, Any],
     monkeypatch: MonkeyPatch,
 ) -> None:
-    instance = {
-        'control_m_api_endpoint': 'https://example.com/automation-api',
-        'control_m_username': 'workbench',
-        'control_m_password': 'workbench',
-    }
-    check = _make_check(instance)
+    check = _make_check(session_instance)
 
     response = Mock()
     response.status_code = 200
