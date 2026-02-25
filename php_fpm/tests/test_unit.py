@@ -33,50 +33,44 @@ def test_bad_ping(aggregator, dd_run_check):
     aggregator.all_metrics_asserted()
 
 
-def test_should_not_retry(check, instance):
+def test_should_not_retry(check, instance, mock_http):
     """
     backoff only works when response code is 503, otherwise the error
     should bubble up
     """
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.side_effect = FooException("Generic http error here")
-        with pytest.raises(FooException):
-            check._process_status(instance['status_url'], [], None, False)
+    mock_http.get.side_effect = FooException("Generic http error here")
+    with pytest.raises(FooException):
+        check._process_status(instance['status_url'], [], None, False)
 
 
-def test_should_bail_out(check, instance):
+def test_should_bail_out(check, instance, mock_http):
     """
     backoff should give up after 3 attempts
     """
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        attrs = {'raise_for_status.side_effect': FooException()}
-        r.get.side_effect = [
-            mock.MagicMock(status_code=503, **attrs),
-            mock.MagicMock(status_code=503, **attrs),
-            mock.MagicMock(status_code=503, **attrs),
-            mock.MagicMock(status_code=200),
-        ]
-        with pytest.raises(FooException):
-            check._process_status(instance['status_url'], [], None, False)
+    attrs = {'raise_for_status.side_effect': FooException()}
+    mock_http.get.side_effect = [
+        mock.MagicMock(status_code=503, **attrs),
+        mock.MagicMock(status_code=503, **attrs),
+        mock.MagicMock(status_code=503, **attrs),
+        mock.MagicMock(status_code=200),
+    ]
+    with pytest.raises(FooException):
+        check._process_status(instance['status_url'], [], None, False)
 
 
-def test_backoff_success(check, instance, aggregator, payload):
+def test_backoff_success(check, instance, aggregator, payload, mock_http):
     """
     Success after 2 failed attempts
     """
     instance['ping_url'] = None
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        attrs = {'json.return_value': payload}
-        r.get.side_effect = [
-            mock.MagicMock(status_code=503),
-            mock.MagicMock(status_code=503),
-            mock.MagicMock(status_code=200, **attrs),
-        ]
-        pool_name = check._process_status(instance['status_url'], [], None, False)
-        assert pool_name == 'www'
+    attrs = {'json.return_value': payload}
+    mock_http.get.side_effect = [
+        mock.MagicMock(status_code=503),
+        mock.MagicMock(status_code=503),
+        mock.MagicMock(status_code=200, **attrs),
+    ]
+    pool_name = check._process_status(instance['status_url'], [], None, False)
+    assert pool_name == 'www'
 
 
 @pytest.mark.parametrize(
@@ -101,25 +95,14 @@ def test_backoff_success(check, instance, aggregator, payload):
         ),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs, dd_run_check):
+def test_config(test_case, extra_config, expected_http_kwargs):
     instance = {'ping_url': 'http://foo:9001/ping'}
     instance.update(extra_config)
     check = PHPFPMCheck('php_fpm', {}, instances=[instance])
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200)
-
-        dd_run_check(check)
-
-        http_kwargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_kwargs.update(expected_http_kwargs)
-        r.get.assert_called_with('http://foo:9001/ping', **http_kwargs)
+    for key, value in expected_http_kwargs.items():
+        if key == 'headers':
+            for h_key, h_value in value.items():
+                assert check.http.options['headers'].get(h_key) == h_value
+        else:
+            assert check.http.options[key] == value
