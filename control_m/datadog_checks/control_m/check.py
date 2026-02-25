@@ -244,10 +244,18 @@ class ControlMCheck(AgentCheck, ConfigMixin):
             response.raise_for_status()
             payload = response.json()
         except Exception as e:
-            self.log.debug("Unable to collect job statuses from /run/jobs/status: %s", e)
+            self.log.warning("Unable to collect job statuses from /run/jobs/status: %s", e)
             return
 
-        statuses = payload.get("statuses", []) if isinstance(payload, dict) else []
+        if not isinstance(payload, dict):
+            return
+
+        statuses = payload.get("statuses", [])
+        total = payload.get("total")
+        if total is not None:
+            self.gauge("jobs.total", total, tags=self._base_tags)
+        self.gauge("jobs.returned", len(statuses), tags=self._base_tags)
+
         if not statuses:
             return
 
