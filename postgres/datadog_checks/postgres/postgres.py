@@ -162,9 +162,10 @@ class PostgreSql(DatabaseCheck):
             token_provider=self.build_token_provider(),
         )
         self.metrics_cache = PostgresMetricsCache(self._config)
-        self.statement_metrics = PostgresStatementMetrics(self, self._config)
-        self.statement_samples = PostgresStatementSamples(self, self._config)
-        self.metadata_samples = PostgresMetadata(self, self._config)
+        # Register DBM jobs for lifecycle management
+        self.statement_metrics = self.register_dbm_job(PostgresStatementMetrics(self, self._config))
+        self.statement_samples = self.register_dbm_job(PostgresStatementSamples(self, self._config))
+        self.metadata_samples = self.register_dbm_job(PostgresMetadata(self, self._config))
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
         self._query_manager = QueryManager(self, lambda _: None, queries=[])  # query executor is set later
@@ -464,18 +465,10 @@ class PostgreSql(DatabaseCheck):
 
     def cancel(self):
         """
-        Cancels and sends cancel signal to all threads.
+        Cancels all DBM jobs and closes the database connection pool.
         """
-        if self._config.dbm:
-            self.statement_samples.cancel()
-            self.statement_metrics.cancel()
-            self.metadata_samples.cancel()
-            if self.statement_metrics._job_loop_future:
-                self.statement_metrics._job_loop_future.result()
-            if self.statement_samples._job_loop_future:
-                self.statement_samples._job_loop_future.result()
-            if self.metadata_samples._job_loop_future:
-                self.metadata_samples._job_loop_future.result()
+        super().cancel()
+        self.wait_for_all_jobs()
         self._close_db_pool()
 
     def _clean_state(self):
