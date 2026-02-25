@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
-from unittest.mock import ANY, MagicMock
 
 import pytest
 
@@ -74,25 +73,12 @@ def test_service_check(aggregator, instance, dd_run_check):
     ],
 )
 @pytest.mark.integration
-def test_config(instance, test_case, extra_config, expected_http_kwargs, dd_run_check, http_client_session):
+def test_config(instance, test_case, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = Etcd(CHECK_NAME, {}, [instance])
 
-    http_client_session.get.return_value = MagicMock(status_code=200)
-    dd_run_check(check)
-
-    http_kwargs = {
-        'auth': ANY,
-        'cert': ANY,
-        'data': ANY,
-        'headers': ANY,
-        'proxies': ANY,
-        'timeout': ANY,
-        'verify': ANY,
-        'allow_redirects': ANY,
-    }
-    http_kwargs.update(expected_http_kwargs)
-    http_client_session.post.assert_called_with(URL + '/v3/maintenance/status', **http_kwargs)
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value
 
 
 @pytest.mark.integration

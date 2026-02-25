@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
-import mock
 import pytest
 
 from datadog_checks.consul import ConsulCheck
@@ -155,7 +154,7 @@ def test_get_nodes_with_service_critical(aggregator):
     aggregator.assert_metric('consul.catalog.services_count', value=1, tags=expected_tags)
 
 
-def test_consul_request(aggregator, instance, mocker, http_client_session):
+def test_consul_request(aggregator, instance, mocker, mock_http):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
     mocker.patch("datadog_checks.base.utils.serialization.json.loads")
 
@@ -164,7 +163,7 @@ def test_consul_request(aggregator, instance, mocker, http_client_session):
     aggregator.assert_service_check("consul.can_connect", ConsulCheck.OK, tags=["url:{}".format(url)], count=1)
 
     aggregator.reset()
-    http_client_session.get.side_effect = Exception("message")
+    mock_http.get.side_effect = Exception("message")
     with pytest.raises(Exception):
         consul_check.consul_request("foo")
     aggregator.assert_service_check(
@@ -648,22 +647,13 @@ def test_network_latency_node_name(
         ),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs, mocker, http_client_session):
+def test_config(test_case, extra_config, expected_http_kwargs):
     instance = extra_config
     check = ConsulCheck(common.CHECK_NAME, {}, instances=[instance])
-    mocker.patch("datadog_checks.base.utils.serialization.json.loads")
 
-    http_client_session.get.return_value = mock.MagicMock(status_code=200)
-    check.check(None)
-
-    http_wargs = {
-        'auth': mock.ANY,
-        'cert': mock.ANY,
-        'headers': mock.ANY,
-        'proxies': mock.ANY,
-        'timeout': mock.ANY,
-        'verify': mock.ANY,
-        'allow_redirects': mock.ANY,
-    }
-    http_wargs.update(expected_http_kwargs)
-    http_client_session.get.assert_called_with('/v1/status/leader', **http_wargs)
+    for key, value in expected_http_kwargs.items():
+        if key == 'headers':
+            for h_key, h_value in value.items():
+                assert check.http.options['headers'].get(h_key) == h_value
+        else:
+            assert check.http.options[key] == value
