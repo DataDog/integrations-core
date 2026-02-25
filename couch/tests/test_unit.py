@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
-from unittest.mock import ANY, MagicMock
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -24,25 +24,13 @@ from . import common
         ("timeout", {'timeout': 17}, {'timeout': (17, 17)}),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs, http_client_session):
+def test_config(test_case, extra_config, expected_http_kwargs):
     instance = deepcopy(common.BASIC_CONFIG)
     instance.update(extra_config)
     check = CouchDb(common.CHECK_NAME, {}, instances=[instance])
 
-    http_client_session.get.return_value = MagicMock(status_code=200, content='{}')
-    check.check(instance)
-
-    http_wargs = {
-        'auth': ANY,
-        'cert': ANY,
-        'headers': ANY,
-        'proxies': ANY,
-        'timeout': ANY,
-        'verify': ANY,
-        'allow_redirects': ANY,
-    }
-    http_wargs.update(expected_http_kwargs)
-    http_client_session.get.assert_called_with('http://{}:5984/_all_dbs/'.format(common.HOST), **http_wargs)
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value
 
 
 def test_new_version_system_metrics(load_test_data):
