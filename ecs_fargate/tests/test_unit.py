@@ -289,21 +289,9 @@ def test_successful_check_wrong_sys_delta(check, aggregator, dd_run_check):
     [("explicit timeout", {'timeout': 30}, {'timeout': (30, 30)}), ("default timeout", {}, {'timeout': (5, 5)})],
 )
 @pytest.mark.unit
-def test_config(test_case, extra_config, expected_http_kwargs, dd_run_check, http_client_session):
+def test_config(test_case, extra_config, expected_http_kwargs):
     instance = extra_config
     check = FargateCheck('ecs_fargate', {}, instances=[instance])
 
-    http_client_session.get.return_value = mock.MagicMock(status_code=200)
-    dd_run_check(check)
-
-    http_wargs = {
-        'auth': mock.ANY,
-        'cert': mock.ANY,
-        'headers': mock.ANY,
-        'proxies': mock.ANY,
-        'timeout': mock.ANY,
-        'verify': mock.ANY,
-        'allow_redirects': mock.ANY,
-    }
-    http_wargs.update(expected_http_kwargs)
-    http_client_session.get.assert_called_with('http://169.254.170.2/v2/metadata', **http_wargs)
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value

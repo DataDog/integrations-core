@@ -151,16 +151,17 @@ def test_instance_timeout(check, instance):
 def test_can_connect_service_check(
     instance,
     aggregator,
-    http_client_session,
+    mock_http,
     test_case_name,
     request_mock_side_effects,
     expected_status,
     expected_tags,
     expect_exception,
 ):
+    mock_http.options = {'verify': True}
     check = MesosMaster('mesos_master', {}, [instance])
 
-    http_client_session.get.side_effect = request_mock_side_effects
+    mock_http.get.side_effect = request_mock_side_effects
 
     try:
         check._get_master_state('http://hello.com', ['my:tag'])
