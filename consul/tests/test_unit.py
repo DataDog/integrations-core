@@ -155,25 +155,25 @@ def test_get_nodes_with_service_critical(aggregator):
     aggregator.assert_metric('consul.catalog.services_count', value=1, tags=expected_tags)
 
 
-def test_consul_request(aggregator, instance, mocker):
+def test_consul_request(aggregator, instance, mocker, http_client_session):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
     mocker.patch("datadog_checks.base.utils.serialization.json.loads")
-    with mock.patch("datadog_checks.consul.consul.requests.Session.get") as mock_requests_get:
-        consul_check.consul_request("foo")
-        url = "{}/{}".format(instance["url"], "foo")
-        aggregator.assert_service_check("consul.can_connect", ConsulCheck.OK, tags=["url:{}".format(url)], count=1)
 
-        aggregator.reset()
-        mock_requests_get.side_effect = Exception("message")
-        with pytest.raises(Exception):
-            consul_check.consul_request("foo")
-        aggregator.assert_service_check(
-            "consul.can_connect",
-            ConsulCheck.CRITICAL,
-            tags=["url:{}".format(url)],
-            count=1,
-            message="Consul request to {} failed: message".format(url),
-        )
+    consul_check.consul_request("foo")
+    url = "{}/{}".format(instance["url"], "foo")
+    aggregator.assert_service_check("consul.can_connect", ConsulCheck.OK, tags=["url:{}".format(url)], count=1)
+
+    aggregator.reset()
+    http_client_session.get.side_effect = Exception("message")
+    with pytest.raises(Exception):
+        consul_check.consul_request("foo")
+    aggregator.assert_service_check(
+        "consul.can_connect",
+        ConsulCheck.CRITICAL,
+        tags=["url:{}".format(url)],
+        count=1,
+        message="Consul request to {} failed: message".format(url),
+    )
 
 
 def test_service_checks(aggregator):
@@ -648,26 +648,22 @@ def test_network_latency_node_name(
         ),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs, mocker):
+def test_config(test_case, extra_config, expected_http_kwargs, mocker, http_client_session):
     instance = extra_config
     check = ConsulCheck(common.CHECK_NAME, {}, instances=[instance])
     mocker.patch("datadog_checks.base.utils.serialization.json.loads")
 
-    with mock.patch('datadog_checks.base.utils.http.requests.Session') as session:
-        mock_session = mock.MagicMock()
-        session.return_value = mock_session
-        mock_session.get.return_value = mock.MagicMock(status_code=200)
+    http_client_session.get.return_value = mock.MagicMock(status_code=200)
+    check.check(None)
 
-        check.check(None)
-
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-        mock_session.get.assert_called_with('/v1/status/leader', **http_wargs)
+    http_wargs = {
+        'auth': mock.ANY,
+        'cert': mock.ANY,
+        'headers': mock.ANY,
+        'proxies': mock.ANY,
+        'timeout': mock.ANY,
+        'verify': mock.ANY,
+        'allow_redirects': mock.ANY,
+    }
+    http_wargs.update(expected_http_kwargs)
+    http_client_session.get.assert_called_with('/v1/status/leader', **http_wargs)
