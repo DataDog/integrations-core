@@ -16,6 +16,7 @@ from datadog_checks.dev import TempDir
 from datadog_checks.dev.tooling.commands.console import (
     CONTEXT_SETTINGS,
     abort,
+    echo_debug,
     echo_failure,
     echo_info,
     echo_success,
@@ -144,14 +145,14 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
             import sys
             import time
 
-            from pysmi import debug, error
+            from pysmi import error
             from pysmi.compat import decode
 
             headers = {"Accept": "text/plain", "User-Agent": self._user_agent}
 
             mibname = decode(mibname)
 
-            debug.logger & debug.FLAG_READER and debug.logger(f"looking for MIB {mibname}")
+            echo_debug(f"looking for MIB {mibname}")
 
             for mibalias, mibfile in self.get_mib_variants(mibname, **options):
                 if self.MIB_MAGIC in self._url:
@@ -159,18 +160,18 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
                 else:
                     url = self._url + mibfile
 
-                debug.logger & debug.FLAG_READER and debug.logger(f"trying to fetch MIB from {url}")
+                echo_debug(f"trying to fetch MIB from {url}")
 
                 try:
                     response = self.session.get(url, headers=headers)
 
                 except Exception:
-                    debug.logger & debug.FLAG_READER and debug.logger(
+                    echo_debug(
                         f"failed to fetch MIB from {url}: {sys.exc_info()[1]}"
                     )
                     continue
 
-                debug.logger & debug.FLAG_READER and debug.logger(f"HTTP response {response.status_code}")
+                echo_debug(f"HTTP response {response.status_code}")
 
                 if response.status_code == 200:
                     try:
@@ -182,12 +183,12 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
                         )
 
                     except Exception:
-                        debug.logger & debug.FLAG_READER and debug.logger(
+                        echo_debug(
                             f"malformed HTTP headers: {sys.exc_info()[1]}"
                         )
                         mtime = time.time()
 
-                    debug.logger & debug.FLAG_READER and debug.logger(
+                    echo_debug(
                         f"fetching source MIB {url}, mtime {response.headers['Last-Modified']}"
                     )
 
@@ -199,9 +200,9 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
 
     if debug:
         set_debug()
-        from pysmi import debug
+        from pysmi import debug as pysmi_debug
 
-        debug.setLogger(debug.Debug('all'))
+        pysmi_debug.setLogger(pysmi_debug.Debug('all'))
 
     # Defaulting to github.com/DataDog/mibs.snmplabs.com/
     mib_sources = [mib_sources] if mib_sources else [MIB_SOURCE_URL]
