@@ -931,9 +931,7 @@ def test_option_formats_duplicate_values():
     )
     spec.load()
 
-    assert (
-        'test, test.yaml, instances, foo: Attribute `formats` contains duplicate entries: url'
-    ) in spec.errors
+    assert ('test, test.yaml, instances, foo: Attribute `formats` contains duplicate entries: url') in spec.errors
 
 
 def test_option_formats_valid():

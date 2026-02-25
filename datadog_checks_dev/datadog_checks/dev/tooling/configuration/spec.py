@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from .constants import ALLOWED_FLEET_FORMATS, OPENAPI_DATA_TYPES
+from .constants import ALLOWED_FORMATS, OPENAPI_DATA_TYPES
 
 
 def spec_validator(spec: dict, loader) -> None:
@@ -408,13 +408,19 @@ def formats_validator(formats, loader, file_name, sections_display, option_name,
             )
         )
 
-    invalid_formats = sorted(set(formats) - ALLOWED_FLEET_FORMATS)
+    invalid_formats = sorted(set(formats) - ALLOWED_FORMATS)
     if invalid_formats:
-        valid_formats = ' | '.join(sorted(ALLOWED_FLEET_FORMATS))
+        valid_formats = ' | '.join(sorted(ALLOWED_FORMATS))
         invalid_display = ', '.join(invalid_formats)
         loader.errors.append(
             '{}, {}, {}{}: Attribute `formats`{} contains unknown value(s): {}, valid values are {}'.format(
-                loader.source, file_name, sections_display, option_name, property_context, invalid_display, valid_formats
+                loader.source,
+                file_name,
+                sections_display,
+                option_name,
+                property_context,
+                invalid_display,
+                valid_formats,
             )
         )
 
