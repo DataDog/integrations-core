@@ -19,6 +19,7 @@ def mock_http(mocker: Any) -> Any:
     from unittest.mock import PropertyMock, create_autospec
 
     client = create_autospec(HTTPClientProtocol)
+    client.options = MagicMock(spec=dict)
     mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
     return client
 
