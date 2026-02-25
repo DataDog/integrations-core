@@ -132,6 +132,24 @@ def test_job_metric_tags_minimal_and_server_fallback(instance: dict[str, Any], a
     aggregator.assert_metric_has_tag('control_m._test', 'ctm_server:primary')
 
 
+def test_build_jobs_status_url_defaults_and_custom(instance: dict[str, Any]) -> None:
+    check = _make_check(instance)
+    url = check._build_jobs_status_url()
+    assert '/run/jobs/status?' in url
+    assert 'limit=200' in url
+    assert 'jobname=%2A' in url
+
+    custom_instance = {
+        **instance,
+        'job_status_limit': 50,
+        'job_name_filter': 'nightly_*',
+    }
+    check = _make_check(custom_instance)
+    url = check._build_jobs_status_url()
+    assert 'limit=50' in url
+    assert 'jobname=nightly_%2A' in url
+
+
 def test_server_health_mixed_states(instance: dict[str, Any], aggregator: AggregatorStub) -> None:
     check = _make_check(instance)
     check._collect_server_health(
@@ -232,6 +250,33 @@ def test_jobs_terminal_without_timestamps_emits_count_only(
     aggregator.assert_metric('control_m.job.run.duration_ms', count=0)
 
 
+def test_jobs_terminal_with_timestamps_emits_duration(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    check = _make_check(instance)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [
+            {
+                'ctm': 'srv1',
+                'name': 'timed_job',
+                'status': 'Ended OK',
+                'startTime': '20260115100000',
+                'endTime': '20260115103000',
+            },
+        ],
+    )
+    check._collect_job_statuses()
+
+    aggregator.assert_metric('control_m.job.run.count', value=1, count=1)
+    aggregator.assert_metric_has_tag('control_m.job.run.count', 'result:ok')
+    aggregator.assert_metric('control_m.job.run.duration_ms', value=1_800_000, count=1)
+    aggregator.assert_metric_has_tag('control_m.job.run.duration_ms', 'job_name:timed_job')
+
+
 def test_jobs_all_terminal_statuses_and_result_tags(
     instance: dict[str, Any],
     aggregator: AggregatorStub,
@@ -295,8 +340,10 @@ def test_jobs_api_failure_and_bad_entries_handled_gracefully(
 
     aggregator.reset()
 
+    base = ['control_m_instance:https://example.com/automation-api']
     _mock_job_response(check, monkeypatch, ["not a dict", None, {'ctm': 'srv1', 'status': 'Executing'}])
     check._collect_job_statuses()
+    aggregator.assert_metric('control_m.jobs.returned', value=3, tags=base, count=1)
     aggregator.assert_metric('control_m.jobs.active', value=1, count=1)
 
 
@@ -343,6 +390,29 @@ def test_session_token_refresh_behavior() -> None:
     check._token_expiration = time.monotonic() + check._token_refresh_buffer - 1
     check._ensure_token()
     check._login.assert_called_once()
+
+
+def test_session_login_failure_emits_critical_and_gauges(
+    dd_run_check: Callable[[AgentCheck, bool], None],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    instance = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'control_m_username': 'workbench',
+        'control_m_password': 'workbench',
+    }
+    check = _make_check(instance)
+    monkeypatch.setattr(check, '_ensure_token', Mock(side_effect=RuntimeError("auth failed")))
+
+    with pytest.raises(Exception):
+        dd_run_check(check)
+
+    auth_tags = ['control_m_instance:https://example.com/automation-api', 'auth_method:session_login']
+    aggregator.assert_service_check('control_m.can_login', status=AgentCheck.CRITICAL, tags=auth_tags, count=1)
+    aggregator.assert_service_check('control_m.can_connect', status=AgentCheck.CRITICAL, tags=auth_tags, count=1)
+    aggregator.assert_metric('control_m.can_login', value=0, tags=auth_tags, count=1)
+    aggregator.assert_metric('control_m.can_connect', value=0, tags=auth_tags, count=1)
 
 
 def test_check_can_connect(
