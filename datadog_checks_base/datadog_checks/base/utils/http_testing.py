@@ -6,7 +6,21 @@ from io import BytesIO
 from typing import Any, Iterator
 from unittest.mock import MagicMock
 
-__all__ = ['MockHTTPResponse']
+import pytest
+
+__all__ = ['MockHTTPResponse', 'mock_http']
+
+
+@pytest.fixture
+def mock_http(mocker: Any) -> Any:
+    # Intercept HTTP calls made through AgentCheck.http, import into integration conftest.py to use
+    from datadog_checks.base.checks.base import AgentCheck
+    from datadog_checks.base.utils.http_protocol import HTTPClientProtocol
+    from unittest.mock import PropertyMock, create_autospec
+
+    client = create_autospec(HTTPClientProtocol)
+    mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
+    return client
 
 
 class MockHTTPResponse:
