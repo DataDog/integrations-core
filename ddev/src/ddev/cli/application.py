@@ -88,6 +88,7 @@ class Application(Terminal):
     def initialize_old_cli(self):
         from copy import deepcopy
 
+        from datadog_checks.dev.tooling.constants import REPO_CHOICES
         from datadog_checks.dev.tooling.utils import initialize_root
 
         self.__config.update(deepcopy(self.config.raw_data))
@@ -106,6 +107,10 @@ class Application(Terminal):
             repo_name = self.config.repo.name
             self.__config.setdefault('repos', {})[repo_name] = str(Path.cwd())
         self.__config['repo'] = repo_name
+        # initialize_root() short-circuits when root is already set (e.g. DDEV_ROOT or leaked test state),
+        # so ensure repo metadata is always present for legacy commands.
+        self.__config['repo_choice'] = repo_name
+        self.__config['repo_name'] = REPO_CHOICES.get(repo_name, repo_name)
         initialize_root(self.__config)
 
     def copy(self):
