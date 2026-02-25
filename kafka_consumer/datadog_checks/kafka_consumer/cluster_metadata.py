@@ -36,6 +36,9 @@ class ClusterMetadataCollector:
         self.SCHEMA_CACHE_KEY = 'kafka_schema_cache'
         self.SCHEMA_FETCH_CACHE_KEY = 'kafka_schema_fetch_cache'
 
+        self._schema_registry_oauth_token = None
+        self._schema_registry_oauth_token_expiry = 0
+
         if self.config._collect_schema_registry:
             self._configure_schema_registry_http_client()
 
@@ -65,6 +68,63 @@ class ClusterMetadataCollector:
             )
         elif self.config._schema_registry_tls_cert:
             self.http.options['cert'] = self.config._schema_registry_tls_cert
+
+    def _refresh_schema_registry_oauth_token(self):
+        """Fetch or refresh the OAuth token for Schema Registry if configured and expired."""
+        oauth_config = self.config._schema_registry_oauth_token_provider
+        if not oauth_config:
+            return
+
+        # Check if token is still valid (with 30s buffer)
+        if self._schema_registry_oauth_token and time.time() < (self._schema_registry_oauth_token_expiry - 30):
+            return
+
+        token, expires_at = self._fetch_oidc_token(oauth_config)
+
+        self._schema_registry_oauth_token = token
+        self._schema_registry_oauth_token_expiry = expires_at
+        headers = {
+            **self.http.options.get('headers', {}),
+            'Authorization': f'Bearer {token}',
+        }
+
+        custom_headers = oauth_config.get("custom_headers")
+        if custom_headers:
+            headers.update(custom_headers)
+
+        self.http.options['headers'] = headers
+        self.log.debug("Schema Registry OAuth token refreshed, expires at %s", expires_at)
+
+    def _fetch_oidc_token(self, oauth_config: dict) -> tuple[str, float]:
+        """Fetch an OIDC token using client credentials grant."""
+        token_url = oauth_config["url"]
+        client_id = oauth_config["client_id"]
+        client_secret = oauth_config["client_secret"]
+
+        data = {"grant_type": "client_credentials"}
+        scope = oauth_config.get("scope")
+        if scope:
+            data["scope"] = scope
+
+        options = {}
+        tls_ca_cert = oauth_config.get("tls_ca_cert")
+        if tls_ca_cert:
+            options["verify"] = tls_ca_cert
+
+        response = self.http.post(
+            token_url,
+            data=data,
+            auth=(client_id, client_secret),
+            **options,
+        )
+        response.raise_for_status()
+        token_data = response.json()
+
+        access_token = token_data["access_token"]
+        expires_in = token_data.get("expires_in", 300)
+        expires_at = time.time() + expires_in
+
+        return access_token, expires_at
 
     def _get_schema_registry_subjects(self):
         base_url = self.config._collect_schema_registry
@@ -636,6 +696,12 @@ class ClusterMetadataCollector:
             return
 
         self.log.debug("Collecting schema registry information from %s", self.config._collect_schema_registry)
+
+        try:
+            self._refresh_schema_registry_oauth_token()
+        except Exception as e:
+            self.log.error("Failed to refresh Schema Registry OAuth token: %s", e)
+            return
 
         try:
             subjects = self._get_schema_registry_subjects()
