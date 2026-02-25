@@ -20,7 +20,7 @@
 * Updates collect_raw_query_statements config description ([#22611](https://github.com/DataDog/integrations-core/pull/22611))
 * Fix a truthy check on AWS authentication fallback logic ([#22614](https://github.com/DataDog/integrations-core/pull/22614))
 
-## 23.3.4 / 2026-01-21
+## 23.3.4 / 2026-01-21 / Agent 7.76.0
 
 ***Fixed***:
 

@@ -1,3 +1,25 @@
+## Datadog Agent version [7.76.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7761)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.76.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7760)
+
+### New Integrations
+* Zscaler Private Access [1.1.0](https://github.com/DataDog/integrations-core/blob/master/zscaler_private_access/CHANGELOG.md)
+### Integration Updates
+* Datadog Checks Base [37.30.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Cisco ACI [4.12.0](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
+* HTTP [12.4.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* IBM Spectrum LSF [1.2.0](https://github.com/DataDog/integrations-core/blob/master/ibm_spectrum_lsf/CHANGELOG.md)
+* Kafka Actions [2.2.0](https://github.com/DataDog/integrations-core/blob/master/kafka_actions/CHANGELOG.md)
+* Kafka Consumer [6.13.0](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+* MySQL [15.12.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* Postgres [23.3.4](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Snowflake [7.10.0](https://github.com/DataDog/integrations-core/blob/master/snowflake/CHANGELOG.md)
+* Spark [7.4.0](https://github.com/DataDog/integrations-core/blob/master/spark/CHANGELOG.md)
+* SQL Server [22.12.4](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* TLS [5.4.0](https://github.com/DataDog/integrations-core/blob/master/tls/CHANGELOG.md)
+
 ## Datadog Agent version [7.75.4](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7754)
 
 * There were no integration updates for this version of the Agent.

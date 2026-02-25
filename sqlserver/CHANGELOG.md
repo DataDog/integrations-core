@@ -15,7 +15,7 @@
 * Updates collect_raw_query_statements config description ([#22611](https://github.com/DataDog/integrations-core/pull/22611))
 * Fix AgentJobs, Deadlocks and XE collections to run async by default ([#22633](https://github.com/DataDog/integrations-core/pull/22633))
 
-## 22.12.4 / 2026-02-05
+## 22.12.4 / 2026-02-05 / Agent 7.76.0
 
 ***Fixed***:
 
