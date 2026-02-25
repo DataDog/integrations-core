@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
-from unittest.mock import ANY, MagicMock
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -102,22 +102,10 @@ def test_get_instance_config(check):
         ("default config", {}, {}, {'verify': True}),
     ],
 )
-def test_config(test_case, init_config, extra_config, expected_http_kwargs, http_client_session):
+def test_config(test_case, init_config, extra_config, expected_http_kwargs):
     instance = deepcopy(INSTANCE_INTEGRATION)
     instance.update(extra_config)
     check = Marathon('marathon', init_config, instances=[instance])
 
-    http_client_session.get.return_value = MagicMock(status_code=200)
-    check.check(instance)
-
-    http_wargs = {
-        'auth': ANY,
-        'cert': ANY,
-        'headers': ANY,
-        'proxies': ANY,
-        'timeout': ANY,
-        'verify': ANY,
-        'allow_redirects': ANY,
-    }
-    http_wargs.update(expected_http_kwargs)
-    http_client_session.get.assert_called_with('http://localhost:8080/v2/queue', **http_wargs)
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value

@@ -95,9 +95,7 @@ pytestmark = pytest.mark.unit
         ),
     ],
 )
-def test_get_models(
-    check, mocked_management_instance, expected_models, fixture_folder, status_codes, http_client_session
-):
+def test_get_models(check, mocked_management_instance, expected_models, fixture_folder, status_codes, mock_http):
     # Build all the responses our mock will return
     responses = []
     full_path = get_fixture_path(os.path.join("management", "pagination", fixture_folder))
@@ -111,17 +109,17 @@ def test_get_models(
                 mock_resp.raise_for_status.side_effect = HTTPError() if status_code != 200 else None
                 responses.append(mock_resp)
 
-    http_client_session.get.side_effect = responses
+    mock_http.get.side_effect = responses
     discovery = ModelDiscovery(check(mocked_management_instance), include=[".*"])
     assert [('.*', model['modelName'], model, None) for model in expected_models] == list(discovery.get_items())
-    assert http_client_session.get.call_count == len(status_codes)
+    assert mock_http.get.call_count == len(status_codes)
 
     # Validate we used the right params
-    assert http_client_session.get.call_args_list[0].kwargs["params"] == {"limit": 100}
+    assert mock_http.get.call_args_list[0].kwargs["params"] == {"limit": 100}
 
     for index, _ in enumerate(status_codes[1:], start=1):
         # The nextPageToken from the call n comes from the answer n-1
-        assert http_client_session.get.call_args_list[index].kwargs["params"] == {
+        assert mock_http.get.call_args_list[index].kwargs["params"] == {
             "limit": 100,
             "nextPageToken": responses[index - 1].json.return_value["nextPageToken"],
         }
