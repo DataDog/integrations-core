@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.base.utils.http_testing import http_client_session  # noqa: F401
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.etcd.metrics import METRIC_MAP

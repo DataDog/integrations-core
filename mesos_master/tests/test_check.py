@@ -1,7 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
+from unittest.mock import MagicMock
+
 import pytest
 import requests
 
@@ -84,28 +85,28 @@ def test_instance_timeout(check, instance):
     [
         (
             'OK case for /state endpoint',
-            [mock.MagicMock(status_code=200, content='{}')],
+            [MagicMock(status_code=200, content='{}')],
             AgentCheck.OK,
             ['my:tag', 'url:http://hello.com/state'],
             False,
         ),
         (
             'OK case with failing /state due to bad status and fallback on /state.json',
-            [mock.MagicMock(status_code=500), mock.MagicMock(status_code=200, content='{}')],
+            [MagicMock(status_code=500), MagicMock(status_code=200, content='{}')],
             AgentCheck.OK,
             ['my:tag', 'url:http://hello.com/state.json'],
             False,
         ),
         (
             'OK case with failing /state due to Timeout and fallback on /state.json',
-            [requests.exceptions.Timeout, mock.MagicMock(status_code=200, content='{}')],
+            [requests.exceptions.Timeout, MagicMock(status_code=200, content='{}')],
             AgentCheck.OK,
             ['my:tag', 'url:http://hello.com/state.json'],
             False,
         ),
         (
             'OK case with failing /state due to Exception and fallback on /state.json',
-            [Exception, mock.MagicMock(status_code=200, content='{}')],
+            [Exception, MagicMock(status_code=200, content='{}')],
             AgentCheck.OK,
             ['my:tag', 'url:http://hello.com/state.json'],
             False,
@@ -119,7 +120,7 @@ def test_instance_timeout(check, instance):
         ),
         (
             'NOK case with failing /state and /state.json with bad status',
-            [mock.MagicMock(status_code=500), mock.MagicMock(status_code=500)],
+            [MagicMock(status_code=500), MagicMock(status_code=500)],
             AgentCheck.CRITICAL,
             ['my:tag', 'url:http://hello.com/state.json'],
             True,
@@ -127,8 +128,8 @@ def test_instance_timeout(check, instance):
         (
             'OK case with non-leader master on /state',
             [
-                mock.MagicMock(status_code=401, history=[mock.MagicMock(status_code=307)]),
-                mock.MagicMock(content='{}', history=[], status_code=500),
+                MagicMock(status_code=401, history=[MagicMock(status_code=307)]),
+                MagicMock(content='{}', history=[], status_code=500),
             ],
             AgentCheck.UNKNOWN,
             ['my:tag', 'url:http://hello.com/state.json'],
@@ -137,8 +138,8 @@ def test_instance_timeout(check, instance):
         (
             'OK case with non-leader master on /state.json',
             [
-                mock.MagicMock(status_code=500, history=[]),
-                mock.MagicMock(content='{}', history=[mock.MagicMock(status_code=307)], status_code=401),
+                MagicMock(status_code=500, history=[]),
+                MagicMock(content='{}', history=[MagicMock(status_code=307)], status_code=401),
             ],
             AgentCheck.UNKNOWN,
             ['my:tag', 'url:http://hello.com/state.json'],
@@ -148,20 +149,25 @@ def test_instance_timeout(check, instance):
 )
 @pytest.mark.integration
 def test_can_connect_service_check(
-    instance, aggregator, test_case_name, request_mock_side_effects, expected_status, expected_tags, expect_exception
+    instance,
+    aggregator,
+    http_client_session,
+    test_case_name,
+    request_mock_side_effects,
+    expected_status,
+    expected_tags,
+    expect_exception,
 ):
     check = MesosMaster('mesos_master', {}, [instance])
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.side_effect = request_mock_side_effects
+    http_client_session.get.side_effect = request_mock_side_effects
 
-        try:
-            check._get_master_state('http://hello.com', ['my:tag'])
-            exception_raised = False
-        except CheckException:
-            exception_raised = True
+    try:
+        check._get_master_state('http://hello.com', ['my:tag'])
+        exception_raised = False
+    except CheckException:
+        exception_raised = True
 
-        assert expect_exception == exception_raised
+    assert expect_exception == exception_raised
 
     aggregator.assert_service_check('mesos_master.can_connect', count=1, status=expected_status, tags=expected_tags)
