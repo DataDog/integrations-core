@@ -166,9 +166,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
                     response = self.session.get(url, headers=headers)
 
                 except Exception:
-                    echo_debug(
-                        f"failed to fetch MIB from {url}: {sys.exc_info()[1]}"
-                    )
+                    echo_debug(f"failed to fetch MIB from {url}: {sys.exc_info()[1]}")
                     continue
 
                 echo_debug(f"HTTP response {response.status_code}")
@@ -183,14 +181,10 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
                         )
 
                     except Exception:
-                        echo_debug(
-                            f"malformed HTTP headers: {sys.exc_info()[1]}"
-                        )
+                        echo_debug(f"malformed HTTP headers: {sys.exc_info()[1]}")
                         mtime = time.time()
 
-                    echo_debug(
-                        f"fetching source MIB {url}, mtime {response.headers['Last-Modified']}"
-                    )
+                    echo_debug(f"fetching source MIB {url}, mtime {response.headers['Last-Modified']}")
 
                     return MibInfo(path=url, file=mibfile, name=mibalias, mtime=mtime), response.content.decode(
                         "utf-8", errors='replace'
