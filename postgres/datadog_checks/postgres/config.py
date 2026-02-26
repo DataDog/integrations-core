@@ -192,10 +192,6 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
     if instance.get('obfuscator_options', {}).get('quantize_sql_tables'):
         args['obfuscator_options']['replace_digits'] = True
 
-    # Auto-detect RDS endpoints and backfill instance_endpoint when not explicitly configured
-    if not args['aws'].get('instance_endpoint') and AWS_RDS_HOSTNAME_SUFFIX in args['host']:
-        args['aws']['instance_endpoint'] = args['host']
-
     validation_result = ValidationResult()
 
     # Generate and validate tags
@@ -321,6 +317,10 @@ def apply_validated_defaults(args: dict, instance: dict, validation_result: Vali
 
 
 def apply_cloud_defaults(args: dict, instance: dict, validation_result: ValidationResult):
+    # Auto-detect RDS endpoints and backfill instance_endpoint when not explicitly configured
+    if not args['aws'].get('instance_endpoint') and AWS_RDS_HOSTNAME_SUFFIX in args['host']:
+        args['aws']['instance_endpoint'] = args['host']
+
     # AWS backfill and validation
     if (
         not instance.get("aws", {}).get("managed_authentication", None)
