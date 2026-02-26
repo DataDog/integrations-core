@@ -1,3 +1,4 @@
+import email.message
 import fnmatch
 from pathlib import Path
 from unittest import mock
@@ -490,7 +491,9 @@ def test_collect_and_validate_wheels_invalid_name(tmp_path):
 def test_process_wheel_for_upload_external_new(setup_fake_hash):
     """Test processing a new external wheel that needs to be uploaded."""
     wheel_path = Path("test.whl")
-    metadata = {"Name": "test-pkg", "Version": "1.0.0"}
+    metadata = email.message.Message()
+    metadata["Name"] = "test-pkg"
+    metadata["Version"] = "1.0.0"
 
     mock_bucket = mock.Mock()
     mock_blob = mock.Mock()
@@ -510,7 +513,9 @@ def test_process_wheel_for_upload_external_new(setup_fake_hash):
 def test_process_wheel_for_upload_external_existing(setup_fake_hash):
     """Test processing an existing external wheel that doesn't need upload."""
     wheel_path = Path("test.whl")
-    metadata = {"Name": "test-pkg", "Version": "1.0.0"}
+    metadata = email.message.Message()
+    metadata["Name"] = "test-pkg"
+    metadata["Version"] = "1.0.0"
 
     mock_bucket = mock.Mock()
     mock_blob = mock.Mock()
