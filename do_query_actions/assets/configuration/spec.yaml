@@ -1,0 +1,145 @@
+name: Do Query Actions
+files:
+- name: do_query_actions.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: host
+      required: true
+      description: |
+        The database hostname to connect to.
+      value:
+        example: "localhost"
+        type: string
+    - name: port
+      description: |
+        The database port to connect to.
+        If not specified, defaults to 5432.
+      value:
+        type: integer
+    - name: username
+      required: true
+      description: |
+        The database username for authentication.
+      value:
+        example: "datadog"
+        type: string
+    - name: password
+      secret: true
+      description: |
+        The database password for authentication.
+      value:
+        type: string
+    - name: dbname
+      required: true
+      description: |
+        The name of the database to connect to.
+      value:
+        example: "mydb"
+        type: string
+    - name: ssl
+      description: |
+        SSL mode for PostgreSQL connections.
+        Valid values: disable, allow, prefer, require, verify-ca, verify-full.
+      value:
+        type: string
+    - name: ssl_cert
+      description: |
+        Path to the client SSL certificate.
+      value:
+        type: string
+    - name: ssl_root_cert
+      description: |
+        Path to the SSL root certificate authority.
+      value:
+        type: string
+    - name: ssl_key
+      description: |
+        Path to the client SSL private key.
+      value:
+        type: string
+    - name: ssl_password
+      secret: true
+      description: |
+        Password for the client SSL private key.
+      value:
+        type: string
+    - name: aws
+      description: |
+        AWS configuration for RDS IAM authentication.
+      value:
+        type: object
+        properties:
+        - name: region
+          type: string
+        - name: managed_authentication
+          type: object
+          properties:
+          - name: enabled
+            type: boolean
+          - name: role_arn
+            type: string
+    - name: managed_authentication
+      description: |
+        Azure Managed Identity configuration.
+      value:
+        type: object
+        properties:
+        - name: enabled
+          type: boolean
+        - name: client_id
+          type: string
+        - name: identity_scope
+          type: string
+    - name: remote_config_id
+      description: |
+        An identifier for tracking this query configuration via Remote Config.
+      value:
+        type: string
+    - name: db_type
+      required: true
+      description: |
+        The type of database to connect to.
+        Currently only 'postgres' is supported.
+      value:
+        example: "postgres"
+        type: string
+    - name: queries
+      required: true
+      description: |
+        List of SQL queries to execute with per-query scheduling.
+        Each query has its own interval and timeout settings.
+      value:
+        type: array
+        items:
+          type: object
+          properties:
+          - name: monitor_id
+            type: integer
+          - name: query
+            type: string
+          - name: interval_seconds
+            type: integer
+          - name: timeout_seconds
+            type: integer
+          - name: entity
+            type: object
+            properties:
+            - name: platform
+              type: string
+            - name: account_id
+              type: string
+            - name: database
+              type: string
+            - name: schema
+              type: string
+            - name: table
+              type: string
+            - name: metric_config_id
+              type: integer
+            - name: measure
+              type: string
+    - template: instances/default
