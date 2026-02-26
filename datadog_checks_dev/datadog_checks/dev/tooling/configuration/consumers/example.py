@@ -14,6 +14,7 @@ ALLOWED_OPTION_FIELDS = {
     'hidden',
     'display_priority',
     'deprecation',
+    'legacy',
     'multiple',
     'multiple_instances_defined',
     'metadata_tags',
@@ -25,6 +26,7 @@ ALLOWED_OPTION_FIELDS = {
     'template',
     'overrides',
     'fleet_configurable',
+    'formats',
 }
 ALLOWED_VALUE_FIELDS = OPENAPI_SCHEMA_PROPERTIES | {'example', 'display_default', 'compact_example'}
 DESCRIPTION_LINE_LENGTH_LIMIT = 120

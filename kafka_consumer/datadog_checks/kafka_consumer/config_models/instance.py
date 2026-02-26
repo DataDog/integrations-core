@@ -34,8 +34,26 @@ class SaslOauthTokenProvider(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    aws_region: Optional[str] = None
     client_id: Optional[str] = None
     client_secret: Optional[str] = None
+    extensions: Optional[str] = None
+    method: Optional[str] = None
+    scope: Optional[str] = None
+    tls_ca_cert: Optional[str] = None
+    url: Optional[str] = None
+
+
+class SchemaRegistryOauthTokenProvider(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    client_id: Optional[str] = None
+    client_secret: Optional[str] = None
+    custom_headers: Optional[MappingProxyType[str, str]] = None
+    scope: Optional[str] = None
+    tls_ca_cert: Optional[str] = None
     url: Optional[str] = None
 
 
@@ -54,6 +72,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_cluster_monitoring: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     kafka_client_api_version: Optional[str] = None
     kafka_connect_str: Union[str, tuple[str, ...]]
     metric_patterns: Optional[MetricPatterns] = None
@@ -68,6 +87,7 @@ class InstanceConfig(BaseModel):
     sasl_oauth_token_provider: Optional[SaslOauthTokenProvider] = None
     sasl_plain_password: Optional[str] = None
     sasl_plain_username: Optional[str] = None
+    schema_registry_oauth_token_provider: Optional[SchemaRegistryOauthTokenProvider] = None
     schema_registry_password: Optional[str] = None
     schema_registry_tls_ca_cert: Optional[str] = None
     schema_registry_tls_cert: Optional[str] = None

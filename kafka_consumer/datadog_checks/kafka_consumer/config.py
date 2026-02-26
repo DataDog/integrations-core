@@ -8,7 +8,7 @@ from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.kafka_consumer.constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
 
 # https://github.com/confluentinc/librdkafka/blob/e03d3bb91ed92a38f38d9806b8d8deffe78a1de5/src/rd.h#L78-L89
-LIBRDKAFKA_LOG_CRIT = 2
+LIBRDKAFKA_LOG_ERR = 3
 
 
 class KafkaConfig:
@@ -45,7 +45,7 @@ class KafkaConfig:
         self._request_timeout = init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT)
         self._request_timeout_ms = self._request_timeout * 1000
         self._librdkafka_log_level = instance.get(
-            'librdkafka_log_level', init_config.get('librdkafka_log_level', LIBRDKAFKA_LOG_CRIT)
+            'librdkafka_log_level', init_config.get('librdkafka_log_level', LIBRDKAFKA_LOG_ERR)
         )
         self._security_protocol = instance.get('security_protocol', 'PLAINTEXT')
         self._sasl_mechanism = instance.get('sasl_mechanism')
@@ -80,6 +80,10 @@ class KafkaConfig:
         ):
             self._tls_ca_cert = '/opt/datadog-agent/embedded/ssl/certs/cacert.pem'
 
+        self._sasl_oauth_tls_ca_cert = (
+            self._sasl_oauth_token_provider.get("tls_ca_cert") if self._sasl_oauth_token_provider else None
+        )
+
         # Data Streams live messages
         self.live_messages_configs = instance.get('live_messages_configs', [])
 
@@ -111,6 +115,7 @@ class KafkaConfig:
         self._schema_registry_tls_cert = instance.get('schema_registry_tls_cert')
         self._schema_registry_tls_key = instance.get('schema_registry_tls_key')
         self._schema_registry_tls_ca_cert = instance.get('schema_registry_tls_ca_cert')
+        self._schema_registry_oauth_token_provider = instance.get('schema_registry_oauth_token_provider')
 
     def validate_config(self):
         if not self._kafka_connect_str:
@@ -129,14 +134,64 @@ class KafkaConfig:
             if self._sasl_oauth_token_provider is None:
                 raise ConfigurationError("sasl_oauth_token_provider required for OAUTHBEARER sasl")
 
-            if self._sasl_oauth_token_provider.get("url") is None:
-                raise ConfigurationError("The `url` setting of `auth_token` reader is required")
+            if not isinstance(self._sasl_oauth_token_provider, dict):
+                raise ConfigurationError(
+                    f"sasl_oauth_token_provider must be a dictionary. Got: {type(self._sasl_oauth_token_provider)}"
+                )
 
-            elif self._sasl_oauth_token_provider.get("client_id") is None:
-                raise ConfigurationError("The `client_id` setting of `auth_token` reader is required")
+            # Default to 'oidc' for backwards compatibility with existing configs
+            method = self._sasl_oauth_token_provider.get("method", "oidc")
 
-            elif self._sasl_oauth_token_provider.get("client_secret") is None:
-                raise ConfigurationError("The `client_secret` setting of `auth_token` reader is required")
+            if method == "aws_msk_iam":
+                aws_region = self._sasl_oauth_token_provider.get("aws_region")
+                if not aws_region:
+                    try:
+                        import boto3
+
+                        detected_region = boto3.session.Session().region_name
+                        if not detected_region:
+                            self.log.warning(
+                                "AWS region cannot be detected automatically for MSK IAM authentication. "
+                                "Consider specifying 'aws_region' in sasl_oauth_token_provider configuration. "
+                                "You can also set it via AWS_REGION environment variable or AWS config file. "
+                                "Authentication will fail at runtime if the region cannot be determined."
+                            )
+                    except ImportError:
+                        raise ConfigurationError(
+                            "AWS MSK IAM authentication requires 'boto3' and 'aws-msk-iam-sasl-signer-python' "
+                            "libraries. Install them with: pip install boto3 aws-msk-iam-sasl-signer-python"
+                        )
+            elif method == "oidc":
+                if self._sasl_oauth_token_provider.get("url") is None:
+                    raise ConfigurationError("The `url` setting of `auth_token` reader is required")
+
+                if self._sasl_oauth_token_provider.get("client_id") is None:
+                    raise ConfigurationError("The `client_id` setting of `auth_token` reader is required")
+
+                if self._sasl_oauth_token_provider.get("client_secret") is None:
+                    raise ConfigurationError("The `client_secret` setting of `auth_token` reader is required")
+            else:
+                raise ConfigurationError(
+                    f"Invalid method '{method}' for sasl_oauth_token_provider. Must be 'aws_msk_iam' or 'oidc'"
+                )
+
+        if self._schema_registry_oauth_token_provider is not None:
+            if not isinstance(self._schema_registry_oauth_token_provider, dict):
+                raise ConfigurationError(
+                    "schema_registry_oauth_token_provider must be a dictionary. "
+                    f"Got: {type(self._schema_registry_oauth_token_provider)}"
+                )
+
+            if self._schema_registry_oauth_token_provider.get("url") is None:
+                raise ConfigurationError("The `url` setting of `schema_registry_oauth_token_provider` is required")
+            if self._schema_registry_oauth_token_provider.get("client_id") is None:
+                raise ConfigurationError(
+                    "The `client_id` setting of `schema_registry_oauth_token_provider` is required"
+                )
+            if self._schema_registry_oauth_token_provider.get("client_secret") is None:
+                raise ConfigurationError(
+                    "The `client_secret` setting of `schema_registry_oauth_token_provider` is required"
+                )
 
         # If `monitor_unlisted_consumer_groups` is set to true and
         # using `consumer_groups`, we prioritize `monitor_unlisted_consumer_groups`

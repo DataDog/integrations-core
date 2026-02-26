@@ -118,6 +118,10 @@ integration/arangodb:
 - changed-files:
   - any-glob-to-any-file:
     - arangodb/**/*
+integration/arctic_wolf_aurora_endpoint_security:
+- changed-files:
+  - any-glob-to-any-file:
+    - arctic_wolf_aurora_endpoint_security/**/*
 integration/argo_rollouts:
 - changed-files:
   - any-glob-to-any-file:
@@ -194,6 +198,10 @@ integration/blazemeter:
 - changed-files:
   - any-glob-to-any-file:
     - blazemeter/**/*
+integration/bluecat_edge:
+- changed-files:
+  - any-glob-to-any-file:
+    - bluecat_edge/**/*
 integration/boundary:
 - changed-files:
   - any-glob-to-any-file:
@@ -278,6 +286,10 @@ integration/cisco_sdwan:
 - changed-files:
   - any-glob-to-any-file:
     - cisco_sdwan/**/*
+integration/cisco_secure_client:
+- changed-files:
+  - any-glob-to-any-file:
+    - cisco_secure_client/**/*
 integration/cisco_secure_email_threat_defense:
 - changed-files:
   - any-glob-to-any-file:
@@ -670,6 +682,10 @@ integration/iboss:
 - changed-files:
   - any-glob-to-any-file:
     - iboss/**/*
+integration/ide_shepherd:
+- changed-files:
+  - any-glob-to-any-file:
+    - ide_shepherd/**/*
 integration/ignite:
 - changed-files:
   - any-glob-to-any-file:

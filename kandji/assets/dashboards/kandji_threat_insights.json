@@ -1,13 +1,13 @@
 {
-    "title": "Kandji - Threat Insights",
-    "description": "This dashboard provides a comprehensive summary of Threats.",
+    "title": "Iru (Kandji) - Threat Insights",
+    "description": "This dashboard provides a comprehensive summary of Iru (Kandji) Threats.",
     "widgets": [
         {
             "id": 8187342910039561,
             "definition": {
                 "type": "image",
-                "url": "/static/images/logos/kandji_small.svg",
-                "url_dark_theme": "/static/images/logos/kandji_reversed_small.svg",
+                "url": "https://www.iru.com/hs-fs/hubfs/raw_assets/public/IruAurelia/images/iru-logo-dark.png",
+                "url_dark_theme": "https://www.iru.com/hs-fs/hubfs/raw_assets/public/IruAurelia/images/iru-logo-light.png",
                 "sizing": "contain",
                 "margin": "md",
                 "has_background": true,
@@ -26,7 +26,7 @@
             "id": 3838180428255268,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides a comprehensive summary of Threats.\n\nFor more information, see the [Kandji Documentation](https://docs.datadoghq.com/integrations/kandji/).\n\n**Tips**:\n - Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n",
+                "content": "This dashboard provides a comprehensive summary of Iru (Kandji) Threats.\n\nFor more information, see the [Iru (Kandji) Documentation](https://docs.datadoghq.com/integrations/kandji/).\n\n**Tips**:\n - Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

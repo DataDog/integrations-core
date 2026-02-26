@@ -2,6 +2,25 @@
 
 <!-- towncrier release notes start -->
 
+## 2.3.0 / 2026-02-19
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Bump confluent-kafka to 2.13.0 ([#22630](https://github.com/DataDog/integrations-core/pull/22630))
+
+## 2.2.0 / 2026-02-04
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
+## 2.1.0 / 2026-02-04 / Agent 7.75.3
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
 ## 2.0.1 / 2026-01-06 / Agent 7.75.0
 
 ***Fixed***:

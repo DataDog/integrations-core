@@ -140,6 +140,7 @@ jobs:
 
     - name: Install ddev from PyPI
       if: inputs.repo != 'core'
+      # When ddev version is empty we install the latest released ddev.
       run: pip install ddev${{ inputs.ddev-version }}
 
     - name: Configure ddev

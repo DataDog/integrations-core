@@ -16,6 +16,7 @@ from datadog_checks.dev import TempDir
 from datadog_checks.dev.tooling.commands.console import (
     CONTEXT_SETTINGS,
     abort,
+    echo_debug,
     echo_failure,
     echo_info,
     echo_success,
@@ -28,6 +29,11 @@ from .constants import CLEAR_LINE_ESCAPE_CODE, MIB_SOURCE_URL
 # Unique identifiers of traps in json-compiled MIB files.
 NOTIFICATION_TYPE = 'notificationtype'
 ALLOWED_EXTENSIONS_BY_FORMAT = {"json": [".json"], "yaml": [".yml", ".yaml"]}
+
+
+def _name_for_output(name: str) -> str:
+    """Normalize trap/variable name for output: hyphens to underscores (pysmi 0.3 compatibility)."""
+    return name.replace("-", "_")
 
 
 class MappingType(Enum):
@@ -105,16 +111,92 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
     """
     from pysmi.codegen import JsonCodeGen
     from pysmi.compiler import MibCompiler
+    from pysmi.mibinfo import MibInfo
     from pysmi.parser import SmiV1CompatParser
-    from pysmi.reader import getReadersFromUrls
+    from pysmi.reader import get_readers_from_urls
+    from pysmi.reader.httpclient import HttpReader
     from pysmi.searcher import AnyFileSearcher
     from pysmi.writer import FileWriter
 
+    # pysmi's HttpReader decodes HTTP response as UTF-8 only; MIBs with non-UTF-8 bytes
+    # (e.g. https://github.com/DataDog/mibs.snmplabs.com/blob/master/asn1/A3COM-HUAWEI-DEVICE-MIB#L593)
+    # raise UnicodeDecodeError and are reported as "missing".
+    # Use a tolerant reader for HTTP(S) URLs that decodes with errors='replace'.
+
+    def _make_readers(sources, fuzzy_matching=True):
+        readers = []
+        for src in sources:
+            if src.startswith('http://') or src.startswith('https://'):
+                readers.append(_TolerantHttpReader(src, fuzzy_matching=fuzzy_matching))
+            else:
+                readers.extend(get_readers_from_urls(src, fuzzy_matching=fuzzy_matching))
+        return readers
+
+    # This code is copied from https://github.com/lextudio/pysmi/blob/main/pysmi/reader/httpclient.py.
+    # Except that it decodes the response content with errors='replace' for non-UTF-8 bytes.
+    class _TolerantHttpReader(HttpReader):
+        """HttpReader that decodes response content with errors='replace' for non-UTF-8 bytes."""
+
+        def __init__(self, url, fuzzy_matching=True):
+            super().__init__(url)
+            self.set_options(fuzzy_matching=fuzzy_matching)
+
+        def get_data(self, mibname, **options):
+            import sys
+            import time
+
+            from pysmi import error
+            from pysmi.compat import decode
+
+            headers = {"Accept": "text/plain", "User-Agent": self._user_agent}
+
+            mibname = decode(mibname)
+
+            echo_debug(f"looking for MIB {mibname}")
+
+            for mibalias, mibfile in self.get_mib_variants(mibname, **options):
+                if self.MIB_MAGIC in self._url:
+                    url = self._url.replace(self.MIB_MAGIC, mibfile)
+                else:
+                    url = self._url + mibfile
+
+                echo_debug(f"trying to fetch MIB from {url}")
+
+                try:
+                    response = self.session.get(url, headers=headers)
+
+                except Exception:
+                    echo_debug(f"failed to fetch MIB from {url}: {sys.exc_info()[1]}")
+                    continue
+
+                echo_debug(f"HTTP response {response.status_code}")
+
+                if response.status_code == 200:
+                    try:
+                        mtime = time.mktime(
+                            time.strptime(
+                                response.headers["Last-Modified"],
+                                "%a, %d %b %Y %H:%M:%S %Z",
+                            )
+                        )
+
+                    except Exception:
+                        echo_debug(f"malformed HTTP headers: {sys.exc_info()[1]}")
+                        mtime = time.time()
+
+                    echo_debug(f"fetching source MIB {url}, mtime {response.headers.get('Last-Modified', '')}")
+
+                    return MibInfo(path=url, file=mibfile, name=mibalias, mtime=mtime), response.content.decode(
+                        "utf-8", errors='replace'
+                    )
+
+            raise error.PySmiReaderFileNotFoundError(f"source MIB {mibname} not found", reader=self)
+
     if debug:
         set_debug()
-        from pysmi import debug
+        from pysmi import debug as pysmi_debug
 
-        debug.setLogger(debug.Debug('all'))
+        pysmi_debug.setLogger(pysmi_debug.Debug('all'))
 
     # Defaulting to github.com/DataDog/mibs.snmplabs.com/
     mib_sources = [mib_sources] if mib_sources else [MIB_SOURCE_URL]
@@ -144,12 +226,12 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
         mib_sources = sorted({pathlib.Path(x).parent.as_uri() for x in mib_files if os.path.sep in x}) + mib_sources
 
         mib_files = [os.path.basename(x) for x in mib_files]
-        searchers = [AnyFileSearcher(compiled_mibs_sources).setOptions(exts=['.json'])]
+        searchers = [AnyFileSearcher(compiled_mibs_sources).set_options(exts=['.json'])]
         code_generator = JsonCodeGen()
-        file_writer = FileWriter(compiled_mibs_sources).setOptions(suffix='.json')
+        file_writer = FileWriter(compiled_mibs_sources).set_options(suffix='.json')
         mib_compiler = MibCompiler(SmiV1CompatParser(tempdir=''), code_generator, file_writer)
-        mib_compiler.addSources(*getReadersFromUrls(*mib_sources, **{'fuzzyMatching': True}))
-        mib_compiler.addSearchers(*searchers)
+        mib_compiler.add_sources(*_make_readers(mib_sources, fuzzy_matching=True))
+        mib_compiler.add_searchers(*searchers)
 
         compiled_mibs, compiled_dependencies_mibs = compile_and_report_status(mib_files, mib_compiler)
 
@@ -307,12 +389,13 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
             trap_name = trap['name']
             trap_oid = trap['oid']
             trap_descr = trap.get('description', '')
-            trap_db["traps"][trap_oid] = {"name": trap_name, "mib": file_mib_name}
+            trap_db["traps"][trap_oid] = {"name": _name_for_output(trap_name), "mib": file_mib_name}
             if not no_descr:
                 trap_db["traps"][trap_oid]["descr"] = trap_descr
             for trap_var in trap.get('objects', []):
                 try:
-                    var_name, mib_name = trap_var['object'], trap_var['module']
+                    var_name = trap_var['object']
+                    mib_name = trap_var['module']
                     var_metadata = get_var_metadata(
                         var_name,
                         mib_name,
@@ -331,8 +414,7 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
                         "Ignoring this variable.".format(trap_name, var_name, mib_name)
                     )
                     continue
-                var_name = trap_var['object']
-                trap_db["vars"][var_metadata.oid] = {"name": var_name}
+                trap_db["vars"][var_metadata.oid] = {"name": _name_for_output(var_name)}
                 if not no_descr:
                     trap_db["vars"][var_metadata.oid]["descr"] = var_metadata.description
                 if var_metadata.enum:
@@ -430,8 +512,14 @@ def get_mapping(var_name, mib_name, mapping_type: MappingType, search_locations=
     :param search_locations: Tuple of path to directories containing json-compiled MIB files
     :return: The oid and the description of the variable.
     """
+    visited = set()  # Guard against circular type references (would cause infinite loop)
     mapping = {}
     while mib_name and var_name and not mapping:
+        key = (var_name, mib_name)
+        if key in visited:
+            break
+        visited.add(key)
+
         for location in search_locations:
             file_name = os.path.join(location, mib_name + '.json')
             if os.path.isfile(file_name):
@@ -481,7 +569,7 @@ def get_import_mib(var_name, mib_name, search_locations=None):
         if os.path.isfile(file_name):
             break
     else:
-        return MissingMIBException
+        raise MissingMIBException()
 
     with open(file_name, 'r') as f:
         file_content = json.load(f)

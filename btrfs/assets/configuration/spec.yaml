@@ -1,4 +1,5 @@
 name: Btrfs
+fleet_configurable: true
 files:
   - name: btrfs.yaml
     options:
