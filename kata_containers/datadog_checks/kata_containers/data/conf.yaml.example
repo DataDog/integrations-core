@@ -15,22 +15,33 @@ instances:
 
   -
     ## @param sandbox_storage_paths - list of strings - optional
-    ## List of paths where Kata sandbox information is stored.
-    ## Default paths are for Go runtime (/run/vc/sbs) and Rust runtime (/run/kata).
+    ## Paths where Kata sandbox sockets are discovered.
+    ##   /run/vc/sbs  Go runtime (containerd-shim-kata-v2)
+    ##   /run/kata    Rust runtime (runtime-rs)
     #
     # sandbox_storage_paths:
     #   - /run/vc/sbs
     #   - /run/kata
 
-    ## @param collect_pod_metrics - boolean - optional - default: true
-    ## Enable collection of pod-level metrics.
+    ## @param cri_socket_path - string - optional
+    ## Path to the CRI Unix socket used to resolve Kata sandbox IDs to Kubernetes
+    ## pod UIDs for tag enrichment (pod_name, kube_namespace, kube_deployment, …).
+    ## Requires grpcio. Defaults to /run/containerd/containerd.sock.
     #
-    # collect_pod_metrics: true
+    # cri_socket_path: /run/containerd/containerd.sock
 
-    ## @param timeout - integer - optional - default: 5
-    ## Timeout in seconds for connecting to each sandbox socket.
+    ## @param rename_labels - mapping - optional
+    ## Rename Prometheus labels before they are submitted as tags.
+    ## The integration already renames `version` to `go_version` by default.
     #
-    # timeout: 5
+    # rename_labels:
+    #   my_label: my_renamed_label
+
+    ## @param exclude_labels - list of strings - optional
+    ## Prometheus label names to drop from all metrics entirely.
+    #
+    # exclude_labels:
+    #   - label_to_drop
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -56,18 +67,5 @@ instances:
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.
-    ##
-    ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
-
-    ## @param metric_patterns - mapping - optional
-    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
-    ##
-    ## Metrics defined in `exclude` will take precedence in case of overlap.
-    #
-    # metric_patterns:
-    #   include:
-    #   - <INCLUDE_REGEX>
-    #   exclude:
-    #   - <EXCLUDE_REGEX>

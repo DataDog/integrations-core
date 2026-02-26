@@ -2,10 +2,10 @@
   {
     "agent_version": "7.0.0",
     "integration": "kata_containers",
-    "check": "kata.can_connect",
+    "check": "kata.openmetrics.health",
     "statuses": ["ok", "critical"],
     "groups": ["sandbox_id"],
-    "name": "Can Connect",
-    "description": "Returns `CRITICAL` if the Agent cannot connect to the Kata sandbox socket, otherwise returns `OK`."
+    "name": "OpenMetrics Health",
+    "description": "Returns `CRITICAL` if the Agent cannot connect to the Kata sandbox metrics socket, otherwise returns `OK`."
   }
 ]

@@ -11,43 +11,22 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.base.utils.tagging import tagger
 from datadog_checks.kata_containers import KataContainersCheck
 
-SAMPLE_METRICS = """# HELP kata_hypervisor_fds Number of file descriptors
-# TYPE kata_hypervisor_fds gauge
-kata_hypervisor_fds 10
-# HELP kata_hypervisor_threads Number of threads
-# TYPE kata_hypervisor_threads gauge
-kata_hypervisor_threads 5
-# HELP kata_shim_fds Number of file descriptors
-# TYPE kata_shim_fds gauge
-kata_shim_fds 15
-# HELP kata_shim_threads Number of threads
-# TYPE kata_shim_threads gauge
-kata_shim_threads 3
-# HELP kata_shim_pod_overhead_cpu CPU overhead
-# TYPE kata_shim_pod_overhead_cpu gauge
-kata_shim_pod_overhead_cpu 0.5
-# HELP kata_shim_pod_overhead_memory_in_bytes Memory overhead in bytes
-# TYPE kata_shim_pod_overhead_memory_in_bytes gauge
-kata_shim_pod_overhead_memory_in_bytes 104857600
-# HELP kata_agent_scrape_count Agent scrape count
-# TYPE kata_agent_scrape_count counter
-kata_agent_scrape_count 100
-"""
-
 POD_UID = 'aabbccdd-1234-5678-abcd-ef0123456789'
 K8S_TAGS = ['pod_name:my-pod', 'kube_namespace:default', 'kube_deployment:my-app']
 
 
 @pytest.fixture(autouse=True)
 def reset_tagger():
-    """Ensure tagger state is clean between tests."""
     tagger.reset()
     yield
     tagger.reset()
 
 
+def _make_check(instance=None):
+    return KataContainersCheck('kata_containers', {}, [instance or {}])
+
+
 def _make_sandbox_mocks(sandbox_id: str, storage_path: str = '/run/vc/sbs'):
-    """Return filesystem mock callables for a single sandbox at *storage_path*."""
     socket_path = f'{storage_path}/{sandbox_id}/shim-monitor.sock'
 
     def mock_exists(path):
@@ -62,197 +41,216 @@ def _make_sandbox_mocks(sandbox_id: str, storage_path: str = '/run/vc/sbs'):
     return mock_exists, mock_listdir, mock_isdir, socket_path
 
 
-def _mock_http(check, metrics_text: str):
-    """Attach a mock HTTP wrapper to *check* that returns *metrics_text*."""
-    mock_response = mock.Mock()
-    mock_response.text = metrics_text
-    mock_response.raise_for_status = mock.Mock()
-    mock_http = mock.Mock()
-    mock_http.get.return_value = mock_response
-    # AgentCheck.http is a lazy property backed by _http; set the instance attr
-    # directly so the property returns our mock without triggering real initialization.
-    check._http = mock_http
-    return mock_http
+# ---------------------------------------------------------------------------
+# Discovery
+# ---------------------------------------------------------------------------
 
 
-def test_check_no_sandboxes(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    """Test check when no sandboxes are found."""
-    check = KataContainersCheck('kata_containers', {}, [instance])
-
+def test_discover_sandboxes_empty_when_paths_missing(aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+    check = _make_check()
     with mock.patch('os.path.exists', return_value=False):
-        dd_run_check(check)
+        assert check._discover_sandboxes() == {}
+
+
+def test_discover_sandboxes_finds_socket(aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+    sandbox_id = 'abc123'
+    check = _make_check()
+    mock_exists, mock_listdir, mock_isdir, socket_path = _make_sandbox_mocks(sandbox_id)
+
+    with (
+        mock.patch('os.path.exists', side_effect=mock_exists),
+        mock.patch('os.listdir', side_effect=mock_listdir),
+        mock.patch('os.path.isdir', side_effect=mock_isdir),
+    ):
+        result = check._discover_sandboxes()
+
+    assert result == {sandbox_id: socket_path}
+
+
+# ---------------------------------------------------------------------------
+# Tag enrichment
+# ---------------------------------------------------------------------------
+
+
+def test_get_sandbox_tags_no_cri(aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+    check = _make_check()
+    # No CRI client → only sandbox_id tag
+    assert check._get_sandbox_tags('my-sandbox') == ['sandbox_id:my-sandbox']
+
+
+def test_get_sandbox_tags_with_cri_and_tagger(aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+    check = _make_check()
+    tagger.set_tags({'kubernetes_pod_uid://' + POD_UID: K8S_TAGS})
+
+    mock_cri = mock.Mock(spec=['get_pod_uid', 'close'])
+    mock_cri.get_pod_uid.return_value = POD_UID
+    check._cri_client = mock_cri
+
+    tags = check._get_sandbox_tags('my-sandbox')
+    assert tags == ['sandbox_id:my-sandbox'] + K8S_TAGS
+    mock_cri.get_pod_uid.assert_called_once_with('my-sandbox')
+
+
+def test_get_sandbox_tags_cri_returns_none(aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+    check = _make_check()
+    mock_cri = mock.Mock(spec=['get_pod_uid', 'close'])
+    mock_cri.get_pod_uid.return_value = None
+    check._cri_client = mock_cri
+
+    assert check._get_sandbox_tags('my-sandbox') == ['sandbox_id:my-sandbox']
+
+
+# ---------------------------------------------------------------------------
+# Scraper config builder
+# ---------------------------------------------------------------------------
+
+
+def test_build_scraper_config_endpoint(aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+    check = _make_check()
+    socket_path = '/run/vc/sbs/abc123/shim-monitor.sock'
+    config = check._build_scraper_config('abc123', socket_path)
+
+    assert config['openmetrics_endpoint'] == 'unix:///run/vc/sbs/abc123/shim-monitor.sock/metrics'
+
+
+def test_build_scraper_config_default_rename_labels(aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+    check = _make_check()
+    config = check._build_scraper_config('abc123', '/run/vc/sbs/abc123/shim-monitor.sock')
+
+    # version→go_version must always be present
+    assert config['rename_labels'].get('version') == 'go_version'
+
+
+def test_build_scraper_config_user_rename_labels_merged(aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+    check = _make_check({'rename_labels': {'my_label': 'my_renamed'}})
+    config = check._build_scraper_config('abc123', '/run/vc/sbs/abc123/shim-monitor.sock')
+
+    # Both the default and the user addition must be present
+    assert config['rename_labels'].get('version') == 'go_version'
+    assert config['rename_labels'].get('my_label') == 'my_renamed'
+
+
+def test_build_scraper_config_tags_include_sandbox_id(aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+    check = _make_check({'tags': ['env:prod']})
+    config = check._build_scraper_config('abc123', '/run/vc/sbs/abc123/shim-monitor.sock')
+
+    assert 'sandbox_id:abc123' in config['tags']
+    assert 'env:prod' in config['tags']
+
+
+# ---------------------------------------------------------------------------
+# refresh_scrapers / running_shim_count
+# ---------------------------------------------------------------------------
+
+
+def test_refresh_scrapers_no_sandboxes(dd_run_check, aggregator, instance):
+    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
+    check = _make_check()
+
+    with (
+        mock.patch('os.path.exists', return_value=False),
+        mock.patch.object(check, 'configure_scrapers'),
+    ):
+        check.refresh_scrapers()
 
     aggregator.assert_metric('kata.running_shim_count', value=0)
 
 
-@pytest.mark.parametrize(
-    'sandbox_id',
-    [
-        'test-sandbox-123',
-        'abc123def456',
-    ],
-)
-def test_check_with_sandbox_no_cri(dd_run_check, aggregator, instance, sandbox_id):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any], str) -> None
-    """Test check with a running sandbox and no CRI enrichment available."""
-    check = KataContainersCheck('kata_containers', {}, [instance])
+def test_refresh_scrapers_counts_sandboxes(dd_run_check, aggregator, instance):
+    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
+    sandbox_id = 'test-sandbox'
+    check = _make_check()
     mock_exists, mock_listdir, mock_isdir, _ = _make_sandbox_mocks(sandbox_id)
-    _mock_http(check, SAMPLE_METRICS)
 
     with (
         mock.patch('os.path.exists', side_effect=mock_exists),
         mock.patch('os.listdir', side_effect=mock_listdir),
         mock.patch('os.path.isdir', side_effect=mock_isdir),
-        mock.patch('datadog_checks.kata_containers.check.GRPC_AVAILABLE', False),
+        mock.patch.object(check, 'configure_scrapers'),
     ):
-        dd_run_check(check)
+        check.refresh_scrapers()
 
     aggregator.assert_metric('kata.running_shim_count', value=1)
-
-    expected_tags = [f'sandbox_id:{sandbox_id}']
-    aggregator.assert_metric('kata.hypervisor_fds', value=10, tags=expected_tags)
-    aggregator.assert_metric('kata.hypervisor_threads', value=5, tags=expected_tags)
-    aggregator.assert_metric('kata.shim_fds', value=15, tags=expected_tags)
-    aggregator.assert_metric('kata.shim_threads', value=3, tags=expected_tags)
-    aggregator.assert_metric('kata.shim_pod_overhead_cpu', value=0.5, tags=expected_tags)
-    aggregator.assert_metric('kata.shim_pod_overhead_memory_in_bytes', value=104857600, tags=expected_tags)
-    aggregator.assert_metric('kata.agent_scrape_count_total', value=100, tags=expected_tags)
-    aggregator.assert_service_check('kata.can_connect', status=AgentCheck.OK, tags=expected_tags)
+    assert len(check.scraper_configs) == 1
 
 
-def test_check_with_cri_enrichment(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    """Test that CRI lookup adds Kubernetes tags from the tagger to all metrics."""
-    sandbox_id = 'enriched-sandbox-abc'
-    check = KataContainersCheck('kata_containers', {}, [instance])
-    mock_exists, mock_listdir, mock_isdir, _ = _make_sandbox_mocks(sandbox_id)
-    _mock_http(check, SAMPLE_METRICS)
+# ---------------------------------------------------------------------------
+# Pod UID cache
+# ---------------------------------------------------------------------------
 
-    # Pre-populate the tagger stub with K8s tags for the pod UID.
-    tagger.set_tags({'kubernetes_pod_uid://' + POD_UID: K8S_TAGS})
 
+def test_pod_uid_cache_hit(aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+    check = _make_check()
     mock_cri = mock.Mock(spec=['get_pod_uid', 'close'])
     mock_cri.get_pod_uid.return_value = POD_UID
+    check._cri_client = mock_cri
 
-    with (
-        mock.patch('os.path.exists', side_effect=mock_exists),
-        mock.patch('os.listdir', side_effect=mock_listdir),
-        mock.patch('os.path.isdir', side_effect=mock_isdir),
-        mock.patch('datadog_checks.kata_containers.check.CRIClient', return_value=mock_cri),
-    ):
-        dd_run_check(check)
+    check._get_pod_uid('sandbox-1')
+    check._get_pod_uid('sandbox-1')
 
-    # Metrics should carry both sandbox_id and the K8s tags from the tagger.
-    expected_tags = [f'sandbox_id:{sandbox_id}'] + K8S_TAGS
-    aggregator.assert_metric('kata.hypervisor_fds', value=10, tags=expected_tags)
-    aggregator.assert_metric('kata.shim_fds', value=15, tags=expected_tags)
-    aggregator.assert_service_check('kata.can_connect', status=AgentCheck.OK, tags=expected_tags)
-
-    # The CRI client must have been called exactly once (cache hit on subsequent calls).
-    mock_cri.get_pod_uid.assert_called_once_with(sandbox_id)
+    mock_cri.get_pod_uid.assert_called_once_with('sandbox-1')
 
 
-def test_pod_uid_cache(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    """Verify that the pod UID is resolved once and then served from cache on subsequent runs."""
-    sandbox_id = 'cached-sandbox'
-    check = KataContainersCheck('kata_containers', {}, [instance])
-    mock_exists, mock_listdir, mock_isdir, _ = _make_sandbox_mocks(sandbox_id)
-    _mock_http(check, SAMPLE_METRICS)
-
-    tagger.set_tags({'kubernetes_pod_uid://' + POD_UID: K8S_TAGS})
-
-    mock_cri = mock.Mock(spec=['get_pod_uid', 'close'])
-    mock_cri.get_pod_uid.return_value = POD_UID
-
-    with (
-        mock.patch('os.path.exists', side_effect=mock_exists),
-        mock.patch('os.listdir', side_effect=mock_listdir),
-        mock.patch('os.path.isdir', side_effect=mock_isdir),
-        mock.patch('datadog_checks.kata_containers.check.CRIClient', return_value=mock_cri),
-    ):
-        dd_run_check(check)
-        dd_run_check(check)
-
-    # Two check runs but only one CRI call — the second is served from cache.
-    mock_cri.get_pod_uid.assert_called_once_with(sandbox_id)
-
-
-def test_pod_uid_cache_eviction(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    """Verify that cache entries are evicted when a sandbox disappears."""
+def test_pod_uid_cache_eviction(aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
     sandbox_id = 'evicted-sandbox'
-    check = KataContainersCheck('kata_containers', {}, [instance])
+    check = _make_check()
     mock_exists, mock_listdir, mock_isdir, _ = _make_sandbox_mocks(sandbox_id)
-    _mock_http(check, SAMPLE_METRICS)
 
     mock_cri = mock.Mock(spec=['get_pod_uid', 'close'])
     mock_cri.get_pod_uid.return_value = POD_UID
+    check._cri_client = mock_cri
 
-    # First run — sandbox is present, cache is populated.
+    # First refresh — sandbox present, cache populated.
     with (
         mock.patch('os.path.exists', side_effect=mock_exists),
         mock.patch('os.listdir', side_effect=mock_listdir),
         mock.patch('os.path.isdir', side_effect=mock_isdir),
-        mock.patch('datadog_checks.kata_containers.check.CRIClient', return_value=mock_cri),
+        mock.patch.object(check, 'configure_scrapers'),
     ):
-        dd_run_check(check)
+        check.refresh_scrapers()
 
     assert sandbox_id in check._pod_uid_cache
 
-    # Second run — sandbox is gone; cache entry must be evicted.
-    with mock.patch('os.path.exists', return_value=False):
-        dd_run_check(check)
+    # Second refresh — sandbox gone, cache entry evicted.
+    with (
+        mock.patch('os.path.exists', return_value=False),
+        mock.patch.object(check, 'configure_scrapers'),
+    ):
+        check.refresh_scrapers()
 
     assert sandbox_id not in check._pod_uid_cache
 
 
-def test_cri_failure_is_silent(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    """When CRI returns None the check still runs and emits metrics without K8s tags."""
-    sandbox_id = 'no-cri-sandbox'
-    check = KataContainersCheck('kata_containers', {}, [instance])
-    mock_exists, mock_listdir, mock_isdir, _ = _make_sandbox_mocks(sandbox_id)
-    _mock_http(check, SAMPLE_METRICS)
-
-    mock_cri = mock.Mock(spec=['get_pod_uid', 'close'])
-    mock_cri.get_pod_uid.return_value = None  # CRI failure
-
-    with (
-        mock.patch('os.path.exists', side_effect=mock_exists),
-        mock.patch('os.listdir', side_effect=mock_listdir),
-        mock.patch('os.path.isdir', side_effect=mock_isdir),
-        mock.patch('datadog_checks.kata_containers.check.CRIClient', return_value=mock_cri),
-    ):
-        dd_run_check(check)
-
-    # Metrics are still emitted, just without K8s tags.
-    expected_tags = [f'sandbox_id:{sandbox_id}']
-    aggregator.assert_metric('kata.hypervisor_fds', value=10, tags=expected_tags)
-    aggregator.assert_service_check('kata.can_connect', status=AgentCheck.OK, tags=expected_tags)
+# ---------------------------------------------------------------------------
+# CRI client init
+# ---------------------------------------------------------------------------
 
 
-def test_check_socket_connection_failure(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    """Test check when socket connection fails."""
-    sandbox_id = 'failing-sandbox'
-    check = KataContainersCheck('kata_containers', {}, [instance])
-    mock_exists, mock_listdir, mock_isdir, _ = _make_sandbox_mocks(sandbox_id)
+def test_cri_init_skipped_when_grpc_unavailable(aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+    check = _make_check()
+    with mock.patch('datadog_checks.kata_containers.check.GRPC_AVAILABLE', False):
+        check._init_cri_client()
+    assert check._cri_client is None
 
-    mock_http = mock.Mock()
-    mock_http.get.side_effect = Exception('Connection failed')
-    check._http = mock_http
 
-    with (
-        mock.patch('os.path.exists', side_effect=mock_exists),
-        mock.patch('os.listdir', side_effect=mock_listdir),
-        mock.patch('os.path.isdir', side_effect=mock_isdir),
-        mock.patch('datadog_checks.kata_containers.check.GRPC_AVAILABLE', False),
-    ):
-        dd_run_check(check)
+def test_cri_init_uses_config_socket_path(aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
+    check = _make_check({'cri_socket_path': '/run/custom/cri.sock'})
+    mock_cri_class = mock.Mock(return_value=mock.Mock())
 
-    aggregator.assert_metric('kata.running_shim_count', value=1)
+    with mock.patch('datadog_checks.kata_containers.check.CRIClient', mock_cri_class):
+        check._init_cri_client()
 
-    expected_tags = [f'sandbox_id:{sandbox_id}']
-    aggregator.assert_service_check('kata.can_connect', status=AgentCheck.CRITICAL, tags=expected_tags)
+    mock_cri_class.assert_called_once_with(socket_path='/run/custom/cri.sock')

@@ -19,30 +19,22 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-class MetricPatterns(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        frozen=True,
-    )
-    exclude: Optional[tuple[str, ...]] = None
-    include: Optional[tuple[str, ...]] = None
-
-
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    collect_pod_metrics: Optional[bool] = None
+    cri_socket_path: Optional[str] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
-    metric_patterns: Optional[MetricPatterns] = None
+    exclude_labels: Optional[tuple[str, ...]] = None
+    metric_patterns: Optional[object] = None
     min_collection_interval: Optional[float] = None
+    rename_labels: Optional[dict[str, str]] = None
     sandbox_storage_paths: Optional[tuple[str, ...]] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
-    timeout: Optional[int] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
