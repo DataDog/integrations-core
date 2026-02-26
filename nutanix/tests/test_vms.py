@@ -16,14 +16,14 @@ def test_vm_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
 
     expected_tags = [
         'ntnx_type:vm',
-        'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+        'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
         'ntnx_cluster_name:datadog-nutanix-dev',
-        'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
-        'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
-        'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+        'ntnx_generation_uuid:d45a36e7-1c4c-40d6-ba6f-c2f52c211460',
+        'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
+        'ntnx_host_name:10-0-0-103-aws-us-east-1a',
         'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
-        'ntnx_vm_id:f3272103-ea1e-4a90-8318-899636993ed6',
-        'ntnx_vm_name:PC-OptionName-1',
+        'ntnx_vm_id:63e222ec-87ff-491b-b7ba-9247752d44a3',
+        'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
         'nutanix',
         'prism_central:10.0.0.197',
     ]
@@ -37,14 +37,14 @@ def test_vm_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get
 
     expected_tags = [
         'ntnx_type:vm',
-        'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+        'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
         'ntnx_cluster_name:datadog-nutanix-dev',
-        'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
-        'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
-        'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+        'ntnx_generation_uuid:d45a36e7-1c4c-40d6-ba6f-c2f52c211460',
+        'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
+        'ntnx_host_name:10-0-0-103-aws-us-east-1a',
         'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
-        'ntnx_vm_id:f3272103-ea1e-4a90-8318-899636993ed6',
-        'ntnx_vm_name:PC-OptionName-1',
+        'ntnx_vm_id:63e222ec-87ff-491b-b7ba-9247752d44a3',
+        'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
         'nutanix',
         'prism_central:10.0.0.197',
     ]
@@ -58,18 +58,18 @@ def test_external_tags_for_vm(dd_run_check, aggregator, mock_instance, mock_http
     dd_run_check(check)
 
     datadog_agent.assert_external_tags(
-        'PC-OptionName-1',
+        'NTNX-10-0-0-165-PCVM-1767014640',
         {
             'nutanix': [
                 'ntnx_type:vm',
-                'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+                'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
                 'ntnx_cluster_name:datadog-nutanix-dev',
-                'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
-                'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
-                'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+                'ntnx_generation_uuid:d45a36e7-1c4c-40d6-ba6f-c2f52c211460',
+                'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
+                'ntnx_host_name:10-0-0-103-aws-us-east-1a',
                 'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
-                'ntnx_vm_id:f3272103-ea1e-4a90-8318-899636993ed6',
-                'ntnx_vm_name:PC-OptionName-1',
+                'ntnx_vm_id:63e222ec-87ff-491b-b7ba-9247752d44a3',
+                'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
                 'nutanix',
                 'prism_central:10.0.0.197',
             ]

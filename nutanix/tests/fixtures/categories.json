@@ -900,15 +900,15 @@
             "$fv": "v1.r0"
           },
           "$objectType": "common.v1.response.ApiLink",
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories?$limit=50&$page=0",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories?%2524page=0&%2524limit=50&$page=0&$limit=50",
           "rel": "last"
         },
         {
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories?$limit=50&$page=0",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories?%2524page=0&%2524limit=50&$page=0&$limit=50",
           "rel": "self"
         },
         {
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories?$limit=50&$page=0",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories?%2524page=0&%2524limit=50&$page=0&$limit=50",
           "rel": "first"
         }
       ],

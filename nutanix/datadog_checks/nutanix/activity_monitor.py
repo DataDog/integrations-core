@@ -148,6 +148,9 @@ class ActivityMonitor:
                 if entity_name:
                     event_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
 
+            # Add category tags from source entity
+            event_tags.extend(self.check.extract_category_tags(source_entity))
+
         # Distinguish Prism Central events from tasks
         event_tags.append("ntnx_type:event")
 
@@ -478,6 +481,9 @@ class ActivityMonitor:
                 if entity_name:
                     audit_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
 
+            # Add category tags from source entity
+            audit_tags.extend(self.check.extract_category_tags(source_entity))
+
         if user_ref := audit.get("userReference"):
             if user_name := user_ref.get("name"):
                 audit_tags.append(f"ntnx_user_name:{user_name}")
@@ -490,6 +496,9 @@ class ActivityMonitor:
                 audit_tags.append(f"ntnx_affected_entity_id:{entity_id}")
             if entity_name := entity.get("name"):
                 audit_tags.append(f"ntnx_affected_entity_name:{entity_name}")
+
+            # Add category tags from affected entity
+            audit_tags.extend(self.check.extract_category_tags(entity))
 
         audit_tags.append("ntnx_type:audit")
 
@@ -552,6 +561,9 @@ class ActivityMonitor:
                     alert_tags.append(f"ntnx_{entity_type}_id:{entity_id}")
                 if entity_name := source_entity.get("name"):
                     alert_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
+
+            # Add category tags from source entity
+            alert_tags.extend(self.check.extract_category_tags(source_entity))
 
         alert_tags.append("ntnx_type:alert")
 
@@ -635,6 +647,9 @@ class ActivityMonitor:
                 task_tags.append(f"ntnx_entity_id:{entity_id}")
             if entity_name := entity.get("name"):
                 task_tags.append(f"ntnx_entity_name:{entity_name}")
+
+            # Add category tags from affected entity
+            task_tags.extend(self.check.extract_category_tags(entity))
 
         # distinguish from other events we emit
         task_tags.append("ntnx_type:task")

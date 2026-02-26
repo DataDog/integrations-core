@@ -8,11 +8,11 @@ from datadog_checks.nutanix import NutanixCheck
 
 pytestmark = [pytest.mark.unit]
 
-CLUSTER_ID = "0006411c-0286-bc71-9f02-191e334d457b"
+CLUSTER_ID = "00064715-c043-5d8f-ee4b-176ec875554d"
 CLUSTER_NAME = "datadog-nutanix-dev"
-HOST_ID = "71877eae-8fc1-4aae-8d20-70196dfb2f8d"
-HOST_NAME = "10-0-0-9-aws-us-east-1a"
-VM_ID = "f3272103-ea1e-4a90-8318-899636993ed6"
+HOST_ID = "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+HOST_NAME = "10-0-0-103-aws-us-east-1a"
+VM_ID = "63e222ec-87ff-491b-b7ba-9247752d44a3"
 
 BASE_TAGS = ["nutanix", "prism_central:10.0.0.197"]
 
@@ -38,7 +38,7 @@ def test_include_cluster_by_id(dd_run_check, aggregator, mock_instance, mock_htt
 
 def test_include_host_by_name_regex(dd_run_check, aggregator, mock_instance, mock_http_get):
     mock_instance["resource_filters"] = [
-        {"resource": "host", "property": "hostName", "patterns": ["10-0-0-9"]},
+        {"resource": "host", "property": "hostName", "patterns": ["10-0-0-103"]},
     ]
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)

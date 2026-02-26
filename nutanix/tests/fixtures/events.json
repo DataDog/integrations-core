@@ -8,9 +8,7 @@
         "$objectType": "monitoring.v4.serviceability.Event",
         "extId": "9dba574f-90c0-473f-b91b-9be33f1d4732",
         "eventType": "LicenseAudit",
-        "classifications": [
-          "UserAction"
-        ],
+        "classifications": ["UserAction"],
         "sourceClusterUUID": "0006411c-0286-bc71-9f02-191e334d457b",
         "creationTime": "2025-10-14T11:15:48.34704Z",
         "message": "Ultimate license applied to cluster",
@@ -39,9 +37,7 @@
         "$objectType": "monitoring.v4.serviceability.Event",
         "extId": "1f4d5f21-8bdd-4b15-8886-d232b5d030d8",
         "eventType": "PasswordAudit",
-        "classifications": [
-          "UserAction"
-        ],
+        "classifications": ["UserAction"],
         "sourceClusterUUID": "0006411c-0286-bc71-9f02-191e334d457b",
         "creationTime": "2025-10-14T11:47:59.305178Z",
         "message": "Password changed for user {username}",
@@ -143,9 +139,7 @@
         "$objectType": "monitoring.v4.serviceability.Event",
         "extId": "4b7625c6-8a8d-4816-8ef1-019e8636f498",
         "eventType": "PulseAudit",
-        "classifications": [
-          "UserAction"
-        ],
+        "classifications": ["UserAction"],
         "sourceClusterUUID": "0006411c-0286-bc71-9f02-191e334d457b",
         "creationTime": "2025-10-14T11:48:46.639107Z",
         "message": "Pulse configuration updated",
@@ -204,9 +198,7 @@
         "$objectType": "monitoring.v4.serviceability.Event",
         "extId": "14f94d80-4404-4f1e-869d-fe22cbb4d00a",
         "eventType": "PasswordAudit",
-        "classifications": [
-          "UserAction"
-        ],
+        "classifications": ["UserAction"],
         "sourceClusterUUID": "b6d83094-9404-48de-9c74-ca6bddc3a01d",
         "creationTime": "2025-10-16T09:02:52.399712Z",
         "message": "Password reset for user admin",
@@ -312,9 +304,7 @@
         "$objectType": "monitoring.v4.serviceability.Event",
         "extId": "0e7621b9-db61-4344-8978-3001cf386c3d",
         "eventType": "PasswordAudit",
-        "classifications": [
-          "UserAction"
-        ],
+        "classifications": ["UserAction"],
         "sourceClusterUUID": "0006411c-0286-bc71-9f02-191e334d457b",
         "creationTime": "2025-10-16T09:41:24.864192Z",
         "message": "Password reset for user admin",
@@ -353,9 +343,7 @@
         "$objectType": "monitoring.v4.serviceability.Event",
         "extId": "3c3da430-7670-406e-8f03-d29bdbc173f5",
         "eventType": "PasswordAudit",
-        "classifications": [
-          "UserAction"
-        ],
+        "classifications": ["UserAction"],
         "sourceClusterUUID": "0006411c-0286-bc71-9f02-191e334d457b",
         "creationTime": "2025-10-16T13:50:03.366214Z",
         "message": "Password reset for user admin",
@@ -461,9 +449,7 @@
         "$objectType": "monitoring.v4.serviceability.Event",
         "extId": "348a9873-f3c4-47f7-95bb-5ff52ad069cc",
         "eventType": "EnableDisableUserAudit",
-        "classifications": [
-          "UserAction"
-        ],
+        "classifications": ["UserAction"],
         "sourceClusterUUID": "0006411c-0286-bc71-9f02-191e334d457b",
         "creationTime": "2025-10-16T13:51:08.148191Z",
         "message": "User admin enabled",
@@ -522,9 +508,7 @@
         "$objectType": "monitoring.v4.serviceability.Event",
         "extId": "57d23178-e257-497d-9db4-9aa2ccbcd89e",
         "eventType": "PulseAudit",
-        "classifications": [
-          "UserAction"
-        ],
+        "classifications": ["UserAction"],
         "sourceClusterUUID": "b6d83094-9404-48de-9c74-ca6bddc3a01d",
         "creationTime": "2025-10-16T14:25:54.057436Z",
         "message": "Pulse configuration updated",
@@ -650,9 +634,7 @@
         "$objectType": "monitoring.v4.serviceability.Event",
         "extId": "48c8d441-040e-480c-a36f-a05c5f276d35",
         "eventType": "PulseAudit",
-        "classifications": [
-          "UserAction"
-        ],
+        "classifications": ["UserAction"],
         "sourceClusterUUID": "b6d83094-9404-48de-9c74-ca6bddc3a01d",
         "creationTime": "2025-10-16T14:25:54.368175Z",
         "message": "Pulse configuration updated",
@@ -711,9 +693,7 @@
         "$objectType": "monitoring.v4.serviceability.Event",
         "extId": "f1e41e4e-3a4b-4e22-970d-6df49f008e4c",
         "eventType": "MulticlusterAudit",
-        "classifications": [
-          "UserAction"
-        ],
+        "classifications": ["UserAction"],
         "sourceClusterUUID": "b6d83094-9404-48de-9c74-ca6bddc3a01d",
         "creationTime": "2025-10-16T14:26:43.962603Z",
         "message": "External state added for cluster datadog-nutanix-dev",

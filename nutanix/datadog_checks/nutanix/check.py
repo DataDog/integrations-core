@@ -70,6 +70,35 @@ class NutanixCheck(AgentCheck):
     def cluster_names(self):
         return self.infrastructure_monitor.cluster_names
 
+    @property
+    def categories(self):
+        return self.infrastructure_monitor._categories
+
+    def extract_category_tags(self, entity: dict) -> list[str]:
+        """Extract category tags from an entity that has a categories field.
+
+        Args:
+            entity: Entity object that may contain categories
+
+        Returns:
+            List of category tags
+        """
+        tags = []
+        categories = entity.get("categories")
+        if categories:
+            for c in categories:
+                category_id = c.get("extId")
+                if category_id and category_id in self.categories:
+                    category = self.categories[category_id]
+                    key = category.get("key")
+                    value = category.get("value")
+                    if key and value:
+                        if self.prefix_category_tags:
+                            tags.append(f"ntnx_{key}:{value}")
+                        else:
+                            tags.append(f"{key}:{value}")
+        return tags
+
     def check(self, _):
         self.log.info("[PC:%s:%s] Starting check...", self.pc_ip, self.pc_port)
 

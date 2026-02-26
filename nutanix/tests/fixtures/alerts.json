@@ -6,6 +6,3682 @@
           "$fv": "v4.r1"
         },
         "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "eb704f0b-4a87-417e-b337-9382a9fe2cf9",
+        "isAcknowledged": false,
+        "isAutoResolved": false,
+        "isResolved": false,
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "cluster",
+          "name": "prism-central-deployment",
+          "extId": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "cluster",
+            "name": "prism-central-deployment",
+            "extId": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-02-20T08:38:15.524544Z"
+          }
+        ],
+        "title": "The PC admin user password is going to expire soon or has already expired.",
+        "alertType": "A6227",
+        "classifications": [
+          "Cluster"
+        ],
+        "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "creationTime": "2026-02-20T08:38:15.524544Z",
+        "impactTypes": [
+          "CONFIGURATION"
+        ],
+        "lastUpdatedTime": "2026-02-25T03:21:16.527841Z",
+        "message": "{alert_msg}",
+        "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Admin user password will expire soon. Please change the admin password."
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "alert_msg"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 634336664666352648
+            },
+            "paramName": "arithmos_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+            },
+            "paramName": "cluster_uuid"
+          }
+        ],
+        "rootCauseAnalysis": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.RootCauseAnalysis",
+            "cause": "The PC admin password is going to expire soon or has already expired.",
+            "resolution": "Change the password for PC admin user or refer to KB-18014."
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "548d4a86-2555-4b27-a481-42362b01a4b8",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-02-12T06:38:45.182113Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-02-12T06:38:45.182108Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "msp_entity",
+          "name": "msp",
+          "extId": "95e6f96a-8c62-4b47-4bc9-11f1c2e67d14"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "msp_entity",
+            "name": "msp",
+            "extId": "95e6f96a-8c62-4b47-4bc9-11f1c2e67d14"
+          },
+          {
+            "type": "MSP service",
+            "name": "MSP",
+            "extId": "pod_id"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-02-12T05:50:13.286083Z"
+          }
+        ],
+        "title": "IAMv2 authentication Database Connectivity Error Warning",
+        "alertType": "NTNX_IAMv2_Authn_Database_Connectivity_Error_Warning",
+        "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "creationTime": "2026-02-12T05:50:13.286083Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-12T06:38:45.185229Z",
+        "message": "Postgres Database for IAM is serving requests from Authn pod in > 100ms for  66.66666666666666% of requests.",
+        "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "serviceName": "IAMv2",
+        "rootCauseAnalysis": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.RootCauseAnalysis",
+            "cause": "IAMv2 Postgres DB is slow to respond to requests or unavailable",
+            "resolution": "Check the iam-user-authn and postgres-* pods on MSP"
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "10b4dacf-0e2d-4ae7-aa41-c30c997d1d12",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-02-12T07:38:45.348289Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-02-12T07:38:45.348281Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "prism_central_vm",
+          "name": "Prism Central VM",
+          "extId": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "prism_central_vm",
+            "name": "Prism Central VM",
+            "extId": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-02-12T05:39:00.841752Z"
+          }
+        ],
+        "title": "Microservices Infrastructure is not in healthy state.",
+        "alertType": "A200335",
+        "classifications": [
+          "Node"
+        ],
+        "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "creationTime": "2026-02-12T05:39:00.841752Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-12T07:38:45.352031Z",
+        "message": "Microservices Infrastructure is not in healthy state. Please check for errors in logs or contact Nutanix Support",
+        "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 2
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "service_vm_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+            },
+            "paramName": "arithmos_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+            },
+            "paramName": "node_uuid"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10-0-0-165"
+            },
+            "paramName": "node_serial"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "null"
+            },
+            "paramName": "block_serial"
+          }
+        ],
+        "rootCauseAnalysis": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.RootCauseAnalysis",
+            "cause": "This alert indicates that either Microservice Infrastructure enablement has failed or the components are in an unhealthy state.",
+            "resolution": "Check for any error in logs or contact Nutanix Support. Refer to KB-13136 for more details and troubleshooting steps."
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "1084387f-9ca4-4f93-9957-ac18615ff82a",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-02-12T07:38:45.368687Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-02-12T07:38:45.36868Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "cluster",
+          "name": "prism-central-deployment",
+          "extId": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "cluster",
+            "name": "prism-central-deployment",
+            "extId": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "CRITICAL",
+            "severityChangeTime": "2026-02-12T05:19:04.827458Z"
+          }
+        ],
+        "title": "IAM services are not in healthy state.",
+        "alertType": "A111108",
+        "classifications": [
+          "Cluster"
+        ],
+        "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "creationTime": "2026-02-12T05:19:04.827458Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-12T07:38:45.371813Z",
+        "message": "One or more IAM services have restarted within the last 15 minutes. Users may face Authentication/Authorization issues. Errors: {alert_message}",
+        "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "severity": "CRITICAL",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "IAM Authorization Service (Themis) is down. IAM Authentication Service (Authn) is down."
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "alert_message"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+            },
+            "paramName": "arithmos_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+            },
+            "paramName": "cluster_uuid"
+          }
+        ],
+        "rootCauseAnalysis": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.RootCauseAnalysis",
+            "cause": "IAM services are not in a healthy state which may lead to Authentication/Authorization issues for users.",
+            "resolution": "If this alert occurs more than once, please collect Prism Central VM (PCVM) and MSP logs and contact Nutanix support. Additionally you can refer to KB article 16775 for resolution details."
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "3fa7c147-0105-4960-8e69-26cf9725fbb9",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-02-12T07:38:45.388166Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-02-12T07:38:45.388155Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "cluster",
+          "name": "prism-central-deployment",
+          "extId": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "cluster",
+            "name": "prism-central-deployment",
+            "extId": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-02-12T04:47:55.072693Z"
+          }
+        ],
+        "title": "Cluster Service {services} Restarting Frequently",
+        "alertType": "A3034",
+        "classifications": [
+          "Cluster"
+        ],
+        "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "creationTime": "2026-02-12T04:47:55.072693Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-12T07:38:45.391012Z",
+        "message": "There have been multiple service restarts of {services} across all Controller VM(s). Latest crash of these services have occurred at {timestamps} respectively.",
+        "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "['uhura']"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "services"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "['uhura']"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "['Wed Feb 11 20:39:10 2026']"
+            },
+            "paramName": "timestamps"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+            },
+            "paramName": "arithmos_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+            },
+            "paramName": "cluster_uuid"
+          }
+        ],
+        "rootCauseAnalysis": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.RootCauseAnalysis",
+            "cause": "This alert indicates that one or more services in the cluster were restarted.",
+            "resolution": "If this alert occurs once or infrequently, no action is necessary. If it is frequent, contact Nutanix support."
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "5b282639-1021-4db7-b7a9-0b1a2e261aa6",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-02-12T04:39:10.975135Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-02-12T04:39:10.975103Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "cluster",
+          "name": "prism-central-deployment",
+          "extId": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "cluster",
+            "name": "prism-central-deployment",
+            "extId": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "CRITICAL",
+            "severityChangeTime": "2026-02-12T04:03:41.799566Z"
+          }
+        ],
+        "title": "IAM services are not in healthy state.",
+        "alertType": "A111108",
+        "classifications": [
+          "Cluster"
+        ],
+        "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "creationTime": "2026-02-12T04:03:41.799566Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-12T04:39:17.161701Z",
+        "message": "One or more IAM services have restarted within the last 15 minutes. Users may face Authentication/Authorization issues. Errors: {alert_message}",
+        "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "severity": "CRITICAL",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "IAM Authorization Service (Themis) is down. "
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "alert_message"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+            },
+            "paramName": "arithmos_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+            },
+            "paramName": "cluster_uuid"
+          }
+        ],
+        "rootCauseAnalysis": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.RootCauseAnalysis",
+            "cause": "IAM services are not in a healthy state which may lead to Authentication/Authorization issues for users.",
+            "resolution": "If this alert occurs more than once, please collect Prism Central VM (PCVM) and MSP logs and contact Nutanix support. Additionally you can refer to KB article 16775 for resolution details."
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "84a1764a-ef9d-4362-9d55-d4463c14c8cc",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-02-12T04:39:21.806424Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-02-12T04:39:21.806419Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "msp_entity",
+          "name": "msp",
+          "extId": "95e6f96a-8c62-4b47-4bc9-11f1c2e67d14"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "msp_entity",
+            "name": "msp",
+            "extId": "95e6f96a-8c62-4b47-4bc9-11f1c2e67d14"
+          },
+          {
+            "type": "MSP service",
+            "name": "MSP",
+            "extId": "pod_id"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-02-12T03:58:39.555628Z"
+          }
+        ],
+        "title": "IAMv2 authorization Database Connectivity Error Warning",
+        "alertType": "NTNX_IAMv2_Themis_Database_Connectivity_Error_Warning",
+        "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "creationTime": "2026-02-12T03:58:39.555628Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-12T04:39:21.875998Z",
+        "message": "Postgres Database for IAM is serving requests from Themis pod in > 100ms for  80.00000000000001% of requests.",
+        "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "serviceName": "IAMv2",
+        "rootCauseAnalysis": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.RootCauseAnalysis",
+            "cause": "IAMv2 Postgres DB is slow to respond to requests or unavailable",
+            "resolution": "Check the themis and postgres-* pods on MSP"
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "abb3febd-ecfb-40e8-bfc5-f929730e3a58",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-02-12T09:38:45.354111Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-02-12T09:38:45.3541Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "prism_central_vm",
+          "name": "Prism Central VM",
+          "extId": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "prism_central_vm",
+            "name": "Prism Central VM",
+            "extId": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-02-12T03:47:51.341933Z"
+          }
+        ],
+        "title": "Prism Central VM CPU Load High",
+        "alertType": "A6517",
+        "classifications": [
+          "ControllerVM"
+        ],
+        "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "creationTime": "2026-02-12T03:47:51.341933Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-12T09:38:45.357347Z",
+        "message": "CPU load in or Prism Central VM {ip_address} is high. Load average over 5 Minutes = {load_average_5min}, number of vCPUs in CVM or Prism Central VM = {num_procs}.",
+        "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.165"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.92"
+            },
+            "paramName": "load_average_5min"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "6"
+            },
+            "paramName": "num_procs"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 2
+            },
+            "paramName": "service_vm_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.165"
+            },
+            "paramName": "service_vm_external_ip"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+            },
+            "paramName": "arithmos_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+            },
+            "paramName": "node_uuid"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10-0-0-165"
+            },
+            "paramName": "node_serial"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "null"
+            },
+            "paramName": "block_serial"
+          }
+        ],
+        "rootCauseAnalysis": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.RootCauseAnalysis",
+            "cause": "The CPU load on the Prism Central VM has been high.",
+            "resolution": "Contact Nutanix Support for diagnosis. CPU on the Prism Central VM may need to be increased."
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "ad72ea3f-2d10-49e7-b873-8588467d11ab",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-02-12T04:39:23.288032Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-02-12T04:39:23.288023Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "cluster",
+          "name": "prism-central-deployment",
+          "extId": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "cluster",
+            "name": "prism-central-deployment",
+            "extId": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-02-12T03:07:54.821675Z"
+          }
+        ],
+        "title": "Cluster Service {services} Restarting Frequently",
+        "alertType": "A3034",
+        "classifications": [
+          "Cluster"
+        ],
+        "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "creationTime": "2026-02-12T03:07:54.821675Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-12T04:39:53.018483Z",
+        "message": "There have been multiple service restarts of {services} across all Controller VM(s). Latest crash of these services have occurred at {timestamps} respectively.",
+        "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "['catalog', 'uhura']"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "services"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "['catalog', 'uhura']"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "['Wed Feb 11 19:01:47 2026', 'Wed Feb 11 19:01:24 2026']"
+            },
+            "paramName": "timestamps"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+            },
+            "paramName": "arithmos_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+            },
+            "paramName": "cluster_uuid"
+          }
+        ],
+        "rootCauseAnalysis": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.RootCauseAnalysis",
+            "cause": "This alert indicates that one or more services in the cluster were restarted.",
+            "resolution": "If this alert occurs once or infrequently, no action is necessary. If it is frequent, contact Nutanix support."
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "ec3e0cd0-c192-4dee-9e87-d5ece580b6e2",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-02-12T04:40:04.93537Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-02-12T04:40:04.935361Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "cluster",
+          "name": "prism-central-deployment",
+          "extId": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "cluster",
+            "name": "prism-central-deployment",
+            "extId": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-02-12T02:47:56.7275Z"
+          }
+        ],
+        "title": "Cluster Service {services} Restarting Frequently",
+        "alertType": "A3034",
+        "classifications": [
+          "Cluster"
+        ],
+        "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "creationTime": "2026-02-12T02:47:56.7275Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-12T04:40:06.05676Z",
+        "message": "There have been multiple service restarts of {services} across all Controller VM(s). Latest crash of these services have occurred at {timestamps} respectively.",
+        "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "['uhura']"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "services"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "['uhura']"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "['Wed Feb 11 18:47:16 2026']"
+            },
+            "paramName": "timestamps"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+            },
+            "paramName": "arithmos_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+            },
+            "paramName": "cluster_uuid"
+          }
+        ],
+        "rootCauseAnalysis": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.RootCauseAnalysis",
+            "cause": "This alert indicates that one or more services in the cluster were restarted.",
+            "resolution": "If this alert occurs once or infrequently, no action is necessary. If it is frequent, contact Nutanix support."
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "a4ace466-c9e9-4da3-8d2b-cc6f2d19094b",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-02-11T10:38:45.496053Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-02-11T10:38:45.496042Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "prism_central_vm",
+          "name": "Prism Central VM",
+          "extId": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "prism_central_vm",
+            "name": "Prism Central VM",
+            "extId": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-02-11T08:57:51.348175Z"
+          }
+        ],
+        "title": "Prism Central VM CPU Load High",
+        "alertType": "A6517",
+        "classifications": [
+          "ControllerVM"
+        ],
+        "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "creationTime": "2026-02-11T08:57:51.348175Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-11T10:38:45.499713Z",
+        "message": "CPU load in or Prism Central VM {ip_address} is high. Load average over 5 Minutes = {load_average_5min}, number of vCPUs in CVM or Prism Central VM = {num_procs}.",
+        "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.165"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "11.75"
+            },
+            "paramName": "load_average_5min"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "6"
+            },
+            "paramName": "num_procs"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 2
+            },
+            "paramName": "service_vm_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.165"
+            },
+            "paramName": "service_vm_external_ip"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+            },
+            "paramName": "arithmos_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+            },
+            "paramName": "node_uuid"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10-0-0-165"
+            },
+            "paramName": "node_serial"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "null"
+            },
+            "paramName": "block_serial"
+          }
+        ],
+        "rootCauseAnalysis": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.RootCauseAnalysis",
+            "cause": "The CPU load on the Prism Central VM has been high.",
+            "resolution": "Contact Nutanix Support for diagnosis. CPU on the Prism Central VM may need to be increased."
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "75638f14-56d5-4928-b1d1-8002e2ca5ad1",
+        "isAcknowledged": false,
+        "isAutoResolved": false,
+        "isResolved": false,
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "cluster",
+          "name": "prism-central-deployment",
+          "extId": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "cluster",
+            "name": "prism-central-deployment",
+            "extId": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "CRITICAL",
+            "severityChangeTime": "2026-02-11T08:03:58.276459Z"
+          }
+        ],
+        "title": "Domain Manager Internal Service has Stopped Working",
+        "alertType": "A400118",
+        "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "creationTime": "2026-02-11T08:03:58.276459Z",
+        "impactTypes": [
+          "AVAILABILITY"
+        ],
+        "lastUpdatedTime": "2026-02-12T06:24:23.970339Z",
+        "message": "Discovered that the Domain Manager internal service is not working: '{service_names}'",
+        "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "severity": "CRITICAL",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "pc-celine"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "service_names"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "pc-celine"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+            },
+            "paramName": "arithmos_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08"
+            },
+            "paramName": "cluster_uuid"
+          }
+        ],
+        "rootCauseAnalysis": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.RootCauseAnalysis",
+            "cause": "Domain Manager internal service may have stopped working",
+            "resolution": "Please refer to KB-13120"
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "38a45152-7b1f-46b1-910c-3292eb8b87b1",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-02-12T07:38:45.407419Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-02-12T07:38:45.407409Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "prism_central_vm",
+          "name": "Prism Central VM",
+          "extId": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "prism_central_vm",
+            "name": "Prism Central VM",
+            "extId": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "CRITICAL",
+            "severityChangeTime": "2026-02-10T22:37:48.161115Z"
+          }
+        ],
+        "title": "RAM Usage high on {vm_type} : {ip_address}",
+        "alertType": "A1056",
+        "classifications": [
+          "ControllerVM"
+        ],
+        "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "creationTime": "2026-02-10T22:37:48.161115Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-12T07:38:45.409499Z",
+        "message": "Main memory usage in {vm_type} {ip_address} is high, {available_memory_kb} KB is free.",
+        "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "severity": "CRITICAL",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.BoolValue",
+              "boolValue": true
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "alert_log_collect"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "cvm_memory_usage"
+            },
+            "paramName": "alert_log_tag_list"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "-1h"
+            },
+            "paramName": "alert_log_duration"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.165"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 563312
+            },
+            "paramName": "available_memory_kb"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 2
+            },
+            "paramName": "service_vm_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Prism Central VM"
+            },
+            "paramName": "vm_type"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.165"
+            },
+            "paramName": "service_vm_external_ip"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+            },
+            "paramName": "arithmos_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+            },
+            "paramName": "node_uuid"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10-0-0-165"
+            },
+            "paramName": "node_serial"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "null"
+            },
+            "paramName": "block_serial"
+          }
+        ],
+        "rootCauseAnalysis": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.RootCauseAnalysis",
+            "cause": "The RAM usage on the Controller VM or Prism Central VM has been high.",
+            "resolution": "Check the memory utilization of Prism Central VM or Controller VM. If abnormal behavior is seen, please collect logs and contact Nutanix Support."
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "6633d867-9619-418a-9aa2-666ca22f27f7",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-02-10T21:38:45.33921Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-02-10T21:38:45.339191Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "prism_central_vm",
+          "name": "Prism Central VM",
+          "extId": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "prism_central_vm",
+            "name": "Prism Central VM",
+            "extId": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "CRITICAL",
+            "severityChangeTime": "2026-02-10T19:02:48.432272Z"
+          }
+        ],
+        "title": "RAM Usage high on {vm_type} : {ip_address}",
+        "alertType": "A1056",
+        "classifications": [
+          "ControllerVM"
+        ],
+        "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "creationTime": "2026-02-10T19:02:48.432272Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-10T21:38:45.343403Z",
+        "message": "Main memory usage in {vm_type} {ip_address} is high, {available_memory_kb} KB is free.",
+        "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "severity": "CRITICAL",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.BoolValue",
+              "boolValue": true
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "alert_log_collect"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "cvm_memory_usage"
+            },
+            "paramName": "alert_log_tag_list"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "-1h"
+            },
+            "paramName": "alert_log_duration"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.165"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 530272
+            },
+            "paramName": "available_memory_kb"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 2
+            },
+            "paramName": "service_vm_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Prism Central VM"
+            },
+            "paramName": "vm_type"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.165"
+            },
+            "paramName": "service_vm_external_ip"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+            },
+            "paramName": "arithmos_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+            },
+            "paramName": "node_uuid"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10-0-0-165"
+            },
+            "paramName": "node_serial"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "null"
+            },
+            "paramName": "block_serial"
+          }
+        ],
+        "rootCauseAnalysis": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.RootCauseAnalysis",
+            "cause": "The RAM usage on the Controller VM or Prism Central VM has been high.",
+            "resolution": "Check the memory utilization of Prism Central VM or Controller VM. If abnormal behavior is seen, please collect logs and contact Nutanix Support."
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "dbc33bed-3baf-4185-b645-eb479c505f73",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-02-10T18:38:45.310568Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-02-10T18:38:45.310557Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "prism_central_vm",
+          "name": "Prism Central VM",
+          "extId": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "prism_central_vm",
+            "name": "Prism Central VM",
+            "extId": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "CRITICAL",
+            "severityChangeTime": "2026-02-10T17:22:48.408558Z"
+          }
+        ],
+        "title": "RAM Usage high on {vm_type} : {ip_address}",
+        "alertType": "A1056",
+        "classifications": [
+          "ControllerVM"
+        ],
+        "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "creationTime": "2026-02-10T17:22:48.408558Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-10T18:38:45.314161Z",
+        "message": "Main memory usage in {vm_type} {ip_address} is high, {available_memory_kb} KB is free.",
+        "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
+        "severity": "CRITICAL",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.BoolValue",
+              "boolValue": true
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "alert_log_collect"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "cvm_memory_usage"
+            },
+            "paramName": "alert_log_tag_list"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "-1h"
+            },
+            "paramName": "alert_log_duration"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.165"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 546308
+            },
+            "paramName": "available_memory_kb"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 2
+            },
+            "paramName": "service_vm_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Prism Central VM"
+            },
+            "paramName": "vm_type"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.165"
+            },
+            "paramName": "service_vm_external_ip"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+            },
+            "paramName": "arithmos_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "ea09695d-7ded-40a7-b5dd-4ae19aee08d9"
+            },
+            "paramName": "node_uuid"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10-0-0-165"
+            },
+            "paramName": "node_serial"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "null"
+            },
+            "paramName": "block_serial"
+          }
+        ],
+        "rootCauseAnalysis": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.RootCauseAnalysis",
+            "cause": "The RAM usage on the Controller VM or Prism Central VM has been high.",
+            "resolution": "Check the memory utilization of Prism Central VM or Controller VM. If abnormal behavior is seen, please collect logs and contact Nutanix Support."
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "9c676527-19da-4853-9c5b-0cd6b0756a5c",
+        "isAcknowledged": false,
+        "isAutoResolved": false,
+        "isResolved": false,
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "node",
+          "name": "10-0-0-103-aws-us-east-1a",
+          "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "node",
+            "name": "10-0-0-103-aws-us-east-1a",
+            "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-02-03T14:38:10.539471Z"
+          }
+        ],
+        "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
+        "alertType": "A1031",
+        "classifications": [
+          "Storage"
+        ],
+        "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "creationTime": "2026-02-03T14:38:10.539471Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-25T17:28:58.461066Z",
+        "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
+        "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.108"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "service_vm_external_ip"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "/var/log"
+            },
+            "paramName": "mount_path"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "/var/log"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.108"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 74
+            },
+            "paramName": "score"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Controller VM"
+            },
+            "paramName": "entity"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Controller VM"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 75
+            },
+            "paramName": "threshold"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 2
+            },
+            "paramName": "service_vm_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue"
+            },
+            "paramName": "ref_msg"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+            },
+            "paramName": "node_uuid"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "i-0d446d74c57aa63c9"
+            },
+            "paramName": "node_serial"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "i-0d446d74c57aa63c9"
+            },
+            "paramName": "block_serial"
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "f4ef3c89-42b8-4df4-80ec-071053143c0d",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-02-03T13:53:01.088669Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-02-03T13:53:01.088657Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "node",
+          "name": "10-0-0-103-aws-us-east-1a",
+          "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "node",
+            "name": "10-0-0-103-aws-us-east-1a",
+            "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-02-02T03:03:10.704609Z"
+          }
+        ],
+        "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
+        "alertType": "A1031",
+        "classifications": [
+          "Storage"
+        ],
+        "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "creationTime": "2026-02-02T03:03:10.704609Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-03T13:53:01.090225Z",
+        "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
+        "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.108"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "service_vm_external_ip"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "/var/log"
+            },
+            "paramName": "mount_path"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "/var/log"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.108"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 74
+            },
+            "paramName": "score"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Controller VM"
+            },
+            "paramName": "entity"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Controller VM"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 75
+            },
+            "paramName": "threshold"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 2
+            },
+            "paramName": "service_vm_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue"
+            },
+            "paramName": "ref_msg"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+            },
+            "paramName": "node_uuid"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "i-0d446d74c57aa63c9"
+            },
+            "paramName": "node_serial"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "i-0d446d74c57aa63c9"
+            },
+            "paramName": "block_serial"
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "fde72d69-55e2-4a9d-96f0-74cee421bb86",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-02-01T23:53:01.267767Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-02-01T23:53:01.267759Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "node",
+          "name": "10-0-0-103-aws-us-east-1a",
+          "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "node",
+            "name": "10-0-0-103-aws-us-east-1a",
+            "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-01-31T12:48:10.644883Z"
+          }
+        ],
+        "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
+        "alertType": "A1031",
+        "classifications": [
+          "Storage"
+        ],
+        "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "creationTime": "2026-01-31T12:48:10.644883Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-02-01T23:53:01.269719Z",
+        "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
+        "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.108"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "service_vm_external_ip"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "/var/log"
+            },
+            "paramName": "mount_path"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "/var/log"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.108"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 74
+            },
+            "paramName": "score"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Controller VM"
+            },
+            "paramName": "entity"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Controller VM"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 75
+            },
+            "paramName": "threshold"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 2
+            },
+            "paramName": "service_vm_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue"
+            },
+            "paramName": "ref_msg"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+            },
+            "paramName": "node_uuid"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "i-0d446d74c57aa63c9"
+            },
+            "paramName": "node_serial"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "i-0d446d74c57aa63c9"
+            },
+            "paramName": "block_serial"
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "a1b284fd-e4b4-41c4-825d-a7cbd6761a4f",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-01-31T11:53:01.890272Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-01-31T11:53:01.890264Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "node",
+          "name": "10-0-0-103-aws-us-east-1a",
+          "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "node",
+            "name": "10-0-0-103-aws-us-east-1a",
+            "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-01-28T07:18:10.725136Z"
+          }
+        ],
+        "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
+        "alertType": "A1031",
+        "classifications": [
+          "Storage"
+        ],
+        "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "creationTime": "2026-01-28T07:18:10.725136Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-01-31T11:53:01.894175Z",
+        "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
+        "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.108"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "service_vm_external_ip"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "/var/log"
+            },
+            "paramName": "mount_path"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "/var/log"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.108"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 74
+            },
+            "paramName": "score"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Controller VM"
+            },
+            "paramName": "entity"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Controller VM"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 75
+            },
+            "paramName": "threshold"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 2
+            },
+            "paramName": "service_vm_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue"
+            },
+            "paramName": "ref_msg"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+            },
+            "paramName": "node_uuid"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "i-0d446d74c57aa63c9"
+            },
+            "paramName": "node_serial"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "i-0d446d74c57aa63c9"
+            },
+            "paramName": "block_serial"
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "3c6d0ebf-f395-4627-af92-c1f13e1a7262",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-01-28T06:53:01.115231Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-01-28T06:53:01.11522Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "node",
+          "name": "10-0-0-103-aws-us-east-1a",
+          "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "node",
+            "name": "10-0-0-103-aws-us-east-1a",
+            "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-01-26T16:53:10.910547Z"
+          }
+        ],
+        "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
+        "alertType": "A1031",
+        "classifications": [
+          "Storage"
+        ],
+        "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "creationTime": "2026-01-26T16:53:10.910547Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-01-28T06:53:01.117007Z",
+        "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
+        "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.108"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "service_vm_external_ip"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "/var/log"
+            },
+            "paramName": "mount_path"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "/var/log"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.108"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 74
+            },
+            "paramName": "score"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Controller VM"
+            },
+            "paramName": "entity"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Controller VM"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 75
+            },
+            "paramName": "threshold"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 2
+            },
+            "paramName": "service_vm_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue"
+            },
+            "paramName": "ref_msg"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+            },
+            "paramName": "node_uuid"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "i-0d446d74c57aa63c9"
+            },
+            "paramName": "node_serial"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "i-0d446d74c57aa63c9"
+            },
+            "paramName": "block_serial"
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "50417dc8-f0c6-4d3b-8eba-7720f6c97964",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-01-26T16:53:01.343724Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-01-26T16:53:01.343716Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "node",
+          "name": "10-0-0-103-aws-us-east-1a",
+          "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "node",
+            "name": "10-0-0-103-aws-us-east-1a",
+            "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-01-22T13:08:11.069255Z"
+          }
+        ],
+        "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
+        "alertType": "A1031",
+        "classifications": [
+          "Storage"
+        ],
+        "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "creationTime": "2026-01-22T13:08:11.069255Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-01-26T16:53:01.34747Z",
+        "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
+        "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.108"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "service_vm_external_ip"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "/var/log"
+            },
+            "paramName": "mount_path"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "/var/log"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.108"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 74
+            },
+            "paramName": "score"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Controller VM"
+            },
+            "paramName": "entity"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Controller VM"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 75
+            },
+            "paramName": "threshold"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 2
+            },
+            "paramName": "service_vm_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue"
+            },
+            "paramName": "ref_msg"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+            },
+            "paramName": "node_uuid"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "i-0d446d74c57aa63c9"
+            },
+            "paramName": "node_serial"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "i-0d446d74c57aa63c9"
+            },
+            "paramName": "block_serial"
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "769f6119-cf7f-4b87-9b8a-6d1f451eab6a",
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-01-22T12:53:01.520256Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-01-22T12:53:01.520244Z",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.AlertEntityReference",
+          "type": "node",
+          "name": "10-0-0-103-aws-us-east-1a",
+          "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "node",
+            "name": "10-0-0-103-aws-us-east-1a",
+            "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+          }
+        ],
+        "severityTrails": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.serviceability.SeverityTrail",
+            "severity": "WARNING",
+            "severityChangeTime": "2026-01-18T21:08:10.810346Z"
+          }
+        ],
+        "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
+        "alertType": "A1031",
+        "classifications": [
+          "Storage"
+        ],
+        "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "creationTime": "2026-01-18T21:08:10.810346Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-01-22T12:53:01.524751Z",
+        "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
+        "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
+        "severity": "WARNING",
+        "isUserDefined": false,
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.108"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "service_vm_external_ip"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "/var/log"
+            },
+            "paramName": "mount_path"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "/var/log"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "10.0.0.108"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 74
+            },
+            "paramName": "score"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Controller VM"
+            },
+            "paramName": "entity"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Controller VM"
+            }
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 75
+            },
+            "paramName": "threshold"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.IntValue",
+              "intValue": 2
+            },
+            "paramName": "service_vm_id"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue"
+            },
+            "paramName": "ref_msg"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "5.2.0-0b99177b"
+            },
+            "paramName": "ncc_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "7.3"
+            },
+            "paramName": "nos_version"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+            },
+            "paramName": "node_uuid"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "i-0d446d74c57aa63c9"
+            },
+            "paramName": "node_serial"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "i-0d446d74c57aa63c9"
+            },
+            "paramName": "block_serial"
+          }
+        ]
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Alert",
         "extId": "c17420bd-d048-4a3a-ba02-fb485cae2aaf",
         "isAcknowledged": false,
         "isAutoResolved": false,
@@ -42,10 +3718,14 @@
         ],
         "title": "Degraded VM Recovery Point.",
         "alertType": "A130172",
-        "classifications": ["DR"],
+        "classifications": [
+          "DR"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-13T11:06:27.166178Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2026-01-13T11:06:27.171819Z",
         "message": "Recovery Point for VM {vm_name} failed to capture associated policies and categories because {reason}.",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -162,9 +3842,11 @@
         },
         "$objectType": "monitoring.v4.serviceability.Alert",
         "extId": "ebf72745-2c84-4e5a-a94e-7bec727a206c",
-        "isAcknowledged": false,
-        "isAutoResolved": false,
-        "isResolved": false,
+        "isAcknowledged": true,
+        "acknowledgedTime": "2026-01-18T20:53:01.309858Z",
+        "isAutoResolved": true,
+        "isResolved": true,
+        "resolvedTime": "2026-01-18T20:53:01.309847Z",
         "sourceEntity": {
           "$reserved": {
             "$fv": "v4.r1"
@@ -197,11 +3879,15 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": ["Storage"],
+        "classifications": [
+          "Storage"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-06T09:24:19.032149Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
-        "lastUpdatedTime": "2026-01-15T11:48:10.613952Z",
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
+        "lastUpdatedTime": "2026-01-18T20:53:01.313944Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "severity": "WARNING",
@@ -403,10 +4089,14 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": ["Storage"],
+        "classifications": [
+          "Storage"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-04T21:09:18.865966Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2026-01-06T09:07:24.740767Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -609,10 +4299,14 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": ["Storage"],
+        "classifications": [
+          "Storage"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-04T19:34:18.359504Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2026-01-04T21:07:24.118424Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -815,10 +4509,14 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": ["Storage"],
+        "classifications": [
+          "Storage"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-03T13:29:19.027455Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2026-01-04T19:07:24.704936Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -1021,10 +4719,14 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": ["Storage"],
+        "classifications": [
+          "Storage"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-03T05:24:20.177779Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2026-01-03T13:07:24.075177Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -1227,10 +4929,14 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": ["Storage"],
+        "classifications": [
+          "Storage"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-02T02:44:19.172217Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2026-01-03T05:07:24.642395Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -1433,10 +5139,14 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": ["Storage"],
+        "classifications": [
+          "Storage"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-01T18:29:18.436618Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2026-01-02T02:07:24.95622Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -1639,10 +5349,14 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": ["Storage"],
+        "classifications": [
+          "Storage"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-01T16:34:18.92299Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2026-01-01T18:07:24.34806Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -1845,10 +5559,14 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": ["Storage"],
+        "classifications": [
+          "Storage"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-31T11:09:18.701587Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2026-01-01T16:07:24.275649Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -2051,10 +5769,14 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": ["Storage"],
+        "classifications": [
+          "Storage"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-31T09:34:18.748146Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2025-12-31T11:07:24.31752Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -2257,10 +5979,14 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": ["Storage"],
+        "classifications": [
+          "Storage"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-31T07:44:18.332858Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2025-12-31T09:07:24.573791Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -2463,10 +6189,14 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": ["Storage"],
+        "classifications": [
+          "Storage"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-31T05:49:19.014508Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2025-12-31T07:07:24.609126Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -2669,10 +6399,14 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": ["Storage"],
+        "classifications": [
+          "Storage"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-30T18:44:18.642542Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2025-12-31T02:07:24.605045Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -2875,10 +6609,14 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": ["Storage"],
+        "classifications": [
+          "Storage"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-30T16:49:18.609751Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2025-12-30T18:07:24.721534Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -3081,10 +6819,14 @@
         ],
         "title": "Pulse is not enabled on cluster.",
         "alertType": "A140004",
-        "classifications": ["Cluster"],
+        "classifications": [
+          "Cluster"
+        ],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2025-12-29T14:29:58.448974Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2025-12-29T16:46:05.457167Z",
         "message": "Pulse is not enabled on cluster",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -3190,10 +6932,14 @@
         ],
         "title": "IAM services are not in healthy state.",
         "alertType": "A111108",
-        "classifications": ["Cluster"],
+        "classifications": [
+          "Cluster"
+        ],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2025-12-29T13:50:56.180489Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2025-12-29T14:46:05.474851Z",
         "message": "One or more IAM services have restarted within the last 15 minutes. Users may face Authentication/Authorization issues. Errors: {alert_message}",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -3307,11 +7053,15 @@
         ],
         "title": "The PC is using password based ssh access.",
         "alertType": "A6220",
-        "classifications": ["Cluster"],
+        "classifications": [
+          "Cluster"
+        ],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2025-12-29T13:45:33.148301Z",
-        "impactTypes": ["CONFIGURATION"],
-        "lastUpdatedTime": "2026-01-14T13:45:33.587663Z",
+        "impactTypes": [
+          "CONFIGURATION"
+        ],
+        "lastUpdatedTime": "2026-02-25T03:21:14.355024Z",
         "message": "{alert_msg}",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "severity": "INFO",
@@ -3424,11 +7174,15 @@
         ],
         "title": "Prism Central {pcvm_ip} is using default password",
         "alertType": "A111050",
-        "classifications": ["Cluster"],
+        "classifications": [
+          "Cluster"
+        ],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2025-12-29T13:45:32.576365Z",
-        "impactTypes": ["CONFIGURATION"],
-        "lastUpdatedTime": "2026-01-12T13:45:32.608364Z",
+        "impactTypes": [
+          "CONFIGURATION"
+        ],
+        "lastUpdatedTime": "2026-02-25T03:21:13.716876Z",
         "message": "Please update the default password(s) on the PC for user(s): {users} to harden the security on the clusters. Nutanix recommends immediately changing all default passwords.",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "severity": "CRITICAL",
@@ -3553,10 +7307,14 @@
         ],
         "title": "Pulse is disabled",
         "alertType": "A140002",
-        "classifications": ["Cluster"],
+        "classifications": [
+          "Cluster"
+        ],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2025-12-29T13:45:00.693237Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2026-01-04T13:46:05.291468Z",
         "message": "Pulse is disabled on the paired Prism Central {cluster_uuid}",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -3664,10 +7422,14 @@
         ],
         "title": "License Feature Violation",
         "alertType": "A1077",
-        "classifications": ["License"],
+        "classifications": [
+          "License"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-29T12:06:28.311173Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2025-12-29T12:12:43.466583Z",
         "message": "Features not permitted by license(s) applied are being used. Non compliant features: {feature_violation_list}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -3803,10 +7565,14 @@
         ],
         "title": "Cluster Service {services} Restarting Frequently",
         "alertType": "A3034",
-        "classifications": ["Cluster"],
+        "classifications": [
+          "Cluster"
+        ],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2025-12-29T12:03:20.322649Z",
-        "impactTypes": ["SYSTEM_INDICATOR"],
+        "impactTypes": [
+          "SYSTEM_INDICATOR"
+        ],
         "lastUpdatedTime": "2025-12-29T13:07:24.516523Z",
         "message": "There have been multiple service restarts of {services} across all Controller VM(s). Latest crash of these services have occurred at {timestamps} respectively.",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -3950,19 +7716,19 @@
             "$fv": "v1.r0"
           },
           "$objectType": "common.v1.response.ApiLink",
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.2/serviceability/alerts?$limit=50&$page=0",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/alerts?$limit=50&$page=0",
           "rel": "last"
         },
         {
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.2/serviceability/alerts?$limit=50&$page=0",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/alerts?$limit=50&$page=0",
           "rel": "self"
         },
         {
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.2/serviceability/alerts?$limit=50&$page=0",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/alerts?$limit=50&$page=0",
           "rel": "first"
         }
       ],
-      "totalAvailableResults": 22
+      "totalAvailableResults": 44
     }
   }
 ]

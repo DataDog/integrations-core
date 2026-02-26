@@ -556,6 +556,9 @@ class InfrastructureMonitor:
         if hypervisor_type := hypervisor.get("type"):
             tags.append(f"ntnx_hypervisor_type:{hypervisor_type}")
 
+        # Add category tags
+        tags.extend(self.check.extract_category_tags(host))
+
         return tags
 
     def _extract_cluster_tags(self, cluster: dict) -> list[str]:
@@ -582,6 +585,9 @@ class InfrastructureMonitor:
 
         if cluster_profile_id := cluster.get("clusterProfileExtId"):
             tags.append(f"ntnx_cluster_profile_id:{cluster_profile_id}")
+
+        # Add category tags
+        tags.extend(self.check.extract_category_tags(cluster))
 
         return tags
 
@@ -610,19 +616,8 @@ class InfrastructureMonitor:
         if vm_generation_uuid:
             tags.append(f"ntnx_generation_uuid:{vm_generation_uuid}")
 
-        categories = vm.get("categories")
-        if categories:
-            for c in categories:
-                category_id = c.get("extId")
-                if category_id and category_id in self._categories:
-                    category = self._categories[category_id]
-                    key = category.get("key")
-                    value = category.get("value")
-                    if key and value:
-                        if self.check.prefix_category_tags:
-                            tags.append(f"ntnx_{key}:{value}")
-                        else:
-                            tags.append(f"{key}:{value}")
+        # Add category tags
+        tags.extend(self.check.extract_category_tags(vm))
 
         owner_id = vm.get("ownershipInfo", {}).get("owner", {}).get("extId")
         if owner_id:
@@ -790,7 +785,7 @@ class InfrastructureMonitor:
             if vm_id:
                 vm_stats_dict[vm_id] = stats
 
-        self.check.log.debug(
+        self.check.log.info(
             "[%s][%s] Retrieved %d VM stats from API for cluster_id=%s",
             pc_label,
             cluster_name,

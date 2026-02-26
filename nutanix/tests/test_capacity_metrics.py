@@ -25,19 +25,19 @@ class TestVMCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:vm',
-            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
-            'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
-            'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+            'ntnx_generation_uuid:d45a36e7-1c4c-40d6-ba6f-c2f52c211460',
+            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
+            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
-            'ntnx_vm_id:f3272103-ea1e-4a90-8318-899636993ed6',
-            'ntnx_vm_name:PC-OptionName-1',
+            'ntnx_vm_id:63e222ec-87ff-491b-b7ba-9247752d44a3',
+            'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
 
-        # VM "PC-OptionName-1" has numSockets=6
+        # VM "NTNX-10-0-0-165-PCVM-1767014640" has numSockets=6
         aggregator.assert_metric("nutanix.vm.cpu.sockets", value=6, tags=expected_tags)
 
     def test_vm_cpu_cores_per_socket(self, dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -47,19 +47,19 @@ class TestVMCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:vm',
-            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
-            'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
-            'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+            'ntnx_generation_uuid:d45a36e7-1c4c-40d6-ba6f-c2f52c211460',
+            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
+            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
-            'ntnx_vm_id:f3272103-ea1e-4a90-8318-899636993ed6',
-            'ntnx_vm_name:PC-OptionName-1',
+            'ntnx_vm_id:63e222ec-87ff-491b-b7ba-9247752d44a3',
+            'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
 
-        # VM "PC-OptionName-1" has numCoresPerSocket=1
+        # VM "NTNX-10-0-0-165-PCVM-1767014640" has numCoresPerSocket=1
         aggregator.assert_metric("nutanix.vm.cpu.cores_per_socket", value=1, tags=expected_tags)
 
     def test_vm_cpu_vcpus_allocated(self, dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -69,19 +69,19 @@ class TestVMCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:vm',
-            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
-            'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
-            'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+            'ntnx_generation_uuid:d45a36e7-1c4c-40d6-ba6f-c2f52c211460',
+            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
+            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
-            'ntnx_vm_id:f3272103-ea1e-4a90-8318-899636993ed6',
-            'ntnx_vm_name:PC-OptionName-1',
+            'ntnx_vm_id:63e222ec-87ff-491b-b7ba-9247752d44a3',
+            'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
 
-        # VM "PC-OptionName-1": 6 sockets * 1 core = 6 vCPUs
+        # VM "NTNX-10-0-0-165-PCVM-1767014640": 6 sockets * 1 core = 6 vCPUs
         aggregator.assert_metric("nutanix.vm.cpu.vcpus_allocated", value=6, tags=expected_tags)
 
     def test_vm_cpu_threads_per_core(self, dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -91,19 +91,19 @@ class TestVMCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:vm',
-            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
-            'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
-            'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+            'ntnx_generation_uuid:d45a36e7-1c4c-40d6-ba6f-c2f52c211460',
+            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
+            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
-            'ntnx_vm_id:f3272103-ea1e-4a90-8318-899636993ed6',
-            'ntnx_vm_name:PC-OptionName-1',
+            'ntnx_vm_id:63e222ec-87ff-491b-b7ba-9247752d44a3',
+            'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
 
-        # VM "PC-OptionName-1" has numThreadsPerCore=1
+        # VM "NTNX-10-0-0-165-PCVM-1767014640" has numThreadsPerCore=1
         aggregator.assert_metric("nutanix.vm.cpu.threads_per_core", value=1, tags=expected_tags)
 
     def test_vm_memory_allocated(self, dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -113,19 +113,19 @@ class TestVMCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:vm',
-            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
-            'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
-            'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+            'ntnx_generation_uuid:d45a36e7-1c4c-40d6-ba6f-c2f52c211460',
+            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
+            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
-            'ntnx_vm_id:f3272103-ea1e-4a90-8318-899636993ed6',
-            'ntnx_vm_name:PC-OptionName-1',
+            'ntnx_vm_id:63e222ec-87ff-491b-b7ba-9247752d44a3',
+            'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
 
-        # VM "PC-OptionName-1" has memorySizeBytes=30064771072
+        # VM "NTNX-10-0-0-165-PCVM-1767014640" has memorySizeBytes=30064771072
         aggregator.assert_metric("nutanix.vm.memory.allocated_bytes", value=30064771072, tags=expected_tags)
 
 
@@ -139,20 +139,20 @@ class TestHostCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:host',
-            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_host_type:HYPER_CONVERGED',
-            'ntnx_hypervisor_name:AHV 10.0.1.4',
+            'ntnx_hypervisor_name:AHV 10.3',
             'ntnx_hypervisor_type:AHV',
-            'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
 
         # Host has numberOfCpuSockets=2
         aggregator.assert_metric(
-            "nutanix.host.cpu.sockets", value=2, tags=expected_tags, hostname="10-0-0-9-aws-us-east-1a"
+            "nutanix.host.cpu.sockets", value=2, tags=expected_tags, hostname="10-0-0-103-aws-us-east-1a"
         )
 
     def test_host_cpu_cores(self, dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -162,20 +162,20 @@ class TestHostCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:host',
-            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_host_type:HYPER_CONVERGED',
-            'ntnx_hypervisor_name:AHV 10.0.1.4',
+            'ntnx_hypervisor_name:AHV 10.3',
             'ntnx_hypervisor_type:AHV',
-            'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
 
         # Host has numberOfCpuCores=24
         aggregator.assert_metric(
-            "nutanix.host.cpu.cores", value=24, tags=expected_tags, hostname="10-0-0-9-aws-us-east-1a"
+            "nutanix.host.cpu.cores", value=24, tags=expected_tags, hostname="10-0-0-103-aws-us-east-1a"
         )
 
     def test_host_cpu_threads(self, dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -185,20 +185,20 @@ class TestHostCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:host',
-            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_host_type:HYPER_CONVERGED',
-            'ntnx_hypervisor_name:AHV 10.0.1.4',
+            'ntnx_hypervisor_name:AHV 10.3',
             'ntnx_hypervisor_type:AHV',
-            'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
 
         # Host has numberOfCpuThreads=48
         aggregator.assert_metric(
-            "nutanix.host.cpu.threads", value=48, tags=expected_tags, hostname="10-0-0-9-aws-us-east-1a"
+            "nutanix.host.cpu.threads", value=48, tags=expected_tags, hostname="10-0-0-103-aws-us-east-1a"
         )
 
     def test_host_memory_bytes(self, dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -208,20 +208,20 @@ class TestHostCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:host',
-            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_host_type:HYPER_CONVERGED',
-            'ntnx_hypervisor_name:AHV 10.0.1.4',
+            'ntnx_hypervisor_name:AHV 10.3',
             'ntnx_hypervisor_type:AHV',
-            'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
 
-        # Host has memorySizeBytes=404835270656
+        # Host has memorySizeBytes=404834222080
         aggregator.assert_metric(
-            "nutanix.host.memory.bytes", value=404835270656, tags=expected_tags, hostname="10-0-0-9-aws-us-east-1a"
+            "nutanix.host.memory.bytes", value=404834222080, tags=expected_tags, hostname="10-0-0-103-aws-us-east-1a"
         )
 
 
@@ -234,7 +234,7 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
-            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'nutanix',
             'prism_central:10.0.0.197',
@@ -249,7 +249,7 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
-            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'nutanix',
             'prism_central:10.0.0.197',
@@ -264,14 +264,14 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
-            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
 
-        # Cluster has 1 host with 404835270656 bytes
-        aggregator.assert_metric("nutanix.cluster.memory.total_bytes", value=404835270656, tags=expected_tags)
+        # Cluster has 1 host with 404834222080 bytes
+        aggregator.assert_metric("nutanix.cluster.memory.total_bytes", value=404834222080, tags=expected_tags)
 
     def test_cluster_vcpus_allocated(self, dd_run_check, aggregator, mock_instance, mock_http_get):
         """Cluster should report total vCPUs allocated to all VMs."""
@@ -279,18 +279,18 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
-            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
 
         # All VMs in cluster (fixture returns 3 VMs):
-        # - PC-OptionName-1: 6 sockets * 1 core = 6 vCPUs
+        # - NTNX-10-0-0-165-PCVM-1767014640: 6 sockets * 1 core = 6 vCPUs
         # - dd-vm: 2 sockets * 1 core = 2 vCPUs
         # - datadog-agent-cloned: 1 socket * 1 core = 1 vCPU
         # Total: 9 vCPUs
-        aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=9, tags=expected_tags)
+        aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=10, tags=expected_tags)
 
     def test_cluster_memory_allocated_bytes(self, dd_run_check, aggregator, mock_instance, mock_http_get):
         """Cluster should report total memory allocated to all VMs."""
@@ -298,15 +298,15 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
-            'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
 
         # All VMs in cluster (fixture returns 3 VMs):
-        # - PC-OptionName-1: 30064771072 bytes (~28GB)
+        # - NTNX-10-0-0-165-PCVM-1767014640: 30064771072 bytes (~28GB)
         # - dd-vm: 8589934592 bytes (8GB)
         # - datadog-agent-cloned: 4294967296 bytes (4GB)
-        # Total: 42949672960 bytes (~40GB)
-        aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=42949672960, tags=expected_tags)
+        # Total: 47244640256 bytes (~40GB)
+        aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=47244640256, tags=expected_tags)

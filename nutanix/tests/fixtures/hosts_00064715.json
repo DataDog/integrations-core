@@ -1,0 +1,175 @@
+[
+  {
+    "data": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.config.Host",
+        "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6",
+        "hostName": "10-0-0-103-aws-us-east-1a",
+        "hostType": "HYPER_CONVERGED",
+        "hypervisor": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "clustermgmt.v4.config.HypervisorReference",
+          "externalAddress": {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.config.IPAddress",
+            "ipv4": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPv4Address",
+              "value": "10.0.0.103",
+              "prefixLength": 32
+            }
+          },
+          "userName": "root",
+          "fullName": "AHV 10.3",
+          "type": "AHV",
+          "numberOfVms": 4,
+          "state": "ACROPOLIS_NORMAL",
+          "acropolisConnectionState": "CONNECTED"
+        },
+        "cluster": {
+          "name": "datadog-nutanix-dev",
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "clustermgmt.v4.config.ClusterReference",
+          "uuid": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "controllerVm": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "clustermgmt.v4.config.ControllerVmReference",
+          "externalAddress": {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.config.IPAddress",
+            "ipv4": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPv4Address",
+              "value": "10.0.0.108",
+              "prefixLength": 32
+            }
+          },
+          "backplaneAddress": {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.config.IPAddress",
+            "ipv4": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPv4Address",
+              "value": "10.0.0.108",
+              "prefixLength": 32
+            }
+          }
+        },
+        "disk": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "clustermgmt.v4.config.DiskReference",
+            "uuid": "3161fed2-5654-4370-b9a4-c12a639460bc",
+            "mountPath": "/home/nutanix/data/stargate-storage/disks/AWS21725D0E68B8ADD56",
+            "sizeInBytes": 586087669863,
+            "serialId": "AWS21725D0E68B8ADD56"
+          },
+          {
+            "uuid": "b17afe63-3e1a-426b-a87c-40a7e686ddac",
+            "mountPath": "/home/nutanix/data/stargate-storage/disks/AWS08393D8D2A48CE245",
+            "sizeInBytes": 623689179390,
+            "serialId": "AWS08393D8D2A48CE245"
+          }
+        ],
+        "isSecureBooted": false,
+        "isHardwareVirtualized": false,
+        "hasCsr": false,
+        "numberOfCpuCores": 24,
+        "numberOfCpuThreads": 48,
+        "numberOfCpuSockets": 2,
+        "cpuFrequencyHz": 3400000000,
+        "cpuModel": "Intel(R) Xeon(R) Platinum 8151 CPU @ 3.40GHz",
+        "gpuList": [
+          ""
+        ],
+        "bootTimeUsecs": 1767008683607175,
+        "memorySizeBytes": 404834222080,
+        "nodeSerial": "i-0d446d74c57aa63c9",
+        "blockSerial": "i-0d446d74c57aa63c9",
+        "blockModel": "AWS.z1d.metal",
+        "maintenanceState": "normal",
+        "nodeStatus": "NORMAL",
+        "rackableUnitUuid": "202c879c-bbb0-4ac7-9479-ef432ba867e5"
+      }
+    ],
+    "$reserved": {
+      "$fv": "v4.r1"
+    },
+    "$objectType": "clustermgmt.v4.config.ListHostsByClusterIdApiResponse",
+    "metadata": {
+      "flags": [
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "hasError",
+          "value": false
+        },
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "isPaginated",
+          "value": true
+        },
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "isTruncated",
+          "value": false
+        }
+      ],
+      "$reserved": {
+        "$fv": "v1.r0"
+      },
+      "$objectType": "common.v1.response.ApiResponseMetadata",
+      "links": [
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.response.ApiLink",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters/00064715-c043-5d8f-ee4b-176ec875554d/hosts?$limit=50&$page=0",
+          "rel": "first"
+        },
+        {
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters/00064715-c043-5d8f-ee4b-176ec875554d/hosts?$limit=50&$page=0",
+          "rel": "self"
+        },
+        {
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters/00064715-c043-5d8f-ee4b-176ec875554d/hosts?$limit=50&$page=0",
+          "rel": "last"
+        }
+      ],
+      "totalAvailableResults": 1
+    }
+  }
+]

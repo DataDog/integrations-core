@@ -35,7 +35,7 @@ def test_cluster_metrics(dd_run_check, aggregator, mock_instance, mock_http_get)
     dd_run_check(check)
 
     expected_tags = [
-        'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+        'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
         'ntnx_cluster_name:datadog-nutanix-dev',
         'nutanix',
         'prism_central:10.0.0.197',
@@ -54,7 +54,7 @@ def test_cluster_stats_metrics(dd_run_check, aggregator, mock_instance, mock_htt
     dd_run_check(check)
 
     expected_tags = [
-        'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+        'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
         'ntnx_cluster_name:datadog-nutanix-dev',
         'nutanix',
         'prism_central:10.0.0.197',

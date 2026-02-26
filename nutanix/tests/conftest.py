@@ -106,31 +106,27 @@ def mock_http_get(mocker):
 
         # Host stats endpoint - always non-paginated
         if (
-            "/api/clustermgmt/v4.0/stats/clusters/0006411c-0286-bc71-9f02-191e334d457b/hosts/71877eae-8fc1-4aae-8d20-70196dfb2f8d"
+            "/api/clustermgmt/v4.0/stats/clusters/00064715-c043-5d8f-ee4b-176ec875554d/hosts/d8787814-4fe8-4ba5-931f-e1ee31c294a6"
             in url
         ):
-            response_data = load_fixture(
-                "host_stats_0006411c-0286-bc71-9f02-191e334d457b_71877eae-8fc1-4aae-8d20-70196dfb2f8d.json"
-            )
+            response_data = load_fixture("host_stats_00064715_d8787814.json")
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
         # Cluster stats endpoint - always non-paginated
-        if "/api/clustermgmt/v4.0/stats/clusters/0006411c-0286-bc71-9f02-191e334d457b" in url:
-            response_data = load_fixture("cluster_stats_0006411c-0286-bc71-9f02-191e334d457b.json")
+        if "/api/clustermgmt/v4.0/stats/clusters/00064715-c043-5d8f-ee4b-176ec875554d" in url:
+            response_data = load_fixture("cluster_stats_00064715.json")
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
-        # Hosts endpoint for cluster b6d83094 - paginated
-        if '/api/clustermgmt/v4.0/config/clusters/b6d83094-9404-48de-9c74-ca6bddc3a01d/hosts' in url:
-            response_data = load_fixture_page("hosts_b6d83094.json", page)
-            mock_resp.json = mocker.Mock(return_value=response_data)
+        # Hosts endpoint for Prism Central cluster - returns 400 (expected)
+        if '/api/clustermgmt/v4.0/config/clusters/d07db284-6df6-4ca2-88cd-9dd5ed71ac08/hosts' in url:
             mock_resp.status_code = 400
             return mock_resp
 
-        # Hosts endpoint for cluster 0006411c - paginated
-        if '/api/clustermgmt/v4.0/config/clusters/0006411c-0286-bc71-9f02-191e334d457b/hosts' in url:
-            response_data = load_fixture_page("hosts_0006411c.json", page)
+        # Hosts endpoint for cluster 00064715 - paginated
+        if '/api/clustermgmt/v4.0/config/clusters/00064715-c043-5d8f-ee4b-176ec875554d/hosts' in url:
+            response_data = load_fixture_page("hosts_00064715.json", page)
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
