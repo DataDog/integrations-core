@@ -4,23 +4,9 @@
 import json
 from io import BytesIO
 from typing import Any, Iterator
-from unittest.mock import MagicMock, PropertyMock, create_autospec
+from unittest.mock import MagicMock
 
-import pytest
-
-__all__ = ['MockHTTPResponse', 'mock_http']
-
-
-@pytest.fixture
-def mock_http(mocker: Any) -> Any:
-    # Intercept HTTP calls made through AgentCheck.http, import into integration conftest.py to use
-    from datadog_checks.base.checks.base import AgentCheck
-    from datadog_checks.base.utils.http_protocol import HTTPClientProtocol
-
-    client = create_autospec(HTTPClientProtocol)
-    client.options_method.side_effect = NotImplementedError('HTTP OPTIONS not yet supported in mock_http')
-    mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
-    return client
+__all__ = ['MockHTTPResponse']
 
 
 class MockHTTPResponse:
