@@ -235,7 +235,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "-@http.method:* @load_balancer.service_name:*"
+        query: "-@http.method:* (@load_balancer.service_name:* OR @haproxy.mode:TCP)"
       processors:
         - type: schema-processor
           name: Apply OCSF schema for 4001
