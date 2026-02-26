@@ -40,6 +40,23 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     SELECT * FROM persons;
     CREATE SCHEMA public2;
     CREATE TABLE public2.cities (city VARCHAR(255), country VARCHAR(255), PRIMARY KEY(city));
+    -- Wide table with narrow index for bloat estimation testing.
+    -- The many TEXT columns create a large avg row width, while the single-column
+    -- integer index has a very small entry width. This maximizes the divergence
+    -- between a naive "all columns" bloat estimate and the correct per-index estimate.
+    CREATE TABLE bloat_test (
+        id SERIAL PRIMARY KEY,
+        col1 TEXT, col2 TEXT, col3 TEXT, col4 TEXT, col5 TEXT,
+        col6 TEXT, col7 TEXT, col8 TEXT, col9 TEXT, col10 TEXT
+    );
+    INSERT INTO bloat_test (col1,col2,col3,col4,col5,col6,col7,col8,col9,col10)
+        SELECT md5(i::text), md5(i::text), md5(i::text), md5(i::text), md5(i::text),
+               md5(i::text), md5(i::text), md5(i::text), md5(i::text), md5(i::text)
+        FROM generate_series(1, 5000) i;
+    CREATE INDEX bloat_test_id_idx ON bloat_test(id);
+    ANALYZE bloat_test;
+    -- Grant SELECT so the datadog user can see pg_stats entries for bloat_test
+    GRANT SELECT ON bloat_test TO datadog;
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bob;
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO blocking_bob;
 EOSQL
@@ -48,9 +65,9 @@ EOSQL
 echo -e "id,name\n1,Alice\n2,Bob" > /tmp/sample.csv
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     CREATE EXTENSION IF NOT EXISTS file_fdw;
-    
+
     CREATE SERVER file_server FOREIGN DATA WRAPPER file_fdw;
-    
+
     CREATE FOREIGN TABLE sample_foreign_d73a8c (id INTEGER, name TEXT) SERVER file_server OPTIONS (filename '/tmp/sample.csv', format 'csv', header 'true');
 
     SELECT * FROM sample_foreign_d73a8c;

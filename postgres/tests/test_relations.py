@@ -244,6 +244,113 @@ def test_bloat_metrics(aggregator, collect_bloat_metrics, expected_count, integr
         expected_tags = base_tags + ["index:{}".format(index)]
         aggregator.assert_metric("postgresql.index_bloat", count=expected_count, tags=expected_tags)
 
+    # When bloat metrics are enabled, assert values are in a sane range
+    if collect_bloat_metrics:
+        for metric in aggregator.metrics("postgresql.index_bloat"):
+            assert 0.5 <= metric.value <= 50.0, (
+                f"index_bloat value {metric.value} outside sane range [0.5, 50.0] for tags {metric.tags}"
+            )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_index_bloat_accuracy(aggregator, integration_check, pg_instance):
+    """
+    Validate index bloat estimation accuracy against pgstattuple ground truth.
+
+    Uses bloat_test: a wide table (10 TEXT columns, ~330 bytes/row) with a narrow
+    single-column integer index (bloat_test_id_idx). This scenario maximizes the
+    divergence between a naive "all table columns" estimate and a correct per-index
+    column estimate.
+
+    The test collects:
+      - Ground truth from pgstattuple (exact free space ratio)
+      - The reported postgresql.index_bloat metric value
+    and logs both for baseline comparison. A loose sanity bound is applied so the
+    test is useful both before and after the query fix.
+    """
+    pg_instance["relations"] = ["bloat_test"]
+    pg_instance["collect_bloat_metrics"] = True
+
+    # Step 1: Get ground truth from pgstattuple using a superuser connection
+    conn = _get_superconn(pg_instance)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM pgstatindex('bloat_test_id_idx')")
+    pgstatindex_result = cursor.fetchone()
+    # pgstatindex returns: (version, tree_level, index_size, root_block_no, internal_pages,
+    #   leaf_pages, empty_pages, deleted_pages, avg_leaf_density, leaf_fragmentation)
+    # avg_leaf_density is the average fill percentage of leaf pages (0-100)
+    avg_leaf_density = pgstatindex_result[8]
+    # Ground truth bloat ratio: 100 / avg_leaf_density gives us "actual / ideal"
+    # e.g. density=90% -> ratio=1.11 (roughly no bloat), density=45% -> ratio=2.22 (50% wasted)
+    ground_truth_ratio = round(100.0 / avg_leaf_density, 1) if avg_leaf_density > 0 else 0.0
+
+    # Also get the primary key index for a second data point
+    cursor.execute("SELECT * FROM pgstatindex('bloat_test_pkey')")
+    pkey_result = cursor.fetchone()
+    pkey_density = pkey_result[8]
+    pkey_ground_truth = round(100.0 / pkey_density, 1) if pkey_density > 0 else 0.0
+    cursor.close()
+    conn.close()
+
+    # Step 2: Run the integration check to collect the index_bloat metric
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    # Step 3: Extract reported bloat values from the aggregator
+    base_tags = _get_expected_tags(check, pg_instance, db=pg_instance["dbname"], table="bloat_test", schema="public")
+
+    idx_tags = base_tags + ["index:bloat_test_id_idx"]
+    pkey_tags = base_tags + ["index:bloat_test_pkey"]
+
+    aggregator.assert_metric("postgresql.index_bloat", count=1, tags=idx_tags)
+    aggregator.assert_metric("postgresql.index_bloat", count=1, tags=pkey_tags)
+
+    # Extract actual reported values
+    reported_idx_bloat = None
+    reported_pkey_bloat = None
+    from datadog_checks.base.stubs.aggregator import normalize_tags
+
+    normalized_idx_tags = normalize_tags(idx_tags, sort=True)
+    normalized_pkey_tags = normalize_tags(pkey_tags, sort=True)
+    for metric in aggregator.metrics("postgresql.index_bloat"):
+        if sorted(metric.tags) == normalized_idx_tags:
+            reported_idx_bloat = metric.value
+        elif sorted(metric.tags) == normalized_pkey_tags:
+            reported_pkey_bloat = metric.value
+
+    # Step 4: Log comparison data
+    print("\n=== INDEX BLOAT ACCURACY ===")
+    print("bloat_test_id_idx (narrow int index on wide table):")
+    print(f"  pgstattuple avg_leaf_density: {avg_leaf_density}%")
+    print(f"  pgstattuple ground truth ratio: {ground_truth_ratio}")
+    print(f"  reported index_bloat: {reported_idx_bloat}")
+    if reported_idx_bloat is not None and ground_truth_ratio > 0:
+        print(f"  divergence from ground truth: {abs(reported_idx_bloat - ground_truth_ratio):.1f}")
+    print("bloat_test_pkey (same table, PK index):")
+    print(f"  pgstattuple avg_leaf_density: {pkey_density}%")
+    print(f"  pgstattuple ground truth ratio: {pkey_ground_truth}")
+    print(f"  reported index_bloat: {reported_pkey_bloat}")
+    if reported_pkey_bloat is not None and pkey_ground_truth > 0:
+        print(f"  divergence from ground truth: {abs(reported_pkey_bloat - pkey_ground_truth):.1f}")
+    print("=== END ===\n")
+
+    # Step 5: Assert correctness -- the reported bloat ratio should be close to ground truth.
+    # For a freshly loaded table (no deletes/updates), the bloat ratio should be near 1.0.
+    # We allow a tolerance of 0.5 to accommodate estimation imprecision.
+    assert reported_idx_bloat is not None, "bloat_test_id_idx metric was not reported"
+    assert reported_idx_bloat > 0, f"Expected positive bloat ratio, got {reported_idx_bloat}"
+    assert abs(reported_idx_bloat - ground_truth_ratio) <= 0.5, (
+        f"bloat_test_id_idx: reported {reported_idx_bloat} diverges from ground truth "
+        f"{ground_truth_ratio} by more than 0.5"
+    )
+    assert reported_pkey_bloat is not None, "bloat_test_pkey metric was not reported"
+    assert reported_pkey_bloat > 0, f"Expected positive bloat ratio, got {reported_pkey_bloat}"
+    assert abs(reported_pkey_bloat - pkey_ground_truth) <= 0.5, (
+        f"bloat_test_pkey: reported {reported_pkey_bloat} diverges from ground truth "
+        f"{pkey_ground_truth} by more than 0.5"
+    )
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
