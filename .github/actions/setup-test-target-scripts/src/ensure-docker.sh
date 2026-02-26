@@ -1,6 +1,7 @@
 #!/bin/bash
 # Ensure the Docker daemon is running, starting it if necessary.
-# Works on Linux, macOS, and Windows (Git Bash) runners.
+# Works on Linux and Windows (Git Bash) runners. On macOS, Docker is not
+# available on GitHub-hosted runners so the check is skipped.
 
 set -euo pipefail
 
@@ -9,18 +10,20 @@ start_docker() {
     Linux)
       sudo systemctl start docker
       ;;
-    macOS)
-      open -a Docker
-      ;;
     Windows)
       powershell -Command "Start-Service docker"
       ;;
-    *)
-      echo "::error::Unsupported platform: $RUNNER_OS"
-      exit 1
-      ;;
   esac
 }
+
+# Docker is not available on GitHub-hosted macOS runners:
+# - https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
+# - https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md
+# - https://github.com/actions/runner/issues/1456
+if [ "$RUNNER_OS" == "macOS" ]; then
+  echo "::warning::Docker is not available on GitHub-hosted macOS runners. Tests that require Docker will likely fail."
+  exit 0
+fi
 
 if docker info > /dev/null 2>&1; then
   echo "Docker is running."
@@ -30,13 +33,7 @@ fi
 echo "Docker is not running. Attempting to start..."
 start_docker
 
-# macOS Docker Desktop takes longer to initialise
-if [ "$RUNNER_OS" == "macOS" ]; then
-  retries=30
-else
-  retries=15
-fi
-
+retries=15
 while [ $retries -gt 0 ]; do
   if docker info > /dev/null 2>&1; then
     echo "Docker is running."
