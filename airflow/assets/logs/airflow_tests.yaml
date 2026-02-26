@@ -215,7 +215,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1577381689039
  -
-  sample: "[2025-04-10T17:15:01.220+0000] {logging_mixin.py:188} INFO - Running task"
+  sample: "[2025-04-10T17:15:01.220Z] {logging_mixin.py:188} INFO - Running task"
   result:
     custom:
       filename: "logging_mixin.py"
@@ -228,7 +228,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1744305301220
  -
-  sample: "[2025-04-10T17:15:01.220+0000] {base_task_runner.py:115} INFO - Job 12: Subtask my_task [2025-04-10T17:15:01.450+0000] {settings.py:211} INFO - Setting up DB connection pool (PID 42)"
+  sample: "[2025-04-10T17:15:01.220+0100] {base_task_runner.py:115} INFO - Job 12: Subtask my_task [2025-04-10T17:15:01.450+0100] {settings.py:211} INFO - Setting up DB connection pool (PID 42)"
   result:
     custom:
       filename: "settings.py"
@@ -236,12 +236,12 @@ tests:
       level: "INFO"
       lineno: 211
       subtask: "my_task"
-      timestamp: 1744305301450
+      timestamp: 1744301701450
     message: "Setting up DB connection pool (PID 42)"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1744305301450
+    timestamp: 1744301701450
  -
   sample: |
     [2025-04-10T17:15:01.220+0000] {taskinstance.py:1058} ERROR - Task failed!
