@@ -30,6 +30,7 @@ classifiers = [
 ]
 dependencies = [
     "datadog-checks-base>=37.24.0",
+    "grpcio>=1.50.0",
     "prometheus-client>=0.16.0",
 ]
 dynamic = [

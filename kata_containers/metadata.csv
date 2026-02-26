@@ -44,7 +44,7 @@ kata.go_gc_duration_seconds_sum,count,,second,,Total Go garbage collection pause
 kata.go_gc_duration_seconds_count,count,,,,Total number of Go garbage collections,0,kata_containers,go gc count,,"sandbox_id"
 kata.go_goroutines,gauge,,,,Number of goroutines in the shim process,0,kata_containers,go goroutines,,"sandbox_id"
 kata.go_threads,gauge,,thread,,Number of OS threads created by the Go runtime,0,kata_containers,go threads,,"sandbox_id"
-kata.go_info,gauge,,,,Information about the Go environment,0,kata_containers,go info,,"sandbox_id:version"
+kata.go_info,gauge,,,,Information about the Go environment,0,kata_containers,go info,,"sandbox_id:go_version"
 kata.go_memstats_alloc_bytes,gauge,,byte,,Bytes allocated in heap and currently in use,0,kata_containers,go memstats alloc,,"sandbox_id"
 kata.go_memstats_alloc_bytes_total,count,,byte,,Total bytes allocated in heap,0,kata_containers,go memstats alloc total,,"sandbox_id"
 kata.go_memstats_heap_alloc_bytes,gauge,,byte,,Heap bytes allocated and currently in use,0,kata_containers,go heap alloc,,"sandbox_id"
