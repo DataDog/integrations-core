@@ -57,10 +57,8 @@ class WheelSizes(TypedDict):
     uncompressed: int
 
 
-class VersionedWheelSizes(TypedDict):
+class VersionedWheelSizes(WheelSizes):
     version: str
-    compressed: int
-    uncompressed: int
 
 
 if sys.platform == 'win32':
@@ -72,7 +70,7 @@ if sys.platform == 'win32':
     def join_command_args(args: list[str]) -> str:
         return subprocess.list2cmdline(args)
 
-    def path_to_uri(path: str) -> str:
+    def path_to_uri(path: str | Path) -> str:
         return f'file:///{os.path.abspath(path).replace(" ", "%20").replace(os.sep, "/")}'
 
 else:
@@ -86,7 +84,7 @@ else:
     def join_command_args(args: list[str]) -> str:
         return shlex.join(args)
 
-    def path_to_uri(path: str) -> str:
+    def path_to_uri(path: str | Path) -> str:
         return f'file://{os.path.abspath(path).replace(" ", "%20")}'
 
 
@@ -308,7 +306,7 @@ def main():
 
         # Spaces are used to separate multiple values which means paths themselves cannot contain spaces, see:
         # https://github.com/pypa/pip/issues/10114#issuecomment-1880125475
-        env_vars['PIP_FIND_LINKS'] = path_to_uri(str(staged_wheel_dir))
+        env_vars['PIP_FIND_LINKS'] = path_to_uri(staged_wheel_dir)
 
         # Perform builder-specific logic if required
         if build_command := os.environ.get('DD_BUILD_COMMAND'):

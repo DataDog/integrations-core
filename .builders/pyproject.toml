@@ -1,7 +1,6 @@
 [tool.mypy]
 python_version = "3.13"
 follow_imports = "normal"
-ignore_missing_imports = true
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
 check_untyped_defs = true
