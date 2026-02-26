@@ -18,6 +18,7 @@ def mock_http(mocker: Any) -> Any:
     from datadog_checks.base.utils.http_protocol import HTTPClientProtocol
 
     client = create_autospec(HTTPClientProtocol)
+    client.options_method.side_effect = NotImplementedError('HTTP OPTIONS not yet supported in mock_http')
     mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
     return client
 
