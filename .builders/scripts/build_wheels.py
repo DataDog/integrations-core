@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import argparse
-import email
+import email.message
 import json
 import os
 import re
@@ -57,6 +57,12 @@ class WheelSizes(TypedDict):
     uncompressed: int
 
 
+class VersionedWheelSizes(TypedDict):
+    version: str
+    compressed: int
+    uncompressed: int
+
+
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
     PY2_PATH = Path('C:\\py2\\Scripts\\python.exe')
@@ -98,7 +104,7 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
     return process
 
 
-def extract_metadata(wheel: Path) -> email.Message:
+def extract_metadata(wheel: Path) -> email.message.Message:
     with ZipFile(str(wheel)) as zip_archive:
         for path in zip_archive.namelist():
             root = path.split('/', 1)[0]
@@ -245,7 +251,7 @@ def is_excluded_from_wheel(path: str | Path) -> bool:
     return False
 
 
-def add_dependency(dependencies: dict[str, str], sizes: dict[str, WheelSizes], wheel: Path) -> None:
+def add_dependency(dependencies: dict[str, str], sizes: dict[str, VersionedWheelSizes], wheel: Path) -> None:
     project_metadata = extract_metadata(wheel)
     project_name = normalize_project_name(project_metadata['Name'])
     project_version = project_metadata['Version']
@@ -302,7 +308,7 @@ def main():
 
         # Spaces are used to separate multiple values which means paths themselves cannot contain spaces, see:
         # https://github.com/pypa/pip/issues/10114#issuecomment-1880125475
-        env_vars['PIP_FIND_LINKS'] = path_to_uri(staged_wheel_dir)
+        env_vars['PIP_FIND_LINKS'] = path_to_uri(str(staged_wheel_dir))
 
         # Perform builder-specific logic if required
         if build_command := os.environ.get('DD_BUILD_COMMAND'):
@@ -359,8 +365,8 @@ def main():
             ]
         )
 
-    dependencies: dict[str, tuple[str, str]] = {}
-    sizes: dict[str, WheelSizes] = {}
+    dependencies: dict[str, str] = {}
+    sizes: dict[str, VersionedWheelSizes] = {}
 
     # Handle wheels currently in the external directory and move them to the built directory if they were modified
     for wheel in iter_wheels(external_wheels_dir):

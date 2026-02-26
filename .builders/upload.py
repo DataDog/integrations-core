@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import argparse
-import email
+import email.message
 import json
 import re
 import time
@@ -37,7 +37,7 @@ def normalize_project_name(name: str) -> str:
     return UNNORMALIZED_PROJECT_NAME_CHARS.sub('-', name).lower()
 
 
-def extract_metadata(wheel: Path) -> email.Message:
+def extract_metadata(wheel: Path) -> email.message.Message:
     with ZipFile(str(wheel)) as zip_archive:
         for path in zip_archive.namelist():
             root = path.split('/', 1)[0]
@@ -136,7 +136,7 @@ def upload(targets_dir):
                 artifact_types.add(artifact_type)
                 display_message_block(f'Processing {artifact_type} wheels')
 
-                upload_data: list[tuple[str, email.Message, Path]] = []
+                upload_data: list[tuple[str, email.message.Message, Path]] = []
                 for wheel in entry.iterdir():
                     project_metadata = extract_metadata(wheel)
                     project_name = project_metadata['Name']

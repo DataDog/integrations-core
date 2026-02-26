@@ -1,0 +1,37 @@
+[tool.mypy]
+python_version = "3.13"
+follow_imports = "normal"
+ignore_missing_imports = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+warn_return_any = false
+warn_unused_ignores = false
+warn_redundant_casts = true
+warn_unused_configs = true
+strict_optional = false
+show_column_numbers = true
+show_error_codes = true
+pretty = true
+namespace_packages = true
+explicit_package_bases = true
+allow_redefinition = true
+allow_untyped_globals = true
+
+[[tool.mypy.overrides]]
+module = [
+    "google.cloud.*",
+    "auditwheel.*",
+    "delocate.*",
+    "pathspec",
+    "dotenv",
+    "utils",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+allow_untyped_calls = true
+allow_redefinition = true
