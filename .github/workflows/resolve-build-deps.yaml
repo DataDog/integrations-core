@@ -106,6 +106,7 @@ jobs:
     name: Target ${{ matrix.job.image }} on ${{ matrix.job.os }}
     needs:
       - check-should-run
+      - test
     if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ${{ matrix.job.os }}
     strategy:
@@ -303,7 +304,7 @@ jobs:
         project_id: datadog-agent-int-build
         workload_identity_provider: projects/574011472402/locations/global/workloadIdentityPools/github/providers/integrations-core
 
-    - name: Upload wheels and create lock files 
+    - name: Upload wheels and create lock files
       run: python .builders/upload.py targets
 
     - name: Clean up repository
