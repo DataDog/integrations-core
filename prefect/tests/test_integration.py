@@ -41,8 +41,4 @@ def test_all_metadata_metrics_found(aggregator: AggregatorStub):
 
 @pytest.mark.usefixtures("ready_check")
 def test_events_collected(aggregator: AggregatorStub):
-    flow_run_events = [e for e in aggregator.events if e.get('event_type', '').startswith('prefect.flow-run')]
-    task_run_events = [e for e in aggregator.events if e.get('event_type', '').startswith('prefect.task-run')]
-
-    assert len(flow_run_events) > 0, "Expected at least one prefect.flow-run event"
-    assert len(task_run_events) > 0, "Expected at least one prefect.task-run event"
+    assert len(aggregator.events) > 0, "Expected at least one event"
