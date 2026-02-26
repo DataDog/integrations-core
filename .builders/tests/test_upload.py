@@ -453,3 +453,110 @@ def test_generate_lockfiles_accepts_string_path(tmp_path):
          mock.patch.object(upload, "LOCK_FILE_DIR", fake_resolved_dir):
         # Should not raise TypeError: unsupported operand type(s) for /: 'str' and 'str'
         upload.generate_lockfiles(str(tmp_path / "targets"), lockfile)
+
+
+def test_collect_and_validate_wheels(tmp_path):
+    """Test that collect_and_validate_wheels correctly collects and validates wheel metadata."""
+    wheel_dir = tmp_path / "wheels"
+    wheel_dir.mkdir()
+
+    write_dummy_wheel(wheel_dir / "package1-1.0.0-py3-none-any.whl", "package1", "1.0.0", ">=3.6")
+    write_dummy_wheel(wheel_dir / "package2-2.0.0-py3-none-any.whl", "package2", "2.0.0", ">=3.7")
+
+    upload_data = upload.collect_and_validate_wheels(wheel_dir)
+
+    assert len(upload_data) == 2
+    assert upload_data[0][0] == "package1"
+    assert upload_data[0][1]["Name"] == "package1"
+    assert upload_data[0][1]["Version"] == "1.0.0"
+    assert upload_data[1][0] == "package2"
+    assert upload_data[1][1]["Name"] == "package2"
+    assert upload_data[1][1]["Version"] == "2.0.0"
+
+
+def test_collect_and_validate_wheels_invalid_name(tmp_path):
+    """Test that collect_and_validate_wheels raises error for invalid project names."""
+    wheel_dir = tmp_path / "wheels"
+    wheel_dir.mkdir()
+
+    write_dummy_wheel(wheel_dir / "-invalid-1.0.0-py3-none-any.whl", "-invalid", "1.0.0", ">=3.6")
+
+    with pytest.raises(RuntimeError) as exc_info:
+        upload.collect_and_validate_wheels(wheel_dir)
+
+    assert "Invalid project name" in str(exc_info.value)
+
+
+def test_process_wheel_for_upload_external_new(setup_fake_hash):
+    """Test processing a new external wheel that needs to be uploaded."""
+    wheel_path = Path("test.whl")
+    metadata = {"Name": "test-pkg", "Version": "1.0.0"}
+
+    mock_bucket = mock.Mock()
+    mock_blob = mock.Mock()
+    mock_blob.exists.return_value = False
+    mock_bucket.blob.return_value = mock_blob
+
+    setup_fake_hash({"test.whl": "abc123"})
+
+    lockfile_entry, artifact_name = upload.process_wheel_for_upload(
+        wheel_path, "external", "test-pkg", metadata, mock_bucket, "(1/1)"
+    )
+
+    assert artifact_name == "test.whl"
+    assert "test-pkg @ https://agent-int-packages.datadoghq.com/external/test-pkg/test.whl#sha256=abc123" == lockfile_entry
+
+
+def test_process_wheel_for_upload_external_existing(setup_fake_hash):
+    """Test processing an existing external wheel that doesn't need upload."""
+    wheel_path = Path("test.whl")
+    metadata = {"Name": "test-pkg", "Version": "1.0.0"}
+
+    mock_bucket = mock.Mock()
+    mock_blob = mock.Mock()
+    mock_blob.exists.return_value = True
+    mock_blob.metadata = {"sha256": "existing123"}
+    mock_bucket.blob.return_value = mock_blob
+
+    setup_fake_hash({"test.whl": "abc123"})
+
+    lockfile_entry, artifact_name = upload.process_wheel_for_upload(
+        wheel_path, "external", "test-pkg", metadata, mock_bucket, "(1/1)"
+    )
+
+    assert artifact_name is None
+    assert "test-pkg @ https://agent-int-packages.datadoghq.com/external/test-pkg/test.whl#sha256=existing123" == lockfile_entry
+
+
+def test_generate_artifact_listings():
+    """Test that generate_artifact_listings creates proper HTML index pages."""
+    mock_bucket = mock.Mock()
+
+    mock_blob1 = mock.Mock()
+    mock_blob1.name = "external/package1/package1-1.0.0.whl"
+    mock_blob1.metadata = {"requires-python": ">=3.6", "sha256": "hash1"}
+
+    mock_blob2 = mock.Mock()
+    mock_blob2.name = "external/package2/package2-2.0.0.whl"
+    mock_blob2.metadata = {"requires-python": ">=3.7", "sha256": "hash2"}
+
+    mock_bucket.list_blobs.return_value = [mock_blob1, mock_blob2]
+
+    created_blobs = {}
+    def track_blob(name):
+        blob = mock.Mock()
+        blob.upload_from_string = mock.Mock(side_effect=lambda content, **kwargs: created_blobs.update({name: content}))
+        return blob
+
+    mock_bucket.blob.side_effect = track_blob
+
+    upload.generate_artifact_listings({"external"}, mock_bucket)
+
+    assert "external/" in created_blobs
+    assert "external/package1/" in created_blobs
+    assert "external/package2/" in created_blobs
+
+    root_html = created_blobs["external/"]
+    assert "<h1>Agent integrations dependencies</h1>" in root_html
+    assert 'href="package1/"' in root_html
+    assert 'href="package2/"' in root_html

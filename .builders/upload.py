@@ -83,133 +83,76 @@ def _build_number_of_wheel_blob(wheel_path: Blob) -> int:
     return int(build_number[0]) if build_number else -1
 
 
-def generate_lockfiles(targets_dir, lockfiles):
-    targets_dir = Path(targets_dir)
-    LOCK_FILE_DIR.mkdir(parents=True, exist_ok=True)
-    with RESOLUTION_DIR.joinpath('metadata.json').open('w', encoding='utf-8') as f:
-        contents = json.dumps(
-            {
-                'sha256': sha256(DIRECT_DEP_FILE.read_bytes()).hexdigest(),
-            },
-            indent=2,
-            sort_keys=True,
-        )
-        f.write(f'{contents}\n')
+def collect_and_validate_wheels(wheel_dir: Path) -> list[tuple[str, email.Message, Path]]:
+    """Collect all wheels from a directory and validate their metadata."""
+    upload_data: list[tuple[str, email.Message, Path]] = []
+    for wheel in wheel_dir.iterdir():
+        project_metadata = extract_metadata(wheel)
+        project_name = project_metadata['Name']
+        if not is_valid_project_name(project_name):
+            message = f'Invalid project name `{project_name}` found in wheel: {wheel.name}'
+            raise RuntimeError(message)
 
-    image_digests = {}
-    for target_name, lockfile_lines in lockfiles.items():
-        # The lockfiles contain the major.minor Python version
-        # so that the Agent can transition safely
-        lock_file = LOCK_FILE_DIR / f'{target_name}_{CURRENT_PYTHON_VERSION}.txt'
-        lock_file.write_text('\n'.join(lockfile_lines), encoding='utf-8')
+        print(f'Project name: {project_name}')
+        upload_data.append((normalize_project_name(project_name), project_metadata, wheel))
 
-        # these `image_digest` files are generated in the 'Save new image digest'
-        # step of the github workflow
-        if (image_digest_file := targets_dir / target_name / 'image_digest').is_file():
-            image_digests[target_name] = image_digest_file.read_text(encoding='utf-8').strip()
-
-    with RESOLUTION_DIR.joinpath('image_digests.json').open('w', encoding='utf-8') as f:
-        contents = json.dumps(image_digests, indent=2, sort_keys=True)
-        f.write(f'{contents}\n')
+    upload_data.sort()
+    return upload_data
 
 
-def upload(targets_dir):
-    client = storage.Client()
-    bucket = client.bucket(BUCKET_NAME)
-    artifact_types: set[str] = set()
-    lockfiles = {}
+def process_wheel_for_upload(wheel: Path, artifact_type: str, project_name: str, project_metadata: email.Message, bucket, prefix: str) -> tuple[str | None, str | None]:
+    """Process a single wheel and determine if it needs to be uploaded."""
+    padding = ' ' * (len(prefix) + 1)
+    print(f'{prefix} Name: {project_metadata["Name"]}')
+    print(f'{padding}Version: {project_metadata["Version"]}')
 
-    for target in Path(targets_dir).iterdir():
-        display_message_block(f'Target {target.name}')
-        for python_version in target.iterdir():
-            if not python_version.name.startswith('py'):
-                continue
+    sha256_digest = hash_file(wheel)
+    index_url = f'{STORAGE_URL}/{artifact_type}/{project_name}'
 
-            lockfile_lines = []
+    if artifact_type == 'external':
+        artifact_name = wheel.name
+        artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
 
-            display_message_block(f'Python version {python_version.name}')
+        if artifact.exists():
+            print(f'{prefix} {project_name}=={project_metadata["Version"]} already exists')
+            artifact.reload()
+            existing_sha256 = artifact.metadata['sha256']
+            return f'{project_name} @ {index_url}/{artifact_name}#sha256={existing_sha256}', None
+        else:
+            return f'{project_name} @ {index_url}/{artifact_name}#sha256={sha256_digest}', artifact_name
+    else:
+        name, version, *_build_tag, python_tag, abi_tag, platform_tag = wheel.stem.split('-')
+        existing_wheels = list(bucket.list_blobs(
+            match_glob=(f'{artifact_type}/{project_name}/'
+                        f'{name}-{version}*-{python_tag}-{abi_tag}-{platform_tag}.whl'),
+        ))
 
-            wheel_dir = python_version / 'wheels'
-            for entry in sorted(wheel_dir.iterdir(), key=lambda p: p.name):
+        if existing_wheels:
+            most_recent_wheel = max(existing_wheels, key=_build_number_of_wheel_blob)
+            if most_recent_wheel.metadata['sha256'] == sha256_digest:
+                print(f'{prefix} {project_name}=={project_metadata["Version"]} already exists '
+                      'with the same hash')
+                existing_artifact_name = PurePosixPath(most_recent_wheel.name).name
+                return f'{project_name} @ {index_url}/{existing_artifact_name}#sha256={sha256_digest}', None
 
-                artifact_type = entry.name
-                artifact_types.add(artifact_type)
-                display_message_block(f'Processing {artifact_type} wheels')
+        build_number = timestamp_build_number()
+        artifact_name = f'{name}-{version}-{build_number}-{python_tag}-{abi_tag}-{platform_tag}.whl'
+        return f'{project_name} @ {index_url}/{artifact_name}#sha256={sha256_digest}', artifact_name
 
-                upload_data: list[tuple[str, email.Message, Path]] = []
-                for wheel in entry.iterdir():
-                    project_metadata = extract_metadata(wheel)
-                    project_name = project_metadata['Name']
-                    if not is_valid_project_name(project_name):
-                        message = f'Invalid project name `{project_name}` found in wheel: {wheel.name}'
-                        raise RuntimeError(message)
 
-                    print(f'Project name: {project_name}')
-                    upload_data.append((normalize_project_name(project_name), project_metadata, wheel))
+def upload_wheel_to_bucket(wheel: Path, artifact_type: str, project_name: str, artifact_name: str, project_metadata: email.Message, bucket, padding: str):
+    """Upload a wheel file to the bucket."""
+    print(f'{padding}Artifact: {artifact_name}')
+    artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
+    artifact.upload_from_filename(str(wheel))
+    sha256_digest = hash_file(wheel)
+    requires_python = project_metadata.get('Requires-Python', '').replace('<', '&lt;').replace('>', '&gt;')
+    artifact.metadata = {'requires-python': requires_python, 'sha256': sha256_digest}
+    artifact.patch()
 
-                queued = len(upload_data)
-                upload_data.sort()
 
-                for i, (project_name, project_metadata, wheel) in enumerate(upload_data, start=1):
-                    prefix = f'({i}/{queued})'
-                    padding = ' ' * (len(prefix) + 1)
-                    print(f'{prefix} Name: {project_metadata["Name"]}')
-                    print(f'{padding}Version: {project_metadata["Version"]}')
-
-                    sha256_digest = hash_file(wheel)
-                    index_url = f'{STORAGE_URL}/{artifact_type}/{project_name}'
-                    if artifact_type == 'external':
-                        artifact_name = wheel.name
-                        # https://agent-int-packages.datadoghq.com/external/cffi/cffi-1.17.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
-
-                        artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
-
-                        # PyPI artifacts never change, so we don't need to upload them again.
-                        if artifact.exists():
-                            print(f'{prefix} {project_name}=={project_metadata["Version"]} already exists')
-                            artifact.reload()
-                            existing_sha256 = artifact.metadata['sha256']
-                            lockfile_lines.append(f'{project_name} @ {index_url}/{artifact_name}#sha256={existing_sha256}')
-                            continue
-                        else:
-                            lockfile_lines.append(f'{project_name} @ {index_url}/{artifact_name}#sha256={sha256_digest}')
-
-                    else:
-                        # https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention
-                        name, version, *_build_tag, python_tag, abi_tag, platform_tag = wheel.stem.split('-')
-                        existing_wheels = list(bucket.list_blobs(
-                            match_glob=(f'{artifact_type}/{project_name}/'
-                                        f'{name}-{version}*-{python_tag}-{abi_tag}-{platform_tag}.whl'),
-                        ))
-
-                        if existing_wheels:
-                            most_recent_wheel = max(existing_wheels, key=_build_number_of_wheel_blob)
-                            # Don't upload if it's the same file
-                            if most_recent_wheel.metadata['sha256'] == sha256_digest:
-                                print(f'{prefix} {project_name}=={project_metadata["Version"]} already exists '
-                                    'with the same hash')
-                                existing_artifact_name = PurePosixPath(most_recent_wheel.name).name # GCS blob name use forward slashes
-                                lockfile_lines.append(f'{project_name} @ {index_url}/{existing_artifact_name}#sha256={sha256_digest}')
-                                continue
-
-                        # If we get here, that means that this is a new dependency
-                        # and we need to upload the wheel for built artifacts
-                        build_number = timestamp_build_number()
-                        artifact_name = f'{name}-{version}-{build_number}-{python_tag}-{abi_tag}-{platform_tag}.whl'
-                        artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
-                        lockfile_lines.append(f'{project_name} @ {index_url}/{artifact_name}#sha256={sha256_digest}')
-
-                    # For built OR external artifacts
-                    # only get here if we need to upload the wheel
-                    print(f'{padding}Artifact: {artifact_name}')
-                    artifact.upload_from_filename(str(wheel))
-                    requires_python = project_metadata.get('Requires-Python', '').replace('<', '&lt;').replace('>', '&gt;') # noqa: 501
-                    artifact.metadata = {'requires-python': requires_python, 'sha256': sha256_digest}
-                    artifact.patch()
-
-            lockfile_lines.append('')
-            lockfiles[target.name] = lockfile_lines
-
+def generate_artifact_listings(artifact_types: set[str], bucket):
+    """Generate HTML listings for all artifact types."""
     for artifact_type in sorted(artifact_types):
         display_message_block(f'Updating {artifact_type} listing')
 
@@ -258,6 +201,80 @@ def upload(targets_dir):
         root_listing.upload_from_string('\n'.join(root_listing_lines), content_type='text/html')
         root_listing.cache_control = CACHE_CONTROL
         root_listing.patch()
+
+
+def generate_lockfiles(targets_dir, lockfiles):
+    targets_dir = Path(targets_dir)
+    LOCK_FILE_DIR.mkdir(parents=True, exist_ok=True)
+    with RESOLUTION_DIR.joinpath('metadata.json').open('w', encoding='utf-8') as f:
+        contents = json.dumps(
+            {
+                'sha256': sha256(DIRECT_DEP_FILE.read_bytes()).hexdigest(),
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        f.write(f'{contents}\n')
+
+    image_digests = {}
+    for target_name, lockfile_lines in lockfiles.items():
+        # The lockfiles contain the major.minor Python version
+        # so that the Agent can transition safely
+        lock_file = LOCK_FILE_DIR / f'{target_name}_{CURRENT_PYTHON_VERSION}.txt'
+        lock_file.write_text('\n'.join(lockfile_lines), encoding='utf-8')
+
+        # these `image_digest` files are generated in the 'Save new image digest'
+        # step of the github workflow
+        if (image_digest_file := targets_dir / target_name / 'image_digest').is_file():
+            image_digests[target_name] = image_digest_file.read_text(encoding='utf-8').strip()
+
+    with RESOLUTION_DIR.joinpath('image_digests.json').open('w', encoding='utf-8') as f:
+        contents = json.dumps(image_digests, indent=2, sort_keys=True)
+        f.write(f'{contents}\n')
+
+
+def upload(targets_dir):
+    client = storage.Client()
+    bucket = client.bucket(BUCKET_NAME)
+    artifact_types: set[str] = set()
+    lockfiles = {}
+
+    for target in Path(targets_dir).iterdir():
+        display_message_block(f'Target {target.name}')
+        for python_version in target.iterdir():
+            if not python_version.name.startswith('py'):
+                continue
+
+            lockfile_lines = []
+            display_message_block(f'Python version {python_version.name}')
+
+            wheel_dir = python_version / 'wheels'
+            for entry in sorted(wheel_dir.iterdir(), key=lambda p: p.name):
+                artifact_type = entry.name
+                artifact_types.add(artifact_type)
+                display_message_block(f'Processing {artifact_type} wheels')
+
+                upload_data = collect_and_validate_wheels(entry)
+                queued = len(upload_data)
+
+                for i, (project_name, project_metadata, wheel) in enumerate(upload_data, start=1):
+                    prefix = f'({i}/{queued})'
+                    padding = ' ' * (len(prefix) + 1)
+
+                    lockfile_entry, artifact_name = process_wheel_for_upload(
+                        wheel, artifact_type, project_name, project_metadata, bucket, prefix
+                    )
+                    lockfile_lines.append(lockfile_entry)
+
+                    if artifact_name:
+                        upload_wheel_to_bucket(
+                            wheel, artifact_type, project_name, artifact_name, project_metadata, bucket, padding
+                        )
+
+            lockfile_lines.append('')
+            lockfiles[target.name] = lockfile_lines
+
+    generate_artifact_listings(artifact_types, bucket)
     return lockfiles
 
 if __name__ == '__main__':
