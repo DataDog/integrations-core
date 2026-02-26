@@ -13,7 +13,7 @@ jobs:
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Check code meets quality and security standards
       id: datadog-static-analysis
-      uses: DataDog/datadog-static-analyzer-github-action@2cc0e0621ea2863272b29d9aea230d9aad238086 # v2.0.0
+      uses: DataDog/datadog-static-analyzer-github-action@447086f347f225f777e409c8f2dfbd0e3b1a452d # v2.0.0
       with:
         dd_api_key: ${{ secrets.DD_API_KEY }}
         dd_app_key: ${{ secrets.DD_STATIC_ANALYSIS_APP_KEY }}
