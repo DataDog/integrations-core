@@ -286,6 +286,8 @@ jobs:
       run: |
         if [ "$RUNNER_OS" == "Windows" ]; then
           bash .github/workflows/scripts/ensure-docker-windows.sh
+        elif [ "$RUNNER_OS" == "macOS" ]; then
+          bash .github/workflows/scripts/ensure-docker-macos.sh
         else
           bash .github/workflows/scripts/ensure-docker-linux.sh
         fi
