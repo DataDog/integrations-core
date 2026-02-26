@@ -176,11 +176,11 @@ class InstanceConfig(BaseModel):
     service: Optional[str] = None
     ssl_cafile: Optional[str] = None
     ssl_capath: Optional[str] = None
+    ssl_ciphers: Optional[tuple[str, ...]] = None
     ssl_verify: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     tags_prefix: Optional[str] = None
     threads_count: Optional[int] = None
-    tls_ciphers: Optional[tuple[str, ...]] = None
     tls_ignore_warning: Optional[bool] = None
     use_collect_events_fallback: Optional[bool] = None
     use_guest_hostname: Optional[bool] = None

@@ -145,7 +145,7 @@ files:
         value:
           type: boolean
           example: false
-      - name: tls_ciphers
+      - name: ssl_ciphers
         description: |
           A list of TLS cipher suites to use when connecting to vCenter.
           If not specified, the default ciphers from the system's OpenSSL configuration are used.

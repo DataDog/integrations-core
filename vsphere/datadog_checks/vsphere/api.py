@@ -114,7 +114,7 @@ class VSphereAPI(object):
         Docs for vim.ServiceInstance:
             https://vdc-download.vmware.com/vmwb-repository/dcr-public/b525fb12-61bb-4ede-b9e3-c4a1f8171510/99ba073a-60e9-4933-8690-149860ce8754/doc/vim.ServiceInstance.html
         """
-        tls_ciphers = self.config.tls_ciphers or []
+        tls_ciphers = self.config.ssl_ciphers or []
         context = None
         if not self.config.ssl_verify:
             context = create_ssl_context({"tls_verify": False, "tls_ciphers": tls_ciphers})
