@@ -60,6 +60,24 @@ files:
       value:
         type: string
         example: "*"
+    - name: finalized_ttl_seconds
+      required: false
+      description: |
+        How long (in seconds) to remember finalized job runs for deduplication.
+        Terminal jobs seen within this window will not be re-emitted on subsequent
+        check cycles or after Agent restarts. Increase if completed jobs remain
+        visible in the Control-M status feed for a long time.
+      value:
+        type: integer
+        example: 86400
+    - name: active_ttl_seconds
+      required: false
+      description: |
+        How long (in seconds) to track active (non-terminal) job runs.
+        Entries older than this are evicted to bound memory usage.
+      value:
+        type: integer
+        example: 21600
     - template: instances/http
       overrides:
         headers.display_priority: 1

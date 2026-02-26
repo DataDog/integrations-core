@@ -2,6 +2,8 @@
   "total": 3,
   "statuses": [
     {
+      "jobId": "workbench:job_ok",
+      "numberOfRuns": 1,
       "ctm": "workbench",
       "name": "job_ok",
       "status": "Ended OK",
@@ -9,11 +11,13 @@
       "endTime": "20260210185442"
     },
     {
+      "jobId": "workbench:job_waiting",
       "ctm": "workbench",
       "name": "job_waiting",
       "status": "Wait Condition"
     },
     {
+      "jobId": "workbench:job_running",
       "ctm": "workbench",
       "name": "job_running",
       "status": "Executing"
