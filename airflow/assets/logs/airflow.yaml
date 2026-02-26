@@ -36,14 +36,6 @@ pipeline:
             File "/usr/local/airflow/dags/task_fail.py", line 9, in print_hello
             raise Exception('Hello world fail!')
           Exception: Hello world fail!
-        - '[2025-04-10T17:15:01.220+0000] {logging_mixin.py:188} INFO - Running task'
-        - '[2025-04-10T17:15:01.220+0000] {taskinstance.py:1058} INFO - Job 12: Subtask my_task [2025-04-10T17:15:01.450+0000] {settings.py:211} INFO - Setting up DB connection pool (PID 42)'
-        - |
-          [2025-04-10T17:15:01.220+0000] {taskinstance.py:1058} ERROR - Task failed!
-          Traceback (most recent call last):
-            File "/usr/local/lib/python3.11/site-packages/airflow/operators/python.py", line 118, in execute_callable
-            return self.python_callable(*self.op_args, **self.op_kwargs)
-          Exception: Task failed!
       grok:
         supportRules: |
           _date_legacy %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp}
