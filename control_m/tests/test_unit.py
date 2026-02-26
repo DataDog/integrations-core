@@ -132,11 +132,11 @@ def test_job_metric_tags_minimal_and_server_fallback(instance: dict[str, Any], a
     aggregator.assert_metric_has_tag('control_m._test', 'ctm_server:primary')
 
 
-def test_build_jobs_status_url_defaults_and_custom(instance: dict[str, Any]) -> None:
+def test_jobs_status_url_defaults_and_custom(instance: dict[str, Any]) -> None:
     check = _make_check(instance)
-    url = check._build_jobs_status_url()
+    url = check._jobs_status_url
     assert '/run/jobs/status?' in url
-    assert 'limit=200' in url
+    assert 'limit=10000' in url
     assert 'jobname=%2A' in url
 
     custom_instance = {
@@ -145,7 +145,7 @@ def test_build_jobs_status_url_defaults_and_custom(instance: dict[str, Any]) -> 
         'job_name_filter': 'nightly_*',
     }
     check = _make_check(custom_instance)
-    url = check._build_jobs_status_url()
+    url = check._jobs_status_url
     assert 'limit=50' in url
     assert 'jobname=nightly_%2A' in url
 
