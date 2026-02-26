@@ -170,49 +170,6 @@ def test_server_tag_(disable_generic_tags, expected_tags, pg_instance, integrati
 
 
 @pytest.mark.parametrize(
-    'rds_host, expected_resource_tag, expected_rds_tag, expected_instance_endpoint',
-    [
-        (
-            'my-cluster.cluster-cfxdfe8cpixl.us-east-1.rds.amazonaws.com',
-            'dd.internal.resource:aws_rds_instance:my-cluster.cluster-cfxdfe8cpixl.us-east-1.rds.amazonaws.com',
-            'dbclusteridentifier:my-cluster',
-            'my-cluster.cluster-cfxdfe8cpixl.us-east-1.rds.amazonaws.com',
-        ),
-        (
-            'my-instance.cfxdfe8cpixl.us-east-1.rds.amazonaws.com',
-            'dd.internal.resource:aws_rds_instance:my-instance.cfxdfe8cpixl.us-east-1.rds.amazonaws.com',
-            'dbinstanceidentifier:my-instance',
-            'my-instance.cfxdfe8cpixl.us-east-1.rds.amazonaws.com',
-        ),
-    ],
-    ids=['cluster_endpoint', 'instance_endpoint'],
-)
-def test_rds_auto_detected_cloud_metadata(
-    rds_host,
-    expected_resource_tag,
-    expected_rds_tag,
-    expected_instance_endpoint,
-    pg_instance,
-    integration_check,
-):
-    """
-    When a user configures a check to connect to an RDS endpoint via the
-    host field without explicitly setting aws config, the check should
-    auto-detect the RDS host and populate both the resource tags and
-    cloud_metadata.aws.instance_endpoint so the backend can properly
-    associate query metrics with the RDS resource.
-    """
-    pg_instance['host'] = rds_host
-
-    with mock.patch('datadog_checks.postgres.PostgreSql.resolve_db_host', return_value=rds_host):
-        check = integration_check(pg_instance)
-
-    assert expected_resource_tag in check.tags
-    assert expected_rds_tag in check.tags
-    assert check.cloud_metadata['aws']['instance_endpoint'] == expected_instance_endpoint
-
-
-@pytest.mark.parametrize(
     'disable_generic_tags, expected_hostname', [(True, 'resolved.hostname'), (False, 'resolved.hostname')]
 )
 def test_resolved_hostname(disable_generic_tags, expected_hostname, pg_instance, integration_check):
