@@ -184,6 +184,7 @@ jobs:
     name: Target macOS/${{ matrix.job.arch }} on ${{ matrix.job.os }}
     needs:
       - check-should-run
+      - test
     if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ${{ matrix.job.os }}
     strategy:
