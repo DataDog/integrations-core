@@ -55,6 +55,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    active_ttl_seconds: Optional[int] = None
     allow_redirects: Optional[bool] = None
     auth_token: Optional[AuthToken] = None
     auth_type: Optional[str] = None
@@ -68,6 +69,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
+    finalized_ttl_seconds: Optional[int] = None
     headers: Optional[MappingProxyType[str, Any]] = None
     job_name_filter: Optional[str] = None
     job_status_limit: Optional[int] = None

@@ -16,6 +16,10 @@ def shared_timeout():
     return 10
 
 
+def instance_active_ttl_seconds():
+    return 21600
+
+
 def instance_allow_redirects():
     return True
 
@@ -34,6 +38,10 @@ def instance_disable_generic_tags():
 
 def instance_empty_default_hostname():
     return False
+
+
+def instance_finalized_ttl_seconds():
+    return 86400
 
 
 def instance_job_name_filter():
