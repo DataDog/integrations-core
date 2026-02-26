@@ -97,6 +97,10 @@ jobs:
         run: |
           cd .builders
           pytest -vvv
+      - name: Run mypy type checking
+        run: |
+          cd .builders
+          python -m mypy --config-file pyproject.toml .
 
   build:
     name: Target ${{ matrix.job.image }} on ${{ matrix.job.os }}
