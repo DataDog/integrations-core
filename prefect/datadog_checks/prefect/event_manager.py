@@ -69,6 +69,7 @@ class EventManager:
                 f"work_queue_id:{self.event_related.get('work-queue', {}).get('id')}",
                 f"work_queue_name:{self.event_related.get('work-queue', {}).get('name')}",
                 f"deployment_id:{self.event_related.get('deployment', {}).get('id')}",
+                f"deployment_name:{self.event_related.get('deployment', {}).get('name')}",
                 f"flow_id:{self.event_related.get('flow', {}).get('id')}",
             ]
         else:

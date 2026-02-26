@@ -31,9 +31,13 @@ def dd_environment():
     conditions = [
         CheckEndpoints(f"{prefect_url}/ready", attempts=120, wait=2),
         CheckEndpoints(f"{prefect_url}/health", attempts=120, wait=2),
-        CheckDockerLogs(COMPOSE_FILE_E2E, patterns=["Finished in state Completed()"], service="prefect-worker"),
-        CheckDockerLogs(COMPOSE_FILE_E2E, patterns=["Finished all tasks"], service="prefect-worker"),
-        CheckDockerLogs(COMPOSE_FILE_E2E, patterns=["Retried"], service="prefect-worker"),
+        CheckDockerLogs(
+            COMPOSE_FILE_E2E, patterns=["Finished in state Completed()"], service="prefect-worker", attempts=120, wait=1
+        ),
+        CheckDockerLogs(
+            COMPOSE_FILE_E2E, patterns=["Finished all tasks"], service="prefect-worker", attempts=120, wait=1
+        ),
+        CheckDockerLogs(COMPOSE_FILE_E2E, patterns=["Retried"], service="prefect-worker", attempts=120, wait=1),
     ]
 
     with docker_run(
@@ -45,7 +49,7 @@ def dd_environment():
     ):
         yield (
             {
-                "instances": [{"prefect_url": prefect_url, "min_collection_interval": 60}],
+                "instances": [{"prefect_url": prefect_url, "min_collection_interval": 300}],
             },
             E2E_METADATA,
         )
@@ -58,7 +62,6 @@ def check(instance: Callable[[str], dict[str, str]]) -> PrefectCheck:
         {},
         [instance(PREFECT_URL)],
     )
-    check.write_persistent_cache(PrefectCheck.LAST_CHECK_TIME_CACHE_KEY, "2026-01-15T11:57:24.861899Z")
 
     return check
 

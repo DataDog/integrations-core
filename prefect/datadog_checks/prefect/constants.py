@@ -17,6 +17,7 @@ WORK_QUEUE_METRICS = {
     "work_queue.last_polled_age_seconds": "gauge",
     "work_queue.backlog.size": "gauge",
     "work_queue.backlog.age": "gauge",
+    "work_queue.concurrency.in_use": "gauge",
 }
 
 DEPLOYMENT_METRICS = {
@@ -30,6 +31,7 @@ FLOW_RUN_METRICS = {
     "flow_runs.failed.count": "count",
     "flow_runs.cancelled.count": "count",
     "flow_runs.crashed.count": "count",
+    "flow_runs.running.count": "gauge",
     "flow_runs.paused.count": "gauge",
     "flow_runs.completed.count": "count",
     "flow_runs.execution_duration": "histogram",
@@ -43,6 +45,7 @@ TASK_RUN_METRICS = {
     "task_runs.dependency_wait_duration": "histogram",
     "task_runs.late_start.count": "count",
     "task_runs.pending.count": "gauge",
+    "task_runs.running.count": "gauge",
     "task_runs.throughput": "count",
     "task_runs.paused.count": "gauge",
     "task_runs.completed.count": "count",

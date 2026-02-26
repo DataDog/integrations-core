@@ -10,14 +10,15 @@ from typing import Any, Literal
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
 
+from .config_models import ConfigMixin
 from .constants import METRICS_SPEC
 from .event_manager import EventManager
 from .filter_metrics import PrefectFilterMetrics
 
 
-class PrefectCheck(AgentCheck):
+class PrefectCheck(AgentCheck, ConfigMixin):
     """
     PrefectCheck monitors a Prefect control plane.
     """
@@ -28,24 +29,29 @@ class PrefectCheck(AgentCheck):
 
     DEPENDENCY_WAIT_KEY = f'{__NAMESPACE__}.dependency_wait'
     FLOWS_AWAITING_RETRY_KEY = f'{__NAMESPACE__}.flows_awaiting_retry'
+    FLOW_RUNS_TAGS_KEY = f'{__NAMESPACE__}.flow_runs_tags'
 
     def __init__(self, name, init_config, instances):
         super(PrefectCheck, self).__init__(name, init_config, instances)
-        self.url = self.instance.get("prefect_url")
-        if not self.url:
-            raise ConfigurationError('Prefect instance missing "prefect_url" value.')
-
-        self.url = self.url.rstrip('/')
-        self.http.options['headers'].update(self.instance.get("custom_headers", {}))
-
-        self.base_tags = []
-        for k, v in self.instance.get("tags", {}).items():
-            self.base_tags.append(f"{k}:{v}")
-
         self.metrics_spec = METRICS_SPEC
+        self.check_initializations.append(self._parse_config)
+
+    def _parse_config(self):
+        self.url = self.config.prefect_url.rstrip('/')
+
+        self.http.options['headers'].update(self.config.custom_headers or {})
+
+        self.base_tags = self.config.tags or []
 
         self.filter_metrics = self._set_up_filters()
 
+        self._get_last_check_time()
+
+        self.dependency_wait = json.loads(self.read_persistent_cache(self.DEPENDENCY_WAIT_KEY) or "{}")
+        self.flows_awaiting_retry = json.loads(self.read_persistent_cache(self.FLOWS_AWAITING_RETRY_KEY) or "{}")
+        self.flow_runs_tags = json.loads(self.read_persistent_cache(self.FLOW_RUNS_TAGS_KEY) or "{}")
+
+    def _get_last_check_time(self):
         last_check = self.read_persistent_cache(self.LAST_CHECK_TIME_CACHE_KEY)
         parsed_last_check = self._parse_time(last_check)
         if last_check is not None and parsed_last_check is not None:
@@ -53,20 +59,20 @@ class PrefectCheck(AgentCheck):
             self.last_check_time = parsed_last_check
         else:
             self.log.debug("Last check time not found, setting to now - min_collection_interval")
-            self.last_check_time = datetime.now(timezone.utc) - timedelta(
-                seconds=self.instance.get("min_collection_interval", 15)
-            )
+            self.last_check_time = datetime.now(timezone.utc) - timedelta(seconds=self.config.min_collection_interval)
             self.last_check_time_iso = self.last_check_time.isoformat()
 
-        self.dependency_wait = json.loads(self.read_persistent_cache(self.DEPENDENCY_WAIT_KEY) or "{}")
-        self.flows_awaiting_retry = json.loads(self.read_persistent_cache(self.FLOWS_AWAITING_RETRY_KEY) or "{}")
-
     def _set_up_filters(self):
+        def _to_dict(model):
+            if model is None:
+                return None
+            return {k: list(v) for k, v in model.model_dump().items() if v is not None}
+
         return PrefectFilterMetrics(
-            work_pool_names=self.instance.get("work_pool_names"),
-            work_queue_names=self.instance.get("work_queue_names"),
-            deployment_names=self.instance.get("deployment_names"),
-            event_names=self.instance.get("event_names"),
+            work_pool_names=_to_dict(self.config.work_pool_names),
+            work_queue_names=_to_dict(self.config.work_queue_names),
+            deployment_names=_to_dict(self.config.deployment_names),
+            event_names=_to_dict(self.config.event_names),
         )
 
     def api_get(self, endpoint: str, pagination: bool = False) -> Any:
@@ -167,9 +173,6 @@ class PrefectCheck(AgentCheck):
             self.log.debug("Metric %s not found in metrics spec", name)
 
     def _aggregate_metric(self, name: str, value: float, tags: list[str]):
-        """
-        Internal helper to aggregate metrics.
-        """
         tags_sorted = sorted(tags)
         key = (name, tuple(tags_sorted))
         self.collected_metrics[key] = self.collected_metrics.get(key, 0) + value
@@ -181,8 +184,12 @@ class PrefectCheck(AgentCheck):
         self.collected_metrics = {}
         self.queues_by_name = {}
         self.pools_by_name = {}
+        self.deployments_by_id = {}
 
         self.set_metadata('version', self.api_get("/version"))
+
+        # Flows that complete in this run of the check so that they are removed from the flow_runs_tags cache
+        self.completed_flow_runs = set()
 
         # 1. API Status
         self._collect_api_status_metrics()
@@ -200,7 +207,7 @@ class PrefectCheck(AgentCheck):
         self._collect_flow_run_metrics(now_iso, now)
 
         # 7. Queue Backlog (depends on work queues and flow runs)
-        self._collect_queue_backlog_metrics(now)
+        self._collect_queue_aggregated_metrics(now)
 
         # 8. Task Runs (depends on flow runs)
         self._collect_task_run_metrics(now_iso)
@@ -210,12 +217,18 @@ class PrefectCheck(AgentCheck):
 
         self._emit_aggregated_metrics()
 
+        self._clean_cache()
+
         self.last_check_time_iso = now_iso
         self.last_check_time = now
 
         self.write_persistent_cache(self.LAST_CHECK_TIME_CACHE_KEY, now_iso)
         self.write_persistent_cache(self.DEPENDENCY_WAIT_KEY, json.dumps(self.dependency_wait))
         self.write_persistent_cache(self.FLOWS_AWAITING_RETRY_KEY, json.dumps(self.flows_awaiting_retry))
+        self.write_persistent_cache(self.FLOW_RUNS_TAGS_KEY, json.dumps(self.flow_runs_tags))
+
+    def _clean_cache(self):
+        self.flow_runs_tags = {k: v for k, v in self.flow_runs_tags.items() if k not in self.completed_flow_runs}
 
     def _collect_api_status_metrics(self):
         """
@@ -288,7 +301,11 @@ class PrefectCheck(AgentCheck):
             self._add_queue_last_polled_age_seconds(q, now, qtags_status)
 
             if pname and qname:
-                self.queues_by_name[(pname, qname)] = {'tags': qtags_status, 'id': qid}
+                self.queues_by_name[(pname, qname)] = {
+                    'tags': qtags_status,
+                    'id': qid,
+                    'concurrency_limit': (q.get('concurrency_limit') or 0.0),
+                }
 
     def _collect_worker_metrics(self, now: datetime, pool: dict):
         """
@@ -300,6 +317,7 @@ class PrefectCheck(AgentCheck):
         for w in workers:
             wtags = [
                 f"work_pool_id:{pool.get('id', '')}",
+                f"work_pool_name:{pname}",
                 f"worker_id:{w.get('id', '')}",
                 f"worker_name:{w.get('name', '')}",
             ]
@@ -332,13 +350,14 @@ class PrefectCheck(AgentCheck):
             ]
 
             self._emit_metric("deployment.is_ready", 1.0 if d['status'] == 'READY' else 0.0, dtags)
+            self.deployments_by_id[d.get('id', '')] = d.get('name', '')
 
     def _get_runs(self, type: Literal["flow_runs"] | Literal["task_runs"], now_iso: str) -> list[dict]:
         runs = []
         payload = {
             type: {
                 "operator": "or_",
-                "state": {"type": {"any_": ["SCHEDULED", "PENDING", "PAUSED"]}},
+                "state": {"type": {"any_": ["SCHEDULED", "PENDING", "PAUSED", "RUNNING", "CANCELLING"]}},
                 "expected_start_time": {"after_": self.last_check_time_iso, "before_": now_iso},
                 "start_time": {"after_": self.last_check_time_iso, "before_": now_iso},
             }
@@ -357,21 +376,27 @@ class PrefectCheck(AgentCheck):
         return runs
 
     def _define_flow_run_tags(self, fr: dict[str, str]) -> list[str]:
-        return [
+        d_id = fr.get('deployment_id', '')
+        d_name = self.deployments_by_id.get(d_id, '')
+        fr_id = fr.get('id', '')
+        fr_tags = [
             f"work_pool_id:{fr.get('work_pool_id', '')}",
             f"work_pool_name:{fr.get('work_pool_name', '')}",
             f"work_queue_id:{fr.get('work_queue_id', '')}",
             f"work_queue_name:{fr.get('work_queue_name', '')}",
-            f"deployment_id:{fr.get('deployment_id', '')}",
+            f"deployment_id:{d_id}",
+            f"deployment_name:{d_name}",
             f"flow_id:{fr.get('flow_id', '')}",
         ]
+        if fr_id not in self.flow_runs_tags:
+            self.flow_runs_tags[fr_id] = tuple(sorted(fr_tags))
+
+        return fr_tags
 
     def _collect_flow_run_metrics(self, now_iso: str, now: datetime):
         """
         Collects flow_runs.* metrics
         """
-        self.flow_runs_tags: dict[str, tuple[str, ...]] = {}
-
         flow_runs = self._get_runs("flow_runs", now_iso)
 
         for fr in flow_runs:
@@ -382,13 +407,13 @@ class PrefectCheck(AgentCheck):
             start_time = self._parse_time(fr.get('start_time', None))
             end_time = self._parse_time(fr.get('end_time', None))
 
-            self.flow_runs_tags[fr.get('id', '')] = tuple(sorted(fr_tags))
-
             if expected_start_time:
                 self._aggregate_queue_backlog_metrics(
                     state_type, expected_start_time, fr.get('work_pool_name', ''), fr.get('work_queue_name', ''), now
                 )
-
+            self._aggregate_concurrency_in_use_metric(
+                state_type, fr.get('work_pool_name', ''), fr.get('work_queue_name', '')
+            )
             self._aggregate_metric("flow_runs.scheduled.count", 1.0 if state_type == 'SCHEDULED' else 0.0, fr_tags)
             self._aggregate_metric("flow_runs.pending.count", 1.0 if state_type == 'PENDING' else 0.0, fr_tags)
             self._aggregate_metric("flow_runs.failed.count", 1.0 if state_type == 'FAILED' else 0.0, fr_tags)
@@ -398,6 +423,7 @@ class PrefectCheck(AgentCheck):
             self._aggregate_metric("flow_runs.crashed.count", 1.0 if state_type == 'CRASHED' else 0.0, fr_tags)
             self._aggregate_metric("flow_runs.paused.count", 1.0 if state_type == 'PAUSED' else 0.0, fr_tags)
             self._aggregate_metric("flow_runs.completed.count", 1.0 if state_type == 'COMPLETED' else 0.0, fr_tags)
+            self._aggregate_metric("flow_runs.running.count", 1.0 if state_type == 'RUNNING' else 0.0, fr_tags)
 
             if start_time and end_time:
                 self._emit_metric("flow_runs.execution_duration", (end_time - start_time).total_seconds(), fr_tags)
@@ -421,9 +447,9 @@ class PrefectCheck(AgentCheck):
             else:
                 self._aggregate_metric("flow_runs.throughput", 0.0, fr_tags)
 
-    def _collect_queue_backlog_metrics(self, now: datetime):
+    def _collect_queue_aggregated_metrics(self, now: datetime):
         """
-        Collects work_queue.backlog.size and work_queue.backlog.age metrics.
+        Collects work_queue.backlog.size, work_queue.backlog.age, and work_queue.concurrency.in_use metrics.
         """
         for _, q in self.queues_by_name.items():
             qtags = q.get('tags', [])
@@ -433,6 +459,11 @@ class PrefectCheck(AgentCheck):
 
             self._emit_metric("work_queue.backlog.age", max(0, age), qtags)
             self._emit_metric("work_queue.backlog.size", q.get('backlog_count', 0.0), qtags)
+            concurrency_limit = q.get('concurrency_limit', 0.0)
+            if concurrency_limit > 0:
+                self._emit_metric(
+                    "work_queue.concurrency.in_use", q.get('concurrency_in_use', 0.0) / concurrency_limit, qtags
+                )
 
     def _collect_task_run_metrics(self, now_iso: str):
         """
@@ -462,6 +493,7 @@ class PrefectCheck(AgentCheck):
             self._aggregate_metric("task_runs.completed.count", 1.0 if state_type == 'COMPLETED' else 0.0, tr_tags_list)
             self._aggregate_metric("task_runs.failed.count", 1.0 if state_type == 'FAILED' else 0.0, tr_tags_list)
             self._aggregate_metric("task_runs.crashed.count", 1.0 if state_type == 'CRASHED' else 0.0, tr_tags_list)
+            self._aggregate_metric("task_runs.running.count", 1.0 if state_type == 'RUNNING' else 0.0, tr_tags_list)
 
             if start_time and end_time:
                 self._emit_metric("task_runs.execution_duration", (end_time - start_time).total_seconds(), tr_tags_list)
@@ -634,3 +666,11 @@ class PrefectCheck(AgentCheck):
                 not queue.get('backlog_oldest') or expected_start_time < queue.get('backlog_oldest')
             ):
                 queue['backlog_oldest'] = expected_start_time
+
+    def _aggregate_concurrency_in_use_metric(self, state_type: str, pname: str, qname: str):
+        queue = self.queues_by_name.get((pname, qname), {})
+        if not queue:
+            self.log.warning("Could not find queue for pool %s and queue %s", pname, qname)
+            return
+        if state_type == 'RUNNING':
+            queue['concurrency_in_use'] = queue.get('concurrency_in_use', 0) + 1

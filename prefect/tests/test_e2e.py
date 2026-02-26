@@ -22,8 +22,13 @@ def ready_check(dd_environment, dd_run_check: Callable, aggregator: AggregatorSt
     return check
 
 
+@pytest.fixture(scope='module')
+def e2e_aggregator(dd_agent_check):
+    return dd_agent_check()
+
+
 @pytest.mark.e2e
-def test_e2e_metrics_as_metadata(dd_agent_check):
+def test_e2e_metrics(dd_agent_check):
     aggregator = dd_agent_check()
 
     cross_check_metrics = ('flow_runs.retry_gaps_duration', 'task_runs.dependency_wait_duration')
@@ -36,11 +41,6 @@ def test_e2e_metrics_as_metadata(dd_agent_check):
         check_symmetric_inclusion=True,
         exclude=exclude,
     )
-
-
-@pytest.mark.e2e
-def test_e2e_metric_tags(dd_agent_check):
-    aggregator = dd_agent_check()
 
     for metric_name, expected_tags in E2E_METRIC_TAGS.items():
         for tag in expected_tags:

@@ -3,7 +3,7 @@
 
 WORK_POOL_TAG_KEYS = ["work_pool_id:", "work_pool_name:", "work_pool_type:"]
 
-WORKER_TAG_KEYS = ["work_pool_id:", "worker_id:", "worker_name:"]
+WORKER_TAG_KEYS = ["work_pool_id:", "worker_id:", "worker_name:", "work_pool_name:"]
 
 WORK_QUEUE_TAG_KEYS = ["work_queue_id:", "work_queue_name:", "work_pool_id:", "work_pool_name:", "work_queue_priority:"]
 
@@ -26,6 +26,7 @@ FLOW_RUN_TAG_KEYS = [
     "work_queue_id:",
     "work_queue_name:",
     "deployment_id:",
+    "deployment_name:",
     "flow_id:",
 ]
 
@@ -49,6 +50,7 @@ E2E_METRIC_TAGS: dict[str, list[str]] = {
     "prefect.server.work_queue.last_polled_age_seconds": WORK_QUEUE_STATUS_TAG_KEYS,
     "prefect.server.work_queue.backlog.age": WORK_QUEUE_STATUS_TAG_KEYS,
     "prefect.server.work_queue.backlog.size": WORK_QUEUE_STATUS_TAG_KEYS,
+    "prefect.server.work_queue.concurrency.in_use": WORK_QUEUE_TAG_KEYS,
     # --- deployment metrics ---
     "prefect.server.deployment.is_ready": DEPLOYMENT_TAG_KEYS,
     # --- flow run metrics ---
@@ -60,6 +62,7 @@ E2E_METRIC_TAGS: dict[str, list[str]] = {
     "prefect.server.flow_runs.paused.count": FLOW_RUN_TAG_KEYS,
     "prefect.server.flow_runs.completed.count": FLOW_RUN_TAG_KEYS,
     "prefect.server.flow_runs.throughput": FLOW_RUN_TAG_KEYS,
+    "prefect.server.flow_runs.running.count": FLOW_RUN_TAG_KEYS,
     "prefect.server.flow_runs.late_start.count": FLOW_RUN_TAG_KEYS,
     "prefect.server.flow_runs.execution_duration.avg": FLOW_RUN_TAG_KEYS,
     "prefect.server.flow_runs.execution_duration.count": FLOW_RUN_TAG_KEYS,
@@ -79,6 +82,7 @@ E2E_METRIC_TAGS: dict[str, list[str]] = {
     "prefect.server.task_runs.failed.count": TASK_RUN_TAG_KEYS,
     "prefect.server.task_runs.crashed.count": TASK_RUN_TAG_KEYS,
     "prefect.server.task_runs.throughput": TASK_RUN_TAG_KEYS,
+    "prefect.server.task_runs.running.count": TASK_RUN_TAG_KEYS,
     "prefect.server.task_runs.late_start.count": TASK_RUN_TAG_KEYS,
     "prefect.server.task_runs.execution_duration.avg": TASK_RUN_TAG_KEYS,
     "prefect.server.task_runs.execution_duration.count": TASK_RUN_TAG_KEYS,

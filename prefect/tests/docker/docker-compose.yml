@@ -12,7 +12,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
   redis:
     image: redis:7
     volumes:
@@ -24,7 +23,7 @@ services:
       retries: 5
 
   prefect-server:
-    image: prefecthq/prefect:3.6.17-python3.13 #${PREFECT_VERSION}-python${PYTHON}
+    image: prefecthq/prefect:${PREFECT_VERSION}-python${PYTHON}
     depends_on:
       postgres:
         condition: service_healthy
@@ -50,7 +49,7 @@ services:
     restart: on-failure
 
   prefect-services:
-    image: prefecthq/prefect:3.6.17-python3.13 #${PREFECT_VERSION}-python${PYTHON}
+    image: prefecthq/prefect:${PREFECT_VERSION}-python${PYTHON}
     depends_on:
       prefect-server:
         condition: service_healthy
@@ -65,7 +64,7 @@ services:
     restart: on-failure
 
   prefect-worker:
-    image: prefecthq/prefect:3.6.17-python3.13 #${PREFECT_VERSION}-python${PYTHON}
+    image: prefecthq/prefect:${PREFECT_VERSION}-python${PYTHON}
     depends_on:
       prefect-server:
         condition: service_healthy
@@ -76,7 +75,9 @@ services:
       - ./sample_flow.py:/app/sample_flow.py
       - ./failing_flow.py:/app/failing_flow.py
       - ${DD_LOG_1:-/tmp/dd_log_1}:/var/log/prefect/dd_log_1
-    command: sh -c "prefect worker start --pool local-pool --with-healthcheck 2>&1 | tee -a /var/log/prefect/dd_log_1"
+    command: >
+      sh -c "prefect worker start --pool local-pool --with-healthcheck 2>&1 | tee -a /var/log/prefect/dd_log_1"
+
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
       interval: 10s
@@ -86,7 +87,7 @@ services:
     restart: on-failure
 
   prefect-flow:
-    image: prefecthq/prefect:3.6.17-python3.13 #${PREFECT_VERSION}-python${PYTHON}
+    image: prefecthq/prefect:${PREFECT_VERSION}-python${PYTHON}
     depends_on:
       prefect-worker:
         condition: service_healthy 
@@ -98,10 +99,13 @@ services:
       - ./prefect.yaml:/app/prefect.yaml
       - ./failing_flow.py:/app/failing_flow.py
     command: >
-      bash -c "prefect --no-prompt deploy --name 'sample-deploy-2' &&
+      bash -c "
+      prefect work-queue set-concurrency-limit default 10 &&
+      prefect --no-prompt deploy --name 'sample-deploy-2' --pool local-pool --work-queue default &&
       prefect deployment run 'failing-flow/sample-deploy-2' &&
-      prefect --no-prompt deploy --name 'sample-deploy' && 
-      prefect deployment run 'sample-flow/sample-deploy'"
+      prefect --no-prompt deploy --name 'sample-deploy' --pool local-pool --work-queue default &&
+      prefect deployment run 'sample-flow/sample-deploy'
+      "
 
     restart: "no"
       

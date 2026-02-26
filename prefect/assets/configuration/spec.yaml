@@ -89,7 +89,7 @@ files:
         Patterns defined in `exclude` will take precedence in case of overlap.
       value:
         type: object
-        example: &event_names
+        example:
           include:
             - <EVENT_NAME_REGEX_1>
             - <EVENT_NAME_REGEX_2>

@@ -1,3 +1,5 @@
+import time
+
 from prefect import flow, task
 from prefect.context import get_run_context
 
@@ -12,6 +14,8 @@ def failing_flow():
     ctx = get_run_context()
     run_count = ctx.flow_run.run_count
     print(f"Run count: {run_count}")
+    if run_count == 1:
+        time.sleep(10)
 
     if run_count > 1:
         print("Retried")

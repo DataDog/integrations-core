@@ -5,9 +5,9 @@ WP1_TAGS = ["work_pool_id:wp-1", "work_pool_name:default-pool", "work_pool_type:
 WP2_TAGS = ["work_pool_id:wp-2", "work_pool_name:paused-pool", "work_pool_type:docker"]
 WP3_TAGS = ["work_pool_id:wp-3", "work_pool_name:not-ready-pool", "work_pool_type:kubernetes"]
 
-WP1_WORKER_TAGS = ["work_pool_id:wp-1", "worker_id:w-3", "worker_name:worker-3"]
-WP2_WORKER_TAGS = ["work_pool_id:wp-2", "worker_id:w-6", "worker_name:worker-6"]
-WP3_WORKER_TAGS = ["work_pool_id:wp-3", "worker_id:w-8", "worker_name:worker-8"]
+WP1_WORKER_TAGS = ["work_pool_id:wp-1", "work_pool_name:default-pool", "worker_id:w-3", "worker_name:worker-3"]
+WP2_WORKER_TAGS = ["work_pool_id:wp-2", "work_pool_name:paused-pool", "worker_id:w-6", "worker_name:worker-6"]
+WP3_WORKER_TAGS = ["work_pool_id:wp-3", "work_pool_name:not-ready-pool", "worker_id:w-8", "worker_name:worker-8"]
 
 WQ1_TAGS = [
     "work_queue_id:wq-1",
@@ -41,6 +41,7 @@ TAGS_F1 = [
     "work_queue_id:wq-1",
     "work_queue_name:default-queue",
     "deployment_id:d-1",
+    "deployment_name:deployment-1",
     "flow_id:f-1",
 ]
 
@@ -50,6 +51,7 @@ TAGS_F2 = [
     "work_queue_id:wq-2",
     "work_queue_name:paused-queue",
     "deployment_id:d-2",
+    "deployment_name:deployment-2",
     "flow_id:f-2",
 ]
 
@@ -59,6 +61,7 @@ TAGS_F3 = [
     "work_queue_id:wq-4",
     "work_queue_name:not-ready-queue",
     "deployment_id:d-3",
+    "deployment_name:deployment-3",
     "flow_id:f-3",
 ]
 
@@ -103,6 +106,7 @@ ALL_METRIC_CASES = [
     ("prefect.server.work_queue.is_not_ready", 1.0, WQ4_TAGS, "wq4-is_not_ready", 1),
     ("prefect.server.work_queue.is_paused", 0.0, WQ4_TAGS, "wq4-is_paused", 1),
     ("prefect.server.work_queue.last_polled_age_seconds", 5.877, WQ4_STATUS_TAGS, "wq4-last_polled", 1),
+    ("prefect.server.work_queue.concurrency.in_use", 0.2, WQ1_STATUS_TAGS, "wq1-concurrency_in_use", 1),
     # --- work queue backlog metrics ---
     ("prefect.server.work_queue.backlog.age", 110.0, WQ1_STATUS_TAGS, "wq1-backlog-age", 1),
     ("prefect.server.work_queue.backlog.age", 31.889, WQ2_STATUS_TAGS, "wq2-backlog-age", 1),
@@ -149,6 +153,7 @@ ALL_METRIC_CASES = [
     ("prefect.server.flow_runs.failed.count", 1.0, TAGS_F1, "flow_runs-failed-count-f1", 1),
     ("prefect.server.flow_runs.cancelled.count", 0.0, TAGS_F2, "flow_runs-cancelled-count-f2", 1),
     ("prefect.server.flow_runs.crashed.count", 1.0, TAGS_F1, "flow_runs-crashed-count-f1", 1),
+    ("prefect.server.flow_runs.running.count", 1.0, TAGS_F3, "flow_runs-running-count-f3", 1),
     ("prefect.server.flow_runs.paused.count", 0.0, TAGS_F1, "flow_runs-paused-f1", 1),
     ("prefect.server.flow_runs.completed.count", 2.0, TAGS_F2, "flow_runs-completed-count-f2", 1),
     ("prefect.server.flow_runs.throughput", 6.0, TAGS_F2, "flow_runs-throughput-f2", 1),
@@ -164,7 +169,8 @@ ALL_METRIC_CASES = [
     ("prefect.server.task_runs.cancelled.count", 2.0, TAGS_TR9, "task_runs-cancelled-count-tr9", 1),
     ("prefect.server.task_runs.completed.count", 2.0, TAGS_TR3, "task_runs-completed-count-tr3", 1),
     ("prefect.server.task_runs.failed.count", 0.0, TAGS_TR3, "task_runs-failed-count-tr3", 1),
-    ("prefect.server.task_runs.throughput", 4.0, TAGS_TR1, "task_runs-throughput-tr1", 1),
+    ("prefect.server.task_runs.throughput", 5.0, TAGS_TR1, "task_runs-throughput-tr1", 1),
+    ("prefect.server.task_runs.running.count", 1.0, TAGS_TR1, "task_runs-running-count-tr1", 1),
     ("prefect.server.task_runs.late_start.count", 1.0, TAGS_TR1, "task_runs-late_start-tr1", 1),
     # ("prefect.server.task_runs.late_start.rate", 1.0 / 4.0, TAGS_TR1, "task_runs-late_start-rate-tr1", 1),
     # --- task run metrics ---

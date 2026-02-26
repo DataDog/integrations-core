@@ -18,6 +18,7 @@ pytestmark = [pytest.mark.usefixtures("mock_http_responses"), pytest.mark.unit]
 @pytest.fixture()
 def ready_check(check: PrefectCheck, dd_run_check: Callable, aggregator, mocker) -> PrefectCheck:
     mocker.patch("datadog_checks.prefect.check.datetime", MockDatetime)
+    mocker.patch.object(check, '_get_last_check_time')
 
     check.last_check_time_iso = "2026-01-20T15:00:00Z"
     check.last_check_time = datetime(2026, 1, 20, 15, 0, 0, tzinfo=timezone.utc)
