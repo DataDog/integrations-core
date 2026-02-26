@@ -152,8 +152,9 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
+    # Pinning virtualenv because of https://github.com/pypa/hatch/issues/2193
     - name: Install Hatch
-      run: pip install -U hatch "virtualenv<21"
+      run: pip install -U hatch "virtualenv<21" 
 
     - name: Install Hatch environment collector plugin
       run: pip install -e . --no-deps
