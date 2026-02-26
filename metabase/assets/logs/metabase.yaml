@@ -30,16 +30,11 @@ pipeline:
   filter:
     query: "source:metabase"
   processors:
-    - type: service-remapper
-      name: Define `service` as the official service of the log
-      enabled: true
-      sources:
-        - service
     - type: pipeline
       name: Processing for Activity Events
       enabled: true
       filter:
-        query: "service:activity-events"
+        query: (service:activity-events OR @vendor.endpoint:activity-events)
       processors:
         - type: attribute-remapper
           name: Map `topic` to `evt.name`
@@ -60,7 +55,7 @@ pipeline:
       name: Processing for View Logs
       enabled: true
       filter:
-        query: "service:view-logs"
+        query: (service:view-logs OR @vendor.endpoint:view-logs)
       processors:
         - type: date-remapper
           name: Define `timestamp` as the official date of the log
@@ -91,7 +86,7 @@ pipeline:
       name: Processing for Query Logs
       enabled: true
       filter:
-        query: "service:query-logs"
+        query: (service:query-logs OR @vendor.endpoint:query-logs)
       processors:
         - type: date-remapper
           name: Define `started_at` as the official date of the log
@@ -132,7 +127,7 @@ pipeline:
       name: Processing for Table View Logs
       enabled: true
       filter:
-        query: "service:view-logs @entity_type:table"
+        query: (service:view-logs OR @vendor.endpoint:view-logs) @entity_type:table
       processors:
         - type: attribute-remapper
           name: Map `table_name` to `entity_name`

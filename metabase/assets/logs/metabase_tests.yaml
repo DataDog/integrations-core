@@ -6,6 +6,9 @@ tests:
       "entity_qualified_id" : "dashboard_11",
       "entity_type" : "dashboard",
       "user_id" : 1,
+      "vendor" : {
+        "endpoint" : "activity-events"
+      },
       "topic" : "dashboard-add-cards",
       "details" : {
         "dashcards" : [ {
@@ -20,7 +23,6 @@ tests:
       "entity_id" : 11,
       "timestamp" : "2024-09-30T11:47:26.247269+05:30"
     }
-  service: "activity-events"
   result:
     custom:
       details:
@@ -40,11 +42,16 @@ tests:
       timestamp: "2024-09-30T11:47:26.247269+05:30"
       usr:
         id: 1
+      vendor:
+        endpoint: "activity-events"
     message: |-
       {
         "entity_qualified_id" : "dashboard_11",
         "entity_type" : "dashboard",
         "user_id" : 1,
+        "vendor" : {
+          "endpoint" : "activity-events"
+        },
         "topic" : "dashboard-add-cards",
         "details" : {
           "dashcards" : [ {
@@ -59,7 +66,6 @@ tests:
         "entity_id" : 11,
         "timestamp" : "2024-09-30T11:47:26.247269+05:30"
       }
-    service: "activity-events"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1727677046247
@@ -68,6 +74,9 @@ tests:
     {
       "entity_type" : "setting",
       "user_id" : 1,
+      "vendor" : {
+        "endpoint" : "activity-events"
+      },
       "topic" : "setting-update",
       "details" : {
         "previous-value" : "UCT",
@@ -77,7 +86,6 @@ tests:
       "id" : "188",
       "timestamp" : "2024-09-30T12:37:04.133904+05:30"
     }
-  service: "activity-events"
   result:
     custom:
       details:
@@ -91,10 +99,15 @@ tests:
       timestamp: "2024-09-30T12:37:04.133904+05:30"
       usr:
         id: 1
+      vendor:
+        endpoint: "activity-events"
     message: |-
       {
         "entity_type" : "setting",
         "user_id" : 1,
+        "vendor" : {
+          "endpoint" : "activity-events"
+        },
         "topic" : "setting-update",
         "details" : {
           "previous-value" : "UCT",
@@ -104,7 +117,6 @@ tests:
         "id" : "188",
         "timestamp" : "2024-09-30T12:37:04.133904+05:30"
       }
-    service: "activity-events"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1727680024133
@@ -121,12 +133,14 @@ tests:
       "user_type" : "personal",
       "user_id" : 1,
       "database_description" : "Some example data for you to play around with.",
+      "vendor" : {
+        "endpoint" : "view-logs"
+      },
       "user_full_name" : "Abc Xyz",
       "table_display_name" : "Accounts",
       "id" : "12",
       "timestamp" : "2024-09-05T11:59:10.181879Z"
     }
-  service: "view-logs"
   result:
     custom:
       database_description: "Some example data for you to play around with."
@@ -144,6 +158,8 @@ tests:
         email: "abc.xyz@something.com"
         id: 1
         name: "Abc Xyz"
+      vendor:
+        endpoint: "view-logs"
     message: |-
       {
         "entity_qualified_id" : "dashboard_1",
@@ -156,12 +172,14 @@ tests:
         "user_type" : "personal",
         "user_id" : 1,
         "database_description" : "Some example data for you to play around with.",
+        "vendor" : {
+          "endpoint" : "view-logs"
+        },
         "user_full_name" : "Abc Xyz",
         "table_display_name" : "Accounts",
         "id" : "12",
         "timestamp" : "2024-09-05T11:59:10.181879Z"
       }
-    service: "view-logs"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1725537550181
@@ -178,6 +196,9 @@ tests:
       "dashboard_qualified_id" : "dashboard_5",
       "action_id" : 7,
       "database_description" : "Some example data for you to play around with.",
+      "vendor" : {
+        "endpoint" : "query-logs"
+      },
       "user_email" : "abc.xyz@something.com",
       "query_source" : "dashboard",
       "dashboard_name" : "Question overview",
@@ -202,7 +223,6 @@ tests:
       "action_qualified_id" : "action_7",
       "dashboard_id" : 5
     }
-  service: "query-logs"
   result:
     custom:
       action_id: 7
@@ -237,6 +257,8 @@ tests:
         email: "abc.xyz@something.com"
         id: "1"
         name: "Abc Xyz"
+      vendor:
+        endpoint: "query-logs"
     message: |-
       {
         "result_rows" : 2,
@@ -249,6 +271,9 @@ tests:
         "dashboard_qualified_id" : "dashboard_5",
         "action_id" : 7,
         "database_description" : "Some example data for you to play around with.",
+        "vendor" : {
+          "endpoint" : "query-logs"
+        },
         "user_email" : "abc.xyz@something.com",
         "query_source" : "dashboard",
         "dashboard_name" : "Question overview",
@@ -273,7 +298,6 @@ tests:
         "action_qualified_id" : "action_7",
         "dashboard_id" : 5
       }
-    service: "query-logs"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1725964655965
