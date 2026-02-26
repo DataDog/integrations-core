@@ -241,7 +241,7 @@ def test_jobs_terminal_without_timestamps_emits_count_only(
         check,
         monkeypatch,
         [
-            {'ctm': 'srv1', 'name': 'no_times', 'status': 'Ended OK'},
+            {'jobId': 'notimes1', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'no_times', 'status': 'Ended OK'},
         ],
     )
     check._collect_job_statuses()
@@ -261,6 +261,8 @@ def test_jobs_terminal_with_timestamps_emits_duration(
         monkeypatch,
         [
             {
+                'jobId': 'timed1',
+                'numberOfRuns': 1,
                 'ctm': 'srv1',
                 'name': 'timed_job',
                 'status': 'Ended OK',
@@ -287,9 +289,9 @@ def test_jobs_all_terminal_statuses_and_result_tags(
         check,
         monkeypatch,
         [
-            {'ctm': 'srv1', 'name': 'job_fail', 'status': 'Ended Not OK'},
-            {'ctm': 'srv1', 'name': 'job_cancel', 'status': 'Cancelled'},
-            {'server': 'alt_server', 'name': 'job_ok', 'status': 'Ended OK'},
+            {'jobId': 'term_fail', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'job_fail', 'status': 'Ended Not OK'},
+            {'jobId': 'term_cancel', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'job_cancel', 'status': 'Cancelled'},
+            {'jobId': 'term_ok', 'numberOfRuns': 1, 'server': 'alt_server', 'name': 'job_ok', 'status': 'Ended OK'},
         ],
     )
     check._collect_job_statuses()
@@ -370,6 +372,152 @@ def test_metadata_no_version_found(instance: dict[str, Any], datadog_agent: Any,
     check = _make_check(instance)
     check._collect_metadata(servers)
     datadog_agent.assert_metadata(check.check_id, {})
+
+
+@pytest.mark.parametrize(
+    'job, expected_key',
+    [
+        ({'jobId': 'abc', 'numberOfRuns': 3}, 'abc#3'),
+        ({'jobId': 'abc', 'startTime': '20260115100000'}, 'abc#20260115100000'),
+        ({'jobId': 'abc', 'endTime': '20260115103000'}, 'abc#20260115103000'),
+        ({'jobId': 'abc', 'numberOfRuns': 2, 'startTime': '20260115100000'}, 'abc#2'),
+        ({'jobId': 'abc'}, None),
+        ({'name': 'no_job_id', 'status': 'Ended OK'}, None),
+        ({}, None),
+    ],
+)
+def test_build_run_key(instance: dict[str, Any], job: dict, expected_key: str | None) -> None:
+    assert _make_check(instance)._build_run_key(job) == expected_key
+
+
+def test_terminal_job_emitted_once(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    check = _make_check(instance)
+    terminal_job = [
+        {'jobId': 'dedup1', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'j1', 'status': 'Ended OK'},
+    ]
+
+    _mock_job_response(check, monkeypatch, terminal_job)
+    check._collect_job_statuses()
+    aggregator.assert_metric('control_m.job.run.count', value=1, count=1)
+
+    aggregator.reset()
+
+    _mock_job_response(check, monkeypatch, terminal_job)
+    check._collect_job_statuses()
+    aggregator.assert_metric('control_m.job.run.count', count=0)
+
+
+def test_terminal_job_new_run_number(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    check = _make_check(instance)
+
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [{'jobId': 'rerun1', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'j1', 'status': 'Ended OK'}],
+    )
+    check._collect_job_statuses()
+    aggregator.assert_metric('control_m.job.run.count', value=1, count=1)
+
+    aggregator.reset()
+
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [{'jobId': 'rerun1', 'numberOfRuns': 2, 'ctm': 'srv1', 'name': 'j1', 'status': 'Ended OK'}],
+    )
+    check._collect_job_statuses()
+    aggregator.assert_metric('control_m.job.run.count', value=1, count=1)
+
+
+def test_terminal_job_no_dedupe_key_skipped(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    check = _make_check(instance)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [{'ctm': 'srv1', 'name': 'no_id', 'status': 'Ended OK'}],
+    )
+    check._collect_job_statuses()
+
+    aggregator.assert_metric('control_m.job.run.count', count=0)
+    aggregator.assert_metric('control_m.jobs.by_status', count=1)
+
+
+def test_finalized_cache_persisted_and_loaded(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    check = _make_check(instance)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [{'jobId': 'persist1', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'j1', 'status': 'Ended OK'}],
+    )
+    check._collect_job_statuses()
+    aggregator.assert_metric('control_m.job.run.count', value=1, count=1)
+
+    check2 = _make_check(instance)
+    aggregator.reset()
+    _mock_job_response(
+        check2,
+        monkeypatch,
+        [{'jobId': 'persist1', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'j1', 'status': 'Ended OK'}],
+    )
+    check2._collect_job_statuses()
+    aggregator.assert_metric('control_m.job.run.count', count=0)
+
+
+def test_finalized_prune_removes_expired(instance: dict[str, Any], monkeypatch: MonkeyPatch) -> None:
+    check = _make_check(instance)
+    now = time.time()
+    check._finalized_runs = {
+        'fresh_key': now - 100,
+        'stale_key': now - 100_000,
+    }
+    changed = check._prune_state_map(check._finalized_runs, now, check._finalized_ttl_seconds)
+    assert changed is True
+    assert 'fresh_key' in check._finalized_runs
+    assert 'stale_key' not in check._finalized_runs
+
+
+def test_active_runs_cleaned_on_terminal(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    check = _make_check(instance)
+
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [{'jobId': 'active1', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'j1', 'status': 'Executing'}],
+    )
+    check._collect_job_statuses()
+    assert 'active1#1' in check._active_runs
+
+    aggregator.reset()
+
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [{'jobId': 'active1', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'j1', 'status': 'Ended OK'}],
+    )
+    check._collect_job_statuses()
+    assert 'active1#1' not in check._active_runs
+    assert 'active1#1' in check._finalized_runs
+    aggregator.assert_metric('control_m.job.run.count', value=1, count=1)
 
 
 @pytest.mark.parametrize(

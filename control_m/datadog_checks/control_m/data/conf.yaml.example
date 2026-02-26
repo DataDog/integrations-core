@@ -90,6 +90,20 @@ instances:
     #
     # job_name_filter: '*'
 
+    ## @param finalized_ttl_seconds - integer - optional - default: 86400
+    ## How long (in seconds) to remember finalized job runs for deduplication.
+    ## Terminal jobs seen within this window will not be re-emitted on subsequent
+    ## check cycles or after Agent restarts. Increase if completed jobs remain
+    ## visible in the Control-M status feed for a long time.
+    #
+    # finalized_ttl_seconds: 86400
+
+    ## @param active_ttl_seconds - integer - optional - default: 21600
+    ## How long (in seconds) to track active (non-terminal) job runs.
+    ## Entries older than this are evicted to bound memory usage.
+    #
+    # active_ttl_seconds: 21600
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
