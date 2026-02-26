@@ -27,6 +27,7 @@ oracle.session_limit_usage,gauge,,percent,,Session limit usage,0,oracle_database
 oracle.shared_pool_free,gauge,,percent,,Shared pool free memory %,0,oracle_database,shared pool free,,
 oracle.sorts_per_user_call,gauge,,,,Sorts per user call,0,oracle_database,sorts per user call,,
 oracle.tablespace.in_use,gauge,,percent,,Tablespace in-use,0,oracle_database,tablespace in-use,,
+oracle.tablespace.maxsize,gauge,,byte,,Tablespace maximum size,0,oracle_database,tablespace maxsize,,
 oracle.tablespace.offline,gauge,,,,Tablespace offline,0,oracle_database,tablespace offline,,
 oracle.tablespace.size,gauge,,byte,,Tablespace size,0,oracle_database,tablespace size,,
 oracle.tablespace.used,gauge,,byte,,Tablespace used,0,oracle_database,tablespace used,,
