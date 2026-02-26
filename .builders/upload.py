@@ -83,9 +83,9 @@ def _build_number_of_wheel_blob(wheel_path: Blob) -> int:
     return int(build_number[0]) if build_number else -1
 
 
-def collect_and_validate_wheels(wheel_dir: Path) -> list[tuple[str, email.Message, Path]]:
+def collect_and_validate_wheels(wheel_dir: Path) -> list[tuple[str, email.message.Message, Path]]:
     """Collect all wheels from a directory and validate their metadata."""
-    upload_data: list[tuple[str, email.Message, Path]] = []
+    upload_data: list[tuple[str, email.message.Message, Path]] = []
     for wheel in wheel_dir.iterdir():
         project_metadata = extract_metadata(wheel)
         project_name = project_metadata['Name']
@@ -100,7 +100,7 @@ def collect_and_validate_wheels(wheel_dir: Path) -> list[tuple[str, email.Messag
     return upload_data
 
 
-def process_wheel_for_upload(wheel: Path, artifact_type: str, project_name: str, project_metadata: email.Message, bucket, prefix: str) -> tuple[str | None, str | None]:
+def process_wheel_for_upload(wheel: Path, artifact_type: str, project_name: str, project_metadata: email.message.Message, bucket, prefix: str) -> tuple[str | None, str | None]:
     """Process a single wheel and determine if it needs to be uploaded."""
     padding = ' ' * (len(prefix) + 1)
     print(f'{prefix} Name: {project_metadata["Name"]}')
@@ -140,7 +140,7 @@ def process_wheel_for_upload(wheel: Path, artifact_type: str, project_name: str,
         return f'{project_name} @ {index_url}/{artifact_name}#sha256={sha256_digest}', artifact_name
 
 
-def upload_wheel_to_bucket(wheel: Path, artifact_type: str, project_name: str, artifact_name: str, project_metadata: email.Message, bucket, padding: str):
+def upload_wheel_to_bucket(wheel: Path, artifact_type: str, project_name: str, artifact_name: str, project_metadata: email.message.Message, bucket, padding: str):
     """Upload a wheel file to the bucket."""
     print(f'{padding}Artifact: {artifact_name}')
     artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
