@@ -150,6 +150,10 @@ coverage:
         target: 75
         flags:
         - consul
+      Control-M:
+        target: 75
+        flags:
+        - control_m
       CoreDNS:
         target: 75
         flags:
@@ -998,6 +1002,11 @@ flags:
     paths:
     - consul/datadog_checks/consul
     - consul/tests
+  control_m:
+    carryforward: true
+    paths:
+    - control_m/datadog_checks/control_m
+    - control_m/tests
   coredns:
     carryforward: true
     paths:
