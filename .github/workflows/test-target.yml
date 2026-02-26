@@ -283,14 +283,7 @@ jobs:
       run: ddev ci setup ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
     - name: Ensure Docker is running
-      run: |
-        if [ "$RUNNER_OS" == "Windows" ]; then
-          bash .github/workflows/scripts/ensure-docker-windows.sh
-        elif [ "$RUNNER_OS" == "macOS" ]; then
-          bash .github/workflows/scripts/ensure-docker-macos.sh
-        else
-          bash .github/workflows/scripts/ensure-docker-linux.sh
-        fi
+      run: bash .github/workflows/scripts/ensure-docker.sh
 
     - name: Run Unit & Integration tests
       if: inputs.latest != true
