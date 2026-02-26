@@ -19,6 +19,7 @@ mypy-deps = [
 python = ["3.13"]
 version = [
   "5.7",  # EOL October 21, 2023
+  "8.0.18", # Test for pre-json aggregation version
   "8.0.36",  # EOL April, 2026
   "8.4.0",
 ]
@@ -53,7 +54,7 @@ version = [
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.0.36"] },
+  { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.0.18", "8.0.36"] },
   { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.4.0"] },
 ]
 name."8.0-group".env-vars = [
