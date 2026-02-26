@@ -153,7 +153,7 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
 
     - name: Install Hatch
-      run: pip install -U hatch virtualenv
+      run: pip install -U hatch "virtualenv<21"
 
     - name: Install Hatch environment collector plugin
       run: pip install -e . --no-deps
