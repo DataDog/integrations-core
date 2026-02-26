@@ -1,11 +1,11 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 control_m.can_connect,gauge,0,,,"Control-M API connectivity status (1 when API is reachable, 0 otherwise).",0,control_m,can connect,,
 control_m.can_login,gauge,0,,,"Control-M session login status (1 when authentication succeeds, 0 otherwise). Only emitted in session-login mode.",0,control_m,can login,,
-control_m.server.up,gauge,0,,,"Whether the Control-M server is up (1) or down (0).",0,control_m,server up,,
-control_m.jobs.by_status,gauge,0,,,"Current number of jobs per normalized Control-M status.",0,control_m,jobs by status,,status:ended_ok
-control_m.jobs.active,gauge,0,,,"Current number of active (non-terminal) jobs.",0,control_m,jobs active,,
-control_m.jobs.waiting.total,gauge,0,,,"Current number of waiting jobs across wait-related states.",0,control_m,jobs waiting total,,
-control_m.jobs.total,gauge,0,,,"Total number of jobs reported by the Control-M API (from the response total field).",0,control_m,jobs total,,
-control_m.jobs.returned,gauge,0,,,"Number of job entries returned in the current status response.",0,control_m,jobs returned,,
 control_m.job.run.count,count,0,,,"Count of terminal job runs observed in the status feed.",0,control_m,job run count,,result:ok
-control_m.job.run.duration_ms,histogram,0,millisecond,,"Distribution of terminal job run durations computed from start and end timestamps.",0,control_m,job run duration,,result:ok
+control_m.job.run.duration_ms,gauge,0,millisecond,,"Distribution of terminal job run durations computed from start and end timestamps.",0,control_m,job run duration,,result:ok
+control_m.jobs.active,gauge,0,,,"Current number of active (non-terminal) jobs.",0,control_m,jobs active,,
+control_m.jobs.by_status,gauge,0,,,"Current number of jobs per normalized Control-M status.",0,control_m,jobs by status,,status:ended_ok
+control_m.jobs.returned,gauge,0,,,"Number of job entries returned in the current status response.",0,control_m,jobs returned,,
+control_m.jobs.total,gauge,0,,,"Total number of jobs reported by the Control-M API (from the response total field).",0,control_m,jobs total,,
+control_m.jobs.waiting.total,gauge,0,,,"Current number of waiting jobs across wait-related states.",0,control_m,jobs waiting total,,
+control_m.server.up,gauge,0,,,"Whether the Control-M server is up (1) or down (0).",0,control_m,server up,,
