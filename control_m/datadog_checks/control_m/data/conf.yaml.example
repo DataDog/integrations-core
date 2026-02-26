@@ -80,10 +80,13 @@ instances:
     #
     # token_refresh_buffer_seconds: 300
 
-    ## @param job_status_limit - integer - optional - default: 200
-    ## Limit query parameter sent to `/run/jobs/status`.
+    ## @param job_status_limit - integer - optional - default: 10000
+    ## Maximum number of jobs to retrieve per `/run/jobs/status` request.
+    ## The Control-M API defaults to returning at most 1000 jobs when no
+    ## limit is specified and does not support offset-based pagination.
+    ## The server-enforced maximum is 10000.
     #
-    # job_status_limit: 200
+    # job_status_limit: 10000
 
     ## @param job_name_filter - string - optional - default: *
     ## Job name filter sent to `/run/jobs/status` as the `jobname` query parameter.

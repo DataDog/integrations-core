@@ -49,10 +49,13 @@ files:
     - name: job_status_limit
       required: false
       description: |
-        Limit query parameter sent to `/run/jobs/status`.
+        Maximum number of jobs to retrieve per `/run/jobs/status` request.
+        The Control-M API defaults to returning at most 1000 jobs when no
+        limit is specified and does not support offset-based pagination.
+        The server-enforced maximum is 10000.
       value:
         type: integer
-        example: 200
+        example: 10000
     - name: job_name_filter
       required: false
       description: |
