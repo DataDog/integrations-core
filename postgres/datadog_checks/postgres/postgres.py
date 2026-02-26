@@ -262,6 +262,7 @@ class PostgreSql(DatabaseCheck):
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
             self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
+            self.cloud_metadata["aws"]["instance_endpoint"] = self.resolved_hostname
         if self._config.azure.deployment_type and self._config.azure.fully_qualified_domain_name:
             deployment_type = self._config.azure.deployment_type
             # some `deployment_type`s map to multiple `resource_type`s
