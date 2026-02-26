@@ -1,16 +1,22 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 import json
 import time
 from datetime import datetime
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urlencode
-
-from requests.exceptions import HTTPError, RequestException
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.control_m.config_models import ConfigMixin
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from requests import Response
 
 _SERVICE_CHECK_CAN_LOGIN = "can_login"
 _SERVICE_CHECK_CAN_CONNECT = "can_connect"
@@ -43,7 +49,7 @@ _ACTIVE_RUNS_CACHE_KEY = "active_runs_control_m"
 class ControlMCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = "control_m"
 
-    def __init__(self, name, init_config, instances):
+    def __init__(self, name: str, init_config: dict[str, Any], instances: list[dict[str, Any]]) -> None:
         super().__init__(name, init_config, instances)
 
         self._configure_auth()
@@ -51,12 +57,12 @@ class ControlMCheck(AgentCheck, ConfigMixin):
 
         self._base_tags = [f"control_m_instance:{self._api_endpoint}"]
 
-        self._finalized_runs: dict[str, float] = {}
-        self._active_runs: dict[str, float] = {}
+        self._finalized_runs = {}
+        self._active_runs = {}
         self._load_finalized_runs_cache()
         self._load_active_runs_cache()
 
-    def _configure_auth(self):
+    def _configure_auth(self) -> None:
         self._api_endpoint = self.instance.get("control_m_api_endpoint", "").rstrip("/")
         if not self._api_endpoint:
             raise ConfigurationError("`control_m_api_endpoint` is required")
@@ -96,26 +102,27 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         self._static_token_retry_after = 0.0
         self._static_token_retry_interval = 300.0
 
-    def _configure_collection(self):
-        self._job_status_limit = int(self.instance.get("job_status_limit", 200))
+    def _configure_collection(self) -> None:
+        self._job_status_limit = int(self.instance.get("job_status_limit", 10000))
         self._job_name_filter = self.instance.get("job_name_filter", "*")
         self._finalized_ttl_seconds = int(self.instance.get("finalized_ttl_seconds", 86400))
         self._active_ttl_seconds = int(self.instance.get("active_ttl_seconds", 21600))
+        query = {"limit": self._job_status_limit, "jobname": self._job_name_filter}
+        self._jobs_status_url = f"{self._api_endpoint}/run/jobs/status?{urlencode(query)}"
 
-    def _login(self):
-        # Used in session login mode only. Retrieve a new token from the API to use for subsequent requests.
+    def _login(self) -> None:
         url = f"{self._api_endpoint}/session/login"
         payload = {"username": self._username, "password": self._password}
 
         try:
             response = self.http.post(url, json=payload)
-            response.raise_for_status()
-        except HTTPError as e:
-            self.log.error("Control-M authentication failed (HTTP %s): %s", e.response.status_code, e.response.text)
-            raise
-        except RequestException:
+        except OSError:
             self.log.error("Could not reach Control-M API at %s", url)
             raise
+
+        if not response.ok:
+            self.log.error("Control-M authentication failed (HTTP %s): %s", response.status_code, response.text)
+            response.raise_for_status()
 
         try:
             data = response.json()
@@ -131,7 +138,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         self._token_expiration = time.monotonic() + self._token_lifetime
         self.log.debug("Obtained Control-M API token (valid for %d minutes)", self._token_lifetime // 60)
 
-    def _ensure_token(self):
+    def _ensure_token(self) -> None:
         # Used in session login mode only. Refresh the token if it's about to expire.
         remaining = self._token_expiration - time.monotonic()
         if self._token is not None and remaining > self._token_refresh_buffer:
@@ -139,7 +146,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         self.log.info("Refreshing Control-M API token")
         self._login()
 
-    def _make_request(self, method, url, **kwargs):
+    def _make_request(self, method: str, url: str, **kwargs: Any) -> Response:
         request_fn = getattr(self.http, method)
 
         if self._use_session_login:
@@ -163,7 +170,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         self._static_token_retry_after = time.monotonic() + self._static_token_retry_interval
         return self._make_session_request(request_fn, url, **kwargs)
 
-    def _make_session_request(self, request_fn, url, **kwargs):
+    def _make_session_request(self, request_fn: Callable[..., Response], url: str, **kwargs: Any) -> Response:
         # Used in session login mode only. Make a request to the API using the session token.
         self._ensure_token()
         extra = {"Authorization": f"Bearer {self._token}"}
@@ -178,16 +185,16 @@ class ControlMCheck(AgentCheck, ConfigMixin):
 
         return response
 
-    def _auth_method_tag(self):
+    def _auth_method_tag(self) -> str:
         # Added to keep track of which authentication method is being used.
         if self._use_session_login:
             return "auth_method:session_login"
         return "auth_method:static_token"
 
-    def _auth_tags(self):
+    def _auth_tags(self) -> list[str]:
         return self._base_tags + [self._auth_method_tag()]
 
-    def _collect_server_health(self, servers):
+    def _collect_server_health(self, servers: Any) -> None:
         # Collect server health from the Control-M API. 1 is up, 0 is down.
         if not isinstance(servers, list):
             return
@@ -200,7 +207,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
             tags = self._base_tags + [f"ctm_server:{ctm_server}", f"state:{state_tag}"]
             self.gauge("server.up", is_up, tags=tags)
 
-    def check(self, _):
+    def check(self, _: Any) -> None:
         auth_tags = self._auth_tags()
 
         if self._use_session_login:
@@ -247,8 +254,8 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         self._collect_metadata(servers)
         self._collect_job_statuses()
 
-    def _collect_job_statuses(self):
-        url = self._build_jobs_status_url()
+    def _collect_job_statuses(self) -> None:
+        url = self._jobs_status_url
         try:
             response = self._make_request("get", url)
             response.raise_for_status()
@@ -266,12 +273,16 @@ class ControlMCheck(AgentCheck, ConfigMixin):
             self.gauge("jobs.total", total, tags=self._base_tags)
         self.gauge("jobs.returned", len(statuses), tags=self._base_tags)
 
-        if not statuses:
-            return
-
         now = time.time()
         finalized_changed = self._prune_state_map(self._finalized_runs, now, self._finalized_ttl_seconds)
         active_changed = self._prune_state_map(self._active_runs, now, self._active_ttl_seconds)
+
+        if not statuses:
+            if finalized_changed:
+                self._persist_finalized_runs_cache()
+            if active_changed:
+                self._persist_active_runs_cache()
+            return
 
         status_counts = {}
         active_by_server = {}
@@ -293,14 +304,15 @@ class ControlMCheck(AgentCheck, ConfigMixin):
             dedupe_key = self._build_run_key(job)
 
             if normalized_status in _TERMINAL_STATUSES:
-                if self._handle_terminal_job(job, normalized_status, dedupe_key, now):
+                if self._handle_terminal_job(job, normalized_status, dedupe_key, now, ctm_server):
                     finalized_changed = True
                 if dedupe_key is not None and dedupe_key in self._active_runs:
                     self._active_runs.pop(dedupe_key)
                     active_changed = True
             elif dedupe_key is not None:
+                if dedupe_key not in self._active_runs:
+                    active_changed = True
                 self._active_runs[dedupe_key] = now
-                active_changed = True
 
         for (ctm_server, normalized_status), count in status_counts.items():
             tags = self._base_tags + [f"ctm_server:{ctm_server}", f"status:{normalized_status}"]
@@ -321,7 +333,9 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         if active_changed:
             self._persist_active_runs_cache()
 
-    def _handle_terminal_job(self, job, normalized_status, dedupe_key, now):
+    def _handle_terminal_job(
+        self, job: dict[str, Any], normalized_status: str, dedupe_key: str | None, now: float, ctm_server: str
+    ) -> bool:
         if dedupe_key is None:
             self.log.debug("Skipping completion metrics for job without dedupe key: %s", job.get("name"))
             return False
@@ -329,7 +343,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
             return False
 
         result = self._result_from_status(normalized_status)
-        metric_tags = self._job_metric_tags(job)
+        metric_tags = self._job_metric_tags(job, ctm_server=ctm_server)
         completion_tags = metric_tags + [f"result:{result}"]
         self.count("job.run.count", 1, tags=completion_tags)
 
@@ -340,7 +354,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         self._finalized_runs[dedupe_key] = now
         return True
 
-    def _build_run_key(self, job):
+    def _build_run_key(self, job: dict[str, Any]) -> str | None:
         job_id = job.get("jobId")
         if not job_id:
             return None
@@ -359,25 +373,25 @@ class ControlMCheck(AgentCheck, ConfigMixin):
 
         return None
 
-    def _prune_state_map(self, state_map, now, ttl_seconds):
+    def _prune_state_map(self, state_map: dict[str, float], now: float, ttl_seconds: int) -> bool:
         stale = [key for key, seen_at in state_map.items() if now - seen_at > ttl_seconds]
         for key in stale:
             state_map.pop(key)
         return bool(stale)
 
-    def _load_finalized_runs_cache(self):
+    def _load_finalized_runs_cache(self) -> None:
         self._finalized_runs = self._load_cache(_FINALIZED_RUNS_CACHE_KEY, self._finalized_ttl_seconds)
 
-    def _persist_finalized_runs_cache(self):
+    def _persist_finalized_runs_cache(self) -> None:
         self._persist_cache(_FINALIZED_RUNS_CACHE_KEY, self._finalized_runs)
 
-    def _load_active_runs_cache(self):
+    def _load_active_runs_cache(self) -> None:
         self._active_runs = self._load_cache(_ACTIVE_RUNS_CACHE_KEY, self._active_ttl_seconds)
 
-    def _persist_active_runs_cache(self):
+    def _persist_active_runs_cache(self) -> None:
         self._persist_cache(_ACTIVE_RUNS_CACHE_KEY, self._active_runs)
 
-    def _load_cache(self, cache_key, ttl_seconds):
+    def _load_cache(self, cache_key: str, ttl_seconds: int) -> dict[str, float]:
         raw = self.read_persistent_cache(cache_key)
         if not raw:
             return {}
@@ -405,32 +419,21 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         self.log.debug("Loaded %d entries from persistent cache %s", len(loaded), cache_key)
         return loaded
 
-    def _persist_cache(self, cache_key, state_map):
+    def _persist_cache(self, cache_key: str, state_map: dict[str, float]) -> None:
         try:
             self.write_persistent_cache(cache_key, json.dumps(state_map))
         except Exception as e:
             self.log.warning("Could not persist cache %s: %s", cache_key, e)
 
-    def _build_jobs_status_url(self):
-        query = {
-            "limit": self._job_status_limit,
-            "jobname": self._job_name_filter,
-        }
-        return f"{self._api_endpoint}/run/jobs/status?{urlencode(query)}"
-
-    def _increment_count(self, counter, key):
+    def _increment_count(self, counter: dict, key: object) -> None:
         counter[key] = counter.get(key, 0) + 1
 
-    def _normalize_status(self, status):
-        # Normalize the status to a known value.
+    def _normalize_status(self, status: Any) -> str:
         if not status:
             return "unknown"
-        normalized = _STATUS_NORMALIZATION.get(str(status).strip().lower())
-        if normalized:
-            return normalized
-        return "unknown"
+        return _STATUS_NORMALIZATION.get(str(status).strip().lower(), "unknown")
 
-    def _result_from_status(self, status):
+    def _result_from_status(self, status: str) -> str:
         # Map the normalized status to a known result after job run completion.
         if status == "ended_ok":
             return "ok"
@@ -440,9 +443,9 @@ class ControlMCheck(AgentCheck, ConfigMixin):
             return "canceled"
         return "unknown"
 
-    def _job_metric_tags(self, job):
-        # Build tags for the job.
-        ctm_server = str(job.get("ctm") or job.get("server") or "unknown")
+    def _job_metric_tags(self, job: dict[str, Any], ctm_server: str | None = None) -> list[str]:
+        if ctm_server is None:
+            ctm_server = str(job.get("ctm") or job.get("server") or "unknown")
         tags = self._base_tags + [f"ctm_server:{ctm_server}"]
 
         job_name = job.get("name")
@@ -459,7 +462,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
 
         return tags
 
-    def _duration_ms(self, job):
+    def _duration_ms(self, job: dict[str, Any]) -> int | None:
         # Calculate the job duration in milliseconds from start/end timestamps.
         start = self._parse_datetime(job.get("startTime"))
         end = self._parse_datetime(job.get("endTime"))
@@ -470,7 +473,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
             return None
         return delta_ms
 
-    def _parse_datetime(self, value):
+    def _parse_datetime(self, value: Any) -> datetime | None:
         # Parse datetime values from compact Control-M format or human-readable fallback.
         timestamp = self._timestamp_string(value)
         if not timestamp:
@@ -488,7 +491,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         except ValueError:
             return None
 
-    def _timestamp_string(self, value):
+    def _timestamp_string(self, value: Any) -> str | None:
         # Estimated times can sometimes be a list...
         if isinstance(value, list):
             if not value:
@@ -504,7 +507,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         return str(value)
 
     @AgentCheck.metadata_entrypoint
-    def _collect_metadata(self, servers):
+    def _collect_metadata(self, servers: Any) -> None:
         # The /config/servers response is a list of server objects, each with
         # a "version" field (e.g. "9.0.21.080").  Report the first one found.
         if isinstance(servers, list):

@@ -49,7 +49,7 @@ def instance_job_name_filter():
 
 
 def instance_job_status_limit():
-    return 200
+    return 10000
 
 
 def instance_kerberos_auth():
