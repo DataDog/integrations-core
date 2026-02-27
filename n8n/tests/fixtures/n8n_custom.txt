@@ -1,0 +1,410 @@
+# HELP test_process_cpu_user_seconds_total Total user CPU time spent in seconds.
+# TYPE test_process_cpu_user_seconds_total counter
+test_process_cpu_user_seconds_total 8.298932999999998
+
+# HELP test_process_cpu_system_seconds_total Total system CPU time spent in seconds.
+# TYPE test_process_cpu_system_seconds_total counter
+test_process_cpu_system_seconds_total 3.1041119999999998
+
+# HELP test_process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE test_process_cpu_seconds_total counter
+test_process_cpu_seconds_total 11.403044999999999
+
+# HELP test_process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE test_process_start_time_seconds gauge
+test_process_start_time_seconds 1761656578
+
+# HELP test_process_resident_memory_bytes Resident memory size in bytes.
+# TYPE test_process_resident_memory_bytes gauge
+test_process_resident_memory_bytes 245043200
+
+# HELP test_process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE test_process_virtual_memory_bytes gauge
+test_process_virtual_memory_bytes 33656197120
+
+# HELP test_process_heap_bytes Process heap size in bytes.
+# TYPE test_process_heap_bytes gauge
+test_process_heap_bytes 277200896
+
+# HELP test_process_open_fds Number of open file descriptors.
+# TYPE test_process_open_fds gauge
+test_process_open_fds 44
+
+# HELP test_process_max_fds Maximum number of open file descriptors.
+# TYPE test_process_max_fds gauge
+test_process_max_fds 1048576
+
+# HELP test_nodejs_eventloop_lag_seconds Lag of event loop in seconds.
+# TYPE test_nodejs_eventloop_lag_seconds gauge
+test_nodejs_eventloop_lag_seconds 0.002765567
+
+# HELP test_nodejs_eventloop_lag_min_seconds The minimum recorded event loop delay.
+# TYPE test_nodejs_eventloop_lag_min_seconds gauge
+test_nodejs_eventloop_lag_min_seconds 0.010018816
+
+# HELP test_nodejs_eventloop_lag_max_seconds The maximum recorded event loop delay.
+# TYPE test_nodejs_eventloop_lag_max_seconds gauge
+test_nodejs_eventloop_lag_max_seconds 0.011239423
+
+# HELP test_nodejs_eventloop_lag_mean_seconds The mean of the recorded event loop delays.
+# TYPE test_nodejs_eventloop_lag_mean_seconds gauge
+test_nodejs_eventloop_lag_mean_seconds 0.010092521938958708
+
+# HELP test_nodejs_eventloop_lag_stddev_seconds The standard deviation of the recorded event loop delays.
+# TYPE test_nodejs_eventloop_lag_stddev_seconds gauge
+test_nodejs_eventloop_lag_stddev_seconds 0.00016945350643679045
+
+# HELP test_nodejs_eventloop_lag_p50_seconds The 50th percentile of the recorded event loop delays.
+# TYPE test_nodejs_eventloop_lag_p50_seconds gauge
+test_nodejs_eventloop_lag_p50_seconds 0.010067967
+
+# HELP test_nodejs_eventloop_lag_p90_seconds The 90th percentile of the recorded event loop delays.
+# TYPE test_nodejs_eventloop_lag_p90_seconds gauge
+test_nodejs_eventloop_lag_p90_seconds 0.010067967
+
+# HELP test_nodejs_eventloop_lag_p99_seconds The 99th percentile of the recorded event loop delays.
+# TYPE test_nodejs_eventloop_lag_p99_seconds gauge
+test_nodejs_eventloop_lag_p99_seconds 0.011124735
+
+# HELP test_nodejs_active_resources Number of active resources that are currently keeping the event loop alive, grouped by async resource type.
+# TYPE test_nodejs_active_resources gauge
+test_nodejs_active_resources{type="PipeWrap"} 2
+test_nodejs_active_resources{type="TCPServerWrap"} 1
+test_nodejs_active_resources{type="TCPSocketWrap"} 1
+test_nodejs_active_resources{type="Timeout"} 13
+test_nodejs_active_resources{type="Immediate"} 1
+
+# HELP test_nodejs_active_resources_total Total number of active resources.
+# TYPE test_nodejs_active_resources_total gauge
+test_nodejs_active_resources_total 18
+
+# HELP test_nodejs_active_handles Number of active libuv handles grouped by handle type. Every handle type is C++ class name.
+# TYPE test_nodejs_active_handles gauge
+test_nodejs_active_handles{type="Socket"} 3
+test_nodejs_active_handles{type="Server"} 1
+
+# HELP test_nodejs_active_handles_total Total number of active handles.
+# TYPE test_nodejs_active_handles_total gauge
+test_nodejs_active_handles_total 4
+
+# HELP test_nodejs_active_requests Number of active libuv requests grouped by request type. Every request type is C++ class name.
+# TYPE test_nodejs_active_requests gauge
+
+# HELP test_nodejs_active_requests_total Total number of active requests.
+# TYPE test_nodejs_active_requests_total gauge
+test_nodejs_active_requests_total 0
+
+# HELP test_nodejs_heap_size_total_bytes Process heap size from Node.js in bytes.
+# TYPE test_nodejs_heap_size_total_bytes gauge
+test_nodejs_heap_size_total_bytes 142774272
+
+# HELP test_nodejs_heap_size_used_bytes Process heap size used from Node.js in bytes.
+# TYPE test_nodejs_heap_size_used_bytes gauge
+test_nodejs_heap_size_used_bytes 136342632
+
+# HELP test_nodejs_external_memory_bytes Node.js external memory size in bytes.
+# TYPE test_nodejs_external_memory_bytes gauge
+test_nodejs_external_memory_bytes 20824585
+
+# HELP test_nodejs_heap_space_size_total_bytes Process heap space size total from Node.js in bytes.
+# TYPE test_nodejs_heap_space_size_total_bytes gauge
+test_nodejs_heap_space_size_total_bytes{space="read_only"} 0
+test_nodejs_heap_space_size_total_bytes{space="new"} 1048576
+test_nodejs_heap_space_size_total_bytes{space="old"} 122208256
+test_nodejs_heap_space_size_total_bytes{space="code"} 4718592
+test_nodejs_heap_space_size_total_bytes{space="shared"} 0
+test_nodejs_heap_space_size_total_bytes{space="trusted"} 7643136
+test_nodejs_heap_space_size_total_bytes{space="new_large_object"} 0
+test_nodejs_heap_space_size_total_bytes{space="large_object"} 7000064
+test_nodejs_heap_space_size_total_bytes{space="code_large_object"} 155648
+test_nodejs_heap_space_size_total_bytes{space="shared_large_object"} 0
+test_nodejs_heap_space_size_total_bytes{space="trusted_large_object"} 0
+
+# HELP test_nodejs_heap_space_size_used_bytes Process heap space size used from Node.js in bytes.
+# TYPE test_nodejs_heap_space_size_used_bytes gauge
+test_nodejs_heap_space_size_used_bytes{space="read_only"} 0
+test_nodejs_heap_space_size_used_bytes{space="new"} 652896
+test_nodejs_heap_space_size_used_bytes{space="old"} 119347344
+test_nodejs_heap_space_size_used_bytes{space="code"} 4183424
+test_nodejs_heap_space_size_used_bytes{space="shared"} 0
+test_nodejs_heap_space_size_used_bytes{space="trusted"} 5187192
+test_nodejs_heap_space_size_used_bytes{space="new_large_object"} 0
+test_nodejs_heap_space_size_used_bytes{space="large_object"} 6837144
+test_nodejs_heap_space_size_used_bytes{space="code_large_object"} 138432
+test_nodejs_heap_space_size_used_bytes{space="shared_large_object"} 0
+test_nodejs_heap_space_size_used_bytes{space="trusted_large_object"} 0
+
+# HELP test_nodejs_heap_space_size_available_bytes Process heap space size available from Node.js in bytes.
+# TYPE test_nodejs_heap_space_size_available_bytes gauge
+test_nodejs_heap_space_size_available_bytes{space="read_only"} 0
+test_nodejs_heap_space_size_available_bytes{space="new"} 378016
+test_nodejs_heap_space_size_available_bytes{space="old"} 430568
+test_nodejs_heap_space_size_available_bytes{space="code"} 239680
+test_nodejs_heap_space_size_available_bytes{space="shared"} 0
+test_nodejs_heap_space_size_available_bytes{space="trusted"} 2323072
+test_nodejs_heap_space_size_available_bytes{space="new_large_object"} 1048576
+test_nodejs_heap_space_size_available_bytes{space="large_object"} 0
+test_nodejs_heap_space_size_available_bytes{space="code_large_object"} 0
+test_nodejs_heap_space_size_available_bytes{space="shared_large_object"} 0
+test_nodejs_heap_space_size_available_bytes{space="trusted_large_object"} 0
+
+# HELP test_nodejs_version_info Node.js version info.
+# TYPE test_nodejs_version_info gauge
+test_nodejs_version_info{version="v22.18.0",major="22",minor="18",patch="0"} 1
+
+# HELP test_nodejs_gc_duration_seconds Garbage collection duration by kind, one of major, minor, incremental or weakcb.
+# TYPE test_nodejs_gc_duration_seconds histogram
+test_nodejs_gc_duration_seconds_bucket{le="0.001",kind="minor"} 128
+test_nodejs_gc_duration_seconds_bucket{le="0.01",kind="minor"} 132
+test_nodejs_gc_duration_seconds_bucket{le="0.1",kind="minor"} 132
+test_nodejs_gc_duration_seconds_bucket{le="1",kind="minor"} 132
+test_nodejs_gc_duration_seconds_bucket{le="2",kind="minor"} 132
+test_nodejs_gc_duration_seconds_bucket{le="5",kind="minor"} 132
+test_nodejs_gc_duration_seconds_bucket{le="+Inf",kind="minor"} 132
+test_nodejs_gc_duration_seconds_sum{kind="minor"} 0.09924478498101237
+test_nodejs_gc_duration_seconds_count{kind="minor"} 132
+test_nodejs_gc_duration_seconds_bucket{le="0.001",kind="incremental"} 1
+test_nodejs_gc_duration_seconds_bucket{le="0.01",kind="incremental"} 2
+test_nodejs_gc_duration_seconds_bucket{le="0.1",kind="incremental"} 2
+test_nodejs_gc_duration_seconds_bucket{le="1",kind="incremental"} 2
+test_nodejs_gc_duration_seconds_bucket{le="2",kind="incremental"} 2
+test_nodejs_gc_duration_seconds_bucket{le="5",kind="incremental"} 2
+test_nodejs_gc_duration_seconds_bucket{le="+Inf",kind="incremental"} 2
+test_nodejs_gc_duration_seconds_sum{kind="incremental"} 0.0022786640077829363
+test_nodejs_gc_duration_seconds_count{kind="incremental"} 2
+test_nodejs_gc_duration_seconds_bucket{le="0.001",kind="major"} 0
+test_nodejs_gc_duration_seconds_bucket{le="0.01",kind="major"} 0
+test_nodejs_gc_duration_seconds_bucket{le="0.1",kind="major"} 2
+test_nodejs_gc_duration_seconds_bucket{le="1",kind="major"} 2
+test_nodejs_gc_duration_seconds_bucket{le="2",kind="major"} 2
+test_nodejs_gc_duration_seconds_bucket{le="5",kind="major"} 2
+test_nodejs_gc_duration_seconds_bucket{le="+Inf",kind="major"} 2
+test_nodejs_gc_duration_seconds_sum{kind="major"} 0.1028408939987421
+test_nodejs_gc_duration_seconds_count{kind="major"} 2
+
+# HELP test_version_info n8n version info.
+# TYPE test_version_info gauge
+test_version_info{version="v1.117.2",major="1",minor="117",patch="2"} 1
+
+# HELP test_instance_role_leader Whether this main instance is the leader (1) or not (0).
+# TYPE test_instance_role_leader gauge
+test_instance_role_leader 1
+
+# HELP test_http_request_duration_seconds duration histogram of http responses labeled with: status_code
+# TYPE test_http_request_duration_seconds histogram
+
+# HELP test_last_activity last instance activity (backend request) in Unix time (seconds).
+# TYPE test_last_activity gauge
+test_last_activity 1761656582
+
+# HELP test_active_workflow_count Total number of active workflows.
+# TYPE test_active_workflow_count gauge
+test_active_workflow_count{workflow_id="wf_8a3b2c1d"} 0
+test_active_workflow_count{workflow_id="wf_7f4e9a2b"} 0
+test_active_workflow_count{workflow_id="wf_5d6c8e1f"} 0
+
+# HELP test_nodejs_event_loop_lag_seconds Event loop lag in seconds
+# TYPE test_nodejs_event_loop_lag_seconds gauge
+test_nodejs_event_loop_lag_seconds 0.0035
+
+# HELP test_nodejs_heap_total_bytes Total heap size allocated in bytes
+# TYPE test_nodejs_heap_total_bytes gauge
+test_nodejs_heap_total_bytes 73400320
+
+# HELP test_nodejs_heap_used_bytes Heap memory used in bytes
+# TYPE test_nodejs_heap_used_bytes gauge
+test_nodejs_heap_used_bytes 51200000
+
+# HELP test_workflow_executions_total Total number of workflow executions
+# TYPE test_workflow_executions_total counter
+test_workflow_executions_total{status="success",workflow_id="wf_8a3b2c1d"} 45
+test_workflow_executions_total{status="success",workflow_id="wf_7f4e9a2b"} 38
+test_workflow_executions_total{status="success",workflow_id="wf_5d6c8e1f"} 45
+test_workflow_executions_total{status="error",workflow_id="wf_8a3b2c1d"} 3
+test_workflow_executions_total{status="error",workflow_id="wf_5d6c8e1f"} 4
+
+# HELP test_workflow_executions_duration_seconds Workflow execution duration in seconds
+# TYPE test_workflow_executions_duration_seconds histogram
+test_workflow_executions_duration_seconds_bucket{le="0.1",workflow_id="wf_8a3b2c1d"} 5
+test_workflow_executions_duration_seconds_bucket{le="1",workflow_id="wf_8a3b2c1d"} 18
+test_workflow_executions_duration_seconds_bucket{le="+Inf",workflow_id="wf_8a3b2c1d"} 48
+test_workflow_executions_duration_seconds_sum{workflow_id="wf_8a3b2c1d"} 14.3
+test_workflow_executions_duration_seconds_count{workflow_id="wf_8a3b2c1d"} 48
+test_workflow_executions_duration_seconds_bucket{le="0.1",workflow_id="wf_7f4e9a2b"} 4
+test_workflow_executions_duration_seconds_bucket{le="1",workflow_id="wf_7f4e9a2b"} 15
+test_workflow_executions_duration_seconds_bucket{le="+Inf",workflow_id="wf_7f4e9a2b"} 38
+test_workflow_executions_duration_seconds_sum{workflow_id="wf_7f4e9a2b"} 11.2
+test_workflow_executions_duration_seconds_count{workflow_id="wf_7f4e9a2b"} 38
+test_workflow_executions_duration_seconds_bucket{le="0.1",workflow_id="wf_5d6c8e1f"} 3
+test_workflow_executions_duration_seconds_bucket{le="1",workflow_id="wf_5d6c8e1f"} 12
+test_workflow_executions_duration_seconds_bucket{le="+Inf",workflow_id="wf_5d6c8e1f"} 49
+test_workflow_executions_duration_seconds_sum{workflow_id="wf_5d6c8e1f"} 12.7
+test_workflow_executions_duration_seconds_count{workflow_id="wf_5d6c8e1f"} 49
+
+# HELP test_workflow_started_total Total number of workflows started
+# TYPE test_workflow_started_total counter
+test_workflow_started_total 25634
+test_workflow_started_total{workflow_id="12",workflow_name="CRM Sync"} 8142
+test_workflow_started_total{workflow_id="25",workflow_name="Webhook Intake"} 14290
+test_workflow_started_total{workflow_id="33",workflow_name="Slack Alerts"} 2202
+
+# HELP test_workflow_success_total Total number of workflows completed successfully
+# TYPE test_workflow_success_total counter
+test_workflow_success_total 25209
+test_workflow_success_total{workflow_id="12",workflow_name="CRM Sync"} 8059
+test_workflow_success_total{workflow_id="25",workflow_name="Webhook Intake"} 14135
+test_workflow_success_total{workflow_id="33",workflow_name="Slack Alerts"} 2015
+
+# HELP test_workflow_failed_total Total number of workflows that failed
+# TYPE test_workflow_failed_total counter
+test_workflow_failed_total 425
+test_workflow_failed_total{workflow_id="12",workflow_name="CRM Sync"} 83
+test_workflow_failed_total{workflow_id="25",workflow_name="Webhook Intake"} 155
+test_workflow_failed_total{workflow_id="33",workflow_name="Slack Alerts"} 187
+
+
+# HELP test_queue_jobs_total Total number of queue jobs
+# TYPE test_queue_jobs_total counter
+test_queue_jobs_total{state="waiting"} 3
+test_queue_jobs_total{state="active"} 2
+test_queue_jobs_total{state="completed"} 148
+test_queue_jobs_total{state="failed"} 5
+
+# HELP test_queue_jobs_duration_seconds Job duration in seconds
+# TYPE test_queue_jobs_duration_seconds histogram
+test_queue_jobs_duration_seconds_bucket{le="0.1"} 22
+test_queue_jobs_duration_seconds_bucket{le="1"} 84
+test_queue_jobs_duration_seconds_bucket{le="+Inf"} 150
+test_queue_jobs_duration_seconds_sum 44.8
+test_queue_jobs_duration_seconds_count 150
+
+# HELP test_queue_job_waiting_total Number of jobs currently waiting in the queue
+# TYPE test_queue_job_waiting_total gauge
+test_queue_job_waiting_total{queue="default"} 3
+
+# HELP test_queue_job_active_total Number of jobs currently being processed
+# TYPE test_queue_job_active_total gauge
+test_queue_job_active_total{queue="default"} 2
+
+# HELP test_queue_job_completed_total Number of jobs completed successfully
+# TYPE test_queue_job_completed_total counter
+test_queue_job_completed_total{queue="default"} 15892
+
+# HELP test_queue_job_failed_total Number of jobs that have failed
+# TYPE test_queue_job_failed_total counter
+test_queue_job_failed_total{queue="default"} 47
+
+# HELP test_queue_job_dequeued_total Number of jobs dequeued (picked up from queue)
+# TYPE test_queue_job_dequeued_total counter
+test_queue_job_dequeued_total{queue="default"} 15939
+
+# HELP test_queue_job_enqueued_total Number of jobs added to the queue
+# TYPE test_queue_job_enqueued_total counter
+test_queue_job_enqueued_total{queue="default"} 15670
+
+# HELP test_queue_job_delayed_total Number of jobs scheduled to run later
+# TYPE test_queue_job_delayed_total gauge
+test_queue_job_delayed_total{queue="default"} 5
+
+# HELP test_queue_job_waiting_duration_seconds Duration jobs spend waiting before being processed
+# TYPE test_queue_job_waiting_duration_seconds histogram
+test_queue_job_waiting_duration_seconds_bucket{queue="default",le="0.1"} 50
+test_queue_job_waiting_duration_seconds_bucket{queue="default",le="1"} 241
+test_queue_job_waiting_duration_seconds_bucket{queue="default",le="5"} 820
+test_queue_job_waiting_duration_seconds_bucket{queue="default",le="10"} 1105
+test_queue_job_waiting_duration_seconds_bucket{queue="default",le="30"} 1240
+test_queue_job_waiting_duration_seconds_bucket{queue="default",le="+Inf"} 1253
+test_queue_job_waiting_duration_seconds_sum{queue="default"} 450.32
+test_queue_job_waiting_duration_seconds_count{queue="default"} 1253
+
+# HELP test_api_requests_total Total API requests
+# TYPE test_api_requests_total counter
+test_api_requests_total{method="GET",endpoint="/workflows"} 240
+test_api_requests_total{method="POST",endpoint="/executions"} 75
+
+# HELP test_api_request_duration_seconds API request duration in seconds
+# TYPE test_api_request_duration_seconds histogram
+test_api_request_duration_seconds_bucket{le="0.1"} 90
+test_api_request_duration_seconds_bucket{le="1"} 120
+test_api_request_duration_seconds_bucket{le="+Inf"} 125
+test_api_request_duration_seconds_sum 15.3
+test_api_request_duration_seconds_count 125
+
+# HELP test_cache_operations_total Total cache operations
+# TYPE test_cache_operations_total counter
+test_cache_operations_total{operation="get"} 1250
+test_cache_operations_total{operation="set"} 320
+test_cache_operations_total{operation="delete"} 10
+
+# HELP test_cache_hits_total Cache hits
+# TYPE test_cache_hits_total counter
+test_cache_hits_total 1080
+
+# HELP test_cache_misses_total Cache misses
+# TYPE test_cache_misses_total counter
+test_cache_misses_total 170
+
+# HELP test_cache_errors_total Cache errors
+# TYPE test_cache_errors_total counter
+test_cache_errors_total 0
+
+# HELP test_cache_latency_seconds Cache operation latency in seconds
+# TYPE test_cache_latency_seconds histogram
+test_cache_latency_seconds_bucket{le="0.001"} 90
+test_cache_latency_seconds_bucket{le="0.01"} 240
+test_cache_latency_seconds_bucket{le="+Inf"} 260
+test_cache_latency_seconds_sum 1.42
+test_cache_latency_seconds_count 260
+
+# HELP test_eventbus_events_total Total events published on the event bus
+# TYPE test_eventbus_events_total counter
+test_eventbus_events_total{event_type="workflowStarted"} 140
+test_eventbus_events_total{event_type="workflowCompleted"} 135
+test_eventbus_events_total{event_type="workflowFailed"} 5
+
+# HELP test_eventbus_events_processed_total Total processed events
+# TYPE test_eventbus_events_processed_total counter
+test_eventbus_events_processed_total 138
+
+# HELP test_eventbus_events_failed_total Total failed event processing
+# TYPE test_eventbus_events_failed_total counter
+test_eventbus_events_failed_total 2
+
+# HELP test_eventbus_queue_size Current event queue size
+# TYPE test_eventbus_queue_size gauge
+test_eventbus_queue_size 1
+
+# HELP test_eventbus_connections_total Active event bus backend connections
+# TYPE test_eventbus_connections_total gauge
+test_eventbus_connections_total 1
+
+# HELP test_workflow_executions_active Number of active workflow executions
+# TYPE test_workflow_executions_active gauge
+test_workflow_executions_active 3
+
+# HELP test_queue_job_attempts_total Total number of job attempts
+# TYPE test_queue_job_attempts_total counter
+test_queue_job_attempts_total{result="success"} 435
+test_queue_job_attempts_total{result="failed"} 12
+
+# HELP test_workflow_started_total Total number of workflows started
+# TYPE test_workflow_started_total counter
+test_workflow_started_total 25634
+test_workflow_started_total{workflow_id="12",workflow_name="CRM Sync"} 8142
+test_workflow_started_total{workflow_id="25",workflow_name="Webhook Intake"} 14290
+test_workflow_started_total{workflow_id="33",workflow_name="Slack Alerts"} 2202
+
+# HELP test_workflow_success_total Total number of workflows completed successfully
+# TYPE test_workflow_success_total counter
+test_workflow_success_total 25209
+test_workflow_success_total{workflow_id="12",workflow_name="CRM Sync"} 8059
+test_workflow_success_total{workflow_id="25",workflow_name="Webhook Intake"} 14135
+test_workflow_success_total{workflow_id="33",workflow_name="Slack Alerts"} 2015
+
+# HELP test_workflow_failed_total Total number of workflows that failed
+# TYPE test_workflow_failed_total counter
+test_workflow_failed_total 425
+test_workflow_failed_total{workflow_id="12",workflow_name="CRM Sync"} 83
+test_workflow_failed_total{workflow_id="25",workflow_name="Webhook Intake"} 155
+test_workflow_failed_total{workflow_id="33",workflow_name="Slack Alerts"} 187
+

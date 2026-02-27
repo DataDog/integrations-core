@@ -1,0 +1,95 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+# Metrics mapping without prefix - use raw_metric_prefix config to strip prefixes like 'n8n_', 'n8n_my_team_', etc.
+# Namespace will be applied by the check
+# Note: OpenMetrics automatically appends .count to counter metrics, so don't add it here
+METRIC_MAP = {
+    'active_workflow_count': 'active.workflow.count',
+    'api_request_duration_seconds': 'api.request.duration.seconds',
+    'api_requests': 'api.requests',
+    'cache_errors': 'cache.errors',
+    'cache_hits': 'cache.hits',
+    'cache_latency_seconds': 'cache.latency.seconds',
+    'cache_misses': 'cache.misses',
+    'cache_operations': 'cache.operations',
+    'eventbus_connections_total': 'eventbus.connections.total',
+    'eventbus_events_failed': 'eventbus.events.failed',
+    'eventbus_events_processed': 'eventbus.events.processed',
+    'eventbus_events': 'eventbus.events',
+    'eventbus_queue_size': 'eventbus.queue.size',
+    'http_request_duration_seconds': 'http.request.duration.seconds',
+    'instance_role_leader': 'instance.role.leader',
+    'last_activity': {
+        'name': 'last.activity',
+        'type': 'time_elapsed',
+    },
+    'nodejs_active_handles': 'nodejs.active.handles',
+    'nodejs_active_handles_total': 'nodejs.active.handles.total',
+    'nodejs_active_requests': 'nodejs.active.requests',
+    'nodejs_active_requests_total': 'nodejs.active.requests.total',
+    'nodejs_active_resources': 'nodejs.active.resources',
+    'nodejs_active_resources_total': 'nodejs.active.resources.total',
+    'nodejs_event_loop_lag_seconds': 'nodejs.event.loop.lag.seconds',
+    'nodejs_eventloop_lag_max_seconds': 'nodejs.eventloop.lag.max.seconds',
+    'nodejs_eventloop_lag_mean_seconds': 'nodejs.eventloop.lag.mean.seconds',
+    'nodejs_eventloop_lag_min_seconds': 'nodejs.eventloop.lag.min.seconds',
+    'nodejs_eventloop_lag_p50_seconds': 'nodejs.eventloop.lag.p50.seconds',
+    'nodejs_eventloop_lag_p90_seconds': 'nodejs.eventloop.lag.p90.seconds',
+    'nodejs_eventloop_lag_p99_seconds': 'nodejs.eventloop.lag.p99.seconds',
+    'nodejs_eventloop_lag_seconds': 'nodejs.eventloop.lag.seconds',
+    'nodejs_eventloop_lag_stddev_seconds': 'nodejs.eventloop.lag.stddev.seconds',
+    'nodejs_external_memory_bytes': 'nodejs.external.memory.bytes',
+    'nodejs_gc_duration_seconds': 'nodejs.gc.duration.seconds',
+    'nodejs_heap_size_total_bytes': 'nodejs.heap.size.total.bytes',
+    'nodejs_heap_size_used_bytes': 'nodejs.heap.size.used.bytes',
+    'nodejs_heap_space_size_available_bytes': 'nodejs.heap.space.size.available.bytes',
+    'nodejs_heap_space_size_total_bytes': 'nodejs.heap.space.size.total.bytes',
+    'nodejs_heap_space_size_used_bytes': 'nodejs.heap.space.size.used.bytes',
+    'nodejs_heap_total_bytes': 'nodejs.heap.total.bytes',
+    'nodejs_heap_used_bytes': 'nodejs.heap.used.bytes',
+    'process_cpu_system_seconds': 'process.cpu.system.seconds',
+    'process_cpu_user_seconds': 'process.cpu.user.seconds',
+    'process_heap_bytes': 'process.heap.bytes',
+    'process_max_fds': 'process.max.fds',
+    'process_open_fds': 'process.open.fds',
+    'process_resident_memory_bytes': 'process.resident.memory.bytes',
+    'process_start_time_seconds': {
+        'name': 'process.uptime.seconds',
+        'type': 'time_elapsed',
+    },
+    'process_virtual_memory_bytes': 'process.virtual.memory.bytes',
+    'queue_job_active_total': 'queue.job.active.total',
+    'queue_job_attempts': 'queue.job.attempts',
+    'queue_job_completed': 'queue.job.completed',
+    'queue_job_delayed_total': 'queue.job.delayed.total',
+    'queue_job_dequeued': 'queue.job.dequeued',
+    'queue_job_enqueued': 'queue.job.enqueued',
+    'queue_job_failed': 'queue.job.failed',
+    'queue_job_waiting_duration_seconds': 'queue.job.waiting.duration.seconds',
+    'queue_job_waiting_total': 'queue.job.waiting.total',
+    'queue_jobs_duration_seconds': 'queue.jobs.duration.seconds',
+    'queue_jobs': 'queue.jobs',
+    'workflow_executions_active': 'workflow.executions.active',
+    'workflow_executions_duration_seconds': 'workflow.executions.duration.seconds',
+    'workflow_executions': 'workflow.executions',
+    'workflow_failed': 'workflow.failed',
+    'workflow_started': 'workflow.started',
+    'workflow_success': 'workflow.success',
+    'process_cpu_seconds': 'process.cpu.seconds',
+    'version_info': 'version.info',
+    'nodejs_version_info': 'nodejs.version.info',
+}
+
+N8N_VERSION = {'version_info': {'type': 'metadata', 'label': 'version', 'name': 'version'}}
+NODEJS_VERSION = {'nodejs_version_info': {'type': 'metadata', 'label': 'version', 'name': 'nodejs.version'}}
+
+METRIC_MAP.update(N8N_VERSION)
+METRIC_MAP.update(NODEJS_VERSION)
+
+RENAME_LABELS_MAP = {
+    'name': 'n8n_name',
+    'namespace': 'n8n_namespace',
+    'version': 'n8n_version',
+}

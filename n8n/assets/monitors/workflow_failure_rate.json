@@ -1,0 +1,42 @@
+{
+  "version": 2,
+  "created_at": "2026-02-03",
+  "last_updated_at": "2026-02-03",
+  "title": "High Workflow Failure Rate",
+  "tags": [
+    "integration:n8n"
+  ],
+  "description": "This monitor tracks the failure rate of n8n workflow executions. A high failure rate indicates reliability issues with specific workflows that require investigation of execution logs.",
+  "definition": {
+    "name": "[n8n] High Workflow Failure Rate",
+    "type": "query alert",
+    "query": "avg(last_15m):( sum:n8n.workflow.failed.count{*} by {workflow,host}.as_rate() / ( sum:n8n.workflow.failed.count{*} by {workflow,host}.as_rate() + sum:n8n.workflow.success.count{*} by {workflow,host}.as_rate() ) ) * 100 > 10",
+    "message": "{{#is_alert}}Workflow {{workflow.name}} on {{host.name}} has high failure rate: {{value}}% (threshold: {{threshold}}%).{{/is_alert}}{{#is_warning}}Workflow {{workflow.name}} failure rate elevated: {{value}}%.{{/is_warning}}{{#is_recovery}}Workflow {{workflow.name}} failure rate returned to normal.{{/is_recovery}}",
+    "tags": [
+      "integration:n8n",
+      "service:n8n",
+      "category:workflow",
+      "category:reliability"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 10,
+        "warning": 5,
+        "critical_recovery": 8,
+        "warning_recovery": 3
+      },
+      "notify_audit": false,
+      "require_full_window": true,
+      "notify_no_data": false,
+      "no_data_timeframe": null,
+      "renotify_interval": 30,
+      "include_tags": true,
+      "evaluation_delay": 120,
+      "new_group_delay": 300,
+      "escalation_message": "Workflow failure rate still elevated. Review execution logs.",
+      "renotify_statuses": ["alert"]
+    },
+    "priority": 2,
+    "restricted_roles": null
+  }
+}

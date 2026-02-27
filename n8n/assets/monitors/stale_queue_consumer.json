@@ -1,0 +1,40 @@
+{
+  "version": 2,
+  "created_at": "2026-02-03",
+  "last_updated_at": "2026-02-03",
+  "title": "Stale Queue Consumer (No Dequeue Activity)",
+  "tags": [
+    "integration:n8n"
+  ],
+  "description": "This monitor detects stale queue consumers in n8n by tracking dequeue activity over time. No dequeue activity indicates stuck workers or stale consumer deployments that need attention.",
+  "definition": {
+    "name": "[n8n] Stale Queue Consumer (No Dequeue Activity)",
+    "type": "query alert",
+    "query": "sum(last_15m):derivative(sum:n8n.queue.job.dequeued.count{*} by {host}.as_count()) <= 0",
+    "message": "{{#is_alert}}No dequeue activity on {{host.name}}. Stale consumers or stuck worker deployment detected.{{/is_alert}}{{#is_warning}}Dequeue activity on {{host.name}} unusually low.{{/is_warning}}{{#is_recovery}}Dequeue activity resumed on {{host.name}}.{{/is_recovery}}",
+    "tags": [
+      "integration:n8n",
+      "service:n8n",
+      "category:queue",
+      "category:availability",
+      "category:worker-health"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 0
+      },
+      "notify_audit": false,
+      "require_full_window": true,
+      "notify_no_data": true,
+      "no_data_timeframe": 20,
+      "renotify_interval": 15,
+      "include_tags": true,
+      "evaluation_delay": 120,
+      "new_group_delay": 300,
+      "escalation_message": "Queue consumers still stale. Workers may need restart.",
+      "renotify_statuses": ["alert", "no data"]
+    },
+    "priority": 1,
+    "restricted_roles": null
+  }
+}
