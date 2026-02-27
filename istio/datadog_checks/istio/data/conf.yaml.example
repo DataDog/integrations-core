@@ -47,10 +47,33 @@ instances:
 
     ## @param use_openmetrics - boolean - optional - default: false
     ## Use the OpenMetrics V2 implementation for more features and better performance.
-    ## This implementation is only available for Istio >= 1.5, and should be used with 
+    ## This implementation is only available for Istio >= 1.5, and should be used with
     ## `istiod_endpoint` or `istio_mesh_endpoint`.
     #
   - use_openmetrics: true
+
+    ## @param istio_mode - string - optional - default: sidecar
+    ## Specify the Istio data plane mode to monitor.
+    ## - `sidecar`: Monitor Istio sidecar proxies (traditional mode)
+    ## - `ambient`: Monitor Istio ambient mode components (ztunnel, waypoint proxies)
+    #
+    istio_mode: sidecar
+
+    ## @param ztunnel_endpoint - string - optional
+    ## Endpoint to collect ztunnel metrics in Istio ambient mode.
+    ## Ztunnel is the L4 proxy that provides zero-trust tunneling and mTLS for ambient mesh.
+    ## Only used when `istio_mode` is set to `ambient`.
+    ## Ztunnel metrics are exposed on port 15020.
+    #
+    # ztunnel_endpoint: http://ztunnel.istio-system:15020/stats/prometheus
+
+    ## @param waypoint_endpoint - string - optional
+    ## Endpoint to collect waypoint proxy metrics in Istio ambient mode.
+    ## Waypoint proxies provide optional L7 processing (HTTP/gRPC traffic management) in ambient mesh.
+    ## Only used when `istio_mode` is set to `ambient`.
+    ## Waypoint metrics are exposed on port 15020.
+    #
+    # waypoint_endpoint: http://waypoint.istio-system:15020/stats/prometheus
 
     ## @param istiod_endpoint - string - optional
     ## Collect mixer, galley, pilot, and citadel metrics available from the istiod deployment.

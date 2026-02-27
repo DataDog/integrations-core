@@ -18,10 +18,17 @@ instances:
   -
     ## @param use_openmetrics - boolean - optional - default: false
     ## Use the OpenMetrics V2 implementation for more features and better performance.
-    ## This implementation is only available for Istio >= 1.5, and should be used with 
+    ## This implementation is only available for Istio >= 1.5, and should be used with
     ## `istiod_endpoint` or `istio_mesh_endpoint`.
     #
     # use_openmetrics: true
+
+    ## @param istio_mode - string - optional - default: sidecar
+    ## Specify the Istio data plane mode to monitor.
+    ## - `sidecar`: Monitor Istio sidecar proxies (traditional mode)
+    ## - `ambient`: Monitor Istio ambient mode components (ztunnel, waypoint proxies)
+    #
+    # istio_mode: sidecar
 
     ## @param send_histograms_buckets - boolean - optional - default: true
     ## Set send_histograms_buckets to true to send the histograms bucket from Istio.

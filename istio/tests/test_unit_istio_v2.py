@@ -5,6 +5,7 @@ import copy
 
 import pytest
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.dev import get_here
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.istio import Istio
@@ -235,3 +236,52 @@ def test_all_labels_submitted(aggregator, dd_run_check, mock_http_response):
 
     for tag in common.PREVIOUSLY_EXCLUDED_TAGS:
         aggregator.assert_metric_has_tag('istio.mesh.request.count', tag)
+
+
+# --- Ambient mode (istio_mode: ambient) tests ---
+
+
+def test_ambient_ztunnel_metrics(aggregator, dd_run_check, mock_http_response):
+    """Test ztunnel metrics collection in ambient mode with default namespace."""
+    mock_http_response(file_path=get_fixture_path('1.5', 'ztunnel.txt'))
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_AMBIENT_ZTUNNEL_INSTANCE])
+    dd_run_check(check)
+
+    for metric in common.V2_ZTUNNEL_METRICS:
+        aggregator.assert_metric(metric)
+
+
+def test_ambient_waypoint_metrics(aggregator, dd_run_check, mock_http_response):
+    """Test waypoint proxy metrics collection in ambient mode with default namespace."""
+    mock_http_response(file_path=get_fixture_path('1.5', 'waypoint.txt'))
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_AMBIENT_WAYPOINT_INSTANCE])
+    dd_run_check(check)
+
+    for metric in common.V2_WAYPOINT_METRICS:
+        aggregator.assert_metric(metric)
+
+
+def test_ambient_invalid_mode():
+    """Test that invalid istio_mode raises ConfigurationError."""
+    instance = {
+        'istio_mode': 'invalid',
+        'ztunnel_endpoint': 'http://localhost:15020/stats/prometheus',
+        'use_openmetrics': True,
+    }
+    check = Istio(common.CHECK_NAME, {}, [instance])
+    with pytest.raises(ConfigurationError, match="Invalid istio_mode 'invalid'"):
+        check._parse_config()
+
+
+def test_ambient_requires_at_least_one_endpoint():
+    """Test that ambient mode requires at least one of ztunnel, waypoint, or istiod endpoint."""
+    instance = {
+        'istio_mode': 'ambient',
+        'use_openmetrics': True,
+    }
+    check = Istio(common.CHECK_NAME, {}, [instance])
+    with pytest.raises(
+        ConfigurationError,
+        match="In ambient mode, must specify at least one of:",
+    ):
+        check._parse_config()

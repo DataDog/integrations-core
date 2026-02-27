@@ -4,6 +4,8 @@
 
 # Istio namespaces
 ISTIOD_NAMESPACE = 'istio'
+ZTUNNEL_NAMESPACE = 'istio.ztunnel'
+WAYPOINT_NAMESPACE = 'istio.waypoint'
 
 # Known labels that cause context explosion
 BLACKLIST_LABELS = ["connectionID"]
