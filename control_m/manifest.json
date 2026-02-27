@@ -8,18 +8,15 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "Monitor Control-M servers and jobs",
     "title": "Control-M",
     "media": [],
     "classifier_tags": [
-      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::<FILL IN>",
-      "Offering::<FILL IN>",
-      "Queried Data Type::<FILL IN>",
-      "Submitted Data Type::<FILL IN>"
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -35,7 +32,7 @@
       },
       "metrics": {
         "prefix": "control_m.",
-        "check": "",
+        "check": "control_m.can_connect",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
@@ -43,7 +40,7 @@
       }
     },
     "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
+        "overview": "control_m_dashboard.json"
     },
     "monitors": {},
     "saved_views": {}
