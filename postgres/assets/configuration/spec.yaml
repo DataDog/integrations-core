@@ -412,6 +412,7 @@ files:
         example: /usr/local/pgsql/data
         display_default: /usr/local/pgsql/data
     - name: tag_replication_role
+      fleet_configurable: true
       hidden: true
       description: Tag metrics and checks with `replication_role:<master|standby>`.
       value:
@@ -571,12 +572,14 @@ files:
       description: Configure collection of query metrics
       options:
         - name: enabled
+          fleet_configurable: true
           description: |
             Enable collection of query metrics. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
+          fleet_configurable: true
           description: |
             Set the query metric collection interval (in seconds). Each collection involves a single query to
             `pg_stat_statements`. If a non-default value is chosen then that exact same value must be used for *every*
@@ -725,6 +728,7 @@ files:
             type: boolean
             example: false
     - name: query_activity
+      fleet_configurable: true
       description: Configure collection of in-flight query samples
       options:
         - name: enabled
@@ -744,6 +748,7 @@ files:
             example: 10
           hidden: true
         - name: payload_row_limit
+          fleet_configurable: true
           description: |
             Set the maximum number of pg_stat_activity rows you want to report. If the table is larger
             than the maximum rows set, then the top N longest running transactions will be reported.
@@ -751,6 +756,7 @@ files:
             type: number
             example: 3500
     - name: collect_settings
+      fleet_configurable: true
       description: Configure collection of pg_settings.
       options:
         - name: enabled
@@ -769,6 +775,7 @@ files:
             type: number
             example: 600
         - name: ignored_settings_patterns
+          fleet_configurable: true
           description: |
             A list of setting patterns to ignore. Any setting key matching one of the value in this list will
             not be collected. This uses the traditional LIKE pattern-matching approach.
@@ -781,6 +788,7 @@ files:
               default:
                 - plpgsql%
         - name: run_sync
+          fleet_configurable: true
           hidden: true
           description: |
             Run the metadata collection synchronously. This is useful for testing purposes, but should not be used
@@ -789,6 +797,7 @@ files:
             type: boolean
             example: false
     - name: collect_schemas
+      fleet_configurable: true
       description: |
         Enable collection of database schemas. In order to collect schemas from all user databases,
         enable `database_autodiscovery`. To collect from a single database, set `dbname` to collect
@@ -810,12 +819,14 @@ files:
             example: 300
             display_default: 300
         - name: max_query_duration
+          fleet_configurable: true
           description: |
             Maximum duration of the query to collect schema information in seconds.
           value:
             type: number
             display_default: 60
         - name: max_columns
+          fleet_configurable: true
           description: |
             Maximum amount of columns the Agent collects per table.
           value:
@@ -830,6 +841,7 @@ files:
             type: number
             example: 600
         - name: include_databases
+          fleet_configurable: true
           description: |
             A list of regex patterns to include databases. 
             Any database whose name matches any one of these patterns will be included. 
@@ -841,6 +853,7 @@ files:
             example:
               - "mydb"
         - name: exclude_databases
+          fleet_configurable: true
           description: |
             A list of regex patterns to exclude databases.
             Any database whose name matches any one of these patterns will be excluded.
@@ -860,6 +873,7 @@ files:
               - "alloydbadmin"
               - "alloydbmetadata"
         - name: include_schemas
+          fleet_configurable: true
           description: |
             A list of regex patterns to include schemas. 
             Any schema whose name matches any one of these patterns will be included.
@@ -871,6 +885,7 @@ files:
             example:
               - "myschema"
         - name: exclude_schemas
+          fleet_configurable: true
           description: |
             A list of regex patterns to exclude schemas. 
             Any schema whose name matches any one of these patterns will be excluded.
@@ -882,6 +897,7 @@ files:
             example:
               - "privateschema.*"
         - name: include_tables
+          fleet_configurable: true
           description: |
             A list of regex patterns to include tables. 
             Any table whose name matches any one of these patterns will be included.
@@ -893,6 +909,7 @@ files:
             example:
               - "users.*"
         - name: exclude_tables
+          fleet_configurable: true
           description: |
             A list of regex patterns to exclude tables. 
             Any table whose name matches any one of these patterns will be excluded.

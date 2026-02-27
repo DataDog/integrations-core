@@ -282,9 +282,9 @@
     example: true
     type: boolean
 - name: non_cumulative_histogram_buckets
+  fleet_configurable: true
   description: |
     Whether or not histogram buckets are non-cumulative and to come with a `lower_bound` tag.
-  fleet_configurable: true
   value:
     example: false
     type: boolean

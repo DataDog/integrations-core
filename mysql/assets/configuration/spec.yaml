@@ -479,12 +479,14 @@ files:
             fleet_configurable: true
             options:
               - name: enabled
+                fleet_configurable: true
                 description: |
                   Enable collection of query metrics. Requires `dbm: true`.
                 value:
                   type: boolean
                   example: true
               - name: collection_interval
+                fleet_configurable: true
                 description: |
                   Set the query metric collection interval (in seconds). Each collection involves a single query to
                   `pg_stat_statements`. If a non-default value is chosen then that exact same value must be used for *every*
@@ -493,6 +495,7 @@ files:
                   type: number
                   example: 10
               - name: only_query_recent_statements
+                fleet_configurable: true
                 description: |
                   Enable querying only for statements that have been run since last collection. This may improve agent
                   performance and reduce database load. Enabling this option should not alter the total number of query
@@ -503,6 +506,7 @@ files:
                   display_default: false
               - name: collect_prepared_statements
                 hidden: true
+                fleet_configurable: true
                 description: |
                   Enable collection of prepared statements metrics. Prerequisites: `only_query_recent_statements: false`.
                   Defaults to true.
@@ -516,12 +520,14 @@ files:
             fleet_configurable: true
             options:
               - name: enabled
+                fleet_configurable: true
                 description: |
                   Enables collection of query samples. Requires `dbm: true`.
                 value:
                   type: boolean
                   example: true
               - name: collection_interval
+                fleet_configurable: true
                 description: |
                   Sets the query sample collection interval (in seconds). Each collection involves a single query to one
                   of the `performance_schema.events_statements_*` tables, followed by at most one `EXPLAIN` query per
@@ -530,12 +536,14 @@ files:
                   type: number
                   example: 1
               - name: explained_queries_per_hour_per_query
+                fleet_configurable: true
                 description: |
                   Sets the rate limit for how many execution plans will be collected per hour per normalized query.
                 value:
                   type: integer
                   example: 60
               - name: samples_per_hour_per_query
+                fleet_configurable: true
                 description: |
                   Sets the rate limit for how many statement sample events will be ingested per hour per normalized
                   execution plan.
@@ -543,6 +551,7 @@ files:
                   type: integer
                   example: 15
               - name: explained_queries_cache_maxsize
+                fleet_configurable: true
                 description: |
                   Sets the max size of the cache used for the explained_queries_per_hour_per_query rate limit. This
                   should be increased for databases with a very large number of unique normalized queries which exceed the
@@ -551,6 +560,7 @@ files:
                   type: integer
                   example: 5000
               - name: seen_samples_cache_maxsize
+                fleet_configurable: true
                 description: |
                   Sets the max size of the cache used for the samples_per_hour_per_query rate limit. This should be
                   increased for databases with a very large number of unique normalized execution plans which exceed the
@@ -559,6 +569,7 @@ files:
                   type: integer
                   example: 10000
               - name: events_statements_row_limit
+                fleet_configurable: true
                 description: |
                   Sets the maximum number of rows to read out from a `performance_schema.events_statements_*` table during
                   a single collection.
@@ -566,6 +577,7 @@ files:
                   type: integer
                   example: 5000
               - name: explain_procedure
+                fleet_configurable: true
                 description: |
                   Overrides the default procedure used for collecting execution plans. The agent will use this
                   procedure in each schema where it exists: `{schema}.explain_statement({statement})`.
@@ -573,6 +585,7 @@ files:
                   type: string
                   example: explain_statement
               - name: fully_qualified_explain_procedure
+                fleet_configurable: true
                 description: |
                   Overrides the default fully qualified explain procedure used for collecting execution plans for
                   statements sent from connections that do not have a default schema configured.
@@ -580,12 +593,14 @@ files:
                   type: string
                   example: datadog.explain_statement
               - name: events_statements_enable_procedure
+                fleet_configurable: true
                 description: |
                   Overrides the default procedure used for enabling events statements consumers.
                 value:
                   type: string
                   example: datadog.enable_events_statements_consumers
               - name: events_statements_temp_table_name
+                fleet_configurable: true
                 description: |
                   Overrides the default fully qualified name for the temp table the agent creates while collecting
                   samples.
@@ -593,6 +608,7 @@ files:
                   type: string
                   example: datadog.temp_events
               - name: collection_strategy_cache_maxsize
+                fleet_configurable: true
                 description: |
                   Sets the max size of the cache used for caching collection strategies. This value should be increased
                   to be at least as many as the number of unique schemas that are being monitored.
@@ -600,6 +616,7 @@ files:
                   type: integer
                   example: 1000
               - name: collection_strategy_cache_ttl
+                fleet_configurable: true
                 description: |
                   Sets how long to cache collection strategies. This should only be decreased if the set of enabled
                   `events_statements_*` tables changes frequently enough to cause stale strategies to return empty
