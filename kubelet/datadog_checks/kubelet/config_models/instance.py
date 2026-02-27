@@ -109,6 +109,7 @@ class InstanceConfig(BaseModel):
     label_to_hostname: Optional[str] = None
     labels_mapper: Optional[MappingProxyType[str, Any]] = None
     log_requests: Optional[bool] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, str]], ...]] = None
     min_collection_interval: Optional[float] = None

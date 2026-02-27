@@ -54,6 +54,7 @@ EXPECTED_DEFAULTS = {
     'tag_replication_role': True,
     'table_count_limit': 200,
     'max_relations': 300,
+    'max_returned_metrics': None,
     # === Database filtering ===
     'ignore_databases': [
         'template0',

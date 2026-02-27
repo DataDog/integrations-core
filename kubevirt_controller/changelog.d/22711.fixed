@@ -1,0 +1,1 @@
+Add `max_returned_metrics` to the instance configuration model to reflect the existing runtime support for limiting the number of unique metric contexts submitted per collection cycle.

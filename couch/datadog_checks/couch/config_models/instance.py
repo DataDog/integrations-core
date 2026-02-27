@@ -80,6 +80,7 @@ class InstanceConfig(BaseModel):
     log_requests: Optional[bool] = None
     max_dbs_per_check: Optional[int] = None
     max_nodes_per_check: Optional[int] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     name: Optional[str] = None

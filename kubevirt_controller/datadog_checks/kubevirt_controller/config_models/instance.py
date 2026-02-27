@@ -123,6 +123,7 @@ class InstanceConfig(BaseModel):
     kubevirt_controller_healthz_endpoint: Optional[str] = None
     kubevirt_controller_metrics_endpoint: Optional[str] = None
     log_requests: Optional[bool] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]] = None
     min_collection_interval: Optional[float] = None
