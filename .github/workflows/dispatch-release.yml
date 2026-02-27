@@ -1,0 +1,121 @@
+name: Dispatch Release
+
+# Reusable workflow that chunks integrations and dispatches release workflow runs
+# This workflow can be called from integration repositories to trigger wheel builds
+# in agent-integration-wheels-release
+
+on:
+  workflow_call:
+    inputs:
+      integrations:
+        description: 'JSON array of integrations to release'
+        required: true
+        type: string
+      source-repo:
+        description: 'Source repository name (integrations-core, integrations-extras, or marketplace)'
+        required: true
+        type: string
+      source-repo-ref:
+        description: 'Git reference to build from (commit SHA, branch, or tag)'
+        required: true
+        type: string
+      release-workflow-ref:
+        description: 'Git reference of release workflow to dispatch (branch or commit SHA)'
+        required: false
+        type: string
+        default: 'main'
+      sts-policy:
+        description: 'dd-octo-sts trust policy name to use for authentication'
+        required: true
+        type: string
+      chunk-size:
+        description: 'Maximum integrations per workflow run (default: 200)'
+        required: false
+        type: number
+        default: 200
+
+permissions:
+  id-token: write # Required for OIDC token generation (dd-octo-sts)
+  contents: read
+
+jobs:
+  dispatch:
+    name: Dispatch release workflow runs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get GitHub token via dd-octo-sts
+        id: octo-sts
+        uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
+        with:
+          scope: DataDog/agent-integration-wheels-release
+          policy: ${{ inputs.sts-policy }}
+
+      - name: Chunk and dispatch workflow runs
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        env:
+          INTEGRATIONS_JSON: ${{ inputs.integrations }}
+          SOURCE_REPO: ${{ inputs.source-repo }}
+          SOURCE_REF: ${{ inputs.source-repo-ref }}
+          RELEASE_WORKFLOW_REF: ${{ inputs.release-workflow-ref }}
+          CHUNK_SIZE: ${{ inputs.chunk-size }}
+        with:
+          github-token: ${{ steps.octo-sts.outputs.token }}
+          script: |
+            // Parse inputs from environment to prevent code injection
+            const integrations = JSON.parse(process.env.INTEGRATIONS_JSON);
+            const sourceRepo = process.env.SOURCE_REPO;
+            const sourceRef = process.env.SOURCE_REF;
+            const releaseWorkflowRef = process.env.RELEASE_WORKFLOW_REF;
+            const chunkSize = parseInt(process.env.CHUNK_SIZE);
+
+            console.log(`🚀 Triggering builds for ${integrations.length} integration(s)`);
+            console.log(`📦 Source: ${sourceRepo} at ${sourceRef}`);
+            console.log(`🎯 Target: release-integrations.yml at ${releaseWorkflowRef}`);
+
+            // Split into chunks
+            const chunks = [];
+            for (let i = 0; i < integrations.length; i += chunkSize) {
+              chunks.push(integrations.slice(i, i + chunkSize));
+            }
+
+            console.log(`\n📊 Split into ${chunks.length} chunk(s) of max ${chunkSize} integrations each`);
+
+            // Dispatch a workflow run for each chunk
+            const dispatchedRuns = [];
+
+            for (let i = 0; i < chunks.length; i++) {
+              const chunk = chunks[i];
+              console.log(`\n📨 Dispatching chunk ${i + 1}/${chunks.length} (${chunk.length} integrations)`);
+              console.log(`   Integrations: ${chunk.slice(0, 5).join(', ')}${chunk.length > 5 ? '...' : ''}`);
+
+              try {
+                await github.rest.actions.createWorkflowDispatch({
+                  owner: 'DataDog',
+                  repo: 'agent-integration-wheels-release',
+                  workflow_id: 'release-integrations.yml',
+                  ref: releaseWorkflowRef,
+                  inputs: {
+                    integrations: JSON.stringify(chunk),
+                    'source-repo': sourceRepo,
+                    'source-repo-ref': sourceRef,
+                    'release-cli-ref': releaseWorkflowRef
+                  }
+                });
+
+                dispatchedRuns.push({
+                  chunk: i + 1,
+                  count: chunk.length,
+                  integrations: chunk
+                });
+
+                console.log(`   ✅ Chunk ${i + 1} dispatched successfully`);
+              } catch (error) {
+                console.error(`   ❌ Failed to dispatch chunk ${i + 1}:`, error.message);
+                throw error;
+              }
+            }
+
+            console.log(`\n🎉 Successfully dispatched ${chunks.length} workflow run(s)`);
+            console.log(`📊 Total integrations: ${integrations.length}`);
+            console.log(`🔗 Monitor progress at: https://github.com/DataDog/agent-integration-wheels-release/actions/workflows/release-integrations.yml`);

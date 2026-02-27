@@ -1,0 +1,81 @@
+name: Trigger Integration Release
+
+# This workflow triggers wheel builds in the private agent-integration-wheels-release repo
+# when new integration versions are ready to release
+# TRIGGER
+
+on:
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      integrations:
+        description: 'JSON array of integrations to release (e.g., ["postgres", "mysql"])'
+        required: true
+        type: string
+      ref:
+        description: "Git reference to build from (commit SHA, branch, or tag)"
+        required: false
+        type: string
+        default: "master"
+
+  # PR trigger for testing (when PRs target master from test branch)
+  pull_request:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/trigger-release.yml"
+
+  # TODO: Add tag trigger after testing
+  # push:
+  #   tags:
+  #     - '*-*'
+
+jobs:
+  trigger-release:
+    name: Extract inputs and prepare dispatch
+    runs-on: ubuntu-latest
+    outputs:
+      integrations: ${{ steps.extract.outputs.integrations }}
+      source-ref: ${{ steps.extract.outputs.source-ref }}
+      sts-policy: ${{ steps.extract.outputs.sts-policy }}
+
+    steps:
+      - name: Extract inputs
+        id: extract
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # PR testing - use test integrations, PR head ref, and test policy
+            INTEGRATIONS='["postgres", "redisdb", "windows_performance_counters", "ibm_mq"]'
+            SOURCE_REF='${{ github.event.pull_request.head.sha }}'
+            POLICY="integrations-core.dispatch-wheel-builds-test"
+            echo "PR testing mode"
+          else
+            # Manual trigger - use workflow inputs and production policy
+            INTEGRATIONS='${{ inputs.integrations }}'
+            SOURCE_REF='${{ inputs.ref }}'
+            POLICY="integrations-core.dispatch-wheel-builds"
+            echo "Manual trigger mode"
+          fi
+
+          echo "Integrations to build: $INTEGRATIONS"
+          echo "Source ref: $SOURCE_REF"
+          echo "Policy: $POLICY"
+
+          echo "integrations=$INTEGRATIONS" >> $GITHUB_OUTPUT
+          echo "source-ref=$SOURCE_REF" >> $GITHUB_OUTPUT
+          echo "sts-policy=$POLICY" >> $GITHUB_OUTPUT
+
+  dispatch-release:
+    name: Dispatch releases
+    needs: trigger-release
+    permissions:
+      id-token: write # Required for OIDC token generation (dd-octo-sts)
+      contents: read
+    uses: ./.github/workflows/dispatch-release.yml
+    with:
+      integrations: ${{ needs.trigger-release.outputs.integrations }}
+      source-repo: integrations-core
+      source-repo-ref: ${{ needs.trigger-release.outputs.source-ref }}
+      release-workflow-ref: ${{ github.event_name == 'pull_request' && '01-28-add_release_workflow' || 'main' }}
+      sts-policy: ${{ needs.trigger-release.outputs.sts-policy }}
+      chunk-size: ${{ github.event_name == 'pull_request' && 2 || 200 }}
