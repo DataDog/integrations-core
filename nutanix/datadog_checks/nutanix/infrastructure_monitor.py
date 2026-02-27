@@ -84,7 +84,7 @@ class InfrastructureMonitor:
             self.check.log.info("[%s] Found %d categories", pc_label, len(categories))
             for category in categories:
                 category_id = category.get("extId")
-                if category_id:
+                if category_id and should_collect_resource('category', category, self.check.resource_filters):
                     self._categories[category_id] = category
 
             clusters = self._list_clusters()

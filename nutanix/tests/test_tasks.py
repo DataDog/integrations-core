@@ -163,6 +163,7 @@ def test_tasks_filtered_by_resource_filters_exclude_cluster(
 
     tasks = [t for t in aggregator.events if "ntnx_type:task" in t.get('tags', [])]
     # Verify that no tasks from the excluded cluster are collected
+    # Note: all() returns True for empty list, which is correct for exclude filters
     assert all("ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d" not in t["tags"] for t in tasks)
 
 
@@ -210,6 +211,7 @@ def test_tasks_filtered_by_activity_filter_status_exclude(
 
     tasks = [t for t in aggregator.events if "ntnx_type:task" in t.get('tags', [])]
     # Verify that no tasks with excluded status are collected
+    # Note: all() returns True for empty list, which is correct for exclude filters
     assert all("ntnx_task_status:SUCCEEDED" not in t["tags"] for t in tasks)
 
 

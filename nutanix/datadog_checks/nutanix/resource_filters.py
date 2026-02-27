@@ -7,7 +7,8 @@ from typing import Any
 
 INFRASTRUCTURE_RESOURCE_TYPES = frozenset(('cluster', 'host', 'vm'))
 ACTIVITY_RESOURCE_TYPES = frozenset(('event', 'task', 'alert', 'audit'))
-RESOURCE_TYPES = INFRASTRUCTURE_RESOURCE_TYPES | ACTIVITY_RESOURCE_TYPES
+METADATA_RESOURCE_TYPES = frozenset(('category',))
+RESOURCE_TYPES = INFRASTRUCTURE_RESOURCE_TYPES | ACTIVITY_RESOURCE_TYPES | METADATA_RESOURCE_TYPES
 FILTER_TYPES = frozenset(('include', 'exclude'))
 
 ACTIVITY_DEFAULT_PROPERTIES = {
@@ -15,6 +16,10 @@ ACTIVITY_DEFAULT_PROPERTIES = {
     'task': 'status',
     'alert': 'severity',
     'audit': 'auditType',
+}
+
+METADATA_DEFAULT_PROPERTIES = {
+    'category': 'type',  # Valid values: SYSTEM, INTERNAL, USER
 }
 
 
@@ -38,7 +43,41 @@ def _validate_filter_structure(f: dict[str, Any]) -> bool:
 
 
 def parse_resource_filters(raw_filters: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Parse and validate resource filters, compiling regex patterns."""
+    """Parse and validate resource filters, compiling regex patterns.
+
+    Resource filters allow selective collection of infrastructure resources (clusters, hosts, VMs),
+    activity data (events, tasks, alerts, audits), and metadata (categories).
+
+    Args:
+        raw_filters: List of filter configurations from user config
+
+    Returns:
+        List of validated filters with compiled regex patterns
+
+    Filter Structure:
+        - resource: Type of resource to filter (cluster, host, vm, event, task, alert, audit, category)
+        - property: Property to match against (defaults based on resource type)
+        - type: 'include' (default) or 'exclude'
+        - patterns: List of regex patterns to match
+
+    Default Properties:
+        - Infrastructure (cluster, host, vm): 'name'
+        - Activity (event, task, alert, audit): specific to type (eventType, status, severity, auditType)
+        - Metadata (category): 'type' (valid values: SYSTEM, INTERNAL, USER)
+
+    Examples:
+        # Include only SYSTEM categories
+        {"resource": "category", "property": "type", "patterns": ["^SYSTEM$"]}
+
+        # Exclude INTERNAL categories
+        {"resource": "category", "property": "type", "type": "exclude", "patterns": ["^INTERNAL$"]}
+
+        # Include specific clusters by name
+        {"resource": "cluster", "property": "name", "patterns": ["^prod-"]}
+
+        # Exclude failed tasks
+        {"resource": "task", "property": "status", "type": "exclude", "patterns": ["^FAILED$"]}
+    """
     result = []
     for f in raw_filters or []:
         if not _validate_filter_structure(f):
@@ -54,6 +93,8 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]]) -> list[dict[str, 
                 property_ = 'name'
             elif resource in ACTIVITY_RESOURCE_TYPES:
                 property_ = ACTIVITY_DEFAULT_PROPERTIES.get(resource, '')
+            elif resource in METADATA_RESOURCE_TYPES:
+                property_ = METADATA_DEFAULT_PROPERTIES.get(resource, '')
 
         filter_type = str(f.get('type', 'include')).lower()
         if filter_type not in FILTER_TYPES:
