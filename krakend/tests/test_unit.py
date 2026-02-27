@@ -55,9 +55,10 @@ def test_check_filters_metrics_config(
     prefixed_metrics: dict[str, list] = {expected_prefix: [] for expected_prefix in expected_prefixes}
 
     for expected_prefix in expected_prefixes:
-        prefixed_metrics[expected_prefix].extend(
-            [metric for metric in final_config["metrics"][0] if metric.startswith(expected_prefix)]
-        )
+        for metrics_dict in final_config["metrics"]:
+            prefixed_metrics[expected_prefix].extend(
+                [metric for metric in metrics_dict if metric.startswith(expected_prefix)]
+            )
 
     errors = []
     for expected_prefix in expected_prefixes:
