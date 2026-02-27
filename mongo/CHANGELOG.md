@@ -2,7 +2,20 @@
 
 <!-- towncrier release notes start -->
 
-## 10.5.0 / 2025-10-02
+## 10.7.0 / 2026-02-19
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Add query metrics collection using $queryStats aggregation pipeline (MongoDB 7.0+ for Atlas deployments or 8.0+ for self-hosted) ([#22344](https://github.com/DataDog/integrations-core/pull/22344))
+
+## 10.6.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 10.5.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 

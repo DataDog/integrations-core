@@ -2,7 +2,29 @@
 
 <!-- towncrier release notes start -->
 
-## 2.1.0 / 2025-10-02
+## 2.4.0 / 2026-02-19
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+## 2.3.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 2.2.0 / 2025-10-31 / Agent 7.73.0
+
+***Added***:
+
+* Update python classifier to python 3.13 ([#21473](https://github.com/DataDog/integrations-core/pull/21473))
+
+***Fixed***:
+
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+
+## 2.1.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 

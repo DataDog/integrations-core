@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "1e4b89ef-f66e-4c78-8cb3-70a222a1fcb4",
   "app_id": "pan-firewall",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

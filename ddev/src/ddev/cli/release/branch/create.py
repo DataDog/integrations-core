@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 BRANCH_NAME_PATTERN = r"^\d+\.\d+\.x$"
 BRANCH_NAME_REGEX = re.compile(BRANCH_NAME_PATTERN)
 GITHUB_LABEL_COLOR = '5319e7'
+DATADOG_AGENT_REPO_URL = 'https://github.com/DataDog/datadog-agent.git'
 
 
 @click.command
@@ -44,14 +45,15 @@ def create(app: Application, branch_name):
     app.repo.git.run('checkout', '-B', branch_name)
     app.display_success("Done.")
 
-    app.display_waiting("Updating the .gitlab/build_agent.yaml file...")
-    update_build_agent_yaml(app, branch_name)
+    app.display_waiting("Checking and updating the .gitlab/build_agent.yaml file...")
+    yaml_updated = ensure_build_agent_yaml_updated(app, branch_name)
     app.display_success("Done.")
 
-    app.display_waiting("Adding and committing the changes...")
-    app.repo.git.run('add', '.gitlab/build_agent.yaml')
-    app.repo.git.run('commit', '-m', f"Update build_agent.yaml to use agent branch: {branch_name}")
-    app.display_success("Done.")
+    if yaml_updated:
+        app.display_waiting("Adding and committing the changes...")
+        app.repo.git.run('add', '.gitlab/build_agent.yaml')
+        app.repo.git.run('commit', '-m', f"Update build_agent.yaml to use agent branch: {branch_name}")
+        app.display_success("Done.")
 
     app.display_waiting(f"Pushing the release branch `{branch_name}`...")
     app.repo.git.run('push', 'origin', branch_name)
@@ -64,12 +66,20 @@ def create(app: Application, branch_name):
     app.display_success("All done.")
 
 
-def update_build_agent_yaml(app: Application, branch_name: str) -> None:
+def ensure_build_agent_yaml_updated(app: Application, branch_name: str) -> bool:
     """
-    Update the .gitlab/build_agent.yaml file to use the correct agent branch for release builds.
+    Ensure build_agent.yaml points to the correct agent branch for release builds.
+
+    This function:
+    1. Checks if the file still points to 'main' (needs update)
+    2. Checks if the agent branch exists in datadog-agent repository
+    3. Updates the file if both conditions are met
 
     Args:
         branch_name: The release branch name (e.g., '7.45.x')
+
+    Returns:
+        True if the file was updated, False otherwise.
     """
     from ddev.utils.fs import Path
 
@@ -77,26 +87,38 @@ def update_build_agent_yaml(app: Application, branch_name: str) -> None:
 
     if not build_agent_yaml.exists():
         app.display_warning(f'Warning: {build_agent_yaml} not found')
-        return
+        return False
 
     # Read the current content
     with open(build_agent_yaml, 'r') as f:
         content = f.read()
 
-    # Update the build-agent-manual-release job to use the correct agent branch
-    # Find the line with 'branch: main' and replace it
+    # Check if file still points to main (needs update)
     old_pattern = r'(\s+branch:\s+)main'
+    if not re.search(old_pattern, content):
+        # Already updated to a release branch, nothing to do
+        return False
 
+    # Check if the agent branch exists in datadog-agent repository using git ls-remote
+    app.display_waiting(f'Checking if branch `{branch_name}` exists in datadog-agent...')
+    ls_remote_output = app.repo.git.capture('ls-remote', '--heads', DATADOG_AGENT_REPO_URL, branch_name)
+    if not ls_remote_output.strip():
+        app.display_warning(
+            f"Agent branch `{branch_name}` does not exist yet in datadog-agent. "
+            f"Keeping build_agent.yaml pointing to 'main'. "
+            f"The `ddev release branch tag` command will automatically update the file "
+            f"once the agent branch is created."
+        )
+        return False
+
+    # Agent branch exists, update the file
     def replacement(match):
         return match.group(1) + branch_name
 
-    if re.search(old_pattern, content):
-        updated_content = re.sub(old_pattern, replacement, content)
+    updated_content = re.sub(old_pattern, replacement, content)
 
-        # Write the updated content back
-        with open(build_agent_yaml, 'w') as f:
-            f.write(updated_content)
+    with open(build_agent_yaml, 'w') as f:
+        f.write(updated_content)
 
-        app.display_success(f'Updated build_agent.yaml file to use Agent branch: {branch_name}')
-    else:
-        app.display_warning(f'Warning: Could not find branch pattern to update in {build_agent_yaml}')
+    app.display_success(f'Updated build_agent.yaml file to use Agent branch: {branch_name}')
+    return True

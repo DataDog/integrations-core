@@ -49,3 +49,29 @@ def test_exclude_default(aggregator, dd_run_check, mock_performance_objects):
     dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_exclude_case_insensitive(aggregator, dd_run_check, mock_performance_objects):
+    mock_performance_objects({'Foo': (['0,_total', 'baz'], {'Bar': [1, 2]})})
+    check = get_check({'metrics': {'Foo': {'name': 'foo', 'exclude': ['Baz'], 'counters': [{'Bar': 'bar'}]}}})
+    dd_run_check(check)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_include_case_insensitive(aggregator, dd_run_check, mock_performance_objects):
+    mock_performance_objects({'Foo': (['Foobar', 'Bar', 'Barbat'], {'Bar': [1, 2, 3]})})
+    check = get_check({'metrics': {'Foo': {'name': 'foo', 'include': ['bar$'], 'counters': [{'Bar': 'bar'}]}}})
+    dd_run_check(check)
+
+    tags = ['instance:Foobar']
+    tags.extend(GLOBAL_TAGS)
+    aggregator.assert_metric('test.foo.bar', 1, tags=tags)
+
+    tags = ['instance:Bar']
+    tags.extend(GLOBAL_TAGS)
+    aggregator.assert_metric('test.foo.bar', 2, tags=tags)
+
+    aggregator.assert_metric_has_tag('test.foo.bar', 'instance:Barbat', count=0)
+
+    aggregator.assert_all_metrics_covered()

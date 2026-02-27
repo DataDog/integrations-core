@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 5.4.0 / 2025-10-02
+## 5.5.1 / 2026-02-19
+
+***Fixed***:
+
+* Update conf.yaml to display 'default' field defined in spec.yaml ([#21744](https://github.com/DataDog/integrations-core/pull/21744))
+
+## 5.5.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 5.4.1 / 2025-10-31 / Agent 7.73.0
+
+***Fixed***:
+
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+
+## 5.4.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 

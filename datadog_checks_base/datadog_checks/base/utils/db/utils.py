@@ -647,3 +647,10 @@ class TagManager:
         # Generate and cache regular tags
         self._cached_tag_list = self._generate_tag_strings(self._tags)
         return list(self._cached_tag_list)
+
+
+def now_ms() -> int:
+    """
+    Get the current time in whole milliseconds.
+    """
+    return int(time.time() * 1000)

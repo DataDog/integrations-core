@@ -1,4 +1,5 @@
 name: Openstack_controller
+fleet_configurable: true
 
 files:
 - name: openstack_controller.yaml
@@ -15,6 +16,7 @@ files:
     - template: instances
       options:
         - name: name
+          fleet_configurable: true
           hidden: true
           description: |
             Unique identifier for this instance.
@@ -24,6 +26,7 @@ files:
         - name: username
           description: |
            The User name used to connect to Openstack.
+          fleet_configurable: true
           value:
             example: "admin"
             type: string
@@ -31,6 +34,8 @@ files:
         - name: password
           description: |
            The Password used to connect to Openstack.
+          fleet_configurable: true
+          secret: true
           value:
             example: <PASSWORD>
             type: string
@@ -39,6 +44,7 @@ files:
           description: |
            The domain ID used to connect to Openstack. If not specified, the check will
            use the "default" Domain ID
+          fleet_configurable: true
           value:
             example: "default"
             type: string
@@ -62,11 +68,13 @@ files:
           description: |
             For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
             integration by setting this field to "true".
+          fleet_configurable: true
           enabled: true
           value:
               type: boolean
               example: false
         - name: whitelist_project_names
+          fleet_configurable: true
           hidden: true
           description: |
            IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
@@ -81,6 +89,7 @@ files:
             items:
               type: string
         - name: blacklist_project_names
+          fleet_configurable: true
           hidden: true
           description: |
            IDs of projects to blacklist for monitoring (by default the agent collects limit metrics from all projects)
@@ -95,6 +104,7 @@ files:
             items:
               type: string
         - name: exclude_server_ids
+          fleet_configurable: true
           hidden: true
           description: |
            IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)
@@ -108,6 +118,7 @@ files:
             items:
               type: string
         - name: exclude_network_ids
+          fleet_configurable: true
           hidden: true
           description: |
            IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the
@@ -124,6 +135,7 @@ files:
         - name: use_agent_proxy
           description: |
             Whether the dd-agent proxy should also be used for openstack API requests (if set).
+          fleet_configurable: true
           value:
             example: true
             display_default: true
@@ -131,6 +143,7 @@ files:
         - name: paginated_limit
           description: |
             paginated_limit sets the number of items some api calls should return.
+          fleet_configurable: true
           value:
             example: 1000
             default: null
@@ -138,6 +151,7 @@ files:
         - name: openstack_config_file_path
           description: |
             Absolute path of the configuration file for the connection to openstack with openstacksdk.
+          fleet_configurable: true
           value:
             example: <PATH_TO_YAML_FILE>
             type: string
@@ -147,10 +161,13 @@ files:
            If this parameter is specified, the connection to Openstack only uses the configuration file specified in
            openstack_config_file_path, or at the default location:
            ~/.config/openstack or /etc/openstack
+          fleet_configurable: true
           value:
             example: <CLOUD_NAME>
             type: string
         - name: keystone_server_url
+          fleet_configurable: true
+          formats: ["url"]
           description: |
            URL of your identity server. NOTE: The server must support Identity API v3.
            This parameter is required if openstack_config_file_path or openstack_cloud_name are not specified.
@@ -165,6 +182,7 @@ files:
 
            View this page for more about Ironic microvoersion compatibility:
               https://docs.openstack.org/ironic/latest/contributor/webapi-version-history.html
+          fleet_configurable: true
           enabled: true
           value:
             example: "1.80"
@@ -178,6 +196,7 @@ files:
               https://docs.openstack.org/nova/latest/reference/api-microversion-history.html
            View this page for more information about microversions in Openstack:
               https://docs.openstack.org/api-guide/compute/microversions.html
+          fleet_configurable: true
           enabled: true
           value:
             example: "2.93"
@@ -190,12 +209,14 @@ files:
 
            View this page for more about microvoersion compatibility:
               https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html
+          fleet_configurable: true
           enabled: true
           value:
             example: "volume 3.70"
             type: string
             display_default: null
         - name: collect_hypervisor_load
+          fleet_configurable: true
           hidden: true
           description: |
            Collects hypervisor_load.1/5/15 for each hypervisor
@@ -207,6 +228,7 @@ files:
             display_default: true
             type: boolean
         - name: collect_hypervisor_metrics
+          fleet_configurable: true
           hidden: true
           description: |
            Collects hypervisor metrics (including hypervisor_load).

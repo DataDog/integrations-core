@@ -2694,6 +2694,7 @@ def test_template_mapping():
             '\n'
             'Learn more about tagging at https://docs.datadoghq.com/tagging\n'
         ),
+        "fleet_configurable": True,
         # Defaults should be post-populated
         'required': False,
         'hidden': False,

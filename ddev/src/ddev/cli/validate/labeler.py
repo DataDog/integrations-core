@@ -4,13 +4,18 @@
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 import yaml
+from rich.markup import escape
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
+
+
+def labeler_config_for_check(check: str) -> list[dict[str, list[dict[str, list[str]]]]]:
+    return [{"changed-files": [{"any-glob-to-any-file": [f"{check}/**/*"]}]}]
 
 
 @click.command()
@@ -29,7 +34,7 @@ def labeler(app: Application, sync: bool):
 
     valid_integrations = dict.fromkeys(i.name for i in app.repo.integrations.iter("all"))
 
-    include = set(app.repo.config.get('/overrides/validate/labeler/include', []))
+    include = set(cast(list, app.repo.config.get('/overrides/validate/labeler/include', [])))
     for integration in include:
         valid_integrations[integration] = None
 
@@ -56,10 +61,11 @@ def labeler(app: Application, sync: bool):
     # Check if valid integration has a label
     for check_name in valid_integrations:
         integration_label = f"integration/{check_name}"
+        expected_config = labeler_config_for_check(check_name)
 
         if integration_label not in pr_labels_config:
             if sync:
-                new_pr_labels_config[integration_label] = [f'{check_name}/**/*']
+                new_pr_labels_config[integration_label] = expected_config
                 app.display_info(f'Adding config for `{check_name}`')
                 continue
 
@@ -69,9 +75,9 @@ def labeler(app: Application, sync: bool):
 
         # Check if label config is properly configured
         integration_label_config = pr_labels_config.get(integration_label)
-        if integration_label_config != [f'{check_name}/**/*']:
+        if integration_label_config != expected_config:
             if sync:
-                new_pr_labels_config[integration_label] = [f'{check_name}/**/*']
+                new_pr_labels_config[integration_label] = expected_config
                 app.display_info(f"Fixing label config for `{check_name}`")
                 continue
             message = (
@@ -87,8 +93,15 @@ def labeler(app: Application, sync: bool):
     tracker.display()
 
     if tracker.errors:  # no cov
-        message = 'Try running `ddev validate labeler --sync`'
-        app.display_info(message)
+        message = (
+            'To fix this, you can take one of the following actions based on whether the failure is related to '
+            'an Agent check or not:\n'
+            '\n'
+            '* If it is an Agent check, run `ddev validate labeler --sync`.\n'
+            '* If it is not an Agent check, you can mark it as such by adding '
+            'it to the `[overrides.is-integration]` table in your `.ddev/config.toml` file.'
+        )
+        app.display_info(escape(message))
         app.abort()
 
     app.display_success('Labeler configuration is valid')

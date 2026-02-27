@@ -8,6 +8,7 @@ import time
 from datetime import timedelta
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.tagging import tagger
 from datadog_checks.base.utils.time import get_timestamp
 
 from .config_models import ConfigMixin
@@ -597,6 +598,13 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             for header, value in zip(headers, fields):
                 new_header = SCONTROL_TAG_MAPPING.get(header, f"slurm_{header.lower()}")
                 tags.append(f"{new_header}:{value}")
+
+                if new_header == "pid":
+                    # Example gpu tags being returned:
+                    # ['gpu_vendor:nvidia', 'gpu_device:tesla_v100', 'gpu_uuid:gpu_xxxx...']
+                    pidtags = tagger.tag(f"process://{value}", tagger.ORCHESTRATOR)
+                    if pidtags:  # Guard against tagger.tag returning None
+                        tags.extend(pidtags)
 
                 if header == "JOBID" and value.isdigit():
                     job_id = value

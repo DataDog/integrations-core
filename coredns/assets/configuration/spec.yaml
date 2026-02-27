@@ -1,4 +1,5 @@
 name: CoreDNS
+fleet_configurable: true
 files:
 - name: coredns.yaml
   options:
@@ -18,9 +19,9 @@ files:
         tags.value.example:
           - "dns-pod:%%host%%"
         extra_metrics.value.example:
-          - coredns_template_matches_total: template_matches_count
-          - coredns_template_template_failures_total: template_templating_failures_count
-          - coredns_template_rr_failures_total: template_resource_record_failures_count
+          - coredns_template_matches: template_matches
+          - coredns_template_template_failures: template_templating_failures
+          - coredns_template_rr_failures: template_resource_record_failures
     - template: instances/openmetrics_legacy_base
       hidden: true
       overrides:
@@ -46,6 +47,7 @@ files:
         See documentation: https://docs.datadoghq.com/integrations/coredns
 
       enabled: true
+      legacy: true
       value:
         type: string
         example: "http://%%host%%:9153/metrics"
@@ -63,6 +65,7 @@ files:
           - "dns-pod:%%host%%"
     - name: send_histograms_buckets
       description: (Legacy OpenMetricsBaseCheckV1) Set send_histograms_buckets to true to send the histograms bucket.
+      legacy: true
       value:
         type: boolean
         example: True
@@ -70,6 +73,7 @@ files:
       description: |
         (Legacy OpenMetricsBaseCheckV1) To send counters as monotonic counter
         see: https://github.com/DataDog/integrations-core/issues/1303
+      legacy: true
       value:
         type: boolean
         example: True
@@ -79,6 +83,7 @@ files:
         are enabled by default, however in order to scrape metrics for optional
         plugins, enable the plugin in the CoreDNS corefile and then add the metric below.
         As an example, the 'template' plugin's metrics are below
+      legacy: true
       value:
         type: array
         items:

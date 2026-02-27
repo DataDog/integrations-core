@@ -1,1 +1,0 @@
-Filters out noisy `ER_NO_SYSTEM_TABLE_ACCESS` from the monitoring user which get triggered when querying `information_schema` tables

@@ -1,1 +1,0 @@
-Adds the new command `ddev ci codeowners` to check repository CODEOWNERS for pull requests, commits, or specific files.

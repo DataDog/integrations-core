@@ -63,9 +63,9 @@ SERVER_METRICS = [
     'sqlserver.server.virtual_memory',
 ]
 
+SQLSERVER_YEAR = int(os.environ.get('SQLSERVER_YEAR'))
+SQLSERVER_ENGINE_EDITION = os.environ.get('SQLSERVER_ENGINE_EDITION')
 SQLSERVER_MAJOR_VERSION = int(os.environ.get('SQLSERVER_MAJOR_VERSION'))
-SQLSERVER_ENGINE_EDITION = int(os.environ.get('SQLSERVER_ENGINE_EDITION'))
-
 
 EXPECTED_FILE_STATS_METRICS = [
     'sqlserver.files.io_stall',

@@ -64,7 +64,8 @@
       "Kubernetes Jobs & Cronjobs Overview": "assets/dashboards/kubernetes_jobs.json",
       "Kubernetes StatefulSets Overview": "assets/dashboards/kubernetes_statefulsets.json",
       "Kubernetes Clusters Overview": "assets/dashboards/kubernetes_clusters.json",
-      "Kubernetes CPU & Memory usage": "assets/dashboards/kubernetes_cpu_memory.json"
+      "Kubernetes CPU & Memory Usage": "assets/dashboards/kubernetes_cpu_memory.json",
+      "Kubernetes Control Plane Overview": "assets/dashboards/kubernetes_control_plane.json"
     },
     "monitors": {
       "Kubernetes Deployment Replicas are failing": "assets/monitors/monitor_deployments_replicas.json",

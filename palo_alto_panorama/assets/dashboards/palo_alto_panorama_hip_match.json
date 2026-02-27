@@ -6,9 +6,8 @@
             "id": 3092474590624262,
             "definition": {
                 "type": "image",
-                "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/PaloAltoNetworks_2020_Logo.svg/220px-PaloAltoNetworks_2020_Logo.svg.png",
-                "url_dark_theme": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/PaloAltoNetworks_2020_Logo.svg/220px-PaloAltoNetworks_2020_Logo.svg.png",
-                "sizing": "scale-down",
+                "url": "/static/images/logos/palo-alto-panorama_large.svg",
+                "url_dark_theme": "/static/images/logos/palo-alto-panorama_reversed_large.svg",
                 "has_background": true,
                 "has_border": false,
                 "vertical_align": "center",

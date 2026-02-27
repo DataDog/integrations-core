@@ -81,6 +81,7 @@ class CollectSchemas(BaseModel):
     include_schemas: Optional[tuple[str, ...]] = None
     include_tables: Optional[tuple[str, ...]] = None
     max_columns: Optional[float] = None
+    max_query_duration: Optional[float] = None
     max_tables: Optional[float] = None
 
 
@@ -267,6 +268,7 @@ class InstanceConfig(BaseModel):
     dbstrict: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     exclude_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
     host: Optional[str] = None

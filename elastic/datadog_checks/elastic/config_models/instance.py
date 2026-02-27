@@ -89,10 +89,12 @@ class InstanceConfig(BaseModel):
     connect_timeout: Optional[float] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     detailed_index_stats: Optional[bool] = None
+    detailed_shard_metrics: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     disable_legacy_cluster_tag: Optional[bool] = None
     disable_legacy_service_check_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     gc_collectors_as_rate: Optional[bool] = None
     headers: Optional[MappingProxyType[str, Any]] = None

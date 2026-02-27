@@ -37,6 +37,7 @@ class IncludeEvent(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    event: Optional[str] = None
     excluded_messages: Optional[tuple[str, ...]] = None
 
 
@@ -154,12 +155,14 @@ class InstanceConfig(BaseModel):
     connection_reset_timeout: Optional[int] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: bool
+    enable_legacy_tags_normalization: Optional[bool] = None
     event_resource_filters: Optional[tuple[str, ...]] = None
     excluded_host_tags: Optional[tuple[str, ...]] = None
     host: str
     hostname_transform: Optional[str] = None
     include_datastore_cluster_folder_tag: Optional[bool] = None
     include_events: Optional[tuple[IncludeEvent, ...]] = None
+    infrastructure_mode: Optional[str] = None
     max_historical_metrics: Optional[int] = None
     metric_filters: Optional[MetricFilters] = None
     metric_patterns: Optional[MetricPatterns] = None

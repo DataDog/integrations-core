@@ -7,6 +7,8 @@ from datadog_checks.sqlserver import SQLServer
 
 from .common import CHECK_NAME
 
+KEY_PREFIX = "dbm-test-"
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -14,8 +16,8 @@ def test_integration_connection_with_commenter_cursor(instance_docker, sa_conn):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
 
-    with check.connection.open_managed_default_connection():
-        with check.connection.get_managed_cursor() as cursor:
+    with check.connection.open_managed_default_connection(KEY_PREFIX):
+        with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             cursor.execute("SELECT /* testcomments */ count(*) from sys.databases where name = 'master'")
             result = cursor.fetchone()
             assert result[0] == 1

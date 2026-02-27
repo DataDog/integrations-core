@@ -2,7 +2,23 @@
 
 <!-- towncrier release notes start -->
 
-## 6.2.0 / 2025-10-02
+## 6.4.0 / 2026-02-19
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+***Fixed***:
+
+* Handle malformed binary protocol responses from `bmemcached` gracefully. Instead of crashing with an unhandled `AssertionError`, the check now logs a warning and reports a `WARNING` service check, allowing the next check run to retry. ([#22650](https://github.com/DataDog/integrations-core/pull/22650))
+
+## 6.3.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 6.2.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 

@@ -416,3 +416,7 @@ argocd_cluster_connection_status{name="foo"} 0
 argocd_cluster_connection_status{name="bar"} 1
 argocd_cluster_connection_status{name="baz"} 2
 argocd_cluster_connection_status{name="faz"} 10
+# HELP argocd_app_sync_duration_seconds_total Application sync performance in seconds total.
+# TYPE argocd_app_sync_duration_seconds_total counter
+argocd_app_sync_duration_seconds_total{dest_server="https://kubernetes.default.svc",name="application-bootstrap",namespace="argocd",phase="Succeeded",project="infrastructure"} 1
+argocd_app_sync_duration_seconds_total{dest_server="https://kubernetes.default.svc",name="superhot",namespace="argocd",phase="Failed",project="main"} 1

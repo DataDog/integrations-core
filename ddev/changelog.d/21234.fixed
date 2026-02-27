@@ -1,2 +1,0 @@
-Removes duplicated os.path.join when defining the path for the resolved folder.
-

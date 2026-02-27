@@ -17,6 +17,7 @@ from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.kafka_consumer import (
     DATA_STREAMS_MESSAGES_CACHE_KEY,
     _get_interpolated_timestamp,
+    _get_protobuf_message_class,
     build_avro_schema,
     build_protobuf_schema,
     build_schema,
@@ -27,7 +28,7 @@ from datadog_checks.kafka_consumer.kafka_consumer import (
 pytestmark = [pytest.mark.unit]
 
 
-def fake_consumer_offsets_for_times(partitions):
+def fake_consumer_offsets_for_times(partitions, offset=-1):
     """In our testing environment the offset is 80 for all partitions and topics."""
 
     return [(t, p, 80) for t, p in partitions]
@@ -181,6 +182,21 @@ mock_client.consumer_get_cluster_id_and_list_topics.return_value = (
             does_not_raise(),
             mock_client,
             id="valid config",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {'method': 'aws_msk_iam'}},
+            does_not_raise(),
+            mock_client,
+            id="valid AWS MSK IAM config",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {'method': 'invalid_method'}},
+            pytest.raises(
+                Exception,
+                match="Invalid method 'invalid_method' for sasl_oauth_token_provider. Must be 'aws_msk_iam' or 'oidc'",
+            ),
+            None,
+            id="invalid method",
         ),
     ],
 )
@@ -902,8 +918,12 @@ def test_schema_registry_explicit_configuration():
     assert result == (None, None, None, None), "Protobuf should fail when uses_schema_registry=True but no SR format"
 
     # Valid Protobuf message WITH schema registry format
+    # Confluent Protobuf wire format:
+    # [magic_byte][schema_id:4bytes][array_length:varint][index:varint][protobuf_payload]
     protobuf_message_with_sr = (
-        b'\x00\x00\x00\x01\x5e'
+        b'\x00\x00\x00\x01\x5e'  # magic byte (0x00) + schema ID 350 (0x0000015e)
+        b'\x01'  # message indices array length = 1
+        b'\x00'  # message index = 0
         b'\x08\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1b\x54\x68\x65\x20\x47\x6f\x20\x50\x72\x6f\x67\x72\x61\x6d\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65'
         b'\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e'
     )
@@ -932,6 +952,91 @@ def test_schema_registry_explicit_configuration():
     assert result[0] is not None, "Value should succeed"
     assert result[2] is None, "Key should fail when key_uses_schema_registry=True but no SR format"
     assert result[3] is None, "Key schema ID should be None when key fails"
+
+
+def test_protobuf_message_indices_with_schema_registry():
+    """Test Confluent Protobuf wire format with different message indices."""
+    key = b'{"test": "key"}'
+
+    # Schema with multiple message types and nested type
+    # message Book { int64 isbn = 1; string title = 2; }
+    # message Author { string name = 1; int32 age = 2; }
+    # message Library { message Section { string name = 1; } string name = 1; }
+    protobuf_schema = (
+        'CpMBCgxzY2hlbWEucHJvdG8SC2NvbS5leGFtcGxlIh8KBEJvb2sSCgoEaXNibhgBKAMSCwoFdGl0bGUY'
+        'AigJIh8KBkF1dGhvchIKCgRuYW1lGAEoCRIJCgNhZ2UYAigFIiwKB0xpYnJhcnkSCgoEbmFtZRgBKAka'
+        'FQoHU2VjdGlvbhIKCgRuYW1lGAEoCWIGcHJvdG8z'
+    )
+    parsed_schema = build_schema('protobuf', protobuf_schema)
+
+    # Test index [0] - Book message
+    book_payload = bytes.fromhex('08e80712095465737420426f6f6b')
+    book_msg = b'\x00\x00\x00\x01\x5e\x01\x00' + book_payload
+    result = deserialize_message(MockedMessage(book_msg, key), 'protobuf', parsed_schema, True, 'json', '', False)
+    assert result[0] and 'Test Book' in result[0]
+
+    # Test index [1] - Author message
+    author_payload = bytes.fromhex('0a0a4a616e6520536d697468101e')
+    author_msg = b'\x00\x00\x00\x01\x5e\x01\x01' + author_payload
+    result = deserialize_message(MockedMessage(author_msg, key), 'protobuf', parsed_schema, True, 'json', '', False)
+    assert result[0] and 'Jane Smith' in result[0] and '30' in result[0]
+
+    # Test nested [2, 0] - Library.Section message
+    section_payload = bytes.fromhex('0a0746696374696f6e')
+    section_msg = b'\x00\x00\x00\x01\x5e\x02\x02\x00' + section_payload
+    result = deserialize_message(MockedMessage(section_msg, key), 'protobuf', parsed_schema, True, 'json', '', False)
+    assert result[0] and 'Fiction' in result[0]
+
+
+def test_protobuf_empty_message_indices_with_schema_registry():
+    """Test Confluent Protobuf wire format with empty message indices array.
+
+    When message indices array is empty (encoded as varint 0x00), it should
+    default to using the first message type (index 0).
+
+    This test uses real message bytes from a Kafka topic to ensure the
+    deserialization handles the Confluent wire format correctly.
+    """
+    key = b'null'
+
+    # Schema from real Kafka topic - Purchase message
+    # message Purchase { string order_id = 1; string customer_id = 2; int64 order_date = 3;
+    #                    string city = 6; string country = 7; }
+    protobuf_schema = (
+        'CrkDCgxzY2hlbWEucHJvdG8SCHB1cmNoYXNlIpMBCghQdXJjaGFzZRIZCghvcmRlcl9pZBgBIAEoCVIH'
+        'b3JkZXJJZBIfCgtjdXN0b21lcl9pZBgCIAEoCVIKY3VzdG9tZXJJZBIdCgpvcmRlcl9kYXRlGAMgASgD'
+        'UglvcmRlckRhdGUSEgoEY2l0eRgGIAEoCVIEY2l0eRIYCgdjb3VudHJ5GAcgASgJUgdjb3VudHJ5ItIB'
+        'CgpQdXJjaGFzZVYyEiUKDnRyYW5zYWN0aW9uX2lkGAEgASgJUg10cmFuc2FjdGlvbklkEhcKB3VzZXJf'
+        'aWQYAiABKAlSBnVzZXJJZBIcCgl0aW1lc3RhbXAYAyABKANSCXRpbWVzdGFtcBIaCghsb2NhdGlvbhgE'
+        'IAEoCVIIbG9jYXRpb24SFgoGcmVnaW9uGAUgASgJUgZyZWdpb24SFgoGYW1vdW50GAYgASgBUgZhbW91'
+        'bnQSGgoIY3VycmVuY3kYByABKAlSCGN1cnJlbmN5QiwKG2RhdGFkb2cua2Fma2EuZXhhbXBsZS5wcm90'
+        'b0INUHVyY2hhc2VQcm90b2IGcHJvdG8z'
+    )
+    parsed_schema = build_schema('protobuf', protobuf_schema)
+
+    # Real message from Kafka topic "human-orders"
+    # Hex breakdown:
+    #   00 00 00 00 01 - Schema Registry header (magic byte + schema ID 1)
+    #   00             - Empty message indices array (varint 0 = 0 elements)
+    #   0a 05 31 32 33 34 35 ... - Protobuf payload (Purchase message)
+    message_hex = '0000000001000a0531323334351205363738393018f4eae0c4b8333a064d657869636f'
+    message_bytes = bytes.fromhex(message_hex)
+
+    # Test with uses_schema_registry=True (explicit)
+    result = deserialize_message(MockedMessage(message_bytes, key), 'protobuf', parsed_schema, True, 'json', '', False)
+    assert result[0], "Deserialization should succeed"
+    assert '12345' in result[0], "Should contain order_id"
+    assert '67890' in result[0], "Should contain customer_id"
+    assert 'Mexico' in result[0], "Should contain country"
+    assert result[1] == 1, "Should detect schema ID 1"
+
+    # Test with uses_schema_registry=False (fallback mode)
+    result_fallback = deserialize_message(
+        MockedMessage(message_bytes, key), 'protobuf', parsed_schema, False, 'json', '', False
+    )
+    assert result_fallback[0], "Fallback mode should also succeed"
+    assert '12345' in result_fallback[0], "Fallback should contain order_id"
+    assert result_fallback[1] == 1, "Fallback should detect schema ID 1"
 
 
 def mocked_time():
@@ -1200,11 +1305,11 @@ def test_build_schema():
         'EhQKBXRpdGxlGAIgASgJUgV0aXRsZRIWCgZhdXRob3IYAyABKAlSBmF1dGhvcmIGcHJvdG8z'
     )
     protobuf_result = build_schema('protobuf', valid_protobuf_schema)
-    assert protobuf_result is not None
-    # The result should be a protobuf message class instance
-    assert hasattr(protobuf_result, 'isbn')
-    assert hasattr(protobuf_result, 'title')
-    assert hasattr(protobuf_result, 'author')
+    message_class = _get_protobuf_message_class(protobuf_result, [0])
+    message_instance = message_class()
+    assert hasattr(message_instance, 'isbn')
+    assert hasattr(message_instance, 'title')
+    assert hasattr(message_instance, 'author')
 
     # Test unknown format
     assert build_schema('unknown_format', 'some_schema') is None
@@ -1232,14 +1337,15 @@ def test_build_schema_error_cases():
     with pytest.raises(DecodeError):  # Will be a protobuf DecodeError
         build_schema('protobuf', 'SGVsbG8gV29ybGQ=')  # "Hello World" in base64
 
-    # Valid base64 but empty schema (should cause IndexError)
+    # Valid base64 but empty schema - should fail when trying to access message types
     # Create a minimal but empty FileDescriptorSet
     empty_descriptor = descriptor_pb2.FileDescriptorSet()
     empty_descriptor_bytes = empty_descriptor.SerializeToString()
     empty_descriptor_b64 = base64.b64encode(empty_descriptor_bytes).decode('utf-8')
 
+    result = build_schema('protobuf', empty_descriptor_b64)
     with pytest.raises(IndexError):  # Should fail when trying to access file[0]
-        build_schema('protobuf', empty_descriptor_b64)
+        _get_protobuf_message_class(result, [0])
 
 
 def test_build_schema_none_handling():
@@ -1261,6 +1367,125 @@ def test_count_consumer_contexts(check, kafka_instance):
         'consumer_group2': {('topic2', 'partition0'): 3},  # 1 context
     }
     assert kafka_consumer_check.count_consumer_contexts(consumer_offsets) == 3
+
+
+@pytest.mark.parametrize(
+    'oauth_config, expected_auth_keys',
+    [
+        pytest.param(
+            {'method': 'aws_msk_iam'},
+            ['oauth_cb'],  # AWS MSK IAM uses oauth_cb callback, not sasl.oauthbearer.method
+            id="AWS MSK IAM authentication",
+        ),
+        pytest.param(
+            {'method': 'oidc', 'url': 'http://fake.url', 'client_id': 'test_id', 'client_secret': 'test_secret'},
+            {
+                'sasl.oauthbearer.method': 'oidc',
+                'sasl.oauthbearer.client.id': 'test_id',
+                'sasl.oauthbearer.token.endpoint.url': 'http://fake.url',
+                'sasl.oauthbearer.client.secret': 'test_secret',
+            },
+            id="OIDC authentication",
+        ),
+    ],
+)
+def test_oauth_authentication_config(oauth_config, expected_auth_keys, kafka_instance, check):
+    """Test that OAuth authentication configuration is correctly set for both AWS MSK IAM and OIDC."""
+    kafka_instance.update(
+        {
+            'monitor_unlisted_consumer_groups': True,
+            'security_protocol': 'SASL_SSL',
+            'sasl_mechanism': 'OAUTHBEARER',
+            'sasl_oauth_token_provider': oauth_config,
+        }
+    )
+    kafka_consumer_check = check(kafka_instance)
+    auth_config = kafka_consumer_check.client._KafkaClient__get_authentication_config()
+
+    # Verify security protocol is set
+    assert auth_config['security.protocol'] == 'sasl_ssl'
+    assert auth_config['sasl.mechanism'] == 'OAUTHBEARER'
+
+    # Verify OAuth-specific configuration
+    if isinstance(expected_auth_keys, dict):
+        # OIDC: verify exact key-value pairs
+        for key, value in expected_auth_keys.items():
+            assert auth_config[key] == value
+    else:
+        # AWS MSK IAM: verify oauth_cb callback is present and callable
+        for key in expected_auth_keys:
+            assert key in auth_config
+            if key == 'oauth_cb':
+                assert callable(auth_config[key])
+
+
+@pytest.mark.parametrize(
+    'oauth_config, mock_boto3_region, expected_region, should_succeed',
+    [
+        pytest.param(
+            {'method': 'aws_msk_iam', 'aws_region': 'us-west-2'},
+            None,  # Explicitly configured region should be used regardless of boto3
+            'us-west-2',
+            True,
+            id="explicit region in config",
+        ),
+        pytest.param(
+            {'method': 'aws_msk_iam'},
+            'eu-central-1',  # Region detected by boto3
+            'eu-central-1',
+            True,
+            id="region from boto3 auto-detection",
+        ),
+        pytest.param(
+            {'method': 'aws_msk_iam'},
+            None,  # No region configured or detected
+            None,
+            False,
+            id="no region available - should fail",
+        ),
+    ],
+)
+def test_aws_msk_iam_region_handling(
+    oauth_config, mock_boto3_region, expected_region, should_succeed, kafka_instance, check
+):
+    """Test that AWS MSK IAM authentication properly handles region configuration."""
+    kafka_instance.update(
+        {
+            'monitor_unlisted_consumer_groups': True,
+            'security_protocol': 'SASL_SSL',
+            'sasl_mechanism': 'OAUTHBEARER',
+            'sasl_oauth_token_provider': oauth_config,
+        }
+    )
+
+    kafka_consumer_check = check(kafka_instance)
+
+    # Get the OAuth callback from the authentication config
+    auth_config = kafka_consumer_check.client._KafkaClient__get_authentication_config()
+    assert 'oauth_cb' in auth_config
+    oauth_callback = auth_config['oauth_cb']
+
+    # Mock boto3 session and MSKAuthTokenProvider
+    with mock.patch('datadog_checks.kafka_consumer.client.boto3') as mock_boto3_module:
+        mock_session = mock.Mock()
+        mock_session.region_name = mock_boto3_region
+        mock_boto3_module.session.Session.return_value = mock_session
+
+        with mock.patch('datadog_checks.kafka_consumer.client.MSKAuthTokenProvider') as mock_auth_provider:
+            mock_auth_provider.generate_auth_token.return_value = ('fake_token', 900000)
+
+            if should_succeed:
+                # Should successfully generate token
+                token, expiry = oauth_callback(None)
+                assert token == 'fake_token'
+                assert expiry == 900  # 900000ms / 1000 = 900s
+
+                # Verify the correct region was used
+                mock_auth_provider.generate_auth_token.assert_called_once_with(expected_region)
+            else:
+                # Should fail with clear error message about missing region
+                with pytest.raises(Exception, match="AWS region could not be determined"):
+                    oauth_callback(None)
 
 
 def test_consumer_group_state_fetched_once_per_group(check, kafka_instance, dd_run_check, aggregator):

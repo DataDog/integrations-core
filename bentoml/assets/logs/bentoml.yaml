@@ -1,0 +1,52 @@
+id: bentoml
+metric_id: bentoml
+backend_only: false
+facets:
+pipeline:
+  type: pipeline
+  name: BentoML
+  enabled: true
+  filter:
+    query: source:bentoml
+  processors:
+    - type: grok-parser
+      name: Parse timestamp from json logs
+      enabled: true
+      source: timestamp
+      samples:
+        - "22025-10-07T23:10:10.287722"
+      grok:
+        matchRules: |
+          timestamp %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"):timestamp}
+        supportRules: ""
+    - type: grok-parser
+      name:  BentoML Parser
+      enabled: true
+      source: message
+      samples:
+        - "2025-10-22T15:49:41-0400 [INFO] [entry_service:Summarization:1] 127.0.0.1:50870 (scheme=http,method=POST,path=/summarize,type=application/json,length=227) (status=200,type=text/plain; charset=utf-8,length=407) 5890.581ms (trace=ab27d3de318c77adc1a75e34786fb557,span=29583fecc118996f,sampled=0,service.name=Summarization)"
+      grok:
+        matchRules: |
+          general %{_timestamp} \[%{word:level}\] \[%{_component}\] %{_client} \(%{notSpace:bentoml.request:keyvalue("=","/:")}\) \(%{_response}\) %{_latency} \(%{_tracing}\).*
+        supportRules: |
+          _timestamp %{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}
+          _component %{word:bentoml.component_name}\:%{word:bentoml.service.name}\:%{number:bentoml.service.instance}
+          _client %{ip:bentoml.client.ip}\:%{number:bentoml.client.port}
+          _response status=%{number:bentoml.response.code},type=%{notSpace:bentoml.response.type} charset=%{notSpace:bentoml.response.charset},length=%{number:bentoml.response.length}
+          _latency %{number:bentoml.request.latency_ms}ms
+          _tracing trace=%{notSpace:tracing.trace_id},span=%{notSpace:tracing.span_id},sampled=%{integer:tracing.sampled},service.name=%{notSpace:tracing.service.name}
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - bentoml.service.name
+    - type: status-remapper
+      name: Define `level` as the official status of the log
+      enabled: true
+      sources:
+        - level

@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "bbfe8b36-ac16-4f29-9b0c-7ee1d81e0a3c",
   "app_id": "microsoft-copilot",
-  "display_on_public_website": false,
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -10,8 +11,21 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into your Microsoft Copilot usage across your organization.",
     "title": "Microsoft Copilot",
-    "media": [],
+    "media": [
+      {
+        "caption": "Microsoft Copilot Usage",
+        "image_url": "images/microsoft_copilot_usage_reports_only_page1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft Copilot Usage (Continued)",
+        "image_url": "images/microsoft_copilot_usage_reports_only_page2.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
+      "Category::AI/ML",
+      "Category::Collaboration",
       "Category::Metrics",
       "Category::Log Collection",
       "Submitted Data Type::Logs",
@@ -30,6 +44,9 @@
       "metrics": {
         "prefix": "microsoft_copilot.",
         "check": [
+          "microsoft_copilot.airesponse.count",
+          "microsoft_copilot.airesponse.guardrail.count",
+          "microsoft_copilot.userprompt.count",
           "microsoft_copilot.teams.users.enabled",
           "microsoft_copilot.teams.users.active",
           "microsoft_copilot.word.users.enabled",
@@ -54,6 +71,15 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Microsoft Copilot Usage": "assets/dashboards/microsoft_copilot_usage.json"
+    },
+    "logs": {
+        "source": "microsoft-copilot"
+    },
+    "monitors": {
+      "Low Percentage of Active Microsoft 365 Copilot Users" : "assets/monitors/low_percentage_of_microsoft_copilot_usage.json"
     }
   },
   "author": {

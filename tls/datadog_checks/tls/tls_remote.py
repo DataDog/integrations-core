@@ -179,7 +179,7 @@ class TLSRemoteCheck(object):
 
         with sock:
             try:
-                context = create_ssl_context(ChainMap({'tls_verify': False}, self.agent_check.tls_config))
+                context = create_ssl_context(ChainMap({'tls_verify': False}, self.agent_check.http.tls_config))
 
                 with context.wrap_socket(sock, server_hostname=self.agent_check._server_hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)

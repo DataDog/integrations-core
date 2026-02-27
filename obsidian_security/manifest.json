@@ -1,38 +1,89 @@
 {
-  "manifest_version": "2.0.0",
-  "app_uuid": "f8919d56-bbcb-4526-8561-3f3c271878b4",
-  "app_id": "obsidian-security",
-  "display_on_public_website": false,
-  "tile": {
-    "overview": "README.md#Overview",
-    "configuration": "README.md#Setup",
-    "support": "README.md#Support",
-    "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Obsidian Security Platform alerts, events and audit logs.",
-    "title": "Obsidian Security",
-    "media": [],
-    "classifier_tags": [
-      "Category::Log Collection",
-      "Category::Security",
-      "Category::Cloud",
-      "Offering::Integration",
-      "Submitted Data Type::Logs"
-    ]
-  },
-  "assets": {
-    "integration": {
-      "auto_install": false,
-      "source_type_id": 58697853,
-      "source_type_name": "Obsidian Security",
-      "events": {
-        "creates_events": false
-      }
+    "manifest_version": "2.0.0",
+    "app_uuid": "f8919d56-bbcb-4526-8561-3f3c271878b4",
+    "app_id": "obsidian-security",
+    "owner": "saas-integrations",
+    "display_on_public_website": true,
+    "tile": {
+        "overview": "README.md#Overview",
+        "configuration": "README.md#Setup",
+        "support": "README.md#Support",
+        "changelog": "CHANGELOG.md",
+        "description": "Gain insights into Obsidian Security Platform alerts, events and audit logs.",
+        "title": "Obsidian Security",
+        "media": [
+            {
+                "media_type": "image",
+                "caption": "Obsidian Security - Overview",
+                "image_url": "images/obsidian_security_overview.png"
+            },
+            {
+                "media_type": "image",
+                "caption": "Obsidian Security - Alert Insights",
+                "image_url": "images/obsidian_security_alert_insights_1.png"
+            },
+            {
+                "media_type": "image",
+                "caption": "Obsidian Security - Alert Insights",
+                "image_url": "images/obsidian_security_alert_insights_2.png"
+            },
+            {
+                "media_type": "image",
+                "caption": "Obsidian Security - Alert Insights",
+                "image_url": "images/obsidian_security_alert_insights_3.png"
+            },
+            {
+                "media_type": "image",
+                "caption": "Obsidian Security - Alert Insights",
+                "image_url": "images/obsidian_security_alert_insights_4.png"
+            },
+            {
+                "media_type": "image",
+                "caption": "Obsidian Security - Event Insights",
+                "image_url": "images/obsidian_security_event_insights.png"
+            },
+            {
+                "media_type": "image",
+                "caption": "Obsidian Security - Audit Insights",
+                "image_url": "images/obsidian_security_audit_insights_1.png"
+            },
+            {
+                "media_type": "image",
+                "caption": "Obsidian Security - Audit Insights",
+                "image_url": "images/obsidian_security_audit_insights_2.png"
+            }
+        ],
+        "classifier_tags": [
+            "Category::Log Collection",
+            "Category::Security",
+            "Category::Cloud",
+            "Offering::Integration",
+            "Submitted Data Type::Logs"
+        ]
+    },
+    "assets": {
+        "integration": {
+            "auto_install": false,
+            "source_type_id": 58697853,
+            "source_type_name": "Obsidian Security",
+            "events": {
+                "creates_events": false
+            }
+        },
+        "dashboards": {
+            "Obsidian Security - Overview": "assets/dashboards/obsidian_security_overview.json",
+            "Obsidian Security - Alert Insights": "assets/dashboards/obsidian_security_alert_insights.json",
+            "Obsidian Security - Event Insights": "assets/dashboards/obsidian_security_event_insights.json",
+            "Obsidian Security - Audit Insights": "assets/dashboards/obsidian_security_audit_insights.json"
+        },
+        "logs": {
+            "source": "obsidian-security"
+        }
+    },
+    "author": {
+        "support_email": "help@datadoghq.com",
+        "name": "Datadog",
+        "homepage": "https://www.datadoghq.com",
+        "sales_email": "info@datadoghq.com"
     }
-  },
-  "author": {
-    "support_email": "help@datadoghq.com",
-    "name": "Datadog",
-    "homepage": "https://www.datadoghq.com",
-    "sales_email": "info@datadoghq.com"
-  }
 }

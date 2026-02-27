@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 8.2.0 / 2025-10-02
+## 8.5.0 / 2026-02-19
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+## 8.4.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 8.3.0 / 2025-10-31 / Agent 7.73.0
+
+***Added***:
+
+* Add new metrics collected from the INFO command ([#21555](https://github.com/DataDog/integrations-core/pull/21555))
+
+## 8.2.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 

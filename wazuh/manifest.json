@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "5b1e3f2f-419d-4d9d-bb00-002b58e28835",
   "app_id": "wazuh",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

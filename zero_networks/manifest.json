@@ -3,7 +3,7 @@
   "app_uuid": "5be301d0-072e-42c2-a579-0c8d24755a85",
   "app_id": "zero-networks",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -14,12 +14,42 @@
     "media": [
       {
         "caption": "Zero Networks - Audit",
-        "image_url": "images/zero_networks_audit.png",
+        "image_url": "images/zero_networks_audit_light_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Zero Networks - Audit",
+        "image_url": "images/zero_networks_audit_dark_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Zero Networks - Audit",
+        "image_url": "images/zero_networks_audit_light_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Zero Networks - Audit",
+        "image_url": "images/zero_networks_audit_dark_2.png",
         "media_type": "image"
       },
       {
         "caption": "Zero Networks - Network Activities",
-        "image_url": "images/zero_networks_network_activities.png",
+        "image_url": "images/zero_networks_network_activities_light_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Zero Networks - Network Activities",
+        "image_url": "images/zero_networks_network_activities_dark_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Zero Networks - Network Activities",
+        "image_url": "images/zero_networks_network_activities_light_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Zero Networks - Network Activities",
+        "image_url": "images/zero_networks_network_activities_dark_2.png",
         "media_type": "image"
       }
     ],

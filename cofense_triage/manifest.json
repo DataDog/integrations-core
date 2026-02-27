@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "babb887c-e7a0-4948-9e76-fa17cf3d78c0",
   "app_id": "cofense-triage",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",

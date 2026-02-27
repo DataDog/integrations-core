@@ -201,7 +201,7 @@ def test_azure_fetch_token_with_scope(mock_credential_class):
     """Test Azure token fetching with custom scope."""
     mock_token = Mock()
     mock_token.token = "azure_token_123"
-    mock_token.expires_at = 1900.0
+    mock_token.expires_on = 1900.0
 
     mock_credential = Mock()
     mock_credential.get_token.return_value = mock_token
@@ -222,7 +222,7 @@ def test_azure_fetch_token_without_scope(mock_credential_class):
     """Test Azure token fetching without custom scope (uses default)."""
     mock_token = Mock()
     mock_token.token = "azure_token_456"
-    mock_token.expires_at = 2000.0
+    mock_token.expires_on = 2000.0
 
     mock_credential = Mock()
     mock_credential.get_token.return_value = mock_token
@@ -243,7 +243,7 @@ def test_azure_token_provider_integration():
     with patch('datadog_checks.postgres.azure.ManagedIdentityCredential') as mock_credential_class:
         mock_token = Mock()
         mock_token.token = "integration_azure_token"
-        mock_token.expires_at = time.time() + 3600
+        mock_token.expires_on = time.time() + 3600
 
         mock_credential = Mock()
         mock_credential.get_token.return_value = mock_token

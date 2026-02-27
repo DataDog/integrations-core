@@ -221,20 +221,17 @@ def test_conflicts_bufferpin(aggregator, integration_check, pg_instance, pg_repl
 
 
 @requires_over_10
-def test_pg_control_replication(aggregator, integration_check, pg_instance, pg_replica_instance):
-    check = integration_check(pg_replica_instance)
+@pytest.mark.flaky
+def test_pg_control_replication(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
     check.run()
 
-    dd_agent_tags = _get_expected_tags(check, pg_replica_instance, role='standby')
+    dd_agent_tags = _get_expected_tags(check, pg_instance, role='master')
     aggregator.assert_metric('postgresql.control.timeline_id', count=1, value=1, tags=dd_agent_tags)
 
     # Also checkpoint on primary to generate changes
     master_conn = _get_superconn(pg_instance)
     with master_conn.cursor() as cur:
-        cur.execute("CHECKPOINT;")
-
-    postgres_conn = _get_superconn(pg_replica_instance)
-    with postgres_conn.cursor() as cur:
         cur.execute("CHECKPOINT;")
 
     aggregator.reset()

@@ -124,9 +124,6 @@ def build_macos():
             'LDFLAGS': f'-L{prefix_path}/lib',
             'CFLAGS': f'-I{prefix_path}/include -O2',
             'CXXFLAGS': f'-I{prefix_path}/include -O2',
-            # Use single-arch builds to avoid bundling extraneous binary payload and enable `require_archs` verification
-            'ARCHFLAGS': f'-arch {os.uname().machine}',
-            '_PYTHON_HOST_PLATFORM': f'macosx-{os.environ["MACOSX_DEPLOYMENT_TARGET"]}-{os.uname().machine}',
             # Build command for extra platform-specific build steps
             'DD_BUILD_COMMAND': f'bash {build_context_dir}/extra_build.sh'
         }

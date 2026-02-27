@@ -53,6 +53,10 @@
       {
         "resource_type": "blog",
         "url": "https://www.datadoghq.com/blog/monitor-azure-openai-with-datadog/"
+      },
+      {
+        "url": "https://docs.datadoghq.com/integrations/openai",
+        "resource_type": "documentation"
       }
     ]
   },
@@ -67,7 +71,7 @@
         "prefix": "openai.",
         "check": [
           "openai.request.duration",
-          "openai.api.usage.n_requests"
+          "openai.completions.input_tokens"
         ],
         "metadata_path": "metadata.csv"
       },
@@ -79,14 +83,13 @@
     },
     "dashboards": {
       "OpenAI Overview Dashboard": "assets/dashboards/overview_dashboard.json",
-      "OpenAI Usage Overview": "assets/dashboards/usage_overview_dashboard.json",
       "OpenAI Cost Overview": "assets/dashboards/cost_overview_dashboard.json",
       "OpenAI Admin Usage Overview": "assets/dashboards/usage_admin_overview_dashboard.json"
     },
     "monitors": {
       "OpenAI API usage is approaching rate limit": "assets/monitors/request_limits.json",
       "OpenAI tokens usage is approaching rate limit": "assets/monitors/tokens_limits.json",
-      "Token usage is abnormally high": "assets/monitors/api_token_usage.json"
+      "Token usage is abnormally high": "assets/monitors/token_usage.json"
     }
   },
   "author": {

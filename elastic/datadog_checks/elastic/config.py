@@ -22,6 +22,7 @@ ESInstanceConfig = namedtuple(
         'url',
         'pending_task_stats',
         'cat_allocation_stats',
+        'detailed_shard_metrics',
         'custom_queries',
         'submit_events',
     ],
@@ -69,6 +70,7 @@ def from_instance(instance):
     pending_task_stats = is_affirmative(instance.get('pending_task_stats', True))
     admin_forwarder = is_affirmative(instance.get('admin_forwarder', False))
     cat_allocation_stats = is_affirmative(instance.get('cat_allocation_stats', False))
+    detailed_shard_metrics = is_affirmative(instance.get('detailed_shard_metrics', False))
 
     # Support URLs that have a path in them from the config, for
     # backwards-compatibility.
@@ -108,6 +110,7 @@ def from_instance(instance):
         url=url,
         pending_task_stats=pending_task_stats,
         cat_allocation_stats=cat_allocation_stats,
+        detailed_shard_metrics=detailed_shard_metrics,
         custom_queries=custom_queries,
         submit_events=submit_events,
     )
