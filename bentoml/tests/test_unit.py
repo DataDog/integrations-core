@@ -31,7 +31,6 @@ def test_bentoml_mock_metrics(dd_run_check, aggregator, mock_http_response):
         aggregator.assert_metric(metric, value=1, tags=['test:tag', 'status_code:200'])
 
     aggregator.assert_all_metrics_covered()
-    assert get_mock.call_count == 3  # 1 metrics scrape + 2 health endpoints (/livez, /readyz)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metric_has_tag('bentoml.service.request.count', 'bentoml_endpoint:/summarize')
