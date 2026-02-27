@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from collections import ChainMap
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -62,11 +61,11 @@ class KrakendCheck(OpenMetricsBaseCheckV2):
     def create_scraper(self, config: InstanceType):
         return HttpCodeClassScraper(self, self.get_config_with_defaults(config))
 
+    def get_default_config(self):
+        return {"target_info": True}
+
     def get_config_with_defaults(self, config: InstanceType) -> Mapping:
-        defaults = self.get_default_config()
-        file_metrics = self._load_file_based_metrics(config)
-        if file_metrics:
-            defaults.setdefault('metrics', []).extend(file_metrics)
+        result = super().get_config_with_defaults(config)
 
         go_metrics = config.get("go_metrics", True)
 
@@ -76,7 +75,6 @@ class KrakendCheck(OpenMetricsBaseCheckV2):
             # This is explained in the tile
             rename_labels["version"] = "go_version"
 
-        defaults["rename_labels"] = rename_labels
-        defaults["target_info"] = True
+        result.maps[-1]["rename_labels"] = rename_labels
 
-        return ChainMap(config, defaults)
+        return result
