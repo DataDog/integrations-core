@@ -357,6 +357,15 @@ instances:
     #
     # enable_cluster_monitoring: false
 
+    ## @param kafka_configs_refresh_interval - integer - optional - default: 180
+    ## How often (in seconds) to re-fetch broker configurations, topic configurations,
+    ## and schema registry version checks from Kafka. A longer interval reduces load on
+    ## the Kafka cluster and Schema Registry. On clusters with many topics or schemas,
+    ## the check fetches in batches and gracefully degrades by re-fetching less often if
+    ## it cannot keep up within this interval. Minimum value is 60 seconds.
+    #
+    # kafka_configs_refresh_interval: 180
+
     ## @param schema_registry_url - string - optional - default: http://localhost:8081
     ## Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.
     #
