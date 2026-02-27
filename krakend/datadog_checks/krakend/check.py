@@ -11,8 +11,6 @@ from datadog_checks.base.checks.openmetrics.v2.metrics_file import ConfigOptionT
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
 from datadog_checks.base.types import InstanceType
 
-from .metrics import RENAME_LABELS_MAP
-
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
@@ -21,6 +19,11 @@ if TYPE_CHECKING:
     from datadog_checks.base.checks.base import AgentCheck
 
 HTTP_STATUS_CODE_TAG = "http_response_status_code"
+
+RENAME_LABELS_MAP = {
+    "service_version": "krakend.service_version",
+    "service_name": "krakend.service_name",
+}
 
 
 class HttpCodeClassScraper(OpenMetricsScraper):
@@ -66,6 +69,7 @@ class KrakendCheck(OpenMetricsBaseCheckV2):
 
     def get_config_with_defaults(self, config: InstanceType) -> Mapping:
         result = super().get_config_with_defaults(config)
+        defaults = result.maps[-1]
 
         go_metrics = config.get("go_metrics", True)
 
@@ -75,6 +79,6 @@ class KrakendCheck(OpenMetricsBaseCheckV2):
             # This is explained in the tile
             rename_labels["version"] = "go_version"
 
-        result.maps[-1]["rename_labels"] = rename_labels
+        defaults["rename_labels"] = rename_labels
 
         return result
