@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "d9a4c6cb-fd64-463a-860d-03e9c7fd463b",
   "app_id": "nutanix",
+  "owner": "agent-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
