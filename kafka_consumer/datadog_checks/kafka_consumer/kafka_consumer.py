@@ -315,10 +315,6 @@ class KafkaCheck(AgentCheck):
                         continue
                     producer_offset = highwater_offsets[(topic, partition)]
                     consumer_lag = producer_offset - consumer_offset
-                    if reported_contexts < contexts_limit:
-                        self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
-                        self.log.debug('%s consumer lag reported with %s tags', consumer_lag, consumer_group_tags)
-                        reported_contexts += 1
 
                     if consumer_lag < 0:
                         # this will effectively result in data loss, so emit an event for max visibility
@@ -331,6 +327,12 @@ class KafkaCheck(AgentCheck):
                         key = "{}:{}:{}".format(consumer_group, topic, partition)
                         self.send_event(title, message, consumer_group_tags, 'consumer_lag', key, severity="error")
                         self.log.debug(message)
+                        consumer_lag = 0
+
+                    if reported_contexts < contexts_limit:
+                        self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
+                        self.log.debug('%s consumer lag reported with %s tags', consumer_lag, consumer_group_tags)
+                        reported_contexts += 1
 
                     if not self._data_streams_enabled:
                         continue
