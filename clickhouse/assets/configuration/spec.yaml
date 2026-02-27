@@ -99,16 +99,42 @@ files:
   - template: logs
     example:
     - source: clickhouse
+      service: clickhouse
       type: file
       path:  /var/log/clickhouse-server/clickhouse-server.log
+      tags:
+        - format:plain
       log_processing_rules:
         - type: multi_line
-          name: log_start_with_date
-          pattern: \d{4}\.\d{2}\.\d{2}
+          name: new_log_start_with_date
+          pattern: '\d{4}\.\d{2}\.\d{2}'
     - source: clickhouse
+      service: clickhouse
       type: file
       path: /var/log/clickhouse-server/clickhouse-server.err.log
+      tags:
+        - format:plain
       log_processing_rules:
         - type: multi_line
-          name: log_start_with_date
-          pattern: \d{4}\.\d{2}\.\d{2}
+          name: new_log_start_with_date
+          pattern: '\d{4}\.\d{2}\.\d{2}'
+    - source: clickhouse
+      service: clickhouse
+      type: file
+      path:  /var/log/clickhouse-server/clickhouse-server.log
+      tags:
+        - format:json
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_json
+          pattern: '\{'
+    - source: clickhouse
+      service: clickhouse
+      type: file
+      path: /var/log/clickhouse-server/clickhouse-server.err.log
+      tags:
+        - format:json
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_json
+          pattern: '\{'

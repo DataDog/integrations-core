@@ -6,7 +6,7 @@ import pytest
 from clickhouse_connect.driver.exceptions import Error, OperationalError
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.clickhouse import ClickhouseCheck, queries
+from datadog_checks.clickhouse import ClickhouseCheck, advanced_queries
 
 from .utils import ensure_csv_safe, parse_described_metrics, raise_error
 
@@ -42,7 +42,7 @@ def test_config(instance):
 def test_error_query(instance, dd_run_check):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.log = mock.MagicMock()
-    del check.check_initializations[-2]
+    check.get_queries = lambda _: []
 
     client = mock.MagicMock()
     client.execute_iter = raise_error
@@ -56,12 +56,12 @@ def test_error_query(instance, dd_run_check):
     'metrics, ignored_columns, metric_source_url',
     [
         (
-            queries.SystemMetrics['columns'][1]['items'],
+            advanced_queries.SystemMetrics['columns'][1]['items'],
             {'Revision', 'VersionInteger'},
             'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/src/Common/CurrentMetrics.cpp',
         ),
         (
-            queries.SystemEvents['columns'][1]['items'],
+            advanced_queries.SystemEvents['columns'][1]['items'],
             set(),
             'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/src/Common/ProfileEvents.cpp',
         ),
@@ -141,3 +141,37 @@ def test_validate_config(instance):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     with pytest.raises(ConfigurationError):
         check.validate_config()
+
+
+@pytest.mark.parametrize(
+    ['ch_version', 'comparable', 'expected'],
+    [
+        ('25', 'latest', True),
+        ('25', '25', False),
+        ('25.1', '25.2', True),
+        ('25.1.2.3', '25.1.2.10', True),
+        ('25.1', '25.3', True),
+        ('23.1', '25.1', True),
+    ],
+)
+def test_version_lt(instance, ch_version, comparable, expected):
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._server_version = ch_version
+    assert check.version_lt(comparable) == expected
+
+
+@pytest.mark.parametrize(
+    ['ch_version', 'comparable', 'expected'],
+    [
+        ('25', 'latest', False),
+        ('25', '25', True),
+        ('25.1.2.3', '25.1.2', True),
+        ('25.1.2.3', '25.1.2.3', True),
+        ('25.1', '25.3', False),
+        ('23.1', '25.1', False),
+    ],
+)
+def test_version_ge(instance, ch_version, comparable, expected):
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._server_version = ch_version
+    assert check.version_ge(comparable) == expected
