@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 22.12.5 / 2026-02-27
+
+***Fixed***:
+
+* Fix AgentJobs, Deadlocks and XE collections to run async by default ([#22633](https://github.com/DataDog/integrations-core/pull/22633))
+* Cancel SQLServer agent history job on check cancel ([#22753](https://github.com/DataDog/integrations-core/pull/22753))
+
 ## 22.12.4 / 2026-02-05
 
 ***Fixed***:
