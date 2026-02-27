@@ -546,7 +546,7 @@ def test_event_on_failure(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) 
 
     assert len(aggregator.events) == 1
     aggregator.assert_event(
-        '**Result:** failed',
+        'Result: failed',
         exact_match=False,
         msg_title='Control-M job failed: fail_job',
         alert_type='error',
@@ -570,7 +570,7 @@ def test_event_on_cancellation(aggregator: AggregatorStub, monkeypatch: MonkeyPa
 
     assert len(aggregator.events) == 1
     aggregator.assert_event(
-        '**Result:** canceled',
+        'Result: canceled',
         exact_match=False,
         msg_title='Control-M job canceled: cancel_job',
         alert_type='warning',
@@ -612,7 +612,7 @@ def test_event_success_when_opted_in(aggregator: AggregatorStub, monkeypatch: Mo
 
     assert len(aggregator.events) == 1
     aggregator.assert_event(
-        '**Result:** ok',
+        'Result: ok',
         exact_match=False,
         msg_title='Control-M job ok: ok_job',
         alert_type='success',
@@ -647,7 +647,7 @@ def test_slow_run_event(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) ->
     # Success event suppressed (emit_success_events=False), but slow run event fires
     assert len(aggregator.events) == 1
     aggregator.assert_event(
-        '**Result:** ok',
+        'Result: ok',
         exact_match=False,
         event_type='control_m.job.slow_run',
         alert_type='warning',
@@ -710,11 +710,11 @@ def test_event_includes_high_cardinality_in_text(aggregator: AggregatorStub, mon
 
     assert len(aggregator.events) == 1
     text = aggregator.events[0]['msg_text']
-    assert '**Job ID:** wb:0042' in text
-    assert '**Run #:** 3' in text
-    assert '**Folder:** nightly' in text
-    assert '**Start:** 20260115100000' in text
-    assert '**Duration:** 1800000ms' in text
+    assert 'Job ID: wb:0042' in text
+    assert 'Run #: 3' in text
+    assert 'Folder: nightly' in text
+    assert 'Start: Jan 15, 2026, 10:00:00 AM' in text
+    assert 'Duration: 1800000ms' in text
 
 
 def test_event_deduplicated_with_finalized_runs(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:

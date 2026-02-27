@@ -152,31 +152,40 @@ def prune_state_map(state_map: dict[str, float], now: float, ttl_seconds: int) -
     return bool(stale)
 
 
+def _format_timestamp(raw: Any) -> str | None:
+    dt = parse_datetime(raw)
+    if dt is not None:
+        return dt.strftime("%b %d, %Y, %I:%M:%S %p")
+    # Unparseable but non-empty — return the raw value so it's still visible.
+    s = timestamp_string(raw)
+    return s if s else None
+
+
 def _build_event_text(job: dict[str, Any], result: str, ctm_server: str, job_duration: int | None) -> str:
-    lines = [f"**Result:** {result}", f"**Server:** {ctm_server}"]
+    lines = [f"Result: {result}", f"Server: {ctm_server}"]
 
     folder = job.get("folder")
     if folder:
-        lines.append(f"**Folder:** {folder}")
+        lines.append(f"Folder: {folder}")
 
     job_id = job.get("jobId")
     if job_id:
-        lines.append(f"**Job ID:** {job_id}")
+        lines.append(f"Job ID: {job_id}")
 
     number_of_runs = job.get("numberOfRuns")
     if number_of_runs is not None:
-        lines.append(f"**Run #:** {number_of_runs}")
+        lines.append(f"Run #: {number_of_runs}")
 
-    start = job.get("startTime")
+    start = _format_timestamp(job.get("startTime"))
     if start:
-        lines.append(f"**Start:** {start}")
+        lines.append(f"Start: {start}")
 
-    end = job.get("endTime")
+    end = _format_timestamp(job.get("endTime"))
     if end:
-        lines.append(f"**End:** {end}")
+        lines.append(f"End: {end}")
 
     if job_duration is not None:
-        lines.append(f"**Duration:** {job_duration}ms")
+        lines.append(f"Duration: {job_duration}ms")
 
     return "\n".join(lines)
 
