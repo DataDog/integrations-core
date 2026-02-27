@@ -114,33 +114,41 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         limit = 200
         offset = 0
         all_results: list[dict] = []
+        try:
+            while True:
+                payload['limit'] = limit
+                payload['offset'] = offset
+                results = self.api_post(endpoint, payload)
 
-        while True:
-            payload['limit'] = limit
-            payload['offset'] = offset
-            results = self.api_post(endpoint, payload)
+                all_results.extend(results if isinstance(results, list) else [results])
+                if len(results) < limit:
+                    break
+                offset += limit
+            return all_results
 
-            all_results.extend(results if isinstance(results, list) else [results])
-            if len(results) < limit:
-                break
-            offset += limit
-
-        return all_results
+        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
+            self.log.error("Could not collect %s: %s", endpoint, e)
+            return []
 
     def paginate_events(self, endpoint: str, payload: dict | None = None) -> list[dict]:
         if payload is None:
             payload = {}
 
         events = []
-        response = self.api_post(endpoint, payload)
+        try:
+            response = self.api_post(endpoint, payload)
 
-        while True:
-            events.extend(response.get("events", []))
-            if not response.get("next_page"):
-                break
+            while True:
+                events.extend(response.get("events", []))
+                if not response.get("next_page"):
+                    break
 
-            response = self.api_get(response.get("next_page"), pagination=True)
-        return events
+                response = self.api_get(response.get("next_page"), pagination=True)
+            return events
+
+        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
+            self.log.error("Could not collect events: %s", e)
+            return []
 
     def _emit_metric(self, name: str, value: float, tags: list[str]):
         """
@@ -359,16 +367,13 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         }
         if type == "flow_runs":
             payload[type]["end_time"] = {"after_": self.last_check_time_iso, "before_": now_iso}
-        try:
-            runs = self.paginate_filter(f"/{type}/filter", payload)
-            runs = (
-                self.filter_metrics.filter_flow_runs(runs)
-                if type == "flow_runs"
-                else self.filter_metrics.filter_task_runs(runs)
-            )
-        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
-            self.log.exception("Failed to collect %s runs metrics: %s", type, e)
-            return []
+        runs = self.paginate_filter(f"/{type}/filter", payload)
+        runs = (
+            self.filter_metrics.filter_flow_runs(runs)
+            if type == "flow_runs"
+            else self.filter_metrics.filter_task_runs(runs)
+        )
+
         return runs
 
     def _define_flow_run_tags(self, fr: dict[str, str]) -> list[str]:
@@ -622,7 +627,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         last_polled = _parse_time(queue.get('last_polled'), self.log)
         if last_polled:
             age = (now - last_polled).total_seconds()
-            self._emit_metric("work_queue.last_polled_age_seconds", age, tags)
+            self._emit_metric("work_queue.last_polled_age_seconds", max(0, age), tags)
 
     def _add_worker_heartbeat_age_seconds(self, worker: dict, now: datetime, tags: list[str]):
         last_heartbeat = _parse_time(worker.get('last_heartbeat_time'), self.log)

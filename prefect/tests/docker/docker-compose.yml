@@ -101,9 +101,9 @@ services:
     command: >
       bash -c "
       prefect work-queue set-concurrency-limit default 10 &&
-      prefect --no-prompt deploy --name 'sample-deploy-2' --pool local-pool --work-queue default &&
+      prefect --no-prompt deploy --name 'sample-deploy-2' &&
       prefect deployment run 'failing-flow/sample-deploy-2' &&
-      prefect --no-prompt deploy --name 'sample-deploy' --pool local-pool --work-queue default &&
+      prefect --no-prompt deploy --name 'sample-deploy' &&
       prefect deployment run 'sample-flow/sample-deploy'
       "
 
