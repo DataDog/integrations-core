@@ -81,6 +81,32 @@ files:
       value:
         type: integer
         example: 21600
+    - name: emit_job_events
+      required: false
+      description: |
+        Emit Datadog events for terminal job runs. When enabled, events are
+        created for failed and canceled jobs. Success events and slow-run
+        events are controlled by additional flags below.
+      value:
+        type: boolean
+        example: false
+    - name: emit_success_events
+      required: false
+      description: |
+        Include successful job completions in events. Only applies when
+        `emit_job_events` is enabled. Off by default because success events
+        are high-volume in most estates.
+      value:
+        type: boolean
+        example: false
+    - name: slow_run_threshold_ms
+      required: false
+      description: |
+        Emit a warning event when a terminal job's duration exceeds this
+        threshold in milliseconds. Only applies when `emit_job_events` is
+        enabled. When not set, no slow-run events are emitted.
+      value:
+        type: integer
     - template: instances/http
       overrides:
         headers.display_priority: 1

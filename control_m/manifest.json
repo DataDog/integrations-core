@@ -28,7 +28,7 @@
         "spec": "assets/configuration/spec.yaml"
       },
       "events": {
-        "creates_events": false
+        "creates_events": true
       },
       "metrics": {
         "prefix": "control_m.",
