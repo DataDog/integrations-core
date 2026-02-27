@@ -176,8 +176,14 @@ class OpenMetricsBaseCheckV2(AgentCheck):
     def _load_metrics_file(self, path: Path) -> MetricsConfig:
         """Load and parse a single YAML metrics file."""
         file_path = self._get_package_dir() / path
-        with open(file_path) as f:
-            return yaml.safe_load(f)
+        try:
+            with open(file_path) as f:
+                data = yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            raise RuntimeError(f"Failed to parse metrics file {path}: {e}") from None
+        if not isinstance(data, dict):
+            raise RuntimeError(f"Metrics file {path} must contain a YAML mapping, got {type(data).__name__}")
+        return data
 
     @contextmanager
     def adopt_namespace(self, namespace):
