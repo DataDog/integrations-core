@@ -88,6 +88,10 @@ app_controller_counters = [
     'app.sync.duration.seconds.count',
     'cluster.events.count',
     'kubectl.exec.count',
+    'kubectl.requests.count',
+    'kubectl.exec_plugin.call.count',
+    'kubectl.request.retries.count',
+    'kubectl.transport.create_calls.count',
     'workqueue.adds.count',
     'workqueue.retries.count',
     'process.cpu.seconds.count',
@@ -95,10 +99,15 @@ app_controller_counters = [
 
 app_controller_gauges = [
     'app.info',
+    'app.condition',
+    'app.orphaned_resources.count',
+    'resource_events.processed_in_batch',
     'cluster.api.resource_objects',
     'cluster.api.resources',
     'cluster.cache.age.seconds',
     'kubectl.exec.pending',
+    'kubectl.client_cert_rotation.age.seconds',
+    'kubectl.transport.cache_entries',
     'workqueue.depth',
     'workqueue.longest.running_processor.seconds',
     'workqueue.unfinished_work.seconds',
@@ -108,6 +117,24 @@ app_controller_histograms = [
     'app.reconcile.bucket',
     'app.reconcile.count',
     'app.reconcile.sum',
+    'resource_events.processing.bucket',
+    'resource_events.processing.count',
+    'resource_events.processing.sum',
+    'kubectl.request.duration.seconds.bucket',
+    'kubectl.request.duration.seconds.count',
+    'kubectl.request.duration.seconds.sum',
+    'kubectl.dns_resolution.duration.seconds.bucket',
+    'kubectl.dns_resolution.duration.seconds.count',
+    'kubectl.dns_resolution.duration.seconds.sum',
+    'kubectl.request.size.bytes.bucket',
+    'kubectl.request.size.bytes.count',
+    'kubectl.request.size.bytes.sum',
+    'kubectl.response.size.bytes.bucket',
+    'kubectl.response.size.bytes.count',
+    'kubectl.response.size.bytes.sum',
+    'kubectl.rate_limiter.duration.seconds.bucket',
+    'kubectl.rate_limiter.duration.seconds.count',
+    'kubectl.rate_limiter.duration.seconds.sum',
     'workqueue.queue.duration.seconds.bucket',
     'workqueue.queue.duration.seconds.count',
     'workqueue.queue.duration.seconds.sum',
@@ -119,7 +146,11 @@ app_controller_histograms = [
     'redis.request.duration.sum',
 ]
 
-appset_controller_counters = ['reconcile.errors.count', 'runtime.reconcile.count']
+appset_controller_counters = [
+    'reconcile.errors.count',
+    'runtime.reconcile.count',
+    'github_api.requests.count',
+]
 
 appset_controller_gauges = [
     'active.workers',
@@ -127,6 +158,10 @@ appset_controller_gauges = [
     'appset.info',
     'appset.owned.applications',
     'appset.labels',
+    'github_api.rate_limit.remaining',
+    'github_api.rate_limit.limit',
+    'github_api.rate_limit.reset.seconds',
+    'github_api.rate_limit.used',
 ]
 
 appset_controller_histograms = [
@@ -136,6 +171,9 @@ appset_controller_histograms = [
     'appset.reconcile.bucket',
     'appset.reconcile.count',
     'appset.reconcile.sum',
+    'github_api.request.duration.seconds.bucket',
+    'github_api.request.duration.seconds.count',
+    'github_api.request.duration.seconds.sum',
 ]
 
 api_server_counters = [
@@ -144,12 +182,17 @@ api_server_counters = [
     'grpc.server.msg.sent.count',
     'grpc.server.msg.received.count',
     'grpc.server.started.count',
+    'login.request.count',
+    'proxy_extension.request.count',
 ]
 
 api_server_histograms = [
     'redis.request.duration.bucket',
     'redis.request.duration.count',
     'redis.request.duration.sum',
+    'proxy_extension.request.duration.seconds.bucket',
+    'proxy_extension.request.duration.seconds.count',
+    'proxy_extension.request.duration.seconds.sum',
 ]
 
 repo_server_gauges = [
@@ -159,6 +202,13 @@ repo_server_gauges = [
 repo_server_counters = [
     'redis.request.count',
     'git.request.count',
+    'git.fetch.fail.count',
+    'oci.request.count',
+    'oci.test_repo.fail.count',
+    'oci.get_tags.fail.count',
+    'oci.digest_metadata.fail.count',
+    'oci.resolve_revision.fail.count',
+    'oci.extract.fail.count',
 ]
 
 repo_server_histograms = [
@@ -168,6 +218,9 @@ repo_server_histograms = [
     'redis.request.duration.seconds.bucket',
     'redis.request.duration.seconds.count',
     'redis.request.duration.seconds.sum',
+    'oci.request.duration.seconds.bucket',
+    'oci.request.duration.seconds.count',
+    'oci.request.duration.seconds.sum',
 ]
 
 commit_server_counters = [
@@ -252,6 +305,66 @@ E2E_NOT_EXPOSED_METRICS = [
     'argocd.commit_server.commit.pending.request.total',
     'argocd.commit_server.git.request.count',
     'argocd.commit_server.commit.request.count',
+    # GitHub API metrics - disabled by default in ArgoCD
+    # (requires applicationsetcontroller.enable.github.api.metrics: true);
+    # also requires ApplicationSets with GitHub generators, which are not deployed in E2E
+    'argocd.appset_controller.github_api.requests.count',
+    'argocd.appset_controller.github_api.rate_limit.remaining',
+    'argocd.appset_controller.github_api.rate_limit.limit',
+    'argocd.appset_controller.github_api.rate_limit.reset.seconds',
+    'argocd.appset_controller.github_api.rate_limit.used',
+    'argocd.appset_controller.github_api.request.duration.seconds.bucket',
+    'argocd.appset_controller.github_api.request.duration.seconds.count',
+    'argocd.appset_controller.github_api.request.duration.seconds.sum',
+    # Kubectl metrics - emitted during app resource management operations; no apps deployed in E2E
+    'argocd.app_controller.kubectl.requests.count',
+    'argocd.app_controller.kubectl.exec_plugin.call.count',
+    'argocd.app_controller.kubectl.request.retries.count',
+    'argocd.app_controller.kubectl.transport.create_calls.count',
+    'argocd.app_controller.kubectl.client_cert_rotation.age.seconds',
+    'argocd.app_controller.kubectl.transport.cache_entries',
+    'argocd.app_controller.kubectl.request.duration.seconds.bucket',
+    'argocd.app_controller.kubectl.request.duration.seconds.count',
+    'argocd.app_controller.kubectl.request.duration.seconds.sum',
+    'argocd.app_controller.kubectl.dns_resolution.duration.seconds.bucket',
+    'argocd.app_controller.kubectl.dns_resolution.duration.seconds.count',
+    'argocd.app_controller.kubectl.dns_resolution.duration.seconds.sum',
+    'argocd.app_controller.kubectl.request.size.bytes.bucket',
+    'argocd.app_controller.kubectl.request.size.bytes.count',
+    'argocd.app_controller.kubectl.request.size.bytes.sum',
+    'argocd.app_controller.kubectl.response.size.bytes.bucket',
+    'argocd.app_controller.kubectl.response.size.bytes.count',
+    'argocd.app_controller.kubectl.response.size.bytes.sum',
+    'argocd.app_controller.kubectl.rate_limiter.duration.seconds.bucket',
+    'argocd.app_controller.kubectl.rate_limiter.duration.seconds.count',
+    'argocd.app_controller.kubectl.rate_limiter.duration.seconds.sum',
+    # App condition - disabled by default (requires --metrics-application-conditions flag);
+    # orphaned resources require deployed apps with orphaned resource monitoring enabled
+    'argocd.app_controller.app.condition',
+    'argocd.app_controller.app.orphaned_resources.count',
+    # Resource events metrics - emitted during app reconciliation; no apps deployed in E2E
+    'argocd.app_controller.resource_events.processed_in_batch',
+    'argocd.app_controller.resource_events.processing.bucket',
+    'argocd.app_controller.resource_events.processing.count',
+    'argocd.app_controller.resource_events.processing.sum',
+    # Login and proxy extension metrics - require user authentication attempts and configured
+    # proxy extensions; not exercised in E2E
+    'argocd.api_server.login.request.count',
+    'argocd.api_server.proxy_extension.request.count',
+    'argocd.api_server.proxy_extension.request.duration.seconds.bucket',
+    'argocd.api_server.proxy_extension.request.duration.seconds.count',
+    'argocd.api_server.proxy_extension.request.duration.seconds.sum',
+    # OCI metrics - require OCI/Helm registry usage; E2E environment uses git repos, not OCI registries
+    'argocd.repo_server.git.fetch.fail.count',
+    'argocd.repo_server.oci.request.count',
+    'argocd.repo_server.oci.test_repo.fail.count',
+    'argocd.repo_server.oci.get_tags.fail.count',
+    'argocd.repo_server.oci.digest_metadata.fail.count',
+    'argocd.repo_server.oci.resolve_revision.fail.count',
+    'argocd.repo_server.oci.extract.fail.count',
+    'argocd.repo_server.oci.request.duration.seconds.bucket',
+    'argocd.repo_server.oci.request.duration.seconds.count',
+    'argocd.repo_server.oci.request.duration.seconds.sum',
 ]
 
 general = general_gauges + general_counters + general_summaries
