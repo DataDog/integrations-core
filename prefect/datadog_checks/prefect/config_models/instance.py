@@ -7,10 +7,10 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-
 from __future__ import annotations
 
-from typing import Optional
+from types import MappingProxyType
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
@@ -20,16 +20,70 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class DeploymentNames(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+
+
+class EventNames(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+
+
+class MetricPatterns(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+
+
+class WorkPoolNames(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+
+
+class WorkQueueNames(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    custom_headers: Optional[MappingProxyType[str, Any]] = None
+    deployment_names: Optional[DeploymentNames] = None
+    disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
+    event_names: Optional[EventNames] = None
+    metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
+    prefect_url: str
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+    work_pool_names: Optional[WorkPoolNames] = None
+    work_queue_names: Optional[WorkQueueNames] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
