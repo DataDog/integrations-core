@@ -107,7 +107,7 @@ files:
       - name: nodes
         description: |
           Use the `nodes` parameters to specify the nodes you'd like to collect metrics on.
-          The default maximum number of nodes is 100. Exceeding this limit can cause 
+          The default maximum number of nodes is 100. Exceeding this limit can cause
           data loss. To increase the maximum, contact customer support.
         value:
           type: array
@@ -132,7 +132,7 @@ files:
       - name: queues
         description: |
           Use the `queues` parameters to specify the queues you'd like to collect metrics on.
-          The default maximum number of queues is 200. Exceeding this limit can cause 
+          The default maximum number of queues is 200. Exceeding this limit can cause
           data loss. To increase the maximum, contact customer support.
         fleet_configurable: true
         value:
@@ -166,7 +166,7 @@ files:
       - name: exchanges
         description: |
           Use the `exchanges` parameters to specify the exchanges you'd like to collect metrics on.
-          The default maximum number of exchanges is 50. Exceeding this limit can cause 
+          The default maximum number of exchanges is 50. Exceeding this limit can cause
           data loss. To increase the maximum, contact customer support.
         fleet_configurable: true
         value:
@@ -212,6 +212,12 @@ files:
           example:
             - <VHOST_NAME_1>
             - <VHOST_NAME_2>
+      - template: instances/http
+        overrides:
+          use_legacy_auth_encoding.value.example: false
+          username.hidden: true
+          password.hidden: true
+      - template: instances/default
   - template: logs
     example:
     - type: file
