@@ -103,8 +103,11 @@ class ConfigOptionEquals:
 class AllOf:
     """Compose predicates so that all must pass for the metrics file to be loaded.
 
+    Follows Python's ``all()`` semantics: if no predicates are provided,
+    ``should_load`` returns ``True`` (vacuous truth).
+
     Args:
-        *predicates: Two or more predicates that must all return ``True``.
+        *predicates: Predicates that must all return ``True``.
 
     Example::
 
@@ -129,8 +132,11 @@ class AllOf:
 class AnyOf:
     """Compose predicates so that any one passing is sufficient to load the metrics file.
 
+    Follows Python's ``any()`` semantics: if no predicates are provided,
+    ``should_load`` returns ``False``.
+
     Args:
-        *predicates: Two or more predicates where at least one must return ``True``.
+        *predicates: Predicates where at least one must return ``True``.
 
     Example::
 
