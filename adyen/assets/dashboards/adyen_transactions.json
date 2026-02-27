@@ -117,7 +117,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:AUTHORISATION $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -176,7 +176,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -235,7 +235,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -298,7 +298,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:CANCELLATION $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:CANCELLATION $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -357,7 +357,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -416,7 +416,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -475,7 +475,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:CAPTURE_FAILED $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:CAPTURE_FAILED $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -534,7 +534,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:HANDLED_EXTERNALLY $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:HANDLED_EXTERNALLY $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -597,7 +597,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -673,7 +673,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -766,7 +766,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         },
@@ -782,7 +782,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -868,7 +868,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         },
@@ -884,7 +884,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:CAPTURE_FAILED $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:CAPTURE_FAILED $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         },
@@ -900,7 +900,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:CAPTURE @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -974,7 +974,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:REFUND @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:REFUND @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -1027,7 +1027,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:REFUNDED_REVERSED $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:REFUNDED_REVERSED $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -1080,7 +1080,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:CANCEL_OR_REFUND $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:CANCEL_OR_REFUND $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -1138,7 +1138,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:REFUND @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:REFUND @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -1209,7 +1209,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:REFUND @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:REFUND @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -1262,7 +1262,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:REFUND_FAILED $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:REFUND_FAILED $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -1361,7 +1361,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:REFUND @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:REFUND @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         },
@@ -1377,7 +1377,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:REFUND_FAILED $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:REFUND_FAILED $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         },
@@ -1393,7 +1393,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:REFUNDED_REVERSED $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:REFUNDED_REVERSED $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         },
@@ -1409,7 +1409,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:CANCEL_OR_REFUND $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:CANCEL_OR_REFUND $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         },
@@ -1425,7 +1425,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:REFUND @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:REFUND @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -1499,7 +1499,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION_ADJUSTMENT @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:AUTHORISATION_ADJUSTMENT @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -1560,7 +1560,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION_ADJUSTMENT $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:AUTHORISATION_ADJUSTMENT $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -1620,7 +1620,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION_ADJUSTMENT @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:AUTHORISATION_ADJUSTMENT @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -1677,7 +1677,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION_ADJUSTMENT @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:AUTHORISATION_ADJUSTMENT @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -1775,7 +1775,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:AUTHORISATION $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -1844,7 +1844,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:AUTHORISATION $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -1913,7 +1913,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:true $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -1982,7 +1982,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:transaction @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
+                                                "query": "source:adyen @evt.name:AUTHORISATION @notificationItems.NotificationRequestItem.success:false $MerchantAccount $PaymentMethod $Currency"
                                             },
                                             "storage": "hot"
                                         }

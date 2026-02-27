@@ -1,4 +1,5 @@
 name: SAP HANA
+fleet_configurable: true
 files:
 - name: sap_hana.yaml
   options:
@@ -6,6 +7,7 @@ files:
     options:
       - name: persist_db_connections
         description: Whether or not to persist database connections.
+        fleet_configurable: true
         value:
           type: boolean
           example: true
@@ -15,27 +17,32 @@ files:
     options:
       - name: server
         description: The hostname used to connect to the system.
+        fleet_configurable: true
         required: true
         value:
           type: string
       - name: port
         description: The port used to connect to the system.
+        fleet_configurable: true
         value:
           type: integer
           display_default: 30015
       - name: username
         description: The database user to authenticate as.
+        fleet_configurable: true
         required: true
         value:
           type: string
       - name: password
         description: The password of `username`.
+        fleet_configurable: true
         required: true
         secret: true
         value:
           type: string
       - name: schema
         description: The schema containing the tenant databases views.
+        fleet_configurable: true
         value:
           type: string
           display_default: SYS_DATABASES
@@ -55,11 +62,13 @@ files:
         description: |
           Whether or not to use the hostnames contained in HANA's monitoring
           views instead of the Agent hostname.
+        fleet_configurable: true
         value:
           type: boolean
           example: false
       - name: batch_size
         description: The number of rows to return with each query result.
+        fleet_configurable: true
         value:
           type: integer
           example: 1000
@@ -77,6 +86,7 @@ files:
       - name: use_tls
         description: |
           Instructs the SAP HANA integration to connect using TLS.
+        fleet_configurable: true
         value:
           example: false
           type: boolean

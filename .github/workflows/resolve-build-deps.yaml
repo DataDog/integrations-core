@@ -97,11 +97,16 @@ jobs:
         run: |
           cd .builders
           pytest -vvv
+      - name: Run mypy type checking
+        run: |
+          cd .builders
+          python -m mypy --config-file pyproject.toml .
 
   build:
     name: Target ${{ matrix.job.image }} on ${{ matrix.job.os }}
     needs:
       - check-should-run
+      - test
     if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ${{ matrix.job.os }}
     strategy:
@@ -179,6 +184,7 @@ jobs:
     name: Target macOS/${{ matrix.job.arch }} on ${{ matrix.job.os }}
     needs:
       - check-should-run
+      - test
     if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ${{ matrix.job.os }}
     strategy:
@@ -209,10 +215,10 @@ jobs:
       # Use PBS as suggested by: https://github.com/DataDog/integrations-core/pull/21692#pullrequestreview-3358660684
       # PBS stands for "Python Build Standalone": https://astral.sh/blog/python-build-standalone
       env:
-        PYTHON_PATCH: 11
-        PBS_RELEASE: 20251217
-        PBS_SHA256__aarch64: 324b24ebd50c16cf3a88360fc0e85ced38b04abcf580bc73cf95def4852e0c29
-        PBS_SHA256__x86_64: 70f76d40609999213b44a37e947dc0fe0b975f48d206f8931992892870bd4026
+        PYTHON_PATCH: 12
+        PBS_RELEASE: 20260203
+        PBS_SHA256__aarch64: 146d011e9246790659d86c729a9bb37dc423545d0ed8e542ba1dfe93700aa0f2
+        PBS_SHA256__x86_64: 5fb24d5a82f248e985bdc01f504f40d4150e321809b0bbeee7441cedd6dac227
       run: |
         set -u
         curl -fsSL -o pbs.tgz "https://github.com/astral-sh/python-build-standalone/releases/download/$PBS_RELEASE/cpython-$PYTHON_VERSION.$PYTHON_PATCH+$PBS_RELEASE-${{ matrix.job.arch }}-apple-darwin-install_only_stripped.tar.gz"
@@ -299,7 +305,7 @@ jobs:
         project_id: datadog-agent-int-build
         workload_identity_provider: projects/574011472402/locations/global/workloadIdentityPools/github/providers/integrations-core
 
-    - name: Upload wheels and create lock files 
+    - name: Upload wheels and create lock files
       run: python .builders/upload.py targets
 
     - name: Clean up repository

@@ -602,5 +602,5 @@ Additional helpful documentation, links, and articles:
 [29]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges/
 [30]: https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/#collecting-metrics-from-a-custom-procedure
 [31]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics
-[32]: https://docs.datadoghq.com/database_monitoring/
+[32]: https://docs.datadoghq.com/database_monitoring/setup_mysql/
 [33]: https://docs.datadoghq.com/database_monitoring/#mysql

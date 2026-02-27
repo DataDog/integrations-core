@@ -521,6 +521,6 @@ Additional helpful documentation, links, and articles:
 [25]: https://www.datadoghq.com/blog/postgresql-monitoring-tools
 [26]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog
 [27]: https://docs.datadoghq.com/agent/docker/apm/
-[28]: https://docs.datadoghq.com/database_monitoring/
+[28]: https://docs.datadoghq.com/database_monitoring/setup_postgres/
 [29]: https://docs.datadoghq.com/database_monitoring/#postgres
 [30]: https://docs.datadoghq.com/integrations/postgres/?tab=host#faq

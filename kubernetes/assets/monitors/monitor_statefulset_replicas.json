@@ -8,7 +8,7 @@
   ],
   "description": "Kubernetes replicas are clones that facilitate self-healing for pods. Each pod has a desired number of replica Pods that should be running at any given time. This monitor tracks when the number of replicas per statefulset is falling.",
   "definition": {
-    "message": "More than one Statefulset Replica's pods are down in Statefulset {{kube_namespace.name}}/{{kube_stateful_set.name}}. This might present an unsafe situation for any further manual operations, such as killing other pods.",
+    "message": "{{#is_alert}}\n\n## What's happening?\nThere are at least 2 desired replicas that are not ready for {{kube_namespace.name}}/{{kube_stateful_set.name}} StatefulSet over the last 15 minutes.\n\n{{/is_alert}}\n\n This might present an unsafe situation for any further manual operations, such as killing other pods.",
     "name": "[Kubernetes] Monitor Kubernetes Statefulset Replicas",
     "options": {
       "escalation_message": "",

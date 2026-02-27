@@ -1,4 +1,5 @@
 name: Postfix
+fleet_configurable: true
 files:
 - name: postfix.yaml
   options:
@@ -13,6 +14,7 @@ files:
 
         On Redhat, CentOS, and Amazon Linux, also add:
           Defaults:dd-agent !requiretty
+      fleet_configurable: true
       value:
         type: string
         example: root
@@ -29,6 +31,7 @@ files:
 
         authorized_mailq_users (static:anyone): List of users who are authorized to view the queue.
         http://www.postfix.org/postqueue.1.html
+      fleet_configurable: true
       value:
         type: boolean
         example: false
@@ -39,6 +42,7 @@ files:
       description: |
         Path to the postfix directory. The directory option is required if `postqueue: false` is set. For more 
         information see https://docs.datadoghq.com/integrations/postfix/#using-sudo.
+      fleet_configurable: true
       enabled: true
       value:
         display_default: null
@@ -46,6 +50,7 @@ files:
         type: string
     - name: queues
       description: List of queues to monitor.
+      fleet_configurable: true
       enabled: true
       value:
         display_default: null
@@ -60,6 +65,7 @@ files:
       description: |
         The config_directory option applies only when `postqueue: true`.
         The config_directory is the location of the Postfix configuration directory that contains the main.cf file.
+      fleet_configurable: true
       value:
         type: string
         example: /etc/postfix

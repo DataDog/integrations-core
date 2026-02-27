@@ -2,6 +2,25 @@
 
 <!-- towncrier release notes start -->
 
+## 22.13.0 / 2026-02-19
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Require key_prefix for SQLServer connections to avoid unsafely sharing connections across threads ([#22557](https://github.com/DataDog/integrations-core/pull/22557))
+
+***Fixed***:
+
+* Clarifies the default ADO provider in conf.yaml.example ([#21364](https://github.com/DataDog/integrations-core/pull/21364))
+* Updates collect_raw_query_statements config description ([#22611](https://github.com/DataDog/integrations-core/pull/22611))
+* Fix AgentJobs, Deadlocks and XE collections to run async by default ([#22633](https://github.com/DataDog/integrations-core/pull/22633))
+
+## 22.12.4 / 2026-02-05
+
+***Fixed***:
+
+* Fixed an issue where schema collection thread connections could get abruptly closed from the main check loop ([#22471](https://github.com/DataDog/integrations-core/pull/22471))
+
 ## 22.12.3 / 2026-01-21
 
 ***Fixed***:

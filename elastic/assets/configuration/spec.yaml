@@ -15,6 +15,7 @@ files:
       description: |
         The URL where Elasticsearch accepts HTTP requests. This is used to
         fetch statistics from the nodes and information about the cluster health.
+      formats: ["url"]
       value:
         example: http://localhost:9200
         type: string
@@ -71,11 +72,13 @@ files:
       description: |
         Set `slm_stats` to true to collect statistics about Snapshot Lifecycle Management.
         The user must have the `read_slm` cluster privilege to get these metrics.
+      fleet_configurable: true
       value:
         type: boolean
         example: false
     - name: pshard_graceful_timeout
       description: Continue gracefully if pshard stats timeout.
+      fleet_configurable: true
       value:
         type: boolean
         example: false
@@ -85,6 +88,7 @@ files:
         Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-pending.html
         Some managed Elasticsearch services (e.g., AWS Elasticsearch) do not expose this endpoint.
         Set `pending_task_stats` to false if you use such a service.
+      fleet_configurable: true
       value:
         type: boolean
         example: true
@@ -92,6 +96,7 @@ files:
       description: |
         Enable to collect Elastic Cat Allocation metrics. Available only for Elasticsearch 5.0 or higher.
         Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html.
+      fleet_configurable: true
       value:
         type: boolean
         example: false
@@ -111,6 +116,7 @@ files:
         Specifies a URL that includes a context root
         needed for a forwarder application to access Elasticsearch REST services, for example:
         https://www.ibm.com/support/knowledgecenter/SSFTN5_8.5.6/com.ibm.wbpm.main.doc/topics/tadm_fps_esearch.html
+      fleet_configurable: true
       value:
         type: boolean
         example: false
@@ -118,11 +124,13 @@ files:
       description: |
         Submit `jvm.gc.collectors` metrics as rate.
         Note: Only for ES versions 0.9.10 or higher.
+      fleet_configurable: true
       value:
         type: boolean
         example: false
     - name: disable_legacy_cluster_tag
       description: Enable to stop submitting the tag `cluster_name`, which has been renamed to `elastic_cluster`.
+      fleet_configurable: true
       value:
         type: boolean
         display_default: false
@@ -132,6 +140,7 @@ files:
       description: |
         Disable the submission of the Elasticsearch `host` and `port` as tags in service checks.
         Submit them as `url` instead.
+      fleet_configurable: true
       value:
         type: boolean
         display_default: false
@@ -167,6 +176,7 @@ files:
                                 request into a POST request, so a read-only user should be used when writing
                                 custom queries with a payload. Use YAML formatting when including a payload.
 
+      fleet_configurable: true
       value:
         example:
         - endpoint: /_search
@@ -214,6 +224,7 @@ files:
         By default we submit events to Datadog if the cluster starts unhealthy or anytime its health changes.
         You can set this option to `false` to disable submitting the events in case you already implemented
         your own custom alerts based on metrics.
+      fleet_configurable: true
       value:
         type: boolean
         example: true

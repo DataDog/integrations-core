@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import json
 import os
+import pathlib
 from unittest import mock
 
 import pytest
@@ -29,7 +31,7 @@ def dd_environment():
     compose_file = os.path.join(HERE, 'docker', 'docker-compose.yaml')
     with docker_run(
         compose_file=compose_file,
-        conditions=[WaitFor(create_volume)],
+        conditions=[WaitFor(create_volume), WaitFor(gstatus_ready)],
         down=delete_volume,
     ):
         yield CONFIG, E2E_METADATA
@@ -48,9 +50,7 @@ def config():
 @pytest.fixture()
 def mock_gstatus_data():
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'gstatus.txt')
-    with open(f_name) as f:
-        data = f.read()
-
+    data = pathlib.Path(f_name).read_text()
     with mock.patch('datadog_checks.glusterfs.check.GlusterfsCheck.get_gstatus_output', return_value=(data, "", 0)):
         yield
 
@@ -81,5 +81,25 @@ def create_volume():
         run_command(f"docker exec gluster-{command}", capture=True, check=True)
 
 
+def gstatus_ready():
+    result = run_command(
+        "docker exec gluster-node-1 gstatus -a -o json -u g",
+        capture=True,
+        check=True,
+    )
+    stdout = result.stdout
+    if not stdout.lstrip().startswith('{'):
+        stdout = stdout.split('\n', 1)[-1]
+    data = json.loads(stdout)
+    volume_summary = data.get('data', {}).get('volume_summary', [])
+    if not volume_summary:
+        raise Exception("No volume data from gstatus yet")
+    for vol in volume_summary:
+        healinfo = vol.get('healinfo', [])
+        if all(h.get('status', '').lower() != 'connected' for h in healinfo):
+            raise Exception("Heal info not ready yet")
+
+
 def delete_volume():
+    run_command("docker exec gluster-node-1 gluster volume stop gv0 force", capture=True, check=False)
     run_command("docker exec gluster-node-1 gluster volume delete gv0", capture=True, check=True)

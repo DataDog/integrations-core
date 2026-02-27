@@ -1,0 +1,226 @@
+id: ide-shepherd
+metric_id: ide-shepherd
+backend_only: false
+installation_sources:
+  - ide-shepherd
+facets:
+  - groups:
+      - IDE-Shepherd
+    name: IDE
+    path: metadata.environment.ide_flavor
+    source: log
+  - groups:
+      - IDE-Shepherd
+    name: Extension Lifecycle
+    path: ide_shepherd.activity_name
+    source: log
+  - groups:
+      - IDE-Shepherd
+    name: OCSF Class
+    path: ide_shepherd.class_name
+    source: log
+  - groups:
+      - IDE-Shepherd
+    name: Extension
+    path: ocsf.application.name
+    source: log
+  - groups:
+      - IDE-Shepherd
+    name: Resource (Extension / Workspace)
+    path: ocsf.resources.uid
+    source: log
+  - groups:
+      - IDE-Shepherd
+    name: Technique
+    path: ocsf.observables.name
+    source: log
+  - groups:
+      - IDE-Shepherd
+    name: Is Alert
+    path: ocsf.is_alert
+    source: log
+pipeline:
+  type: pipeline
+  name: IDE-Shepherd
+  enabled: true
+  filter:
+    query: source:ide-shepherd
+  processors:
+    - type: date-remapper
+      name: Define `time` as the official date of the log
+      enabled: true
+      sources:
+        - time
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
+    - type: attribute-remapper
+      name: Map `isAlert` to `ocsf.is_alert`
+      enabled: true
+      sources:
+        - isAlert
+      sourceType: attribute
+      target: ocsf.is_alert
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `metadata` to `ocsf.metadata`
+      enabled: true
+      sources:
+        - metadata
+      sourceType: attribute
+      target: ocsf.metadata
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `activity_id` to `ocsf.activity_id`
+      enabled: true
+      sources:
+        - activity_id
+      sourceType: attribute
+      target: ocsf.activity_id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `class_uid` to `ocsf.class_uid`
+      enabled: true
+      sources:
+        - class_uid
+      sourceType: attribute
+      target: ocsf.class_uid
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `category_uid` to `ocsf.category_uid`
+      enabled: true
+      sources:
+        - category_uid
+      sourceType: attribute
+      target: ocsf.category_uid
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `type_uid` to `ocsf.type_uid`
+      enabled: true
+      sources:
+        - type_uid
+      sourceType: attribute
+      target: ocsf.type_uid
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `severity_id` to `ocsf.severity_id`
+      enabled: true
+      sources:
+        - severity_id
+      sourceType: attribute
+      target: ocsf.severity_id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `status_id` to `ocsf.status_id`
+      enabled: true
+      sources:
+        - status_id
+      sourceType: attribute
+      target: ocsf.status_id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `time` to `ocsf.time`
+      enabled: true
+      sources:
+        - time
+      sourceType: attribute
+      target: ocsf.time
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `application` to `ocsf.application`
+      enabled: true
+      sources:
+        - application
+      sourceType: attribute
+      target: ocsf.application
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `resources` to `ocsf.resources`
+      enabled: true
+      sources:
+        - resources
+      sourceType: attribute
+      target: ocsf.resources
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `observables` to `ocsf.observables`
+      enabled: true
+      sources:
+        - observables
+      sourceType: attribute
+      target: ocsf.observables
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `finding_info` to `ocsf.finding_info`
+      enabled: true
+      sources:
+        - finding_info
+      sourceType: attribute
+      target: ocsf.finding_info
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - name: Lookup for `ocsf.activity_id` to `activity_name`
+      enabled: true
+      source: ocsf.activity_id
+      target: activity_name
+      lookupTable: |-
+        1,Create
+        2,Update
+        3,Close
+      type: lookup-processor
+    - type: attribute-remapper
+      name: Map `activity_name` to `ide_shepherd.activity_name`
+      enabled: true
+      sources:
+        - activity_name
+      sourceType: attribute
+      target: ide_shepherd.activity_name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - name: Lookup for `ocsf.class_uid` to `class_name`
+      enabled: true
+      source: ocsf.class_uid
+      target: class_name
+      lookupTable: |-
+        2007,Application Security Posture Finding
+        2004,Detection Finding
+      type: lookup-processor
+    - type: attribute-remapper
+      name: Map `class_name` to `ide_shepherd.class_name`
+      enabled: true
+      sources:
+        - class_name
+      sourceType: attribute
+      target: ide_shepherd.class_name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+

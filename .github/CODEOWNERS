@@ -451,6 +451,15 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /squid/manifest.json                                                 @DataDog/agent-integrations @DataDog/documentation
 /squid/assets/logs/                                                  @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/storage_management/                                                 @DataDog/new-workloads
+/storage_management/*.md                                            @DataDog/new-workloads @DataDog/documentation
+/storage_management/manifest.json                                    @DataDog/new-workloads @DataDog/documentation
+
+/supabase_cloud/                                                     @DataDog/saas-integrations
+/supabase_cloud/*.md                                                 @DataDog/saas-integrations @DataDog/documentation
+/supabase_cloud/manifest.json                                        @DataDog/saas-integrations @DataDog/documentation
+/supabase_cloud/assets/logs/                                         @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 /ping_one/                                                           @DataDog/saas-integrations
 /ping_one/*.md                                                       @DataDog/saas-integrations @DataDog/documentation
 /ping_one/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
@@ -751,10 +760,30 @@ plaid/assets/logs/                                                  @DataDog/saa
 /cato_networks/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /cato_networks/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/arctic_wolf_aurora_endpoint_security/                               @DataDog/agent-integrations
+/arctic_wolf_aurora_endpoint_security/*.md                           @DataDog/agent-integrations @DataDog/documentation
+/arctic_wolf_aurora_endpoint_security/manifest.json                  @DataDog/agent-integrations @DataDog/documentation
+/arctic_wolf_aurora_endpoint_security/assets/logs/                   @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 /cisco_asa/                                                           @DataDog/agent-integrations
 /cisco_asa/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
 /cisco_asa/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
 /cisco_asa/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/bluecat_edge/                                                        @DataDog/saas-integrations
+/bluecat_edge/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
+/bluecat_edge/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
+/bluecat_edge/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/cisco_secure_client/                                                @DataDog/agent-integrations
+/cisco_secure_client/*.md                                            @DataDog/agent-integrations @DataDog/documentation
+/cisco_secure_client/manifest.json                                   @DataDog/agent-integrations @DataDog/documentation
+/cisco_secure_client/assets/logs/                                    @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/ide-shepherd/                                                        @DataDog/agent-integrations
+/ide-shepherd/*.md                                                    @DataDog/agent-integrations @DataDog/documentation
+/ide-shepherd/manifest.json                                           @DataDog/agent-integrations @DataDog/documentation
+/ide-shepherd/assets/logs/                                            @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
