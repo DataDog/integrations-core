@@ -550,6 +550,10 @@ coverage:
         target: 75
         flags:
         - powerdns_recursor
+      Prefect:
+        target: 75
+        flags:
+        - prefect
       Process:
         target: 75
         flags:
@@ -1548,6 +1552,11 @@ flags:
     paths:
     - powerdns_recursor/datadog_checks/powerdns_recursor
     - powerdns_recursor/tests
+  prefect:
+    carryforward: true
+    paths:
+    - prefect/datadog_checks/prefect
+    - prefect/tests
   process:
     carryforward: true
     paths:
