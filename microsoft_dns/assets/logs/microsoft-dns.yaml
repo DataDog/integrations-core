@@ -432,7 +432,7 @@ pipeline:
               sourceType: attribute
               target: ocsf.metadata.event_code
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `Event.System.Provider.Name` to `ocsf.metadata.log_provider`
