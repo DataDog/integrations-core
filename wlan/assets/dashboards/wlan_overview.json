@@ -526,7 +526,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:system.wlan.rssi{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
+                      "query": "avg:system.wlan.rssi{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}.fill(null)"
                     }
                   ],
                   "formulas": [
@@ -586,7 +586,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:system.wlan.noise{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
+                      "query": "avg:system.wlan.noise{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}.fill(null)"
                     }
                   ],
                   "formulas": [
@@ -640,7 +640,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:system.wlan.channel_swap_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}.as_count()"
+                      "query": "sum:system.wlan.channel_swap_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}.as_count().fill(null)"
                     }
                   ],
                   "formulas": [
@@ -688,7 +688,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:system.wlan.roaming_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}.as_count()"
+                      "query": "sum:system.wlan.roaming_events{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}.as_count().fill(null)"
                     }
                   ],
                   "formulas": [
@@ -755,7 +755,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:system.wlan.txrate{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
+                      "query": "avg:system.wlan.txrate{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}.fill(null)"
                     }
                   ],
                   "formulas": [
@@ -809,7 +809,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:system.wlan.rxrate{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}"
+                      "query": "avg:system.wlan.rxrate{$ssid,$bssid,$mac_address,$host} by {host,mac_address,bssid,ssid}.fill(null)"
                     }
                   ],
                   "formulas": [
