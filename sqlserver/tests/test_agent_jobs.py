@@ -344,6 +344,7 @@ def agent_jobs_instance(instance_docker):
     instance_docker['dbm'] = True
     instance_docker['agent_jobs'] = {
         'enabled': True,
+        'run_sync': True,
         'collection_interval': 1.0,
         'history_row_limit': 10000,
     }
