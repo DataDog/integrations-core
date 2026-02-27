@@ -565,7 +565,7 @@ pipeline:
         - type: grok-parser
           name: Extracting file extention
           enabled: true
-          source: file_name
+          source: ocsf.file.name
           samples:
             - nginx.pid
             - libcrypt.so.1

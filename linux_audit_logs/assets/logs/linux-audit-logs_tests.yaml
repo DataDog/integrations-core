@@ -978,7 +978,6 @@ tests:
       cap_fver: 0
       dev: "fd:03"
       event_id: 2247
-      file_name: "shadow"
       inode: 50314523
       item: 0
       mode: 100000
@@ -1004,8 +1003,8 @@ tests:
         file:
           name: "shadow"
           path: "/etc/shadow"
-          type: "Regular File"
-          type_id: 1
+          type: "Folder"
+          type_id: 2
           uid: "50314523"
         metadata:
           event_code: "PATH"
@@ -1042,7 +1041,6 @@ tests:
       cap_fver: 0
       dev: "fd:03"
       event_id: 2247
-      file_name: "libcrypt.so.1"
       inode: 50314523
       item: 0
       mode: 100000
@@ -1107,7 +1105,6 @@ tests:
       cap_fver: 0
       dev: "fd:03"
       event_id: 2247
-      folder_name: "lib"
       inode: 50314523
       item: 0
       mode: 100000
@@ -1171,7 +1168,6 @@ tests:
       cap_fver: 0
       dev: "fd:03"
       event_id: 2247
-      file_name: "nginx.pid"
       inode: 50314523
       item: 0
       mode: 100000
