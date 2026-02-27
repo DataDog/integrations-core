@@ -16,6 +16,7 @@ from .config_models import ConfigMixin
 from .constants import METRICS_SPEC
 from .event_manager import EventManager
 from .filter_metrics import PrefectFilterMetrics
+from .utils import _parse_time
 
 
 class PrefectCheck(AgentCheck, ConfigMixin):
@@ -32,7 +33,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
     FLOW_RUNS_TAGS_KEY = f'{__NAMESPACE__}.flow_runs_tags'
 
     def __init__(self, name, init_config, instances):
-        super(PrefectCheck, self).__init__(name, init_config, instances)
+        super().__init__(name, init_config, instances)
         self.metrics_spec = METRICS_SPEC
         self.check_initializations.append(self._parse_config)
 
@@ -47,13 +48,21 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
         self._get_last_check_time()
 
-        self.dependency_wait = json.loads(self.read_persistent_cache(self.DEPENDENCY_WAIT_KEY) or "{}")
-        self.flows_awaiting_retry = json.loads(self.read_persistent_cache(self.FLOWS_AWAITING_RETRY_KEY) or "{}")
-        self.flow_runs_tags = json.loads(self.read_persistent_cache(self.FLOW_RUNS_TAGS_KEY) or "{}")
+        self.dependency_wait = self._read_persistent_cache_values(self.DEPENDENCY_WAIT_KEY)
+        self.flows_awaiting_retry = self._read_persistent_cache_values(self.FLOWS_AWAITING_RETRY_KEY)
+        self.flow_runs_tags = self._read_persistent_cache_values(self.FLOW_RUNS_TAGS_KEY)
 
+    def _read_persistent_cache_values(self, key: str) -> dict[str, Any]:
+        try:
+            return json.loads(self.read_persistent_cache(key) or "{}")
+        except JSONDecodeError:
+            self.log.error("Error parsing persistent cache value for key %s", key)
+            return {}
+
+    # todo mostrar excepcion parse time
     def _get_last_check_time(self):
         last_check = self.read_persistent_cache(self.LAST_CHECK_TIME_CACHE_KEY)
-        parsed_last_check = self._parse_time(last_check)
+        parsed_last_check = _parse_time(last_check, self.log)
         if last_check is not None and parsed_last_check is not None:
             self.last_check_time_iso = last_check
             self.last_check_time = parsed_last_check
@@ -133,15 +142,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             response = self.api_get(response.get("next_page"), pagination=True)
         return events
 
-    def _parse_time(self, ts: str | None) -> datetime | None:
-        if not ts or ts == "null":
-            return None
-        try:
-            return datetime.fromisoformat(ts.replace('Z', '+00:00'))
-        except ValueError:
-            self.log.error("Could not parse timestamp: %s", ts)
-            return None
-
     def _emit_metric(self, name: str, value: float, tags: list[str]):
         """
         Internal helper to collect metrics.
@@ -186,7 +186,10 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         self.pools_by_name = {}
         self.deployments_by_id = {}
 
-        self.set_metadata('version', self.api_get("/version"))
+        try:
+            self.set_metadata('version', self.api_get("/version"))
+        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
+            self.log.warning("Failed to retrieve Prefect version: %s", e)
 
         # Flows that complete in this run of the check so that they are removed from the
         # flow_runs_tags cache after task runs are collected
@@ -238,13 +241,15 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         try:
             health = self.api_get("/health")
             self._emit_metric("health", 1.0 if health is True else 0.0, [])
-        except Exception:
+        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
+            self.log.warning("Failed to retrieve Prefect health status: %s", e)
             self._emit_metric("health", 0.0, [])
 
         try:
             self.api_get("/ready")
             self._emit_metric("ready", 1.0, [])
-        except Exception:
+        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
+            self.log.warning("Failed to retrieve Prefect ready status: %s", e)
             self._emit_metric("ready", 0.0, [])
 
     def _collect_work_pool_metrics(self, now: datetime):
@@ -342,7 +347,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self._emit_metric("deployment.is_ready", 1.0 if d['status'] == 'READY' else 0.0, dtags)
             self.deployments_by_id[d.get('id', '')] = d.get('name', '')
 
-    def _get_runs(self, type: Literal["flow_runs"] | Literal["task_runs"], now_iso: str) -> list[dict]:
+    def _get_runs(self, type: Literal["flow_runs", "task_runs"], now_iso: str) -> list[dict]:
         runs = []
         payload = {
             type: {
@@ -361,8 +366,9 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 if type == "flow_runs"
                 else self.filter_metrics.filter_task_runs(runs)
             )
-        except Exception as e:
-            self.log.error("Failed to collect %s runs metrics: %s", type, e)
+        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
+            self.log.exception("Failed to collect %s runs metrics: %s", type, e)
+            return []
         return runs
 
     def _define_flow_run_tags(self, fr: dict[str, str]) -> list[str]:
@@ -381,6 +387,9 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         if fr_id not in self.flow_runs_tags:
             self.flow_runs_tags[fr_id] = tuple(sorted(fr_tags))
 
+        if fr.get('state_type', '') == 'COMPLETED':
+            self.completed_flow_runs.add(fr_id)
+
         return fr_tags
 
     def _collect_flow_run_metrics(self, now_iso: str, now: datetime):
@@ -390,9 +399,9 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             fr_tags = self._define_flow_run_tags(fr)
 
             state_type = fr.get('state_type', '')
-            expected_start_time = self._parse_time(fr.get('expected_start_time', None))
-            start_time = self._parse_time(fr.get('start_time', None))
-            end_time = self._parse_time(fr.get('end_time', None))
+            expected_start_time = _parse_time(fr.get('expected_start_time', None), self.log)
+            start_time = _parse_time(fr.get('start_time', None), self.log)
+            end_time = _parse_time(fr.get('end_time', None), self.log)
 
             if expected_start_time:
                 self._aggregate_queue_backlog_metrics(
@@ -454,8 +463,11 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         task_tags = set[tuple[str, ...]]()
         for tr in task_runs:
             state_type = tr.get('state_type', '')
-            start_time, end_time = self._parse_time(tr.get('start_time')), self._parse_time(tr.get('end_time'))
-            expected_start_time = self._parse_time(tr.get('expected_start_time'))
+            start_time, end_time = (
+                _parse_time(tr.get('start_time'), self.log),
+                _parse_time(tr.get('end_time'), self.log),
+            )
+            expected_start_time = _parse_time(tr.get('expected_start_time'), self.log)
 
             tr_tags_list = sorted(
                 [
@@ -544,7 +556,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             event_manager.event_type == 'prefect.flow-run.Running'
             and event_manager.initial_state_name == "AwaitingRetry"
         ):
-            await_retry_timestamp = self._parse_time(self.flows_awaiting_retry.pop(event_manager.follows, None))
+            await_retry_timestamp = _parse_time(self.flows_awaiting_retry.pop(event_manager.follows, None), self.log)
 
             if not await_retry_timestamp:
                 self.log.error("Could not find await retry timestamp for flow run %s", event_manager.follows)
@@ -582,7 +594,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 return
             elif dependencies:
                 parsed_times = [
-                    t for dep_id in dependencies if (t := self._parse_time(flow_tasks.get(dep_id))) is not None
+                    t for dep_id in dependencies if (t := _parse_time(flow_tasks.get(dep_id), self.log)) is not None
                 ]
 
                 last_dep_finished = max(parsed_times) if parsed_times else None
@@ -607,13 +619,13 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self._emit_metric(name, val, list(tags))
 
     def _add_queue_last_polled_age_seconds(self, queue: dict, now: datetime, tags: list[str]):
-        last_polled = self._parse_time(queue.get('last_polled'))
+        last_polled = _parse_time(queue.get('last_polled'), self.log)
         if last_polled:
             age = (now - last_polled).total_seconds()
             self._emit_metric("work_queue.last_polled_age_seconds", age, tags)
 
     def _add_worker_heartbeat_age_seconds(self, worker: dict, now: datetime, tags: list[str]):
-        last_heartbeat = self._parse_time(worker.get('last_heartbeat_time'))
+        last_heartbeat = _parse_time(worker.get('last_heartbeat_time'), self.log)
         if last_heartbeat:
             age = (now - last_heartbeat).total_seconds()
             self._emit_metric("work_pool.worker.heartbeat_age_seconds", max(0, age), tags)
@@ -634,11 +646,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             backlog_oldest = queue.get("backlog_oldest")
             if expected_start_time and (backlog_oldest is None or expected_start_time < backlog_oldest):
                 queue["backlog_oldest"] = expected_start_time
-
-            if expected_start_time and (
-                not queue.get('backlog_oldest') or expected_start_time < queue.get('backlog_oldest')
-            ):
-                queue['backlog_oldest'] = expected_start_time
 
     def _aggregate_concurrency_in_use_metric(self, state_type: str, pname: str, qname: str):
         queue = self.queues_by_name.get((pname, qname), {})

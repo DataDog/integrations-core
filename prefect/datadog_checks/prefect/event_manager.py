@@ -1,13 +1,12 @@
-from datetime import datetime
-
-
 class EventManager:
     def __init__(self, event: dict):
+        from .utils import _parse_time
+
         self.event = event
 
         self.id = event.get('id', '')
         self.follows = event.get('follows', '')  # the id of the event that this event follows
-        self.occurred = self._parse_time(self.event.get('occurred', ''))  # the timestamp of the event
+        self.occurred = _parse_time(self.event.get('occurred', ''), None)  # the timestamp of the event
         self.event_type = self.event.get('event', '')  # e.g. "prefect.task-run.Completed"
         self.event_state_type = self.event_type.split('.')[-1]  # e.g. "Completed"
 
@@ -41,8 +40,8 @@ class EventManager:
             role = r.get('prefect.resource.role')
             if role:
                 related[role] = {
-                    'id': r.get('prefect.resource.id').split('.')[-1],
-                    'name': r.get('prefect.resource.name'),
+                    'id': r.get('prefect.resource.id', '').split('.')[-1],
+                    'name': r.get('prefect.resource.name', ''),
                 }
         return related
 
@@ -136,15 +135,8 @@ class EventManager:
             "Failed" in self.event_state_type
             or "Crashed" in self.event_state_type
             or "not-ready" in self.event_state_type
+            or "AwaitingRetry" in self.event_state_type
         ):
             return "error"
         else:
             return "info"
-
-    def _parse_time(self, ts: str | None) -> datetime | None:
-        if not ts or ts == "null":
-            return None
-        try:
-            return datetime.fromisoformat(ts.replace('Z', '+00:00'))
-        except ValueError:
-            return None

@@ -93,7 +93,7 @@ def test_assert_metrics(ready_check: PrefectCheck, aggregator: AggregatorStub):
             True,
             "[flow-run] fr-retry -> AwaitingRetry",
             "prefect.flow-run.AwaitingRetry",
-            "info",
+            "error",
             id="flow-run-awaiting-retry",
         ),
         pytest.param(

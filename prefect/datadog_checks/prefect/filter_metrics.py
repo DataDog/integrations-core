@@ -147,6 +147,7 @@ class PrefectFilterMetrics:
                 fallback.add_mapping(e)
 
             for field, (cache, check_pattern, fallback_to_use) in caches.items():
+                value = None
                 if field in e:
                     value = e.get(field)
                 elif fallback_to_use:
