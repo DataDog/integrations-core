@@ -3,11 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+from collections import ChainMap
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
-from datadog_checks.base.checks.openmetrics.v2.metrics_file import ConfigOptionTruthy, MetricsFile
+from datadog_checks.base.checks.openmetrics.v2.metrics_mapping import ConfigOptionTruthy, MetricsMapping
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
 from datadog_checks.base.types import InstanceType
 
@@ -55,10 +56,10 @@ class KrakendCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = "krakend.api"
     DEFAULT_METRIC_LIMIT = 0
 
-    METRICS_FILES = [
-        MetricsFile(Path("metrics/default.yaml")),
-        MetricsFile(Path("metrics/go.yaml"), predicate=ConfigOptionTruthy("go_metrics")),
-        MetricsFile(Path("metrics/process.yaml"), predicate=ConfigOptionTruthy("process_metrics")),
+    METRICS_MAP = [
+        MetricsMapping(Path("metrics/default.yaml")),
+        MetricsMapping(Path("metrics/go.yaml"), predicate=ConfigOptionTruthy("go_metrics")),
+        MetricsMapping(Path("metrics/process.yaml"), predicate=ConfigOptionTruthy("process_metrics")),
     ]
 
     def create_scraper(self, config: InstanceType):
@@ -68,8 +69,8 @@ class KrakendCheck(OpenMetricsBaseCheckV2):
         return {"target_info": True}
 
     def get_config_with_defaults(self, config: InstanceType) -> Mapping:
-        result = super().get_config_with_defaults(config)
-        defaults = result.maps[-1]
+        defaults = self.get_default_config()
+        self._apply_file_metrics(defaults, config)
 
         go_metrics = config.get("go_metrics", True)
 
@@ -81,4 +82,4 @@ class KrakendCheck(OpenMetricsBaseCheckV2):
 
         defaults["rename_labels"] = rename_labels
 
-        return result
+        return ChainMap(config, defaults)
