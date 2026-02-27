@@ -188,20 +188,55 @@ instances:
     #
     # sasl_oauth_token_provider:
 
-        ## @param url - string - required
-        ## The token endpoint.
+        ## @param method - string - optional - default: oidc
+        ## The OAuth method to use. Either `aws_msk_iam` for AWS MSK IAM authentication
+        ## or `oidc` for standard OIDC authentication. Defaults to `oidc` for backwards compatibility.
+        #
+        # method: aws_msk_iam
+
+        ## @param aws_region - string - optional - default: us-west-2
+        ## AWS region for MSK IAM authentication. Required when method is `aws_msk_iam` and the region
+        ## cannot be automatically detected from the environment
+        ## (for example, through `AWS_REGION` or instance metadata).
+        ## If not specified, attempts to detect the region automatically.
+        #
+        # aws_region: us-west-2
+
+        ## @param url - string - optional
+        ## The token endpoint. Required when method is `oidc`.
         #
         # url: <URL>
 
-        ## @param client_id - string - required
-        ## The client identifier.
+        ## @param client_id - string - optional
+        ## The client identifier. Required when method is `oidc`.
         #
         # client_id: <CLIENT_ID>
 
-        ## @param client_secret - string - required
-        ## The client secret.
+        ## @param client_secret - string - optional
+        ## The client secret. Required when method is `oidc`.
         #
         # client_secret: <CLIENT_SECRET>
+
+        ## @param scope - string - optional
+        ## The OAuth scope to request. Required by most identity providers.
+        ## For example, a custom scope like 'kafka' or 'api://default'.
+        #
+        # scope: <SCOPE>
+
+        ## @param extensions - string - optional
+        ## SASL/OAUTHBEARER extensions to pass to the broker.
+        ## For Confluent Cloud, this typically includes the logical cluster ID
+        ## and optionally the identity pool ID.
+        ## Format: 'logicalCluster=lkc-xxxxx' or 'logicalCluster=lkc-xxxxx,identityPoolId=pool-xxxxx'
+        #
+        # extensions: <EXTENSIONS>
+
+        ## @param tls_ca_cert - string - optional - default: /path/to/oauth_ca_cert.pem
+        ## Path to a CA certificate file used to verify the OIDC token endpoint's TLS certificate.
+        ## This maps to librdkafka's `https.ca.location` property, which is separate from
+        ## the broker connection's `ssl.ca.location` (configured through the top-level `tls_ca_cert`).
+        #
+        # tls_ca_cert: /path/to/oauth_ca_cert.pem
 
     ## @param tls_verify - boolean - optional - default: true
     ## Instructs the check to validate the TLS certificate(s) of the service(s).
@@ -362,3 +397,44 @@ instances:
     ## Must be used in combination with schema_registry_tls_cert.
     #
     # schema_registry_tls_key: /path/to/client_key.pem
+
+    ## OAuth token provider settings for Schema Registry authentication.
+    ## When configured, the check will fetch an OAuth token and use it as a Bearer token
+    ## for Schema Registry HTTP requests.
+    #
+    # schema_registry_oauth_token_provider:
+
+        ## @param url - string - required
+        ## The token endpoint.
+        #
+        # url: <URL>
+
+        ## @param client_id - string - required
+        ## The client identifier.
+        #
+        # client_id: <CLIENT_ID>
+
+        ## @param client_secret - string - required
+        ## The client secret.
+        #
+        # client_secret: <CLIENT_SECRET>
+
+        ## @param scope - string - optional
+        ## The OAuth scope to request.
+        #
+        # scope: <SCOPE>
+
+        ## @param custom_headers - mapping - optional
+        ## Additional HTTP headers to include in Schema Registry requests.
+        ## For Confluent Cloud, this typically includes the identity pool ID and
+        ## the Schema Registry cluster ID.
+        ## Example:
+        ##   Confluent-Identity-Pool-Id: pool-xxxxx
+        ##   target-sr-cluster: lsrc-xxxxx
+        #
+        # custom_headers: {}
+
+        ## @param tls_ca_cert - string - optional - default: /path/to/oauth_ca_cert.pem
+        ## Path to a CA certificate file used to verify the OIDC token endpoint's TLS certificate.
+        #
+        # tls_ca_cert: /path/to/oauth_ca_cert.pem

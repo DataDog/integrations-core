@@ -1,4 +1,5 @@
 name: Vault
+fleet_configurable: true
 files:
 - name: vault.yaml
   options:
@@ -17,12 +18,15 @@ files:
 
         Note: To see the configuration options for the legacy implementation (Agent 7.34 or older),
         https://github.com/DataDog/integrations-core/blob/7.34.x/vault/datadog_checks/vault/data/conf.yaml.example
+      fleet_configurable: true
       enabled: true
       value:
         display_default: false
         example: true
         type: boolean
     - name: api_url
+      fleet_configurable: true
+      formats: ["url"]
       required: true
       description: URL of the Vault to query.
       value:
@@ -33,16 +37,19 @@ files:
       description: |
         Enable this option to collect metrics from the OpenMetrics endpoint if the
         connected instance is a secondary in a Vault replication cluster.
+      fleet_configurable: true
       value:
         example: false
         type: boolean
     - name: detect_leader
       description: Whether or not this instance should report cluster leader change events.
+      fleet_configurable: true
       value:
         example: false
         type: boolean
     - name: client_token
       description: Client token necessary to collect metrics.
+      fleet_configurable: true
       secret: true
       value:
         example: <CLIENT_TOKEN>
@@ -51,11 +58,13 @@ files:
       description: |
          Path to a file containing the client token. Overrides `client_token`.
          The token will be re-read after every authorization error.
+      fleet_configurable: true
       value:
         example: <CLIENT_TOKEN_PATH>
         type: string
     - name: no_token
       description: Attempt metric collection without a token.
+      fleet_configurable: true
       value:
         example: false
         type: boolean

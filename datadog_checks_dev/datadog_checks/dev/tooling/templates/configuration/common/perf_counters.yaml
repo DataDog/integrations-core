@@ -1,4 +1,5 @@
 - name: metrics
+  fleet_configurable: true
   description: |
     This mapping defines which metrics to collect from the performance
     counters on the `server`. For more information, see:

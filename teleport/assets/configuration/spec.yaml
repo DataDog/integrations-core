@@ -1,4 +1,5 @@
 name: Teleport
+fleet_configurable: true
 files:
   - name: teleport.yaml
     options:

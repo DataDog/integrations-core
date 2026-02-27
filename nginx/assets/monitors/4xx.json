@@ -8,7 +8,7 @@
   ],
   "description": "NGINX sends requests to upstream peers that can fail eventually. This monitor tracks the count of 4xx HTTP responses to identify issues in the communication between NGINX and the backend servers.",
   "definition": {
-    "message": "Number of 4xx errors on NGINX upstreams is at {{value}} which is higher than usual.",
+    "message": "{{#is_alert}}\n\n## What's happening?\nAn anomaly has been detected in the number of 4xx responses from NGINX upstream peers over the last hour, with a value of {{value}}.\n\n{{/is_alert}}",
     "name": "[NGINX] 4xx Errors higher than usual",
     "options": {
       "escalation_message": "",

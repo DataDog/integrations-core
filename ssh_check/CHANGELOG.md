@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 4.6.0 / 2026-02-19
+
+***Security***:
+
+* Add warning to the configuration docs about host keys. ([#22391](https://github.com/DataDog/integrations-core/pull/22391))
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
 ## 4.5.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
