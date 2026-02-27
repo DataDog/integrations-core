@@ -29,6 +29,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
 from datadog_checks.postgres.features import Feature, FeatureKey, FeatureNames
+from datadog_checks.postgres.util import AWS_RDS_HOSTNAME_SUFFIX
 
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
@@ -316,6 +317,10 @@ def apply_validated_defaults(args: dict, instance: dict, validation_result: Vali
 
 
 def apply_cloud_defaults(args: dict, instance: dict, validation_result: ValidationResult):
+    # Auto-detect RDS endpoints and backfill instance_endpoint when not explicitly configured
+    if not args['aws'].get('instance_endpoint') and AWS_RDS_HOSTNAME_SUFFIX in args['host']:
+        args['aws']['instance_endpoint'] = args['host']
+
     # AWS backfill and validation
     if (
         not instance.get("aws", {}).get("managed_authentication", None)
