@@ -498,10 +498,20 @@ class AgentCheck(object):
         The method follows the same ``__module__`` + ``importlib`` pattern
         used by :attr:`check_version`.
         """
-        module_parts = type(self).__module__.split('.')
-        package_path = '.'.join(module_parts[:2])
-        package = importlib.import_module(package_path)
-        return Path(package.__file__).parent
+        if not hasattr(self, '_package_dir'):
+            module_parts = self.__module__.split('.')
+            package_path = '.'.join(module_parts[:2])
+            package = importlib.import_module(package_path)
+            if package.__file__ is not None:
+                self._package_dir = Path(package.__file__).parent
+            elif hasattr(package, '__path__') and package.__path__:
+                self._package_dir = Path(package.__path__[0])
+            else:
+                raise RuntimeError(
+                    f"Cannot determine package directory for {package_path}: "
+                    f"package has no __file__ or __path__ attribute"
+                )
+        return self._package_dir
 
     @property
     def in_developer_mode(self):
