@@ -208,6 +208,7 @@ class SQLServer(DatabaseCheck):
         self.activity.cancel()
         self.sql_metadata.cancel()
         self.deadlocks.cancel()
+        self.agent_history.cancel()
 
         # Cancel all XE session handlers
         for handler in self.xe_session_handlers:
