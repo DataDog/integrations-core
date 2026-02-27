@@ -303,7 +303,7 @@ def mock_http_response(mocker, mock_response):
 
 @pytest.fixture
 def mock_http(mocker):
-    from unittest.mock import PropertyMock, create_autospec
+    from unittest.mock import MagicMock, PropertyMock, create_autospec
 
     from datadog_checks.base.checks.base import AgentCheck
     from datadog_checks.base.utils.http_protocol import HTTPClientProtocol
