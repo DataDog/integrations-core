@@ -66,7 +66,7 @@ jobs:
         cache: 'pip'
 
     - name: Restore cache
-      uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: '~/.cache/pip'
         key: >-
@@ -126,7 +126,7 @@ jobs:
 
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: "test-results-${{ inputs.target || 'tls' }}"
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
