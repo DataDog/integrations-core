@@ -14,6 +14,7 @@ from .fci_metrics import SqlserverFciMetrics
 from .file_stats_metrics import SqlserverFileStatsMetrics
 from .index_usage_metrics import SqlserverIndexUsageMetrics
 from .master_files_metrics import SqlserverMasterFilesMetrics
+from .missing_index_metrics import SqlserverMissingIndexMetrics
 from .os_schedulers_metrics import SqlserverOsSchedulersMetrics
 from .os_tasks_metrics import SqlserverOsTasksMetrics
 from .primary_log_shipping_metrics import SqlserverPrimaryLogShippingMetrics
