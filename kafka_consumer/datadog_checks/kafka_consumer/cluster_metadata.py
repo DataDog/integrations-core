@@ -406,7 +406,7 @@ class ClusterMetadataCollector:
                 json.dumps(
                     {
                         'collection_timestamp': int(time.time() * 1000),
-                        'kafka_cluster_id': cluster_id,
+                        **self._resolve_event_cluster_id(cluster_id),
                         'broker_id': str(broker_id),
                         'broker_host': info['broker_host'],
                         'broker_port': info['broker_port'],
@@ -616,7 +616,7 @@ class ClusterMetadataCollector:
                 json.dumps(
                     {
                         'collection_timestamp': int(time.time() * 1000),
-                        'kafka_cluster_id': cluster_id,
+                        **self._resolve_event_cluster_id(cluster_id),
                         'topic': topic_name,
                         'config_type': 'topic',
                         'config': json.loads(info['event_text']),
@@ -798,7 +798,7 @@ class ClusterMetadataCollector:
                 json.dumps(
                     {
                         'collection_timestamp': int(time.time() * 1000),
-                        'kafka_cluster_id': cluster_id,
+                        **self._resolve_event_cluster_id(cluster_id),
                         'subject': subject,
                         'topic': info['topic_name'],
                         'schema_for': info['schema_for'],
@@ -891,5 +891,16 @@ class ClusterMetadataCollector:
     def _get_tags(self, cluster_id: str | None = None) -> list[str]:
         tags = list(self.config._custom_tags)
         if cluster_id:
-            tags.append(f'kafka_cluster_id:{cluster_id}')
+            override = self.config._kafka_cluster_id_override
+            tags.append(f'kafka_cluster_id:{override or cluster_id}')
+            if override:
+                tags.append(f'original_kafka_cluster_id:{cluster_id}')
         return tags
+
+    def _resolve_event_cluster_id(self, cluster_id: str) -> dict[str, str]:
+        """Return dict fields for event_platform_event payloads with override support."""
+        override = self.config._kafka_cluster_id_override
+        result = {'kafka_cluster_id': override or cluster_id}
+        if override:
+            result['original_kafka_cluster_id'] = cluster_id
+        return result
