@@ -323,7 +323,23 @@ def main():
         if constraints_file := env_vars.get('PIP_CONSTRAINT'):
             env_vars['PIP_CONSTRAINT'] = path_to_uri(constraints_file)
 
-        # Fetch or build wheels
+        # Reuse wheels from previous resolution runs.
+        check_process(
+            [
+                str(python_path),
+                '-m',
+                'pip',
+                'wheel',
+                '-r',
+                str(MOUNT_DIR / 'resolved' / f'{os.environ["DD_TARGET_NAME"]}_{os.environ["PYTHON_VERSION"]}.txt'),
+                '--wheel-dir',
+                str(staged_wheel_dir),
+                '--index-url',
+                CUSTOM_EXTERNAL_INDEX,
+            ]
+        )
+
+        # Fetch or build wheels for dependencies that need updating.
         command_args = [
             str(python_path),
             '-m',
