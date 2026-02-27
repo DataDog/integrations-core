@@ -38,6 +38,7 @@ UP_STATES = {"up", "available", "connected", "active"}
 
 _FINALIZED_RUNS_CACHE_KEY = "finalized_runs_control_m"
 _ACTIVE_RUNS_CACHE_KEY = "active_runs_control_m"
+_ALERT_TYPE = {"ok": "success", "failed": "error", "canceled": "warning", "unknown": "warning"}
 
 
 def normalize_status(status: Any) -> str:
@@ -151,6 +152,44 @@ def prune_state_map(state_map: dict[str, float], now: float, ttl_seconds: int) -
     return bool(stale)
 
 
+def _format_timestamp(raw: Any) -> str | None:
+    dt = parse_datetime(raw)
+    if dt is not None:
+        return dt.strftime("%b %d, %Y, %I:%M:%S %p")
+    # Unparseable but non-empty — return the raw value so it's still visible.
+    s = timestamp_string(raw)
+    return s if s else None
+
+
+def _build_event_text(job: dict[str, Any], result: str, ctm_server: str, job_duration: int | None) -> str:
+    lines = [f"Result: {result}", f"Server: {ctm_server}"]
+
+    folder = job.get("folder")
+    if folder:
+        lines.append(f"Folder: {folder}")
+
+    job_id = job.get("jobId")
+    if job_id:
+        lines.append(f"Job ID: {job_id}")
+
+    number_of_runs = job.get("numberOfRuns")
+    if number_of_runs is not None:
+        lines.append(f"Run #: {number_of_runs}")
+
+    start = _format_timestamp(job.get("startTime"))
+    if start:
+        lines.append(f"Start: {start}")
+
+    end = _format_timestamp(job.get("endTime"))
+    if end:
+        lines.append(f"End: {end}")
+
+    if job_duration is not None:
+        lines.append(f"Duration: {job_duration}ms")
+
+    return "\n".join(lines)
+
+
 class JobCollector:
     def __init__(self, check: AgentCheck, client: ControlMClient, base_tags: list[str]) -> None:
         self._check = check
@@ -162,6 +201,11 @@ class JobCollector:
         self._job_name_filter = instance.get("job_name_filter", "*")
         self._finalized_ttl = int(instance.get("finalized_ttl_seconds", 86400))
         self._active_ttl = int(instance.get("active_ttl_seconds", 21600))
+
+        self._emit_job_events = bool(instance.get("emit_job_events", False))
+        self._emit_success_events = bool(instance.get("emit_success_events", False))
+        raw_threshold = instance.get("slow_run_threshold_ms")
+        self._slow_run_threshold_ms: int | None = int(raw_threshold) if raw_threshold is not None else None
 
         query = {"limit": self._job_status_limit, "jobname": self._job_name_filter}
         self._jobs_status_url = f"{client.api_endpoint}/run/jobs/status?{urlencode(query)}"
@@ -267,8 +311,54 @@ class JobCollector:
         if job_duration is not None:
             self._check.histogram("job.run.duration_ms", job_duration, tags=completion_tags)
 
+        if self._emit_job_events:
+            self._emit_job_event(job, result, ctm_server, completion_tags, job_duration)
+
         self._finalized_runs[dedupe_key] = now
         return True
+
+    def _emit_job_event(
+        self,
+        job: dict[str, Any],
+        result: str,
+        ctm_server: str,
+        tags: list[str],
+        job_duration: int | None,
+    ) -> None:
+        job_name = job.get("name", "unknown")
+        agg_key = f"{ctm_server}:{job_name}"
+
+        if result != "ok" or self._emit_success_events:
+            self._check.event(
+                {
+                    "timestamp": int(time.time()),
+                    "event_type": "control_m.job.completion",
+                    "msg_title": f"Control-M job {result}: {job_name}",
+                    "msg_text": _build_event_text(job, result, ctm_server, job_duration),
+                    "alert_type": _ALERT_TYPE.get(result, "info"),
+                    "source_type_name": "control_m",
+                    "tags": tags,
+                    "aggregation_key": agg_key,
+                }
+            )
+
+        if (
+            self._slow_run_threshold_ms is not None
+            and job_duration is not None
+            and job_duration > self._slow_run_threshold_ms
+        ):
+            self._check.event(
+                {
+                    "timestamp": int(time.time()),
+                    "event_type": "control_m.job.slow_run",
+                    "msg_title": f"Control-M slow run: {job_name} ({job_duration}ms > {self._slow_run_threshold_ms}ms)",
+                    "msg_text": _build_event_text(job, result, ctm_server, job_duration),
+                    "alert_type": "warning",
+                    "source_type_name": "control_m",
+                    "tags": tags,
+                    "aggregation_key": agg_key,
+                }
+            )
 
     def _load_runs_cache(self, cache_key: str, ttl: int, target: dict[str, float]) -> None:
         raw = self._check.read_persistent_cache(cache_key)

@@ -504,6 +504,239 @@ def test_active_runs_cleaned_on_terminal(
     aggregator.assert_metric('control_m.job.run.count', value=1, count=1)
 
 
+def test_events_disabled_by_default(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    check = _make_check(instance)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [{'jobId': 'ev1', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'fail_job', 'status': 'Ended Not OK'}],
+    )
+    check._job_collector.collect()
+
+    aggregator.assert_metric('control_m.job.run.count', count=1)
+    assert len(aggregator.events) == 0
+
+
+def test_event_on_failure(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+    }
+    check = _make_check(inst)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [
+            {
+                'jobId': 'ev2',
+                'numberOfRuns': 1,
+                'ctm': 'srv1',
+                'name': 'fail_job',
+                'folder': 'nightly',
+                'status': 'Ended Not OK',
+            }
+        ],
+    )
+    check._job_collector.collect()
+
+    assert len(aggregator.events) == 1
+    aggregator.assert_event(
+        'Result: failed',
+        exact_match=False,
+        msg_title='Control-M job failed: fail_job',
+        alert_type='error',
+        event_type='control_m.job.completion',
+    )
+
+
+def test_event_on_cancellation(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+    }
+    check = _make_check(inst)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [{'jobId': 'ev3', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'cancel_job', 'status': 'Cancelled'}],
+    )
+    check._job_collector.collect()
+
+    assert len(aggregator.events) == 1
+    aggregator.assert_event(
+        'Result: canceled',
+        exact_match=False,
+        msg_title='Control-M job canceled: cancel_job',
+        alert_type='warning',
+    )
+
+
+def test_event_success_suppressed_by_default(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+    }
+    check = _make_check(inst)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [{'jobId': 'ev4', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'ok_job', 'status': 'Ended OK'}],
+    )
+    check._job_collector.collect()
+
+    aggregator.assert_metric('control_m.job.run.count', count=1)
+    assert len(aggregator.events) == 0
+
+
+def test_event_success_when_opted_in(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+        'emit_success_events': True,
+    }
+    check = _make_check(inst)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [{'jobId': 'ev5', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'ok_job', 'status': 'Ended OK'}],
+    )
+    check._job_collector.collect()
+
+    assert len(aggregator.events) == 1
+    aggregator.assert_event(
+        'Result: ok',
+        exact_match=False,
+        msg_title='Control-M job ok: ok_job',
+        alert_type='success',
+    )
+
+
+def test_slow_run_event(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+        'slow_run_threshold_ms': 60000,
+    }
+    check = _make_check(inst)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [
+            {
+                'jobId': 'ev6',
+                'numberOfRuns': 1,
+                'ctm': 'srv1',
+                'name': 'slow_job',
+                'status': 'Ended OK',
+                'startTime': '20260115100000',
+                'endTime': '20260115103000',
+            }
+        ],
+    )
+    check._job_collector.collect()
+
+    # Success event suppressed (emit_success_events=False), but slow run event fires
+    assert len(aggregator.events) == 1
+    aggregator.assert_event(
+        'Result: ok',
+        exact_match=False,
+        event_type='control_m.job.slow_run',
+        alert_type='warning',
+    )
+    assert '1800000ms' in aggregator.events[0]['msg_title']
+
+
+def test_slow_run_below_threshold_no_event(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+        'slow_run_threshold_ms': 9999999,
+    }
+    check = _make_check(inst)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [
+            {
+                'jobId': 'ev7',
+                'numberOfRuns': 1,
+                'ctm': 'srv1',
+                'name': 'fast_job',
+                'status': 'Ended OK',
+                'startTime': '20260115100000',
+                'endTime': '20260115100001',
+            }
+        ],
+    )
+    check._job_collector.collect()
+
+    assert len(aggregator.events) == 0
+
+
+def test_event_includes_high_cardinality_in_text(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+    }
+    check = _make_check(inst)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [
+            {
+                'jobId': 'wb:0042',
+                'numberOfRuns': 3,
+                'ctm': 'srv1',
+                'name': 'fail_job',
+                'folder': 'nightly',
+                'status': 'Ended Not OK',
+                'startTime': '20260115100000',
+                'endTime': '20260115103000',
+            }
+        ],
+    )
+    check._job_collector.collect()
+
+    assert len(aggregator.events) == 1
+    text = aggregator.events[0]['msg_text']
+    assert 'Job ID: wb:0042' in text
+    assert 'Run #: 3' in text
+    assert 'Folder: nightly' in text
+    assert 'Start: Jan 15, 2026, 10:00:00 AM' in text
+    assert 'Duration: 1800000ms' in text
+
+
+def test_event_deduplicated_with_finalized_runs(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+    }
+    check = _make_check(inst)
+    job = [{'jobId': 'ev_dup', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'dup_job', 'status': 'Ended Not OK'}]
+
+    _mock_job_response(check, monkeypatch, job)
+    check._job_collector.collect()
+    assert len(aggregator.events) == 1
+
+    aggregator.reset()
+
+    _mock_job_response(check, monkeypatch, job)
+    check._job_collector.collect()
+    assert len(aggregator.events) == 0
+
+
 @pytest.mark.parametrize(
     'bad_instance, match',
     [
