@@ -1,0 +1,96 @@
+name: Control-M
+files:
+- name: control_m.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+    - template: init_config/http
+  - template: instances
+    options:
+    - name: control_m_api_endpoint
+      required: true
+      description: |
+        Control-M Automation API endpoint, including the `/automation-api` path.
+      value:
+        type: string
+        example: https://example.com:8443/automation-api
+      display_priority: 2
+    - name: control_m_username
+      required: false
+      description: |
+        Control-M username used for session-login authentication.
+        Must be set together with `control_m_password`.
+      value:
+        type: string
+        example: workbench
+    - name: control_m_password
+      required: false
+      secret: true
+      description: |
+        Control-M password used for session-login authentication.
+        Must be set together with `control_m_username`.
+      value:
+        type: string
+    - name: token_lifetime_seconds
+      required: false
+      description: |
+        Assumed Control-M session token lifetime in seconds.
+      value:
+        type: integer
+        example: 1800
+    - name: token_refresh_buffer_seconds
+      required: false
+      description: |
+        Refresh session token this many seconds before expiration.
+      value:
+        type: integer
+        example: 300
+    - name: job_status_limit
+      required: false
+      description: |
+        Maximum number of jobs to retrieve per `/run/jobs/status` request.
+        The Control-M API defaults to returning at most 1000 jobs when no
+        limit is specified and does not support offset-based pagination.
+        The server-enforced maximum is 10000.
+      value:
+        type: integer
+        example: 10000
+    - name: job_name_filter
+      required: false
+      description: |
+        Job name filter sent to `/run/jobs/status` as the `jobname` query parameter.
+      value:
+        type: string
+        example: "*"
+    - name: finalized_ttl_seconds
+      required: false
+      description: |
+        How long (in seconds) to remember finalized job runs for deduplication.
+        Terminal jobs seen within this window will not be re-emitted on subsequent
+        check cycles or after Agent restarts. Increase if completed jobs remain
+        visible in the Control-M status feed for a long time.
+      value:
+        type: integer
+        example: 86400
+    - name: active_ttl_seconds
+      required: false
+      description: |
+        How long (in seconds) to track active (non-terminal) job runs.
+        Entries older than this are evicted to bound memory usage.
+      value:
+        type: integer
+        example: 21600
+    - template: instances/http
+      overrides:
+        headers.display_priority: 1
+        headers.enabled: true
+        headers.description: |
+          Optional HTTP headers to send with every request.
+          Use this for static token authentication, for example:
+            Authorization: Bearer <your_token>
+        headers.value.example:
+          Authorization: Bearer <your_token>
+        username.hidden: true
+        password.hidden: true
+    - template: instances/default
