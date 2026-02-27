@@ -559,9 +559,9 @@ pipeline:
             supportRules: file_or_folder_path (/%{regex("[^/]*")})*
             matchRules: >-
               rule_extract_folder_name
-              %{file_or_folder_path}/%{regex("[^/]*"):folder_name}/
+              %{file_or_folder_path}/%{regex("[^/]*"):ocsf.file.name}/
 
-              rule_extract_file_name %{file_or_folder_path}/%{data:file_name}
+              rule_extract_file_name %{file_or_folder_path}/%{data:ocsf.file.name}
         - type: grok-parser
           name: Extracting file extention
           enabled: true
@@ -577,12 +577,6 @@ pipeline:
               (%{regex("[^.]*")}.)+%{word:ocsf.file.ext}.%{number}
 
               rule_extract_file_extention_2 (%{regex("[^.]*")}.)+%{word:ocsf.file.ext}
-        - type: string-builder-processor
-          name: Set ocsf.file.name attribute
-          enabled: true
-          template: "%{folder_name}%{file_name}"
-          target: ocsf.file.name
-          replaceMissing: true
         - type: schema-processor
           name: Apply OCSF schema for 1001
           enabled: true
@@ -630,13 +624,13 @@ pipeline:
             - name: ocsf.file.type_id
               categories:
                 - filter:
-                    query: "@folder_name:*"
-                  name: Folder
-                  id: 2
-                - filter:
-                    query: "@file_name:*"
+                    query: "@ocsf.file.name:*\\.*"
                   name: Regular File
                   id: 1
+                - filter:
+                    query: -@ocsf.file.name:*\.*
+                  name: Folder
+                  id: 2
               targets:
                 name: ocsf.file.type
                 id: ocsf.file.type_id
