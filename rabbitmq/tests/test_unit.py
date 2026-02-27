@@ -24,16 +24,14 @@ from . import common, metrics
 pytestmark = [pytest.mark.unit, common.requires_management]
 
 
-def test__get_data(check):
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.side_effect = [requests.exceptions.HTTPError, ValueError]
-        with pytest.raises(RabbitMQException) as e:
-            check._get_data('')
-            assert isinstance(e, RabbitMQException)
-        with pytest.raises(RabbitMQException) as e:
-            check._get_data('')
-            assert isinstance(e, RabbitMQException)
+def test__get_data(check, mock_http):
+    mock_http.get.side_effect = [requests.exceptions.HTTPError, ValueError]
+    with pytest.raises(RabbitMQException) as e:
+        check._get_data('')
+        assert isinstance(e, RabbitMQException)
+    with pytest.raises(RabbitMQException) as e:
+        check._get_data('')
+        assert isinstance(e, RabbitMQException)
 
 
 def test_status_check(check, aggregator):
@@ -139,24 +137,8 @@ def test_config(check, test_case, extra_config, expected_http_kwargs):
     config.update(extra_config)
     check = RabbitMQ('rabbitmq', {}, instances=[config])
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200)
-
-        check.check(config)
-
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-
-        r.get.assert_called_with('http://localhost:15672/api/connections', **http_wargs)
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value
 
 
 def test_nodes(aggregator, check):

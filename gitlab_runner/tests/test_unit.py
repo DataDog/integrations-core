@@ -4,7 +4,6 @@
 
 from copy import deepcopy
 
-import mock
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -29,22 +28,7 @@ def test_timeout(test_case, timeout_config, expected_timeout):
 
     gitlab_runner = GitlabRunnerCheck('gitlab_runner', common.CONFIG['init_config'], instances=config['instances'])
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200)
-
-        gitlab_runner.check(config['instances'][0])
-
-        r.get.assert_called_with(
-            'http://localhost:8085/ci',
-            auth=mock.ANY,
-            cert=mock.ANY,
-            headers=mock.ANY,
-            proxies=mock.ANY,
-            timeout=expected_timeout,
-            verify=mock.ANY,
-            allow_redirects=mock.ANY,
-        )
+    assert gitlab_runner.http.options['timeout'] == expected_timeout
 
 
 @pytest.mark.unit

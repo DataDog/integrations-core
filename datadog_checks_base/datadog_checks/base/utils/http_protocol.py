@@ -3,10 +3,19 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any, Iterator, Protocol
 
 
 class HTTPResponseProtocol(Protocol):
+    status_code: int
+    content: bytes
+    text: str
+    headers: Mapping[str, str]
+
+    def json(self, **kwargs: Any) -> Any: ...
+    def raise_for_status(self) -> None: ...
+    def close(self) -> None: ...
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]: ...
     def iter_lines(
         self,
@@ -19,6 +28,8 @@ class HTTPResponseProtocol(Protocol):
 
 
 class HTTPClientProtocol(Protocol):
+    options: dict[str, Any]
+
     def get(self, url: str, **options: Any) -> HTTPResponseProtocol: ...
     def post(self, url: str, **options: Any) -> HTTPResponseProtocol: ...
     def head(self, url: str, **options: Any) -> HTTPResponseProtocol: ...

@@ -4,7 +4,6 @@
 from copy import deepcopy
 from unittest.mock import MagicMock
 
-import mock
 import pytest
 
 from datadog_checks.couch import CouchDb
@@ -30,24 +29,8 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = CouchDb(common.CHECK_NAME, {}, instances=[instance])
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200, content='{}')
-
-        check.check(instance)
-
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-
-        r.get.assert_called_with('http://{}:5984/_all_dbs/'.format(common.HOST), **http_wargs)
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value
 
 
 def test_new_version_system_metrics(load_test_data):
