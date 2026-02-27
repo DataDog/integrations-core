@@ -22,6 +22,9 @@ requires_new_environment = pytest.mark.skipif(
 ON_CI = running_on_ci()
 skip_on_ci = pytest.mark.skipif(ON_CI, reason="This test environment flakes on CI")
 
+# NOTE: E2E environments only cover up to Cilium 1.11 (see `ddev env show cilium`).
+# All metrics from Cilium 1.12 onward are unit-tested against fixture data only.
+
 AGENT_V2_METRICS = [
     "cilium.agent.api_process_time.seconds.bucket",
     "cilium.agent.api_process_time.seconds.count",
@@ -126,10 +129,86 @@ AGENT_V2_METRICS = [
     "cilium.kvstore.quorum_errors.count",
     "cilium.kvstore.sync_queue_size",
     "cilium.kvstore.initial_sync_completed",
-]
-
-AGENT_V2_METRICS_1_14 = [
-    # E2E not updated yet to 1.14+ of Cilium
+    # ClusterMesh agent metrics
+    "cilium.clustermesh.remote_cluster_services",
+    "cilium.clustermesh.remote_cluster_nodes",
+    "cilium.clustermesh.remote_clusters",
+    "cilium.clustermesh.remote_cluster_failures",
+    "cilium.clustermesh.remote_cluster_last_failure_ts",
+    "cilium.clustermesh.remote_cluster_readiness_status",
+    "cilium.clustermesh.remote_cluster_cache_revocations",
+    # IPsec
+    "cilium.ipsec.xfrm_error",
+    "cilium.ipsec.keys",
+    "cilium.ipsec.xfrm_states",
+    "cilium.ipsec.xfrm_policies",
+    # eBPF additions
+    "cilium.bpf.syscall_duration.seconds.bucket",
+    "cilium.bpf.syscall_duration.seconds.count",
+    "cilium.bpf.syscall_duration.seconds.sum",
+    "cilium.bpf.ratelimit_dropped.count",
+    # Drop/Forward additions
+    "cilium.mtu_error_message.count",
+    "cilium.fragmented_count.count",
+    # Services
+    "cilium.service.implementation_delay.bucket",
+    "cilium.service.implementation_delay.count",
+    "cilium.service.implementation_delay.sum",
+    # API limiter
+    "cilium.api_limiter.wait_history_duration.seconds.bucket",
+    "cilium.api_limiter.wait_history_duration.seconds.count",
+    "cilium.api_limiter.wait_history_duration.seconds.sum",
+    # Policy
+    "cilium.policy.incremental_update_duration.bucket",
+    "cilium.policy.incremental_update_duration.count",
+    "cilium.policy.incremental_update_duration.sum",
+    # Identity
+    "cilium.identity.gc_entries",
+    "cilium.identity.gc_runs",
+    "cilium.identity.gc_latency",
+    "cilium.ipcache.events.count",
+    # Controllers
+    "cilium.controllers.group_runs.count",
+    # Kubernetes
+    "cilium.k8s.cnp_status_completion.seconds.bucket",
+    "cilium.k8s.cnp_status_completion.seconds.count",
+    "cilium.k8s.cnp_status_completion.seconds.sum",
+    # Endpoint
+    "cilium.endpoint.restoration_endpoints",
+    "cilium.endpoint.restoration_duration.seconds.bucket",
+    "cilium.endpoint.restoration_duration.seconds.count",
+    "cilium.endpoint.restoration_duration.seconds.sum",
+    # NAT
+    "cilium.nat.endpoint_max_connection",
+    # Hive Jobs (1.17+)
+    "cilium.hive.jobs_runs.count",
+    "cilium.hive.jobs_runs_failed",
+    "cilium.hive.jobs.oneshot.last_run_duration.seconds",
+    "cilium.hive.jobs.observer.last_run_duration.seconds",
+    "cilium.hive.jobs.observer.run_duration.seconds.bucket",
+    "cilium.hive.jobs.observer.run_duration.seconds.count",
+    "cilium.hive.jobs.observer.run_duration.seconds.sum",
+    "cilium.hive.jobs.timer.last_run_duration.seconds",
+    "cilium.hive.jobs.timer.run_duration.seconds.bucket",
+    "cilium.hive.jobs.timer.run_duration.seconds.count",
+    "cilium.hive.jobs.timer.run_duration.seconds.sum",
+    # Cilium 1.15+
+    "cilium.k8s.workqueue.work_duration.seconds.bucket",
+    "cilium.k8s.workqueue.work_duration.seconds.count",
+    "cilium.k8s.workqueue.work_duration.seconds.sum",
+    "cilium.kvstore.sync_errors.count",
+    # Cilium 1.17+
+    "cilium.node_health.connectivity.status",
+    "cilium.node_health.connectivity.latency.seconds.bucket",
+    "cilium.node_health.connectivity.latency.seconds.count",
+    "cilium.node_health.connectivity.latency.seconds.sum",
+    "cilium.policy.selector_match_count_max",
+    "cilium.identity.cache_timer.duration",
+    "cilium.identity.cache_timer_trigger.latency",
+    "cilium.identity.cache_timer_trigger.folds",
+    # Cilium 1.19+
+    "cilium.clustermesh.remote_cluster_endpoints",
+    # Cilium 1.14+
     "cilium.cidrgroup.policies",
     "cilium.k8s_client.rate_limiter_duration.seconds.bucket",
     "cilium.k8s_client.rate_limiter_duration.seconds.count",
@@ -231,11 +310,77 @@ AGENT_V1_METRICS = [
     "cilium.kvstore.quorum_errors.total",
     "cilium.kvstore.sync_queue_size",
     "cilium.kvstore.initial_sync_completed",
-    "cilium.version",
-]
-
-AGENT_V1_METRICS_1_14 = [
-    # E2E not updated yet to 1.14+ of Cilium
+    # ClusterMesh agent metrics (gauge)
+    "cilium.clustermesh.remote_cluster_services",
+    "cilium.clustermesh.remote_cluster_nodes",
+    "cilium.clustermesh.remote_clusters",
+    "cilium.clustermesh.remote_cluster_failures",
+    "cilium.clustermesh.remote_cluster_last_failure_ts",
+    "cilium.clustermesh.remote_cluster_readiness_status",
+    "cilium.clustermesh.remote_cluster_cache_revocations",
+    "cilium.clustermesh.remote_cluster_endpoints",
+    # IPsec (gauge)
+    "cilium.ipsec.xfrm_error",
+    "cilium.ipsec.keys",
+    "cilium.ipsec.xfrm_states",
+    "cilium.ipsec.xfrm_policies",
+    # eBPF (histogram V1: count+sum only; counter V1)
+    "cilium.bpf.syscall_duration.seconds.count",
+    "cilium.bpf.syscall_duration.seconds.sum",
+    "cilium.bpf.ratelimit_dropped.total",
+    # Drop/Forward (counter V1)
+    "cilium.mtu_error_message.total",
+    "cilium.fragmented_count.total",
+    # Services (histogram V1)
+    "cilium.service.implementation_delay.count",
+    "cilium.service.implementation_delay.sum",
+    # API limiter (histogram V1)
+    "cilium.api_limiter.wait_history_duration.seconds.count",
+    "cilium.api_limiter.wait_history_duration.seconds.sum",
+    # Policy (histogram V1)
+    "cilium.policy.incremental_update_duration.count",
+    "cilium.policy.incremental_update_duration.sum",
+    # Identity (gauge)
+    "cilium.identity.gc_entries",
+    "cilium.identity.gc_runs",
+    "cilium.identity.gc_latency",
+    # IPC cache (counter V1)
+    "cilium.ipcache.events.total",
+    # Controllers (counter V1)
+    "cilium.controllers.group_runs.total",
+    # Kubernetes (histogram V1)
+    "cilium.k8s.cnp_status_completion.seconds.count",
+    "cilium.k8s.cnp_status_completion.seconds.sum",
+    # Endpoint (gauge + histogram V1)
+    "cilium.endpoint.restoration_endpoints",
+    "cilium.endpoint.restoration_duration.seconds.count",
+    "cilium.endpoint.restoration_duration.seconds.sum",
+    # NAT (gauge)
+    "cilium.nat.endpoint_max_connection",
+    # Hive Jobs (counter V1, gauge, histogram V1)
+    "cilium.hive.jobs_runs.total",
+    "cilium.hive.jobs_runs_failed",
+    "cilium.hive.jobs.oneshot.last_run_duration.seconds",
+    "cilium.hive.jobs.observer.last_run_duration.seconds",
+    "cilium.hive.jobs.observer.run_duration.seconds.count",
+    "cilium.hive.jobs.observer.run_duration.seconds.sum",
+    "cilium.hive.jobs.timer.last_run_duration.seconds",
+    "cilium.hive.jobs.timer.run_duration.seconds.count",
+    "cilium.hive.jobs.timer.run_duration.seconds.sum",
+    # Cilium 1.15+ (histogram V1)
+    "cilium.k8s.workqueue.work_duration.seconds.count",
+    "cilium.k8s.workqueue.work_duration.seconds.sum",
+    # KVStore (counter V1)
+    "cilium.kvstore.sync_errors.total",
+    # Cilium 1.17+ (gauge + histogram V1)
+    "cilium.node_health.connectivity.status",
+    "cilium.node_health.connectivity.latency.seconds.count",
+    "cilium.node_health.connectivity.latency.seconds.sum",
+    "cilium.policy.selector_match_count_max",
+    "cilium.identity.cache_timer.duration",
+    "cilium.identity.cache_timer_trigger.latency",
+    "cilium.identity.cache_timer_trigger.folds",
+    # Cilium 1.14+
     "cilium.cidrgroup.policies",
     "cilium.k8s_client.rate_limiter_duration.seconds.count",
     "cilium.k8s_client.rate_limiter_duration.seconds.sum",
@@ -271,6 +416,27 @@ AGENT_V1_METRICS_EXCLUDE_METADATA_CHECK = [
     "cilium.proxy.upstream_reply.seconds.sum",
     "cilium.k8s_client.rate_limiter_duration.seconds.count",
     "cilium.k8s_client.rate_limiter_duration.seconds.sum",
+    # New metrics: V2 metadata has .bucket but V1 doesn't emit it
+    "cilium.bpf.syscall_duration.seconds.count",
+    "cilium.bpf.syscall_duration.seconds.sum",
+    "cilium.service.implementation_delay.count",
+    "cilium.service.implementation_delay.sum",
+    "cilium.api_limiter.wait_history_duration.seconds.count",
+    "cilium.api_limiter.wait_history_duration.seconds.sum",
+    "cilium.policy.incremental_update_duration.count",
+    "cilium.policy.incremental_update_duration.sum",
+    "cilium.k8s.cnp_status_completion.seconds.count",
+    "cilium.k8s.cnp_status_completion.seconds.sum",
+    "cilium.endpoint.restoration_duration.seconds.count",
+    "cilium.endpoint.restoration_duration.seconds.sum",
+    "cilium.hive.jobs.observer.run_duration.seconds.count",
+    "cilium.hive.jobs.observer.run_duration.seconds.sum",
+    "cilium.hive.jobs.timer.run_duration.seconds.count",
+    "cilium.hive.jobs.timer.run_duration.seconds.sum",
+    "cilium.k8s.workqueue.work_duration.seconds.count",
+    "cilium.k8s.workqueue.work_duration.seconds.sum",
+    "cilium.node_health.connectivity.latency.seconds.count",
+    "cilium.node_health.connectivity.latency.seconds.sum",
 ]
 
 OPERATOR_V2_PROCESS_METRICS = [
@@ -361,10 +527,49 @@ OPERATOR_V2_METRICS = [
     "cilium.operator.ipam.empty_interface_slots.count",
     "cilium.operator.ipam.interface_candidates.count",
     "cilium.operator.ipam.ip_allocation_ops.count",
-] + OPERATOR_V2_PROCESS_METRICS
-
-OPERATOR_V2_METRICS_1_14 = [
-    # E2E not updated yet to 1.14+ of Cilium
+    # Previously missing
+    "cilium.operator.controllers.group_runs.count",
+    "cilium.operator.num_cep_changes_per_ces.bucket",
+    "cilium.operator.num_cep_changes_per_ces.count",
+    "cilium.operator.num_cep_changes_per_ces.sum",
+    # ClusterMesh operator
+    "cilium.operator.clustermesh.remote_clusters",
+    "cilium.operator.clustermesh.remote_cluster_failures",
+    "cilium.operator.clustermesh.remote_cluster_last_failure_ts",
+    "cilium.operator.clustermesh.remote_cluster_readiness_status",
+    "cilium.operator.clustermesh.remote_cluster_cache_revocations",
+    "cilium.operator.clustermesh.remote_cluster_services",
+    "cilium.operator.clustermesh.remote_cluster_service_exports",
+    # MCS-API
+    "cilium.operator.mcsapi.serviceexport_info",
+    "cilium.operator.mcsapi.serviceexport_status_condition",
+    "cilium.operator.mcsapi.serviceimport_info",
+    "cilium.operator.mcsapi.serviceimport_status_condition",
+    "cilium.operator.mcsapi.serviceimport_status_clusters",
+    # CID controller
+    "cilium.operator.cid_controller.work_queue_event_count",
+    "cilium.operator.cid_controller.work_queue_latency.bucket",
+    "cilium.operator.cid_controller.work_queue_latency.count",
+    "cilium.operator.cid_controller.work_queue_latency.sum",
+    # Cilium 1.17+
+    "cilium.operator.unmanaged_pods",
+    "cilium.operator.doublewrite.crd_identities",
+    "cilium.operator.doublewrite.kvstore_identities",
+    "cilium.operator.doublewrite.crd_only_identities",
+    "cilium.operator.doublewrite.kvstore_only_identities",
+    # Cilium 1.19+ (operator workqueue with cilium_operator_ prefix)
+    "cilium.operator.k8s.workqueue.depth",
+    "cilium.operator.k8s.workqueue.adds.count",
+    "cilium.operator.k8s.workqueue.queue_duration.seconds.bucket",
+    "cilium.operator.k8s.workqueue.queue_duration.seconds.count",
+    "cilium.operator.k8s.workqueue.queue_duration.seconds.sum",
+    "cilium.operator.k8s.workqueue.work_duration.seconds.bucket",
+    "cilium.operator.k8s.workqueue.work_duration.seconds.count",
+    "cilium.operator.k8s.workqueue.work_duration.seconds.sum",
+    "cilium.operator.k8s.workqueue.unfinished_work.seconds",
+    "cilium.operator.k8s.workqueue.longest_running_processor.seconds",
+    "cilium.operator.k8s.workqueue.retries.count",
+    # Cilium 1.14+
     "cilium.operator.ipam.allocation.duration.seconds.bucket",
     "cilium.operator.ipam.allocation.duration.seconds.sum",
     "cilium.operator.ipam.allocation.duration.seconds.count",
@@ -376,7 +581,7 @@ OPERATOR_V2_METRICS_1_14 = [
     "cilium.operator.ipam.release.duration.seconds.sum",
     "cilium.operator.ipam.release.duration.seconds.count",
     "cilium.operator.ipam.used_ips",
-]
+] + OPERATOR_V2_PROCESS_METRICS
 
 # Not available in test metric fixtures
 ADDL_OPERATOR_AWS_METRICS = [
@@ -409,7 +614,10 @@ ADDL_OPERATOR_METRICS = [
     "cilium.operator.ces.sync_errors.count",
 ]
 
-# Optional metrics for integration tests
+# Optional metrics for integration tests.
+# Metrics not emitted by the Cilium 1.11 E2E environment (either conditionally
+# emitted at runtime, or introduced in Cilium 1.12+) must be listed here so
+# that test_e2e.py uses at_least=0 instead of at_least=1.
 OPTIONAL_METRICS = {
     "cilium.bpf.map_pressure",
     "cilium.datapath.conntrack_dump.resets.count",
@@ -442,4 +650,94 @@ OPTIONAL_METRICS = {
     "cilium.proxy.upstream_reply.seconds.sum",
     "cilium.proxy.datapath.update_timeout.count",
     "cilium.policy.l7.count",
+    # Cilium 1.12+ — not present in E2E environments (max 1.11)
+    # ClusterMesh agent metrics
+    "cilium.clustermesh.remote_cluster_services",
+    "cilium.clustermesh.remote_cluster_nodes",
+    "cilium.clustermesh.remote_clusters",
+    "cilium.clustermesh.remote_cluster_failures",
+    "cilium.clustermesh.remote_cluster_last_failure_ts",
+    "cilium.clustermesh.remote_cluster_readiness_status",
+    "cilium.clustermesh.remote_cluster_cache_revocations",
+    # IPsec
+    "cilium.ipsec.xfrm_error",
+    "cilium.ipsec.keys",
+    "cilium.ipsec.xfrm_states",
+    "cilium.ipsec.xfrm_policies",
+    # eBPF additions
+    "cilium.bpf.syscall_duration.seconds.bucket",
+    "cilium.bpf.syscall_duration.seconds.count",
+    "cilium.bpf.syscall_duration.seconds.sum",
+    "cilium.bpf.ratelimit_dropped.count",
+    # Drop/Forward additions
+    "cilium.mtu_error_message.count",
+    "cilium.fragmented_count.count",
+    # Services
+    "cilium.service.implementation_delay.bucket",
+    "cilium.service.implementation_delay.count",
+    "cilium.service.implementation_delay.sum",
+    # API limiter
+    "cilium.api_limiter.wait_history_duration.seconds.bucket",
+    "cilium.api_limiter.wait_history_duration.seconds.count",
+    "cilium.api_limiter.wait_history_duration.seconds.sum",
+    # Policy
+    "cilium.policy.incremental_update_duration.bucket",
+    "cilium.policy.incremental_update_duration.count",
+    "cilium.policy.incremental_update_duration.sum",
+    # Identity
+    "cilium.identity.gc_entries",
+    "cilium.identity.gc_runs",
+    "cilium.identity.gc_latency",
+    "cilium.ipcache.events.count",
+    # Controllers
+    "cilium.controllers.group_runs.count",
+    # Kubernetes
+    "cilium.k8s.cnp_status_completion.seconds.bucket",
+    "cilium.k8s.cnp_status_completion.seconds.count",
+    "cilium.k8s.cnp_status_completion.seconds.sum",
+    # Endpoint
+    "cilium.endpoint.restoration_endpoints",
+    "cilium.endpoint.restoration_duration.seconds.bucket",
+    "cilium.endpoint.restoration_duration.seconds.count",
+    "cilium.endpoint.restoration_duration.seconds.sum",
+    # NAT
+    "cilium.nat.endpoint_max_connection",
+    # Hive Jobs (1.17+)
+    "cilium.hive.jobs_runs.count",
+    "cilium.hive.jobs_runs_failed",
+    "cilium.hive.jobs.oneshot.last_run_duration.seconds",
+    "cilium.hive.jobs.observer.last_run_duration.seconds",
+    "cilium.hive.jobs.observer.run_duration.seconds.bucket",
+    "cilium.hive.jobs.observer.run_duration.seconds.count",
+    "cilium.hive.jobs.observer.run_duration.seconds.sum",
+    "cilium.hive.jobs.timer.last_run_duration.seconds",
+    "cilium.hive.jobs.timer.run_duration.seconds.bucket",
+    "cilium.hive.jobs.timer.run_duration.seconds.count",
+    "cilium.hive.jobs.timer.run_duration.seconds.sum",
+    # Cilium 1.14+
+    "cilium.cidrgroup.policies",
+    "cilium.k8s_client.rate_limiter_duration.seconds.bucket",
+    "cilium.k8s_client.rate_limiter_duration.seconds.count",
+    "cilium.k8s_client.rate_limiter_duration.seconds.sum",
+    "cilium.policy.change.count",
+    "cilium.services.events.count",
+    # Cilium 1.15+
+    "cilium.k8s.workqueue.work_duration.seconds.bucket",
+    "cilium.k8s.workqueue.work_duration.seconds.count",
+    "cilium.k8s.workqueue.work_duration.seconds.sum",
+    "cilium.kvstore.sync_errors.count",
+    # Cilium 1.16+
+    "cilium.fqdn.selectors",
+    "cilium.identity.label_sources",
+    # Cilium 1.17+
+    "cilium.node_health.connectivity.status",
+    "cilium.node_health.connectivity.latency.seconds.bucket",
+    "cilium.node_health.connectivity.latency.seconds.count",
+    "cilium.node_health.connectivity.latency.seconds.sum",
+    "cilium.policy.selector_match_count_max",
+    "cilium.identity.cache_timer.duration",
+    "cilium.identity.cache_timer_trigger.latency",
+    "cilium.identity.cache_timer_trigger.folds",
+    # Cilium 1.19+
+    "cilium.clustermesh.remote_cluster_endpoints",
 }

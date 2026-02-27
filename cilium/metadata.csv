@@ -12,16 +12,34 @@ cilium.api_limiter.processing_duration.seconds,gauge,,second,,[OpenMetrics V1 an
 cilium.api_limiter.rate_limit,gauge,,request,,[OpenMetrics V1 and V2] Current rate limiting configuration (limit and burst),0,cilium,limiter rate limit,,
 cilium.api_limiter.requests_in_flight,gauge,,request,,[OpenMetrics V1 and V2] Current and maximum allowed number of requests in flight.,0,cilium,limiter in flight,,
 cilium.api_limiter.wait_duration.seconds,gauge,,second,,[OpenMetrics V1 and V2] Wait duration aggregated per api call,-1,cilium,limiter wait,,
+cilium.api_limiter.wait_history_duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of API rate limiter wait durations,0,cilium,limiter wait hist bucket,,api_call
+cilium.api_limiter.wait_history_duration.seconds.count,count,,request,,[OpenMetrics V2] Count of API rate limiter wait durations,0,cilium,limiter wait hist count,,api_call
+cilium.api_limiter.wait_history_duration.seconds.sum,count,,second,,[OpenMetrics V2] Sum of API rate limiter wait durations,0,cilium,limiter wait hist sum,,api_call
 cilium.bpf.map.capacity,gauge,,,,[OpenMetrics V1 and V2] Capacity of map tagged by map group. All maps with a capacity of 65536 are grouped under 'default',0,cilium,bpf map capacity,,
 cilium.bpf.map_ops.count,count,,operation,,[OpenMetrics V2] Total BPF map operations performed,0,cilium,bpf map ops,,
 cilium.bpf.map_ops.total,count,,operation,,[OpenMetrics V1] Total BPF map operations performed,0,cilium,bpf map ops,,
 cilium.bpf.map_pressure,gauge,,,,[OpenMetrics V1 and V2] Map pressure defined as a ratio of the map usage compared to it,0,cilium,bpf map pressure,,
 cilium.bpf.maps.virtual_memory.max.bytes,gauge,,byte,,[OpenMetrics V1 and V2] Max memory used by eBPF maps installed in the system,0,cilium,bpf map maps memory,,
 cilium.bpf.progs.virtual_memory.max.bytes,gauge,,byte,,[OpenMetrics V1 and V2] Max memory used by eBPF programs installed in the system,0,cilium,bpf map progs memory,,
+cilium.bpf.ratelimit_dropped.count,count,,packet,,[OpenMetrics V2] Total drops from BPF ratelimiter,0,cilium,bpf ratelimit dropped,,usage
+cilium.bpf.ratelimit_dropped.total,count,,packet,,[OpenMetrics V1] Total drops from BPF ratelimiter,0,cilium,bpf ratelimit dropped v1,,usage
+cilium.bpf.syscall_duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of BPF syscall durations,0,cilium,bpf syscall dur bucket,,error:operation
+cilium.bpf.syscall_duration.seconds.count,count,,request,,[OpenMetrics V2] Count of BPF syscall durations,0,cilium,bpf syscall dur count,,error:operation
+cilium.bpf.syscall_duration.seconds.sum,count,,second,,[OpenMetrics V2] Sum of BPF syscall durations,0,cilium,bpf syscall dur sum,,error:operation
 cilium.cidrgroup.policies,gauge,,unit,,[OpenMetrics V1 and V2] Number of CNPs and CCNPs referencing at least one CiliumCIDRGroup,0,cilium,cidrgroup policies,,
 cilium.cidrgroup.translation.time.stats.seconds,gauge,,second,,[OpenMetrics V1 and V2] CIDRGroup translation time stats,0,cilium,cidrgroup translation time,,
 cilium.cidrgroups.referenced,gauge,,unit,,[OpenMetrics V1 and V2] Number of CNPs and CCNPs referencing at least one CiliumCIDRGroup. CNPs with empty or non-existing CIDRGroupRefs are not considered,0,cilium,cidrgroup referenced,,
+cilium.clustermesh.remote_cluster_cache_revocations,gauge,,,,[OpenMetrics V2] Total cache revocations in remote cluster,0,cilium,remote cluster cache revocations,,target_cluster
+cilium.clustermesh.remote_cluster_endpoints,gauge,,,,[OpenMetrics V2] Total endpoints in remote cluster,0,cilium,remote cluster endpoints,,target_cluster
+cilium.clustermesh.remote_cluster_failures,gauge,,,,[OpenMetrics V2] Total failures related to remote cluster,0,cilium,remote cluster failures,,target_cluster
+cilium.clustermesh.remote_cluster_last_failure_ts,gauge,,,,[OpenMetrics V2] Timestamp of last failure in remote cluster,0,cilium,remote cluster last failure,,target_cluster
+cilium.clustermesh.remote_cluster_nodes,gauge,,,,[OpenMetrics V2] Total nodes in remote cluster,0,cilium,remote cluster nodes,,target_cluster
+cilium.clustermesh.remote_cluster_readiness_status,gauge,,,,[OpenMetrics V2] Readiness status of remote cluster,0,cilium,remote cluster readiness,,target_cluster
+cilium.clustermesh.remote_cluster_services,gauge,,,,[OpenMetrics V2] Total services in remote cluster,0,cilium,remote cluster services,,target_cluster
+cilium.clustermesh.remote_clusters,gauge,,,,[OpenMetrics V2] Total number of remote clusters meshed,0,cilium,remote clusters,,
 cilium.controllers.failing.count,gauge,,error,,[OpenMetrics V1 and V2] Number of failing controllers,-1,cilium, fail controllers,,
+cilium.controllers.group_runs.count,count,,operation,,[OpenMetrics V2] Controller runs grouped by group name,0,cilium,controller group runs,,group_name:status
+cilium.controllers.group_runs.total,count,,operation,,[OpenMetrics V1] Controller runs grouped by group name,0,cilium,controller group runs v1,,group_name:status
 cilium.controllers.runs.count,count,,event,,[OpenMetrics V2] Total number of controller runs,0,cilium,controller runs,,
 cilium.controllers.runs.total,count,,event,,[OpenMetrics V1] Total number of controller runs,0,cilium,controller runs,,
 cilium.controllers.runs_duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of controller processes duration,0,cilium,controller dur bucket,,
@@ -50,6 +68,10 @@ cilium.endpoint.regeneration_time_stats.seconds.count,count,,operation,,[OpenMet
 cilium.endpoint.regeneration_time_stats.seconds.sum,count,,second,,[OpenMetrics V1 and V2] Sum of endpoint regeneration time stats,0,cilium,endpoint regen time sum,,
 cilium.endpoint.regenerations.count,count,,unit,,[OpenMetrics V2] Count of completed endpoint regenerations,1,cilium,endpoint regen count v2,,
 cilium.endpoint.regenerations.total,count,,unit,,[OpenMetrics V1] Count of completed endpoint regenerations,1,cilium,endpoint regen count v1,,
+cilium.endpoint.restoration_duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of endpoint restoration phase durations,0,cilium,endpoint restore dur bucket,,phase
+cilium.endpoint.restoration_duration.seconds.count,count,,request,,[OpenMetrics V2] Count of endpoint restoration phase durations,0,cilium,endpoint restore dur count,,phase
+cilium.endpoint.restoration_duration.seconds.sum,count,,second,,[OpenMetrics V2] Sum of endpoint restoration phase durations,0,cilium,endpoint restore dur sum,,phase
+cilium.endpoint.restoration_endpoints,gauge,,,,[OpenMetrics V2] Number of restored endpoints by phase and outcome,0,cilium,endpoint restore count,,outcome:phase
 cilium.endpoint.state,gauge,,unit,,[OpenMetrics V1 and V2] Count of all endpoints,0,cilium,endpoint count,,
 cilium.errors_warning.count,count,,error,,[OpenMetrics V2] Total error warnings,-1,cilium,error total,,
 cilium.errors_warning.total,count,,error,,[OpenMetrics V1] Total error warnings,-1,cilium,error total,,
@@ -64,8 +86,28 @@ cilium.fqdn.alive_zombie_connections,gauge,,item,,"Number of IPs associated with
 cilium.fqdn.gc_deletions.count,count,,event,,[OpenMetrics V2] Total number of FQDNs cleaned in FQDN garbage collector job.,0,cilium,fdqn total,,
 cilium.fqdn.gc_deletions.total,count,,event,,[OpenMetrics V1] Total number of FQDNs cleaned in FQDN garbage collector job.,0,cilium,fdqn total,,
 cilium.fqdn.selectors,gauge,,item,,Number of registered ToFQDN selectors. Available in Cilium v1.16+,0,cilium,fdqn selectors,,
+cilium.fragmented_count.count,count,,packet,,[OpenMetrics V2] Total number of fragmented packets,0,cilium,fragmented packets,,direction
+cilium.fragmented_count.total,count,,packet,,[OpenMetrics V1] Total number of fragmented packets,0,cilium,fragmented packets v1,,direction
+cilium.hive.jobs.observer.last_run_duration.seconds,gauge,,second,,[OpenMetrics V2] Observer job last run duration,0,cilium,hive observer last dur,,job_name:module
+cilium.hive.jobs.observer.run_duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of observer job run durations,0,cilium,hive observer run bucket,,job_name:module
+cilium.hive.jobs.observer.run_duration.seconds.count,count,,request,,[OpenMetrics V2] Count of observer job run durations,0,cilium,hive observer run count,,job_name:module
+cilium.hive.jobs.observer.run_duration.seconds.sum,count,,second,,[OpenMetrics V2] Sum of observer job run durations,0,cilium,hive observer run sum,,job_name:module
+cilium.hive.jobs.oneshot.last_run_duration.seconds,gauge,,second,,[OpenMetrics V2] One-shot job last run duration,0,cilium,hive oneshot last dur,,job_name:module
+cilium.hive.jobs.timer.last_run_duration.seconds,gauge,,second,,[OpenMetrics V2] Timer job last run duration,0,cilium,hive timer last dur,,job_name:module
+cilium.hive.jobs.timer.run_duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of timer job run durations,0,cilium,hive timer run bucket,,job_name:module
+cilium.hive.jobs.timer.run_duration.seconds.count,count,,request,,[OpenMetrics V2] Count of timer job run durations,0,cilium,hive timer run count,,job_name:module
+cilium.hive.jobs.timer.run_duration.seconds.sum,count,,second,,[OpenMetrics V2] Sum of timer job run durations,0,cilium,hive timer run sum,,job_name:module
+cilium.hive.jobs_runs.count,count,,operation,,[OpenMetrics V2] Total job runs,0,cilium,hive job runs,,job_name:module
+cilium.hive.jobs_runs.total,count,,operation,,[OpenMetrics V1] Total job runs,0,cilium,hive job runs v1,,job_name:module
+cilium.hive.jobs_runs_failed,gauge,,,,[OpenMetrics V2] Failed job runs,0,cilium,hive job runs failed,,job_name:module
 cilium.hive.status,gauge,,item,,[OpenMetrics V1 and V2] Counts of health status levels of Hive components,0,cilium,hive status,,
+cilium.identity.cache_timer.duration,gauge,,second,,[OpenMetrics V2] Seconds for periodic policy processes,0,cilium,identity cache timer dur,,name
+cilium.identity.cache_timer_trigger.folds,gauge,,,,[OpenMetrics V2] Coalesced timer triggers in one execution,0,cilium,identity timer folds,,name
+cilium.identity.cache_timer_trigger.latency,gauge,,second,,[OpenMetrics V2] Wait time before starting next periodic policy round,0,cilium,identity timer latency,,name
 cilium.identity.count,gauge,,unit,,[OpenMetrics V1 and V2] Number of identities allocate.,0,cilium,id count,,
+cilium.identity.gc_entries,gauge,,,,[OpenMetrics V2] Identities alive and deleted at GC end,0,cilium,identity gc entries,,identity_type:outcome
+cilium.identity.gc_latency,gauge,,second,,[OpenMetrics V2] Duration of last successful identity GC,0,cilium,identity gc latency,,identity_type:outcome
+cilium.identity.gc_runs,gauge,,,,[OpenMetrics V2] Times identity GC process was run,0,cilium,identity gc runs,,identity_type:outcome
 cilium.identity.label_sources,gauge,,item,,Number of identities which contain at least one label from the given label source. Available in Cilium v1.16+,0,cilium,id label sources,,
 cilium.ip_addresses.count,gauge,,unit,,[OpenMetrics V1 and V2] Number of allocated ip_addresses,0,cilium,ip count,,
 cilium.ipam.capacity,gauge,,event,,[OpenMetrics V1 and V2] Total number of IPs in the IPAM pool labeled by family,0,cilium,ipam capacity,,
@@ -73,6 +115,15 @@ cilium.ipam.events.count,count,,event,,[OpenMetrics V2] Number of IPAM events re
 cilium.ipam.events.total,count,,event,,[OpenMetrics V1] Number of IPAM events received by action and datapath family type,0,cilium,ipam total,,
 cilium.ipcache.errors.count,count,,error,,[OpenMetrics V2] Number of errors interacting with the ipcache,-1,cilium,ipcache errors v2,,
 cilium.ipcache.errors.total,count,,error,,[OpenMetrics V1] Number of errors interacting with the ipcache,-1,cilium,ipcache errors v1,,
+cilium.ipcache.events.count,count,,event,,[OpenMetrics V2] Events interacting with ipcache,0,cilium,ipcache events,,type
+cilium.ipcache.events.total,count,,event,,[OpenMetrics V1] Events interacting with ipcache,0,cilium,ipcache events v1,,type
+cilium.ipsec.keys,gauge,,,,[OpenMetrics V2] Number of IPsec keys in use,0,cilium,ipsec keys,,
+cilium.ipsec.xfrm_error,gauge,,,,[OpenMetrics V2] Total XFRM errors,0,cilium,ipsec xfrm error,,error:type
+cilium.ipsec.xfrm_policies,gauge,,,,[OpenMetrics V2] Number of XFRM policies,0,cilium,ipsec xfrm policies,,direction
+cilium.ipsec.xfrm_states,gauge,,,,[OpenMetrics V2] Number of XFRM states,0,cilium,ipsec xfrm states,,direction
+cilium.k8s.cnp_status_completion.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of CNP status update completion durations,0,cilium,cnp status compl bucket,,attempts:outcome
+cilium.k8s.cnp_status_completion.seconds.count,count,,request,,[OpenMetrics V2] Count of CNP status update completions,0,cilium,cnp status compl count,,attempts:outcome
+cilium.k8s.cnp_status_completion.seconds.sum,count,,second,,[OpenMetrics V2] Sum of CNP status update completion durations,0,cilium,cnp status compl sum,,attempts:outcome
 cilium.k8s.workqueue.adds.total,count,,event,,[OpenMetrics V1 and V2] Total number of adds handled by workqueue,0,cilium,k8s workqueue adds,,
 cilium.k8s.workqueue.depth,gauge,,event,,[OpenMetrics V1 and V2] Current depth of workqueue,0,cilium,k8s workqueue depth,,
 cilium.k8s.workqueue.longest.running.processor.seconds,gauge,,event,,[OpenMetrics V1 and V2] How many seconds has the longest running processor for workqueue been running,0,cilium,k8s workqueue running processor,,
@@ -81,6 +132,9 @@ cilium.k8s.workqueue.queue.duration.seconds.count,count,,event,,[OpenMetrics V1 
 cilium.k8s.workqueue.queue.duration.seconds.sum,count,,event,,[OpenMetrics V1 and V2] Sum of how long in seconds an item stays in workqueue before being requested,0,cilium,k8s workqueue duration sum,,
 cilium.k8s.workqueue.retries.total,count,,event,,[OpenMetrics V1 and V2] Total number of retries handled by workqueue,0,cilium,k8s workqueue retries,,
 cilium.k8s.workqueue.unfinished.work.seconds,gauge,,event,,[OpenMetrics V1 and V2] How many seconds of work has been done that is in progress and hasn't been observed by work_duration. Large values indicate stuck threads. One can deduce the number of stuck threads by observing the rate at which this increases.,0,cilium,k8s workqueue unfinished work,,
+cilium.k8s.workqueue.work_duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of workqueue item processing durations,0,cilium,workqueue work dur bucket,,name
+cilium.k8s.workqueue.work_duration.seconds.count,count,,request,,[OpenMetrics V2] Count of workqueue item processing durations,0,cilium,workqueue work dur count,,name
+cilium.k8s.workqueue.work_duration.seconds.sum,count,,second,,[OpenMetrics V2] Sum of workqueue item processing durations,0,cilium,workqueue work dur sum,,name
 cilium.k8s_client.api_calls.count,count,,request,,[OpenMetrics V1 and V2] Number of API calls made to kube-apiserver. Available in Cilium v1.10+,0,cilium,api call count,,
 cilium.k8s_client.api_latency_time.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of processed API call duration,-1,cilium,api latency bucket,,
 cilium.k8s_client.api_latency_time.seconds.count,count,,request,,[OpenMetrics V1 and V2] Count of processed API call duration,-1,cilium,api latency count,,
@@ -104,7 +158,16 @@ cilium.kvstore.operations_duration.seconds.count,count,,operation,,[OpenMetrics 
 cilium.kvstore.operations_duration.seconds.sum,count,,second,,[OpenMetrics V1 and V2] Duration of kvstore operation sum,0,cilium,kvstore op time sum,,
 cilium.kvstore.quorum_errors.count,count,,error,,[OpenMetrics V2] Number of quorum errors,-1,cilium,kvstore quorum errors,,
 cilium.kvstore.quorum_errors.total,count,,error,,[OpenMetrics V1] Number of quorum errors,-1,cilium,kvstore quorum errors,,
+cilium.kvstore.sync_errors.count,count,,error,,[OpenMetrics V2] Failed synchronizations to kvstore,0,cilium,kvstore sync errors,,scope:source_cluster
+cilium.kvstore.sync_errors.total,count,,error,,[OpenMetrics V1] Failed synchronizations to kvstore,0,cilium,kvstore sync errors v1,,scope:source_cluster
 cilium.kvstore.sync_queue_size,gauge,,item,,Number of elements queued for synchronization in the kvstore,-1,cilium,kvstore sync queue size,,
+cilium.mtu_error_message.count,count,,packet,,[OpenMetrics V2] Total ICMP fragmentation-needed messages sent,0,cilium,mtu error messages,,direction
+cilium.mtu_error_message.total,count,,packet,,[OpenMetrics V1] Total ICMP fragmentation-needed messages sent,0,cilium,mtu error messages v1,,direction
+cilium.nat.endpoint_max_connection,gauge,,,,[OpenMetrics V2] NAT connection saturation percent by family,0,cilium,nat endpoint max conn,,family
+cilium.node_health.connectivity.latency.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of connectivity latency between agents and nodes,0,cilium,node connectivity lat bucket,,address_type:protocol:type
+cilium.node_health.connectivity.latency.seconds.count,count,,request,,[OpenMetrics V2] Count of connectivity latency between agents and nodes,0,cilium,node connectivity lat count,,address_type:protocol:type
+cilium.node_health.connectivity.latency.seconds.sum,count,,second,,[OpenMetrics V2] Sum of connectivity latency between agents and nodes,0,cilium,node connectivity lat sum,,address_type:protocol:type
+cilium.node_health.connectivity.status,gauge,,,,[OpenMetrics V2] Connectivity between Cilium agents and nodes,0,cilium,node connectivity status,,status:type
 cilium.nodes.all_datapath_validations.count,count,,unit,,[OpenMetrics V2] Number of validation calls to implement the datapath implementation of a node,0,cilium,node validations,,
 cilium.nodes.all_datapath_validations.total,count,,unit,,[OpenMetrics V1] Number of validation calls to implement the datapath implementation of a node,0,cilium,node validations,,
 cilium.nodes.all_events_received.count,count,,event,,[OpenMetrics V2] Number of node events received,0,cilium,node events rcvd,,
@@ -122,6 +185,22 @@ cilium.operator.ces.queueing_delay.seconds.sum,count,,second,,[OpenMetrics V1 an
 cilium.operator.ces.sync.total,count,,unit,,[OpenMetrics V1 and V2] Number of completed CES syncs by outcome,0,cilium,ces syncs,,
 cilium.operator.ces.sync_errors.count,count,,error,,[OpenMetrics V2] Number of CES sync errors. Available in Cilium v1.11+,0,cilium,ces sync errors count,,
 cilium.operator.ces.sync_errors.total,count,,error,,[OpenMetrics V1] Number of CES sync errors. Available in Cilium v1.11+,0,cilium,ces sync errors count,,
+cilium.operator.cid_controller.work_queue_event_count,gauge,,,,[OpenMetrics V2] Processed events by CID controller,0,cilium,cid ctrl event count,,outcome:resource
+cilium.operator.cid_controller.work_queue_latency.bucket,count,,second,,[OpenMetrics V2] Sample of CID controller queue latencies,0,cilium,cid ctrl latency bucket,,phase:resource
+cilium.operator.cid_controller.work_queue_latency.count,count,,request,,[OpenMetrics V2] Count of CID controller queue latencies,0,cilium,cid ctrl latency count,,phase:resource
+cilium.operator.cid_controller.work_queue_latency.sum,count,,second,,[OpenMetrics V2] Sum of CID controller queue latencies,0,cilium,cid ctrl latency sum,,phase:resource
+cilium.operator.clustermesh.remote_cluster_cache_revocations,gauge,,,,[OpenMetrics V2] Cache revocations per remote cluster (operator),0,cilium,op remote cluster revocations,,target_cluster
+cilium.operator.clustermesh.remote_cluster_failures,gauge,,,,[OpenMetrics V2] Failures per remote cluster (operator),0,cilium,op remote cluster failures,,target_cluster
+cilium.operator.clustermesh.remote_cluster_last_failure_ts,gauge,,,,[OpenMetrics V2] Last failure timestamp per remote cluster (operator),0,cilium,op remote cluster last fail,,target_cluster
+cilium.operator.clustermesh.remote_cluster_readiness_status,gauge,,,,[OpenMetrics V2] Remote cluster readiness status (operator),0,cilium,op remote cluster readiness,,target_cluster
+cilium.operator.clustermesh.remote_cluster_service_exports,gauge,,,,[OpenMetrics V2] Service exports per remote cluster (operator),0,cilium,op remote cluster svc exports,,target_cluster
+cilium.operator.clustermesh.remote_cluster_services,gauge,,,,[OpenMetrics V2] Services per remote cluster (operator),0,cilium,op remote cluster services,,target_cluster
+cilium.operator.clustermesh.remote_clusters,gauge,,,,[OpenMetrics V2] Total remote clusters meshed (operator),0,cilium,op remote clusters,,
+cilium.operator.controllers.group_runs.count,count,,operation,,[OpenMetrics V2] Operator controller runs grouped by group name,0,cilium,op controller group runs,,group_name:status
+cilium.operator.doublewrite.crd_identities,gauge,,,,[OpenMetrics V2] Total CRD identities,0,cilium,doublewrite crd identities,,
+cilium.operator.doublewrite.crd_only_identities,gauge,,,,[OpenMetrics V2] CRD identities not present in KVStore,0,cilium,doublewrite crd only,,
+cilium.operator.doublewrite.kvstore_identities,gauge,,,,[OpenMetrics V2] Total KVStore identities,0,cilium,doublewrite kvstore identities,,
+cilium.operator.doublewrite.kvstore_only_identities,gauge,,,,[OpenMetrics V2] KVStore identities not present as CRD,0,cilium,doublewrite kvstore only,,
 cilium.operator.ec2.api.duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of duration of interactions with the AWS EC2 API. Available in Cilium v1.9+,0,cilium,aws ec2 api duration sample,,
 cilium.operator.ec2.api.duration.seconds.count,count,,request,,[OpenMetrics V1 and V2] Count of duration of interactions with the AWS EC2 API. Available in Cilium v1.9+,0,cilium,aws ec2 api duration count,,
 cilium.operator.ec2.api.duration.seconds.sum,count,,second,,[OpenMetrics V1 and V2] Sum of duration of interactions with the AWS EC2 API. Available in Cilium v1.9+,0,cilium,aws ec2 api duration sum,,
@@ -236,11 +315,30 @@ cilium.operator.ipam.resync.queued.count,count,,unit,,[OpenMetrics V2] Number of
 cilium.operator.ipam.resync.queued.total,count,,unit,,[OpenMetrics V1] Number of IPAM queued triggers. Available in Cilium v1.9+,0,cilium,ipam queued triggers count,,
 cilium.operator.ipam.resync.total,count,,operation,,[OpenMetrics V1] Number of resync operations to synchronize and resolve IP deficit of nodes. Available in Cilium v1.8+,0,cilium,ipam resync operations count,,
 cilium.operator.ipam.used_ips,gauge,,unit,,[OpenMetrics V1 and V2] Total used IPs on Node for IPAM allocation,0,cilium,used ips,,
+cilium.operator.k8s.workqueue.adds.count,count,,operation,,[OpenMetrics V2] Total adds to operator workqueue,0,cilium,op workqueue adds,,name
+cilium.operator.k8s.workqueue.depth,gauge,,,,[OpenMetrics V2] Current operator workqueue depth,0,cilium,op workqueue depth,,name
+cilium.operator.k8s.workqueue.longest_running_processor.seconds,gauge,,second,,[OpenMetrics V2] Longest running operator workqueue processor,0,cilium,op workqueue longest,,name
+cilium.operator.k8s.workqueue.queue_duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of operator workqueue item durations,0,cilium,op workqueue queue dur bucket,,name
+cilium.operator.k8s.workqueue.queue_duration.seconds.count,count,,request,,[OpenMetrics V2] Count of operator workqueue item durations,0,cilium,op workqueue queue dur count,,name
+cilium.operator.k8s.workqueue.queue_duration.seconds.sum,count,,second,,[OpenMetrics V2] Sum of operator workqueue item durations,0,cilium,op workqueue queue dur sum,,name
+cilium.operator.k8s.workqueue.retries.count,count,,operation,,[OpenMetrics V2] Total operator workqueue retries,0,cilium,op workqueue retries,,name
+cilium.operator.k8s.workqueue.unfinished_work.seconds,gauge,,second,,[OpenMetrics V2] Work in progress duration not yet observed,0,cilium,op workqueue unfinished,,name
+cilium.operator.k8s.workqueue.work_duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of operator workqueue processing durations,0,cilium,op workqueue work dur bucket,,name
+cilium.operator.k8s.workqueue.work_duration.seconds.count,count,,request,,[OpenMetrics V2] Count of operator workqueue processing durations,0,cilium,op workqueue work dur count,,name
+cilium.operator.k8s.workqueue.work_duration.seconds.sum,count,,second,,[OpenMetrics V2] Sum of operator workqueue processing durations,0,cilium,op workqueue work dur sum,,name
 cilium.operator.lbipam.conflicting.pools.total,gauge,,unit,,[OpenMetrics V1 and V2] The number of conflicting pools,0,cilium,conflicting pools,,
 cilium.operator.lbipam.ips.available.total,gauge,,unit,,[OpenMetrics V1 and V2] The number of IP addresses available in a given pool,0,cilium,available pool ips,,
 cilium.operator.lbipam.ips.used.total,gauge,,unit,,[OpenMetrics V1 and V2] The number of IP addresses used in a given pool,0,cilium,used pool ips,,
 cilium.operator.lbipam.services.matching.total,gauge,,unit,,[OpenMetrics V1 and V2] The number of services matching pools,0,cilium,matching pools,,
 cilium.operator.lbipam.services.unsatisfied.total,gauge,,unit,,[OpenMetrics V1 and V2] The number of services which did not receive all requested IPs,0,cilium,unsatisfied pools,,
+cilium.operator.mcsapi.serviceexport_info,gauge,,,,[OpenMetrics V2] ServiceExport information,0,cilium,mcsapi serviceexport info,,namespace:serviceexport
+cilium.operator.mcsapi.serviceexport_status_condition,gauge,,,,[OpenMetrics V2] ServiceExport status conditions,0,cilium,mcsapi serviceexport status,,condition:namespace:reason:serviceexport:status
+cilium.operator.mcsapi.serviceimport_info,gauge,,,,[OpenMetrics V2] ServiceImport information,0,cilium,mcsapi serviceimport info,,namespace:serviceimport
+cilium.operator.mcsapi.serviceimport_status_clusters,gauge,,,,[OpenMetrics V2] Clusters backing ServiceImport,0,cilium,mcsapi serviceimport clusters,,namespace:serviceimport
+cilium.operator.mcsapi.serviceimport_status_condition,gauge,,,,[OpenMetrics V2] ServiceImport status conditions,0,cilium,mcsapi serviceimport status,,condition:namespace:reason:serviceimport:status
+cilium.operator.num_cep_changes_per_ces.bucket,count,,unit,,[OpenMetrics V2] Sample of changed CEPs per CES update,0,cilium,cep changes per ces bucket,,failure_type:opcode
+cilium.operator.num_cep_changes_per_ces.count,count,,request,,[OpenMetrics V2] Count of changed CEPs per CES update,0,cilium,cep changes per ces count,,failure_type:opcode
+cilium.operator.num_cep_changes_per_ces.sum,count,,unit,,[OpenMetrics V2] Sum of changed CEPs per CES update,0,cilium,cep changes per ces sum,,failure_type:opcode
 cilium.operator.num_ceps_per_ces.bucket,count,,unit,,[OpenMetrics V2] Sample of CEPs batched in a CES. Available in Cilium v1.11+,0,cilium,cep per ces sample,,
 cilium.operator.num_ceps_per_ces.count,count,,unit,,[OpenMetrics V1 and V2] Count of CEPs batched in a CES. Available in Cilium v1.11+,0,cilium,cep per ces count,,
 cilium.operator.num_ceps_per_ces.sum,count,,unit,,[OpenMetrics V1 and V2] Sum of CEPs batched in a CES. Available in Cilium v1.11+,0,cilium,cep per ces sum,,
@@ -252,6 +350,7 @@ cilium.operator.process.resident_memory.bytes,gauge,,byte,,[OpenMetrics V1 and V
 cilium.operator.process.start_time.seconds,gauge,,second,,[OpenMetrics V1 and V2] Start time of the process since unix epoch in seconds,0,cilium,proc start time operator,,
 cilium.operator.process.virtual_memory.bytes,gauge,,byte,,[OpenMetrics V1 and V2] Virtual memory size in bytes,0,cilium,virtual mem size operator,,
 cilium.operator.process.virtual_memory_max.bytes,gauge,,byte,,[OpenMetrics V1 and V2] Maximum amount of virtual memory available in bytes,0,cilium,virtual mem size max operator,,
+cilium.operator.unmanaged_pods,gauge,,,,[OpenMetrics V2] Total unmanaged pods observed,0,cilium,unmanaged pods,,
 cilium.policy.change.count,count,,unit,,[OpenMetrics V2] Number of policy changes by outcome,0,cilium,policy change count,,
 cilium.policy.change.total,count,,unit,,[OpenMetrics V1] Number of policy changes by outcome,0,cilium,policy change,,
 cilium.policy.count,gauge,,unit,,[OpenMetrics V1 and V2] Number of policies currently loaded,0,cilium,policy count,,
@@ -260,6 +359,9 @@ cilium.policy.implementation_delay.bucket,count,,second,,[OpenMetrics V1 and V2]
 cilium.policy.implementation_delay.count,count,,unit,,[OpenMetrics V1 and V2] Time between a policy change and it being fully deployed into the datapath,0,cilium,impl delay count,,
 cilium.policy.implementation_delay.sum,count,,second,,[OpenMetrics V1 and V2] Time between a policy change and it being fully deployed into the datapath,0,cilium,impl delay sum,,
 cilium.policy.import_errors.count,count,,error,,[OpenMetrics V1 and V2] Number of failed policy imports,-1,cilium,failed policy,,
+cilium.policy.incremental_update_duration.bucket,count,,second,,[OpenMetrics V2] Sample of policy incremental update durations,0,cilium,policy incr update bucket,,scope
+cilium.policy.incremental_update_duration.count,count,,request,,[OpenMetrics V2] Count of policy incremental update durations,0,cilium,policy incr update count,,scope
+cilium.policy.incremental_update_duration.sum,count,,second,,[OpenMetrics V2] Sum of policy incremental update durations,0,cilium,policy incr update sum,,scope
 cilium.policy.l7.count,count,,unit,,[OpenMetrics V2] Number of total L7 requests/responses by type,0,cilium,policy l7 total,,
 cilium.policy.l7.total,count,,unit,,[OpenMetrics V1] Number of total L7 requests/responses by type,0,cilium,policy l7 total,,
 cilium.policy.l7_denied.count,count,,unit,,[OpenMetrics V2] Number of total L7 denied requests/responses due to policy. Available in Cilium <= v1.7,-1,cilium,denied l7 policy,,
@@ -276,6 +378,7 @@ cilium.policy.regeneration.total,count,,unit,,[OpenMetrics V1] Total number of s
 cilium.policy.regeneration_time_stats.seconds.bucket,count,,second,,[OpenMetrics V2] Policy regeneration time stats sample,0,cilium,policy regen time bucket,,
 cilium.policy.regeneration_time_stats.seconds.count,count,,operation,,[OpenMetrics V1 and V2] Policy regeneration time stats count,0,cilium,policy regen time count,,
 cilium.policy.regeneration_time_stats.seconds.sum,count,,second,,[OpenMetrics V1 and V2] Policy regeneration time stats count,0,cilium,policy regen time sum,,
+cilium.policy.selector_match_count_max,gauge,,,,[OpenMetrics V2] Maximum identities selected by policy selector,0,cilium,policy selector max,,class
 cilium.process.cpu.seconds.count,count,,second,,[OpenMetrics V2] Process CPU time in seconds,0,cilium,proc cpu second,,
 cilium.process.cpu.seconds.total,gauge,,second,,[OpenMetrics V1] Process CPU time in seconds,0,cilium,proc cpu second,,
 cilium.process.max_fds,gauge,,file,,[OpenMetrics V1 and V2] Process file descriptor maximum,0,cilium,max fd,,
@@ -290,6 +393,9 @@ cilium.proxy.redirects,gauge,,,,Number of redirects installed for endpoints by p
 cilium.proxy.upstream_reply.seconds.bucket,count,,second,,"[OpenMetrics V2] Seconds waited for upstream server to reply to a request labeled by error, protocol and span time",-1,cilium,proxy upstream reply seconds,,
 cilium.proxy.upstream_reply.seconds.count,count,,second,,"[OpenMetrics V1 and V2] Seconds waited for upstream server to reply to a request labeled by error, protocol and span time",-1,cilium,proxy upstream reply seconds,,
 cilium.proxy.upstream_reply.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Seconds waited for upstream server to reply to a request labeled by error, protocol and span time",-1,cilium,proxy upstream reply seconds,,
+cilium.service.implementation_delay.bucket,count,,second,,[OpenMetrics V2] Sample of service implementation delays,0,cilium,service impl delay bucket,,action
+cilium.service.implementation_delay.count,count,,request,,[OpenMetrics V2] Count of service implementation delays,0,cilium,service impl delay count,,action
+cilium.service.implementation_delay.sum,count,,second,,[OpenMetrics V2] Sum of service implementation delays,0,cilium,service impl delay sum,,action
 cilium.services.events.count,count,,event,,[OpenMetrics V2] Number of services events labeled by action type,0,cilium,service events count,,
 cilium.services.events.total,count,,event,,[OpenMetrics V1] Number of services events labeled by action type,0,cilium,service events,,
 cilium.subprocess.start.count,count,,unit,,[OpenMetrics V2] Number of times that Cilium has started a subprocess,0,cilium,subproc start,,
@@ -302,4 +408,4 @@ cilium.triggers_policy.update_call_duration.seconds.sum,count,,second,,[OpenMetr
 cilium.triggers_policy.update_folds,gauge,,unit,,[OpenMetrics V1 and V2] Number of folds,0,cilium,fold count,,
 cilium.unreachable.health_endpoints,gauge,,unit,,[OpenMetrics V1 and V2] Number of health endpoints that cannot be reached,0,cilium,unreachable health endpoint,,
 cilium.unreachable.nodes,gauge,,node,,[OpenMetrics V1 and V2] Number of nodes that cannot be reached,0,cilium,unreachable nodes,,
-cilium.version,gauge,,node,,[OpenMetrics V1 and V2] Cilium version,0,cilium,version,,
+cilium.version,gauge,,node,,[OpenMetrics V1] Cilium version (label-only metric; use version metadata for structured version info),0,cilium,version,,
