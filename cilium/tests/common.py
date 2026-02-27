@@ -22,6 +22,9 @@ requires_new_environment = pytest.mark.skipif(
 ON_CI = running_on_ci()
 skip_on_ci = pytest.mark.skipif(ON_CI, reason="This test environment flakes on CI")
 
+# NOTE: E2E environments only cover up to Cilium 1.11 (see `ddev env show cilium`).
+# All metrics from Cilium 1.12 onward are unit-tested against fixture data only.
+
 AGENT_V2_METRICS = [
     "cilium.agent.api_process_time.seconds.bucket",
     "cilium.agent.api_process_time.seconds.count",
@@ -112,10 +115,6 @@ AGENT_V2_METRICS = [
     "cilium.triggers_policy.update_folds",
     "cilium.unreachable.health_endpoints",
     "cilium.unreachable.nodes",
-    "cilium.k8s_client.api_calls.count",
-    "cilium.identity.count",
-    "cilium.policy.count",
-    "cilium.policy.import_errors.count",
     "cilium.datapath.conntrack_dump.resets.count",
     "cilium.ipcache.errors.count",
     "cilium.k8s_event.lag.seconds",
@@ -126,19 +125,153 @@ AGENT_V2_METRICS = [
     "cilium.kvstore.quorum_errors.count",
     "cilium.kvstore.sync_queue_size",
     "cilium.kvstore.initial_sync_completed",
-]
-
-AGENT_V2_METRICS_1_14 = [
-    # E2E not updated yet to 1.14+ of Cilium
+    # ClusterMesh agent metrics
+    "cilium.clustermesh.remote_cluster_services",
+    "cilium.clustermesh.remote_cluster_nodes",
+    "cilium.clustermesh.remote_clusters",
+    "cilium.clustermesh.remote_cluster_failures",
+    "cilium.clustermesh.remote_cluster_last_failure_ts",
+    "cilium.clustermesh.remote_cluster_readiness_status",
+    "cilium.clustermesh.remote_cluster_cache_revocations",
+    # IPsec
+    "cilium.ipsec.xfrm_error",
+    "cilium.ipsec.keys",
+    "cilium.ipsec.xfrm_states",
+    "cilium.ipsec.xfrm_policies",
+    # eBPF additions
+    "cilium.bpf.syscall_duration.seconds.bucket",
+    "cilium.bpf.syscall_duration.seconds.count",
+    "cilium.bpf.syscall_duration.seconds.sum",
+    "cilium.bpf.ratelimit_dropped.count",
+    # Drop/Forward additions
+    "cilium.mtu_error_message.count",
+    "cilium.fragmented_count.count",
+    # Services
+    "cilium.service.implementation_delay.bucket",
+    "cilium.service.implementation_delay.count",
+    "cilium.service.implementation_delay.sum",
+    # API limiter
+    "cilium.api_limiter.wait_history_duration.seconds.bucket",
+    "cilium.api_limiter.wait_history_duration.seconds.count",
+    "cilium.api_limiter.wait_history_duration.seconds.sum",
+    # Policy
+    "cilium.policy.incremental_update_duration.bucket",
+    "cilium.policy.incremental_update_duration.count",
+    "cilium.policy.incremental_update_duration.sum",
+    # Identity
+    "cilium.identity.gc_entries",
+    "cilium.identity.gc_runs",
+    "cilium.identity.gc_latency",
+    "cilium.ipcache.events.count",
+    # Controllers
+    "cilium.controllers.group_runs.count",
+    # Kubernetes
+    "cilium.k8s.cnp_status_completion.seconds.bucket",
+    "cilium.k8s.cnp_status_completion.seconds.count",
+    "cilium.k8s.cnp_status_completion.seconds.sum",
+    # Endpoint
+    "cilium.endpoint.restoration_endpoints",
+    "cilium.endpoint.restoration_duration.seconds.bucket",
+    "cilium.endpoint.restoration_duration.seconds.count",
+    "cilium.endpoint.restoration_duration.seconds.sum",
+    # NAT
+    "cilium.nat.endpoint_max_connection",
+    # Hive Jobs (1.17+)
+    "cilium.hive.jobs_runs.count",
+    "cilium.hive.jobs_runs_failed",
+    "cilium.hive.jobs.oneshot.last_run_duration.seconds",
+    "cilium.hive.jobs.observer.last_run_duration.seconds",
+    "cilium.hive.jobs.observer.run_duration.seconds.bucket",
+    "cilium.hive.jobs.observer.run_duration.seconds.count",
+    "cilium.hive.jobs.observer.run_duration.seconds.sum",
+    "cilium.hive.jobs.timer.last_run_duration.seconds",
+    "cilium.hive.jobs.timer.run_duration.seconds.bucket",
+    "cilium.hive.jobs.timer.run_duration.seconds.count",
+    "cilium.hive.jobs.timer.run_duration.seconds.sum",
+    # Cilium 1.14+
     "cilium.cidrgroup.policies",
     "cilium.k8s_client.rate_limiter_duration.seconds.bucket",
     "cilium.k8s_client.rate_limiter_duration.seconds.count",
     "cilium.k8s_client.rate_limiter_duration.seconds.sum",
     "cilium.policy.change.count",
     "cilium.services.events.count",
-    # 1.16+
+    # Cilium 1.15+
+    "cilium.k8s.workqueue.work_duration.seconds.bucket",
+    "cilium.k8s.workqueue.work_duration.seconds.count",
+    "cilium.k8s.workqueue.work_duration.seconds.sum",
+    "cilium.kvstore.sync_errors.count",
+    # Cilium 1.16+
     "cilium.fqdn.selectors",
     "cilium.identity.label_sources",
+    # Cilium 1.17+
+    "cilium.node_health.connectivity.status",
+    "cilium.node_health.connectivity.latency.seconds.bucket",
+    "cilium.node_health.connectivity.latency.seconds.count",
+    "cilium.node_health.connectivity.latency.seconds.sum",
+    "cilium.policy.selector_match_count_max",
+    "cilium.identity.cache_timer.duration",
+    "cilium.identity.cache_timer_trigger.latency",
+    "cilium.identity.cache_timer_trigger.folds",
+    # Cilium 1.19+
+    "cilium.clustermesh.remote_cluster_endpoints",
+    # BGP Control Plane
+    "cilium.bgp.session_state",
+    "cilium.bgp.advertised_routes",
+    "cilium.bgp.received_routes",
+    "cilium.bgp.reconcile_errors.count",
+    "cilium.bgp.reconcile_run_duration.seconds.bucket",
+    "cilium.bgp.reconcile_run_duration.seconds.count",
+    "cilium.bgp.reconcile_run_duration.seconds.sum",
+    # Feature metrics - adv_connect_and_lb
+    "cilium.feature.adv_connect_and_lb.bandwidth_manager_enabled",
+    "cilium.feature.adv_connect_and_lb.bgp_enabled",
+    "cilium.feature.adv_connect_and_lb.big_tcp_enabled",
+    "cilium.feature.adv_connect_and_lb.cilium_envoy_config_enabled",
+    "cilium.feature.adv_connect_and_lb.cilium_node_config_enabled",
+    "cilium.feature.adv_connect_and_lb.clustermesh_enabled",
+    "cilium.feature.adv_connect_and_lb.egress_gateway_enabled",
+    "cilium.feature.adv_connect_and_lb.envoy_proxy_enabled",
+    "cilium.feature.adv_connect_and_lb.kube_proxy_replacement_enabled",
+    "cilium.feature.adv_connect_and_lb.l2_lb_enabled",
+    "cilium.feature.adv_connect_and_lb.l2_pod_announcement_enabled",
+    "cilium.feature.adv_connect_and_lb.node_port_configuration",
+    "cilium.feature.adv_connect_and_lb.sctp_enabled",
+    "cilium.feature.adv_connect_and_lb.transparent_encryption",
+    "cilium.feature.adv_connect_and_lb.vtep_enabled",
+    # Feature metrics - controlplane
+    "cilium.feature.controlplane.cilium_endpoint_slices_enabled",
+    "cilium.feature.controlplane.identity_allocation",
+    "cilium.feature.controlplane.ipam",
+    # Feature metrics - datapath
+    "cilium.feature.datapath.chaining_enabled",
+    "cilium.feature.datapath.config",
+    "cilium.feature.datapath.internet_protocol",
+    "cilium.feature.datapath.network",
+    # Feature metrics - network_policies
+    "cilium.feature.network_policies.cidr_policies",
+    "cilium.feature.network_policies.cilium_clusterwide_envoy_config.count",
+    "cilium.feature.network_policies.cilium_clusterwide_network_policies.count",
+    "cilium.feature.network_policies.cilium_envoy_config.count",
+    "cilium.feature.network_policies.cilium_network_policies.count",
+    "cilium.feature.network_policies.deny_policies.count",
+    "cilium.feature.network_policies.dns_policies.count",
+    "cilium.feature.network_policies.fqdn_policies.count",
+    "cilium.feature.network_policies.host_firewall_enabled",
+    "cilium.feature.network_policies.host_network_policies.count",
+    "cilium.feature.network_policies.http_header_matches_policies.count",
+    "cilium.feature.network_policies.http_policies.count",
+    "cilium.feature.network_policies.ingress_cidr_group_policies.count",
+    "cilium.feature.network_policies.internal_traffic_policy_services.count",
+    "cilium.feature.network_policies.l3_policies.count",
+    "cilium.feature.network_policies.local_redirect_policies.count",
+    "cilium.feature.network_policies.local_redirect_policy_enabled",
+    "cilium.feature.network_policies.mutual_auth_enabled",
+    "cilium.feature.network_policies.mutual_auth_policies.count",
+    "cilium.feature.network_policies.non_defaultdeny_policies_enabled",
+    "cilium.feature.network_policies.non_defaultdeny_policies.count",
+    "cilium.feature.network_policies.other_l7_policies.count",
+    "cilium.feature.network_policies.sni_allow_list_policies.count",
+    "cilium.feature.network_policies.tls_inspection_policies.count",
 ]
 
 AGENT_V1_METRICS = [
@@ -231,11 +364,77 @@ AGENT_V1_METRICS = [
     "cilium.kvstore.quorum_errors.total",
     "cilium.kvstore.sync_queue_size",
     "cilium.kvstore.initial_sync_completed",
-    "cilium.version",
-]
-
-AGENT_V1_METRICS_1_14 = [
-    # E2E not updated yet to 1.14+ of Cilium
+    # ClusterMesh agent metrics (gauge)
+    "cilium.clustermesh.remote_cluster_services",
+    "cilium.clustermesh.remote_cluster_nodes",
+    "cilium.clustermesh.remote_clusters",
+    "cilium.clustermesh.remote_cluster_failures",
+    "cilium.clustermesh.remote_cluster_last_failure_ts",
+    "cilium.clustermesh.remote_cluster_readiness_status",
+    "cilium.clustermesh.remote_cluster_cache_revocations",
+    "cilium.clustermesh.remote_cluster_endpoints",
+    # IPsec (gauge)
+    "cilium.ipsec.xfrm_error",
+    "cilium.ipsec.keys",
+    "cilium.ipsec.xfrm_states",
+    "cilium.ipsec.xfrm_policies",
+    # eBPF (histogram V1: count+sum only; counter V1)
+    "cilium.bpf.syscall_duration.seconds.count",
+    "cilium.bpf.syscall_duration.seconds.sum",
+    "cilium.bpf.ratelimit_dropped.total",
+    # Drop/Forward (counter V1)
+    "cilium.mtu_error_message.total",
+    "cilium.fragmented_count.total",
+    # Services (histogram V1)
+    "cilium.service.implementation_delay.count",
+    "cilium.service.implementation_delay.sum",
+    # API limiter (histogram V1)
+    "cilium.api_limiter.wait_history_duration.seconds.count",
+    "cilium.api_limiter.wait_history_duration.seconds.sum",
+    # Policy (histogram V1)
+    "cilium.policy.incremental_update_duration.count",
+    "cilium.policy.incremental_update_duration.sum",
+    # Identity (gauge)
+    "cilium.identity.gc_entries",
+    "cilium.identity.gc_runs",
+    "cilium.identity.gc_latency",
+    # IPC cache (counter V1)
+    "cilium.ipcache.events.total",
+    # Controllers (counter V1)
+    "cilium.controllers.group_runs.total",
+    # Kubernetes (histogram V1)
+    "cilium.k8s.cnp_status_completion.seconds.count",
+    "cilium.k8s.cnp_status_completion.seconds.sum",
+    # Endpoint (gauge + histogram V1)
+    "cilium.endpoint.restoration_endpoints",
+    "cilium.endpoint.restoration_duration.seconds.count",
+    "cilium.endpoint.restoration_duration.seconds.sum",
+    # NAT (gauge)
+    "cilium.nat.endpoint_max_connection",
+    # Hive Jobs (counter V1, gauge, histogram V1)
+    "cilium.hive.jobs_runs.total",
+    "cilium.hive.jobs_runs_failed",
+    "cilium.hive.jobs.oneshot.last_run_duration.seconds",
+    "cilium.hive.jobs.observer.last_run_duration.seconds",
+    "cilium.hive.jobs.observer.run_duration.seconds.count",
+    "cilium.hive.jobs.observer.run_duration.seconds.sum",
+    "cilium.hive.jobs.timer.last_run_duration.seconds",
+    "cilium.hive.jobs.timer.run_duration.seconds.count",
+    "cilium.hive.jobs.timer.run_duration.seconds.sum",
+    # Cilium 1.15+ (histogram V1)
+    "cilium.k8s.workqueue.work_duration.seconds.count",
+    "cilium.k8s.workqueue.work_duration.seconds.sum",
+    # KVStore (counter V1)
+    "cilium.kvstore.sync_errors.total",
+    # Cilium 1.17+ (gauge + histogram V1)
+    "cilium.node_health.connectivity.status",
+    "cilium.node_health.connectivity.latency.seconds.count",
+    "cilium.node_health.connectivity.latency.seconds.sum",
+    "cilium.policy.selector_match_count_max",
+    "cilium.identity.cache_timer.duration",
+    "cilium.identity.cache_timer_trigger.latency",
+    "cilium.identity.cache_timer_trigger.folds",
+    # Cilium 1.14+
     "cilium.cidrgroup.policies",
     "cilium.k8s_client.rate_limiter_duration.seconds.count",
     "cilium.k8s_client.rate_limiter_duration.seconds.sum",
@@ -244,6 +443,63 @@ AGENT_V1_METRICS_1_14 = [
     # 1.16+
     "cilium.fqdn.selectors",
     "cilium.identity.label_sources",
+    # BGP Control Plane (gauge + counter V1 + histogram V1)
+    "cilium.bgp.session_state",
+    "cilium.bgp.advertised_routes",
+    "cilium.bgp.received_routes",
+    "cilium.bgp.reconcile_errors.total",
+    "cilium.bgp.reconcile_run_duration.seconds.count",
+    "cilium.bgp.reconcile_run_duration.seconds.sum",
+    # Feature metrics - adv_connect_and_lb (all gauges)
+    "cilium.feature.adv_connect_and_lb.bandwidth_manager_enabled",
+    "cilium.feature.adv_connect_and_lb.bgp_enabled",
+    "cilium.feature.adv_connect_and_lb.big_tcp_enabled",
+    "cilium.feature.adv_connect_and_lb.cilium_envoy_config_enabled",
+    "cilium.feature.adv_connect_and_lb.cilium_node_config_enabled",
+    "cilium.feature.adv_connect_and_lb.clustermesh_enabled",
+    "cilium.feature.adv_connect_and_lb.egress_gateway_enabled",
+    "cilium.feature.adv_connect_and_lb.envoy_proxy_enabled",
+    "cilium.feature.adv_connect_and_lb.kube_proxy_replacement_enabled",
+    "cilium.feature.adv_connect_and_lb.l2_lb_enabled",
+    "cilium.feature.adv_connect_and_lb.l2_pod_announcement_enabled",
+    "cilium.feature.adv_connect_and_lb.node_port_configuration",
+    "cilium.feature.adv_connect_and_lb.sctp_enabled",
+    "cilium.feature.adv_connect_and_lb.transparent_encryption",
+    "cilium.feature.adv_connect_and_lb.vtep_enabled",
+    # Feature metrics - controlplane (all gauges)
+    "cilium.feature.controlplane.cilium_endpoint_slices_enabled",
+    "cilium.feature.controlplane.identity_allocation",
+    "cilium.feature.controlplane.ipam",
+    # Feature metrics - datapath (all gauges)
+    "cilium.feature.datapath.chaining_enabled",
+    "cilium.feature.datapath.config",
+    "cilium.feature.datapath.internet_protocol",
+    "cilium.feature.datapath.network",
+    # Feature metrics - network_policies (gauges and counter V1)
+    "cilium.feature.network_policies.cidr_policies",
+    "cilium.feature.network_policies.cilium_clusterwide_envoy_config.total",
+    "cilium.feature.network_policies.cilium_clusterwide_network_policies.total",
+    "cilium.feature.network_policies.cilium_envoy_config.total",
+    "cilium.feature.network_policies.cilium_network_policies.total",
+    "cilium.feature.network_policies.deny_policies.total",
+    "cilium.feature.network_policies.dns_policies.total",
+    "cilium.feature.network_policies.fqdn_policies.total",
+    "cilium.feature.network_policies.host_firewall_enabled",
+    "cilium.feature.network_policies.host_network_policies.total",
+    "cilium.feature.network_policies.http_header_matches_policies.total",
+    "cilium.feature.network_policies.http_policies.total",
+    "cilium.feature.network_policies.ingress_cidr_group_policies.total",
+    "cilium.feature.network_policies.internal_traffic_policy_services.total",
+    "cilium.feature.network_policies.l3_policies.total",
+    "cilium.feature.network_policies.local_redirect_policies.total",
+    "cilium.feature.network_policies.local_redirect_policy_enabled",
+    "cilium.feature.network_policies.mutual_auth_enabled",
+    "cilium.feature.network_policies.mutual_auth_policies.total",
+    "cilium.feature.network_policies.non_defaultdeny_policies_enabled",
+    "cilium.feature.network_policies.non_defaultdeny_policies.total",
+    "cilium.feature.network_policies.other_l7_policies.total",
+    "cilium.feature.network_policies.sni_allow_list_policies.total",
+    "cilium.feature.network_policies.tls_inspection_policies.total",
 ]
 
 # Some types changed moving from v1 to v2. We keep v2 in the metadata.csv file.
@@ -271,6 +527,30 @@ AGENT_V1_METRICS_EXCLUDE_METADATA_CHECK = [
     "cilium.proxy.upstream_reply.seconds.sum",
     "cilium.k8s_client.rate_limiter_duration.seconds.count",
     "cilium.k8s_client.rate_limiter_duration.seconds.sum",
+    # New metrics: V2 metadata has .bucket but V1 doesn't emit it
+    "cilium.bpf.syscall_duration.seconds.count",
+    "cilium.bpf.syscall_duration.seconds.sum",
+    "cilium.service.implementation_delay.count",
+    "cilium.service.implementation_delay.sum",
+    "cilium.api_limiter.wait_history_duration.seconds.count",
+    "cilium.api_limiter.wait_history_duration.seconds.sum",
+    "cilium.policy.incremental_update_duration.count",
+    "cilium.policy.incremental_update_duration.sum",
+    "cilium.k8s.cnp_status_completion.seconds.count",
+    "cilium.k8s.cnp_status_completion.seconds.sum",
+    "cilium.endpoint.restoration_duration.seconds.count",
+    "cilium.endpoint.restoration_duration.seconds.sum",
+    "cilium.hive.jobs.observer.run_duration.seconds.count",
+    "cilium.hive.jobs.observer.run_duration.seconds.sum",
+    "cilium.hive.jobs.timer.run_duration.seconds.count",
+    "cilium.hive.jobs.timer.run_duration.seconds.sum",
+    "cilium.k8s.workqueue.work_duration.seconds.count",
+    "cilium.k8s.workqueue.work_duration.seconds.sum",
+    "cilium.node_health.connectivity.latency.seconds.count",
+    "cilium.node_health.connectivity.latency.seconds.sum",
+    # BGP histogram V1: count+sum only
+    "cilium.bgp.reconcile_run_duration.seconds.count",
+    "cilium.bgp.reconcile_run_duration.seconds.sum",
 ]
 
 OPERATOR_V2_PROCESS_METRICS = [
@@ -361,10 +641,31 @@ OPERATOR_V2_METRICS = [
     "cilium.operator.ipam.empty_interface_slots.count",
     "cilium.operator.ipam.interface_candidates.count",
     "cilium.operator.ipam.ip_allocation_ops.count",
-] + OPERATOR_V2_PROCESS_METRICS
-
-OPERATOR_V2_METRICS_1_14 = [
-    # E2E not updated yet to 1.14+ of Cilium
+    # Previously missing
+    "cilium.operator.controllers.group_runs.count",
+    "cilium.operator.num_cep_changes_per_ces.bucket",
+    "cilium.operator.num_cep_changes_per_ces.count",
+    "cilium.operator.num_cep_changes_per_ces.sum",
+    # ClusterMesh operator
+    "cilium.operator.clustermesh.remote_clusters",
+    "cilium.operator.clustermesh.remote_cluster_failures",
+    "cilium.operator.clustermesh.remote_cluster_last_failure_ts",
+    "cilium.operator.clustermesh.remote_cluster_readiness_status",
+    "cilium.operator.clustermesh.remote_cluster_cache_revocations",
+    "cilium.operator.clustermesh.remote_cluster_services",
+    "cilium.operator.clustermesh.remote_cluster_service_exports",
+    # MCS-API
+    "cilium.operator.mcsapi.serviceexport_info",
+    "cilium.operator.mcsapi.serviceexport_status_condition",
+    "cilium.operator.mcsapi.serviceimport_info",
+    "cilium.operator.mcsapi.serviceimport_status_condition",
+    "cilium.operator.mcsapi.serviceimport_status_clusters",
+    # CID controller
+    "cilium.operator.cid_controller.work_queue_event_count",
+    "cilium.operator.cid_controller.work_queue_latency.bucket",
+    "cilium.operator.cid_controller.work_queue_latency.count",
+    "cilium.operator.cid_controller.work_queue_latency.sum",
+    # Cilium 1.14+
     "cilium.operator.ipam.allocation.duration.seconds.bucket",
     "cilium.operator.ipam.allocation.duration.seconds.sum",
     "cilium.operator.ipam.allocation.duration.seconds.count",
@@ -376,7 +677,36 @@ OPERATOR_V2_METRICS_1_14 = [
     "cilium.operator.ipam.release.duration.seconds.sum",
     "cilium.operator.ipam.release.duration.seconds.count",
     "cilium.operator.ipam.used_ips",
-]
+    # Cilium 1.17+
+    "cilium.operator.unmanaged_pods",
+    "cilium.operator.doublewrite.crd_identities",
+    "cilium.operator.doublewrite.kvstore_identities",
+    "cilium.operator.doublewrite.crd_only_identities",
+    "cilium.operator.doublewrite.kvstore_only_identities",
+    # Cilium 1.19+ (operator workqueue with cilium_operator_ prefix)
+    "cilium.operator.k8s.workqueue.depth",
+    "cilium.operator.k8s.workqueue.adds.count",
+    "cilium.operator.k8s.workqueue.queue_duration.seconds.bucket",
+    "cilium.operator.k8s.workqueue.queue_duration.seconds.count",
+    "cilium.operator.k8s.workqueue.queue_duration.seconds.sum",
+    "cilium.operator.k8s.workqueue.work_duration.seconds.bucket",
+    "cilium.operator.k8s.workqueue.work_duration.seconds.count",
+    "cilium.operator.k8s.workqueue.work_duration.seconds.sum",
+    "cilium.operator.k8s.workqueue.unfinished_work.seconds",
+    "cilium.operator.k8s.workqueue.longest_running_processor.seconds",
+    "cilium.operator.k8s.workqueue.retries.count",
+    # BGP Control Plane Operator
+    "cilium.operator.bgp.reconcile_errors.count",
+    "cilium.operator.bgp.reconcile_run_duration.seconds.bucket",
+    "cilium.operator.bgp.reconcile_run_duration.seconds.count",
+    "cilium.operator.bgp.reconcile_run_duration.seconds.sum",
+    # Feature metrics - adv_connect_and_lb
+    "cilium.operator.feature.adv_connect_and_lb.gateway_api_enabled",
+    "cilium.operator.feature.adv_connect_and_lb.ingress_controller_enabled",
+    "cilium.operator.feature.adv_connect_and_lb.l7_aware_traffic_management_enabled",
+    "cilium.operator.feature.adv_connect_and_lb.lb_ipam_enabled",
+    "cilium.operator.feature.adv_connect_and_lb.node_ipam_enabled",
+] + OPERATOR_V2_PROCESS_METRICS
 
 # Not available in test metric fixtures
 ADDL_OPERATOR_AWS_METRICS = [
@@ -409,7 +739,10 @@ ADDL_OPERATOR_METRICS = [
     "cilium.operator.ces.sync_errors.count",
 ]
 
-# Optional metrics for integration tests
+# Optional metrics for integration tests.
+# Metrics not emitted by the Cilium 1.11 E2E environment (either conditionally
+# emitted at runtime, or introduced in Cilium 1.12+) must be listed here so
+# that test_e2e.py uses at_least=0 instead of at_least=1.
 OPTIONAL_METRICS = {
     "cilium.bpf.map_pressure",
     "cilium.datapath.conntrack_dump.resets.count",
@@ -442,4 +775,149 @@ OPTIONAL_METRICS = {
     "cilium.proxy.upstream_reply.seconds.sum",
     "cilium.proxy.datapath.update_timeout.count",
     "cilium.policy.l7.count",
+    # Cilium 1.12+ - not present in E2E environments (max 1.11)
+    # ClusterMesh agent metrics
+    "cilium.clustermesh.remote_cluster_services",
+    "cilium.clustermesh.remote_cluster_nodes",
+    "cilium.clustermesh.remote_clusters",
+    "cilium.clustermesh.remote_cluster_failures",
+    "cilium.clustermesh.remote_cluster_last_failure_ts",
+    "cilium.clustermesh.remote_cluster_readiness_status",
+    "cilium.clustermesh.remote_cluster_cache_revocations",
+    # IPsec
+    "cilium.ipsec.xfrm_error",
+    "cilium.ipsec.keys",
+    "cilium.ipsec.xfrm_states",
+    "cilium.ipsec.xfrm_policies",
+    # eBPF additions
+    "cilium.bpf.syscall_duration.seconds.bucket",
+    "cilium.bpf.syscall_duration.seconds.count",
+    "cilium.bpf.syscall_duration.seconds.sum",
+    "cilium.bpf.ratelimit_dropped.count",
+    # Drop/Forward additions
+    "cilium.mtu_error_message.count",
+    "cilium.fragmented_count.count",
+    # Services
+    "cilium.service.implementation_delay.bucket",
+    "cilium.service.implementation_delay.count",
+    "cilium.service.implementation_delay.sum",
+    # API limiter
+    "cilium.api_limiter.wait_history_duration.seconds.bucket",
+    "cilium.api_limiter.wait_history_duration.seconds.count",
+    "cilium.api_limiter.wait_history_duration.seconds.sum",
+    # Policy
+    "cilium.policy.incremental_update_duration.bucket",
+    "cilium.policy.incremental_update_duration.count",
+    "cilium.policy.incremental_update_duration.sum",
+    # Identity
+    "cilium.identity.gc_entries",
+    "cilium.identity.gc_runs",
+    "cilium.identity.gc_latency",
+    "cilium.ipcache.events.count",
+    # Controllers
+    "cilium.controllers.group_runs.count",
+    # Kubernetes
+    "cilium.k8s.cnp_status_completion.seconds.bucket",
+    "cilium.k8s.cnp_status_completion.seconds.count",
+    "cilium.k8s.cnp_status_completion.seconds.sum",
+    # Endpoint
+    "cilium.endpoint.restoration_endpoints",
+    "cilium.endpoint.restoration_duration.seconds.bucket",
+    "cilium.endpoint.restoration_duration.seconds.count",
+    "cilium.endpoint.restoration_duration.seconds.sum",
+    # NAT
+    "cilium.nat.endpoint_max_connection",
+    # Hive Jobs (1.17+)
+    "cilium.hive.jobs_runs.count",
+    "cilium.hive.jobs_runs_failed",
+    "cilium.hive.jobs.oneshot.last_run_duration.seconds",
+    "cilium.hive.jobs.observer.last_run_duration.seconds",
+    "cilium.hive.jobs.observer.run_duration.seconds.bucket",
+    "cilium.hive.jobs.observer.run_duration.seconds.count",
+    "cilium.hive.jobs.observer.run_duration.seconds.sum",
+    "cilium.hive.jobs.timer.last_run_duration.seconds",
+    "cilium.hive.jobs.timer.run_duration.seconds.bucket",
+    "cilium.hive.jobs.timer.run_duration.seconds.count",
+    "cilium.hive.jobs.timer.run_duration.seconds.sum",
+    # Cilium 1.14+
+    "cilium.cidrgroup.policies",
+    "cilium.k8s_client.rate_limiter_duration.seconds.bucket",
+    "cilium.k8s_client.rate_limiter_duration.seconds.count",
+    "cilium.k8s_client.rate_limiter_duration.seconds.sum",
+    "cilium.policy.change.count",
+    "cilium.services.events.count",
+    # Cilium 1.15+
+    "cilium.k8s.workqueue.work_duration.seconds.bucket",
+    "cilium.k8s.workqueue.work_duration.seconds.count",
+    "cilium.k8s.workqueue.work_duration.seconds.sum",
+    "cilium.kvstore.sync_errors.count",
+    # Cilium 1.16+
+    "cilium.fqdn.selectors",
+    "cilium.identity.label_sources",
+    # Cilium 1.17+
+    "cilium.node_health.connectivity.status",
+    "cilium.node_health.connectivity.latency.seconds.bucket",
+    "cilium.node_health.connectivity.latency.seconds.count",
+    "cilium.node_health.connectivity.latency.seconds.sum",
+    "cilium.policy.selector_match_count_max",
+    "cilium.identity.cache_timer.duration",
+    "cilium.identity.cache_timer_trigger.latency",
+    "cilium.identity.cache_timer_trigger.folds",
+    # Cilium 1.19+
+    "cilium.clustermesh.remote_cluster_endpoints",
+    # BGP Control Plane
+    "cilium.bgp.session_state",
+    "cilium.bgp.advertised_routes",
+    "cilium.bgp.received_routes",
+    "cilium.bgp.reconcile_errors.count",
+    "cilium.bgp.reconcile_run_duration.seconds.bucket",
+    "cilium.bgp.reconcile_run_duration.seconds.count",
+    "cilium.bgp.reconcile_run_duration.seconds.sum",
+    # Feature metrics - all groups
+    "cilium.feature.adv_connect_and_lb.bandwidth_manager_enabled",
+    "cilium.feature.adv_connect_and_lb.bgp_enabled",
+    "cilium.feature.adv_connect_and_lb.big_tcp_enabled",
+    "cilium.feature.adv_connect_and_lb.cilium_envoy_config_enabled",
+    "cilium.feature.adv_connect_and_lb.cilium_node_config_enabled",
+    "cilium.feature.adv_connect_and_lb.clustermesh_enabled",
+    "cilium.feature.adv_connect_and_lb.egress_gateway_enabled",
+    "cilium.feature.adv_connect_and_lb.envoy_proxy_enabled",
+    "cilium.feature.adv_connect_and_lb.kube_proxy_replacement_enabled",
+    "cilium.feature.adv_connect_and_lb.l2_lb_enabled",
+    "cilium.feature.adv_connect_and_lb.l2_pod_announcement_enabled",
+    "cilium.feature.adv_connect_and_lb.node_port_configuration",
+    "cilium.feature.adv_connect_and_lb.sctp_enabled",
+    "cilium.feature.adv_connect_and_lb.transparent_encryption",
+    "cilium.feature.adv_connect_and_lb.vtep_enabled",
+    "cilium.feature.controlplane.cilium_endpoint_slices_enabled",
+    "cilium.feature.controlplane.identity_allocation",
+    "cilium.feature.controlplane.ipam",
+    "cilium.feature.datapath.chaining_enabled",
+    "cilium.feature.datapath.config",
+    "cilium.feature.datapath.internet_protocol",
+    "cilium.feature.datapath.network",
+    "cilium.feature.network_policies.cidr_policies",
+    "cilium.feature.network_policies.cilium_clusterwide_envoy_config.count",
+    "cilium.feature.network_policies.cilium_clusterwide_network_policies.count",
+    "cilium.feature.network_policies.cilium_envoy_config.count",
+    "cilium.feature.network_policies.cilium_network_policies.count",
+    "cilium.feature.network_policies.deny_policies.count",
+    "cilium.feature.network_policies.dns_policies.count",
+    "cilium.feature.network_policies.fqdn_policies.count",
+    "cilium.feature.network_policies.host_firewall_enabled",
+    "cilium.feature.network_policies.host_network_policies.count",
+    "cilium.feature.network_policies.http_header_matches_policies.count",
+    "cilium.feature.network_policies.http_policies.count",
+    "cilium.feature.network_policies.ingress_cidr_group_policies.count",
+    "cilium.feature.network_policies.internal_traffic_policy_services.count",
+    "cilium.feature.network_policies.l3_policies.count",
+    "cilium.feature.network_policies.local_redirect_policies.count",
+    "cilium.feature.network_policies.local_redirect_policy_enabled",
+    "cilium.feature.network_policies.mutual_auth_enabled",
+    "cilium.feature.network_policies.mutual_auth_policies.count",
+    "cilium.feature.network_policies.non_defaultdeny_policies_enabled",
+    "cilium.feature.network_policies.non_defaultdeny_policies.count",
+    "cilium.feature.network_policies.other_l7_policies.count",
+    "cilium.feature.network_policies.sni_allow_list_policies.count",
+    "cilium.feature.network_policies.tls_inspection_policies.count",
 }
