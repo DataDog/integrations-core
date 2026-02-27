@@ -1,0 +1,27 @@
+# HTTP client metrics
+http_client_duration: http_client.duration
+http_client_request_dns_duration: http_client.request_dns_duration
+http_client_request_failed_count: http_client.request_failed
+http_client_request_get_conn_duration: http_client.request_get_conn_duration
+http_client_request_size: http_client.request_size
+http_client_request_started_count: http_client.request_started
+http_client_request_timedout_count: http_client.request_timedout
+http_client_request_canceled_count: http_client.request_canceled
+http_client_request_read_errors_count: http_client.request_read_errors
+http_client_request_tls_duration: http_client.request_tls_duration
+http_client_response_no_content_length: http_client.response_no_content_length
+http_client_response_read_size_hist: http_client.response_read_size_hist
+http_client_response_read_size: http_client.response_read_size
+http_client_response_read_time_hist_seconds: http_client.response_read_time_hist_seconds
+http_client_response_read_time_seconds: http_client.response_read_time_seconds
+
+# HTTP server metrics
+http_server_duration: http_server.duration
+http_server_response_size: http_server.response_size
+
+# KrakenD metrics
+krakend_backend_duration: backend_duration
+krakend_proxy_duration: proxy_duration
+
+# OpenTelemetry scope info
+otel_scope_info: otel_scope_info
