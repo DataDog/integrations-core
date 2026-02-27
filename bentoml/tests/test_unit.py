@@ -19,7 +19,7 @@ from .common import (
 
 
 def test_bentoml_mock_metrics(dd_run_check, aggregator, mock_http_response):
-    get_mock = mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
 
     check = BentomlCheck('bentoml', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
