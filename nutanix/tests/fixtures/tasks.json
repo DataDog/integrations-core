@@ -1,0 +1,321 @@
+[
+  {
+    "data": [
+      {
+        "extId": "ZXJnb24=:3e25313f-cf66-43c1-4eb2-ed3701db7b27",
+        "operation": "LogCollectionWithDownloadLink",
+        "operationDescription": "Collect logs",
+        "createdTime": "2026-02-24T20:11:08.60048Z",
+        "startedTime": "2026-02-24T20:11:11.799971Z",
+        "completedTime": "2026-02-24T21:26:19.556191Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "00064715-c043-5d8f-ee4b-176ec875554d",
+            "rel": "clustermgmt:config:cluster",
+            "name": "datadog-nutanix-dev",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "completionDetails": [
+          {
+            "value": "efcc2f7a-54b3-45b5-598a-02be77ebed49",
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.config.KVPair",
+            "name": "LogExtId"
+          }
+        ],
+        "lastUpdatedTime": "2026-02-24T21:26:19.55619Z",
+        "clusterExtIds": [
+          "00064715-c043-5d8f-ee4b-176ec875554d"
+        ],
+        "isBackgroundTask": true,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks/ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "ownedBy": {
+          "name": "System",
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.OwnerReference"
+        },
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks/ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
+        "operation": "LogCollectionFromPC",
+        "operationDescription": "Collect logs",
+        "createdTime": "2026-02-24T20:11:08.50709Z",
+        "startedTime": "2026-02-24T20:11:08.530197Z",
+        "completedTime": "2026-02-24T21:26:19.798031Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "00064715-c043-5d8f-ee4b-176ec875554d",
+            "rel": "clustermgmt:config:cluster",
+            "name": "datadog-nutanix-dev",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:3e25313f-cf66-43c1-4eb2-ed3701db7b27",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks/ZXJnb24=:3e25313f-cf66-43c1-4eb2-ed3701db7b27",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "completionDetails": [
+          {
+            "value": "efcc2f7a-54b3-45b5-598a-02be77ebed49",
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.config.KVPair",
+            "name": "LogExtId"
+          }
+        ],
+        "lastUpdatedTime": "2026-02-24T21:26:19.798031Z",
+        "clusterExtIds": [
+          "00064715-c043-5d8f-ee4b-176ec875554d"
+        ],
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED",
+        "ownedBy": {
+          "extId": "773ffab1-a60b-52e7-bdab-a62c75151cb1",
+          "name": "noueman",
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.OwnerReference"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:44782277-2630-4de5-51cd-403cbfcb3bc5",
+        "operation": "LogCollectionWithDownloadLink",
+        "operationDescription": "Collect logs",
+        "createdTime": "2026-02-24T19:56:16.785607Z",
+        "startedTime": "2026-02-24T19:56:18.758428Z",
+        "completedTime": "2026-02-24T20:02:31.57757Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "00064715-c043-5d8f-ee4b-176ec875554d",
+            "rel": "clustermgmt:config:cluster",
+            "name": "datadog-nutanix-dev",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "completionDetails": [
+          {
+            "value": "70d7be38-0cf4-4282-5587-0bee9d54390d",
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.config.KVPair",
+            "name": "LogExtId"
+          }
+        ],
+        "lastUpdatedTime": "2026-02-24T20:02:31.577568Z",
+        "clusterExtIds": [
+          "00064715-c043-5d8f-ee4b-176ec875554d"
+        ],
+        "isBackgroundTask": true,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks/ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "ownedBy": {
+          "name": "System",
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.OwnerReference"
+        },
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks/ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
+        "operation": "LogCollectionFromPC",
+        "operationDescription": "Collect logs",
+        "createdTime": "2026-02-24T19:56:16.540895Z",
+        "startedTime": "2026-02-24T19:56:16.573508Z",
+        "completedTime": "2026-02-24T20:02:31.76735Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "00064715-c043-5d8f-ee4b-176ec875554d",
+            "rel": "clustermgmt:config:cluster",
+            "name": "datadog-nutanix-dev",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:44782277-2630-4de5-51cd-403cbfcb3bc5",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks/ZXJnb24=:44782277-2630-4de5-51cd-403cbfcb3bc5",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "completionDetails": [
+          {
+            "value": "70d7be38-0cf4-4282-5587-0bee9d54390d",
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.config.KVPair",
+            "name": "LogExtId"
+          }
+        ],
+        "lastUpdatedTime": "2026-02-24T20:02:31.76735Z",
+        "clusterExtIds": [
+          "00064715-c043-5d8f-ee4b-176ec875554d"
+        ],
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED",
+        "ownedBy": {
+          "extId": "773ffab1-a60b-52e7-bdab-a62c75151cb1",
+          "name": "noueman",
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.OwnerReference"
+        }
+      }
+    ],
+    "$reserved": {
+      "$fv": "v4.r1"
+    },
+    "$objectType": "prism.v4.config.ListTasksApiResponse",
+    "metadata": {
+      "flags": [
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "hasError",
+          "value": false
+        },
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "isPaginated",
+          "value": true
+        },
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "isTruncated",
+          "value": false
+        }
+      ],
+      "$reserved": {
+        "$fv": "v1.r0"
+      },
+      "$objectType": "common.v1.response.ApiResponseMetadata",
+      "links": [
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.response.ApiLink",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks?$page=0&$limit=50&$filter=createdTime gt 2026-02-24T17:30:15.435899Z",
+          "rel": "first"
+        },
+        {
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks?$page=0&$limit=50&$filter=createdTime gt 2026-02-24T17:30:15.435899Z",
+          "rel": "self"
+        },
+        {
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks?$page=0&$limit=50&$filter=createdTime gt 2026-02-24T17:30:15.435899Z",
+          "rel": "last"
+        }
+      ],
+      "totalAvailableResults": 4
+    }
+  }
+]

@@ -1,0 +1,241 @@
+name: Nutanix
+files:
+  - name: nutanix.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: pc_ip
+            description: |
+              The IP address or FQDN of the Prism Central.
+              This is required to connect to your Nutanix Prism Central instance.
+
+              You can optionally include the port in this field (e.g., 'prism-central.example.com:9440').
+              If a port is specified here, do not set the pc_port option, as this will cause a configuration error.
+            required: true
+            display_priority: 5
+            value:
+              type: string
+              example: prism-central.example.com
+          - name: pc_port
+            description: |
+              The port of the Prism Central API.
+              Default is 9440 for HTTPS.
+
+              Note: If you include the port in the pc_ip field (e.g., 'prism-central.example.com:9440'),
+              do not set this option as it will cause a configuration error.
+            display_priority: 4
+            value:
+              type: integer
+              example: 9440
+          - name: pc_username
+            description: |
+              The username to authenticate with Prism Central.
+            required: true
+            display_priority: 3
+            value:
+              type: string
+          - name: pc_password
+            description: |
+              The password to authenticate with Prism Central.
+            required: true
+            display_priority: 2
+            value:
+              type: string
+          - name: page_limit
+            description: |
+              The maximum number of items to retrieve per page when making paginated API requests.
+              This controls the page size for API calls to Prism Central.
+              Default is 50. Increase this value to reduce the number of API calls for large environments.
+            display_priority: 1
+            value:
+              type: integer
+              example: 50
+          - name: pc_max_retries
+            description: |
+              The maximum number of retry attempts for API requests when rate limited by Prism Central API.
+              Set to 0 to disable retries. Default is 3.
+            value:
+              type: integer
+              example: 3
+          - name: pc_base_backoff_seconds
+            description: |
+              The initial backoff duration in seconds when retrying rate-limited requests.
+              The actual backoff time uses exponential backoff: base * (2 ^ attempt) + jitter.
+              Default is 1 second.
+            value:
+              type: number
+              example: 1
+          - name: pc_max_backoff_seconds
+            description: |
+              The maximum backoff duration in seconds when retrying rate-limited requests.
+              This caps the exponential backoff calculation to prevent excessive wait times.
+              Default is 30 seconds.
+            value:
+              type: number
+              example: 30
+          - name: resource_filters
+            description: |
+              Filter infrastructure metrics and activity data by resource properties.
+              Each filter: 'resource', 'property', 'patterns' (regex list), 'type' (include default, or exclude).
+              Exclude wins over include. No filters = collect all.
+
+              All resources (infrastructure and activity):
+              - Specify any API property name (case-sensitive)
+              - Use '/' for nested object access (OData format, e.g., 'userReference/name')
+              - If property doesn't exist in the data, filter won't match
+
+              Infrastructure (cluster|host|vm):
+              - Default property: 'name'
+              - Common properties: name, extId, status, num_nodes, hypervisor_type
+
+              Activity (event|task|alert|audit):
+              - Default properties: eventType, status, severity, auditType
+              - Examples: eventType, classifications, operationType, alertType, userReference/name
+
+              Examples:
+              - Filter clusters by name:
+                - resource: cluster
+                  property: name
+                  patterns: ['^prod-.*']
+              - Filter clusters by hypervisor type:
+                - resource: cluster
+                  property: config/hypervisorTypes
+                  patterns: ['^AHV$']
+              - Filter hosts by name (exclude):
+                - resource: host
+                  property: name
+                  type: exclude
+                  patterns: ['^standby-.*']
+              - Filter VMs by power state:
+                - resource: vm
+                  property: powerState
+                  patterns: ['^ON$']
+              - Filter events by type:
+                - resource: event
+                  property: eventType
+                  patterns: ['^PasswordAudit$', '^LicenseAudit$']
+              - Filter events by source entity type:
+                - resource: event
+                  property: sourceEntityType
+                  patterns: ['^VM$']
+              - Filter tasks by status (exclude failed/canceled):
+                - resource: task
+                  property: status
+                  type: exclude
+                  patterns: ['^FAILED$', '^CANCELED$']
+              - Filter tasks by operation type:
+                - resource: task
+                  property: operationType
+                  patterns: ['^kClone', '^kMigrate']
+              - Filter alerts by severity (include WARNING and CRITICAL):
+                - resource: alert
+                  property: severity
+                  patterns: ['^WARNING$', '^CRITICAL$']
+              - Filter alerts by alert type:
+                - resource: alert
+                  property: alertType
+                  patterns: ['^A1031$', '^A130172$']
+              - Filter alerts by impact type:
+                - resource: alert
+                  property: impactTypes
+                  patterns: ['^SystemIndicator$']
+              - Filter audits by type:
+                - resource: audit
+                  property: auditType
+                  patterns: ['^LoginInfoAudit$', '^PasswordAudit$']
+              - Filter audits by operation type:
+                - resource: audit
+                  property: operationType
+                  type: exclude
+                  patterns: ['^CREATE$']
+              - Filter audits by nested user property:
+                - resource: audit
+                  property: userReference/name
+                  type: exclude
+                  patterns: ['^admin$', '^system$']
+              - Filter audits by user UUID (nested access):
+                - resource: audit
+                  property: userReference/uuid
+                  patterns: ['^00000000-']
+            value:
+              type: array
+              items:
+                type: object
+                properties:
+                  - name: resource
+                    type: string
+                  - name: patterns
+                    type: array
+                    items:
+                      type: string
+                  - name: type
+                    type: string
+                  - name: property
+                    type: string
+              example:
+                - resource: cluster
+                  property: name
+                  patterns:
+                    - '^prod-.*'
+                - resource: host
+                  property: name
+                  type: exclude
+                  patterns:
+                    - '^standby-.*'
+                - resource: event
+                  property: type
+                  patterns:
+                    - '^PasswordAudit$'
+                    - '^LicenseAudit$'
+                - resource: task
+                  property: status
+                  type: exclude
+                  patterns:
+                    - '^FAILED$'
+                    - '^CANCELED$'
+                - resource: alert
+                  property: severity
+                  patterns:
+                    - '^WARNING$'
+                    - '^CRITICAL$'
+                - resource: alert
+                  property: alertType
+                  patterns:
+                    - '^A1031$'
+                    - '^A130172$'
+                - resource: audit
+                  property: auditType
+                  patterns:
+                    - '^LoginInfoAudit$'
+                    - '^PasswordAudit$'
+                - resource: audit
+                  property: userReference/name
+                  type: exclude
+                  patterns:
+                    - '^system$'
+                - resource: audit
+                  property: userReference/uuid
+                  patterns:
+                    - '^00000000-'
+          - name: collect_events
+            description: |
+              Whether to collect events from Prism Central.
+              Default is true.
+            value:
+              type: boolean
+              example: true
+          - name: collect_alerts
+            description: |
+              Whether to collect alerts from Prism Central.
+              Default is true.
+            value:
+              type: boolean
+              example: true
+          - template: instances/http
+          - template: instances/default
+            overrides:
+              min_collection_interval.value.example: 120
+              min_collection_interval.enabled: true

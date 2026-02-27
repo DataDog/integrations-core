@@ -1,0 +1,827 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+from datetime import datetime, timedelta
+
+from requests.exceptions import HTTPError
+
+from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
+from datadog_checks.nutanix.resource_filters import should_collect_activity, should_collect_resource
+
+
+class ActivityMonitor:
+    def __init__(self, check):
+        self.check = check
+        self.last_event_collection_time = None
+        self.last_task_collection_time = None
+        self.last_audit_collection_time = None
+        self.last_alert_collection_time = None
+        self.last_audit_collection_time = None
+        # Read from cache and convert string to bool
+        cached_value = self.check.read_persistent_cache("alerts_v42_supported")
+        if cached_value == "true":
+            self.alerts_v42_supported = True
+        elif cached_value == "false":
+            self.alerts_v42_supported = False
+        else:
+            self.alerts_v42_supported = None
+
+    def collect_events(self) -> int:
+        """Collect events from Nutanix Prism Central.
+
+        Returns:
+            Number of events collected
+        """
+        try:
+            self.check.log.debug("[PC:%s:%s] Starting events collection", self.check.pc_ip, self.check.pc_port)
+
+            start_time = self.last_event_collection_time
+            if not start_time:
+                now = get_current_datetime()
+                start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
+                self.check.log.debug(
+                    "[PC:%s:%s] First events collection, using start_time: %s",
+                    self.check.pc_ip,
+                    self.check.pc_port,
+                    start_time,
+                )
+            else:
+                self.check.log.debug(
+                    "[PC:%s:%s] Collecting events since: %s", self.check.pc_ip, self.check.pc_port, start_time
+                )
+
+            events = self._list_events(start_time)
+            if not events:
+                self.check.log.debug("[PC:%s:%s] No events found", self.check.pc_ip, self.check.pc_port)
+                return 0
+
+            self.check.log.debug(
+                "[PC:%s:%s] Fetched %d events from API", self.check.pc_ip, self.check.pc_port, len(events)
+            )
+
+            events = self._filter_after_time(events, self.last_event_collection_time, "creationTime")
+            if not events:
+                self.check.log.debug("[PC:%s:%s] No new events after filtering", self.check.pc_ip, self.check.pc_port)
+                return 0
+
+            # Track the most recent timestamp before field filtering so we don't re-fetch filtered-out events
+            most_recent_time_str = self._find_max_timestamp(events, "creationTime")
+
+            events = [e for e in events if self._should_collect_activity_item(e, "event")]
+
+            self.check.log.debug(
+                "[PC:%s:%s] Processing %d events after filtering", self.check.pc_ip, self.check.pc_port, len(events)
+            )
+
+            for event in events:
+                self._process_event(event)
+            if most_recent_time_str:
+                self.last_event_collection_time = most_recent_time_str
+                self.check.log.debug(
+                    "[PC:%s:%s] Updated last_event_collection_time to: %s",
+                    self.check.pc_ip,
+                    self.check.pc_port,
+                    most_recent_time_str,
+                )
+
+            self.check.log.debug("[PC:%s:%s] Completed events collection", self.check.pc_ip, self.check.pc_port)
+            return len(events)
+
+        except Exception as e:
+            self.check.log.exception("[PC:%s:%s] Error collecting events: %s", self.check.pc_ip, self.check.pc_port, e)
+            return 0
+
+    def _list_events(self, start_time_str: str) -> list[dict]:
+        """Fetch events from Prism Central.
+
+        Args:
+            start_time_str: ISO 8601 formatted start time
+
+        Returns:
+            List of event objects
+        """
+        params = {}
+        params["$filter"] = f"creationTime gt {start_time_str}"
+        params["$orderBy"] = "creationTime asc"
+
+        return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/events", params=params)
+
+    def _process_event(self, event: dict) -> None:
+        """Process and send a single event to Datadog.
+
+        Args:
+            event: Event object from API
+        """
+        event_id = event.get("extId", "unknown")
+        event_title = event.get("eventType", "Nutanix Event")
+        event_message = event.get("message", "")
+        created_time = event.get("creationTime")
+        classifications = event.get("classifications", [])
+        alert_type = "info"
+
+        # Extract entity information for tagging
+        event_tags = self.check.base_tags.copy()
+
+        event_tags.append(f"ntnx_event_id:{event_id}")
+
+        cluster_id = event.get("sourceClusterUUID", event.get("clusterUUID"))
+
+        if cluster_id:
+            event_tags.append(f"ntnx_cluster_id:{cluster_id}")
+            # Access cluster_names via parent check's infrastructure_monitor (which should expose it)
+            # or directly if we choose to expose it on check.
+            # Assuming check exposes access to cluster_names property/attribute
+            if cluster_id in self.check.cluster_names:
+                event_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
+
+        for classification in classifications:
+            event_tags.append(f"ntnx_event_classification:{classification}")
+
+        if source_entity := event.get("sourceEntity"):
+            if entity_type := source_entity.get("type"):
+                entity_id = source_entity.get("extId")
+                if entity_id:
+                    event_tags.append(f"ntnx_{entity_type}_id:{entity_id}")
+
+                entity_name = source_entity.get("name")
+                if entity_name:
+                    event_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
+
+            # Add category tags from source entity
+            event_tags.extend(self.check.extract_category_tags(source_entity))
+
+        # Distinguish Prism Central events from tasks
+        event_tags.append("ntnx_type:event")
+
+        self.check.event(
+            {
+                "timestamp": self._parse_timestamp(created_time)
+                if created_time
+                else get_timestamp(get_current_datetime()),
+                "event_type": self.check.__NAMESPACE__,
+                "msg_title": event_title,
+                "msg_text": event_message,
+                "alert_type": alert_type,
+                "source_type_name": self.check.__NAMESPACE__,
+                "tags": event_tags,
+            }
+        )
+
+    def collect_tasks(self) -> int:
+        """Collect tasks from Nutanix Prism Central.
+
+        Returns:
+            Number of tasks collected
+        """
+        try:
+            self.check.log.debug("[PC:%s:%s] Starting tasks collection", self.check.pc_ip, self.check.pc_port)
+
+            start_time = self.last_task_collection_time
+            if not start_time:
+                now = get_current_datetime()
+                start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
+                self.check.log.debug(
+                    "[PC:%s:%s] First tasks collection, using start_time: %s",
+                    self.check.pc_ip,
+                    self.check.pc_port,
+                    start_time,
+                )
+            else:
+                self.check.log.debug(
+                    "[PC:%s:%s] Collecting tasks since: %s", self.check.pc_ip, self.check.pc_port, start_time
+                )
+
+            tasks = self._list_tasks(start_time)
+            if not tasks:
+                self.check.log.debug("[PC:%s:%s] No tasks found", self.check.pc_ip, self.check.pc_port)
+                return 0
+
+            self.check.log.debug(
+                "[PC:%s:%s] Fetched %d tasks from API", self.check.pc_ip, self.check.pc_port, len(tasks)
+            )
+
+            tasks = self._filter_after_time(tasks, self.last_task_collection_time, "createdTime")
+            if not tasks:
+                self.check.log.debug("[PC:%s:%s] No new tasks after filtering", self.check.pc_ip, self.check.pc_port)
+                return 0
+
+            # Track the most recent timestamp before field filtering so we don't re-fetch filtered-out tasks
+            most_recent_time_str = self._find_max_timestamp(tasks, "createdTime")
+
+            tasks = [t for t in tasks if self._should_collect_activity_item(t, "task")]
+
+            self.check.log.debug(
+                "[PC:%s:%s] Processing %d tasks after filtering", self.check.pc_ip, self.check.pc_port, len(tasks)
+            )
+
+            for task in tasks:
+                self._process_task(task)
+            if most_recent_time_str:
+                self.last_task_collection_time = most_recent_time_str
+                self.check.log.debug(
+                    "[PC:%s:%s] Updated last_task_collection_time to: %s",
+                    self.check.pc_ip,
+                    self.check.pc_port,
+                    most_recent_time_str,
+                )
+
+            self.check.log.debug("[PC:%s:%s] Completed tasks collection", self.check.pc_ip, self.check.pc_port)
+            return len(tasks)
+
+        except Exception as e:
+            self.check.log.exception("[PC:%s:%s] Error collecting tasks: %s", self.check.pc_ip, self.check.pc_port, e)
+            return 0
+
+    def collect_audits(self) -> int:
+        """Collect audits from Nutanix Prism Central.
+
+        Returns:
+            Number of audits collected
+        """
+        try:
+            self.check.log.debug("[PC:%s:%s] Starting audits collection", self.check.pc_ip, self.check.pc_port)
+
+            start_time = self.last_audit_collection_time
+            if not start_time:
+                now = get_current_datetime()
+                start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
+                self.check.log.debug(
+                    "[PC:%s:%s] First audits collection, using start_time: %s",
+                    self.check.pc_ip,
+                    self.check.pc_port,
+                    start_time,
+                )
+            else:
+                self.check.log.debug(
+                    "[PC:%s:%s] Collecting audits since: %s", self.check.pc_ip, self.check.pc_port, start_time
+                )
+
+            audits = self._list_audits(start_time)
+            if not audits:
+                self.check.log.debug("[PC:%s:%s] No audits found", self.check.pc_ip, self.check.pc_port)
+                return 0
+
+            self.check.log.debug(
+                "[PC:%s:%s] Fetched %d audits from API", self.check.pc_ip, self.check.pc_port, len(audits)
+            )
+
+            audits = self._filter_after_time(audits, self.last_audit_collection_time, "creationTime")
+            if not audits:
+                self.check.log.debug("[PC:%s:%s] No new audits after filtering", self.check.pc_ip, self.check.pc_port)
+                return 0
+
+            audits = [a for a in audits if self._should_collect_activity_item(a, "audit")]
+
+            self.check.log.debug(
+                "[PC:%s:%s] Processing %d audits after filtering", self.check.pc_ip, self.check.pc_port, len(audits)
+            )
+
+            for audit in audits:
+                self._process_audit(audit)
+
+            most_recent_time_str = self._find_max_timestamp(audits, "creationTime")
+            if most_recent_time_str:
+                self.last_audit_collection_time = most_recent_time_str
+                self.check.log.debug(
+                    "[PC:%s:%s] Updated last_audit_collection_time to: %s",
+                    self.check.pc_ip,
+                    self.check.pc_port,
+                    most_recent_time_str,
+                )
+
+            self.check.log.debug("[PC:%s:%s] Completed audits collection", self.check.pc_ip, self.check.pc_port)
+            return len(audits)
+
+        except Exception as e:
+            self.check.log.exception("[PC:%s:%s] Error collecting audits: %s", self.check.pc_ip, self.check.pc_port, e)
+            return 0
+
+    def collect_alerts(self) -> int:
+        """Collect alerts from Nutanix Prism Central.
+
+        Returns:
+            Number of alerts collected
+        """
+        try:
+            self.check.log.debug("[PC:%s:%s] Starting alerts collection", self.check.pc_ip, self.check.pc_port)
+
+            start_time = self.last_alert_collection_time
+            if not start_time:
+                now = get_current_datetime()
+                start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
+                self.check.log.debug(
+                    "[PC:%s:%s] First alerts collection, using start_time: %s",
+                    self.check.pc_ip,
+                    self.check.pc_port,
+                    start_time,
+                )
+            else:
+                self.check.log.debug(
+                    "[PC:%s:%s] Collecting alerts since: %s", self.check.pc_ip, self.check.pc_port, start_time
+                )
+
+            alerts = self._list_alerts(start_time)
+            if not alerts:
+                self.check.log.debug("[PC:%s:%s] No alerts found", self.check.pc_ip, self.check.pc_port)
+                return 0
+
+            self.check.log.debug(
+                "[PC:%s:%s] Fetched %d alerts from API", self.check.pc_ip, self.check.pc_port, len(alerts)
+            )
+
+            alerts = self._filter_after_time(alerts, self.last_alert_collection_time, "creationTime")
+            if not alerts:
+                self.check.log.debug("[PC:%s:%s] No new alerts after filtering", self.check.pc_ip, self.check.pc_port)
+                return 0
+
+            # Track the most recent timestamp before field filtering so we don't re-fetch filtered-out alerts
+            most_recent_time_str = self._find_max_timestamp(alerts, "creationTime")
+
+            alerts = [a for a in alerts if self._should_collect_activity_item(a, "alert")]
+
+            self.check.log.debug(
+                "[PC:%s:%s] Processing %d alerts after filtering", self.check.pc_ip, self.check.pc_port, len(alerts)
+            )
+
+            for alert in alerts:
+                self._process_alert(alert)
+            if most_recent_time_str:
+                self.last_alert_collection_time = most_recent_time_str
+                self.check.log.debug(
+                    "[PC:%s:%s] Updated last_alert_collection_time to: %s",
+                    self.check.pc_ip,
+                    self.check.pc_port,
+                    most_recent_time_str,
+                )
+
+            self.check.log.debug("[PC:%s:%s] Completed alerts collection", self.check.pc_ip, self.check.pc_port)
+            return len(alerts)
+
+        except Exception as e:
+            self.check.log.exception("[PC:%s:%s] Error collecting alerts: %s", self.check.pc_ip, self.check.pc_port, e)
+            return 0
+
+    def _list_audits(self, start_time_str: str) -> list[dict]:
+        """Fetch audits from Prism Central.
+
+        Args:
+            start_time_str: ISO 8601 formatted start time
+
+        Returns:
+            List of audit objects
+        """
+        params = {}
+        params["$filter"] = f"creationTime gt {start_time_str}"
+        params["$orderBy"] = "creationTime asc"
+
+        return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/audits", params=params)
+
+    def _list_alerts(self, start_time_str: str) -> list[dict]:
+        """Fetch alerts from Prism Central.
+
+        Args:
+            start_time_str: ISO 8601 formatted start time
+
+        Returns:
+            List of alert objects
+        """
+        params = {}
+        params["$filter"] = f"creationTime gt {start_time_str}"
+        params["$orderBy"] = "creationTime asc"
+
+        if self.alerts_v42_supported is False:
+            self.check.log.debug(
+                "[PC:%s:%s] Using alerts API v4.0 (v4.2 not supported)", self.check.pc_ip, self.check.pc_port
+            )
+            del params["$filter"]
+            return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/alerts", params=params)
+
+        try:
+            self.check.log.debug("[PC:%s:%s] Attempting to use alerts API v4.2", self.check.pc_ip, self.check.pc_port)
+            result = self.check._get_paginated_request_data("api/monitoring/v4.2/serviceability/alerts", params=params)
+            if self.alerts_v42_supported is None:
+                self.check.log.info(
+                    "[PC:%s:%s] Alerts API v4.2 is supported, caching for future use",
+                    self.check.pc_ip,
+                    self.check.pc_port,
+                )
+                self.alerts_v42_supported = True
+                self.check.write_persistent_cache("alerts_v42_supported", "true")
+            return result
+        except HTTPError as e:
+            if e.response is not None and e.response.status_code == 404:
+                self.check.log.info(
+                    "[PC:%s:%s] Alerts API v4.2 not supported, falling back to v4.0 permanently",
+                    self.check.pc_ip,
+                    self.check.pc_port,
+                )
+                self.alerts_v42_supported = False
+                self.check.write_persistent_cache("alerts_v42_supported", "false")
+                del params["$filter"]
+                return self.check._get_paginated_request_data(
+                    "api/monitoring/v4.0/serviceability/alerts", params=params
+                )
+            raise
+
+    def _process_audit(self, audit: dict) -> None:
+        """Process and send a single audit to Datadog.
+
+        Args:
+            audit: Audit object from API
+        """
+        audit_id = audit.get("extId", "unknown")
+
+        # Get cluster context for logging
+        cluster_label = ""
+        if cluster_ref := audit.get("clusterReference"):
+            cluster_id = cluster_ref.get("extId")
+            if cluster_id and cluster_id in self.check.cluster_names:
+                cluster_label = f"[{self.check.cluster_names[cluster_id]}]"
+
+        # Log audit submission for duplicate debugging
+        self.check.log.debug(
+            "[PC:%s:%s]%s Submitting audit - ID: %s, CreationTime: %s",
+            self.check.pc_ip,
+            self.check.pc_port,
+            cluster_label,
+            audit_id,
+            audit.get("creationTime", "unknown"),
+        )
+
+        audit_type = audit.get("auditType", "Nutanix Audit")
+        operation_type = audit.get("operationType")
+        message = audit.get("message", "")
+        created_time = audit.get("creationTime")
+
+        audit_tags = self.check.base_tags.copy()
+        audit_tags.append(f"ntnx_audit_id:{audit_id}")
+        audit_tags.append(f"ntnx_audit_type:{audit_type}")
+        if operation_type:
+            audit_tags.append(f"ntnx_operation_type:{operation_type}")
+
+        if cluster_ref := audit.get("clusterReference"):
+            cluster_id = cluster_ref.get("extId")
+            cluster_name = cluster_ref.get("name")
+            if cluster_id:
+                audit_tags.append(f"ntnx_cluster_id:{cluster_id}")
+                if cluster_id in self.check.cluster_names:
+                    audit_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
+                elif cluster_name:
+                    audit_tags.append(f"ntnx_cluster_name:{cluster_name}")
+            elif cluster_name:
+                audit_tags.append(f"ntnx_cluster_name:{cluster_name}")
+
+        if source_entity := audit.get("sourceEntity"):
+            if entity_type := source_entity.get("type"):
+                entity_id = source_entity.get("extId")
+                if entity_id:
+                    audit_tags.append(f"ntnx_{entity_type}_id:{entity_id}")
+                entity_name = source_entity.get("name")
+                if entity_name:
+                    audit_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
+
+            # Add category tags from source entity
+            audit_tags.extend(self.check.extract_category_tags(source_entity))
+
+        if user_ref := audit.get("userReference"):
+            if user_name := user_ref.get("name"):
+                audit_tags.append(f"ntnx_user_name:{user_name}")
+
+        affected_entities = audit.get("affectedEntities", [])
+        for entity in affected_entities:
+            if entity_type := entity.get("type"):
+                audit_tags.append(f"ntnx_affected_entity_type:{entity_type}")
+            if entity_id := entity.get("extId"):
+                audit_tags.append(f"ntnx_affected_entity_id:{entity_id}")
+            if entity_name := entity.get("name"):
+                audit_tags.append(f"ntnx_affected_entity_name:{entity_name}")
+
+            # Add category tags from affected entity
+            audit_tags.extend(self.check.extract_category_tags(entity))
+
+        audit_tags.append("ntnx_type:audit")
+
+        self.check.event(
+            {
+                "timestamp": self._parse_timestamp(created_time)
+                if created_time
+                else get_timestamp(get_current_datetime()),
+                "event_type": self.check.__NAMESPACE__,
+                "msg_title": f"Audit: {audit_type}",
+                "msg_text": message,
+                "alert_type": "info",
+                "source_type_name": self.check.__NAMESPACE__,
+                "tags": audit_tags,
+            }
+        )
+
+    def _process_alert(self, alert: dict) -> None:
+        """Process and send a single alert to Datadog.
+
+        Args:
+            alert: Alert object from API
+        """
+        alert_id = alert.get("extId", "unknown")
+        title = alert.get("title", "Nutanix Alert")
+        message = alert.get("message", "")
+        created_time = alert.get("creationTime")
+        severity = alert.get("severity")
+        alert_type = alert.get("alertType")
+
+        # map severity to alert_type
+        severity_map = {
+            "CRITICAL": "error",
+            "WARNING": "warning",
+            "INFO": "info",
+        }
+        event_alert_type = severity_map.get(severity, "info")
+
+        alert_tags = self.check.base_tags.copy()
+        alert_tags.append(f"ntnx_alert_id:{alert_id}")
+        if alert_type:
+            alert_tags.append(f"ntnx_alert_type:{alert_type}")
+        if severity:
+            alert_tags.append(f"ntnx_alert_severity:{severity}")
+
+        if cluster_id := alert.get("clusterUUID"):
+            alert_tags.append(f"ntnx_cluster_id:{cluster_id}")
+            if cluster_id in self.check.cluster_names:
+                alert_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
+
+        for classification in alert.get("classifications", []) or []:
+            alert_tags.append(f"ntnx_alert_classification:{classification}")
+
+        for impact in alert.get("impactTypes", []) or []:
+            alert_tags.append(f"ntnx_alert_impact:{impact}")
+
+        if source_entity := alert.get("sourceEntity"):
+            if entity_type := source_entity.get("type"):
+                if entity_id := source_entity.get("extId"):
+                    alert_tags.append(f"ntnx_{entity_type}_id:{entity_id}")
+                if entity_name := source_entity.get("name"):
+                    alert_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
+
+            # Add category tags from source entity
+            alert_tags.extend(self.check.extract_category_tags(source_entity))
+
+        alert_tags.append("ntnx_type:alert")
+
+        self.check.event(
+            {
+                "timestamp": self._parse_timestamp(created_time)
+                if created_time
+                else get_timestamp(get_current_datetime()),
+                "event_type": self.check.__NAMESPACE__,
+                "msg_title": f"Alert: {title}",
+                "msg_text": message,
+                "alert_type": event_alert_type,
+                "source_type_name": self.check.__NAMESPACE__,
+                "tags": alert_tags,
+            }
+        )
+
+    def _list_tasks(self, start_time_str: str) -> list[dict]:
+        """Fetch tasks from Prism Central.
+
+        Args:
+            start_time_str: ISO 8601 formatted start time
+
+        Returns:
+            List of task objects
+        """
+        params = {}
+        params["$filter"] = f"createdTime gt {start_time_str}"
+        params["$orderBy"] = "createdTime asc"
+
+        return self.check._get_paginated_request_data("api/prism/v4.0/config/tasks", params=params)
+
+    def _process_task(self, task: dict) -> None:
+        """Process and send a single task to Datadog as an event.
+
+        Args:
+            task: Task object from API
+        """
+        task_id = task.get("extId", "unknown")
+        task_operation = task.get("operation", "Nutanix Task")
+        task_description = task.get("operationDescription", "")
+        created_time = task.get("createdTime")
+        status = task.get("status", "UNKNOWN")
+
+        # alert type
+        alert_type_map = {
+            "SUCCEEDED": "success",
+            "FAILED": "error",
+            "RUNNING": "info",
+            "QUEUED": "info",
+            "CANCELED": "warning",
+        }
+        alert_type = alert_type_map.get(status, "info")
+
+        # tags
+        task_tags = self.check.base_tags.copy()
+        task_tags.append(f"ntnx_task_id:{task_id}")
+        task_tags.append(f"ntnx_task_status:{status}")
+
+        # cluster info
+        cluster_ext_ids = task.get("clusterExtIds", [])
+        if cluster_ext_ids:
+            for cluster_id in cluster_ext_ids:
+                task_tags.append(f"ntnx_cluster_id:{cluster_id}")
+                if cluster_id in self.check.cluster_names:
+                    task_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
+
+        # owner info
+        if owner := task.get("ownedBy"):
+            if owner_name := owner.get("name"):
+                task_tags.append(f"ntnx_owner_name:{owner_name}")
+            if owner_id := owner.get("extId"):
+                task_tags.append(f"ntnx_owner_id:{owner_id}")
+
+        # affected entities
+        entities_affected = task.get("entitiesAffected", [])
+        for entity in entities_affected:
+            if entity_type := entity.get("rel"):
+                task_tags.append(f"ntnx_entity_type:{entity_type}")
+            if entity_id := entity.get("extId"):
+                task_tags.append(f"ntnx_entity_id:{entity_id}")
+            if entity_name := entity.get("name"):
+                task_tags.append(f"ntnx_entity_name:{entity_name}")
+
+            # Add category tags from affected entity
+            task_tags.extend(self.check.extract_category_tags(entity))
+
+        # distinguish from other events we emit
+        task_tags.append("ntnx_type:task")
+
+        # message text
+        msg_text = task_description
+        if progress := task.get("progressPercentage"):
+            msg_text += f" (Progress: {progress}%)"
+
+        self.check.event(
+            {
+                "timestamp": self._parse_timestamp(created_time)
+                if created_time
+                else get_timestamp(get_current_datetime()),
+                "event_type": self.check.__NAMESPACE__,
+                "msg_title": f"Task: {task_operation}",
+                "msg_text": msg_text,
+                "alert_type": alert_type,
+                "source_type_name": self.check.__NAMESPACE__,
+                "tags": task_tags,
+            }
+        )
+
+    def _parse_timestamp(self, timestamp_str: str) -> int | None:
+        """Parse ISO 8601 timestamp string to Unix timestamp.
+
+        Args:
+            timestamp_str: ISO 8601 formatted timestamp string
+
+        Returns:
+            Unix timestamp in seconds, or None if parsing fails
+        """
+        try:
+            dt = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
+            return int(dt.timestamp())
+        except (ValueError, AttributeError):
+            self.check.log.warning(
+                "[PC:%s:%s] Failed to parse timestamp: %s", self.check.pc_ip, self.check.pc_port, timestamp_str
+            )
+            return None
+
+    def _should_collect_activity_item(self, item: dict, item_kind: str) -> bool:
+        """Return True if the activity item should be collected per resource_filters."""
+        filters = self.check.resource_filters
+        resources = []
+        if item_kind == "event":
+            cid = item.get("sourceClusterUUID") or item.get("clusterUUID")
+            if cid:
+                cluster_entity = {"extId": cid, "name": self.check.cluster_names.get(cid, "")}
+                resources.append(("cluster", cluster_entity))
+            if se := item.get("sourceEntity"):
+                rtype = se.get("type")
+                if rtype in ("cluster", "host", "vm"):
+                    entity = {"extId": se.get("extId"), "name": se.get("name") or ""}
+                    resources.append((rtype, entity))
+        elif item_kind == "task":
+            for cid in item.get("clusterExtIds") or []:
+                cluster_entity = {"extId": cid, "name": self.check.cluster_names.get(cid, "")}
+                resources.append(("cluster", cluster_entity))
+            for ent in item.get("entitiesAffected") or []:
+                rel = ent.get("rel", "")
+                rtype = "cluster" if "cluster" in rel else "host" if "host" in rel else "vm" if "vm" in rel else None
+                if rtype:
+                    entity = {"extId": ent.get("extId"), "name": ent.get("name") or ""}
+                    resources.append((rtype, entity))
+        elif item_kind == "alert":
+            if cid := item.get("clusterUUID"):
+                cluster_entity = {"extId": cid, "name": self.check.cluster_names.get(cid, "")}
+                resources.append(("cluster", cluster_entity))
+            if se := item.get("sourceEntity"):
+                rtype = se.get("type")
+                if rtype in ("cluster", "host", "vm"):
+                    entity = {"extId": se.get("extId"), "name": se.get("name") or ""}
+                    resources.append((rtype, entity))
+        elif item_kind == "audit":
+            if cr := item.get("clusterReference"):
+                cid, cname = cr.get("extId"), cr.get("name") or ""
+                if cid:
+                    cluster_entity = {"extId": cid, "name": cname or self.check.cluster_names.get(cid, "")}
+                    resources.append(("cluster", cluster_entity))
+            if se := item.get("sourceEntity"):
+                rtype = se.get("type")
+                if rtype in ("cluster", "host", "vm"):
+                    entity = {"extId": se.get("extId"), "name": se.get("name") or ""}
+                    resources.append((rtype, entity))
+
+        # Infrastructure filters: cluster/host/vm
+        if filters:
+            if resources:
+                if not all(should_collect_resource(rt, entity, filters) for rt, entity in resources):
+                    return False
+            # Activity filters: event/task/alert/audit
+            if item_kind in ("event", "task", "alert", "audit") and not should_collect_activity(
+                item_kind, item, filters
+            ):
+                return False
+        return True
+
+    def _filter_after_time(self, items: list[dict], last_time_str: str | None, field_name: str) -> list[dict]:
+        """Filter items to those strictly after the last submitted time.
+
+        This provides client-side filtering as a safeguard against API edge cases
+        where items might be returned with timestamps equal to or before the last collection time.
+
+        Args:
+            items: List of items to filter
+            last_time_str: ISO 8601 formatted timestamp string of the last collection (or None)
+            field_name: Name of the timestamp field in the items
+
+        Returns:
+            List of items with timestamps strictly after last_time_str
+        """
+        if not last_time_str:
+            return items
+
+        try:
+            last_time = datetime.fromisoformat(last_time_str.replace("Z", "+00:00"))
+        except (ValueError, AttributeError):
+            self.check.log.warning(
+                "[PC:%s:%s] Failed to parse last collection time: %s",
+                self.check.pc_ip,
+                self.check.pc_port,
+                last_time_str,
+            )
+            return items
+
+        filtered = []
+        for item in items:
+            item_time_str = item.get(field_name)
+            if not item_time_str:
+                continue
+            try:
+                item_time = datetime.fromisoformat(item_time_str.replace("Z", "+00:00"))
+            except (ValueError, AttributeError):
+                self.check.log.warning(
+                    "[PC:%s:%s] Failed to parse item timestamp: %s", self.check.pc_ip, self.check.pc_port, item_time_str
+                )
+                continue
+            if item_time > last_time:
+                filtered.append(item)
+
+        return filtered
+
+    def _find_max_timestamp(self, items: list[dict], field_name: str) -> str | None:
+        """Find the maximum timestamp among all items.
+
+        The Nutanix API may not return items sorted by timestamp despite the $orderBy parameter,
+        so we need to explicitly find the maximum timestamp to track the last collection time.
+
+        Args:
+            items: List of items to search
+            field_name: Name of the timestamp field in the items
+
+        Returns:
+            The maximum timestamp string, or None if no valid timestamps found
+        """
+        max_time = None
+        max_time_str = None
+
+        for item in items:
+            item_time_str = item.get(field_name)
+            if not item_time_str:
+                continue
+            try:
+                item_time = datetime.fromisoformat(item_time_str.replace("Z", "+00:00"))
+                if max_time is None or item_time > max_time:
+                    max_time = item_time
+                    max_time_str = item_time_str
+            except (ValueError, AttributeError):
+                self.check.log.warning(
+                    "[PC:%s:%s] Failed to parse item timestamp: %s", self.check.pc_ip, self.check.pc_port, item_time_str
+                )
+                continue
+
+        return max_time_str

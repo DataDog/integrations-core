@@ -1,0 +1,283 @@
+{
+  "data": {
+    "$reserved": {
+      "$fv": "v4.r1"
+    },
+    "$objectType": "clustermgmt.v4.stats.ClusterStats",
+    "extId": "00064715-c043-5d8f-ee4b-176ec875554d",
+    "controllerAvgIoLatencyUsecs": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 483
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 431
+      }
+    ],
+    "controllerAvgReadIoLatencyUsecs": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 347
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 312
+      }
+    ],
+    "controllerAvgWriteIoLatencyUsecs": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 484
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 435
+      }
+    ],
+    "controllerNumIops": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 62
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 109
+      }
+    ],
+    "hypervisorCpuUsagePpm": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 105943
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 107600
+      }
+    ],
+    "aggregateHypervisorMemoryUsagePpm": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 303394
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 303394
+      }
+    ],
+    "controllerNumReadIops": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 0
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 3
+      }
+    ],
+    "controllerNumWriteIops": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 62
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 106
+      }
+    ],
+    "ioBandwidthKbps": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 571
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 1380
+      }
+    ],
+    "controllerReadIoBandwidthKbps": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 1
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 287
+      }
+    ],
+    "controllerWriteIoBandwidthKbps": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 570
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 1092
+      }
+    ],
+    "storageUsageBytes": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 171453915136
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 171450682026
+      }
+    ],
+    "storageCapacityBytes": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 1209776849253
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 1209776849253
+      }
+    ],
+    "freePhysicalStorageBytes": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 1038322934117
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 1038326167226
+      }
+    ],
+    "logicalStorageUsageBytes": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 202594844672
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 202587788629
+      }
+    ],
+    "healthCheckScore": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2026-02-25T17:28:00Z",
+        "value": 100
+      },
+      {
+        "timestamp": "2026-02-25T17:26:00Z",
+        "value": 100
+      }
+    ]
+  },
+  "$reserved": {
+    "$fv": "v4.r1"
+  },
+  "$objectType": "clustermgmt.v4.stats.ClusterStatsApiResponse",
+  "metadata": {
+    "flags": [
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "hasError",
+        "value": false
+      },
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "isPaginated",
+        "value": false
+      },
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "isTruncated",
+        "value": false
+      }
+    ],
+    "$reserved": {
+      "$fv": "v1.r0"
+    },
+    "$objectType": "common.v1.response.ApiResponseMetadata",
+    "links": [
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.response.ApiLink",
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/stats/clusters/00064715-c043-5d8f-ee4b-176ec875554d",
+        "rel": "self"
+      },
+      {
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters/00064715-c043-5d8f-ee4b-176ec875554d",
+        "rel": "cluster"
+      }
+    ]
+  }
+}

@@ -1,0 +1,918 @@
+[
+  {
+    "data": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "bbc3555a-133b-5348-9764-bfff196e84e4",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/bbc3555a-133b-5348-9764-bfff196e84e4",
+            "rel": "self"
+          }
+        ],
+        "key": "ADGroup",
+        "value": "$Default",
+        "type": "SYSTEM",
+        "description": "Default AD Group"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "e4bda88f-e5da-5eb1-a031-2c0bb00d923d",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/e4bda88f-e5da-5eb1-a031-2c0bb00d923d",
+            "rel": "self"
+          }
+        ],
+        "key": "AnalyticsExclusions",
+        "value": "AnomalyDetection",
+        "type": "SYSTEM",
+        "description": "Category to categorise the entities which are excluded from anomaly detection feature"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "4d552748-e119-540a-b06c-3c6f0d213fa2",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/4d552748-e119-540a-b06c-3c6f0d213fa2",
+            "rel": "self"
+          }
+        ],
+        "key": "AnalyticsExclusions",
+        "value": "EfficiencyMeasurement",
+        "type": "SYSTEM",
+        "description": "Category to categorise the entities which are excluded from efficiency measurement feature"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "2686b4ba-2eee-5f06-bdbc-dc219dd61a06",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/2686b4ba-2eee-5f06-bdbc-dc219dd61a06",
+            "rel": "self"
+          }
+        ],
+        "key": "AppFamily",
+        "value": "Nutanix",
+        "type": "INTERNAL"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "16bc6d66-5656-5e1c-8505-78e0c858ef0f",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/16bc6d66-5656-5e1c-8505-78e0c858ef0f",
+            "rel": "self"
+          }
+        ],
+        "key": "AppFamily",
+        "value": "Preferred_Partners",
+        "type": "SYSTEM"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "d5ae9ac2-7ac7-5b28-aae5-b773d78653a2",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/d5ae9ac2-7ac7-5b28-aae5-b773d78653a2",
+            "rel": "self"
+          }
+        ],
+        "key": "AppTier",
+        "value": "Default",
+        "type": "SYSTEM",
+        "description": "Default Application Tier"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "5cb37404-f972-580a-8931-7b926609ad56",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/5cb37404-f972-580a-8931-7b926609ad56",
+            "rel": "self"
+          }
+        ],
+        "key": "AppType",
+        "value": "Apache_Spark",
+        "type": "SYSTEM",
+        "description": "Apache Spark Application"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "8ab4873f-8c8c-574a-9d88-520f43094531",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/8ab4873f-8c8c-574a-9d88-520f43094531",
+            "rel": "self"
+          }
+        ],
+        "key": "AppType",
+        "value": "Default",
+        "type": "SYSTEM",
+        "description": "Default Application Type"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "bddf72e9-8a35-5b9c-b67b-bd7cd83decc6",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/bddf72e9-8a35-5b9c-b67b-bd7cd83decc6",
+            "rel": "self"
+          }
+        ],
+        "key": "AppType",
+        "value": "Employee_Payroll",
+        "type": "SYSTEM",
+        "description": "Employee Payroll Application"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "95c73585-bfc1-5a89-9d0d-8ede2ddf420c",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/95c73585-bfc1-5a89-9d0d-8ede2ddf420c",
+            "rel": "self"
+          }
+        ],
+        "key": "AppType",
+        "value": "Exchange",
+        "type": "SYSTEM",
+        "description": "Exchange Application"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "abfba9d5-4c34-5381-9163-fc1630a657cc",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/abfba9d5-4c34-5381-9163-fc1630a657cc",
+            "rel": "self"
+          }
+        ],
+        "key": "AppType",
+        "value": "Git_Server",
+        "type": "SYSTEM",
+        "description": "Git Server Application"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "512ba0d3-9da7-5e43-968c-468a74357c22",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/512ba0d3-9da7-5e43-968c-468a74357c22",
+            "rel": "self"
+          }
+        ],
+        "key": "AppType",
+        "value": "Hadoop",
+        "type": "SYSTEM",
+        "description": "Hadoop Application"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "c805f2d2-010f-59f6-82b2-d286c35dc8cd",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/c805f2d2-010f-59f6-82b2-d286c35dc8cd",
+            "rel": "self"
+          }
+        ],
+        "key": "AppType",
+        "value": "Inventory",
+        "type": "SYSTEM",
+        "description": "Inventory Application"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "b5211715-3c8e-5a00-9079-42a3c598b8a1",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/b5211715-3c8e-5a00-9079-42a3c598b8a1",
+            "rel": "self"
+          }
+        ],
+        "key": "AppType",
+        "value": "Kubernetes",
+        "type": "SYSTEM",
+        "description": "Kubernetes Application"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "f62ee32d-f147-51f0-b4d3-b73961ee0d06",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/f62ee32d-f147-51f0-b4d3-b73961ee0d06",
+            "rel": "self"
+          }
+        ],
+        "key": "AppType",
+        "value": "Microsoft_SQL",
+        "type": "SYSTEM",
+        "description": "Microsoft SQL Application"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "a22d04ce-78d2-5bf7-805b-affcdc259b5e",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/a22d04ce-78d2-5bf7-805b-affcdc259b5e",
+            "rel": "self"
+          }
+        ],
+        "key": "AppType",
+        "value": "Oracle_DB",
+        "type": "SYSTEM",
+        "description": "Oracle DB Application"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "c1e404a3-de7d-524a-ae7a-9ede9aba3421",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/c1e404a3-de7d-524a-ae7a-9ede9aba3421",
+            "rel": "self"
+          }
+        ],
+        "key": "Environment",
+        "value": "Dev",
+        "type": "SYSTEM",
+        "description": "Dev Environment"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "70f77736-b5e8-52d0-b587-9e58afc90d3e",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/70f77736-b5e8-52d0-b587-9e58afc90d3e",
+            "rel": "self"
+          }
+        ],
+        "key": "Environment",
+        "value": "Production",
+        "type": "SYSTEM",
+        "description": "Production Environment"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "201f3f7d-f006-50ce-aef4-61184d8efb78",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/201f3f7d-f006-50ce-aef4-61184d8efb78",
+            "rel": "self"
+          }
+        ],
+        "key": "Environment",
+        "value": "Staging",
+        "type": "SYSTEM"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "ad7ff39b-267c-55db-bc97-5c3462c152a8",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/ad7ff39b-267c-55db-bc97-5c3462c152a8",
+            "rel": "self"
+          }
+        ],
+        "key": "Environment",
+        "value": "Testing",
+        "type": "SYSTEM",
+        "description": "Testing Environment"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "34c671ec-43f9-5e65-8b56-27fd6fdfb1a0",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/34c671ec-43f9-5e65-8b56-27fd6fdfb1a0",
+            "rel": "self"
+          }
+        ],
+        "key": "ImageType",
+        "value": "PreCanned",
+        "type": "INTERNAL",
+        "description": "Pre-Canned images provided by Nutanix to Xi customers."
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "eb8b4155-b3d1-5772-8d2f-d566d43d8e46",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/eb8b4155-b3d1-5772-8d2f-d566d43d8e46",
+            "rel": "self"
+          }
+        ],
+        "key": "Project",
+        "value": "_internal",
+        "type": "INTERNAL"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "f01477fe-3201-5746-9077-38f9ad863287",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/f01477fe-3201-5746-9077-38f9ad863287",
+            "rel": "self"
+          }
+        ],
+        "key": "Project",
+        "value": "default",
+        "type": "INTERNAL",
+        "description": "Default Project"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "4c313d99-ad50-5480-ae34-6c29ee35ed92",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/4c313d99-ad50-5480-ae34-6c29ee35ed92",
+            "rel": "self"
+          }
+        ],
+        "key": "Quarantine",
+        "value": "Default",
+        "type": "SYSTEM",
+        "description": "Default Quarantine"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "252887b5-1462-501e-9e1d-aac971085a45",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/252887b5-1462-501e-9e1d-aac971085a45",
+            "rel": "self"
+          }
+        ],
+        "key": "Quarantine",
+        "value": "Forensics",
+        "type": "SYSTEM",
+        "description": "Forensic Quarantine"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "fb5b69dd-0123-506a-85d5-9977ab0d9a36",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/fb5b69dd-0123-506a-85d5-9977ab0d9a36",
+            "rel": "self"
+          }
+        ],
+        "key": "RemoteConnectionType",
+        "value": "PC_XI",
+        "type": "INTERNAL",
+        "description": "Remote Connection of PC-Xi type."
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "2d106ed0-77e4-542c-8038-1599d0ddab32",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/2d106ed0-77e4-542c-8038-1599d0ddab32",
+            "rel": "self"
+          }
+        ],
+        "key": "SharedService",
+        "value": "AD",
+        "type": "SYSTEM",
+        "description": "AD Shared Service"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "1f53253a-04b0-5a9a-8ef2-1a0208b3b289",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/1f53253a-04b0-5a9a-8ef2-1a0208b3b289",
+            "rel": "self"
+          }
+        ],
+        "key": "SharedService",
+        "value": "DHCP",
+        "type": "SYSTEM",
+        "description": "DHCP Shared Service"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "48d64692-23f4-54ff-a9c4-854c6b6f5f1d",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/48d64692-23f4-54ff-a9c4-854c6b6f5f1d",
+            "rel": "self"
+          }
+        ],
+        "key": "SharedService",
+        "value": "DNS",
+        "type": "SYSTEM",
+        "description": "DNS Shared Service"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "39d7c787-ce6e-5cba-8548-f83b60a269d5",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/39d7c787-ce6e-5cba-8548-f83b60a269d5",
+            "rel": "self"
+          }
+        ],
+        "key": "SharedService",
+        "value": "NTP",
+        "type": "SYSTEM",
+        "description": "NTP Shared Service"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "3785fbdd-623e-577f-96d9-af4d53683e01",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/3785fbdd-623e-577f-96d9-af4d53683e01",
+            "rel": "self"
+          }
+        ],
+        "key": "SharedService",
+        "value": "SMTP",
+        "type": "SYSTEM",
+        "description": "SMTP Shared Service"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "4707ac34-6627-535e-85d0-0bc447a94b71",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/4707ac34-6627-535e-85d0-0bc447a94b71",
+            "rel": "self"
+          }
+        ],
+        "key": "Storage",
+        "value": "$Default",
+        "type": "SYSTEM",
+        "description": "Storage properties inherited from the default Storage Policy"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "fa45a456-2152-3c1b-99e3-b4275fb6d41f",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/fa45a456-2152-3c1b-99e3-b4275fb6d41f",
+            "rel": "self"
+          }
+        ],
+        "key": "Team",
+        "value": "agent",
+        "type": "USER",
+        "ownerUuid": "773ffab1-a60b-52e7-bdab-a62c75151cb1"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "66ae6983-5a95-3f0b-9e5d-b5b603b5f2c0",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/66ae6983-5a95-3f0b-9e5d-b5b603b5f2c0",
+            "rel": "self"
+          }
+        ],
+        "key": "Team",
+        "value": "agent-integrations",
+        "type": "USER",
+        "ownerUuid": "773ffab1-a60b-52e7-bdab-a62c75151cb1"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "eb6afed6-8276-3e6a-8b46-033e1b7c5c36",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/eb6afed6-8276-3e6a-8b46-033e1b7c5c36",
+            "rel": "self"
+          }
+        ],
+        "key": "Team",
+        "value": "platform-integrations",
+        "type": "USER",
+        "ownerUuid": "773ffab1-a60b-52e7-bdab-a62c75151cb1"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "5b1f27fe-58e9-5fae-af05-8f9248e7b838",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/5b1f27fe-58e9-5fae-af05-8f9248e7b838",
+            "rel": "self"
+          }
+        ],
+        "key": "TemplateType",
+        "value": "Application",
+        "type": "SYSTEM",
+        "description": "Application Template"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "0a0f7d55-8486-5b92-87b2-63c75a024705",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/0a0f7d55-8486-5b92-87b2-63c75a024705",
+            "rel": "self"
+          }
+        ],
+        "key": "TemplateType",
+        "value": "Vm",
+        "type": "SYSTEM",
+        "description": "VM Template"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "50d5545a-9b7a-58bb-abe8-2c6777659001",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/50d5545a-9b7a-58bb-abe8-2c6777659001",
+            "rel": "self"
+          }
+        ],
+        "key": "VirtualNetworkType",
+        "value": "Tenant",
+        "type": "SYSTEM",
+        "description": "Production virtual network"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "edc61761-343e-5bdd-a9e9-4c45e0051914",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/edc61761-343e-5bdd-a9e9-4c45e0051914",
+            "rel": "self"
+          }
+        ],
+        "key": "VirtualNetworkType",
+        "value": "Test",
+        "type": "SYSTEM",
+        "description": "Test virtual network"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "342d6f64-87c3-5c22-9aef-cf54b5fbdce4",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/342d6f64-87c3-5c22-9aef-cf54b5fbdce4",
+            "rel": "self"
+          }
+        ],
+        "key": "XiEntityOwner",
+        "value": "Nutanix",
+        "type": "INTERNAL",
+        "description": "Entities owned and managed by Nutanix"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "6e50299a-b7c9-5c5c-9faf-246ee249c597",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories/6e50299a-b7c9-5c5c-9faf-246ee249c597",
+            "rel": "self"
+          }
+        ],
+        "key": "XiEntityOwner",
+        "value": "Tenant",
+        "type": "INTERNAL",
+        "description": "Entities owned and managed by the tenant"
+      }
+    ],
+    "$reserved": {
+      "$fv": "v4.r1"
+    },
+    "$objectType": "prism.v4.config.ListCategoriesApiResponse",
+    "metadata": {
+      "flags": [
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "hasError",
+          "value": false
+        },
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "isPaginated",
+          "value": true
+        },
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "isTruncated",
+          "value": false
+        }
+      ],
+      "$reserved": {
+        "$fv": "v1.r0"
+      },
+      "$objectType": "common.v1.response.ApiResponseMetadata",
+      "links": [
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.response.ApiLink",
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories?%2524page=0&%2524limit=50&$page=0&$limit=50",
+          "rel": "last"
+        },
+        {
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories?%2524page=0&%2524limit=50&$page=0&$limit=50",
+          "rel": "self"
+        },
+        {
+          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/categories?%2524page=0&%2524limit=50&$page=0&$limit=50",
+          "rel": "first"
+        }
+      ],
+      "totalAvailableResults": 41
+    }
+  }
+]
