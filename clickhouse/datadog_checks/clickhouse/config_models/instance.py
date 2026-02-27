@@ -32,6 +32,14 @@ class CustomQuery(BaseModel):
     tags: Optional[tuple[str, ...]] = None
 
 
+class DatabaseIdentifier(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    template: Optional[str] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -39,6 +47,42 @@ class MetricPatterns(BaseModel):
     )
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[str, ...]] = None
+
+
+class QueryCompletions(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_samples_per_collection: Optional[float] = None
+    run_sync: Optional[bool] = None
+    samples_per_hour_per_query: Optional[float] = None
+    seen_samples_cache_maxsize: Optional[float] = None
+
+
+class QueryMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    full_statement_text_cache_max_size: Optional[float] = None
+    full_statement_text_samples_per_hour_per_query: Optional[float] = None
+    run_sync: Optional[bool] = None
+
+
+class QuerySamples(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    payload_row_limit: Optional[int] = None
+    run_sync: Optional[bool] = None
 
 
 class InstanceConfig(BaseModel):
@@ -50,7 +94,9 @@ class InstanceConfig(BaseModel):
     compression: Optional[str] = None
     connect_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
+    database_identifier: Optional[DatabaseIdentifier] = None
     db: Optional[str] = None
+    dbm: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
@@ -59,9 +105,13 @@ class InstanceConfig(BaseModel):
     only_custom_queries: Optional[bool] = None
     password: Optional[str] = None
     port: Optional[int] = None
+    query_completions: Optional[QueryCompletions] = None
+    query_metrics: Optional[QueryMetrics] = None
+    query_samples: Optional[QuerySamples] = None
     read_timeout: Optional[int] = None
     server: str
     service: Optional[str] = None
+    single_endpoint_mode: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     tls_ca_cert: Optional[str] = None
     tls_verify: Optional[bool] = None

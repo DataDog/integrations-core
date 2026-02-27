@@ -1,45 +1,84 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import clickhouse_connect
+from string import Template
+from time import time
 
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+import clickhouse_connect
+from clickhouse_connect.driver import httputil
+
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.db.utils import TagManager, default_json_event_encoding
+from datadog_checks.base.utils.serialization import json
 
 from . import queries
+from .__about__ import __version__
+from .config import build_config, sanitize
+from .health import ClickhouseHealth, HealthEvent, HealthStatus
+from .query_completions import ClickhouseQueryCompletions
+from .statement_samples import ClickhouseStatementSamples
+from .statements import ClickhouseStatementMetrics
 from .utils import ErrorSanitizer
 
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
-class ClickhouseCheck(AgentCheck):
+
+# Database instance collection interval in seconds (not user-configurable)
+DATABASE_INSTANCE_COLLECTION_INTERVAL = 300
+
+
+class ClickhouseCheck(DatabaseCheck):
     __NAMESPACE__ = 'clickhouse'
     SERVICE_CHECK_CONNECT = 'can_connect'
 
     def __init__(self, name, init_config, instances):
         super(ClickhouseCheck, self).__init__(name, init_config, instances)
 
-        self._server = self.instance.get('server', '')
-        self._port = self.instance.get('port')
-        self._db = self.instance.get('db', 'default')
-        self._user = self.instance.get('username', self.instance.get('user', 'default'))
-        self._password = self.instance.get('password', '')
-        self._connect_timeout = float(self.instance.get('connect_timeout', 10))
-        self._read_timeout = float(self.instance.get('read_timeout', 10))
-        self._compression = self.instance.get('compression', False)
-        self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
-        self._tls_ca_cert = self.instance.get('tls_ca_cert', None)
-        self._verify = self.instance.get('verify', True)
-        self._tags = self.instance.get('tags', [])
+        # Build typed configuration
+        config, validation_result = build_config(self)
+        self._config = config
+        self._validation_result = validation_result
 
-        # Add global tags
-        self._tags.append('server:{}'.format(self._server))
-        self._tags.append('port:{}'.format(self._port))
-        self._tags.append('db:{}'.format(self._db))
+        # Initialize health event handler for DBM
+        self.health = ClickhouseHealth(self)
 
-        self._error_sanitizer = ErrorSanitizer(self._password)
+        # Log validation warnings (errors will be raised in validate_config)
+        for warning in validation_result.warnings:
+            self.log.warning(warning)
+
+        # DBM-related properties (computed lazily)
+        self._resolved_hostname = None
+        self._database_identifier = None
+        self._agent_hostname = None
+        self._dbms_version = None
+
+        # Track last emission time for database instance metadata (rate limiting)
+        self._database_instance_last_emitted = 0
+
+        # Initialize TagManager for tag management (similar to MySQL)
+        self.tag_manager = TagManager()
+        self.tag_manager.set_tags_from_list(self._config.tags, replace=True)
+        self._add_core_tags()
+
+        self._error_sanitizer = ErrorSanitizer(self._config.password)
         self.check_initializations.append(self.validate_config)
+
+        # Submit health event with config validation result
+        # Tags are now available so health events will include them
+        self._submit_config_health_event()
 
         # We'll connect on the first check run
         self._client = None
+
+        # Shared HTTP connection pool for all ClickHouse clients (main + DBM jobs)
+        # This reduces connection overhead while maintaining client isolation
+        # See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#customizing-the-http-connection-pool
+        self._pool_manager = httputil.get_pool_manager(maxsize=8, num_pools=4)
 
         self._query_manager = QueryManager(
             self,
@@ -53,15 +92,157 @@ class ClickhouseCheck(AgentCheck):
                 queries.SystemReplicas,
                 queries.SystemDictionaries,
             ],
-            tags=self._tags,
+            tags=self.tags,
             error_handler=self._error_sanitizer.clean,
         )
         self.check_initializations.append(self._query_manager.compile_queries)
+
+        # Initialize DBM components if enabled
+        self._init_dbm_components()
+
+    def _init_dbm_components(self):
+        """Initialize DBM components based on typed configuration."""
+        # Initialize query metrics (from system.query_log - analogous to pg_stat_statements)
+        if self._config.dbm and self._config.query_metrics.enabled:
+            self.statement_metrics = ClickhouseStatementMetrics(self, self._config.query_metrics)
+        else:
+            self.statement_metrics = None
+
+        # Initialize query samples (from system.processes - analogous to pg_stat_activity)
+        if self._config.dbm and self._config.query_samples.enabled:
+            self.statement_samples = ClickhouseStatementSamples(self, self._config.query_samples)
+        else:
+            self.statement_samples = None
+
+        # Initialize query completions (from system.query_log - completed queries)
+        if self._config.dbm and self._config.query_completions.enabled:
+            self.query_completions = ClickhouseQueryCompletions(self, self._config.query_completions)
+        else:
+            self.query_completions = None
+
+    @property
+    def tags(self) -> list[str]:
+        """Return the current list of tags from the TagManager."""
+        return list(self.tag_manager.get_tags())
+
+    def _add_core_tags(self):
+        """
+        Add tags that should be attached to every metric/event.
+        These are core identification tags for the ClickHouse instance.
+        """
+        self.tag_manager.set_tag("server", self._config.server, replace=True)
+        self.tag_manager.set_tag("port", str(self._config.port), replace=True)
+        self.tag_manager.set_tag("db", self._config.db, replace=True)
+        self.tag_manager.set_tag("database_hostname", self.reported_hostname, replace=True)
+        self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
+
+    def validate_config(self):
+        """
+        Validate the configuration and raise an error if invalid.
+        This is called during check initialization.
+        """
+        from datadog_checks.base import ConfigurationError
+
+        if not self._validation_result.valid:
+            for error in self._validation_result.errors:
+                self.log.error(str(error))
+            if self._validation_result.errors:
+                raise ConfigurationError(str(self._validation_result.errors[0]))
+
+    def _submit_config_health_event(self):
+        """
+        Submit a health event with the configuration validation result.
+
+        This event reports the initialization status to DBM, including:
+        - Configuration errors (if any)
+        - Configuration warnings (if any)
+        - DBM feature enablement status
+
+        Uses a 6-hour cooldown to avoid spamming health events.
+        """
+        try:
+            # Determine health status based on validation result
+            if not self._validation_result.valid:
+                status = HealthStatus.ERROR
+            elif self._validation_result.warnings:
+                status = HealthStatus.WARNING
+            else:
+                status = HealthStatus.OK
+
+            self.health.submit_health_event(
+                name=HealthEvent.INITIALIZATION,
+                status=status,
+                cooldown_time=60 * 60 * 6,  # 6 hours
+                data={
+                    "errors": [str(error) for error in self._validation_result.errors],
+                    "warnings": self._validation_result.warnings,
+                    "initialized_at": self._validation_result.created_at,
+                    "config": sanitize(self._config),
+                    "instance": sanitize(self.instance),
+                    "features": self._validation_result.features,
+                },
+            )
+        except Exception as e:
+            # Health event submission should not break the check initialization
+            self.log.debug("Failed to submit config health event: %s", e)
+
+    def _send_database_instance_metadata(self):
+        """Send database instance metadata to the metadata intake."""
+        current_time = time()
+        if current_time - self._database_instance_last_emitted >= DATABASE_INSTANCE_COLLECTION_INTERVAL:
+            # Get the version for the metadata (and cache it)
+            try:
+                version_result = list(self.execute_query_raw('SELECT version()'))[0][0]
+                self._dbms_version = version_result
+            except Exception as e:
+                self.log.debug("Unable to fetch version for metadata: %s", e)
+                self._dbms_version = "unknown"
+
+            # Get tags without db: prefix for metadata
+            tags_no_db = [t for t in self.tags if not t.startswith('db:')]
+
+            event = {
+                "host": self.reported_hostname,
+                "port": self._config.port,
+                "database_instance": self.database_identifier,
+                "database_hostname": self.reported_hostname,
+                "agent_version": datadog_agent.get_version(),
+                "ddagenthostname": self.agent_hostname,
+                "dbms": "clickhouse",
+                "kind": "database_instance",
+                "collection_interval": DATABASE_INSTANCE_COLLECTION_INTERVAL,
+                "dbms_version": self._dbms_version,
+                "integration_version": __version__,
+                "tags": tags_no_db,
+                "timestamp": current_time * 1000,
+                "metadata": {
+                    "dbm": self._config.dbm,
+                    "connection_host": self._config.server,
+                },
+            }
+
+            self._database_instance_last_emitted = current_time
+            self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
     def check(self, _):
         self.connect()
         self._query_manager.execute()
         self.collect_version()
+
+        # Send database instance metadata
+        self._send_database_instance_metadata()
+
+        # Run query metrics collection if DBM is enabled (from system.query_log)
+        if self.statement_metrics:
+            self.statement_metrics.run_job_loop(self.tags)
+
+        # Run query samples collection if DBM is enabled (from system.processes)
+        if self.statement_samples:
+            self.statement_samples.run_job_loop(self.tags)
+
+        # Run query completions if DBM is enabled (from system.query_log)
+        if self.query_completions:
+            self.query_completions.run_job_loop(self.tags)
 
     @AgentCheck.metadata_entrypoint
     def collect_version(self):
@@ -75,15 +256,102 @@ class ClickhouseCheck(AgentCheck):
     def execute_query_raw(self, query):
         return self._client.query(query).result_rows
 
-    def validate_config(self):
-        if not self._server:
-            raise ConfigurationError('the `server` setting is required')
+    def _get_debug_tags(self):
+        """Return debug tags for metrics"""
+        return ['server:{}'.format(self._config.server)]
 
-        # Validate compression type
-        if self._compression and self._compression not in ['lz4', 'zstd', 'br', 'gzip']:
-            raise ConfigurationError(
-                f'Invalid compression type "{self._compression}". Valid values are: lz4, zstd, br, gzip'
-            )
+    @property
+    def reported_hostname(self) -> str | None:
+        """
+        Get the hostname to be reported in metrics and events.
+        """
+        if self._resolved_hostname is None:
+            self._resolved_hostname = self._config.server
+        return self._resolved_hostname
+
+    @property
+    def agent_hostname(self):
+        """Get the agent hostname."""
+        if self._agent_hostname is None:
+            self._agent_hostname = datadog_agent.get_hostname()
+        return self._agent_hostname
+
+    @property
+    def database_identifier(self) -> str:
+        """
+        Get a unique identifier for this database instance.
+        Uses the database_identifier template from config, defaulting to "$server:$port:$db".
+        """
+        if self._database_identifier is None:
+            template = Template(self._config.database_identifier.template)
+            tag_dict = {}
+            tags = self.tags.copy()
+            # Sort tags to ensure consistent ordering
+            tags.sort()
+            for t in tags:
+                if ':' in t:
+                    key, value = t.split(':', 1)
+                    if key in tag_dict:
+                        tag_dict[key] += f",{value}"
+                    else:
+                        tag_dict[key] = value
+            # Add connection parameters to the template variables
+            tag_dict['server'] = str(self._config.server)
+            tag_dict['port'] = str(self._config.port)
+            tag_dict['db'] = str(self._config.db)
+            self._database_identifier = template.safe_substitute(**tag_dict)
+        return self._database_identifier
+
+    @property
+    def dbms_version(self) -> str:
+        """Get the ClickHouse server version."""
+        if self._dbms_version is None:
+            return "unknown"
+        return self._dbms_version
+
+    @property
+    def cloud_metadata(self) -> dict:
+        """Get cloud provider metadata if available."""
+        # TODO: Populate with cloud metadata when available (e.g., ClickHouse Cloud)
+        return {}
+
+    @property
+    def is_single_endpoint_mode(self):
+        """
+        Returns True if single endpoint mode is enabled.
+
+        When True, DBM components should use clusterAllReplicas() to query system tables
+        across all nodes in the cluster, since replicas are abstracted behind a single
+        endpoint (e.g., load balancer or managed service like ClickHouse Cloud).
+        """
+        return self._config.single_endpoint_mode
+
+    def get_system_table(self, table_name):
+        """
+        Get the appropriate system table reference based on deployment type.
+
+        For single endpoint mode: Returns clusterAllReplicas('default', system.<table>)
+        For direct connection: Returns system.<table>
+
+        Args:
+            table_name: The system table name (e.g., 'query_log', 'processes')
+
+        Returns:
+            str: The table reference to use in SQL queries
+
+        Example:
+            >>> self.get_system_table('query_log')
+            "clusterAllReplicas('default', system.query_log)"  # Single endpoint mode
+            >>> self.get_system_table('query_log')
+            "system.query_log"  # Direct connection
+        """
+        if self._config.single_endpoint_mode:
+            # Single endpoint mode: Use clusterAllReplicas to query all nodes
+            # The cluster name is 'default' for ClickHouse Cloud and most setups
+            return f"clusterAllReplicas('default', system.{table_name})"
+        else:
+            # Direct connection: Query the local system table directly
+            return f"system.{table_name}"
 
     def ping_clickhouse(self):
         return self._client.ping()
@@ -95,7 +363,7 @@ class ClickhouseCheck(AgentCheck):
             self.log.debug('Clickhouse client already exists. Pinging Clickhouse Server.')
             try:
                 if self.ping_clickhouse():
-                    self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+                    self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self.tags)
                     return
                 else:
                     self.log.debug('Clickhouse connection ping failed. Attempting to reconnect')
@@ -106,31 +374,110 @@ class ClickhouseCheck(AgentCheck):
                 self._client = None
 
         try:
+            # Convert compression None to False for get_client
+            compress = self._config.compression if self._config.compression else False
             client = clickhouse_connect.get_client(
                 # https://clickhouse.com/docs/integrations/python#connection-arguments
-                host=self._server,
-                port=self._port,
-                username=self._user,
-                password=self._password,
-                database=self._db,
-                secure=self._tls_verify,
-                connect_timeout=self._connect_timeout,
-                send_receive_timeout=self._read_timeout,
+                host=self._config.server,
+                port=self._config.port,
+                username=self._config.username,
+                password=self._config.password,
+                database=self._config.db,
+                connect_timeout=self._config.connect_timeout,
+                send_receive_timeout=self._config.read_timeout,
+                secure=self._config.tls_verify,
+                ca_cert=self._config.tls_ca_cert,
+                verify=self._config.verify,
                 client_name=f'datadog-{self.check_id}',
-                compress=self._compression,
-                ca_cert=self._tls_ca_cert,
-                verify=self._verify,
+                compress=compress,
                 # https://clickhouse.com/docs/integrations/language-clients/python/driver-api#multi-threaded-applications
                 autogenerate_session_id=False,
                 # https://clickhouse.com/docs/integrations/python#settings-argument
                 settings={},
+                # Use shared connection pool for efficiency
+                pool_mgr=self._pool_manager,
             )
         except Exception as e:
             error = 'Unable to connect to ClickHouse: {}'.format(
                 self._error_sanitizer.clean(self._error_sanitizer.scrub(str(e)))
             )
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=error, tags=self._tags)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=error, tags=self.tags)
             raise type(e)(error) from None
         else:
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self.tags)
             self._client = client
+
+    def create_dbm_client(self):
+        """
+        Create a ClickHouse client for DBM async jobs.
+
+        Each DBM job gets its own client for isolation, but all clients share
+        the same HTTP connection pool for efficiency.
+
+        See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#customizing-the-http-connection-pool
+        """
+        try:
+            # Convert compression None to False for get_client
+            compress = self._config.compression if self._config.compression else False
+            client = clickhouse_connect.get_client(
+                host=self._config.server,
+                port=self._config.port,
+                username=self._config.username,
+                password=self._config.password,
+                database=self._config.db,
+                secure=self._config.tls_verify,
+                connect_timeout=self._config.connect_timeout,
+                send_receive_timeout=self._config.read_timeout,
+                client_name=f'datadog-dbm-{self.check_id}',
+                compress=compress,
+                ca_cert=self._config.tls_ca_cert,
+                verify=self._config.verify,
+                # Disable session IDs for multi-threaded safety
+                # See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#managing-clickhouse-session-ids
+                autogenerate_session_id=False,
+                settings={},
+                # Use shared connection pool for efficiency
+                pool_mgr=self._pool_manager,
+            )
+            return client
+        except Exception as e:
+            error = 'Unable to create DBM client: {}'.format(
+                self._error_sanitizer.clean(self._error_sanitizer.scrub(str(e)))
+            )
+            self.log.warning(error)
+            raise
+
+    def cancel(self):
+        """
+        Cancel DBM async jobs and clean up connections.
+        This is called when the check is being shut down.
+        """
+        self.log.debug("Cancelling ClickHouse check and cleaning up connections")
+
+        # Cancel DBM async jobs
+        if self.statement_metrics:
+            self.statement_metrics.cancel()
+        if self.statement_samples:
+            self.statement_samples.cancel()
+        if self.query_completions:
+            self.query_completions.cancel()
+
+        # Wait for job loops to finish
+        if self.statement_metrics and self.statement_metrics._job_loop_future:
+            self.statement_metrics._job_loop_future.result()
+        if self.statement_samples and self.statement_samples._job_loop_future:
+            self.statement_samples._job_loop_future.result()
+        if self.query_completions and self.query_completions._job_loop_future:
+            self.query_completions._job_loop_future.result()
+
+        # Close main client
+        if self._client:
+            try:
+                self._client.close()
+            except Exception as e:
+                self.log.debug("Error closing main client: %s", e)
+            self._client = None
+
+        # Clear the shared pool manager
+        # Note: urllib3 pool connections are automatically closed when idle
+        self._pool_manager = None

@@ -21,11 +21,14 @@ files:
       value:
         type: string
     - name: port
-      description: The port used to connect to the system.
+      description: |
+        The port used to connect to the system.
+        This integration uses the HTTP interface, so the default is 8123 (HTTP port).
+        Note: Port 9000 is for ClickHouse's native TCP protocol, which is not used by this integration.
       fleet_configurable: true
       value:
         type: integer
-        example: 9000
+        example: 8123
     - name: username
       description: The database user to authenticate as.
       fleet_configurable: true
@@ -60,7 +63,7 @@ files:
       description: |
         The compression algorithm to use. The default is no compression.
         If br is specified, the brotli library must be installed separately.
-        
+
         Valid values are:
           - lz4
           - zstd
@@ -83,6 +86,154 @@ files:
       value:
         type: boolean
         example: True
+    - name: dbm
+      description: |
+        Enable Database Monitoring (DBM) to collect query samples, metrics, and completions.
+        This feature provides deep observability into query performance.
+      value:
+        type: boolean
+        example: false
+    - name: database_identifier
+      description: |
+        Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+        billable instance.
+
+        The default value is "$server:$port:$db" which uniquely identifies a ClickHouse database by its server, port,
+        and database name.
+
+        This value will be used as-is for the display name of the instance but will be normalized
+        when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
+        for more details on Datadog tag normalization.
+      options:
+        - name: template
+          description: |
+            The template string for the database identifier. Supports variable substitution using $variable syntax.
+            Available variables: $server, $port, $db, plus any custom tags (e.g., $env, $region).
+          value:
+            type: string
+            display_default: "$server:$port:$db"
+            example: "$env-$server:$port:$db"
+    - name: single_endpoint_mode
+      description: Set to `true` when connecting through a single endpoint for ClickHouse Cloud.
+      value:
+        type: boolean
+        example: false
+    - name: query_samples
+      description: Configure collection of database samples snapshots from system.processes
+      options:
+        - name: enabled
+          description: |
+            Enable collection of database samples snapshots. Requires `dbm: true`.
+            Samples snapshots show currently executing queries and connection counts.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the samples snapshot collection interval (in seconds). Each collection involves a single query to
+            `system.processes` to capture currently executing queries.
+          value:
+            type: number
+            example: 1
+        - name: payload_row_limit
+          description: |
+            Set the maximum number of active sessions to include in each samples snapshot.
+          value:
+            type: integer
+            example: 1000
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the samples collection synchronously. This is useful for testing purposes, but should not be used
+            in production as it can block the main thread and cause performance issues.
+          value:
+            type: boolean
+            example: false
+    - name: query_metrics
+      description: Configure collection of query metrics
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query metrics. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the query metric collection interval (in seconds). Each collection involves a single query to
+            `system.query_log`. If a non-default value is chosen then that exact same value must be used for *every*
+            check instance. Running different instances with different collection intervals is not supported.
+          value:
+            type: number
+            example: 10
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the query metrics collection synchronously. This is useful for testing purposes, but should not be used
+            in production as it can block the main thread and cause performance issues.
+          value:
+            type: boolean
+            example: false
+        - name: full_statement_text_cache_max_size
+          hidden: true
+          description: |
+            Set the max size of the cache used for the full statement text.
+          value:
+            type: number
+            default: 10000
+        - name: full_statement_text_samples_per_hour_per_query
+          hidden: true
+          description: |
+            Set the max number of full statement text samples to collect per hour per query.
+          value:
+            type: number
+            default: 1
+    - name: query_completions
+      description: Configure collection of query completions from system.query_log
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query completions. Requires `dbm: true`.
+            These samples represent individual completed queries and appear on the DBM Query Samples page.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the query completions collection interval (in seconds).
+            Lower values show more recent queries but increase collection overhead.
+          value:
+            type: number
+            example: 10
+        - name: samples_per_hour_per_query
+          description: |
+            Set the maximum number of samples to collect per hour per unique query signature.
+            This rate limiting prevents excessive data collection for frequently executed queries.
+          value:
+            type: number
+            example: 15
+        - name: seen_samples_cache_maxsize
+          hidden: true
+          description: |
+            Set the max size of the cache used for rate limiting samples.
+          value:
+            type: number
+            default: 10000
+        - name: max_samples_per_collection
+          hidden: true
+          description: |
+            Maximum number of samples to collect in a single run (applies LIMIT in SQL).
+            Prevents overwhelming the agent with too many samples at once.
+          value:
+            type: number
+            default: 1000
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the query completions collection synchronously. For testing only.
+          value:
+            type: boolean
+            example: false
     - template: instances/db
       overrides:
         custom_queries.value.example:
