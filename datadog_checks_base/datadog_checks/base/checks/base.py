@@ -11,6 +11,7 @@ import os
 import re
 from collections import deque
 from os.path import basename
+from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -486,6 +487,31 @@ class AgentCheck(object):
             self._check_version = getattr(package, '__version__', '0.0.0')
 
         return self._check_version
+
+    def _get_package_dir(self) -> Path:
+        """Return the package directory of the concrete check subclass.
+
+        Resolves the filesystem path of the top-level package for the check
+        (e.g., ``datadog_checks/krakend/``). This is useful for locating
+        data files shipped alongside the check code.
+
+        The method follows the same ``__module__`` + ``importlib`` pattern
+        used by :attr:`check_version`.
+        """
+        if not hasattr(self, '_package_dir'):
+            module_parts = self.__module__.split('.')
+            package_path = '.'.join(module_parts[:2])
+            package = importlib.import_module(package_path)
+            if package.__file__ is not None:
+                self._package_dir = Path(package.__file__).parent
+            elif hasattr(package, '__path__') and package.__path__:
+                self._package_dir = Path(package.__path__[0])
+            else:
+                raise RuntimeError(
+                    f"Cannot determine package directory for {package_path}: "
+                    f"package has no __file__ or __path__ attribute"
+                )
+        return self._package_dir
 
     @property
     def in_developer_mode(self):
