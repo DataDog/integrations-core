@@ -1523,3 +1523,19 @@ def test_consumer_group_state_fetched_once_per_group(check, kafka_instance, dd_r
                 metric,
                 tags=[f'partition:{partition}', 'consumer_group_state:STABLE'],
             )
+
+
+def test_kafka_cluster_id_override(check, kafka_instance, dd_run_check, aggregator):
+    """When kafka_cluster_id_override is set, metrics use the override and include original_kafka_cluster_id."""
+    mock_client = seed_mock_client(cluster_id="auto-detected-id")
+    kafka_instance["kafka_cluster_id_override"] = "my-override-id"
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    dd_run_check(kafka_consumer_check)
+
+    expected_override_tags = ['kafka_cluster_id:my-override-id', 'original_kafka_cluster_id:auto-detected-id']
+    for metric_name in ("kafka.broker_offset", "kafka.consumer_offset", "kafka.consumer_lag"):
+        for metric in aggregator.metrics(metric_name):
+            for tag in expected_override_tags:
+                assert tag in metric.tags, f"{tag} not in {metric.tags} for {metric_name}"

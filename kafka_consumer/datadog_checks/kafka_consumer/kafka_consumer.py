@@ -114,6 +114,10 @@ class KafkaCheck(AgentCheck):
                 self._context_limit,
             )
 
+        self.config._auto_detected_cluster_id = cluster_id
+        if self.config._kafka_cluster_id_override:
+            cluster_id = self.config._kafka_cluster_id_override
+
         self.report_highwater_offsets(highwater_offsets, self._context_limit, cluster_id)
         self.report_consumer_offsets_and_lag(
             consumer_offsets,
@@ -257,6 +261,8 @@ class KafkaCheck(AgentCheck):
         self.log.debug("Reporting broker offset metric")
         for (topic, partition), highwater_offset in highwater_offsets.items():
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'kafka_cluster_id:%s' % cluster_id]
+            if self.config._kafka_cluster_id_override:
+                broker_tags.append('original_kafka_cluster_id:%s' % self.config._auto_detected_cluster_id)
             broker_tags.extend(self.config._custom_tags)
             self.gauge('broker_offset', highwater_offset, tags=broker_tags)
             self.log.debug('%s highwater offset reported with %s tags', highwater_offset, broker_tags)
@@ -288,6 +294,8 @@ class KafkaCheck(AgentCheck):
                     'consumer_group:%s' % consumer_group,
                     'kafka_cluster_id:%s' % cluster_id,
                 ]
+                if self.config._kafka_cluster_id_override:
+                    consumer_group_tags.append('original_kafka_cluster_id:%s' % self.config._auto_detected_cluster_id)
                 if self.config._collect_consumer_group_state:
                     if consumer_group_state is None:
                         consumer_group_state = self.get_consumer_group_state(consumer_group)

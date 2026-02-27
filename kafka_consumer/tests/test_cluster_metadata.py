@@ -971,3 +971,45 @@ def test_schema_registry_oauth_validation_errors(check, dd_run_check, oauth_conf
 
     with pytest.raises(Exception, match=error_match):
         dd_run_check(check(instance))
+
+
+def test_cluster_metadata_with_cluster_id_override(check, dd_run_check, aggregator):
+    """When kafka_cluster_id_override is set, metadata metrics and events use the override."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'monitor_unlisted_consumer_groups': True,
+        'kafka_cluster_id_override': 'my-override-id',
+        'tags': ['test_tag:test_value'],
+    }
+
+    kafka_consumer_check = check(instance)
+
+    mock_kafka_client = seed_mock_kafka_client(cluster_id='auto-detected-id')
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=None)
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    # Verify metrics use override cluster id and include original tag
+    aggregator.assert_metric(
+        'kafka.broker.count',
+        value=2,
+        tags=[
+            'test_tag:test_value',
+            'kafka_cluster_id:my-override-id',
+            'original_kafka_cluster_id:auto-detected-id',
+            'bootstrap_servers:localhost:9092',
+        ],
+    )
+
+    # Verify event_platform_event payloads use override and include original
+    for call in kafka_consumer_check.event_platform_event.call_args_list:
+        payload = json.loads(call[0][0])
+        if 'kafka_cluster_id' in payload:
+            assert payload['kafka_cluster_id'] == 'my-override-id'
+            assert payload['original_kafka_cluster_id'] == 'auto-detected-id'
