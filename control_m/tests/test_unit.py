@@ -121,8 +121,6 @@ def test_build_run_key(job: dict, expected_key: str | None) -> None:
     assert build_run_key(job) == expected_key
 
 
-
-
 def test_job_metric_tags_full(instance: dict[str, Any], aggregator: AggregatorStub) -> None:
     check = _make_check(instance)
     tags = job_metric_tags(
@@ -160,8 +158,6 @@ def test_job_metric_tags_minimal_and_server_fallback(instance: dict[str, Any], a
     aggregator.assert_metric_has_tag('control_m._test', 'ctm_server:primary')
 
 
-
-
 def test_jobs_status_url_defaults_and_custom(instance: dict[str, Any]) -> None:
     check = _make_check(instance)
     url = check._job_collector._jobs_status_url
@@ -178,8 +174,6 @@ def test_jobs_status_url_defaults_and_custom(instance: dict[str, Any]) -> None:
     url = check._job_collector._jobs_status_url
     assert 'limit=50' in url
     assert 'jobname=nightly_%2A' in url
-
-
 
 
 def test_server_health_mixed_states(instance: dict[str, Any], aggregator: AggregatorStub) -> None:
@@ -225,8 +219,6 @@ def test_server_health_non_list_is_noop(instance: dict[str, Any], aggregator: Ag
     check._collect_server_health({'error': 'not a list'})
 
     aggregator.assert_metric('control_m.server.up', count=0)
-
-
 
 
 def test_jobs_no_terminal_emits_only_rollups(
@@ -383,8 +375,6 @@ def test_jobs_api_failure_and_bad_entries_handled_gracefully(
     aggregator.assert_metric('control_m.jobs.active', value=1, count=1)
 
 
-
-
 def test_terminal_job_emitted_once(
     instance: dict[str, Any],
     aggregator: AggregatorStub,
@@ -514,8 +504,6 @@ def test_active_runs_cleaned_on_terminal(
     aggregator.assert_metric('control_m.job.run.count', value=1, count=1)
 
 
-
-
 @pytest.mark.parametrize(
     'bad_instance, match',
     [
@@ -528,8 +516,6 @@ def test_active_runs_cleaned_on_terminal(
 def test_config_validation_errors(bad_instance: dict, match: str) -> None:
     with pytest.raises(Exception, match=match):
         _make_check(bad_instance)
-
-
 
 
 def test_token_refresh_buffer_clamped_when_exceeds_lifetime(session_instance: dict[str, Any]) -> None:
@@ -630,8 +616,6 @@ def test_session_token_refresh_behavior(session_instance: dict[str, Any]) -> Non
     check._client.login.assert_called_once()
 
 
-
-
 def test_metadata_version_from_first_server(instance: dict[str, Any], datadog_agent: Any) -> None:
     check = _make_check(instance)
     check._collect_metadata(
@@ -655,8 +639,6 @@ def test_metadata_no_version_found(instance: dict[str, Any], datadog_agent: Any,
     check = _make_check(instance)
     check._collect_metadata(servers)
     datadog_agent.assert_metadata(check.check_id, {})
-
-
 
 
 def test_session_login_failure_emits_critical_and_gauges(
