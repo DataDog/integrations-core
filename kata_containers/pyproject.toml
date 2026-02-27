@@ -37,7 +37,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "grpcio>=1.50.0",
+    "grpcio==1.50.0",
 ]
 
 [project.urls]
