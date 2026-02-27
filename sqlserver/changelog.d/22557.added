@@ -1,1 +1,0 @@
-Require key_prefix for SQLServer connections to avoid unsafely sharing connections across threads

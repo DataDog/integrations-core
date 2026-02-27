@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 14.3.1 / 2026-02-20
+
+***Fixed***:
+
+* Stop writing the GitHub username and token to the config file. Read them directly from environment variables instead. ([#22691](https://github.com/DataDog/integrations-core/pull/22691))
+
 ## 14.3.0 / 2026-02-13
 
 ***Added***:

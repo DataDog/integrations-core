@@ -68,7 +68,7 @@ cli = [
     "pathspec>=0.10.0",
     "platformdirs>=2.0.0a3",
     "pydantic>=2.0.2",
-    "pysmi==0.3.4",
+    "pysmi==1.6.2",
     "securesystemslib[crypto]==0.28.0",
     "semver>=2.13.0",
     "tabulate>=0.8.9",

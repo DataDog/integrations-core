@@ -682,6 +682,10 @@ integration/iboss:
 - changed-files:
   - any-glob-to-any-file:
     - iboss/**/*
+integration/ide_shepherd:
+- changed-files:
+  - any-glob-to-any-file:
+    - ide_shepherd/**/*
 integration/ignite:
 - changed-files:
   - any-glob-to-any-file:
@@ -1334,6 +1338,10 @@ integration/sqlserver:
 - changed-files:
   - any-glob-to-any-file:
     - sqlserver/**/*
+integration/storage_management:
+- changed-files:
+  - any-glob-to-any-file:
+    - storage_management/**/*
 integration/squid:
 - changed-files:
   - any-glob-to-any-file:

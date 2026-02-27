@@ -485,6 +485,29 @@ def test_perf_metrics(dd_run_check, aggregator, instance):
         aggregator.assert_metric(metric, count=0, tags=pool_tags)
 
 
+@pytest.mark.parametrize(
+    ('mock_http_get'),
+    [
+        pytest.param(
+            {'http_error': {'/api2/json/cluster/metrics/export': MockResponse(status_code=501)}},
+            id='501',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_performance_metrics_endpoint_unavailable(dd_run_check, aggregator, instance, mock_http_get):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        "proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json', 'proxmox_status:up', 'testing']
+    )
+    aggregator.assert_metric("proxmox.node.up", 1, tags=[], hostname='ip-122-82-3-112')
+    aggregator.assert_metric("proxmox.vm.up", 1, tags=[], hostname="debian")
+    aggregator.assert_metric("proxmox.ha.quorum", hostname='ip-122-82-3-112', tags=['node_status:OK'])
+
+
 @pytest.mark.usefixtures('mock_http_get')
 def test_perf_metrics_error(dd_run_check, caplog, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])

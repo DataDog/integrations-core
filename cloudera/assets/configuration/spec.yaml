@@ -18,6 +18,7 @@ files:
         The Workload password. This value can be found in the `User Management` tab of the Management
         Console in the `Workload Password`.
       fleet_configurable: true
+      secret: true
       required: true
       secret: true
       value:
@@ -27,6 +28,7 @@ files:
     options:
     - name: api_url
       fleet_configurable: true
+      formats: ["url"]
       required: true
       description: |
         The URL endpoint for the Cloudera Manager API. This can be found under the Endpoints tab for
