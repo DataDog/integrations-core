@@ -6,7 +6,6 @@ import os
 
 import pytest
 
-from datadog_checks.base.utils.http_testing import mock_http  # noqa: F401
 from datadog_checks.dev import docker_run
 from datadog_checks.nginx import Nginx
 
