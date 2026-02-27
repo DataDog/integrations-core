@@ -512,418 +512,6 @@ pipeline:
                 sources: {}
               type: schema-category-mapper
     - type: pipeline
-      name: OCSF sub pipeline for class Application Lifecycle [6002]
-      enabled: true
-      ocsf:
-        isOcsf: true
-      filter:
-        query: "@Event.System.EventID:548"
-      processors:
-        - type: schema-processor
-          name: Apply OCSF schema for 6002
-          enabled: true
-          schema:
-            schemaType: ocsf
-            version: 1.5.0
-            className: Application Lifecycle
-            classUid: 6002
-            extensions: []
-            profiles:
-              - host
-          mappers:
-            - name: ocsf.activity_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Restart
-                  id: 5
-              targets:
-                name: ocsf.activity_name
-                id: ocsf.activity_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: ocsf.severity_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Informational
-                  id: 1
-              targets:
-                name: ocsf.severity
-                id: ocsf.severity_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: Map `ocsf.time` to `ocsf.time`
-              sources:
-                - ocsf.time
-              sourceType: attribute
-              target: ocsf.time
-              targetFormat: integer
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
-              sources:
-                - ocsf.metadata.product.vendor_name
-              sourceType: attribute
-              target: ocsf.metadata.product.vendor_name
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
-              sources:
-                - ocsf.metadata.product.name
-              sourceType: attribute
-              target: ocsf.metadata.product.name
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.EventID` to `ocsf.metadata.event_code`
-              sources:
-                - Event.System.EventID
-              sourceType: attribute
-              target: ocsf.metadata.event_code
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Provider.Name` to `ocsf.metadata.log_provider`
-              sources:
-                - Event.System.Provider.Name
-              sourceType: attribute
-              target: ocsf.metadata.log_provider
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Version` to `ocsf.metadata.log_version`
-              sources:
-                - Event.System.Version
-              sourceType: attribute
-              target: ocsf.metadata.log_version
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Channel` to `ocsf.metadata.log_name`
-              sources:
-                - Event.System.Channel
-              sourceType: attribute
-              target: ocsf.metadata.log_name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Correlation` to `ocsf.metadata.correlation_uid`
-              sources:
-                - Event.System.Correlation
-              sourceType: attribute
-              target: ocsf.metadata.correlation_uid
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.TimeCreated.SystemTime` to `ocsf.metadata.original_time`
-              sources:
-                - Event.System.TimeCreated.SystemTime
-              sourceType: attribute
-              target: ocsf.metadata.original_time
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.EventRecordID` to `ocsf.metadata.uid`
-              sources:
-                - Event.System.EventRecordID
-              sourceType: attribute
-              target: ocsf.metadata.uid
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Security.UserID` to `ocsf.actor.user.uid`
-              sources:
-                - Event.System.Security.UserID
-              sourceType: attribute
-              target: ocsf.actor.user.uid
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Execution.ThreadID` to `ocsf.actor.process.tid`
-              sources:
-                - Event.System.Execution.ThreadID
-              sourceType: attribute
-              target: ocsf.actor.process.tid
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Execution.ProcessID` to `ocsf.actor.process.pid`
-              sources:
-                - Event.System.Execution.ProcessID
-              sourceType: attribute
-              target: ocsf.actor.process.pid
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.device.type_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Server
-                  id: 1
-              targets:
-                name: ocsf.device.type
-                id: ocsf.device.type_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: Map `Event.System.Computer` to `ocsf.device.name`
-              sources:
-                - Event.System.Computer
-              sourceType: attribute
-              target: ocsf.device.name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Provider.Name` to `ocsf.app.name`
-              sources:
-                - Event.System.Provider.Name
-              sourceType: attribute
-              target: ocsf.app.name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Provider.Guid` to `ocsf.app.uid`
-              sources:
-                - Event.System.Provider.Guid
-              sourceType: attribute
-              target: ocsf.app.uid
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-    - type: pipeline
-      name: OCSF sub pipeline for class Device Config State Change [5019]
-      enabled: true
-      ocsf:
-        isOcsf: true
-      filter:
-        query: "@Event.System.EventID:(525 OR 526 OR 527 OR 528 OR 529 OR 530 OR 531 OR 533 OR 536 OR 537 OR 540 OR 541 OR 544 OR 545 OR 546 OR 547 OR 557 OR 558 OR 568)"
-      processors:
-        - type: schema-processor
-          name: Apply OCSF schema for 5019
-          enabled: true
-          schema:
-            schemaType: ocsf
-            version: 1.5.0
-            className: Device Config State Change
-            classUid: 5019
-            extensions: []
-            profiles: []
-          mappers:
-            - name: ocsf.activity_id
-              categories:
-                - filter:
-                    query: "@Event.System.EventID:(525 OR 526 OR 527 OR 528 OR 529 OR 530 OR 531 OR 533 OR 536 OR 537 OR 540 OR 541 OR 544 OR 545 OR 546 OR 547 OR 557 OR 558 OR 568)"
-                  name: Log
-                  id: 1
-              targets:
-                name: ocsf.activity_name
-                id: ocsf.activity_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: ocsf.severity_id
-              categories:
-                - filter:
-                    query: "@Event.System.Level:1"
-                  name: Critical
-                  id: 5
-                - filter:
-                    query: "@Event.System.Level:2"
-                  name: Fatal
-                  id: 6
-                - filter:
-                    query: "@Event.System.Level:3"
-                  name: Other
-                  id: 99
-                - filter:
-                    query: "@Event.System.Level:4"
-                  name: Informational
-                  id: 1
-                - filter:
-                    query: "@Event.System.Level:5"
-                  name: Other
-                  id: 99
-                - filter:
-                    query: "@Event.System.Level:0"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.severity
-                id: ocsf.severity_id
-              fallback:
-                values:
-                  ocsf.severity: Other
-                  ocsf.severity_id: "99"
-                sources:
-                  ocsf.severity:
-                    - Warning
-                    - Verbose
-              type: schema-category-mapper
-            - name: Map `ocsf.time` to `ocsf.time`
-              sources:
-                - ocsf.time
-              sourceType: attribute
-              target: ocsf.time
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.TimeCreated.SystemTime` to `ocsf.metadata.original_time`
-              sources:
-                - Event.System.TimeCreated.SystemTime
-              sourceType: attribute
-              target: ocsf.metadata.original_time
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Correlation` to `ocsf.metadata.correlation_uid`
-              sources:
-                - Event.System.Correlation
-              sourceType: attribute
-              target: ocsf.metadata.correlation_uid
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.EventRecordID` to `ocsf.metadata.uid`
-              sources:
-                - Event.System.EventRecordID
-              sourceType: attribute
-              target: ocsf.metadata.uid
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
-              sources:
-                - ocsf.metadata.product.vendor_name
-              sourceType: attribute
-              target: ocsf.metadata.product.vendor_name
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
-              sources:
-                - ocsf.metadata.product.name
-              sourceType: attribute
-              target: ocsf.metadata.product.name
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.EventID` to `ocsf.metadata.event_code`
-              sources:
-                - Event.System.EventID
-              sourceType: attribute
-              target: ocsf.metadata.event_code
-              targetFormat: string
-              preserveSource: false
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Provider.Name` to `ocsf.metadata.log_provider`
-              sources:
-                - Event.System.Provider.Name
-              sourceType: attribute
-              target: ocsf.metadata.log_provider
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Execution.ThreadID` to `ocsf.actor.process.tid`
-              sources:
-                - Event.System.Execution.ThreadID
-              sourceType: attribute
-              target: ocsf.actor.process.tid
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Execution.ProcessID` to `ocsf.actor.process.pid`
-              sources:
-                - Event.System.Execution.ProcessID
-              sourceType: attribute
-              target: ocsf.actor.process.pid
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Security.UserID` to `ocsf.actor.user.uid`
-              sources:
-                - Event.System.Security.UserID
-              sourceType: attribute
-              target: ocsf.actor.user.uid
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Version` to `ocsf.metadata.log_version`
-              sources:
-                - Event.System.Version
-              sourceType: attribute
-              target: ocsf.metadata.log_version
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `Event.System.Channel` to `ocsf.metadata.log_name`
-              sources:
-                - Event.System.Channel
-              sourceType: attribute
-              target: ocsf.metadata.log_name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.device.type_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Server
-                  id: 1
-              targets:
-                name: ocsf.device.type
-                id: ocsf.device.type_id
-              fallback:
-                values: {}
-                sources: {}
-              type: schema-category-mapper
-            - name: Map `Event.System.Computer` to `ocsf.device.name`
-              sources:
-                - Event.System.Computer
-              sourceType: attribute
-              target: ocsf.device.name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-    - type: pipeline
       name: OCSF sub pipeline for class Entity Management [3004] associated with Record, Zone Scope, and Server Scope entities
       enabled: true
       ocsf:
@@ -1537,3 +1125,415 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
+    - type: pipeline
+      name: OCSF sub pipeline for class Device Config State Change [5019]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@Event.System.EventID:(525 OR 526 OR 527 OR 528 OR 529 OR 530 OR 531 OR 533 OR 536 OR 537 OR 540 OR 541 OR 544 OR 545 OR 546 OR 547 OR 557 OR 558 OR 568)"
+      processors:
+        - type: schema-processor
+          name: Apply OCSF schema for 5019
+          enabled: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Device Config State Change
+            classUid: 5019
+            extensions: []
+            profiles: []
+          mappers:
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@Event.System.EventID:(525 OR 526 OR 527 OR 528 OR 529 OR 530 OR 531 OR 533 OR 536 OR 537 OR 540 OR 541 OR 544 OR 545 OR 546 OR 547 OR 557 OR 558 OR 568)"
+                  name: Log
+                  id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@Event.System.Level:1"
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: "@Event.System.Level:2"
+                  name: Fatal
+                  id: 6
+                - filter:
+                    query: "@Event.System.Level:3"
+                  name: Other
+                  id: 99
+                - filter:
+                    query: "@Event.System.Level:4"
+                  name: Informational
+                  id: 1
+                - filter:
+                    query: "@Event.System.Level:5"
+                  name: Other
+                  id: 99
+                - filter:
+                    query: "@Event.System.Level:0"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: "99"
+                sources:
+                  ocsf.severity:
+                    - Warning
+                    - Verbose
+              type: schema-category-mapper
+            - name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.TimeCreated.SystemTime` to `ocsf.metadata.original_time`
+              sources:
+                - Event.System.TimeCreated.SystemTime
+              sourceType: attribute
+              target: ocsf.metadata.original_time
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Correlation` to `ocsf.metadata.correlation_uid`
+              sources:
+                - Event.System.Correlation
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.EventRecordID` to `ocsf.metadata.uid`
+              sources:
+                - Event.System.EventRecordID
+              sourceType: attribute
+              target: ocsf.metadata.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              sourceType: attribute
+              target: ocsf.metadata.product.vendor_name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              sourceType: attribute
+              target: ocsf.metadata.product.name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.EventID` to `ocsf.metadata.event_code`
+              sources:
+                - Event.System.EventID
+              sourceType: attribute
+              target: ocsf.metadata.event_code
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Provider.Name` to `ocsf.metadata.log_provider`
+              sources:
+                - Event.System.Provider.Name
+              sourceType: attribute
+              target: ocsf.metadata.log_provider
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Execution.ThreadID` to `ocsf.actor.process.tid`
+              sources:
+                - Event.System.Execution.ThreadID
+              sourceType: attribute
+              target: ocsf.actor.process.tid
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Execution.ProcessID` to `ocsf.actor.process.pid`
+              sources:
+                - Event.System.Execution.ProcessID
+              sourceType: attribute
+              target: ocsf.actor.process.pid
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Security.UserID` to `ocsf.actor.user.uid`
+              sources:
+                - Event.System.Security.UserID
+              sourceType: attribute
+              target: ocsf.actor.user.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Version` to `ocsf.metadata.log_version`
+              sources:
+                - Event.System.Version
+              sourceType: attribute
+              target: ocsf.metadata.log_version
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Channel` to `ocsf.metadata.log_name`
+              sources:
+                - Event.System.Channel
+              sourceType: attribute
+              target: ocsf.metadata.log_name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Server
+                  id: 1
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: Map `Event.System.Computer` to `ocsf.device.name`
+              sources:
+                - Event.System.Computer
+              sourceType: attribute
+              target: ocsf.device.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+    - type: pipeline
+      name: OCSF sub pipeline for class Application Lifecycle [6002]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@Event.System.EventID:548"
+      processors:
+        - type: schema-processor
+          name: Apply OCSF schema for 6002
+          enabled: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Application Lifecycle
+            classUid: 6002
+            extensions: []
+            profiles:
+              - host
+          mappers:
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Restart
+                  id: 5
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              sourceType: attribute
+              target: ocsf.metadata.product.vendor_name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              sourceType: attribute
+              target: ocsf.metadata.product.name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.EventID` to `ocsf.metadata.event_code`
+              sources:
+                - Event.System.EventID
+              sourceType: attribute
+              target: ocsf.metadata.event_code
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Provider.Name` to `ocsf.metadata.log_provider`
+              sources:
+                - Event.System.Provider.Name
+              sourceType: attribute
+              target: ocsf.metadata.log_provider
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Version` to `ocsf.metadata.log_version`
+              sources:
+                - Event.System.Version
+              sourceType: attribute
+              target: ocsf.metadata.log_version
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Channel` to `ocsf.metadata.log_name`
+              sources:
+                - Event.System.Channel
+              sourceType: attribute
+              target: ocsf.metadata.log_name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Correlation` to `ocsf.metadata.correlation_uid`
+              sources:
+                - Event.System.Correlation
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.TimeCreated.SystemTime` to `ocsf.metadata.original_time`
+              sources:
+                - Event.System.TimeCreated.SystemTime
+              sourceType: attribute
+              target: ocsf.metadata.original_time
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.EventRecordID` to `ocsf.metadata.uid`
+              sources:
+                - Event.System.EventRecordID
+              sourceType: attribute
+              target: ocsf.metadata.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Security.UserID` to `ocsf.actor.user.uid`
+              sources:
+                - Event.System.Security.UserID
+              sourceType: attribute
+              target: ocsf.actor.user.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Execution.ThreadID` to `ocsf.actor.process.tid`
+              sources:
+                - Event.System.Execution.ThreadID
+              sourceType: attribute
+              target: ocsf.actor.process.tid
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Execution.ProcessID` to `ocsf.actor.process.pid`
+              sources:
+                - Event.System.Execution.ProcessID
+              sourceType: attribute
+              target: ocsf.actor.process.pid
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Server
+                  id: 1
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: Map `Event.System.Computer` to `ocsf.device.name`
+              sources:
+                - Event.System.Computer
+              sourceType: attribute
+              target: ocsf.device.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Provider.Name` to `ocsf.app.name`
+              sources:
+                - Event.System.Provider.Name
+              sourceType: attribute
+              target: ocsf.app.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `Event.System.Provider.Guid` to `ocsf.app.uid`
+              sources:
+                - Event.System.Provider.Guid
+              sourceType: attribute
+              target: ocsf.app.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper

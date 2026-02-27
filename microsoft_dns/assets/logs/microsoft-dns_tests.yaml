@@ -1007,6 +1007,7 @@ tests:
         System:
           Channel: "Microsoft-Windows-DNSServer/Audit"
           Correlation: ""
+          EventID: "552"
           EventRecordID: "315"
           Execution:
             ProcessID: "2892"
