@@ -328,7 +328,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@Event.System.EventID:(549 OR 550 OR 551 OR 552 OR 553 OR 554 OR 555 OR 556 OR 565"
+        query: "@Event.System.EventID:(549 OR 550 OR 551 OR 552 OR 553 OR 554 OR 555 OR 556 OR 565)"
       processors:
         - type: schema-processor
           name: Apply OCSF schema for 0
