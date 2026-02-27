@@ -15,6 +15,9 @@ def ready_check(dd_environment, dd_run_check: Callable, aggregator: AggregatorSt
     check = PrefectCheck("prefect", {}, [instance])
 
     dd_run_check(check)
+
+    # Clear the persistent cache to avoid short time intervals between checks
+    check.write_persistent_cache(PrefectCheck.LAST_CHECK_TIME_CACHE_KEY, None)
     return check
 
 
@@ -41,4 +44,8 @@ def test_all_metadata_metrics_found(aggregator: AggregatorStub):
 
 @pytest.mark.usefixtures("ready_check")
 def test_events_collected(aggregator: AggregatorStub):
-    assert len(aggregator.events) > 0, "Expected at least one event"
+    flow_run_events = [e for e in aggregator.events if e.get('event_type', '').startswith('prefect.flow-run')]
+    task_run_events = [e for e in aggregator.events if e.get('event_type', '').startswith('prefect.task-run')]
+
+    assert len(flow_run_events) > 0, "Expected at least one prefect.flow-run event"
+    assert len(task_run_events) > 0, "Expected at least one prefect.task-run event"

@@ -188,7 +188,8 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
         self.set_metadata('version', self.api_get("/version"))
 
-        # Flows that complete in this run of the check so that they are removed from the flow_runs_tags cache
+        # Flows that complete in this run of the check so that they are removed from the
+        # flow_runs_tags cache after task runs are collected
         self.completed_flow_runs = set()
 
         # 1. API Status
@@ -271,10 +272,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self._collect_worker_metrics(now, p)
 
     def _collect_work_queue_metrics(self, now: datetime):
-        """
-        Collects work_queue.is_ready, is_not_ready, is_paused, and last_polled_age_seconds metrics.
-        Populates self.queues_by_name.
-        """
         queues = self.paginate_filter("/work_queues/filter")
         queues = self.filter_metrics.filter_work_queues(queues)
 
@@ -308,9 +305,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 }
 
     def _collect_worker_metrics(self, now: datetime, pool: dict):
-        """
-        Collects work_pool.worker.is_online and heartbeat_age_seconds metrics.
-        """
         pname = pool['name']
 
         workers = self.paginate_filter(f"/work_pools/{pname}/workers/filter")
@@ -326,10 +320,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self._add_worker_heartbeat_age_seconds(w, now, wtags)
 
     def _collect_deployment_metrics(self):
-        """
-        Collects deployment.is_ready metric.
-        """
-
         deployments = self.paginate_filter("/deployments/filter")
         deployments = self.filter_metrics.filter_deployments(deployments)
 
@@ -394,9 +384,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         return fr_tags
 
     def _collect_flow_run_metrics(self, now_iso: str, now: datetime):
-        """
-        Collects flow_runs.* metrics
-        """
         flow_runs = self._get_runs("flow_runs", now_iso)
 
         for fr in flow_runs:
@@ -448,9 +435,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 self._aggregate_metric("flow_runs.throughput", 0.0, fr_tags)
 
     def _collect_queue_aggregated_metrics(self, now: datetime):
-        """
-        Collects work_queue.backlog.size, work_queue.backlog.age, and work_queue.concurrency.in_use metrics.
-        """
         for _, q in self.queues_by_name.items():
             qtags = q.get('tags', [])
 
@@ -466,10 +450,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 )
 
     def _collect_task_run_metrics(self, now_iso: str):
-        """
-        Collects task_runs.* metrics.
-        """
-
         task_runs = self._get_runs("task_runs", now_iso)
         task_tags = set[tuple[str, ...]]()
         for tr in task_runs:
@@ -515,10 +495,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             )
 
     def _collect_event_metrics(self, now_iso: str):
-        """
-        Collects event metrics.
-        """
-
         events = self.paginate_events(
             "/events/filter",
             payload={
@@ -541,9 +517,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self._emit_event_metrics(event_manager)
 
     def _emit_event_metrics(self, event_manager: EventManager):
-        """
-        Emits event metrics.
-        """
         if event_manager.occurred is None:
             self.log.warning("Could not find occurred timestamp for event %s", event_manager.id)
             return
