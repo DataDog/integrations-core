@@ -3,7 +3,7 @@
   "app_uuid": "25199617-08df-4cbf-91b0-89d5599f79c5",
   "app_id": "battery",
   "owner": "windows-products",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
