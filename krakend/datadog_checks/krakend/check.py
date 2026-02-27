@@ -4,22 +4,27 @@
 from __future__ import annotations
 
 from collections import ChainMap
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
+from datadog_checks.base.checks.openmetrics.v2.metrics_mapping import ConfigOptionTruthy, MetricsMapping
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
 from datadog_checks.base.types import InstanceType
 
-from .metrics import METRICS_MAP, RENAME_LABELS_MAP
-
 if TYPE_CHECKING:
-    from typing import Mapping
+    from collections.abc import Mapping
 
     from prometheus_client.metrics_core import Metric
 
     from datadog_checks.base.checks.base import AgentCheck
 
 HTTP_STATUS_CODE_TAG = "http_response_status_code"
+
+RENAME_LABELS_MAP = {
+    "service_version": "krakend.service_version",
+    "service_name": "krakend.service_name",
+}
 
 
 class HttpCodeClassScraper(OpenMetricsScraper):
@@ -51,25 +56,23 @@ class KrakendCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = "krakend.api"
     DEFAULT_METRIC_LIMIT = 0
 
+    METRICS_MAP = [
+        MetricsMapping(Path("metrics/default.yaml")),
+        MetricsMapping(Path("metrics/go.yaml"), predicate=ConfigOptionTruthy("go_metrics")),
+        MetricsMapping(Path("metrics/process.yaml"), predicate=ConfigOptionTruthy("process_metrics")),
+    ]
+
     def create_scraper(self, config: InstanceType):
         return HttpCodeClassScraper(self, self.get_config_with_defaults(config))
 
+    def get_default_config(self):
+        return {"target_info": True}
+
     def get_config_with_defaults(self, config: InstanceType) -> Mapping:
-        # If the user does not provide a value for go_metrics or process_metrics,
-        # assume they want whatever behvaior has been set in KrakenD
+        defaults = self.get_default_config()
+        self._apply_file_metrics(defaults, config)
+
         go_metrics = config.get("go_metrics", True)
-        process_metrics = config.get("process_metrics", True)
-
-        def accept_metric(metric_name):
-            if metric_name.startswith("go_") and not go_metrics:
-                return False
-            if metric_name.startswith("process_") and not process_metrics:
-                return False
-            return True
-
-        metrics = {
-            original_name: new_name for original_name, new_name in METRICS_MAP.items() if accept_metric(original_name)
-        }
 
         rename_labels = RENAME_LABELS_MAP.copy()
         if go_metrics:
@@ -77,10 +80,6 @@ class KrakendCheck(OpenMetricsBaseCheckV2):
             # This is explained in the tile
             rename_labels["version"] = "go_version"
 
-        default_configs = {
-            "metrics": [metrics],
-            "rename_labels": rename_labels,
-            "target_info": True,
-        }
+        defaults["rename_labels"] = rename_labels
 
-        return ChainMap(config, default_configs)
+        return ChainMap(config, defaults)
