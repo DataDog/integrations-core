@@ -118,9 +118,14 @@ pipeline:
           subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
         - pid=12243 uid=0 auid=1001 ses=535 subj=unconfined
         - apparmor="ALLOWED"
+        - arch=c000003e syscall=257 success=yes exit=13 a0=ffffffffffffff9c
+          a1=c0012fe0c0 a2=80000 a3=0 items=1 ppid=1 pid=1055 auid=4294967295
+          uid=111 gid=111 euid=111 suid=111 fsuid=111 egid=111 sgid=111
+          fsgid=111 tty=(none) ses=4294967295 comm="agent"
+          exe="/opt/datadog-agent/bin/agent/agent" subj=unconfined key=(null)
       grok:
         supportRules: ""
-        matchRules: parse_pre_msg_kv_rule %{data::keyvalue("=",":?/\"|*<>,")}
+        matchRules: parse_pre_msg_kv_rule %{data::keyvalue("=",":?/\"|*<>,()")}
     - type: grok-parser
       name: Parsing `msg_raw` attribute
       enabled: true
@@ -146,7 +151,7 @@ pipeline:
           pid=838 comm="rsyslogd" capability=12  capname="net_admin"
       grok:
         supportRules: >-
-          extract_kv_pair %{data::keyvalue("=",":?/\"|*<>,")}
+          extract_kv_pair %{data::keyvalue("=",":?/\"|*<>,()")}
 
           extract_UID_or_OUID_or_FSUID_or_SAUID_SUID (UID="%{regex("[^\"]*"):UID}"|OUID="%{regex("[^\"]*"):OUID}"|FSUID="%{regex("[^\"]*"):FSUID}"|SAUID="%{regex("[^\"]*"):SAUID}"|SUID="%{regex("[^\"]*"):SUID}")
 
@@ -243,6 +248,20 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
+    - type: pipeline
+      name: Parsing SYSCALL logs
+      enabled: true
+      filter:
+        query: "@type:SYSCALL"
+      processors:
+        - name: Lookup on `success` to `msg.res` Field
+          enabled: true
+          source: success
+          target: msg.res
+          lookupTable: |-
+            yes,success
+            no,failed
+          type: lookup-processor
     - type: grok-parser
       name: Convert `msg.grantors` attribute to array
       enabled: true
