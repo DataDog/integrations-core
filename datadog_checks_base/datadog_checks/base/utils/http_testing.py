@@ -17,7 +17,7 @@ class MockHTTPResponse:
         content: str | bytes = '',
         status_code: int = 200,
         headers: dict[str, str] | None = None,
-        json_data: dict[str, Any] | None = None,
+        json_data: Any = None,
         file_path: str | None = None,
         cookies: dict[str, str] | None = None,
         elapsed_seconds: float = 0.1,
