@@ -23,7 +23,6 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
-from datadog_checks.base.utils.http import RequestsWrapper
 
 
 class OpenMetricsScraper:
@@ -215,18 +214,16 @@ class OpenMetricsScraper:
 
             self.raw_line_filter = re.compile('|'.join(raw_line_filters))
 
-        self.http = RequestsWrapper(config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log)
+        self.http = check.http
 
         self._content_type = ''
         self._use_latest_spec = is_affirmative(config.get('use_latest_spec', False))
         if self._use_latest_spec:
-            accept_header = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
+            self._accept_header = (
+                'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
+            )
         else:
-            accept_header = 'text/plain'
-
-        # Request the appropriate exposition format
-        if self.http.options['headers'].get('Accept') == '*/*':
-            self.http.options['headers']['Accept'] = accept_header
+            self._accept_header = 'text/plain'
 
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
 
@@ -463,6 +460,9 @@ class OpenMetricsScraper:
         """
 
         kwargs['stream'] = True
+        extra_headers = kwargs.get('extra_headers', {})
+        extra_headers['Accept'] = self._accept_header
+        kwargs['extra_headers'] = extra_headers
         return self.http.get(self.endpoint, **kwargs)
 
     def set_dynamic_tags(self, *tags):

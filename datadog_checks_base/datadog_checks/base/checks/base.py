@@ -63,7 +63,7 @@ if TYPE_CHECKING:
     import unicodedata as _module_unicodedata
 
     from datadog_checks.base.utils.diagnose import Diagnosis
-    from datadog_checks.base.utils.http import RequestsWrapper
+    from datadog_checks.base.utils.http_protocol import HTTPClientProtocol
     from datadog_checks.base.utils.metadata import MetadataManager
 
 inspect: _module_inspect = lazy_loader.load('inspect')
@@ -376,7 +376,7 @@ class AgentCheck(object):
         return limit
 
     @property
-    def http(self) -> RequestsWrapper:
+    def http(self) -> HTTPClientProtocol:
         """
         Provides logic to yield consistent network behavior based on user configuration.
 

@@ -302,6 +302,19 @@ def mock_http_response(mocker, mock_response):
 
 
 @pytest.fixture
+def mock_http(mocker):
+    from unittest.mock import PropertyMock, create_autospec
+
+    from datadog_checks.base.checks.base import AgentCheck
+    from datadog_checks.base.utils.http_protocol import HTTPClientProtocol
+
+    client = create_autospec(HTTPClientProtocol)
+    client.options_method.side_effect = NotImplementedError('HTTP OPTIONS not yet supported in mock_http')
+    mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
+    return client
+
+
+@pytest.fixture
 def mock_http_response_per_endpoint(mocker, mock_response):
     @overload
     def _mock(
