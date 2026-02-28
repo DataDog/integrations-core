@@ -121,6 +121,20 @@ files:
           - <SERVICE_1>
           - <SERVICE_2>
 
+    - name: allowed_service_tags
+      description: |
+        If set, only tags with keys matching this list will be sent to Datadog.
+        This is helpful if you have a lot of tags on services that are not
+        relevant to Datadog (ingress routing tags, etc). Tags should be specified
+        here in lowercase. Otherwise, the check will downcase tags from Consul before comparing.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - <TAG_1>
+          - <TAG_2>
+
     - name: max_services
       description: |
         Increase the maximum number of queried services.
