@@ -9,22 +9,26 @@ files:
       - name: proxy_host
         description: The host of your proxy server.
         fleet_configurable: true
+        legacy: true
         value:
           type: string
           example: <PROXY_HOST>
       - name: proxy_port
         description: The port of your proxy server.
         fleet_configurable: true
+        legacy: true
         value:
           type: integer
       - name: proxy_user
         description: The username to authenticate your proxy server.
+        legacy: true
         value:
           type: string
           example: <PROXY_USER>
       - name: proxy_password
         description: The password to authenticate your proxy server.
         secret: true
+        legacy: true
         value:
           type: string
           example: <PROXY_PASSWORD>

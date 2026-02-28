@@ -43,6 +43,7 @@ files:
         description: |
           Used to override the default procfs path, e.g. for docker containers with the outside fs mounted at /host/proc
           DEPRECATED: please specify `procfs_path` globally in `datadog.conf` instead
+        legacy: true
         value:
           type: string
           example: /proc
