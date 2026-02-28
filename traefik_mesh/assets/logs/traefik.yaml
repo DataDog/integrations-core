@@ -164,7 +164,7 @@ pipeline:
         - OriginStatus
         - DownstreamStatus
       target: http.status_code
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
       sourceType: attribute
       targetType: attribute
