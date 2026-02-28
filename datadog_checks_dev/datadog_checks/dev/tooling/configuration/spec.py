@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from .constants import OPENAPI_DATA_TYPES
+from .constants import ALLOWED_FORMATS, OPENAPI_DATA_TYPES
 
 
 def spec_validator(spec: dict, loader) -> None:
@@ -294,6 +294,9 @@ def options_validator(options, loader, file_name, *sections):
                         )
                     )
 
+        if 'formats' in option:
+            formats_validator(option['formats'], loader, file_name, sections_display, option_name)
+
         if 'value' in option and 'options' in option:
             loader.errors.append(
                 '{}, {}, {}{}: An option cannot contain both `value` and `options` attributes'.format(
@@ -358,6 +361,68 @@ def options_validator(options, loader, file_name, *sections):
             loader.errors.append(
                 f'{loader.source}, {file_name}, {sections_display}option #{option_index}: {error_message}'
             )
+
+
+def formats_validator(formats, loader, file_name, sections_display, option_name, property_name=None):
+    property_context = ''
+    if property_name is not None:
+        property_context = f' for property `{property_name}`'
+
+    if not isinstance(formats, list):
+        loader.errors.append(
+            '{}, {}, {}{}: Attribute `formats`{} must be an array'.format(
+                loader.source, file_name, sections_display, option_name, property_context
+            )
+        )
+        return
+
+    if not formats:
+        loader.errors.append(
+            '{}, {}, {}{}: Attribute `formats`{} must contain at least one entry'.format(
+                loader.source, file_name, sections_display, option_name, property_context
+            )
+        )
+        return
+
+    if any(not isinstance(fmt, str) for fmt in formats):
+        loader.errors.append(
+            '{}, {}, {}{}: Attribute `formats`{} must only contain strings'.format(
+                loader.source, file_name, sections_display, option_name, property_context
+            )
+        )
+        return
+
+    seen = set()
+    duplicates = set()
+    for fmt in formats:
+        if fmt in seen:
+            duplicates.add(fmt)
+        else:
+            seen.add(fmt)
+
+    if duplicates:
+        duplicate_display = ', '.join(sorted(duplicates))
+        loader.errors.append(
+            '{}, {}, {}{}: Attribute `formats`{} contains duplicate entries: {}'.format(
+                loader.source, file_name, sections_display, option_name, property_context, duplicate_display
+            )
+        )
+
+    invalid_formats = sorted(set(formats) - ALLOWED_FORMATS)
+    if invalid_formats:
+        valid_formats = ' | '.join(sorted(ALLOWED_FORMATS))
+        invalid_display = ', '.join(invalid_formats)
+        loader.errors.append(
+            '{}, {}, {}{}: Attribute `formats`{} contains unknown value(s): {}, valid values are {}'.format(
+                loader.source,
+                file_name,
+                sections_display,
+                option_name,
+                property_context,
+                invalid_display,
+                valid_formats,
+            )
+        )
 
 
 def value_validator(value, loader, file_name, sections_display, option_name, depth=0):
@@ -629,6 +694,9 @@ def value_validator(value, loader, file_name, sections_display, option_name, dep
                 continue
 
             property_names.append(name)
+
+            if 'formats' in prop:
+                formats_validator(prop['formats'], loader, file_name, sections_display, option_name, property_name=name)
 
             value_validator(prop, loader, file_name, sections_display, option_name, depth=new_depth)
 
