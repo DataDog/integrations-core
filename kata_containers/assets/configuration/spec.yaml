@@ -1,0 +1,50 @@
+name: Kata Containers
+files:
+- name: kata_containers.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: sandbox_storage_paths
+      description: |
+        Paths where Kata sandbox sockets are discovered.
+        - /run/vc/sbs  Go runtime (containerd-shim-kata-v2)
+        - /run/kata    Rust runtime (runtime-rs)
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - /run/vc/sbs
+          - /run/kata
+    - name: cri_socket_path
+      description: |
+        Path to the CRI Unix socket used to resolve Kata sandbox IDs to Kubernetes
+        pod UIDs for tag enrichment (pod_name, kube_namespace, kube_deployment, …).
+        Requires grpcio. Leave unset to use the default containerd socket.
+      value:
+        type: string
+        example: /run/containerd/containerd.sock
+    - name: rename_labels
+      description: |
+        Rename Prometheus labels before they are submitted as tags.
+        The integration already renames `version` to `go_version` by default to
+        avoid conflicts with the reserved Agent tag `version`. Add extra mappings here.
+      value:
+        type: object
+        additionalProperties:
+          type: string
+        example:
+          my_label: my_renamed_label
+    - name: exclude_labels
+      description: |
+        Prometheus label names to drop from all metrics entirely.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - label_to_drop
+    - template: instances/default
