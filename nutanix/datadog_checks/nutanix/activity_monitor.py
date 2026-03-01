@@ -17,7 +17,6 @@ class ActivityMonitor:
         self.last_task_collection_time = None
         self.last_audit_collection_time = None
         self.last_alert_collection_time = None
-        self.last_audit_collection_time = None
         # Read from cache and convert string to bool
         cached_value = self.check.read_persistent_cache("alerts_v42_supported")
         if cached_value == "true":
