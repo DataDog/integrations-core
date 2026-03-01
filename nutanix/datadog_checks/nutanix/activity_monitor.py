@@ -10,6 +10,13 @@ from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.nutanix.resource_filters import should_collect_activity, should_collect_resource
 
 
+class _SafeDict(dict):
+    """Dict that returns missing keys as template placeholders for safe string formatting."""
+
+    def __missing__(self, key):
+        return "{" + key + "}"
+
+
 class ActivityMonitor:
     def __init__(self, check):
         self.check = check
@@ -17,11 +24,11 @@ class ActivityMonitor:
         self.last_task_collection_time = None
         self.last_audit_collection_time = None
         self.last_alert_collection_time = None
-        # Read from cache and convert string to bool
+        # Read boolean flag from cache (stored as string)
         cached_value = self.check.read_persistent_cache("alerts_v42_supported")
-        if cached_value == "true":
+        if cached_value == "True":
             self.alerts_v42_supported = True
-        elif cached_value == "false":
+        elif cached_value == "False":
             self.alerts_v42_supported = False
         else:
             self.alerts_v42_supported = None
@@ -87,8 +94,18 @@ class ActivityMonitor:
             self.check.log.debug("[PC:%s:%s] Completed events collection", self.check.pc_ip, self.check.pc_port)
             return len(events)
 
+        except HTTPError as e:
+            self.check.log.error(
+                "[PC:%s:%s] Failed to collect events from endpoint 'api/monitoring/v4.0/serviceability/events': %s",
+                self.check.pc_ip,
+                self.check.pc_port,
+                e.response.status_code if e.response else "HTTP error",
+            )
+            return 0
         except Exception as e:
-            self.check.log.exception("[PC:%s:%s] Error collecting events: %s", self.check.pc_ip, self.check.pc_port, e)
+            self.check.log.exception(
+                "[PC:%s:%s] Unexpected error collecting events: %s", self.check.pc_ip, self.check.pc_port, e
+            )
             return 0
 
     def _list_events(self, start_time_str: str) -> list[dict]:
@@ -228,8 +245,18 @@ class ActivityMonitor:
             self.check.log.debug("[PC:%s:%s] Completed tasks collection", self.check.pc_ip, self.check.pc_port)
             return len(tasks)
 
+        except HTTPError as e:
+            self.check.log.error(
+                "[PC:%s:%s] Failed to collect tasks from API endpoint 'api/prism/v4.0/config/tasks': HTTP %s",
+                self.check.pc_ip,
+                self.check.pc_port,
+                e.response.status_code if e.response else "error",
+            )
+            return 0
         except Exception as e:
-            self.check.log.exception("[PC:%s:%s] Error collecting tasks: %s", self.check.pc_ip, self.check.pc_port, e)
+            self.check.log.exception(
+                "[PC:%s:%s] Unexpected error collecting tasks: %s", self.check.pc_ip, self.check.pc_port, e
+            )
             return 0
 
     def collect_audits(self) -> int:
@@ -270,6 +297,9 @@ class ActivityMonitor:
                 self.check.log.debug("[PC:%s:%s] No new audits after filtering", self.check.pc_ip, self.check.pc_port)
                 return 0
 
+            # Track the most recent timestamp before field filtering so we don't re-fetch filtered-out audits
+            most_recent_time_str = self._find_max_timestamp(audits, "creationTime")
+
             audits = [a for a in audits if self._should_collect_activity_item(a, "audit")]
 
             self.check.log.debug(
@@ -278,8 +308,6 @@ class ActivityMonitor:
 
             for audit in audits:
                 self._process_audit(audit)
-
-            most_recent_time_str = self._find_max_timestamp(audits, "creationTime")
             if most_recent_time_str:
                 self.last_audit_collection_time = most_recent_time_str
                 self.check.log.debug(
@@ -292,8 +320,18 @@ class ActivityMonitor:
             self.check.log.debug("[PC:%s:%s] Completed audits collection", self.check.pc_ip, self.check.pc_port)
             return len(audits)
 
+        except HTTPError as e:
+            self.check.log.error(
+                "[PC:%s:%s] Failed to collect audits from endpoint 'api/monitoring/v4.0/serviceability/audits': %s",
+                self.check.pc_ip,
+                self.check.pc_port,
+                e.response.status_code if e.response else "HTTP error",
+            )
+            return 0
         except Exception as e:
-            self.check.log.exception("[PC:%s:%s] Error collecting audits: %s", self.check.pc_ip, self.check.pc_port, e)
+            self.check.log.exception(
+                "[PC:%s:%s] Unexpected error collecting audits: %s", self.check.pc_ip, self.check.pc_port, e
+            )
             return 0
 
     def collect_alerts(self) -> int:
@@ -357,8 +395,18 @@ class ActivityMonitor:
             self.check.log.debug("[PC:%s:%s] Completed alerts collection", self.check.pc_ip, self.check.pc_port)
             return len(alerts)
 
+        except HTTPError as e:
+            self.check.log.error(
+                "[PC:%s:%s] Failed to collect alerts from API: HTTP %s",
+                self.check.pc_ip,
+                self.check.pc_port,
+                e.response.status_code if e.response else "error",
+            )
+            return 0
         except Exception as e:
-            self.check.log.exception("[PC:%s:%s] Error collecting alerts: %s", self.check.pc_ip, self.check.pc_port, e)
+            self.check.log.exception(
+                "[PC:%s:%s] Unexpected error collecting alerts: %s", self.check.pc_ip, self.check.pc_port, e
+            )
             return 0
 
     def _list_audits(self, start_time_str: str) -> list[dict]:
@@ -400,23 +448,23 @@ class ActivityMonitor:
             self.check.log.debug("[PC:%s:%s] Attempting to use alerts API v4.2", self.check.pc_ip, self.check.pc_port)
             result = self.check._get_paginated_request_data("api/monitoring/v4.2/serviceability/alerts", params=params)
             if self.alerts_v42_supported is None:
-                self.check.log.info(
+                self.check.log.debug(
                     "[PC:%s:%s] Alerts API v4.2 is supported, caching for future use",
                     self.check.pc_ip,
                     self.check.pc_port,
                 )
                 self.alerts_v42_supported = True
-                self.check.write_persistent_cache("alerts_v42_supported", "true")
+                self.check.write_persistent_cache("alerts_v42_supported", "True")
             return result
         except HTTPError as e:
             if e.response is not None and e.response.status_code == 404:
-                self.check.log.info(
+                self.check.log.debug(
                     "[PC:%s:%s] Alerts API v4.2 not supported, falling back to v4.0 permanently",
                     self.check.pc_ip,
                     self.check.pc_port,
                 )
                 self.alerts_v42_supported = False
-                self.check.write_persistent_cache("alerts_v42_supported", "false")
+                self.check.write_persistent_cache("alerts_v42_supported", "False")
                 del params["$filter"]
                 return self.check._get_paginated_request_data(
                     "api/monitoring/v4.0/serviceability/alerts", params=params
@@ -546,12 +594,7 @@ class ActivityMonitor:
 
         # Render template using format_map (handles {variable} syntax)
         try:
-            # Use a custom dict that returns the key if not found (safe substitution)
-            class SafeDict(dict):
-                def __missing__(self, key):
-                    return "{" + key + "}"
-
-            return message.format_map(SafeDict(**param_map))
+            return message.format_map(_SafeDict(**param_map))
         except Exception as e:
             self.check.log.debug("Failed to render alert message template: %s", e)
             return message
