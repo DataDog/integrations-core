@@ -515,6 +515,47 @@ class ActivityMonitor:
             }
         )
 
+    def _render_alert_message(self, message: str, parameters: list[dict]) -> str:
+        """Render template variables in alert message using parameter values.
+
+        Args:
+            message: Alert message with template variables like {param_name}
+            parameters: List of parameter objects from alert payload
+
+        Returns:
+            Rendered message with variables substituted
+        """
+        if not message or not parameters:
+            return message
+
+        # Build parameter map from parameters array
+        param_map = {}
+        for param in parameters:
+            param_name = param.get("paramName")
+            if not param_name:
+                continue
+
+            param_value = param.get("paramValue", {})
+            # Extract value based on type
+            if "stringValue" in param_value:
+                param_map[param_name] = param_value["stringValue"]
+            elif "intValue" in param_value:
+                param_map[param_name] = str(param_value["intValue"])
+            elif "boolValue" in param_value:
+                param_map[param_name] = str(param_value["boolValue"])
+
+        # Render template using format_map (handles {variable} syntax)
+        try:
+            # Use a custom dict that returns the key if not found (safe substitution)
+            class SafeDict(dict):
+                def __missing__(self, key):
+                    return "{" + key + "}"
+
+            return message.format_map(SafeDict(**param_map))
+        except Exception as e:
+            self.check.log.debug("Failed to render alert message template: %s", e)
+            return message
+
     def _process_alert(self, alert: dict) -> None:
         """Process and send a single alert to Datadog.
 
@@ -527,6 +568,11 @@ class ActivityMonitor:
         created_time = alert.get("creationTime")
         severity = alert.get("severity")
         alert_type = alert.get("alertType")
+
+        # Render template variables in title and message from parameters
+        if parameters := alert.get("parameters"):
+            title = self._render_alert_message(title, parameters)
+            message = self._render_alert_message(message, parameters)
 
         # map severity to alert_type
         severity_map = {

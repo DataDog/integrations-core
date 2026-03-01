@@ -242,3 +242,194 @@ def test_alerts_filtered_by_activity_filter_alertType(
     alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
     assert len(alerts) == 1
     assert "ntnx_alert_type:A130172" in alerts[0]["tags"]
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alert_message_template_rendering(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
+    """Test that alert messages with template variables are rendered correctly."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    instance["resource_filters"] = [
+        {"resource": "alert", "property": "alertType", "patterns": ["^A6227$"]},
+    ]
+
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    assert len(alerts) > 0
+
+    alert = alerts[0]
+    msg_text = alert["msg_text"]
+
+    assert "{alert_msg}" not in msg_text, "Template variable should be rendered"
+    assert "Admin user password will expire soon" in msg_text, "Rendered message should contain actual value"
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alert_a1031_disk_space_complete_output(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test complete alert output for A1031 (disk space) with rendered message."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    instance["resource_filters"] = [
+        {"resource": "alert", "property": "alertType", "patterns": ["^A1031$"]},
+    ]
+
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    assert len(alerts) >= 1, "Expected at least one A1031 alert"
+
+    alert = alerts[0]
+
+    # Verify message rendering
+    assert "Disk space usage for /var/log on Controller VM 10.0.0.108 has exceeded 75%" in alert["msg_text"]
+    assert "{mount_path}" not in alert["msg_text"]
+    assert "{entity}" not in alert["msg_text"]
+    assert "{ip_address}" not in alert["msg_text"]
+    assert "{threshold}" not in alert["msg_text"]
+
+    # Verify title rendering
+    assert "Disk space usage high for /var/log on Controller VM 10.0.0.108" in alert["msg_title"]
+
+    # Verify alert structure
+    assert alert["event_type"] == "nutanix"
+    assert alert["alert_type"] == "warning"
+    assert alert["source_type_name"] == "nutanix"
+
+    # Verify tags
+    assert "ntnx_type:alert" in alert["tags"]
+    assert "ntnx_alert_type:A1031" in alert["tags"]
+    assert "ntnx_alert_severity:WARNING" in alert["tags"]
+    assert "ntnx_alert_classification:Storage" in alert["tags"]
+    assert "ntnx_alert_impact:SYSTEM_INDICATOR" in alert["tags"]
+    assert any("ntnx_cluster_id:" in tag for tag in alert["tags"])
+    assert any("ntnx_node_id:" in tag for tag in alert["tags"])
+    assert any("ntnx_node_name:" in tag for tag in alert["tags"])
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alert_a130172_vm_recovery_complete_output(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test complete alert output for A130172 (VM recovery) with rendered message."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    instance["resource_filters"] = [
+        {"resource": "alert", "property": "alertType", "patterns": ["^A130172$"]},
+    ]
+
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    assert len(alerts) == 1, "Expected exactly one A130172 alert"
+
+    alert = alerts[0]
+
+    # Verify message rendering
+    expected_message = (
+        "Recovery Point for VM ubuntu-vm failed to capture associated policies "
+        "and categories because Management plane is not available to get the configuration."
+    )
+    assert alert["msg_text"] == expected_message
+    assert "{vm_name}" not in alert["msg_text"]
+    assert "{reason}" not in alert["msg_text"]
+
+    # Verify alert structure
+    assert alert["event_type"] == "nutanix"
+    assert alert["alert_type"] == "info"
+    assert alert["source_type_name"] == "nutanix"
+    assert alert["msg_title"] == "Alert: Degraded VM Recovery Point."
+
+    # Verify tags
+    assert "ntnx_type:alert" in alert["tags"]
+    assert "ntnx_alert_type:A130172" in alert["tags"]
+    assert "ntnx_alert_severity:INFO" in alert["tags"]
+    assert "ntnx_alert_classification:DR" in alert["tags"]
+    assert "ntnx_alert_impact:SYSTEM_INDICATOR" in alert["tags"]
+    assert "ntnx_vm_id:7b9d5b24-b99a-4c62-516c-0fe0c20411dd" in alert["tags"]
+    assert "ntnx_vm_name:ubuntu-vm" in alert["tags"]
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alert_a6227_password_expiry_complete_output(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test complete alert output for A6227 (password expiry) with rendered message."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    instance["resource_filters"] = [
+        {"resource": "alert", "property": "alertType", "patterns": ["^A6227$"]},
+    ]
+
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    assert len(alerts) >= 1, "Expected at least one A6227 alert"
+
+    alert = alerts[0]
+
+    # Verify message rendering
+    expected_message = "Admin user password will expire soon. Please change the admin password."
+    assert alert["msg_text"] == expected_message
+    assert "{alert_msg}" not in alert["msg_text"]
+
+    # Verify alert structure
+    assert alert["event_type"] == "nutanix"
+    assert alert["alert_type"] == "warning"
+    assert alert["source_type_name"] == "nutanix"
+    assert alert["msg_title"] == "Alert: The PC admin user password is going to expire soon or has already expired."
+
+    # Verify tags
+    assert "ntnx_type:alert" in alert["tags"]
+    assert "ntnx_alert_type:A6227" in alert["tags"]
+    assert "ntnx_alert_severity:WARNING" in alert["tags"]
+    assert "ntnx_alert_classification:Cluster" in alert["tags"]
+    assert "ntnx_alert_impact:CONFIGURATION" in alert["tags"]
+    assert "ntnx_cluster_id:d07db284-6df6-4ca2-88cd-9dd5ed71ac08" in alert["tags"]
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alert_with_ip_address_rendering(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
+    """Test that ip_address template variable is rendered correctly in alert messages."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    instance["resource_filters"] = [
+        {"resource": "alert", "property": "alertType", "patterns": ["^A1031$"]},
+    ]
+
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    assert len(alerts) >= 1, "Expected at least one A1031 alert with ip_address"
+
+    alert = alerts[0]
+
+    # Verify ip_address is rendered in message
+    assert "10.0.0.108" in alert["msg_text"], "IP address should be rendered in message"
+    assert "{ip_address}" not in alert["msg_text"], "Template variable should be replaced"
+
+    # Verify ip_address is rendered in title
+    assert "10.0.0.108" in alert["msg_title"], "IP address should be rendered in title"
+    assert "{ip_address}" not in alert["msg_title"], "Template variable should be replaced"
+
+    # Verify complete rendered message contains ip_address in proper context
+    assert "Disk space usage for /var/log on Controller VM 10.0.0.108" in alert["msg_text"], (
+        "Message should contain rendered ip_address in context"
+    )
