@@ -100,7 +100,7 @@ class NutanixCheck(AgentCheck):
         return tags
 
     def check(self, _):
-        self.log.info("[PC:%s:%s] Starting check...", self.pc_ip, self.pc_port)
+        self.log.debug("Starting check for Prism Central: %s:%s", self.pc_ip, self.pc_port)
 
         # Reset all state for new collection run
         self.infrastructure_monitor.reset_state()
@@ -120,7 +120,7 @@ class NutanixCheck(AgentCheck):
         end_dt = datetime.fromisoformat(end_time)
         window_seconds = (end_dt - start_dt).total_seconds()
 
-        self.log.info(
+        self.log.debug(
             "[PC:%s:%s] Collecting metrics for %ds time window (from %s to %s)",
             self.pc_ip,
             self.pc_port,
@@ -129,55 +129,57 @@ class NutanixCheck(AgentCheck):
             end_time,
         )
 
-        self.log.info("[PC:%s:%s] Collecting infrastructure metrics...", self.pc_ip, self.pc_port)
+        self.log.debug("[PC:%s:%s] Collecting infrastructure metrics", self.pc_ip, self.pc_port)
         self.infrastructure_monitor.collect_cluster_metrics()
-        self.log.info(
-            "[PC:%s:%s] Collected %d cluster metrics, %d host metrics, and %d VM metrics",
-            self.pc_ip,
-            self.pc_port,
-            self.infrastructure_monitor.cluster_metrics_count,
-            self.infrastructure_monitor.host_metrics_count,
-            self.infrastructure_monitor.vm_metrics_count,
-        )
 
         if self.collect_events_enabled:
-            self.log.info("[PC:%s:%s] Collecting events...", self.pc_ip, self.pc_port)
+            self.log.debug("[PC:%s:%s] Collecting events", self.pc_ip, self.pc_port)
             events_count = self.activity_monitor.collect_events()
-            self.log.info("[PC:%s:%s] Collected %d events", self.pc_ip, self.pc_port, events_count)
         else:
             self.log.debug("[PC:%s:%s] Events collection disabled", self.pc_ip, self.pc_port)
+            events_count = 0
 
         if self.collect_tasks_enabled:
-            self.log.info("[PC:%s:%s] Collecting tasks...", self.pc_ip, self.pc_port)
+            self.log.debug("[PC:%s:%s] Collecting tasks", self.pc_ip, self.pc_port)
             tasks_count = self.activity_monitor.collect_tasks()
-            self.log.info("[PC:%s:%s] Collected %d tasks", self.pc_ip, self.pc_port, tasks_count)
         else:
             self.log.debug("[PC:%s:%s] Tasks collection disabled", self.pc_ip, self.pc_port)
+            tasks_count = 0
 
         if self.collect_audits_enabled:
-            self.log.info("[PC:%s:%s] Collecting audits...", self.pc_ip, self.pc_port)
+            self.log.debug("[PC:%s:%s] Collecting audits", self.pc_ip, self.pc_port)
             audits_count = self.activity_monitor.collect_audits()
-            self.log.info("[PC:%s:%s] Collected %d audits", self.pc_ip, self.pc_port, audits_count)
         else:
             self.log.debug("[PC:%s:%s] Audits collection disabled", self.pc_ip, self.pc_port)
+            audits_count = 0
 
         if self.collect_alerts_enabled:
-            self.log.info("[PC:%s:%s] Collecting alerts...", self.pc_ip, self.pc_port)
+            self.log.debug("[PC:%s:%s] Collecting alerts", self.pc_ip, self.pc_port)
             alerts_count = self.activity_monitor.collect_alerts()
-            self.log.info("[PC:%s:%s] Collected %d alerts", self.pc_ip, self.pc_port, alerts_count)
         else:
             self.log.debug("[PC:%s:%s] Alerts collection disabled", self.pc_ip, self.pc_port)
+            alerts_count = 0
 
         if self.infrastructure_monitor.external_tags:
-            self.log.info(
-                "[PC:%s:%s] Applied %d external tags",
+            self.log.debug(
+                "[PC:%s:%s] Applying %d external tags",
                 self.pc_ip,
                 self.pc_port,
                 len(self.infrastructure_monitor.external_tags),
             )
             self.set_external_tags(self.infrastructure_monitor.external_tags)
 
-        self.log.info("[PC:%s:%s] Check completed successfully", self.pc_ip, self.pc_port)
+        self.log.info(
+            "[PC:%s] Check completed: %d clusters, %d hosts, %d VMs, %d events, %d tasks, %d audits, %d alerts",
+            self.pc_ip,
+            self.infrastructure_monitor.cluster_metrics_count,
+            self.infrastructure_monitor.host_metrics_count,
+            self.infrastructure_monitor.vm_metrics_count,
+            events_count,
+            tasks_count,
+            audits_count,
+            alerts_count,
+        )
 
     def _check_health(self):
         try:
