@@ -14,12 +14,12 @@ from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.tracing import traced_class
 
-from .metrics_mapping import MetricsMapping, RawMetricsConfig
 from .scraper import OpenMetricsScraper
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+    from .metrics_mapping import MetricsMapping, RawMetricsConfig
 
 class OpenMetricsBaseCheckV2(AgentCheck):
     """
@@ -67,6 +67,9 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
         # All configured scrapers keyed by the endpoint
         self.scrapers = {}
+
+        # Cache for file-based metrics loaded from METRICS_MAP; None means not yet loaded
+        self._file_metrics: list[RawMetricsConfig] | None = None
 
         self.check_initializations.append(self.configure_scrapers)
 
@@ -122,34 +125,52 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
     def get_config_with_defaults(self, config):
         defaults = self.get_default_config()
-        self._apply_file_metrics(defaults, config)
+        if file_metrics := self._load_file_based_metrics(config):
+            defaults['metrics'] = list(defaults.get('metrics', [])) + file_metrics
         return ChainMap(config, defaults)
 
-    def get_default_config(self):
+    def get_default_config(self) -> dict:
+        """Return instance-level default scraper configuration values.
+
+        The returned dict can be mutated by the framework before being wrapped
+        in a ``ChainMap``. Avoid returning a shared or instance-level object to avoid
+        state leakage between check executions.
+        """
         return {}
 
     def refresh_scrapers(self):
         pass
 
-    def _apply_file_metrics(self, defaults: dict, config: Mapping) -> None:
-        """Load file-based metrics and merge them into the given defaults dict."""
-        file_metrics = self._load_file_based_metrics(config)
-        if file_metrics:
-            defaults.setdefault('metrics', []).extend(file_metrics)
-
     def _load_file_based_metrics(self, config: Mapping) -> list[RawMetricsConfig]:
         """Load metric mappings from YAML files declared in ``METRICS_MAP``.
 
-        Falls back to convention-based discovery of ``metrics.yml`` when
-        ``METRICS_MAP`` is empty.
-        """
-        if not self.METRICS_MAP:
-            default_path = self._get_package_dir() / "metrics.yml"
-            if not default_path.is_file():
-                return []
-            return [self._load_metrics_file(Path("metrics.yml"))]
+        Results are cached for the lifetime of the check instance. Predicates
+        are evaluated once against the first ``config`` supplied — since
+        ``METRICS_MAP`` is a class-level declaration and the instance config
+        does not change between runs, subsequent calls always receive the same
+        effective configuration.
 
-        return [self._load_metrics_file(source.path) for source in self.METRICS_MAP if source.should_load(config)]
+        Falls back to convention-based discovery of ``metrics.yaml`` or
+        ``metrics.yml`` (in that order) when ``METRICS_MAP`` is empty.
+        """
+        if self._file_metrics is not None:
+            return self._file_metrics
+
+        if not self.METRICS_MAP:
+            package_dir = self._get_package_dir()
+            for candidate in (Path("metrics.yaml"), Path("metrics.yml")):
+                if (package_dir / candidate).is_file():
+                    self._file_metrics = [self._load_metrics_file(candidate)]
+                    return self._file_metrics
+            self._file_metrics = []
+        else:
+            self._file_metrics = [
+                self._load_metrics_file(source.path)
+                for source in self.METRICS_MAP
+                if source.should_load(config)
+            ]
+
+        return self._file_metrics
 
     def _load_metrics_file(self, path: Path) -> RawMetricsConfig:
         """Load and parse a single YAML metrics file."""
