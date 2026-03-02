@@ -61,6 +61,7 @@ class MySqlSchemaCollector(SchemaCollector):
         config = MySqlSchemaCollectorConfig()
         config.max_execution_time = check._config.schemas_config.get('max_execution_time', 60)
         config.max_tables = check._config.schemas_config.get('max_tables', 300)
+        config.collection_interval = check._config.schemas_config.get('collection_interval', 3600)
         super().__init__(check, config)
 
     def _supports_json_aggregation(self) -> bool:
@@ -166,8 +167,8 @@ class MySqlSchemaCollector(SchemaCollector):
             """
 
         query = f"""
-            SELECT schema_tables.schema_name, schema_tables.table_name,
-                schema_tables.engine, schema_tables.row_format, schema_tables.create_time,
+            SELECT schema_tables.schema_name, `schemas`.default_character_set_name, `schemas`.default_collation_name,
+                schema_tables.table_name, schema_tables.engine, schema_tables.row_format, schema_tables.create_time,
                 json_arrayagg(json_object({column_columns})) columns,
                 json_arrayagg(json_object({index_columns})) indexes,
                 json_arrayagg(json_object({constraint_columns})) foreign_keys,
@@ -190,9 +191,9 @@ class MySqlSchemaCollector(SchemaCollector):
                     schema_tables.table_name = constraints.table_name AND
                     schema_tables.schema_name = constraints.schema_name
                 LEFT JOIN ({partition_query.replace("%WHERE%", "")}) partitions ON
-                    schema_tables.table_name = partitions.table_name
-            GROUP BY schema_tables.schema_name, schema_tables.table_name,
-            schema_tables.engine, schema_tables.row_format, schema_tables.create_time
+                schema_tables.table_name = partitions.table_name AND schema_tables.schema_name = partitions.schema_name
+            GROUP BY schema_tables.schema_name, `schemas`.default_character_set_name, `schemas`.default_collation_name,
+            schema_tables.table_name, schema_tables.engine, schema_tables.row_format, schema_tables.create_time
             ;
         """
         return query
