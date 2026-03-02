@@ -132,6 +132,13 @@ instances:
     #
     # collect_alerts: true
 
+    ## @param collect_subtasks - boolean - optional - default: false
+    ## Whether to collect subtasks in addition to parent tasks.
+    ## When false, only top-level tasks are collected.
+    ## Default is false.
+    #
+    # collect_subtasks: false
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

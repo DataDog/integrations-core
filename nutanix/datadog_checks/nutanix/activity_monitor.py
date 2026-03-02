@@ -20,10 +20,10 @@ class _SafeDict(dict):
 class ActivityMonitor:
     def __init__(self, check):
         self.check = check
-        self.last_event_collection_time = None
-        self.last_task_collection_time = None
-        self.last_audit_collection_time = None
-        self.last_alert_collection_time = None
+        self.last_event_collection_time = self.check.read_persistent_cache("last_event_collection_time")
+        self.last_task_collection_time = self.check.read_persistent_cache("last_task_collection_time")
+        self.last_audit_collection_time = self.check.read_persistent_cache("last_audit_collection_time")
+        self.last_alert_collection_time = self.check.read_persistent_cache("last_alert_collection_time")
         # Read boolean flag from cache (stored as string)
         cached_value = self.check.read_persistent_cache("alerts_v42_supported")
         if cached_value == "True":
@@ -71,7 +71,7 @@ class ActivityMonitor:
                 self.check.log.debug("[PC:%s:%s] No new events after filtering", self.check.pc_ip, self.check.pc_port)
                 return 0
 
-            # Track the most recent timestamp before field filtering so we don't re-fetch filtered-out events
+            # Advance past all fetched events before filtering
             most_recent_time_str = self._find_max_timestamp(events, "creationTime")
 
             events = [e for e in events if self._should_collect_activity_item(e, "event")]
@@ -82,8 +82,10 @@ class ActivityMonitor:
 
             for event in events:
                 self._process_event(event)
+
             if most_recent_time_str:
                 self.last_event_collection_time = most_recent_time_str
+                self.check.write_persistent_cache("last_event_collection_time", most_recent_time_str)
                 self.check.log.debug(
                     "[PC:%s:%s] Updated last_event_collection_time to: %s",
                     self.check.pc_ip,
@@ -222,8 +224,11 @@ class ActivityMonitor:
                 self.check.log.debug("[PC:%s:%s] No new tasks after filtering", self.check.pc_ip, self.check.pc_port)
                 return 0
 
-            # Track the most recent timestamp before field filtering so we don't re-fetch filtered-out tasks
+            # Advance past all fetched tasks before filtering
             most_recent_time_str = self._find_max_timestamp(tasks, "createdTime")
+
+            if not self.check.collect_subtasks_enabled:
+                tasks = [t for t in tasks if not t.get("parentTask")]
 
             tasks = [t for t in tasks if self._should_collect_activity_item(t, "task")]
 
@@ -233,8 +238,10 @@ class ActivityMonitor:
 
             for task in tasks:
                 self._process_task(task)
+
             if most_recent_time_str:
                 self.last_task_collection_time = most_recent_time_str
+                self.check.write_persistent_cache("last_task_collection_time", most_recent_time_str)
                 self.check.log.debug(
                     "[PC:%s:%s] Updated last_task_collection_time to: %s",
                     self.check.pc_ip,
@@ -297,7 +304,7 @@ class ActivityMonitor:
                 self.check.log.debug("[PC:%s:%s] No new audits after filtering", self.check.pc_ip, self.check.pc_port)
                 return 0
 
-            # Track the most recent timestamp before field filtering so we don't re-fetch filtered-out audits
+            # Advance past all fetched audits before filtering
             most_recent_time_str = self._find_max_timestamp(audits, "creationTime")
 
             audits = [a for a in audits if self._should_collect_activity_item(a, "audit")]
@@ -308,8 +315,10 @@ class ActivityMonitor:
 
             for audit in audits:
                 self._process_audit(audit)
+
             if most_recent_time_str:
                 self.last_audit_collection_time = most_recent_time_str
+                self.check.write_persistent_cache("last_audit_collection_time", most_recent_time_str)
                 self.check.log.debug(
                     "[PC:%s:%s] Updated last_audit_collection_time to: %s",
                     self.check.pc_ip,
@@ -372,7 +381,7 @@ class ActivityMonitor:
                 self.check.log.debug("[PC:%s:%s] No new alerts after filtering", self.check.pc_ip, self.check.pc_port)
                 return 0
 
-            # Track the most recent timestamp before field filtering so we don't re-fetch filtered-out alerts
+            # Advance past all fetched alerts before filtering
             most_recent_time_str = self._find_max_timestamp(alerts, "creationTime")
 
             alerts = [a for a in alerts if self._should_collect_activity_item(a, "alert")]
@@ -383,8 +392,10 @@ class ActivityMonitor:
 
             for alert in alerts:
                 self._process_alert(alert)
+
             if most_recent_time_str:
                 self.last_alert_collection_time = most_recent_time_str
+                self.check.write_persistent_cache("last_alert_collection_time", most_recent_time_str)
                 self.check.log.debug(
                     "[PC:%s:%s] Updated last_alert_collection_time to: %s",
                     self.check.pc_ip,
@@ -695,6 +706,7 @@ class ActivityMonitor:
         task_description = task.get("operationDescription", "")
         created_time = task.get("createdTime")
         status = task.get("status", "UNKNOWN")
+        is_subtask = task.get("parentTask") is not None
 
         # alert type
         alert_type_map = {
@@ -753,7 +765,7 @@ class ActivityMonitor:
                 if created_time
                 else get_timestamp(get_current_datetime()),
                 "event_type": self.check.__NAMESPACE__,
-                "msg_title": f"Task: {task_operation}",
+                "msg_title": f"Subtask: {task_operation}" if is_subtask else f"Task: {task_operation}",
                 "msg_text": msg_text,
                 "alert_type": alert_type,
                 "source_type_name": self.check.__NAMESPACE__,

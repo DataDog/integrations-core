@@ -51,6 +51,7 @@ class NutanixCheck(AgentCheck):
         self.collect_tasks_enabled = is_affirmative(self.instance.get("collect_tasks", True))
         self.collect_audits_enabled = is_affirmative(self.instance.get("collect_audits", True))
         self.collect_alerts_enabled = is_affirmative(self.instance.get("collect_alerts", True))
+        self.collect_subtasks_enabled = is_affirmative(self.instance.get("collect_subtasks", False))
 
         self.prefix_category_tags = is_affirmative(self.instance.get("prefix_category_tags", False))
 

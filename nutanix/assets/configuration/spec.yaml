@@ -152,6 +152,14 @@ files:
             value:
               type: boolean
               example: true
+          - name: collect_subtasks
+            description: |
+              Whether to collect subtasks in addition to parent tasks.
+              When false, only top-level tasks are collected.
+              Default is false.
+            value:
+              type: boolean
+              example: false
           - template: instances/http
           - template: instances/default
             overrides:

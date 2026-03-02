@@ -24,6 +24,10 @@ def instance_collect_events():
     return True
 
 
+def instance_collect_subtasks():
+    return False
+
+
 def instance_disable_generic_tags():
     return False
 
