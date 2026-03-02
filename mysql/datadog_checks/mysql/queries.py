@@ -298,6 +298,22 @@ FROM INFORMATION_SCHEMA.STATISTICS
 %WHERE%
 """
 
+SQL_SCHEMAS_INDEXES_NO_JSON_8_0_13 = """\
+SELECT
+    table_name as `table_name`,
+    table_schema as `schema_name`,
+    index_name as `name`,
+    cardinality as `cardinality`,
+    index_type as `index_type`,
+    non_unique as `non_unique`,
+    expression as `expression`,
+    column_name,
+    collation,
+    nullable,
+    sub_part
+FROM INFORMATION_SCHEMA.STATISTICS
+%WHERE%
+"""
 
 SQL_SCHEMAS_FOREIGN_KEYS = """\
 SELECT

@@ -22,6 +22,7 @@ from datadog_checks.mysql.queries import (
     SQL_SCHEMAS_INDEXES,
     SQL_SCHEMAS_INDEXES_8_0_13,
     SQL_SCHEMAS_INDEXES_NO_JSON,
+    SQL_SCHEMAS_INDEXES_NO_JSON_8_0_13,
     SQL_SCHEMAS_PARTITION,
     SQL_SCHEMAS_PARTITION_NO_JSON,
     SQL_SCHEMAS_TABLES,
@@ -220,9 +221,11 @@ class MySqlSchemaCollector(SchemaCollector):
                 cursor.execute(columns_query, (table_name, table_schema))
                 columns = cursor.fetchall()
                 # Get indexes
-                indexes_query = SQL_SCHEMAS_INDEXES_NO_JSON.replace(
-                    "%WHERE%", "WHERE table_name = %s AND table_schema = %s"
-                )
+                indexes_query = (
+                    SQL_SCHEMAS_INDEXES_NO_JSON_8_0_13
+                    if self._check.version.flavor == 'MySQL' and self._check.version.version_compatible((8, 0, 13))
+                    else SQL_SCHEMAS_INDEXES_NO_JSON
+                ).replace("%WHERE%", "WHERE table_name = %s AND table_schema = %s")
                 cursor.execute(indexes_query, (table_name, table_schema))
                 indexes_rows = cursor.fetchall()
                 indexes_dict = {}
