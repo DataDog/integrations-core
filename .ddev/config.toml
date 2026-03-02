@@ -14,10 +14,12 @@ teamcity = "TeamCity"
 win32_event_log = "Windows Event Log"
 krakend = "KrakenD"
 lustre = "Lustre"
+prefect = "Prefect"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
 lustre = "lustre."
+prefect = "prefect.server."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -208,3 +210,4 @@ __pycache__ = false
 [overrides.manifest.platforms]
 krakend = ["linux", "windows", "mac_os"]
 lustre = ["linux", "windows", "mac_os"]
+prefect = ["linux", "windows", "mac_os"]
