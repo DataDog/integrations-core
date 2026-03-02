@@ -11,7 +11,7 @@ def _parse_time(ts: str | None, log: CheckLoggingAdapter | None = None) -> datet
     if not ts or ts == "null":
         return None
     try:
-        return datetime.fromisoformat(ts.replace('Z', '+00:00'))
+        return datetime.fromisoformat(ts)
     except ValueError:
         if log:
             log.error("Could not parse timestamp: %s", ts)

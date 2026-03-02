@@ -731,8 +731,8 @@
               "flow_run_run_count": 1,
               "expected_start_time": "2026-01-20T15:00:10.000000Z",
               "start_time": "2026-01-20T15:00:15.000000Z",
-              "end_time": "2026-01-20T15:00:20.000000Z",
-              "total_run_time": 5.0,
+              "end_time": "2026-01-20T15:00:20.333000Z",
+              "total_run_time": 5.333,
               "task_inputs": {}
             }
           },
@@ -923,6 +923,207 @@
           "id": "evt-0009",
           "follows": "evt-0008",
           "received": "2026-01-20T15:00:45.050000Z"
+        },
+        {
+          "occurred": "2026-01-20T15:00:46.000000Z",
+          "event": "prefect.task-run.Completed",
+          "resource": {
+            "prefect.resource.id": "prefect.task-run.tr-3",
+            "prefect.resource.name": "task-3",
+            "prefect.run-count": "2",
+            "prefect.state-name": "Completed",
+            "prefect.state-type": "COMPLETED",
+            "prefect.state-message": "",
+            "prefect.state-timestamp": "2026-01-20T15:00:46.000000+00:00",
+            "prefect.orchestration": "client"
+          },
+          "related": [
+            { "prefect.resource.id": "prefect.flow-run.fr-completed", "prefect.resource.role": "flow-run", "prefect.resource.name": "fr-completed" },
+            { "prefect.resource.id": "prefect.flow.f-1", "prefect.resource.role": "flow", "prefect.resource.name": "flow-1" },
+            { "prefect.resource.id": "prefect.deployment.d-1", "prefect.resource.role": "deployment", "prefect.resource.name": "deployment-1" },
+            { "prefect.resource.id": "prefect.work-queue.wq-1", "prefect.resource.role": "work-queue", "prefect.resource.name": "default-queue" },
+            { "prefect.resource.id": "prefect.work-pool.wp-1", "prefect.resource.role": "work-pool", "prefect.resource.name": "default-pool" }
+          ],
+          "payload": {
+            "initial_state": { "name": "Running", "type": "RUNNING", "message": "", "state_details": {} },
+            "intended": { "from": "RUNNING", "to": "COMPLETED" },
+            "validated_state": { "name": "Completed", "type": "COMPLETED", "message": "", "state_details": {} },
+            "task_run": {
+              "name": "task-3",
+              "task_key": "task-3",
+              "dynamic_key": "dyn-tr-3.1",
+              "run_count": 2,
+              "flow_run_run_count": 1,
+              "start_time": "2026-01-20T15:01:50.000000Z",
+              "end_time": "2026-01-20T15:01:55.000000Z",
+              "total_run_time": 5.0,
+              "task_inputs": {}
+            }
+          },
+          "id": "evt-0009.1",
+          "follows": "evt-0009",
+          "received": "2026-01-20T15:00:46.050000Z"
+        },
+        {
+          "occurred": "2026-01-20T15:00:47.000000Z",
+          "event": "prefect.task-run.Completed",
+          "resource": {
+            "prefect.resource.id": "prefect.task-run.tr-1",
+            "prefect.resource.name": "task-1",
+            "prefect.run-count": "2",
+            "prefect.state-name": "Completed",
+            "prefect.state-type": "COMPLETED",
+            "prefect.state-message": "",
+            "prefect.state-timestamp": "2026-01-20T15:00:47.000000+00:00",
+            "prefect.orchestration": "client"
+          },
+          "related": [
+            { "prefect.resource.id": "prefect.flow-run.fr-completed", "prefect.resource.role": "flow-run", "prefect.resource.name": "fr-completed" },
+            { "prefect.resource.id": "prefect.flow.f-1", "prefect.resource.role": "flow", "prefect.resource.name": "flow-1" },
+            { "prefect.resource.id": "prefect.deployment.d-1", "prefect.resource.role": "deployment", "prefect.resource.name": "deployment-1" },
+            { "prefect.resource.id": "prefect.work-queue.wq-1", "prefect.resource.role": "work-queue", "prefect.resource.name": "default-queue" },
+            { "prefect.resource.id": "prefect.work-pool.wp-1", "prefect.resource.role": "work-pool", "prefect.resource.name": "default-pool" }
+          ],
+          "payload": {
+            "initial_state": { "name": "Running", "type": "RUNNING", "message": "", "state_details": {} },
+            "intended": { "from": "RUNNING", "to": "COMPLETED" },
+            "validated_state": { "name": "Completed", "type": "COMPLETED", "message": "", "state_details": {} },
+            "task_run": {
+              "name": "task-1",
+              "task_key": "task-1",
+              "dynamic_key": "dyn-tr-1.1",
+              "run_count": 2,
+              "flow_run_run_count": 1,
+              "expected_start_time": "2026-01-20T15:01:10.123000Z",
+              "start_time": "2026-01-20T15:01:10.123000Z",
+              "end_time": "2026-01-20T15:01:15.456000Z",
+              "total_run_time": 5.333,
+              "task_inputs": {}
+            }
+          },
+          "id": "evt-0009.2",
+          "follows": "evt-0009.1",
+          "received": "2026-01-20T15:00:47.050000Z"
+        },
+        {
+          "occurred": "2026-01-20T15:00:26.000000Z",
+          "event": "prefect.task-run.Crashed",
+          "resource": {
+            "prefect.resource.id": "prefect.task-run.tr-7",
+            "prefect.resource.name": "task-7",
+            "prefect.run-count": "1",
+            "prefect.state-name": "Crashed",
+            "prefect.state-type": "CRASHED",
+            "prefect.state-message": "",
+            "prefect.state-timestamp": "2026-01-20T15:00:26.000000+00:00",
+            "prefect.orchestration": "client"
+          },
+          "related": [
+            { "prefect.resource.id": "prefect.flow-run.fr-late", "prefect.resource.role": "flow-run", "prefect.resource.name": "fr-late" },
+            { "prefect.resource.id": "prefect.flow.f-1", "prefect.resource.role": "flow", "prefect.resource.name": "flow-1" },
+            { "prefect.resource.id": "prefect.deployment.d-1", "prefect.resource.role": "deployment", "prefect.resource.name": "deployment-1" },
+            { "prefect.resource.id": "prefect.work-queue.wq-1", "prefect.resource.role": "work-queue", "prefect.resource.name": "default-queue" },
+            { "prefect.resource.id": "prefect.work-pool.wp-1", "prefect.resource.role": "work-pool", "prefect.resource.name": "default-pool" }
+          ],
+          "payload": {
+            "initial_state": { "name": "Running", "type": "RUNNING", "message": "", "state_details": {} },
+            "intended": { "from": "RUNNING", "to": "CRASHED" },
+            "validated_state": { "name": "Crashed", "type": "CRASHED", "message": "", "state_details": {} },
+            "task_run": {
+              "name": "task-7",
+              "task_key": "task-7",
+              "dynamic_key": "dyn-tr-7",
+              "run_count": 1,
+              "flow_run_run_count": 1,
+              "expected_start_time": "2026-01-20T15:00:26.000000Z",
+              "start_time": "2026-01-20T15:00:26.000000Z",
+              "total_run_time": 0.0,
+              "task_inputs": {}
+            }
+          },
+          "id": "evt-0011",
+          "follows": null,
+          "received": "2026-01-20T15:00:26.050000Z"
+        },
+        {
+          "occurred": "2026-01-20T15:00:27.000000Z",
+          "event": "prefect.task-run.Cancelled",
+          "resource": {
+            "prefect.resource.id": "prefect.task-run.tr-9",
+            "prefect.resource.name": "task-9",
+            "prefect.run-count": "1",
+            "prefect.state-name": "Cancelled",
+            "prefect.state-type": "CANCELLED",
+            "prefect.state-message": "",
+            "prefect.state-timestamp": "2026-01-20T15:00:27.000000+00:00",
+            "prefect.orchestration": "client"
+          },
+          "related": [
+            { "prefect.resource.id": "prefect.flow-run.fr-late", "prefect.resource.role": "flow-run", "prefect.resource.name": "fr-late" },
+            { "prefect.resource.id": "prefect.flow.f-1", "prefect.resource.role": "flow", "prefect.resource.name": "flow-1" },
+            { "prefect.resource.id": "prefect.deployment.d-1", "prefect.resource.role": "deployment", "prefect.resource.name": "deployment-1" },
+            { "prefect.resource.id": "prefect.work-queue.wq-1", "prefect.resource.role": "work-queue", "prefect.resource.name": "default-queue" },
+            { "prefect.resource.id": "prefect.work-pool.wp-1", "prefect.resource.role": "work-pool", "prefect.resource.name": "default-pool" }
+          ],
+          "payload": {
+            "initial_state": { "name": "Running", "type": "RUNNING", "message": "", "state_details": {} },
+            "intended": { "from": "RUNNING", "to": "CANCELLED" },
+            "validated_state": { "name": "Cancelled", "type": "CANCELLED", "message": "", "state_details": {} },
+            "task_run": {
+              "name": "task-9",
+              "task_key": "task-9",
+              "dynamic_key": "dyn-tr-9",
+              "run_count": 1,
+              "flow_run_run_count": 1,
+              "expected_start_time": "2026-01-20T15:00:27.000000Z",
+              "start_time": "2026-01-20T15:00:27.000000Z",
+              "total_run_time": 0.0,
+              "task_inputs": {}
+            }
+          },
+          "id": "evt-0012",
+          "follows": null,
+          "received": "2026-01-20T15:00:27.050000Z"
+        },
+        {
+          "occurred": "2026-01-20T15:00:27.100000Z",
+          "event": "prefect.task-run.Cancelling",
+          "resource": {
+            "prefect.resource.id": "prefect.task-run.tr-9.1",
+            "prefect.resource.name": "task-9",
+            "prefect.run-count": "1",
+            "prefect.state-name": "Cancelling",
+            "prefect.state-type": "CANCELLING",
+            "prefect.state-message": "",
+            "prefect.state-timestamp": "2026-01-20T15:00:27.100000+00:00",
+            "prefect.orchestration": "client"
+          },
+          "related": [
+            { "prefect.resource.id": "prefect.flow-run.fr-late", "prefect.resource.role": "flow-run", "prefect.resource.name": "fr-late" },
+            { "prefect.resource.id": "prefect.flow.f-1", "prefect.resource.role": "flow", "prefect.resource.name": "flow-1" },
+            { "prefect.resource.id": "prefect.deployment.d-1", "prefect.resource.role": "deployment", "prefect.resource.name": "deployment-1" },
+            { "prefect.resource.id": "prefect.work-queue.wq-1", "prefect.resource.role": "work-queue", "prefect.resource.name": "default-queue" },
+            { "prefect.resource.id": "prefect.work-pool.wp-1", "prefect.resource.role": "work-pool", "prefect.resource.name": "default-pool" }
+          ],
+          "payload": {
+            "initial_state": { "name": "Running", "type": "RUNNING", "message": "", "state_details": {} },
+            "intended": { "from": "RUNNING", "to": "CANCELLING" },
+            "validated_state": { "name": "Cancelling", "type": "CANCELLING", "message": "", "state_details": {} },
+            "task_run": {
+              "name": "task-9",
+              "task_key": "task-9",
+              "dynamic_key": "dyn-tr-9.1",
+              "run_count": 1,
+              "flow_run_run_count": 1,
+              "expected_start_time": "2026-01-20T15:00:27.000000Z",
+              "start_time": "2026-01-20T15:00:27.000000Z",
+              "total_run_time": 0.0,
+              "task_inputs": {}
+            }
+          },
+          "id": "evt-0013",
+          "follows": "evt-0012",
+          "received": "2026-01-20T15:00:27.150000Z"
         },
       
         {

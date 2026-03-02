@@ -1,7 +1,10 @@
+from functools import cached_property
+
+from .utils import _parse_time
+
+
 class EventManager:
     def __init__(self, event: dict):
-        from .utils import _parse_time
-
         self.event = event
 
         self.id = event.get('id', '')
@@ -32,10 +35,10 @@ class EventManager:
         self.initial_state_name = self.initial_state.get('name', '')  # e.g. "AwaitingRetry"
         self.initial_state_type = self.initial_state.get('type', '')  # e.g. "SCHEDULED"
 
-    @property
-    def event_related(self) -> dict:
+    @cached_property
+    def event_related(self) -> dict[str, dict[str, str]]:
         related_raw = self.event.get('related', [])
-        related = {}
+        related: dict[str, dict[str, str]] = {}
         for r in related_raw:
             role = r.get('prefect.resource.role')
             if role:
@@ -45,7 +48,7 @@ class EventManager:
                 }
         return related
 
-    @property
+    @cached_property
     def tags(self) -> list[str]:
         tags = [
             f"resource_name:{self.resource_name}",
@@ -59,31 +62,31 @@ class EventManager:
             tags.append(f"{role}_name:{val.get('name', '')}")
         return tags
 
-    @property
+    @cached_property
     def flow_tags(self) -> list[str]:
         if self.event_type.startswith('prefect.flow-run') or self.event_type.startswith('prefect.task-run'):
             return [
-                f"work_pool_id:{self.event_related.get('work-pool', {}).get('id')}",
-                f"work_pool_name:{self.event_related.get('work-pool', {}).get('name')}",
-                f"work_queue_id:{self.event_related.get('work-queue', {}).get('id')}",
-                f"work_queue_name:{self.event_related.get('work-queue', {}).get('name')}",
-                f"deployment_id:{self.event_related.get('deployment', {}).get('id')}",
-                f"deployment_name:{self.event_related.get('deployment', {}).get('name')}",
-                f"flow_id:{self.event_related.get('flow', {}).get('id')}",
+                f"work_pool_id:{self.event_related.get('work-pool', {}).get('id', '')}",
+                f"work_pool_name:{self.event_related.get('work-pool', {}).get('name', '')}",
+                f"work_queue_id:{self.event_related.get('work-queue', {}).get('id', '')}",
+                f"work_queue_name:{self.event_related.get('work-queue', {}).get('name', '')}",
+                f"deployment_id:{self.event_related.get('deployment', {}).get('id', '')}",
+                f"deployment_name:{self.event_related.get('deployment', {}).get('name', '')}",
+                f"flow_id:{self.event_related.get('flow', {}).get('id', '')}",
             ]
         else:
             return []
 
-    @property
+    @cached_property
     def task_tags(self) -> list[str]:
         if self.event_type.startswith('prefect.task-run'):
             return self.flow_tags + [
-                f"task_key:{self.payload.get('task_run', {}).get('task_key')}",
+                f"task_key:{self.payload.get('task_run', {}).get('task_key', '')}",
             ]
         else:
             return []
 
-    @property
+    @cached_property
     def task_run_dependencies(self) -> list[str]:
         if not self.event_type.startswith("prefect.task-run"):
             return []
@@ -102,7 +105,7 @@ class EventManager:
                 )
         return dependencies
 
-    @property
+    @cached_property
     def message(self) -> str:
         if self.event_type.startswith('prefect.flow-run') or self.event_type.startswith('prefect.task-run'):
             run_count = self.resource.get('prefect.run-count') or self.payload.get('task_run', {}).get('run_count')
@@ -125,11 +128,11 @@ class EventManager:
             message = f"{self.resource_type} {self.resource_name} with id {self.resource_id} {self.event_state_type}\n"
         return message
 
-    @property
+    @cached_property
     def msg_title(self) -> str:
         return f"[{self.resource_type}] {self.resource_name} -> {self.event_state_type}"
 
-    @property
+    @cached_property
     def alert_type(self) -> str:
         if (
             "Failed" in self.event_state_type

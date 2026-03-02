@@ -37,6 +37,12 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         self.metrics_spec = METRICS_SPEC
         self.check_initializations.append(self._parse_config)
 
+        self.collected_metrics = {}
+        self.queues_by_name = {}
+        self.pools_by_name = {}
+        self.deployments_by_id = {}
+        self.completed_flow_runs: set[str] = set()
+
     def _parse_config(self):
         self.url = self.config.prefect_url.rstrip('/')
 
@@ -65,7 +71,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self.log.error("Error parsing persistent cache value for key %s", key)
             return {}
 
-    # todo mostrar excepcion parse time
     def _get_last_check_time(self):
         last_check = self.read_persistent_cache(self.LAST_CHECK_TIME_CACHE_KEY)
         parsed_last_check = _parse_time(last_check, self.log)
@@ -84,6 +89,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             return {k: list(v) for k, v in model.model_dump().items() if v is not None}
 
         return PrefectFilterMetrics(
+            log=self.log,
             work_pool_names=_to_dict(self.config.work_pool_names),
             work_queue_names=_to_dict(self.config.work_queue_names),
             deployment_names=_to_dict(self.config.deployment_names),
@@ -106,16 +112,14 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             response = self.http.post(url, json=payload or {})
             response.raise_for_status()
             return response.json()
-        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
-            self.log.error("Error posting to %s: %s", url, e)
+        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError):
             raise
 
     def paginate_filter(self, endpoint: str, payload: dict | None = None) -> list[dict]:
         """
         Implements pagination for /filter endpoints using limit/offset loop.
         """
-        if payload is None:
-            payload = {}
+        payload = dict(payload) if payload else {}
 
         limit = 200
         offset = 0
@@ -362,7 +366,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self.deployments_by_id[d.get('id', '')] = d.get('name', '')
 
     def _get_runs(self, type: Literal["flow_runs", "task_runs"], now_iso: str) -> list[dict]:
-        runs = []
         payload = {
             type: {
                 "operator": "or_",
@@ -371,6 +374,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 "start_time": {"after_": self.last_check_time_iso, "before_": now_iso},
             }
         }
+        # task runs don't have an end_time filter
         if type == "flow_runs":
             payload[type]["end_time"] = {"after_": self.last_check_time_iso, "before_": now_iso}
         runs = self.paginate_filter(f"/{type}/filter", payload)
@@ -471,13 +475,10 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
     def _collect_task_run_metrics(self, now_iso: str):
         task_runs = self._get_runs("task_runs", now_iso)
-        task_tags = set[tuple[str, ...]]()
+        task_tags: set[tuple[str, ...]] = set()
         for tr in task_runs:
             state_type = tr.get('state_type', '')
-            start_time, end_time = (
-                _parse_time(tr.get('start_time'), self.log),
-                _parse_time(tr.get('end_time'), self.log),
-            )
+            start_time = _parse_time(tr.get('start_time'), self.log)
             expected_start_time = _parse_time(tr.get('expected_start_time'), self.log)
 
             tr_tags_list = sorted(
@@ -491,15 +492,9 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self._aggregate_metric("task_runs.pending.count", 1.0 if state_type == 'PENDING' else 0.0, tr_tags_list)
             self._aggregate_metric("task_runs.paused.count", 1.0 if state_type == 'PAUSED' else 0.0, tr_tags_list)
             self._aggregate_metric(
-                "task_runs.cancelled.count", 1.0 if state_type in ['CANCELLING', 'CANCELLED'] else 0.0, tr_tags_list
+                "task_runs.cancelled.count", 1.0 if state_type == 'CANCELLING' else 0.0, tr_tags_list
             )
-            self._aggregate_metric("task_runs.completed.count", 1.0 if state_type == 'COMPLETED' else 0.0, tr_tags_list)
-            self._aggregate_metric("task_runs.failed.count", 1.0 if state_type == 'FAILED' else 0.0, tr_tags_list)
-            self._aggregate_metric("task_runs.crashed.count", 1.0 if state_type == 'CRASHED' else 0.0, tr_tags_list)
             self._aggregate_metric("task_runs.running.count", 1.0 if state_type == 'RUNNING' else 0.0, tr_tags_list)
-
-            if start_time and end_time:
-                self._emit_metric("task_runs.execution_duration", (end_time - start_time).total_seconds(), tr_tags_list)
 
             self._aggregate_metric(
                 "task_runs.late_start.count",
@@ -537,6 +532,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
             self._check_retry_gaps(event_manager)
             self._check_dependency_wait(event_manager)
+            self._collect_task_run_metrics_from_events(event_manager)
             if self.collect_events:
                 self._emit_event_metrics(event_manager)
 
@@ -551,7 +547,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 "event_type": event_manager.event_type,
                 "msg_title": event_manager.msg_title,
                 "msg_text": event_manager.message,
-                "tags": event_manager.tags,
+                "tags": event_manager.tags + self.base_tags,
                 "source_type_name": event_manager.resource_type,
                 "alert_type": event_manager.alert_type,
             }
@@ -576,7 +572,30 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             retry_gap = (event_manager.occurred - await_retry_timestamp).total_seconds()
 
             flow_run_tags = event_manager.flow_tags
-            self._emit_metric("flow_runs.retry_gaps_duration", retry_gap, flow_run_tags)
+            self._emit_metric("flow_runs.retry_gaps_duration", retry_gap, flow_run_tags + self.base_tags)
+
+    def _collect_task_run_metrics_from_events(self, event_manager: EventManager) -> None:
+        """
+        Collects task run metrics from Prefect events instead of API.
+        This includes cancelled, completed, failed, crashed counts and execution duration.
+        """
+        if not event_manager.event_type.startswith('prefect.task-run'):
+            return
+
+        state_type = event_manager.state_type
+        task_tags = sorted(event_manager.task_tags)
+
+        # Emit count metrics for terminal states
+        self._aggregate_metric("task_runs.cancelled.count", 1.0 if state_type == 'CANCELLED' else 0.0, task_tags)
+        self._aggregate_metric("task_runs.completed.count", 1.0 if state_type == 'COMPLETED' else 0.0, task_tags)
+        self._aggregate_metric("task_runs.failed.count", 1.0 if state_type == 'FAILED' else 0.0, task_tags)
+        self._aggregate_metric("task_runs.crashed.count", 1.0 if state_type == 'CRASHED' else 0.0, task_tags)
+
+        # Emit execution duration metric when task run has completed
+        task_run_data = event_manager.payload.get('task_run', {})
+        duration = task_run_data.get('total_run_time', None)
+        if duration:
+            self._emit_metric("task_runs.execution_duration", duration, task_tags)
 
     def _check_dependency_wait(self, event_manager: EventManager) -> None:
         if event_manager.event_type == 'prefect.flow-run.Completed':
@@ -616,7 +635,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                     self._emit_metric(
                         "task_runs.dependency_wait_duration",
                         (event_manager.occurred - last_dep_finished).total_seconds(),
-                        task_tags,
+                        task_tags + self.base_tags,
                     )
                 else:
                     self.log.error(

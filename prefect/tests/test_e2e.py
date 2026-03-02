@@ -22,11 +22,6 @@ def ready_check(dd_environment, dd_run_check: Callable, aggregator: AggregatorSt
     return check
 
 
-@pytest.fixture(scope='module')
-def e2e_aggregator(dd_agent_check):
-    return dd_agent_check()
-
-
 @pytest.mark.e2e
 def test_e2e_metrics(dd_agent_check):
     aggregator = dd_agent_check()

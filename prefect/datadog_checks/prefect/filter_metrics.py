@@ -1,23 +1,55 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from datadog_checks.base.utils.common import pattern_filter
 
 from .event_manager import EventManager
 
+if TYPE_CHECKING:
+    from datadog_checks.base.log import CheckLoggingAdapter
+
 
 class Fallback:
-    def __init__(self, key: str, value: str, custom_key: str, resolver: Fallback | None = None):
+    def __init__(
+        self, key: str, value: str, custom_key: str, log: CheckLoggingAdapter, resolver: Fallback | None = None
+    ):
+        '''
+        e.g Flow runs don't contain deployment_name, only id. So we use the deployment_id to lookup the deployment_name.
+        - key is the name of the key used to lookup the value in the original obj. e.g deployment_id in deployments
+          is "id"
+        - value is the name of the key that contains the value in the original obj. e.g deployment_name in deployments
+          is "name"
+        - custom_key is the name of the key in the object that needs remapping. e.g deployment_id in flow runs
+
+        e.g Task runs don't contain deployment_name, only information on the flow run. So we use the flow_run info to
+        lookup the deployment_name.
+        - key is the name of the key in the intermediate object. e.g flow_run_id in flow_runs is "id"
+        - value is the name of the key that contains the value in the intermediate object. e.g deployment_id in flow
+          runs is "deployment_id"
+        - custom_key is the name of the key in the object that needs remapping. e.g flow_run_id in task runs
+        - resolver is the fallback to resolve the value through. e.g self.deployment_fallback to parse deployment_id
+          to deployment_name
+        '''
         self.key = key  # which field to use as the mapping key e.g. "id"
         self.custom_key = custom_key  # which field to use for lookup e.g. "flow_run_id"
         self.value = value  # which field to use as the mapping value e.g. "name"
         self.resolver = resolver  # optional fallback to resolve the value through
         self.mappings: dict[str, str] = {}
+        self.log = log
 
     def add_mapping(self, element: dict[str, str]):
         raw_value = element[self.value]
+        if raw_value is None:
+            self.log.debug("Value is None for key %s and value %s", self.key, self.value)
+            return
         if self.resolver:
             raw_value = self.resolver.mappings.get(raw_value, raw_value)
-        self.mappings[element[self.key]] = raw_value
+        mapping_key = element[self.key]
+        if mapping_key is None:
+            self.log.debug("Mapping key is None for key %s and value %s", self.key, self.value)
+            return
+        self.mappings[mapping_key] = raw_value
 
     def get(self, element: dict[str, str]) -> str | None:
         return self.mappings.get(element.get(self.custom_key, ''))
@@ -26,11 +58,14 @@ class Fallback:
 class PrefectFilterMetrics:
     def __init__(
         self,
+        log: CheckLoggingAdapter,
         work_pool_names: dict[str, list[str]] | None = None,
         work_queue_names: dict[str, list[str]] | None = None,
         deployment_names: dict[str, list[str]] | None = None,
         event_names: dict[str, list[str]] | None = None,
     ):
+        self.log = log
+
         self.work_pool_names = work_pool_names or {}
         self.work_queue_names = work_queue_names or {}
         self.deployment_names = deployment_names or {}
@@ -43,12 +78,12 @@ class PrefectFilterMetrics:
         self.task_run_cache: dict[str, bool] = {}
         self.event_cache: dict[str, bool] = {}
 
-        self.deployment_fallback = Fallback("id", "name", "deployment_id")
-        self.flow_run_fallback = Fallback("id", "flow_name", "flow_run_id")
-        self.flow_run_to_work_pool_fallback = Fallback("id", "work_pool_name", "flow_run_id")
-        self.flow_run_to_queue_fallback = Fallback("id", "work_queue_name", "flow_run_id")
+        self.deployment_fallback = Fallback("id", "name", "deployment_id", log)
+        self.flow_run_fallback = Fallback("id", "flow_name", "flow_run_id", log)
+        self.flow_run_to_work_pool_fallback = Fallback("id", "work_pool_name", "flow_run_id", log)
+        self.flow_run_to_queue_fallback = Fallback("id", "work_queue_name", "flow_run_id", log)
         self.flow_run_to_deployment_fallback = Fallback(
-            "id", "deployment_id", "flow_run_id", resolver=self.deployment_fallback
+            "id", "deployment_id", "flow_run_id", log, resolver=self.deployment_fallback
         )
 
     def filter_work_pools(self, work_pools: list[dict[str, str]]) -> list[dict[str, str]]:
@@ -152,11 +187,10 @@ class PrefectFilterMetrics:
                     value = e.get(field)
                 elif fallback_to_use:
                     value = fallback_to_use.get(e)
+                else:
+                    self.log.debug("Including event because no fallback or field found for %s", field)
 
-                if not value:
-                    break
-
-                if value not in cache and check_pattern:
+                if value is not None and value not in cache and check_pattern:
                     if list_of_patterns:
                         cache[value] = bool(
                             pattern_filter(
@@ -169,7 +203,7 @@ class PrefectFilterMetrics:
                     else:
                         cache[value] = True
 
-                if not cache[value]:
+                if value is not None and value in cache and not cache[value]:
                     break
             else:
                 result.append(e)

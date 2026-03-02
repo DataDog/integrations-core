@@ -125,22 +125,8 @@ def test_events(
     )
 
 
-def test_filter_metrics():
-    """
-    1. Work pool filtering with whitelist/blacklist
-    2. Work queue filtering (depends on work pools)
-    3. Deployment filtering (depends on work pools and work queues)
-    4. Flow run filtering (depends on work pools, work queues, deployments via fallback)
-    5. Task run filtering (depends on flow runs via fallback)
-    """
-    # Create filter instance with all filters configured
-    filter_metrics = PrefectFilterMetrics(
-        work_pool_names={"include": ["^production-", "^staging-"], "exclude": ["^staging-"]},
-        work_queue_names={"include": ["^high-"]},
-        deployment_names={"include": ["^api-", "^worker-"], "exclude": ["^worker-"]},
-    )
-
-    # 1. Test work pool filtering
+def test_filter_work_pools(filter_metrics):
+    """Test work pool filtering with whitelist/blacklist."""
     work_pools = [
         {"id": "pool1", "name": "production-pool"},
         {"id": "pool2", "name": "production-pool-2"},
@@ -157,7 +143,9 @@ def test_filter_metrics():
     assert filter_metrics.work_pool_cache["staging-pool"] is False
     assert filter_metrics.work_pool_cache["dev-pool"] is False
 
-    # 2. Test work queue filtering (depends on work pool cache)
+
+def test_filter_work_queues(filter_metrics):
+    """Test work queue filtering (depends on work pool cache)."""
     work_queues = [
         {"id": "queue1", "name": "high-priority", "work_pool_name": "production-pool"},
         {"id": "queue2", "name": "low-priority", "work_pool_name": "production-pool"},
@@ -171,7 +159,9 @@ def test_filter_metrics():
     assert filter_metrics.work_queue_cache["high-priority"] is True
     assert filter_metrics.work_queue_cache["low-priority"] is False  # Not whitelisted
 
-    # 3. Test deployment filtering (depends on work pool and work queue caches)
+
+def test_filter_deployments(filter_metrics):
+    """Test deployment filtering (depends on work pool and work queue caches)."""
     deployments = [
         {
             "id": "dep1",
@@ -205,7 +195,33 @@ def test_filter_metrics():
     assert filter_metrics.deployment_fallback.mappings["dep2"] == "worker-deployment"
     assert filter_metrics.deployment_fallback.mappings["dep3"] == "api-deployment-2"
 
-    # 4. Test flow run filtering (uses deployment_id fallback to check deployment_name)
+
+def test_filter_flow_runs(filter_metrics):
+    """Test flow run filtering (uses deployment_id fallback to check deployment_name)."""
+    # First, populate deployment fallback mappings
+    filter_metrics.filter_deployments(
+        [
+            {
+                "id": "dep1",
+                "name": "api-deployment",
+                "work_pool_name": "production-pool",
+                "work_queue_name": "high-priority",
+            },
+            {
+                "id": "dep2",
+                "name": "worker-deployment",
+                "work_pool_name": "production-pool",
+                "work_queue_name": "high-priority",
+            },
+            {
+                "id": "dep3",
+                "name": "api-deployment-2",
+                "work_pool_name": "staging-pool",
+                "work_queue_name": "high-priority-2",
+            },
+        ]
+    )
+
     flow_runs = [
         {
             "id": "fr1",
@@ -240,7 +256,7 @@ def test_filter_metrics():
     assert len(filtered_flow_runs) == 1
     assert filtered_flow_runs[0]["name"] == "scheduled-flow"
 
-    # Verify that the three flow run to fallback mappings were created properly
+    # Verify that the flow run to fallback mappings were created properly
     assert filter_metrics.flow_run_to_deployment_fallback.mappings["fr1"] == "api-deployment"
     assert filter_metrics.flow_run_to_deployment_fallback.mappings["fr2"] == "api-deployment"
     assert filter_metrics.flow_run_to_deployment_fallback.mappings["fr3"] == "worker-deployment"
@@ -256,7 +272,59 @@ def test_filter_metrics():
     assert filter_metrics.flow_run_to_queue_fallback.mappings["fr3"] == "low-priority"
     assert filter_metrics.flow_run_to_queue_fallback.mappings["fr4"] == "high-priority-2"
 
-    # 5. Test task run filtering (uses flow_name fallback to check flow_run_cache)
+
+def test_filter_task_runs(filter_metrics):
+    """Test task run filtering (uses flow_run_id fallback to check flow_run_cache)."""
+    # First, populate flow run cache and fallback mappings
+    filter_metrics.filter_deployments(
+        [
+            {
+                "id": "dep1",
+                "name": "api-deployment",
+                "work_pool_name": "production-pool",
+                "work_queue_name": "high-priority",
+            },
+            {
+                "id": "dep2",
+                "name": "worker-deployment",
+                "work_pool_name": "production-pool",
+                "work_queue_name": "high-priority",
+            },
+        ]
+    )
+
+    flow_runs = [
+        {
+            "id": "fr1",
+            "name": "scheduled-flow",
+            "work_pool_name": "production-pool",
+            "work_queue_name": "high-priority",
+            "deployment_id": "dep1",
+        },
+        {
+            "id": "fr2",
+            "name": "manual-flow",
+            "work_pool_name": "staging-pool",
+            "work_queue_name": "high-priority-2",
+            "deployment_id": "dep1",
+        },
+        {
+            "id": "fr3",
+            "name": "scheduled-flow-2",
+            "work_pool_name": "production-pool",
+            "work_queue_name": "low-priority",
+            "deployment_id": "dep2",
+        },
+        {
+            "id": "fr4",
+            "name": "scheduled-flow-3",
+            "work_pool_name": "staging-pool",
+            "work_queue_name": "high-priority-2",
+            "deployment_id": "dep3",
+        },
+    ]
+    filter_metrics.filter_flow_runs(flow_runs)
+
     task_runs = [
         {"id": "tr1", "flow_run_id": "fr1"},
         {"id": "tr2", "flow_run_id": "fr2"},
@@ -268,10 +336,81 @@ def test_filter_metrics():
     assert filtered_task_runs[0]["id"] == "tr1"
 
 
+def test_filter_metrics_no_rules_configured(check):
+    """Test that when no filter rules are configured, everything is included."""
+    filter_metrics = PrefectFilterMetrics(log=check.log)
+
+    # Test work pools - all should be included
+    work_pools = [
+        {"id": "pool1", "name": "production-pool"},
+        {"id": "pool2", "name": "staging-pool"},
+        {"id": "pool3", "name": "dev-pool"},
+    ]
+    filtered_pools = filter_metrics.filter_work_pools(work_pools)
+    assert len(filtered_pools) == 3
+
+    # Test work queues - all should be included
+    work_queues = [
+        {"id": "queue1", "name": "high-priority", "work_pool_name": "production-pool"},
+        {"id": "queue2", "name": "low-priority", "work_pool_name": "production-pool"},
+    ]
+    filtered_queues = filter_metrics.filter_work_queues(work_queues)
+    assert len(filtered_queues) == 2
+
+    # Test deployments - all should be included
+    deployments = [
+        {
+            "id": "dep1",
+            "name": "api-deployment",
+            "work_pool_name": "production-pool",
+            "work_queue_name": "high-priority",
+        },
+        {
+            "id": "dep2",
+            "name": "worker-deployment",
+            "work_pool_name": "production-pool",
+            "work_queue_name": "high-priority",
+        },
+    ]
+    filtered_deployments = filter_metrics.filter_deployments(deployments)
+    assert len(filtered_deployments) == 2
+
+    # Test flow runs - all should be included
+    filter_metrics.filter_deployments(deployments)  # Populate deployment fallback
+    flow_runs = [
+        {
+            "id": "fr1",
+            "name": "scheduled-flow",
+            "work_pool_name": "production-pool",
+            "work_queue_name": "high-priority",
+            "deployment_id": "dep1",
+        },
+        {
+            "id": "fr2",
+            "name": "manual-flow",
+            "work_pool_name": "staging-pool",
+            "work_queue_name": "low-priority",
+            "deployment_id": "dep2",
+        },
+    ]
+    filtered_flow_runs = filter_metrics.filter_flow_runs(flow_runs)
+    assert len(filtered_flow_runs) == 2
+
+    # Test task runs - all should be included
+    filter_metrics.filter_flow_runs(flow_runs)  # Populate flow run cache
+    task_runs = [
+        {"id": "tr1", "flow_run_id": "fr1"},
+        {"id": "tr2", "flow_run_id": "fr2"},
+    ]
+    filtered_task_runs = filter_metrics.filter_task_runs(task_runs)
+    assert len(filtered_task_runs) == 2
+
+
 @pytest.fixture
-def filter_metrics():
+def filter_metrics(check):
     """Fixture to initialize PrefectFilterMetrics with standard rules and pre-populated caches."""
     f = PrefectFilterMetrics(
+        log=check.log,
         work_pool_names={"include": ["^production-"], "exclude": ["^staging-"]},
         work_queue_names={"include": ["^high-"]},
         deployment_names={"include": ["^api-"], "exclude": ["^worker-"]},
