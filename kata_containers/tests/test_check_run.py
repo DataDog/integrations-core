@@ -5,10 +5,10 @@ from pathlib import Path
 from unittest import mock
 
 import pytest
+from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.tagging import tagger
-from requests.exceptions import ConnectionError as RequestsConnectionError
 
 FIXTURES_PATH = Path(__file__).parent / 'fixtures'
 
@@ -56,6 +56,7 @@ def run_check_with_sandbox(dd_run_check, mock_http_response, make_check, make_sa
 
     return _run
 
+
 def test_check_collects_all_shim_metrics(aggregator, run_check_with_sandbox):
     """All metrics exposed by the shim endpoint are scraped and submitted."""
     run_check_with_sandbox()
@@ -98,9 +99,7 @@ def test_check_running_shim_count_reflects_number_of_discovered_sandboxes(aggreg
     aggregator.assert_metric('kata.running_shim_count', value=1)
 
 
-def test_check_scrapes_metrics_from_all_sandboxes(
-    dd_run_check, aggregator, mock_http_response, make_check
-):
+def test_check_scrapes_metrics_from_all_sandboxes(dd_run_check, aggregator, mock_http_response, make_check):
     """With two live sandboxes, each gets its own scrape and distinct sandbox_id tags."""
     sandbox_a, sandbox_b = 'sandbox-aaa', 'sandbox-bbb'
     storage_path = '/run/vc/sbs'
@@ -151,6 +150,7 @@ def test_check_metrics_carry_k8s_tags_when_cri_resolves_pod(
 
     for k8s_tag in K8S_TAGS:
         aggregator.assert_metric_has_tag('kata.hypervisor_vcpus', k8s_tag)
+
 
 def test_check_emits_critical_service_check_when_shim_socket_unreachable(
     dd_run_check, aggregator, make_check, make_sandbox_mocks

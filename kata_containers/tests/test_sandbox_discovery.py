@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from unittest import mock
 
+
 def test_discover_sandboxes_returns_empty_when_storage_paths_missing(make_check):
     check = make_check()
     with mock.patch('os.path.exists', return_value=False):
@@ -69,6 +70,7 @@ def test_discover_sandboxes_logs_and_continues_on_os_error(make_check):
 
     assert result == {}
 
+
 def test_refresh_scrapers_emits_zero_shim_count_when_no_sandboxes(aggregator, make_check):
     check = make_check()
 
@@ -96,6 +98,7 @@ def test_refresh_scrapers_emits_shim_count_equal_to_discovered_sandboxes(aggrega
 
     aggregator.assert_metric('kata.running_shim_count', value=1)
     assert len(check.scraper_configs) == 1
+
 
 def test_pod_uid_cache_entry_is_evicted_when_sandbox_disappears(aggregator, make_check, make_sandbox_mocks):
     """Cache entries for sandboxes that no longer exist are removed on the next refresh."""

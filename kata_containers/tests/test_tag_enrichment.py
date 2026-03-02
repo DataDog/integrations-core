@@ -5,9 +5,9 @@ from unittest import mock
 
 from datadog_checks.base.utils.tagging import tagger
 
-
 POD_UID = 'aabbccdd-1234-5678-abcd-ef0123456789'
 K8S_TAGS = ['pod_name:my-pod', 'kube_namespace:default', 'kube_deployment:my-app']
+
 
 def test_sandbox_tags_include_only_sandbox_id_without_cri(make_check):
     assert make_check()._get_sandbox_tags('my-sandbox') == ['sandbox_id:my-sandbox']
@@ -33,6 +33,7 @@ def test_sandbox_tags_include_only_sandbox_id_when_cri_returns_no_pod_uid(make_c
     check._cri_client = mock_cri
 
     assert check._get_sandbox_tags('my-sandbox') == ['sandbox_id:my-sandbox']
+
 
 def test_pod_uid_is_cached_after_first_cri_lookup(make_check):
     """The CRI is queried only once per sandbox; subsequent calls use the cache."""
