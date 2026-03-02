@@ -212,11 +212,15 @@ class GitRepository:
 
         Note: Spawns a subprocess per call - avoid in tight loops over many paths.
         """
-        try:
-            self.capture('check-ignore', '-q', str(path))
-            return True
-        except OSError:
-            return False
+        import subprocess
+
+        with self.repo_root.as_cwd():
+            result = subprocess.run(
+                ['git', 'check-ignore', '-q', str(path)],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            return result.returncode == 0
 
     @staticmethod
     def __is_warning_line(line):
