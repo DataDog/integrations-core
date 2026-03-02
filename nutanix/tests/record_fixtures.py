@@ -1,4 +1,12 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 #!/usr/bin/env python3
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+
 """Script to record fixtures from a live Nutanix Prism Central instance.
 
 This script connects to the AWS_INSTANCE defined in conftest.py and records
