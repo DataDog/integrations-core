@@ -37,11 +37,11 @@ deps = [
     "binary==1.0.2",
     "cachetools==7.0.1",
     "cryptography==46.0.5",
-    "ddtrace==4.4.0",
+    "ddtrace==4.5.0",
     "jellyfish==1.2.1",
     "lazy-loader==0.4",
     "prometheus-client==0.24.1",
-    "protobuf==6.33.5",
+    "protobuf==7.34.0",
     "pydantic==2.12.5",
     "python-dateutil==2.9.0.post0",
     "pywin32==311; sys_platform == 'win32'",
@@ -55,7 +55,7 @@ deps = [
 ]
 http = [
     "aws-requests-auth==0.4.3",
-    "botocore==1.42.54",
+    "botocore==1.42.59",
     "oauthlib==3.3.1",
     "pyjwt==2.11.0",
     "pyopenssl==25.3.0",
