@@ -105,6 +105,7 @@ class InstanceConfig(BaseModel):
     labels_mapper: Optional[MappingProxyType[str, Any]] = None
     leader_tag: Optional[bool] = None
     log_requests: Optional[bool] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, str]], ...]] = None
     min_collection_interval: Optional[float] = None

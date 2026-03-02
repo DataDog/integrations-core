@@ -199,6 +199,7 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     kafka_cluster_id: Optional[str] = None
     kafka_connect_str: str
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     produce_message: Optional[ProduceMessage] = None

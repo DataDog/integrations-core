@@ -42,3 +42,14 @@
         items:
           type: string
   fleet_configurable: true
+- name: max_returned_metrics
+  description: |
+    Limits the number of unique metric contexts the check can submit per collection cycle.
+    When the limit is reached, additional metrics are silently dropped and a warning is emitted once.
+    Set to 0 for unlimited; ignored on integrations that enforce a non-zero default (the class default is used instead).
+  hidden: true
+  fleet_configurable: true
+  value:
+    type: integer
+    display_default: null
+    example: 2000

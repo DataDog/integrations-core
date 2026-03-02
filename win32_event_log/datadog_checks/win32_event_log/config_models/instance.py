@@ -65,6 +65,7 @@ class InstanceConfig(BaseModel):
     legacy_mode: Optional[bool] = None
     legacy_mode_v2: Optional[bool] = None
     log_file: Optional[tuple[str, ...]] = None
+    max_returned_metrics: Optional[int] = None
     message_filters: Optional[tuple[str, ...]] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None

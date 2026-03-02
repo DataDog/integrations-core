@@ -57,6 +57,7 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     hostname: Optional[str] = Field(None, max_length=255, min_length=1)
     job_query_timeout: Optional[int] = Field(None, gt=0)
+    max_returned_metrics: Optional[int] = None
     message_queue_info: Optional[MessageQueueInfo] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None

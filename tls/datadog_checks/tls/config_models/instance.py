@@ -44,6 +44,7 @@ class InstanceConfig(BaseModel):
     fetch_intermediate_certs: Optional[bool] = None
     intermediate_cert_refresh_interval: Optional[float] = None
     local_cert_path: Optional[str] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     name: Optional[str] = None

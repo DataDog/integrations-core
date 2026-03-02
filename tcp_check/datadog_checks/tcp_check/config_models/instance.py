@@ -41,6 +41,7 @@ class InstanceConfig(BaseModel):
     host: str
     ip_cache_duration: Optional[float] = None
     ipv4_only: Optional[bool] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     multiple_ips: Optional[bool] = None

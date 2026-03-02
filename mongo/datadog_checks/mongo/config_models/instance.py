@@ -169,6 +169,7 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     free_storage_metrics: Optional[bool] = None
     hosts: Optional[Union[str, tuple[str, ...]]] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics_collection_interval: Optional[MetricsCollectionInterval] = None
     min_collection_interval: Optional[float] = None

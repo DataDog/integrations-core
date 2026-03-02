@@ -65,6 +65,7 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     key_file: Optional[str] = None
     max_parallel_requests: Optional[int] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     pools_size: Optional[int] = None

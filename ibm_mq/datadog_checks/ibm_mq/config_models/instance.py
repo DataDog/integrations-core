@@ -51,6 +51,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
     host: Optional[str] = Field(None, min_length=1)
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     mqcd_version: Optional[float] = Field(None, ge=1.0)

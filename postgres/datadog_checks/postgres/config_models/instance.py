@@ -280,6 +280,7 @@ class InstanceConfig(BaseModel):
     log_unobfuscated_queries: Optional[bool] = None
     max_connections: Optional[int] = None
     max_relations: Optional[int] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     obfuscator_options: Optional[ObfuscatorOptions] = None

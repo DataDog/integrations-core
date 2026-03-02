@@ -114,6 +114,7 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     extra_metrics: Optional[MappingProxyType[str, ExtraMetrics]] = None
     host: Optional[str] = None
+    max_returned_metrics: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[MappingProxyType[str, Metrics]] = None
     min_collection_interval: Optional[float] = None
