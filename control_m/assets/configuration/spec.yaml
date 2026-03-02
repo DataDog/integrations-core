@@ -107,6 +107,37 @@ files:
         enabled. When not set, no slow-run events are emitted.
       value:
         type: integer
+    - name: collect_job_logs
+      required: false
+      description: |
+        Collect job event logs from the Control-M API and ship them as
+        Datadog logs. Requires `logs_enabled: true` in the Agent config.
+
+        Accepted values:
+          - "off"    — do not collect logs (default)
+          - "failed" — collect logs for failed and canceled jobs only
+          - "all"    — collect logs for all terminal jobs
+      value:
+        type: string
+        example: "off"
+    - name: collect_job_output
+      required: false
+      description: |
+        When log collection is enabled, also fetch the job's stdout/stderr
+        output from `/run/job/<jobId>/output`. Only fetched for non-success
+        jobs. Output is truncated at `max_output_bytes`.
+      value:
+        type: boolean
+        example: false
+    - name: max_output_bytes
+      required: false
+      description: |
+        Maximum number of bytes to ship per job output. Output exceeding
+        this limit is truncated. Only applies when `collect_job_output`
+        is enabled.
+      value:
+        type: integer
+        example: 32768
     - template: instances/http
       overrides:
         headers.display_priority: 1

@@ -1,0 +1,12 @@
+Event Time            Message                                                                      	Code
+
+21:04:46 2-Mar-2026  RUN JOB:17143; DAILY FORCED, ODATE 20260302                                  	5065
+21:04:46 2-Mar-2026  FREED BY USER workbench                                                      	5402
+21:04:46 2-Mar-2026  SUBMITTED TO workbench                                                       	5105
+21:04:46 2-Mar-2026  STARTED AT 20260302210446 ON workbench                                       	5101
+21:04:46 2-Mar-2026  JOB STATE CHANGED TO Executing                                               	5120
+21:04:46 2-Mar-2026  ENDED AT 20260302210446. OSCOMPSTAT 2. RUNCNT 1                              	5100
+21:04:46 2-Mar-2026  Message from Agent: /home/workbench/ctm_agent/ctm/sysout/CMD.LOG_000brj_00001	5169
+21:04:46 2-Mar-2026  ENDED NOTOK. NUMBER OF FAILURES SET TO 1                                     	5134
+21:04:46 2-Mar-2026  JOB STATE CHANGED TO Analyzed                                                	5120
+21:04:47 2-Mar-2026  Job STATE CHANGED TO Post processed                                          	5120

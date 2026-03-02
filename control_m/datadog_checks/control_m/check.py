@@ -8,6 +8,7 @@ from typing import Any
 from datadog_checks.base import AgentCheck
 from datadog_checks.control_m.client import ControlMClient
 from datadog_checks.control_m.config_models import ConfigMixin
+from datadog_checks.control_m.logs import LogShipper
 from datadog_checks.control_m.metrics import UP_STATES, JobCollector
 
 _SERVICE_CHECK_CAN_LOGIN = "can_login"
@@ -22,7 +23,10 @@ class ControlMCheck(AgentCheck, ConfigMixin):
 
         self._client = ControlMClient(self)
         self._base_tags = [f"control_m_instance:{self._client.api_endpoint}"]
-        self._job_collector = JobCollector(self, self._client, self._base_tags)
+
+        shipper = LogShipper(self, self._client)
+        log_shipper = shipper if shipper.enabled and self.logs_enabled else None
+        self._job_collector = JobCollector(self, self._client, self._base_tags, log_shipper=log_shipper)
 
     def check(self, _: Any) -> None:
         auth_tags = self._auth_tags()

@@ -12,6 +12,7 @@ from urllib.parse import urlencode
 if TYPE_CHECKING:
     from datadog_checks.base import AgentCheck
     from datadog_checks.control_m.client import ControlMClient
+    from datadog_checks.control_m.logs import LogShipper
 
 STATUS_NORMALIZATION: dict[str, str] = {
     "ended ok": "ended_ok",
@@ -191,10 +192,17 @@ def _build_event_text(job: dict[str, Any], result: str, ctm_server: str, job_dur
 
 
 class JobCollector:
-    def __init__(self, check: AgentCheck, client: ControlMClient, base_tags: list[str]) -> None:
+    def __init__(
+        self,
+        check: AgentCheck,
+        client: ControlMClient,
+        base_tags: list[str],
+        log_shipper: LogShipper | None = None,
+    ) -> None:
         self._check = check
         self._client = client
         self._base_tags = base_tags
+        self._log_shipper = log_shipper
 
         instance = check.instance
         self._job_status_limit = int(instance.get("job_status_limit", 10000))
@@ -313,6 +321,9 @@ class JobCollector:
 
         if self._emit_job_events:
             self._emit_job_event(job, result, ctm_server, completion_tags, job_duration)
+
+        if self._log_shipper is not None:
+            self._log_shipper.ship(job, result, ctm_server, completion_tags)
 
         self._finalized_runs[dedupe_key] = now
         return True
