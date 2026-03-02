@@ -1,1 +1,1 @@
-Migrate config assertion tests to check.http.options
+Reapply auth headers to check.http after scraper started sharing it
