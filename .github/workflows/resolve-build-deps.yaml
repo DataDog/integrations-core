@@ -276,7 +276,7 @@ jobs:
       uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
       with:
         script: |
-          const { data: prs } = await github.rest.pulls.listPullRequestsAssociatedWithCommit({
+          const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
             owner: context.repo.owner,
             repo: context.repo.repo,
             commit_sha: context.sha,
@@ -360,7 +360,7 @@ jobs:
       with:
         github-token: ${{ steps.token-generator.outputs.token }}
         script: |
-          const { data: prs } = await github.rest.pulls.listPullRequestsAssociatedWithCommit({
+          const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
             owner: context.repo.owner,
             repo: context.repo.repo,
             commit_sha: context.sha,
