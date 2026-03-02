@@ -264,42 +264,6 @@ jobs:
         path: output
 
 
-  test-find-pr:
-    name: Test find-triggering-PR step
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: read
-    steps:
-    - name: Find triggering PR
-      id: find-pr
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-      with:
-        script: |
-          // Use a known merge commit from master to verify the regex works,
-          // since context.sha in a PR is a synthetic merge commit with no PR reference.
-          const testSha = 'f00a1701fbfb2d00b3f408f745f2eaad13472c27';
-          const { data: commit } = await github.rest.repos.getCommit({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: testSha,
-          });
-          const message = commit.commit.message;
-          console.log(`Commit message: ${message}`);
-          const match = message.match(/#(\d+)/);
-          if (match) {
-            const pr_ref = `[#${match[1]}](https://github.com/${context.repo.owner}/${context.repo.repo}/pull/${match[1]})`;
-            core.setOutput('pr_ref', pr_ref);
-            console.log(`pr_ref: ${pr_ref}`);
-          } else {
-            core.setOutput('pr_ref', '');
-            console.log('No PR number found in commit message.');
-          }
-    - name: Print result
-      run: |
-        echo "Motivation line preview:"
-        echo "Direct dependencies were updated in f00a1701fb${{ steps.find-pr.outputs.pr_ref != '' && format(' (triggered by PR {0})', steps.find-pr.outputs.pr_ref) || '' }}."
-
   publish:
     name: Publish artifacts and update lockfiles via PR
     if: needs.check-should-run.outputs.should_run_build == 'true' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (github.ref_name == github.event.repository.default_branch || startsWith(github.ref_name, '7.'))))
