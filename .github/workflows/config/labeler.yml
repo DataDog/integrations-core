@@ -430,10 +430,6 @@ integration/disk:
 - changed-files:
   - any-glob-to-any-file:
     - disk/**/*
-integration/dist:
-- changed-files:
-  - any-glob-to-any-file:
-    - dist/**/*
 integration/dns_check:
 - changed-files:
   - any-glob-to-any-file:
