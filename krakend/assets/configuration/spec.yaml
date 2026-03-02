@@ -1,4 +1,5 @@
 name: KrakenD
+fleet_configurable: true
 files:
 - name: krakend.yaml
   options:
@@ -13,6 +14,7 @@ files:
         KrakenD is configured to expose them (for example, for use with other monitoring tools).
         Defaults to `true`, meaning Datadog will collect these metrics if available.
         This setting in `init_config` provides a default for all instances; it can be overridden per instance.
+      fleet_configurable: true
       value:
         type: boolean
         example: true
@@ -24,6 +26,7 @@ files:
         KrakenD is configured to expose them (for example, for use with other monitoring tools).
         Defaults to `true`, meaning Datadog will collect these metrics if available.
         This setting in `init_config` provides a default for all instances; it can be overridden per instance.
+      fleet_configurable: true
       value:
         type: boolean
         example: true
@@ -41,6 +44,7 @@ files:
         This setting overrides the default provided in `init_config` for this specific instance.
 
         If this is supplied for any of the instances, it will override the default provided in `init_config`.
+      fleet_configurable: true
       value:
         type: boolean
         example: true

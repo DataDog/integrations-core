@@ -1,4 +1,5 @@
 name: HAProxy
+fleet_configurable: true
 files:
 - name: haproxy.yaml
   options:
@@ -8,6 +9,7 @@ files:
   - template: instances
     options:
     - name: use_prometheus
+      fleet_configurable: true
       hidden: true
       value:
         example: false
@@ -18,6 +20,7 @@ files:
 
         Prometheus-related options take effect only when this is set to `true`.
     - name: use_openmetrics
+      fleet_configurable: true
       value:
         example: false
         type: boolean
@@ -38,6 +41,8 @@ files:
       overrides:
         prometheus_url.required: false
     - name: url
+      fleet_configurable: true
+      formats: ["url"]
       enabled: true
       legacy: true
       value:
@@ -51,6 +56,7 @@ files:
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: status_check
+      fleet_configurable: true
       legacy: true
       value:
         example: false
@@ -62,6 +68,7 @@ files:
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: collect_aggregates_only
+      fleet_configurable: true
       legacy: true
       value:
         anyOf:
@@ -79,6 +86,7 @@ files:
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: collect_status_metrics
+      fleet_configurable: true
       legacy: true
       value:
         example: false
@@ -88,6 +96,7 @@ files:
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: collect_status_metrics_by_host
+      fleet_configurable: true
       legacy: true
       value:
         example: false
@@ -98,6 +107,7 @@ files:
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: collate_status_tags_per_host
+      fleet_configurable: true
       legacy: true
       value:
         example: true
@@ -108,6 +118,7 @@ files:
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: count_status_by_service
+      fleet_configurable: true
       legacy: true
       value:
         example: true
@@ -118,6 +129,7 @@ files:
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: tag_service_check_by_host
+      fleet_configurable: true
       legacy: true
       value:
         example: false
@@ -142,6 +154,7 @@ files:
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: services_exclude
+      fleet_configurable: true
       legacy: true
       value:
         example:
@@ -155,6 +168,7 @@ files:
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: disable_legacy_service_tag
+      fleet_configurable: true
       legacy: true
       value:
         example: false
@@ -175,6 +189,7 @@ files:
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: enable_service_check
+      fleet_configurable: true
       legacy: true
       value:
         example: false

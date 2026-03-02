@@ -37,6 +37,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     disable_legacy_cluster_tag: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     hostname: Optional[str] = None
     metric_patterns: Optional[MetricPatterns] = None
     metric_whitelist: Optional[tuple[str, ...]] = None

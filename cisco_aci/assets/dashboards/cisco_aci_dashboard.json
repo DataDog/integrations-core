@@ -1442,7 +1442,7 @@
                 "response_format": "event_list",
                 "query": {
                   "data_source": "logs_stream",
-                  "query_string": "service:cisco-aci source:cisco-aci",
+                  "query_string": "source:cisco-aci",
                   "indexes": [],
                   "storage": "hot"
                 },

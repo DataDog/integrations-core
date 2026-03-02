@@ -1,0 +1,1 @@
+Changelog check ignores the builders folder. We don't need a changelog for it.

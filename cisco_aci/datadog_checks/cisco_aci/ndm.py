@@ -28,7 +28,7 @@ def create_node_metadata(node_attrs, tags, namespace):
     """
     node = Node(attributes=node_attrs)
     hostname = node.attributes.name
-    id_tags = common_tags(node.attributes.address, hostname, namespace)
+    id_tags = [device_id_tag(namespace, node.attributes.address)]
     device_tags = [
         'device_vendor:{}'.format(VENDOR_CISCO),
         "source:cisco-aci",
@@ -65,6 +65,7 @@ def create_interface_metadata(phys_if, address, namespace):
         description=eth.attributes.desc,
         mac_address=eth.attributes.router_mac,
         admin_status=eth.attributes.admin_st,
+        is_physical=True,
     )
     if eth.ethpm_phys_if:
         interface.oper_status = eth.ethpm_phys_if.attributes.oper_st
@@ -92,7 +93,7 @@ def create_topology_link_metadata(logger, lldp_adj_eps, cdp_adj_eps, device_map,
             ),
         )
 
-        remote_device_dd_id = get_remote_device_dd_id(device_map, lldp_attrs.remote_device_dn, lldp_attrs.mgmt_ip)
+        remote_device_dd_id = get_remote_device_dd_id(device_map, lldp_attrs.remote_device_dn)
         remote_device = TopologyLinkDevice(
             name=lldp_attrs.sys_name,
             description=lldp_attrs.sys_desc,
@@ -142,15 +143,14 @@ def create_topology_link_metadata(logger, lldp_adj_eps, cdp_adj_eps, device_map,
         )
 
 
-def get_remote_device_dd_id(device_map, remote_device_dn, mgmt_ip) -> str | None:
+def get_remote_device_dd_id(device_map, remote_device_dn) -> str | None:
     """
     Get the Cisco DN for a remote device, if the device is in the device map then
     check that it matches the management IP of the LLDP neighbor, then return it
     """
     device_id = device_map.get(remote_device_dn, "")
     if device_id:
-        if device_id.endswith(mgmt_ip):
-            return device_id
+        return device_id
     return None
 
 
@@ -235,6 +235,10 @@ def append_to_payload(item, current_payload, namespace, collect_ts):
         return current_payload, new_payload
 
 
+def device_id_tag(namespace, address):
+    return f"device_id:{namespace}:{address}"
+
+
 def common_tags(address, hostname, namespace):
     """
     Return a list of common tags (following NDM standards) for a device
@@ -243,5 +247,5 @@ def common_tags(address, hostname, namespace):
         'device_ip:{}'.format(address),
         'device_namespace:{}'.format(namespace),
         'device_hostname:{}'.format(hostname),
-        'device_id:{}:{}'.format(namespace, address),
+        device_id_tag(namespace, address),
     ]

@@ -7,6 +7,7 @@ from copy import deepcopy
 import mock
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab_runner import GitlabRunnerCheck
 
 from . import common
@@ -44,3 +45,28 @@ def test_timeout(test_case, timeout_config, expected_timeout):
             verify=mock.ANY,
             allow_redirects=mock.ANY,
         )
+
+
+@pytest.mark.unit
+def test_job_queue_duration_metric(aggregator, dd_run_check, mock_data):
+    """
+    Test that the gitlab_runner_job_queue_duration_seconds histogram metric
+    is automatically collected via METRICS_LIST without user configuration.
+    """
+    config = deepcopy(common.CONFIG)
+
+    check = GitlabRunnerCheck('gitlab_runner', config['init_config'], instances=config['instances'])
+    dd_run_check(check)
+    dd_run_check(check)
+
+    expected_tags = ['runner:test-runner'] + common.CUSTOM_TAGS
+
+    # Histogram buckets (reported as .count with upper_bound tags)
+    aggregator.assert_metric(
+        'gitlab_runner.gitlab_runner_job_queue_duration_seconds.count',
+        tags=expected_tags + ['upper_bound:none'],
+    )
+    # Histogram sum
+    aggregator.assert_metric('gitlab_runner.gitlab_runner_job_queue_duration_seconds.sum', tags=expected_tags)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
