@@ -1,1 +1,1 @@
-Add library-agnostic HTTP protocol types, exception hierarchy, and `MockHTTPResponse` test helper.
+Add library-agnostic HTTP mocks/proto/exceptions and migrate intg tests.
