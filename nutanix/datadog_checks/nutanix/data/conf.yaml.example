@@ -69,134 +69,56 @@ instances:
     # pc_max_backoff_seconds: 30
 
     ## @param resource_filters - list of mappings - optional
-    ## Filter infrastructure metrics and activity data by resource properties.
-    ## Each filter: 'resource', 'property', 'patterns' (regex list), 'type' (include default, or exclude).
-    ## Exclude wins over include. No filters = collect all.
+    ## Filter which resources are collected using regex patterns on resource properties.
+    ## Each filter requires: 'resource' (type), 'patterns' (regex list).
+    ## Optional: 'property' (defaults per type), 'type' (include|exclude, default: include).
+    ## Exclude takes precedence over include.
     ##
-    ## All resources (infrastructure and activity):
-    ## - Specify any API property name (case-sensitive)
-    ## - Use '/' for nested object access (OData format, e.g., 'userReference/name')
-    ## - If property doesn't exist in the data, filter won't match
+    ## IMPORTANT Default: Only USER category tags are collected.
+    ## For SYSTEM/INTERNAL categories, explicitly configure category filters.
     ##
-    ## Infrastructure (cluster|host|vm):
-    ## - Default property: 'name'
-    ## - Common properties: name, extId, status, num_nodes, hypervisor_type
-    ##
-    ## Activity (event|task|alert|audit):
-    ## - Default properties: eventType, status, severity, auditType
-    ## - Examples: eventType, classifications, operationType, alertType, userReference/name
+    ## Resources: cluster, host, vm, event, task, alert, audit, category
+    ## Property access: Use API property names (case-sensitive).
+    ## Nested properties: 'parent/child' (e.g., 'userReference/name')
+    ## Default properties: name (infrastructure), type (category),
+    ## eventType|status|severity|auditType (activities)
     ##
     ## Examples:
-    ## - Filter clusters by name:
+    ##   # Infrastructure - include clusters by name, exclude hosts
     ##   - resource: cluster
     ##     property: name
-    ##     patterns: ['^prod-.*']
-    ## - Filter clusters by hypervisor type:
-    ##   - resource: cluster
-    ##     property: config/hypervisorTypes
-    ##     patterns: ['^AHV$']
-    ## - Filter hosts by name (exclude):
+    ##     patterns: ['^prod-']
     ##   - resource: host
     ##     property: name
     ##     type: exclude
-    ##     patterns: ['^standby-.*']
-    ## - Filter VMs by power state:
-    ##   - resource: vm
-    ##     property: powerState
-    ##     patterns: ['^ON$']
-    ## - Filter events by type:
-    ##   - resource: event
-    ##     property: eventType
-    ##     patterns: ['^PasswordAudit$', '^LicenseAudit$']
-    ## - Filter events by source entity type:
-    ##   - resource: event
-    ##     property: sourceEntityType
-    ##     patterns: ['^VM$']
-    ## - Filter tasks by status (exclude failed/canceled):
-    ##   - resource: task
-    ##     property: status
-    ##     type: exclude
-    ##     patterns: ['^FAILED$', '^CANCELED$']
-    ## - Filter tasks by operation type:
-    ##   - resource: task
-    ##     property: operationType
-    ##     patterns: ['^kClone', '^kMigrate']
-    ## - Filter alerts by severity (include WARNING and CRITICAL):
+    ##     patterns: ['^standby-']
+    ##   # Category - include SYSTEM type (overrides USER default)
+    ##   - resource: category
+    ##     property: type
+    ##     patterns: ['^SYSTEM$']
+    ##   # Activity - filter by severity, nested property, multiple patterns
     ##   - resource: alert
     ##     property: severity
     ##     patterns: ['^WARNING$', '^CRITICAL$']
-    ## - Filter alerts by alert type:
-    ##   - resource: alert
-    ##     property: alertType
-    ##     patterns: ['^A1031$', '^A130172$']
-    ## - Filter alerts by impact type:
-    ##   - resource: alert
-    ##     property: impactTypes
-    ##     patterns: ['^SystemIndicator$']
-    ## - Filter audits by type:
-    ##   - resource: audit
-    ##     property: auditType
-    ##     patterns: ['^LoginInfoAudit$', '^PasswordAudit$']
-    ## - Filter audits by operation type:
-    ##   - resource: audit
-    ##     property: operationType
-    ##     type: exclude
-    ##     patterns: ['^CREATE$']
-    ## - Filter audits by nested user property:
     ##   - resource: audit
     ##     property: userReference/name
     ##     type: exclude
     ##     patterns: ['^admin$', '^system$']
-    ## - Filter audits by user UUID (nested access):
-    ##   - resource: audit
-    ##     property: userReference/uuid
-    ##     patterns: ['^00000000-']
     #
     # resource_filters:
     #   - resource: cluster
     #     property: name
     #     patterns:
-    #     - ^prod-.*
-    #   - resource: host
-    #     property: name
-    #     type: exclude
-    #     patterns:
-    #     - ^standby-.*
-    #   - resource: event
+    #     - ^prod-
+    #   - resource: category
     #     property: type
     #     patterns:
-    #     - ^PasswordAudit$
-    #     - ^LicenseAudit$
-    #   - resource: task
-    #     property: status
-    #     type: exclude
-    #     patterns:
-    #     - ^FAILED$
-    #     - ^CANCELED$
+    #     - ^SYSTEM$
     #   - resource: alert
     #     property: severity
     #     patterns:
     #     - ^WARNING$
     #     - ^CRITICAL$
-    #   - resource: alert
-    #     property: alertType
-    #     patterns:
-    #     - ^A1031$
-    #     - ^A130172$
-    #   - resource: audit
-    #     property: auditType
-    #     patterns:
-    #     - ^LoginInfoAudit$
-    #     - ^PasswordAudit$
-    #   - resource: audit
-    #     property: userReference/name
-    #     type: exclude
-    #     patterns:
-    #     - ^system$
-    #   - resource: audit
-    #     property: userReference/uuid
-    #     patterns:
-    #     - ^00000000-
 
     ## @param collect_events - boolean - optional - default: true
     ## Whether to collect events from Prism Central.
