@@ -1,4 +1,5 @@
 name: WMI
+fleet_configurable: true
 files:
 - name: wmi_check.yaml
   options:
@@ -9,6 +10,7 @@ files:
   - template: instances
     options:
     - name: class
+      fleet_configurable: true
       required: true
       description: |
         The name of the WMI class, for example `Win32_OperatingSystem`.
@@ -18,6 +20,7 @@ files:
       value:
         type: string
     - name: metrics
+      fleet_configurable: true
       required: true
       description: |
         list of metrics you want to capture, with each item in the list being a set of:
@@ -40,6 +43,7 @@ files:
         example:
         - [<WMI_PROPERTY_NAME>, <METRIC_NAME>, <METRIC_TYPE>]
     - name: host
+      fleet_configurable: true
       required: false
       description: |
         The optional target of the WMI query.
@@ -62,6 +66,7 @@ files:
         type: string
     - name: namespace
       description: The optional WMI namespace to connect to.
+      fleet_configurable: true
       value:
         type: string
         example: 'root\cimv2'
@@ -119,6 +124,7 @@ files:
                     - 'AA%'
                     - '%BB'
             result> WHERE ( NOT ( PROP1 LIKE 'AA%' AND PROP1 LIKE '%BB' ) )
+      fleet_configurable: true
       value:
         type: array
         items:
@@ -136,6 +142,7 @@ files:
         It is used to request WMI data from the non-default provider. Available options are: `32` or `64`.
 
         See https://msdn.microsoft.com/en-us/library/aa393067.aspx
+      fleet_configurable: true
       value:
         type: integer
         example: 64
@@ -146,6 +153,7 @@ files:
         Comma-separated list of property names
         Add aliases to the property tags by appending AS <ALIAS_NAME> to the property name.
         For example: Name AS wmi_name will be tagged as wmi_name:value instead of Name:value.
+      fleet_configurable: true
       value:
         type: string
         display_default: null
@@ -166,6 +174,7 @@ files:
         It translates to a WMI query:
 
         SELECT '<TARGET_PROPERTY>' FROM '<TARGET_CLASS>' WHERE '<LINK_TARGET_CLASS_PROPERTY>' = '<LINK_SOURCE_PROPERTY>'
+      fleet_configurable: true
       value:
         type: array
         items:

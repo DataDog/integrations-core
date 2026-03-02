@@ -126,6 +126,18 @@ def _increase_txid(cur):
     assert cur.fetchone() is not None
 
 
+def _pin_backend_xmin(cur):
+    """Force the backend to acquire an MVCC snapshot, which populates
+    ``pg_stat_activity.backend_xmin``.
+    """
+    if float(POSTGRES_VERSION) >= 13.0:
+        query = 'select pg_current_snapshot();'
+    else:
+        query = 'select txid_current_snapshot();'
+    cur.execute(query)
+    assert cur.fetchone() is not None
+
+
 def test_initialization_tags(integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.run()
@@ -518,6 +530,8 @@ def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     # Start a transaction with xmin age = 1
     cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
     _increase_txid(cur)
+    # Ensure backend_xmin is populated by acquiring an MVCC snapshot
+    _pin_backend_xmin(cur)
 
     # Gather metrics
     check.run()
@@ -556,6 +570,8 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
     # Force assignement of a txid and keep the transaction opened
     _increase_txid(cur)
+    # Ensure backend_xmin is populated by acquiring an MVCC snapshot
+    _pin_backend_xmin(cur)
     start_transaction_time = time.time()
 
     aggregator.reset()

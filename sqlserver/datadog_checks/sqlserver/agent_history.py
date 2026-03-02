@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
@@ -116,7 +117,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
         self._last_collection_time = int(time.time())
         super(SqlserverAgentHistory, self).__init__(
             check,
-            run_sync=True,
+            run_sync=is_affirmative(self._config.agent_jobs_config.get('run_sync', False)),
             enabled=self._config.agent_jobs_config.get('enabled', False),
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,

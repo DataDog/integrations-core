@@ -56,6 +56,7 @@ class InstanceConfig(BaseModel):
     database: Optional[str] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     login_timeout: Optional[int] = None
     metric_groups: Optional[tuple[str, ...]] = None
     metric_patterns: Optional[MetricPatterns] = None

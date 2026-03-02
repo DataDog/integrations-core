@@ -1,38 +1,51 @@
-# Agent Check: BlueCat Edge
-
 ## Overview
 
-This check monitors [BlueCat Edge][1].
+[BlueCat Edge][1] is an intelligent DNS resolver and caching layer that leverages existing DNS infrastructure to provide unprecedented visibility and control over DNS traffic.
+
+This integration ingests the DNS query logs.
+
+- **DNS Query Logs**: Logs that capture DNS request and response activity, including queried domains and source clients.
+
+Integrate BlueCat Edge with Datadog to analyze DNS query logs using pre-built dashboards. Datadog parses and enriches these logs using built-in log pipelines, supporting search and analysis. You can also use this data with Cloud SIEM detection rules for security monitoring.
 
 ## Setup
 
-### Installation
+### Generate API credentials in BlueCat Edge
 
-The BlueCat Edge check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+1. Log in to **BlueCat Edge** using a user with the **Analyst** role or higher.
+2. Click the **Account > Profile** tab.
+3. In the **Access key sets** section, click **New**. The **Client ID** and **Secret key** are displayed.
+4. Identify your **BlueCat Edge Domain URL** using the URL of your BlueCat Edge cloud instance.
+   - For example, if your BlueCat Edge cloud instance URL is **https://myBlueCat.edge.bluec.at/**, the BlueCat Edge Domain URL is **myBlueCat.edge.bluec.at**.
 
-### Configuration
+### Connect your BlueCat Edge account to Datadog
 
-!!! Add list of steps to set up this integration !!!
-
-### Validation
-
-!!! Add steps to validate integration is functioning as expected !!!
+1. Add your `BlueCat Edge Domain`, `Client ID`, and `Secret key`.
+   | Parameter | Description |
+   | ---------- | ---------------------------------------------- |
+   | BlueCat Edge Domain | The BlueCat Edge domain of the instance. |
+   | Client ID | The Client ID for BlueCat Edge. |
+   | Secret key | The secret key for BlueCat Edge. |
+   | Collect NOERROR DNS Query Logs | Controls the collection of NOERROR DNS query logs. Enabled by default. |
+2. Click **Save**.
 
 ## Data Collected
 
+### Logs
+
+The BlueCat Edge integration collects DNS query logs and forwards them to Datadog.
+
 ### Metrics
 
-BlueCat Edge does not include any metrics.
+The BlueCat Edge integration does not include any metrics.
 
 ### Events
 
-BlueCat Edge does not include any events.
+The BlueCat Edge integration does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][2].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/help/
+[1]: https://bluecatnetworks.com/products/edge/
+[2]: https://docs.datadoghq.com/help/
