@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import subprocess
 
 import pytest
 
@@ -159,6 +160,33 @@ release:
     assert (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').read_text() == labeler_test_config(
         ["dummy", "dummy2"]
     )
+
+
+def test_labeler_ignores_gitignored_directories(fake_repo, ddev):
+    """Test that labeler validation ignores directories listed in .gitignore."""
+    subprocess.run(['git', 'init'], cwd=str(fake_repo.path), check=True, capture_output=True)
+    subprocess.run(['git', 'config', 'user.email', 'test@test.com'], cwd=str(fake_repo.path), check=True)
+    subprocess.run(['git', 'config', 'user.name', 'Test User'], cwd=str(fake_repo.path), check=True)
+
+    ignored_dir = fake_repo.path / "ignored_integration"
+    ignored_dir.mkdir()
+
+    gitignore_path = fake_repo.path / ".gitignore"
+    gitignore_content = gitignore_path.read_text() if gitignore_path.exists() else ""
+    gitignore_path.write_text(gitignore_content + "\nignored_integration/\n")
+
+    fake_repo.git.capture('add', '.gitignore')
+    fake_repo.git.capture('commit', '-m', 'Add gitignore')
+
+    (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').write_text(
+        labeler_test_config(["dummy", "dummy2"])
+    )
+
+    result = ddev('validate', 'labeler')
+
+    assert result.exit_code == 0, result.output
+    assert "Labeler configuration is valid" in result.output
+    assert "ignored_integration" not in result.output
 
 
 def labeler_test_config(integrations):

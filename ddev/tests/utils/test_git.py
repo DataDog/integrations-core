@@ -305,3 +305,37 @@ def test_is_worktree(
         repo.git.is_worktree(repo.path.parent / "wt2", include_root=include_root, only_subpaths=only_subpaths)
         is not only_subpaths
     )
+
+
+def test_is_ignored(repository):
+    """Test that is_ignored correctly identifies gitignored paths."""
+    repo = Repository(repository.path.name, str(repository.path))
+    gitignore_path = repo.path / ".gitignore"
+
+    # Directory explicitly ignored
+    test_dir = repo.path / "test_ignored_dir"
+    test_dir.mkdir()
+    gitignore_path.write_text("test_ignored_dir/\n")
+    assert repo.git.is_ignored(test_dir) is True
+
+    # Directory not in .gitignore
+    non_ignored_dir = repo.path / "test_non_ignored_dir"
+    non_ignored_dir.mkdir()
+    assert repo.git.is_ignored(non_ignored_dir) is False
+
+    # Wildcard pattern
+    (repo.path / "test.pyc").touch()
+    gitignore_path.write_text("test_ignored_dir/\n*.pyc\n")
+    assert repo.git.is_ignored(repo.path / "test.pyc") is True
+
+    (repo.path / "test.py").touch()
+    assert repo.git.is_ignored(repo.path / "test.py") is False
+
+    # Nested directory inherits parent ignore
+    nested_dir = test_dir / "nested"
+    nested_dir.mkdir(parents=True)
+    assert repo.git.is_ignored(nested_dir) is True
+
+    # Non-existent paths
+    non_existent = repo.path / "does_not_exist"
+    assert repo.git.is_ignored(non_existent) is False

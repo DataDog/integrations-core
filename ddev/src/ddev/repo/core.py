@@ -185,6 +185,9 @@ class IntegrationRegistry:
             if self.repo.git.is_worktree(path):
                 continue
 
+            if self.repo.git.is_ignored(path):
+                continue
+
             integration = self.__get_from_path(path)
 
             if selected and integration.name not in selected:

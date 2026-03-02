@@ -203,6 +203,21 @@ class GitRepository:
     def merge_base(self, ref_a: str, ref_b: str | None = "HEAD") -> str:
         return self.capture('merge-base', ref_a, ref_b).splitlines()[0]
 
+    def is_ignored(self, path: Path) -> bool:
+        """
+        Check if a path matches any .gitignore pattern in the repository.
+
+        Works for files, directories, and wildcard patterns. Returns False if the path
+        is not ignored, git is unavailable, or any error occurs.
+
+        Note: Spawns a subprocess per call - avoid in tight loops over many paths.
+        """
+        try:
+            self.capture('check-ignore', '-q', str(path))
+            return True
+        except OSError:
+            return False
+
     @staticmethod
     def __is_warning_line(line):
         return line.startswith('warning: ') or 'original line endings' in line
