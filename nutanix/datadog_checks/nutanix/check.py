@@ -22,6 +22,8 @@ class NutanixCheck(AgentCheck):
         self._initialize_check_attributes()
 
     def _parse_config(self):
+        # note: 120 second proved to be reliable during testing with the Nutanix API
+        # it allowed us to retrieve the majority of metrics for Cluster/VM stats endpoints.
         self.sampling_interval = self.instance.get("min_collection_interval", 120)
         self.page_limit = self.instance.get("page_limit", 50)
 
@@ -102,7 +104,7 @@ class NutanixCheck(AgentCheck):
         return tags
 
     def check(self, _):
-        self.log.debug("Starting check for Prism Central: %s:%s", self.pc_ip, self.pc_port)
+        self.log.info("Starting check for Prism Central: %s:%s", self.pc_ip, self.pc_port)
 
         # Reset all state for new collection run
         self.infrastructure_monitor.reset_state()
