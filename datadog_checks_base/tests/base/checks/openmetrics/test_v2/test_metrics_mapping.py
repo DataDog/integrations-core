@@ -186,12 +186,22 @@ def test_load_file_based_metrics_no_files(make_check):
     assert make_check()._load_file_based_metrics({}) == []
 
 
-def test_load_file_based_metrics_convention_discovery(make_check, tmp_path):
-    _write_yaml(tmp_path, "metrics.yml", {"raw": "dd.raw"})
+@pytest.mark.parametrize("filename", ["metrics.yaml", "metrics.yml"])
+def test_load_file_based_metrics_convention_discovery(make_check, tmp_path, filename):
+    _write_yaml(tmp_path, filename, {"raw": "dd.raw"})
     check = make_check()
     with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
         result = check._load_file_based_metrics({})
     assert result == [{"raw": "dd.raw"}]
+
+
+def test_load_file_based_metrics_convention_yaml_takes_precedence(make_check, tmp_path):
+    _write_yaml(tmp_path, "metrics.yaml", {"from_yaml": "dd.yaml"})
+    _write_yaml(tmp_path, "metrics.yml", {"from_yml": "dd.yml"})
+    check = make_check()
+    with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
+        result = check._load_file_based_metrics({})
+    assert result == [{"from_yaml": "dd.yaml"}]
 
 
 def test_load_file_based_metrics_explicit(make_check, tmp_path):
@@ -207,7 +217,7 @@ def test_load_file_based_metrics_explicit(make_check, tmp_path):
     assert result == [{"m1": "d1"}, {"m2": "d2"}]
 
 
-def test_load_file_based_metrics_predicate_filters(make_check, tmp_path):
+def test_load_file_based_metrics_predicate_filters(tmp_path):
     _write_yaml(tmp_path, "metrics/always.yaml", {"m1": "d1"})
     _write_yaml(tmp_path, "metrics/conditional.yaml", {"m2": "d2"})
 
@@ -217,10 +227,11 @@ def test_load_file_based_metrics_predicate_filters(make_check, tmp_path):
             MetricsMapping(Path("metrics/conditional.yaml"), predicate=ConfigOptionTruthy("extra", default=False)),
         ]
 
-    check = make_check(cls=Check)
-    with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
-        assert len(check._load_file_based_metrics({})) == 1
-        assert len(check._load_file_based_metrics({"extra": True})) == 2
+    check_base = Check('test', {}, [{'openmetrics_endpoint': 'http://test:9090/metrics'}])
+    check_extra = Check('test', {}, [{'openmetrics_endpoint': 'http://test:9090/metrics', 'extra': True}])
+    with patch.object(Check, '_get_package_dir', return_value=tmp_path):
+        assert len(check_base._load_file_based_metrics(check_base.instance)) == 1
+        assert len(check_extra._load_file_based_metrics(check_extra.instance)) == 2
 
 
 def test_load_file_based_metrics_explicit_skips_convention(make_check, tmp_path):
@@ -234,6 +245,46 @@ def test_load_file_based_metrics_explicit_skips_convention(make_check, tmp_path)
     with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
         result = check._load_file_based_metrics({})
     assert result == [{"explicit": "metric"}]
+
+
+# ---------------------------------------------------------------------------
+# _load_file_based_metrics caching
+# ---------------------------------------------------------------------------
+
+
+def test_load_file_based_metrics_cached_across_calls(make_check, tmp_path):
+    _write_yaml(tmp_path, "metrics.yml", {"raw": "dd.raw"})
+    check = make_check()
+    with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
+        first = check._load_file_based_metrics({})
+        second = check._load_file_based_metrics({})
+    assert first is second
+
+
+def test_load_file_based_metrics_does_not_accumulate_on_repeated_scraper_creation(make_check, tmp_path):
+    """Repeated create_scraper calls (e.g. from refresh_scrapers) must not grow the metrics list."""
+    _write_yaml(tmp_path, "metrics.yml", {"raw": "dd.raw"})
+    check = make_check()
+    instance = {'openmetrics_endpoint': 'http://test:9090/metrics'}
+    with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
+        config_first = check.get_config_with_defaults(instance)
+        config_second = check.get_config_with_defaults(instance)
+    assert config_first['metrics'] == config_second['metrics']
+
+
+def test_load_file_based_metrics_does_not_mutate_get_default_config(make_check, tmp_path):
+    """File metrics must not mutate the list returned by get_default_config."""
+    _write_yaml(tmp_path, "metrics.yml", {"raw": "dd.raw"})
+    SHARED_METRICS = [{"existing": "metric"}]
+
+    class Check(OpenMetricsBaseCheckV2):
+        def get_default_config(self):
+            return {"metrics": SHARED_METRICS}
+
+    check = make_check(cls=Check)
+    with patch.object(type(check), '_get_package_dir', return_value=tmp_path):
+        check.get_config_with_defaults({'openmetrics_endpoint': 'http://test:9090/metrics'})
+    assert SHARED_METRICS == [{"existing": "metric"}]
 
 
 # ---------------------------------------------------------------------------
