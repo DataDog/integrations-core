@@ -285,3 +285,49 @@ def test_ambient_requires_at_least_one_endpoint():
         match="In ambient mode, must specify at least one of:",
     ):
         check._parse_config()
+
+
+def test_ambient_auto_detect_with_ztunnel_endpoint(aggregator, dd_run_check, mock_http_response):
+    """Test that ambient mode is auto-detected when ztunnel_endpoint is configured without explicit istio_mode."""
+    mock_http_response(file_path=get_fixture_path('1.5', 'ztunnel.txt'))
+    instance = {
+        'ztunnel_endpoint': 'http://localhost:15020/stats/prometheus',
+        'use_openmetrics': True,
+    }
+    check = Istio(common.CHECK_NAME, {}, [instance])
+    dd_run_check(check)
+
+    # Verify ztunnel metrics are collected
+    for metric in common.V2_ZTUNNEL_METRICS:
+        aggregator.assert_metric(metric)
+
+
+def test_ambient_auto_detect_with_waypoint_endpoint(aggregator, dd_run_check, mock_http_response):
+    """Test that ambient mode is auto-detected when waypoint_endpoint is configured without explicit istio_mode."""
+    mock_http_response(file_path=get_fixture_path('1.5', 'waypoint.txt'))
+    instance = {
+        'waypoint_endpoint': 'http://localhost:15020/stats/prometheus',
+        'use_openmetrics': True,
+    }
+    check = Istio(common.CHECK_NAME, {}, [instance])
+    dd_run_check(check)
+
+    # Verify waypoint metrics are collected
+    for metric in common.V2_WAYPOINT_METRICS:
+        aggregator.assert_metric(metric)
+
+
+def test_ambient_auto_detect_with_both_endpoints(aggregator, dd_run_check, mock_http_response):
+    """Test that ambient mode is auto-detected when both ztunnel and waypoint endpoints are configured."""
+    mock_http_response(file_path=get_fixture_path('1.5', 'ztunnel.txt'))
+    instance = {
+        'ztunnel_endpoint': 'http://localhost:15020/stats/prometheus',
+        'waypoint_endpoint': 'http://localhost:15021/stats/prometheus',
+        'use_openmetrics': True,
+    }
+    check = Istio(common.CHECK_NAME, {}, [instance])
+    dd_run_check(check)
+
+    # Verify ztunnel metrics are collected (at least)
+    for metric in common.V2_ZTUNNEL_METRICS:
+        aggregator.assert_metric(metric)

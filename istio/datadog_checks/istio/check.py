@@ -26,9 +26,18 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
 
     def _parse_config(self):
         self.scraper_configs = []
-        istio_mode = self.instance.get("istio_mode", "sidecar")
         istiod_endpoint = self.instance.get("istiod_endpoint")
         istiod_namespace = self.instance.get("namespace", ISTIOD_NAMESPACE)
+
+        # Auto-detect istio_mode based on configured endpoints
+        ztunnel_endpoint = self.instance.get("ztunnel_endpoint")
+        waypoint_endpoint = self.instance.get("waypoint_endpoint")
+
+        # If istio_mode is not explicitly set and ambient endpoints are configured, auto-enable ambient mode
+        if "istio_mode" not in self.instance and (ztunnel_endpoint or waypoint_endpoint):
+            istio_mode = "ambient"
+        else:
+            istio_mode = self.instance.get("istio_mode", "sidecar")
 
         if istio_mode == "ambient":
             self._parse_ambient_config(istiod_endpoint, istiod_namespace)
