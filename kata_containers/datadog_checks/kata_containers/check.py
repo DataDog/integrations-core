@@ -35,6 +35,8 @@ class KataContainersCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             'raw_metric_prefix': 'kata_',
             # Unix socket paths are noisy as metric tags.
             'tag_by_endpoint': False,
+            # Wildcard: collect every metric the shim exposes without an explicit allow-list.
+            'metrics': [{'.*': {}}],
         }
 
     def refresh_scrapers(self) -> None:

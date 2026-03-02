@@ -1,0 +1,33 @@
+# HELP kata_hypervisor_fds Number of file descriptors in the hypervisor process
+# TYPE kata_hypervisor_fds gauge
+kata_hypervisor_fds 42.0
+# HELP kata_hypervisor_io_stats_read_bytes Total bytes read by the hypervisor
+# TYPE kata_hypervisor_io_stats_read_bytes gauge
+kata_hypervisor_io_stats_read_bytes 1.048576e+06
+# HELP kata_hypervisor_io_stats_write_bytes Total bytes written by the hypervisor
+# TYPE kata_hypervisor_io_stats_write_bytes gauge
+kata_hypervisor_io_stats_write_bytes 524288.0
+# HELP kata_hypervisor_threads Number of threads in the hypervisor process
+# TYPE kata_hypervisor_threads gauge
+kata_hypervisor_threads 8.0
+# HELP kata_hypervisor_vcpus Number of virtual CPUs allocated to the VM
+# TYPE kata_hypervisor_vcpus gauge
+kata_hypervisor_vcpus 2.0
+# HELP kata_hypervisor_vm_rss_bytes Virtual machine RSS memory in bytes
+# TYPE kata_hypervisor_vm_rss_bytes gauge
+kata_hypervisor_vm_rss_bytes 5.36870912e+08
+# HELP go_goroutines Number of goroutines that currently exist
+# TYPE go_goroutines gauge
+go_goroutines 13.0
+# HELP go_info Information about the Go environment
+# TYPE go_info gauge
+go_info{version="go1.21.0"} 1.0
+# HELP process_open_fds Number of open file descriptors
+# TYPE process_open_fds gauge
+process_open_fds 20.0
+# HELP process_resident_memory_bytes Resident memory size in bytes
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 3.3849344e+07
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 0.58
