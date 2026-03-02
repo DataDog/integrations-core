@@ -63,7 +63,7 @@ def test_assert_metrics(ready_check: PrefectCheck, aggregator: AggregatorStub):
             "flow-run went from Late to Pending\n"
             "Resource ID: fr-completed\nResource Name: fr-completed\nRun count: 1\n",
             True,
-            "[flow-run] fr-completed -> Pending",
+            "[PREFECT] [flow-run] fr-completed -> Pending",
             "prefect.flow-run.Pending",
             "info",
             id="flow-run-pending",
@@ -71,7 +71,7 @@ def test_assert_metrics(ready_check: PrefectCheck, aggregator: AggregatorStub):
         pytest.param(
             "task-run went from Running to Completed\nResource ID: tr-1\nResource Name: task-1\nRun count: 1\n",
             True,
-            "[task-run] task-1 -> Completed",
+            "[PREFECT] [task-run] task-1 -> Completed",
             "prefect.task-run.Completed",
             "info",
             id="task-run-completed",
@@ -79,7 +79,7 @@ def test_assert_metrics(ready_check: PrefectCheck, aggregator: AggregatorStub):
         pytest.param(
             "worker.process ProcessWorker worker-1 with id worker-1 executed-flow-run\n",
             False,
-            "[worker.process] ProcessWorker worker-1 -> executed-flow-run",
+            "[PREFECT] [worker.process] ProcessWorker worker-1 -> executed-flow-run",
             "prefect.worker.executed-flow-run",
             "info",
             id="worker-executed-flow-run",
@@ -91,7 +91,7 @@ def test_assert_metrics(ready_check: PrefectCheck, aggregator: AggregatorStub):
             "Run count: 1\n"
             "Message: Retry scheduled\n",
             True,
-            "[flow-run] fr-retry -> AwaitingRetry",
+            "[PREFECT] [flow-run] fr-retry -> AwaitingRetry",
             "prefect.flow-run.AwaitingRetry",
             "error",
             id="flow-run-awaiting-retry",
@@ -99,7 +99,7 @@ def test_assert_metrics(ready_check: PrefectCheck, aggregator: AggregatorStub):
         pytest.param(
             "work-pool not-ready-pool with id wp-3 not-ready\n",
             False,
-            "[work-pool] not-ready-pool -> not-ready",
+            "[PREFECT] [work-pool] not-ready-pool -> not-ready",
             "prefect.work-pool.not-ready",
             "error",
             id="work-pool-not-ready-error",

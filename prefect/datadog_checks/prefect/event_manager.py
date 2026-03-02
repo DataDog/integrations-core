@@ -130,7 +130,7 @@ class EventManager:
 
     @cached_property
     def msg_title(self) -> str:
-        return f"[{self.resource_type}] {self.resource_name} -> {self.event_state_type}"
+        return f"[PREFECT] [{self.resource_type}] {self.resource_name} -> {self.event_state_type}"
 
     @cached_property
     def alert_type(self) -> str:
