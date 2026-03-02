@@ -77,6 +77,11 @@ instances:
     #   Authorization: Bearer <YOUR_TOKEN>
     #   Custom-Header: CustomValue
 
+    ## @param collect_events - boolean - optional - default: false
+    ## Whether or not to send Prefect events to Datadog.
+    #
+    # collect_events: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

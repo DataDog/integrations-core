@@ -49,7 +49,7 @@ def dd_environment():
     ):
         yield (
             {
-                "instances": [{"prefect_url": prefect_url, "min_collection_interval": 300}],
+                "instances": [{"prefect_url": prefect_url, "min_collection_interval": 300, "collect_events": True}],
             },
             E2E_METADATA,
         )
@@ -67,20 +67,22 @@ def check(instance: Callable[[str], dict[str, str]]) -> PrefectCheck:
 
 
 @pytest.fixture
-def instance() -> Callable[[str], dict[str, str | dict[str, list[str]] | None]]:
+def instance() -> Callable[[str], dict[str, str | dict[str, list[str]] | None | bool]]:
     def builder(
         prefect_url: str,
         work_pool_names: dict[str, list[str]] | None = None,
         work_queue_names: dict[str, list[str]] | None = None,
         deployment_names: dict[str, list[str]] | None = None,
         event_names: dict[str, list[str]] | None = None,
-    ) -> dict[str, str | dict[str, list[str]] | None]:
+        collect_events: bool = True,
+    ) -> dict[str, str | dict[str, list[str]] | None | bool]:
         return {
             "prefect_url": prefect_url,
             "work_pool_names": work_pool_names,
             "work_queue_names": work_queue_names,
             "deployment_names": deployment_names,
             "event_names": event_names,
+            "collect_events": collect_events,
         }
 
     return builder

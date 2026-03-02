@@ -71,6 +71,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_events: Optional[bool] = None
     custom_headers: Optional[MappingProxyType[str, Any]] = None
     deployment_names: Optional[DeploymentNames] = None
     disable_generic_tags: Optional[bool] = None

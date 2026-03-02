@@ -42,7 +42,13 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
         self.http.options['headers'].update(self.config.custom_headers or {})
 
-        self.base_tags = self.config.tags or []
+        self.base_tags = list(self.config.tags or [])
+
+        service = self.config.service or self.shared_config.service
+        if service:
+            self.base_tags.append(f'service:{service}')
+
+        self.collect_events = self.config.collect_events
 
         self.filter_metrics = self._set_up_filters()
 
@@ -531,7 +537,8 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
             self._check_retry_gaps(event_manager)
             self._check_dependency_wait(event_manager)
-            self._emit_event_metrics(event_manager)
+            if self.collect_events:
+                self._emit_event_metrics(event_manager)
 
     def _emit_event_metrics(self, event_manager: EventManager):
         if event_manager.occurred is None:

@@ -13,7 +13,6 @@ pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration
 def ready_check(dd_environment, dd_run_check: Callable, aggregator: AggregatorStub):
     instance = dd_environment[0]['instances'][0]
     check = PrefectCheck("prefect", {}, [instance])
-
     dd_run_check(check)
 
     # Clear the persistent cache to avoid short time intervals between checks

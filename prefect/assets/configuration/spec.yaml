@@ -119,6 +119,14 @@ files:
           Authorization: "Bearer <YOUR_TOKEN>"
           Custom-Header: "CustomValue"
 
+    - name: collect_events
+      description: |
+        Whether or not to send Prefect events to Datadog.
+      value:
+        type: boolean
+        example: false
+        default: false
+
     - template: instances/default
 
   - template: logs
