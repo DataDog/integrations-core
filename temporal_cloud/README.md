@@ -1,6 +1,6 @@
 ## Overview
 
-<div class="alert alert-warning">This legacy integration is no longer maintained. Migrate to the new <a href="https://docs.datadoghq.com/integrations/temporal-cloud-openmetrics/">Temporal Cloud OpenMetrics integration</a> for expanded metrics and improved monitoring.</div>
+<div class="alert alert-info">To take advantage of expanded metrics and improved monitoring, we encourage migrating to the newer <a href="https://docs.datadoghq.com/integrations/temporal-cloud-openmetrics/">Temporal Cloud OpenMetrics integration</a>.</div>
 
 [Temporal Cloud][1] is a scalable platform for orchestrating complex workflows which enables developers to focus on building applications, without worrying about fault tolerance and consistency.
 
