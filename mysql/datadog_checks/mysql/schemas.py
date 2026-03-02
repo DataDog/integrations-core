@@ -167,7 +167,8 @@ class MySqlSchemaCollector(SchemaCollector):
             """
 
         query = f"""
-            SELECT schema_tables.schema_name, `schemas`.default_character_set_name, `schemas`.default_collation_name,
+            SELECT schema_tables.schema_name,
+                schema_tables.default_character_set_name, schema_tables.default_collation_name,
                 schema_tables.table_name, schema_tables.engine, schema_tables.row_format, schema_tables.create_time,
                 json_arrayagg(json_object({column_columns})) columns,
                 json_arrayagg(json_object({index_columns})) indexes,
@@ -191,8 +192,10 @@ class MySqlSchemaCollector(SchemaCollector):
                     schema_tables.table_name = constraints.table_name AND
                     schema_tables.schema_name = constraints.schema_name
                 LEFT JOIN ({partition_query.replace("%WHERE%", "")}) partitions ON
-                schema_tables.table_name = partitions.table_name AND schema_tables.schema_name = partitions.schema_name
-            GROUP BY schema_tables.schema_name, `schemas`.default_character_set_name, `schemas`.default_collation_name,
+                schema_tables.table_name = partitions.table_name AND
+                schema_tables.schema_name = partitions.schema_name
+            GROUP BY schema_tables.schema_name,
+            schema_tables.default_character_set_name, schema_tables.default_collation_name,
             schema_tables.table_name, schema_tables.engine, schema_tables.row_format, schema_tables.create_time
             ;
         """
