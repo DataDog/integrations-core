@@ -70,7 +70,8 @@ class KrakendCheck(OpenMetricsBaseCheckV2):
 
     def get_config_with_defaults(self, config: InstanceType) -> Mapping:
         defaults = self.get_default_config()
-        self._apply_file_metrics(defaults, config)
+        if file_metrics := self._load_file_based_metrics(config):
+            defaults['metrics'] = list(defaults.get('metrics', [])) + file_metrics
 
         go_metrics = config.get("go_metrics", True)
 
