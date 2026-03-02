@@ -50,7 +50,7 @@ class NutanixCheck(AgentCheck):
 
         self.prefix_category_tags = is_affirmative(self.instance.get("prefix_category_tags", False))
 
-        self.resource_filters = parse_resource_filters(self.instance.get("resource_filters") or [])
+        self.resource_filters = parse_resource_filters(self.instance.get("resource_filters") or [], self.log)
 
     def _initialize_check_attributes(self):
         self.base_url = f"{self.pc_ip}:{self.pc_port}"

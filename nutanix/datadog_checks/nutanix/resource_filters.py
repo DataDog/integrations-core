@@ -42,7 +42,7 @@ def _validate_filter_structure(f: dict[str, Any]) -> bool:
     return isinstance(f, dict) and 'resource' in f and 'patterns' in f and isinstance(f.get('patterns'), list)
 
 
-def parse_resource_filters(raw_filters: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def parse_resource_filters(raw_filters: list[dict[str, Any]], logger: Any) -> list[dict[str, Any]]:
     """Parse and validate resource filters, compiling regex patterns.
 
     Resource filters allow selective collection of infrastructure resources (clusters, hosts, VMs),
@@ -50,6 +50,7 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]]) -> list[dict[str, 
 
     Args:
         raw_filters: List of filter configurations from user config
+        logger: Logger instance to use for warnings
 
     Returns:
         List of validated filters with compiled regex patterns
@@ -81,10 +82,17 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]]) -> list[dict[str, 
     result = []
     for f in raw_filters or []:
         if not _validate_filter_structure(f):
+            logger.error("Invalid filter structure (missing required fields 'resource' or 'patterns'), skipping: %s", f)
             continue
 
         resource = str(f.get('resource', '')).lower()
         if resource not in RESOURCE_TYPES:
+            logger.error(
+                "Invalid resource type '%s' (valid types: %s), skipping filter: %s",
+                resource,
+                ', '.join(sorted(RESOURCE_TYPES)),
+                f,
+            )
             continue
 
         property_ = str(f.get('property', ''))
@@ -106,8 +114,8 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]]) -> list[dict[str, 
             if isinstance(p, str):
                 try:
                     compiled.append(re.compile(p))
-                except re.error:
-                    pass
+                except re.error as e:
+                    logger.error("Invalid regex pattern '%s' in filter: %s", p, e)
 
         if compiled:
             result.append(
