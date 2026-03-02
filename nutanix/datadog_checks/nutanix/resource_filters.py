@@ -66,6 +66,11 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]], logger: Any) -> li
         - Activity (event, task, alert, audit): specific to type (eventType, status, severity, auditType)
         - Metadata (category): 'type' (valid values: SYSTEM, INTERNAL, USER)
 
+    Default Behavior:
+        - Categories: If no category filters are specified, only USER type categories are collected.
+          This applies even if other resource_filters are configured.
+          To collect all categories or specific types, explicitly configure category filters.
+
     Examples:
         # Include only SYSTEM categories
         {"resource": "category", "property": "type", "patterns": ["^SYSTEM$"]}
@@ -79,6 +84,9 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]], logger: Any) -> li
         # Exclude failed tasks
         {"resource": "task", "property": "status", "type": "exclude", "patterns": ["^FAILED$"]}
     """
+    # Check if any category filters are present in raw_filters
+    has_category_filter = any(f.get('resource') == 'category' for f in raw_filters or [])
+
     result = []
     for f in raw_filters or []:
         if not _validate_filter_structure(f):
@@ -126,6 +134,20 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]], logger: Any) -> li
                     'patterns': compiled,
                 }
             )
+
+    # Add default category filter if no category filters were specified
+    # This ensures only USER type categories are collected by default
+    if not has_category_filter:
+        result.append(
+            {
+                'resource': 'category',
+                'property': 'type',
+                'type': 'include',
+                'patterns': [re.compile(r'^USER$')],
+            }
+        )
+        logger.debug("No category filters specified, applying default filter to include only USER type categories")
+
     return result
 
 
