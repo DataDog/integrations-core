@@ -25,8 +25,8 @@ VM_METRICS = [
 ]
 
 
-def test_health_check(dd_run_check, aggregator, aws_instance):
-    check = NutanixCheck('nutanix', {}, [aws_instance])
+def test_health_check(dd_run_check, aggregator, instance):
+    check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
     aggregator.assert_metric("nutanix.health.up", value=1)
@@ -34,8 +34,8 @@ def test_health_check(dd_run_check, aggregator, aws_instance):
     aggregator.assert_metric_has_tag_prefix("nutanix.health.up", tag_prefix="prism_central:")
 
 
-def test_cluster_metrics(dd_run_check, aggregator, aws_instance):
-    check = NutanixCheck('nutanix', {}, [aws_instance])
+def test_cluster_metrics(dd_run_check, aggregator, instance):
+    check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
     expected_tags = [
@@ -50,8 +50,8 @@ def test_cluster_metrics(dd_run_check, aggregator, aws_instance):
             aggregator.assert_metric_has_tag_prefix(metric, tag_prefix=f"{tag}:")
 
 
-def test_cluster_stats_metrics(dd_run_check, aggregator, aws_instance):
-    check = NutanixCheck('nutanix', {}, [aws_instance])
+def test_cluster_stats_metrics(dd_run_check, aggregator, instance):
+    check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
     expected_tags = [
@@ -66,8 +66,8 @@ def test_cluster_stats_metrics(dd_run_check, aggregator, aws_instance):
             aggregator.assert_metric_has_tag_prefix(metric, tag_prefix=f"{tag}:")
 
 
-def test_host_metrics(dd_run_check, aggregator, aws_instance):
-    check = NutanixCheck('nutanix', {}, [aws_instance])
+def test_host_metrics(dd_run_check, aggregator, instance):
+    check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
     expected_tags = [
@@ -88,8 +88,8 @@ def test_host_metrics(dd_run_check, aggregator, aws_instance):
             aggregator.assert_metric_has_tag_prefix(metric, tag_prefix=f"{tag}:")
 
 
-def test_host_stats_metrics(dd_run_check, aggregator, aws_instance):
-    check = NutanixCheck('nutanix', {}, [aws_instance])
+def test_host_stats_metrics(dd_run_check, aggregator, instance):
+    check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
     expected_tags = [
@@ -110,8 +110,8 @@ def test_host_stats_metrics(dd_run_check, aggregator, aws_instance):
             aggregator.assert_metric_has_tag_prefix(metric, tag_prefix=f"{tag}:")
 
 
-def test_vm_metrics(dd_run_check, aggregator, aws_instance):
-    check = NutanixCheck('nutanix', {}, [aws_instance])
+def test_vm_metrics(dd_run_check, aggregator, instance):
+    check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
     expected_tags = [
@@ -133,8 +133,8 @@ def test_vm_metrics(dd_run_check, aggregator, aws_instance):
             aggregator.assert_metric_has_tag_prefix(metric, tag_prefix=f"{tag}:")
 
 
-def test_vm_stats_metrics(dd_run_check, aggregator, aws_instance):
-    check = NutanixCheck('nutanix', {}, [aws_instance])
+def test_vm_stats_metrics(dd_run_check, aggregator, instance):
+    check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
     expected_tags = [

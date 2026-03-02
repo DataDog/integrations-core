@@ -6,9 +6,12 @@ import os
 
 import pytest
 
-from datadog_checks.dev import get_here
+from datadog_checks.dev import docker_run, get_docker_hostname, get_here
+from datadog_checks.dev.conditions import CheckEndpoints
 
 HERE = get_here()
+HOST = get_docker_hostname()
+DOCKER_DIR = os.path.join(HERE, 'docker')
 
 # Cache for loaded fixtures to avoid repeated file reads
 _fixture_cache = {}
@@ -48,8 +51,11 @@ INSTANCE = {
     "page_limit": 2,  # Use limit=2 to match paginated fixtures
 }
 
+# Real Nutanix instance configuration
+# Configure /etc/hosts to map nutanix.local to your Prism Central IP:
+#   echo "<PRISM_CENTRAL_IP>  nutanix.local" | sudo tee -a /etc/hosts
 AWS_INSTANCE = {
-    "pc_ip": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com",
+    "pc_ip": "https://nutanix.local",
     "pc_port": 9440,
     "pc_username": "dd_agent",
     "pc_password": "DummyPassw0rd!",
@@ -60,16 +66,55 @@ AWS_INSTANCE = {
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    yield AWS_INSTANCE.copy()
+    """
+    Spin up Docker container with Flask server serving Nutanix API fixtures.
+    Set USE_NUTANIX_AWS=true env var to run against real AWS environment instead.
+    """
+    if os.environ.get('USE_NUTANIX_AWS'):
+        # Use real AWS environment
+        yield AWS_INSTANCE.copy()
+    else:
+        # Use Docker-based mock environment
+        compose_file = os.path.join(DOCKER_DIR, 'docker-compose.yaml')
+
+        conditions = [
+            CheckEndpoints(f'http://{HOST}:9440/console', attempts=60, wait=1),
+        ]
+
+        with docker_run(
+            compose_file=compose_file,
+            service_name='nutanix-prism-central',
+            conditions=conditions,
+        ):
+            instance = {
+                "pc_ip": f"http://{HOST}",
+                "pc_port": 9440,
+                "pc_username": "admin",
+                "pc_password": "secret",
+                "tls_verify": False,
+                "page_limit": 2,  # Use limit=2 to match paginated fixtures
+            }
+            yield instance
+
+
+@pytest.fixture
+def instance(dd_environment):
+    """
+    Returns instance config from dd_environment.
+    This will be Docker config by default, or AWS config if USE_NUTANIX_AWS=true.
+    """
+    return dd_environment.copy()
 
 
 @pytest.fixture
 def aws_instance():
+    """Returns AWS instance config (for backward compatibility)."""
     return AWS_INSTANCE.copy()
 
 
 @pytest.fixture
 def mock_instance():
+    """Returns mock instance config for unit tests."""
     return INSTANCE.copy()
 
 
@@ -80,14 +125,11 @@ def mock_http_get(mocker):
         mock_resp.status_code = 200
         mock_resp.raise_for_status = mocker.Mock()
 
-        # Check if URL has pagination parameters
         page = None
 
-        # Extract pagination from params dict
         if params:
             page = params.get('$page')
 
-        # Extract pagination from URL query string
         if page is None and '?' in url:
             from urllib.parse import parse_qs, urlparse
 
@@ -96,15 +138,12 @@ def mock_http_get(mocker):
             if '$page' in query_params:
                 page = int(query_params['$page'][0])
 
-        # Default to page 0
         if page is None:
             page = 0
 
-        # Health check endpoint
         if '/console' in url:
             return mock_resp
 
-        # Host stats endpoint - always non-paginated
         if (
             "/api/clustermgmt/v4.0/stats/clusters/00064715-c043-5d8f-ee4b-176ec875554d/hosts/d8787814-4fe8-4ba5-931f-e1ee31c294a6"
             in url
@@ -113,42 +152,35 @@ def mock_http_get(mocker):
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
-        # Cluster stats endpoint - always non-paginated
         if "/api/clustermgmt/v4.0/stats/clusters/00064715-c043-5d8f-ee4b-176ec875554d" in url:
             response_data = load_fixture("cluster_stats_00064715.json")
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
-        # Hosts endpoint for Prism Central cluster - returns 400 (expected)
         if '/api/clustermgmt/v4.0/config/clusters/d07db284-6df6-4ca2-88cd-9dd5ed71ac08/hosts' in url:
             mock_resp.status_code = 400
             return mock_resp
 
-        # Hosts endpoint for cluster 00064715 - paginated
         if '/api/clustermgmt/v4.0/config/clusters/00064715-c043-5d8f-ee4b-176ec875554d/hosts' in url:
             response_data = load_fixture_page("hosts_00064715.json", page)
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
-        # Clusters endpoint - paginated
         if '/api/clustermgmt/v4.0/config/clusters' in url:
             response_data = load_fixture_page("clusters.json", page)
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
-        # Categories endpoint - paginated
         if '/api/prism/v4.0/config/categories' in url:
             response_data = load_fixture_page("categories.json", page)
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
-        # VM stats endpoint - paginated
         if 'api/vmm/v4.0/ahv/stats/vms' in url:
             response_data = load_fixture_page("vms_stats.json", page)
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
-        # VMs config endpoint - paginated
         if 'api/vmm/v4.0/ahv/config/vms' in url:
             response_data = load_fixture_page("vms.json", page)
             mock_resp.json = mocker.Mock(return_value=response_data)
@@ -158,16 +190,13 @@ def mock_http_get(mocker):
         if 'api/monitoring/v4.0/serviceability/events' in url:
             response_data = load_fixture_page("events.json", page)
 
-            # Apply time filter if present (e.g., "creationTime gt 2026-01-02T14:35:00Z")
             filter_param = params.get('$filter', '') if params else ''
             if 'creationTime gt' in filter_param:
                 from datetime import datetime
 
-                # Extract the timestamp from filter
                 filter_time_str = filter_param.split('creationTime gt ')[-1].strip()
                 filter_time = datetime.fromisoformat(filter_time_str.replace('Z', '+00:00'))
 
-                # Filter events by creationTime
                 filtered_data = []
                 for event in response_data.get('data', []):
                     event_time_str = event.get('creationTime', '')
@@ -176,7 +205,6 @@ def mock_http_get(mocker):
                         if event_time > filter_time:
                             filtered_data.append(event)
 
-                # Sort by creationTime asc (as specified by $orderBy param)
                 filtered_data.sort(
                     key=lambda t: datetime.fromisoformat(t.get('creationTime', '').replace('Z', '+00:00'))
                 )
@@ -187,20 +215,16 @@ def mock_http_get(mocker):
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
-        # Audits endpoint - paginated
         if 'api/monitoring/v4.0/serviceability/audits' in url:
             response_data = load_fixture_page("audits.json", page)
 
-            # Apply time filter if present (e.g., "creationTime gt 2026-01-02T14:35:00Z")
             filter_param = params.get('$filter', '') if params else ''
             if 'creationTime gt' in filter_param:
                 from datetime import datetime
 
-                # Extract the timestamp from filter
                 filter_time_str = filter_param.split('creationTime gt ')[-1].strip()
                 filter_time = datetime.fromisoformat(filter_time_str.replace('Z', '+00:00'))
 
-                # Filter audits by creationTime
                 filtered_data = []
                 for audit in response_data.get('data', []):
                     audit_time_str = audit.get('creationTime', '')
@@ -209,7 +233,6 @@ def mock_http_get(mocker):
                         if audit_time > filter_time:
                             filtered_data.append(audit)
 
-                # Sort by creationTime asc (as specified by $orderBy param)
                 filtered_data.sort(
                     key=lambda t: datetime.fromisoformat(t.get('creationTime', '').replace('Z', '+00:00'))
                 )
@@ -220,16 +243,13 @@ def mock_http_get(mocker):
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
-        # Alerts endpoint - paginated
         if 'api/monitoring/v4.0/serviceability/alerts' in url or 'api/monitoring/v4.2/serviceability/alerts' in url:
             response_data = load_fixture_page("alerts.json", page)
 
-            # Apply time filter if present (e.g., "creationTime gt 2026-01-02T14:35:00Z")
             filter_param = params.get('$filter', '') if params else ''
             if 'creationTime gt' in filter_param:
                 from datetime import datetime
 
-                # Extract the timestamp from filter
                 filter_time_str = filter_param.split('creationTime gt ')[-1].strip()
                 filter_time = datetime.fromisoformat(filter_time_str.replace('Z', '+00:00'))
 
@@ -241,7 +261,6 @@ def mock_http_get(mocker):
                         if alert_time > filter_time:
                             filtered_data.append(alert)
 
-                # Sort by creationTime asc (as specified by $orderBy param)
                 filtered_data.sort(
                     key=lambda t: datetime.fromisoformat(t.get('creationTime', '').replace('Z', '+00:00'))
                 )
@@ -251,20 +270,16 @@ def mock_http_get(mocker):
 
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
-        # Tasks endpoint - paginated with time filtering and ordering
         if 'api/prism/v4.0/config/tasks' in url:
             response_data = load_fixture_page("tasks.json", page)
 
-            # Apply time filter if present (e.g., "createdTime gt 2026-01-02T14:35:00Z")
             filter_param = params.get('$filter', '') if params else ''
             if 'createdTime gt' in filter_param:
                 from datetime import datetime
 
-                # Extract the timestamp from filter
                 filter_time_str = filter_param.split('createdTime gt ')[-1].strip()
                 filter_time = datetime.fromisoformat(filter_time_str.replace('Z', '+00:00'))
 
-                # Filter tasks by createdTime
                 filtered_data = []
                 for task in response_data.get('data', []):
                     task_time_str = task.get('createdTime', '')
@@ -273,7 +288,6 @@ def mock_http_get(mocker):
                         if task_time > filter_time:
                             filtered_data.append(task)
 
-                # Sort by createdTime asc (as specified by $orderBy param)
                 filtered_data.sort(
                     key=lambda t: datetime.fromisoformat(t.get('createdTime', '').replace('Z', '+00:00'))
                 )
@@ -284,7 +298,6 @@ def mock_http_get(mocker):
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
-        # Default response for unmapped URLs - return HTTP error
         print(f"[MOCK ERROR] No matching endpoint for URL: {url}")
         mock_resp.status_code = 404
         mock_resp.raise_for_status = mocker.Mock(side_effect=Exception("404 Not Found"))
