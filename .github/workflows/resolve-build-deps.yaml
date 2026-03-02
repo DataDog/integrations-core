@@ -140,6 +140,9 @@ jobs:
     - name: Install management dependencies
       run: pip install -r .builders/deps/host_dependencies.txt
 
+    - name: Ensure Docker is running
+      run: bash .github/actions/setup-test-target-scripts/src/ensure-docker.sh
+
     - name: Log in to GitHub Packages
       uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
       with:
