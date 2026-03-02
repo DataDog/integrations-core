@@ -214,16 +214,10 @@ class OpenMetricsScraper:
 
             self.raw_line_filter = re.compile('|'.join(raw_line_filters))
 
-        self.http = check.http
+        self.http = self.check.http
 
         self._content_type = ''
         self._use_latest_spec = is_affirmative(config.get('use_latest_spec', False))
-        if self._use_latest_spec:
-            self._accept_header = (
-                'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
-            )
-        else:
-            self._accept_header = 'text/plain'
 
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
 
@@ -461,7 +455,13 @@ class OpenMetricsScraper:
 
         kwargs['stream'] = True
         extra_headers = kwargs.get('extra_headers', {})
-        extra_headers['Accept'] = self._accept_header
+        if self._use_latest_spec:
+            accept_header = (
+                'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
+            )
+        else:
+            accept_header = 'text/plain'
+        extra_headers['Accept'] = accept_header
         kwargs['extra_headers'] = extra_headers
         return self.http.get(self.endpoint, **kwargs)
 
