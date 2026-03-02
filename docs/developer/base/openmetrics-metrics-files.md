@@ -2,13 +2,13 @@
 
 -----
 
-Instead of hardcoding metric name mappings in Python or requiring per-instance user configuration, integrations can ship mappings as YAML files alongside the check module. The base class discovers and loads these files automatically, merging them into the scraper configuration before each run.
+Instead of hardcoding metric name mappings in Python or requiring per-instance user configuration, integrations can ship mappings as YAML files alongside the check module. The base class discovers and loads these files automatically and merges them into the scraper configuration before each scrape.
 
-This is a developer-facing feature for integration authors. For the user-level `metrics` configuration option, the
+For the user-level `metrics` configuration option, the
 [generic OpenMetrics check documentation](https://docs.datadoghq.com/integrations/guide/prometheus-host-collection/)
-provides a reference for the supported formats. Note that the generic check exposes a default configuration that may
-not apply to all OpenMetrics-based integrations — each integration may surface a different set of options. Consult
-the individual integration's documentation for the authoritative reference (for example, the
+covers the supported formats. The generic check exposes a default configuration that does not apply to all
+OpenMetrics-based integrations; each integration surfaces its own set of options. See the individual
+integration's documentation for the full reference (for example, the
 [KrakenD integration](https://docs.datadoghq.com/integrations/krakend/)).
 
 ## Metrics File Format
@@ -45,7 +45,7 @@ When `METRICS_MAP` is not set on the check class, the base class searches for a 
 1. `metrics.yaml`
 2. `metrics.yml`
 
-The first match is loaded; if both exist, `.yaml` takes precedence. No code is required — dropping the file in the right place is sufficient.
+The first match is loaded; if both exist, `.yaml` takes precedence. No code is required. Drop the file in the right place and the base class handles the rest.
 
 ## Explicit Declaration with `METRICS_MAP`
 
@@ -70,19 +70,19 @@ Paths in `METRICS_MAP` are relative to the package directory (the directory cont
 
 ## Conditional Loading with Predicates
 
-Any `MetricsMapping` can carry a predicate. When the predicate returns `False` for the current instance configuration, the file is skipped. This allows a single check class to serve deployments that expose different metric sets depending on their configuration.
+Any `MetricsMapping` can carry a predicate. When the predicate returns `False` for the current instance configuration, the file is skipped. A single check class can cover deployments that expose different metric sets based on their configuration.
 
 ```python
 MetricsMapping(Path("metrics/go.yaml"), predicate=ConfigOptionTruthy("go_metrics"))
 ```
 
-The file `metrics/go.yaml` is loaded only when the instance option `go_metrics` is truthy. The default when the option is absent is `True` — metrics are included unless explicitly disabled.
+The file `metrics/go.yaml` is loaded only when the instance option `go_metrics` is truthy. When the option is absent, it defaults to `True`, so metrics are included unless explicitly disabled.
 
 Predicates are evaluated once per check instance, against the configuration at the time of the first scrape. For the full list of built-in predicates, see the [API Reference](#api-reference) below.
 
 ### Custom Predicates
 
-Any class with a `should_load(self, config: Mapping) -> bool` method satisfies the `MetricsPredicate` protocol and can be used directly — no inheritance or registration is required:
+Any class with a `should_load(self, config: Mapping) -> bool` method satisfies the `MetricsPredicate` protocol and can be used directly. No inheritance or registration is required:
 
 ```python
 class MyPredicate:
@@ -109,7 +109,7 @@ class MyCheck(OpenMetricsBaseCheckV2):
         }
 ```
 
-The returned dict may be mutated by the framework before it is wrapped in a `ChainMap`. Return a fresh dict on every call — do not return a shared class-level or instance-level object, as this can cause state leakage between check executions.
+The returned dict may be mutated by the framework before it is wrapped in a `ChainMap`. Return a fresh dict on every call. Returning a shared class-level or instance-level object can cause state leakage between check executions.
 
 ## API Reference
 

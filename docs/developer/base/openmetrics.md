@@ -8,9 +8,9 @@ The base class handles the full scrape lifecycle: HTTP connection management, me
 
 For user-level configuration (the `metrics` instance option, label renaming, type overrides), the
 [generic OpenMetrics check documentation](https://docs.datadoghq.com/integrations/guide/prometheus-host-collection/)
-provides a reference. Note that the generic check exposes a default configuration that may not apply to all
-OpenMetrics-based integrations — each integration may surface a different set of options. Consult the individual
-integration's documentation for the authoritative reference (for example, the
+covers the supported formats. The generic check exposes a default configuration that does not apply to all
+OpenMetrics-based integrations; each integration surfaces its own set of options. See the individual
+integration's documentation for the full reference (for example, the
 [KrakenD integration](https://docs.datadoghq.com/integrations/krakend/)).
 
 For bundling metric name mappings as YAML files alongside the check module, see [Metrics Files](openmetrics-metrics-files.md).
