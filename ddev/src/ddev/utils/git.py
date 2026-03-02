@@ -207,8 +207,10 @@ class GitRepository:
         """
         Check if a path matches any .gitignore pattern in the repository.
 
-        Works for files, directories, and wildcard patterns. Returns False if the path
-        is not ignored, git is unavailable, or any error occurs.
+        Works for files, directories, and wildcard patterns.
+
+        Returns True if the path matches any .gitignore pattern, False otherwise.
+        Raises OSError if git is unavailable or encounters a fatal error.
 
         Note: Spawns a subprocess per call - avoid in tight loops over many paths.
         """
