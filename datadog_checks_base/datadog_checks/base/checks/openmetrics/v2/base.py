@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
     from .metrics_mapping import MetricsMapping, RawMetricsConfig
 
+
 class OpenMetricsBaseCheckV2(AgentCheck):
     """
     OpenMetricsBaseCheckV2 is an updated class of OpenMetricsBaseCheck to scrape endpoints that emit Prometheus metrics.
@@ -165,9 +166,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             self._file_metrics = []
         else:
             self._file_metrics = [
-                self._load_metrics_file(source.path)
-                for source in self.METRICS_MAP
-                if source.should_load(config)
+                self._load_metrics_file(source.path) for source in self.METRICS_MAP if source.should_load(config)
             ]
 
         return self._file_metrics
