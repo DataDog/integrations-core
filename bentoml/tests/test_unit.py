@@ -4,9 +4,9 @@
 from unittest.mock import Mock
 
 import pytest
-import requests
 
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.bentoml import BentomlCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -32,7 +32,6 @@ def test_bentoml_mock_metrics(dd_run_check, aggregator, mock_http_response):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_all_metrics_covered()
     aggregator.assert_metric_has_tag('bentoml.service.request.count', 'bentoml_endpoint:/summarize')
     aggregator.assert_service_check('bentoml.openmetrics.health', ServiceCheck.OK)
 
@@ -52,8 +51,7 @@ def test_bentoml_mock_valid_endpoint_invalid_health(dd_run_check, aggregator, mo
 
     _err = Mock()
     _err.status_code = 500
-    _http_err = requests.HTTPError("500 Internal Server Error")
-    _http_err.response = _err
+    _http_err = HTTPStatusError("500 Internal Server Error", response=_err)
     _err.raise_for_status.side_effect = _http_err
 
     def dispatch(url, **_):
