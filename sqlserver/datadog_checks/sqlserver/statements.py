@@ -421,7 +421,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             procedure_signature = None
             procedure_content = None
             row['is_proc'] = bool(row.get('procedure_name'))
-            if (row['is_proc'] and row['text']) or self.disable_secondary_tags:
+            has_sproc_context = row['is_proc'] or bool(row.get('sproc_object_id'))
+            if (has_sproc_context and row['text']) or self.disable_secondary_tags:
                 try:
                     procedure_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True
@@ -431,8 +432,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     procedure_comments = procedure_statement['metadata'].get('comments', [])
                     if procedure_comments:
                         comments = list(set(comments + procedure_comments))
-                    if self.disable_secondary_tags and not row.get('procedure_name'):
-                        # Extract procedure name from the statement text when disable_secondary_tags is enabled
+                    if not row.get('procedure_name'):
                         procedures = procedure_statement['metadata'].get('procedures')
                         if procedures:
                             row['procedure_name'] = procedures[0].lower()
