@@ -70,3 +70,23 @@ def test_readiness_check_no_status_code(aggregator, instance):
 
     # Assert metric value is 0 (not ready) with status_code:null tag
     aggregator.assert_metric('n8n.readiness.check', value=0, tags=['status_code:null'])
+
+
+def test_version_metadata(datadog_agent, dd_run_check, mock_http_response, instance):
+    """
+    Test version metadata collection from Prometheus metrics
+    """
+    mock_http_response(file_path=common.get_fixture_path('n8n.txt'))
+    check = N8nCheck('n8n', {}, [instance])
+    check.check_id = 'n8n_test'
+    dd_run_check(check)
+    # Version from fixture: n8n_version_info{version="v1.117.2",major="1",minor="117",patch="2"} 1
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': '1',
+        'version.minor': '117',
+        'version.patch': '2',
+        'version.raw': 'v1.117.2',
+    }
+
+    datadog_agent.assert_metadata('n8n_test', version_metadata)
