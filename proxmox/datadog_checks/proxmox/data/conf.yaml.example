@@ -55,7 +55,7 @@ instances:
     #
     # collect_tasks: true
 
-    ## @param collected_task_types - list of strings - optional
+    ## @param collected_task_types - list of strings - optional - default: ['qmstart', 'qmstop', 'qmshutdown', 'qmreboot', 'qmigrate', 'qmsuspend', 'vzstart', 'vzshutdown', 'vzsuspend', 'startall', 'stopall', 'suspendall', 'aptupdate']
     ## Which Proxmox task types to collect. When `collect_tasks` is enabled, the integration will collect
     ## the following task types by default:
     ##   - qmstart

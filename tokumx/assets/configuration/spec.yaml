@@ -1,4 +1,5 @@
 name: TokuMX
+fleet_configurable: true
 files:
 - name: tokumx.yaml
   options:
@@ -8,6 +9,7 @@ files:
   - template: instances
     options:
     - name: server
+      fleet_configurable: true
       required: true
       description: |
         Specify the MongoDB URI, with database to use for reporting (defaults to "admin")
@@ -20,15 +22,18 @@ files:
         Optional SSL parameters, see
         https://github.com/mongodb/mongo-python-driver/blob/2.6.3/pymongo/mongo_client.py#L193-L212
         for more details
+      fleet_configurable: true
       value:
         type: boolean
         example: false
     - name: ssl_keyfile
       description: Path to the private key file used to identify the local connection against Mongodb.
+      fleet_configurable: true
       value:
         type: string
     - name: ssl_certfile
       description: Path to the certificate file used to identify the local connection against Mongodb.
+      fleet_configurable: true
       value:
         type: string
     - name: ssl_cert_reqs
@@ -39,10 +44,12 @@ files:
           * 0 for ssl.CERT_NONE (certificates ignored)
           * 1 for ssl.CERT_OPTIONAL (not required, but validated if provided)
           * 2 for ssl.CERT_REQUIRED (required and validated)
+      fleet_configurable: true
       value:
         type: integer
     - name: ssl_ca_certs
       description: Path to the ca_certs file.
+      fleet_configurable: true
       value:
         type: string
     - template: instances/default

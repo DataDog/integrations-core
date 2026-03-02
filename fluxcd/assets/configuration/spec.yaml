@@ -1,4 +1,5 @@
 name: fluxcd
+fleet_configurable: true
 files:
 - name: fluxcd.yaml
   options:

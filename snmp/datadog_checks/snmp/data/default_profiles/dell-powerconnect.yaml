@@ -118,7 +118,7 @@ metrics:
 #      TODO: enum in scalar metric is not supported yet (keep this metric and this comment in profile until it's fixed)
   - MIB: Dell-Vendor-MIB
     table:
-      name: dell.envMonFanStatusTable
+      name: envMonFanStatusTable
       OID: 1.3.6.1.4.1.674.10895.3000.1.2.110.7.1
     symbols:
       - name: dell.envMonFanSpeed
@@ -141,7 +141,7 @@ metrics:
           6: not_functioning
   - MIB: Dell-Vendor-MIB
     table:
-      name: dell.envMonSupplyStatusTable
+      name: envMonSupplyStatusTable
       OID: 1.3.6.1.4.1.674.10895.3000.1.2.110.7.2
     symbols:
       - name: dell.envMonSupplyCurrentPower

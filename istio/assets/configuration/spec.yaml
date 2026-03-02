@@ -1,4 +1,5 @@
 name: Istio
+fleet_configurable: true
 files:
   - name: istio.yaml
     options:
@@ -12,6 +13,7 @@ files:
             Use the OpenMetrics V2 implementation for more features and better performance.
             This implementation is only available for Istio >= 1.5, and should be used with 
             `istiod_endpoint` or `istio_mesh_endpoint`.
+          fleet_configurable: true
           value:
             example: true
             display_default: false
@@ -21,6 +23,7 @@ files:
           description: |
             Collect mixer, galley, pilot, and citadel metrics available from the istiod deployment.
             Only available for Istio >= v1.5. Cannot be used in combination with `istio_mesh_endpoint` in the same instance.
+          fleet_configurable: true
           value:
             display_default: null
             example: http://istiod.istio-system:15014/metrics
@@ -35,6 +38,7 @@ files:
 
             When collecting mesh metrics in Istio < v1.5, use
             istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
+          fleet_configurable: true
           value:
             display_default: null
             example: http://istio-proxy.istio-system:15020/stats/prometheus

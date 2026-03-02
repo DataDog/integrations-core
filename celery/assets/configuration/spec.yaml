@@ -1,4 +1,5 @@
 name: Celery
+fleet_configurable: true
 files:
 - name: celery.yaml
   options:

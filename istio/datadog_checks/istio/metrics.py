@@ -170,6 +170,9 @@ MESH_METRICS = {
     'istio_agent_pilot_conflict_outbound_listener_tcp_over_current_http': (
         'agent.pilot.conflict.outbound_listener.tcp_over_current_http'
     ),
+    'istio_agent_cert_expiry_seconds': 'agent.cert_expiry_seconds',
+    'istio_agent_dns_requests_total': 'agent.dns_requests_total',
+    'istio_agent_dns_upstream_request_duration_seconds': 'agent.dns_upstream_request_duration_seconds',
 }
 
 

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "da5f5eb9-8c7d-4c21-9d88-8dbf174a3933",
   "app_id": "cisco-asa",
+  "owner": "agent-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",

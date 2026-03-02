@@ -14,6 +14,7 @@ files:
           If the password contains special characters, be sure to escape them using percent encoding.
 
           See: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
+        secret: true
         value:
           example: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
           type: string

@@ -1,4 +1,5 @@
 name: ZooKeeper
+fleet_configurable: true
 
 files:
   - name: zk.yaml
@@ -11,6 +12,7 @@ files:
       - template: instances
         options:
           - name: host
+            fleet_configurable: true
             required: true
             description: Zookeeper host to connect to.
             value:
@@ -19,12 +21,14 @@ files:
 
           - name: port
             description: Zookeeper port to connect to.
+            fleet_configurable: true
             value:
               example: 2181
               type: integer
 
           - name: timeout
             description: The read timeout in seconds.
+            fleet_configurable: true
             value:
               example: 3
               type: integer
@@ -35,6 +39,7 @@ files:
               status is determined by whether the current mode matches the expected.
 
               Available options are: `leader`, `follower`, `standalone` or an array of one or more of these.
+            fleet_configurable: true
             value:
               example:
                 - leader
@@ -50,6 +55,7 @@ files:
               Whether to report the current instance mode as a 0/1 gauge.
               For example if the current instance mode is `observer` - `zookeeper.instances.observer` reports as 1.
               and `zookeeper.instances.(leader|follower|standalone|etc.)` reports as 0.
+            fleet_configurable: true
             value:
               example: true
               type: boolean
@@ -58,6 +64,7 @@ files:
           - name: use_tls
             description: |
               This instructs the Zookeeper check to connect using TLS.
+            fleet_configurable: true
             value:
               example: false
               type: boolean

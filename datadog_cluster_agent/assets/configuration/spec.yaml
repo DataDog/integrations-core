@@ -1,4 +1,5 @@
 name: Datadog Cluster Agent
+fleet_configurable: true
 files:
 - name: datadog_cluster_agent.yaml
   options:

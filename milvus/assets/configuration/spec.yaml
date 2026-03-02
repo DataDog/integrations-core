@@ -1,4 +1,5 @@
 name: Milvus
+fleet_configurable: true
 files:
 - name: milvus.yaml
   options:

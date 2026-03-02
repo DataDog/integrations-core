@@ -8,6 +8,7 @@
 - name: port
   required: true
   description: JMX port to connect to.
+  formats: ["port"]
   value:
     type: integer
   fleet_configurable: true
@@ -25,6 +26,7 @@
 - name: jmx_url
   description: JMX URL to connect to. Can be used instead of host/port configs.
   hidden: true
+  formats: ["url"]
   value:
     type: string
   fleet_configurable: true
@@ -51,6 +53,7 @@
 
     Note: tools.jar was removed in Java 9: https://openjdk.java.net/jeps/220.
     This option is supported in Java 8 and below.
+  fleet_configurable: true
   value:
     type: string
 
@@ -61,6 +64,8 @@
 
     Note: tools.jar was removed in Java 9: https://openjdk.java.net/jeps/220.
     This option is supported in Java 8 and below.
+  fleet_configurable: true
+  formats: ["path"]
   value:
     type: string
 
@@ -72,11 +77,14 @@
   fleet_configurable: true
 - name: java_bin_path
   description: "`java_bin_path` should be set if the Agent cannot find your java executable."
+  fleet_configurable: true
   value:
     type: string
   
 - name: java_options
   description: 'A list of Java JVM options, for example: "-Xmx200m -Xms50m".'
+  fleet_configurable: true
+  formats: ["java_jvm_options"]
   value:
     type: string
   
@@ -84,6 +92,7 @@
   description: |
     The path to your trusted store.
     `trust_store_path` should be set if SSL is enabled.
+  formats: ["path"]
   value:
     type: string
   fleet_configurable: true
@@ -100,6 +109,7 @@
   description: |
     The path to your key store.
     `key_store_path` should be set if client authentication is enabled on the target JVM.
+  formats: ["path"]
   value:
     type: string
   fleet_configurable: true
@@ -115,12 +125,14 @@
 
 - name: rmi_registry_ssl
   description: Whether or not the Agent should connect to the RMI registry using SSL.
+  fleet_configurable: true
   value:
     example: false
     type: boolean
   
 - name: rmi_connection_timeout
   description: The connection timeout, in milliseconds, when connecting to a remote JVM.
+  fleet_configurable: true
   value:
     example: 20000
     type: number
@@ -130,6 +142,7 @@
     The timeout to consider a remote connection, already successfully established, as lost.
     If a connected remote JVM does not reply after `rmi_client_timeout` milliseconds jmxfetch
     will give up on that connection and retry.
+  fleet_configurable: true
   value:
     example: 15000
     type: number 

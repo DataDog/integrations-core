@@ -1,0 +1,1 @@
+elastic: add `prirep` and `index` tags to the `elasticsearch.shards` metric through an additional `detailed_shard_metrics` option

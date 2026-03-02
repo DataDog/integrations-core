@@ -1,4 +1,5 @@
 name: HiveMQ
+fleet_configurable: true
 files:
 - name: hivemq.yaml
   options:

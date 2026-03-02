@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+import re
 from typing import Optional, Tuple
 
 from bson import json_util, regex
@@ -282,3 +283,104 @@ def get_collection_from_namespace(namespace: str) -> Optional[str]:
         return None
     splitted_ns = namespace.split(".", 1)
     return splitted_ns[1] if len(splitted_ns) > 1 else None
+
+
+# $queryStats utilities for MongoDB 8.0+
+# Type annotation pattern used by $queryStats (e.g., "?string", "?number", "?date")
+QUERY_STATS_TYPE_PATTERN = re.compile(
+    r'^\?(?:string|number|date|bool|objectId|array|object|binData|null|regex|timestamp)$'
+)
+
+# Fields to copy from query shape when reconstructing command
+QUERY_SHAPE_COPYABLE_FIELDS = [
+    'filter',
+    'projection',
+    'sort',
+    'pipeline',
+    'hint',
+    'limit',
+    'skip',
+    'batchSize',
+    'let',
+    'collation',
+    'arrayFilters',
+    'key',  # for distinct command
+]
+
+
+def normalize_query_stats_value(value):
+    """
+    Normalize $queryStats type annotations to simple '?' placeholders.
+
+    $queryStats uses typed placeholders like "?string", "?number", etc.
+    We normalize these to "?" for consistent obfuscation with $currentOp.
+
+    Examples:
+        "?string" -> "?"
+        {"$eq": "?number"} -> {"$eq": "?"}
+        ["?string", "?number"] -> ["?", "?"]
+    """
+    if isinstance(value, str):
+        if QUERY_STATS_TYPE_PATTERN.match(value):
+            return "?"
+        return value
+    elif isinstance(value, dict):
+        return {k: normalize_query_stats_value(v) for k, v in value.items()}
+    elif isinstance(value, list):
+        return [normalize_query_stats_value(v) for v in value]
+    return value
+
+
+def reconstruct_command_from_query_shape(query_shape: dict) -> dict:
+    """
+    Reconstruct a $currentOp-style command from a $queryStats query shape.
+
+    $queryStats format:
+    {
+        "cmdNs": {"db": "test", "coll": "products"},
+        "command": "find",
+        "filter": {"item": {"$eq": "?string"}},
+        "projection": {...},
+        "sort": {...}
+    }
+
+    Target format:
+    {
+        "find": "products",
+        "$db": "test",
+        "filter": {"item": {"$eq": "?"}}
+    }
+
+    This allows us to use the existing obfuscate_command() function
+    for unified query signatures across $currentOp and $queryStats.
+    """
+    if not query_shape:
+        return {}
+
+    cmd_ns = query_shape.get('cmdNs', {})
+    db_name = cmd_ns.get('db', '')
+    coll_name = cmd_ns.get('coll', '')
+    command_type = query_shape.get('command', 'unknown')
+
+    # Build the command with command type as key and collection as value
+    command = {
+        command_type: coll_name,
+        '$db': db_name,
+    }
+
+    # Copy and normalize relevant fields from query shape
+    for field in QUERY_SHAPE_COPYABLE_FIELDS:
+        if field in query_shape:
+            command[field] = normalize_query_stats_value(query_shape[field])
+
+    return command
+
+
+def get_query_stats_row_key(row: dict) -> tuple:
+    """
+    Generate a unique key for a query metrics row.
+    Used for derivative calculation and deduplication.
+
+    Returns: (query_signature, db_name, collection)
+    """
+    return (row.get('query_signature', ''), row.get('db_name', ''), row.get('collection', ''))

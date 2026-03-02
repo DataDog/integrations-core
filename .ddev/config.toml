@@ -197,6 +197,8 @@ ddev = false
 docs = false
 # This is a directory that exists only in CI but need to include it to avoid tests failing in CI
 trace-captures = false
+## Just in case __pycache__ is present in the root of the repo
+__pycache__ = false
 
 # Explicitely add the platforms supported by an integration for those where the manifest has been
 # removed.
