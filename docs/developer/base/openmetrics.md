@@ -2,7 +2,18 @@
 
 -----
 
-OpenMetrics is used for collecting metrics using the CNCF-backed OpenMetrics format. This version is the default version for all new OpenMetric-checks, and it is compatible with Python 3 only.
+OpenMetrics V2 is the current Prometheus/OpenMetrics scraping framework for Datadog integrations. It is Python 3 only and is the default for all new OpenMetrics-based checks.
+
+The base class handles the full scrape lifecycle: HTTP connection management, metric parsing, label renaming, type overrides, and submission to the Agent. Integration authors subclass `OpenMetricsBaseCheckV2` and configure it through instance options or by overriding a small set of hooks.
+
+For user-level configuration (the `metrics` instance option, label renaming, type overrides), the
+[generic OpenMetrics check documentation](https://docs.datadoghq.com/integrations/guide/prometheus-host-collection/)
+provides a reference. Note that the generic check exposes a default configuration that may not apply to all
+OpenMetrics-based integrations — each integration may surface a different set of options. Consult the individual
+integration's documentation for the authoritative reference (for example, the
+[KrakenD integration](https://docs.datadoghq.com/integrations/krakend/)).
+
+For bundling metric name mappings as YAML files alongside the check module, see [Metrics Files](openmetrics-metrics-files.md).
 
 ## Interface
 
@@ -14,6 +25,7 @@ OpenMetrics is used for collecting metrics using the CNCF-backed OpenMetrics for
         - check
         - configure_scrapers
         - create_scraper
+        - get_default_config
 
 ## Scrapers
 
