@@ -276,11 +276,15 @@ jobs:
       uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
       with:
         script: |
-          const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+          const { data: commit } = await github.rest.repos.getCommit({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            commit_sha: context.sha,
+            ref: context.sha,
           });
+          const message = commit.commit.message;
+          const match = message.match(/#(\d+)/);
+          const prs = match ? [{ number: parseInt(match[1]), html_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/pull/${match[1]}` }] : [];
+          console.log(`Commit message: ${message}`);
           console.log(`Found ${prs.length} PR(s) for commit ${context.sha}`);
           if (prs.length > 0) {
             const pr = prs[0];
@@ -360,11 +364,14 @@ jobs:
       with:
         github-token: ${{ steps.token-generator.outputs.token }}
         script: |
-          const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+          const { data: commit } = await github.rest.repos.getCommit({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            commit_sha: context.sha,
+            ref: context.sha,
           });
+          const message = commit.commit.message;
+          const match = message.match(/#(\d+)/);
+          const prs = match ? [{ number: parseInt(match[1]), html_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/pull/${match[1]}` }] : [];
           if (prs.length > 0) {
             const pr = prs[0];
             core.setOutput('pr_ref', `[#${pr.number}](${pr.html_url})`);
