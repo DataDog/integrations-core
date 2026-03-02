@@ -72,9 +72,13 @@ def test_alerts_disabled_no_alert_events_collected(dd_run_check, aggregator, moc
         assert not alert_type_tags, f"Should not have alert type, found: {alert_type_tags}"
 
 
-def test_category_tags_without_prefix(dd_run_check, aggregator, mock_instance, mock_http_get):
+def test_category_tags_without_prefix_for_system_and_user_types(dd_run_check, aggregator, mock_instance, mock_http_get):
     instance = mock_instance.copy()
     instance['prefix_category_tags'] = False
+    # Include both SYSTEM and USER types to test prefix behavior
+    instance['resource_filters'] = [
+        {"resource": "category", "property": "type", "patterns": ["^(SYSTEM|USER)$"]},
+    ]
 
     check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
@@ -88,9 +92,13 @@ def test_category_tags_without_prefix(dd_run_check, aggregator, mock_instance, m
         assert not prefixed_tags, f"Category tags should not have ntnx_ prefix, found: {prefixed_tags}"
 
 
-def test_category_tags_with_prefix(dd_run_check, aggregator, mock_instance, mock_http_get):
+def test_category_tags_with_prefix_for_system_and_user_types(dd_run_check, aggregator, mock_instance, mock_http_get):
     instance = mock_instance.copy()
     instance['prefix_category_tags'] = True
+    # Include both SYSTEM and USER types to test prefix behavior
+    instance['resource_filters'] = [
+        {"resource": "category", "property": "type", "patterns": ["^(SYSTEM|USER)$"]},
+    ]
 
     check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
