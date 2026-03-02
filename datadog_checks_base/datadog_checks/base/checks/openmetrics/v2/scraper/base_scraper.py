@@ -456,9 +456,7 @@ class OpenMetricsScraper:
         kwargs['stream'] = True
         extra_headers = kwargs.get('extra_headers', {})
         if self._use_latest_spec:
-            accept_header = (
-                'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
-            )
+            accept_header = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
         else:
             accept_header = 'text/plain'
         extra_headers['Accept'] = accept_header
