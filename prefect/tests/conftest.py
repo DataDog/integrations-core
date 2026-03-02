@@ -49,7 +49,7 @@ def dd_environment():
     ):
         yield (
             {
-                "instances": [{"prefect_url": prefect_url, "min_collection_interval": 300, "collect_events": True}],
+                "instances": [{"prefect_url": prefect_url, "min_collection_interval": 600, "collect_events": True}],
             },
             E2E_METADATA,
         )

@@ -450,8 +450,8 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 fr_tags,
             )
 
-            if start_time and expected_start_time and start_time > self.last_check_time:
-                self._aggregate_metric(
+            if start_time and expected_start_time and start_time >= self.last_check_time:
+                self._emit_metric(
                     "flow_runs.queue_wait_duration", max(0, (start_time - expected_start_time).total_seconds()), fr_tags
                 )
                 self._aggregate_metric("flow_runs.throughput", 1.0, fr_tags)
@@ -508,7 +508,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             )
             self._aggregate_metric(
                 "task_runs.throughput",
-                1.0 if start_time and start_time > self.last_check_time else 0.0,
+                1.0 if start_time and start_time >= self.last_check_time else 0.0,
                 tr_tags_list,
             )
 
@@ -594,6 +594,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         # Emit execution duration metric when task run has completed
         task_run_data = event_manager.payload.get('task_run', {})
         duration = task_run_data.get('total_run_time', None)
+
         if duration:
             self._emit_metric("task_runs.execution_duration", duration, task_tags)
 
