@@ -1,0 +1,10 @@
+name: Dell PowerFlex
+files:
+- name: dell_powerflex.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/default
