@@ -29,6 +29,8 @@ class NutanixCheck(AgentCheck):
 
         # setup
         self.pc_ip = self.instance.get("pc_ip")
+        if not self.pc_ip:
+            raise ConfigurationError("pc_ip is required")
         self.pc_port = self.instance.get("pc_port")
         if self.pc_ip and ":" in self.pc_ip:
             host, _, port = self.pc_ip.rpartition(":")

@@ -65,6 +65,11 @@ def test_cluster_stats_metrics(dd_run_check, aggregator, mock_instance, mock_htt
         aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
 
 
+def test_missing_pc_ip_raises_error():
+    with pytest.raises(ConfigurationError, match="pc_ip is required"):
+        NutanixCheck('nutanix', {}, [{"pc_username": "admin", "pc_password": "secret"}])
+
+
 def test_pc_ip_with_port_raises_error(mock_instance):
     """Test that ConfigurationError is raised when pc_ip contains a port."""
 
