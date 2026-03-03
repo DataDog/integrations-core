@@ -36,7 +36,7 @@ EXPECTED_EVENTS = [
     {
         'alert_type': 'info',
         'event_type': 'nutanix',
-        'msg_text': 'Password changed for user {username}',
+        'msg_text': 'Password changed for user admin',
         'msg_title': 'PasswordAudit',
         'source_type_name': 'nutanix',
         'tags': [

@@ -263,6 +263,10 @@ class ActivityMonitor:
         classifications = event.get("classifications", [])
         alert_type = "info"
 
+        # Render template variables in message from parameters
+        if parameters := event.get("parameters"):
+            event_message = self._render_message(event_message, parameters)
+
         # Extract entity information for tagging
         event_tags = self.check.base_tags.copy()
 
