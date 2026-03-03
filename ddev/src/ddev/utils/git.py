@@ -207,22 +207,83 @@ class GitRepository:
         """
         Check if a path matches any .gitignore pattern in the repository.
 
-        Works for files, directories, and wildcard patterns.
+        Loads and caches .gitignore patterns, reloading if the file changes.
+        Handles common gitignore patterns including wildcards, directory markers,
+        and anchored patterns.
 
         Returns True if the path matches any .gitignore pattern, False otherwise.
-        Raises OSError if git is unavailable or encounters a fatal error.
-
-        Note: Spawns a subprocess per call - avoid in tight loops over many paths.
         """
-        import subprocess
+        gitignore_file = self.repo_root / '.gitignore'
 
-        with self.repo_root.as_cwd():
-            result = subprocess.run(
-                ['git', 'check-ignore', '-q', str(path)],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            return result.returncode == 0
+        # Check if we need to reload .gitignore
+        if gitignore_file.exists():
+            current_mtime = gitignore_file.stat().st_mtime
+            if not hasattr(self, '_gitignore_mtime') or self._gitignore_mtime != current_mtime:
+                self._gitignore_spec = self._load_gitignore_spec()
+                self._gitignore_mtime = current_mtime
+        elif not hasattr(self, '_gitignore_spec'):
+            self._gitignore_spec = None
+
+        if self._gitignore_spec is None:
+            return False
+
+        try:
+            relative_path = path.relative_to(self.repo_root)
+        except ValueError:
+            return False
+
+        return self._gitignore_spec.match_file(str(relative_path))
+
+    def _load_gitignore_spec(self):
+        """Load .gitignore and create a matcher."""
+        gitignore_file = self.repo_root / '.gitignore'
+        if not gitignore_file.exists():
+            return None
+
+        from fnmatch import fnmatch
+
+        patterns = []
+        with open(gitignore_file, encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#'):
+                    patterns.append(line)
+
+        class GitignoreSpec:
+            def __init__(self, patterns):
+                self.patterns = patterns
+
+            def match_file(self, path):
+                for pattern in self.patterns:
+                    if self._match_pattern(path, pattern):
+                        return True
+                return False
+
+            def _match_pattern(self, path, pattern):
+                # Anchored pattern (starts with /)
+                if pattern.startswith('/'):
+                    pattern = pattern[1:]
+                    return fnmatch(path, pattern) or path.startswith(pattern + '/')
+
+                # Directory pattern (ends with /)
+                if pattern.endswith('/'):
+                    pattern = pattern[:-1]
+                    return path == pattern or path.startswith(pattern + '/')
+
+                # Try matching full path
+                if fnmatch(path, pattern):
+                    return True
+
+                # For simple patterns without /, match against any path component
+                if '/' not in pattern:
+                    parts = path.split('/')
+                    for part in parts:
+                        if fnmatch(part, pattern):
+                            return True
+
+                return False
+
+        return GitignoreSpec(patterns)
 
     @staticmethod
     def __is_warning_line(line):
