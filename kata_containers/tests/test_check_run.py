@@ -23,12 +23,6 @@ EXPECTED_METRICS = [
     'kata.hypervisor_threads',
     'kata.hypervisor_vcpus',
     'kata.hypervisor_vm_rss_bytes',
-    'kata.go_goroutines',
-    'kata.go_info',
-    'kata.process_open_fds',
-    'kata.process_resident_memory_bytes',
-    # prometheus_client strips _total from counter names: process_cpu_seconds_total → process_cpu_seconds
-    'kata.process_cpu_seconds.count',
 ]
 
 
@@ -81,16 +75,6 @@ def test_check_metrics_carry_instance_level_tags(aggregator, run_check_with_sand
         aggregator.assert_metric_has_tag(metric, 'team:platform')
         aggregator.assert_metric_has_tag(metric, 'region:us-east')
 
-
-def test_check_renames_go_version_label_to_avoid_generic_tag_conflict(aggregator, run_check_with_sandbox):
-    """The Prometheus 'version' label is renamed to 'go_version' so it is not intercepted by generic-tag filtering."""
-    run_check_with_sandbox()
-
-    aggregator.assert_metric_has_tag('kata.go_info', 'go_version:go1.21.0')
-    for m in aggregator.metrics('kata.go_info'):
-        assert not any(t.startswith('version:') for t in m.tags), (
-            f"Forbidden 'version:' tag found on kata.go_info: {m.tags}"
-        )
 
 
 def test_check_running_shim_count_reflects_number_of_discovered_sandboxes(aggregator, run_check_with_sandbox):

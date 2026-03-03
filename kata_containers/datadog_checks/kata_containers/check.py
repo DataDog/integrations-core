@@ -30,12 +30,12 @@ class KataContainersCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def get_default_config(self) -> dict:
         return {
-            # Strip the kata_ prefix so kata_hypervisor_fds → kata.hypervisor_fds.
-            # Go/process metrics have no such prefix and pass through as-is.
+            # Strip the kata_ prefix so kata_hypervisor_fds -> kata.hypervisor_fds.
+            # raw_metric_prefix is applied before metrics pattern-matching,
+            # so exclude_metrics is the right place to filter by the original prefix.
             'raw_metric_prefix': 'kata_',
             # Unix socket paths are noisy as metric tags.
             'tag_by_endpoint': False,
-            # Wildcard: collect every metric the shim exposes without an explicit allow-list.
             'metrics': [{'.*': {}}],
         }
 
@@ -57,7 +57,7 @@ class KataContainersCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.configure_scrapers()
 
     def _discover_sandboxes(self) -> dict[str, str]:
-        """Return a mapping of sandbox_id → socket_path for every live sandbox."""
+        """Return a mapping of sandbox_id -> socket_path for every live sandbox."""
         storage_paths = self.instance.get('sandbox_storage_paths') or self.SANDBOX_STORAGE_PATHS
         sandboxes: dict[str, str] = {}
 
