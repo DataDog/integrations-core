@@ -18,6 +18,7 @@ lustre = "Lustre"
 [overrides.metrics-prefix]
 krakend = "krakend.api."
 lustre = "lustre."
+n8n = "n8n."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
