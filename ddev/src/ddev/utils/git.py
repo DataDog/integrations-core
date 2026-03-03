@@ -25,6 +25,8 @@ class GitRepository:
         self.__repo_root = repo_root
 
         self.__filtered_tags: dict[str, list[str]] = {}
+        self._gitignore_mtime: float | None = None
+        self._gitignore_spec = None
 
     @property
     def repo_root(self) -> Path:
