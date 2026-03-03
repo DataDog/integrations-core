@@ -444,30 +444,35 @@ files:
         items:
           type: object
     - name: database_autodiscovery
+      fleet_configurable: true
       description: |
         Define the configuration for database autodiscovery.
         Complete this section if you want to auto-discover databases on this host
         instead of specifying each using dbname.
       options:
         - name: enabled
+          fleet_configurable: true
           description: Enable database autodiscovery.
           value:
             type: boolean
             example: false
             display_default: false
         - name: global_view_db
+          fleet_configurable: true
           description: Database the agent connects to perform autodiscovery operations
           value:
             type: string
             example: postgres
             display_default: postgres
         - name: max_databases
+          fleet_configurable: true
           description: The maximum number of databases this host should monitor.
           value:
             type: integer
             example: 100
             display_default: 100
         - name: include
+          fleet_configurable: true
           description: |
             Regular expression for database names to include as part of
             database autodiscovery.
@@ -486,6 +491,7 @@ files:
             display_default:
               - ".*"
         - name: exclude
+          fleet_configurable: true
           description: |
             Regular expression for database names to exclude as part of `database_autodiscovery`.
             Character casing is ignored. The regular expressions start matching from the beginning,
@@ -1125,6 +1131,7 @@ files:
             type: boolean
             example: true
         - name: keep_sql_alias
+          fleet_configurable: true
           description: |
             Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
             `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
@@ -1134,6 +1141,7 @@ files:
             example: true
             display_default: true
         - name: keep_dollar_quoted_func
+          fleet_configurable: true
           description: |
             Set to `true` to prevent dollar quoted function strings (e.g. `$func$`) from being removed.
             When not removed, the sql content of dollar quoted func strings will be obfuscated.
@@ -1143,6 +1151,7 @@ files:
             example: true
             display_default: true
         - name: remove_space_between_parentheses
+          fleet_configurable: true
           description: |
             Set to `true` to remove spaces between parentheses in your normalized SQL statements.
           value:
@@ -1150,6 +1159,7 @@ files:
             example: false
             display_default: false
         - name: keep_null
+          fleet_configurable: true
           description: |
             Set to `true` to keep the keyword `NULL` in your obfuscated SQL statements.
           value:
@@ -1157,6 +1167,7 @@ files:
             example: false
             display_default: false
         - name: keep_boolean
+          fleet_configurable: true
           description: |
             Set to `true` to keep the keywords `TRUE` and `FALSE` in your obfuscated SQL statements.
           value:
@@ -1164,6 +1175,7 @@ files:
             example: false
             display_default: false
         - name: keep_positional_parameter
+          fleet_configurable: true
           description: |
             Set to `true` to keep positional parameters (e.g. `$1`) in your obfuscated SQL statements.
           value:
@@ -1171,6 +1183,7 @@ files:
             example: false
             display_default: false
         - name: keep_trailing_semicolon
+          fleet_configurable: true
           description: |
             Set to `true` to keep trailing semicolons in your normalized SQL statements.
           value:
@@ -1178,6 +1191,7 @@ files:
             example: false
             display_default: false
         - name: keep_identifier_quotation
+          fleet_configurable: true
           description: |
             Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
           value:
@@ -1185,6 +1199,7 @@ files:
             example: false
             display_default: false
         - name: keep_json_path
+          fleet_configurable: true
           description: |
             Set to `true` to keep JSON path expressions (e.g. `data->'key'`) in your normalized SQL statements.
           value:
@@ -1192,6 +1207,7 @@ files:
             example: false
             display_default: false
     - name: collect_raw_query_statement
+      fleet_configurable: true
       description: |
         Configure the collection of raw query statements in query samples and explain plans.
         Raw query statements and explain plans may contain sensitive information (e.g., passwords)
@@ -1203,6 +1219,7 @@ files:
         This option only applies when dbm is enabled.
       options:
         - name: enabled
+          fleet_configurable: true
           description: |
             Set to `true` to collect the raw query statements.
           value:
@@ -1210,6 +1227,7 @@ files:
             example: false
             display_default: false
     - name: log_unobfuscated_queries
+      fleet_configurable: true
       hidden: true
       description: |
         Set to `true` to enable logging of original unobfuscated SQL queries when obfuscation errors occur.
@@ -1231,6 +1249,7 @@ files:
         display_default: false
     - name: database_instance_collection_interval
       hidden: true
+      fleet_configurable: true
       description: |
         Set the database instance collection interval (in seconds). The database instance collection sends
         basic information about the database instance along with a signal that it still exists.
