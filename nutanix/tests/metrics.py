@@ -167,6 +167,7 @@ CLUSTER_CAPACITY_METRICS = [
 
 HOST_BASIC_METRICS = [
     "nutanix.host.count",
+    "nutanix.host.status",
 ]
 
 # Host capacity metrics
