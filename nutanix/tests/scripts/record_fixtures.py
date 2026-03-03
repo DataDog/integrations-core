@@ -1,6 +1,3 @@
-# (C) Datadog, Inc. 2026-present
-# All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
 #!/usr/bin/env python3
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
@@ -23,17 +20,17 @@ The script will:
 """
 
 import json
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
 
-# Import AWS_INSTANCE from conftest
-from conftest import AWS_INSTANCE
-from requests.auth import HTTPBasicAuth
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from conftest import AWS_INSTANCE  # noqa: E402
+from requests.auth import HTTPBasicAuth  # noqa: E402
 
-# Base configuration
-FIXTURES_DIR = Path(__file__).parent / "fixtures"
+FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
 FIXTURES_DIR.mkdir(exist_ok=True)
 
 # Extract config
