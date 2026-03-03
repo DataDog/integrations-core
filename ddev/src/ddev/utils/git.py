@@ -204,18 +204,9 @@ class GitRepository:
         return self.capture('merge-base', ref_a, ref_b).splitlines()[0]
 
     def is_ignored(self, path: Path) -> bool:
-        """
-        Check if a path matches any .gitignore pattern in the repository.
-
-        Loads and caches .gitignore patterns, reloading if the file changes.
-        Handles common gitignore patterns including wildcards, directory markers,
-        and anchored patterns.
-
-        Returns True if the path matches any .gitignore pattern, False otherwise.
-        """
+        """Check if a path matches any .gitignore pattern in the repository."""
         gitignore_file = self.repo_root / '.gitignore'
 
-        # Check if we need to reload .gitignore
         if gitignore_file.exists():
             current_mtime = gitignore_file.stat().st_mtime
             if not hasattr(self, '_gitignore_mtime') or self._gitignore_mtime != current_mtime:
@@ -235,7 +226,7 @@ class GitRepository:
         return self._gitignore_spec.match_file(str(relative_path))
 
     def _load_gitignore_spec(self):
-        """Load .gitignore and create a matcher."""
+        """Load .gitignore patterns and return a matcher."""
         gitignore_file = self.repo_root / '.gitignore'
         if not gitignore_file.exists():
             return None
@@ -260,24 +251,19 @@ class GitRepository:
                 return False
 
             def _match_pattern(self, path, pattern):
-                # Anchored pattern (starts with /)
                 if pattern.startswith('/'):
                     pattern = pattern[1:]
                     return fnmatch(path, pattern) or path.startswith(pattern + '/')
 
-                # Directory pattern (ends with /)
                 if pattern.endswith('/'):
                     pattern = pattern[:-1]
                     return path == pattern or path.startswith(pattern + '/')
 
-                # Try matching full path
                 if fnmatch(path, pattern):
                     return True
 
-                # For simple patterns without /, match against any path component
                 if '/' not in pattern:
-                    parts = path.split('/')
-                    for part in parts:
+                    for part in path.split('/'):
                         if fnmatch(part, pattern):
                             return True
 
