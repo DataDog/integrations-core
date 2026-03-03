@@ -78,7 +78,7 @@ instances:
     ## - Only USER category tags are collected.
     ##   For SYSTEM/INTERNAL categories, explicitly configure category filters.
     ## - Only VMs with powerState ON are collected.
-    ##   To collect all VMs or specific power states, explicitly configure VM filters.
+    ##   To collect OFF/PAUSED VMs, add a VM filter with property: powerState.
     ##
     ## Resources: cluster, host, vm, event, task, alert, audit, category
     ## Property access: Use API property names (case-sensitive).

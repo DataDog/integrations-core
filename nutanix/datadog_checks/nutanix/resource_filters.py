@@ -71,9 +71,6 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]], logger: Any) -> li
         - Categories: If no category filters are specified, only USER type categories are collected.
           This applies even if other resource_filters are configured.
           To collect all categories or specific types, explicitly configure category filters.
-        - VMs: If no VM filters are specified, only VMs with powerState ON are collected.
-          This applies even if other resource_filters are configured.
-          To collect all VMs or specific power states, explicitly configure VM filters.
 
     Examples:
         # Include only SYSTEM categories
@@ -88,9 +85,8 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]], logger: Any) -> li
         # Exclude failed tasks
         {"resource": "task", "property": "status", "type": "exclude", "patterns": ["^FAILED$"]}
     """
-    # Check if any category or VM filters are present in raw_filters
+    # Check if any category filters are present in raw_filters
     has_category_filter = any(f.get('resource') == 'category' for f in raw_filters or [])
-    has_vm_filter = any(f.get('resource') == 'vm' for f in raw_filters or [])
 
     result = []
     for f in raw_filters or []:
@@ -152,19 +148,6 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]], logger: Any) -> li
             }
         )
         logger.debug("No category filters specified, applying default filter to include only USER type categories")
-
-    # Add default VM filter if no VM filters were specified
-    # This ensures only VMs with powerState ON are collected by default
-    if not has_vm_filter:
-        result.append(
-            {
-                'resource': 'vm',
-                'property': 'powerState',
-                'type': 'include',
-                'patterns': [re.compile(r'^ON$')],
-            }
-        )
-        logger.debug("No VM filters specified, applying default filter to include only VMs with powerState ON")
 
     return result
 
@@ -271,20 +254,13 @@ def should_collect_resource(
     if not includes:
         return True
 
-    # Only apply include filters for properties that exist in the entity.
-    # This prevents partial entities (e.g. sourceEntity in alerts with only extId/name)
-    # from being incorrectly excluded by filters on properties they don't carry.
-    applicable = [f for f in includes if _get_nested_value(entity, f['property']) is not None]
-    if not applicable:
-        return True
-
-    if any(_matches_filter(entity, f) for f in applicable):
+    if any(_matches_filter(entity, f) for f in includes):
         return True
 
     logger.debug(
         "Skipping %s due to include filter on %s: %s",
         resource_type,
-        applicable[0]['property'],
+        includes[0]['property'],
         entity.get("name") or entity.get("extId") or "",
     )
     return False

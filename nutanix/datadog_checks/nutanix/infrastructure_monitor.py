@@ -181,6 +181,11 @@ class InfrastructureMonitor:
         """
         vm_id = vm.get("extId", "unknown")
         hostname = vm.get("name")
+        has_power_state_filter = any(
+            f['resource'] == 'vm' and f['property'] == 'powerState' for f in self.check.resource_filters
+        )
+        if not has_power_state_filter and vm.get("powerState") != "ON":
+            return
         if not should_collect_resource("vm", vm, self.check.resource_filters, self.check.log):
             return
         vm_tags = self.check.base_tags + self._extract_vm_tags(vm)

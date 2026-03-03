@@ -291,11 +291,7 @@ class TestClusterCapacityMetrics:
             'prism_central:10.0.0.197',
         ]
 
-        # Only ON VMs in cluster (default filter excludes OFF VMs):
-        # - NTNX-10-0-0-165-PCVM-1767014640: 6 sockets * 1 core = 6 vCPUs
-        # - ubuntu-vm: 2 sockets * 1 core = 2 vCPUs
-        # - random-vm: 2 sockets * 1 core = 2 vCPUs
-        # Total: 10 vCPUs
+        # NTNX-10-0-0-165-PCVM: 6, ubuntu-vm: 2, random-vm: 2 (OFF VM excluded by default)
         aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=10, tags=expected_tags)
 
     def test_cluster_memory_allocated_bytes(self, dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -310,9 +306,5 @@ class TestClusterCapacityMetrics:
             'prism_central:10.0.0.197',
         ]
 
-        # Only ON VMs in cluster (default filter excludes OFF VMs):
-        # - NTNX-10-0-0-165-PCVM-1767014640: 30064771072 bytes (~28GB)
-        # - ubuntu-vm: 8589934592 bytes (8GB)
-        # - random-vm: 8589934592 bytes (8GB)
-        # Total: 47244640256 bytes (~44GB)
+        # NTNX-10-0-0-165-PCVM: 28GB, ubuntu-vm: 8GB, random-vm: 8GB (OFF VM excluded by default)
         aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=47244640256, tags=expected_tags)

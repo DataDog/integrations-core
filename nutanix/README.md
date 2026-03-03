@@ -72,6 +72,20 @@ The integration does not emit any service checks.
 
 ## Troubleshooting
 
+### VM collection
+
+By default, only VMs with `powerState: ON` are collected. To collect VMs in other power states (OFF, PAUSED), add an explicit `powerState` VM filter in `resource_filters`:
+
+```yaml
+resource_filters:
+  - resource: vm
+    property: powerState
+    patterns:
+      - '.*'
+```
+
+Other VM filters (e.g., by name) do not override this default. Only a `powerState` filter does.
+
 ### Category tags
 
 Nutanix categories are attached as tags to metrics. By default, only `USER` category tags are collected. To include `SYSTEM` or `INTERNAL` categories, add an explicit category filter in `resource_filters`.
