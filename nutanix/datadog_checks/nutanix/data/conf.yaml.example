@@ -74,11 +74,8 @@ instances:
     ## Optional: 'property' (defaults per type), 'type' (include|exclude, default: include).
     ## Exclude takes precedence over include.
     ##
-    ## IMPORTANT Defaults:
-    ## - Only USER category tags are collected.
-    ##   For SYSTEM/INTERNAL categories, explicitly configure category filters.
-    ## - Only VMs with powerState ON are collected.
-    ##   To collect OFF/PAUSED VMs, add a VM filter with property: powerState.
+    ## IMPORTANT Default: Only USER category tags are collected.
+    ## For SYSTEM/INTERNAL categories, explicitly configure category filters.
     ##
     ## Resources: cluster, host, vm, event, task, alert, audit, category
     ## Property access: Use API property names (case-sensitive).
