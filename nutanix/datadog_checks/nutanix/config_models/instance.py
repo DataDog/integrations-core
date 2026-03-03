@@ -102,6 +102,7 @@ class InstanceConfig(BaseModel):
     pc_port: Optional[int] = None
     pc_username: str
     persist_connections: Optional[bool] = None
+    prefix_category_tags: Optional[bool] = None
     proxy: Optional[Proxy] = None
     read_timeout: Optional[float] = None
     request_size: Optional[float] = None

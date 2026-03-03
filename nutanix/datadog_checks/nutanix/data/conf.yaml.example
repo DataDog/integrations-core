@@ -120,6 +120,14 @@ instances:
     #     - ^WARNING$
     #     - ^CRITICAL$
 
+    ## @param prefix_category_tags - boolean - optional - default: false
+    ## Whether to prefix Nutanix category tags with 'ntnx_'.
+    ## When false, category tags use the Nutanix category key directly (e.g., 'Environment:Production').
+    ## When true, tags are prefixed with 'ntnx_' (e.g., 'ntnx_Environment:Production').
+    ## Default is false.
+    #
+    # prefix_category_tags: false
+
     ## @param collect_events - boolean - optional - default: true
     ## Whether to collect events from Prism Central.
     ## Default is true.

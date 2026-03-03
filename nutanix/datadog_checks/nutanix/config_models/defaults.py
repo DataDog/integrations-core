@@ -84,6 +84,10 @@ def instance_persist_connections():
     return False
 
 
+def instance_prefix_category_tags():
+    return False
+
+
 def instance_request_size():
     return 16
 

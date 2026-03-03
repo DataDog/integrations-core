@@ -138,6 +138,15 @@ files:
                 - resource: alert
                   property: severity
                   patterns: ['^WARNING$', '^CRITICAL$']
+          - name: prefix_category_tags
+            description: |
+              Whether to prefix Nutanix category tags with 'ntnx_'.
+              When false, category tags use the Nutanix category key directly (e.g., 'Environment:Production').
+              When true, tags are prefixed with 'ntnx_' (e.g., 'ntnx_Environment:Production').
+              Default is false.
+            value:
+              type: boolean
+              example: false
           - name: collect_events
             description: |
               Whether to collect events from Prism Central.
