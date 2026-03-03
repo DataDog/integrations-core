@@ -72,27 +72,35 @@ The integration does not emit any service checks.
 
 ## Troubleshooting
 
+### Category tags
+
+Nutanix categories are attached as tags to metrics. By default, only `USER` category tags are collected. To include `SYSTEM` or `INTERNAL` categories, add an explicit category filter in `resource_filters`.
+
+Category tags use the Nutanix category key as the tag name (e.g., `Environment:Production`). Set `prefix_category_tags: true` to prefix them with `ntnx_` (e.g., `ntnx_Environment:Production`) to avoid collisions with existing Datadog tags.
+
 ### Filtering resources
 
-You can limit which resources are collected with the Nutanix integration using the `nutanix.d/conf.yaml` file. See the `resource_filters` parameter section in the [sample nutanix.d/conf.yaml][3].
+Use the `resource_filters` option to control which resources are collected. Each filter requires a `resource` type and a list of regex `patterns`. Optionally, set `property` (defaults vary by resource type) and `type` (`include` or `exclude`, default: `include`). Exclude filters take precedence over include filters.
 
-Each filter supports regex patterns and include/exclude types. Exclude filters take precedence over include filters. Supported resources: `cluster`, `host`, `vm`, `event`, `task`, `alert`, `audit`, `category`.
+Supported resource types: `cluster`, `host`, `vm`, `event`, `task`, `alert`, `audit`, `category`. Infrastructure resources (`cluster`, `host`, `vm`) default to matching on `name`. Nested properties are supported using `/` as a separator (e.g., `userReference/name`).
 
 ```yaml
 resource_filters:
   - resource: cluster
     property: name
-    patterns: ['^prod-']
+    patterns:
+      - '^prod-'
   - resource: host
     property: name
     type: exclude
-    patterns: ['^standby-']
+    patterns:
+      - '^standby-'
   - resource: alert
     property: severity
-    patterns: ['^WARNING$', '^CRITICAL$']
+    patterns:
+      - '^WARNING$'
+      - '^CRITICAL$'
 ```
-
-**Note**: By default, only `USER` category tags are collected. To include `SYSTEM` or `INTERNAL` categories, add an explicit category filter.
 
 Need help? Contact [Datadog support][7].
 
