@@ -255,6 +255,21 @@
                         "count": 50,
                         "order": "desc"
                       }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Index Scans",
+                      "cell_display_mode": "bar"
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "Live Rows",
+                      "cell_display_mode": "bar"
+                    },
+                    {
+                      "formula": "query4",
+                      "alias": "Dead Rows",
+                      "cell_display_mode": "bar"
                     }
                   ],
                   "response_format": "scalar",
@@ -264,59 +279,23 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
-                    }
-                  ]
-                },
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Index Scans",
-                      "cell_display_mode": "bar"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "queries": [
+                    },
                     {
                       "query": "avg:postgresql.index_scans{$scope,$db,$table,$host} by {table}",
                       "data_source": "metrics",
-                      "name": "query1",
+                      "name": "query2",
                       "aggregator": "avg"
-                    }
-                  ]
-                },
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Live Rows",
-                      "cell_display_mode": "bar"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "queries": [
+                    },
                     {
                       "query": "avg:postgresql.live_rows{$scope,$db,$table,$host} by {table}",
                       "data_source": "metrics",
-                      "name": "query1",
+                      "name": "query3",
                       "aggregator": "avg"
-                    }
-                  ]
-                },
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Dead Rows",
-                      "cell_display_mode": "bar"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "queries": [
+                    },
                     {
                       "query": "avg:postgresql.dead_rows{$scope,$db,$table,$host} by {table}",
                       "data_source": "metrics",
-                      "name": "query1",
+                      "name": "query4",
                       "aggregator": "avg"
                     }
                   ]
@@ -829,6 +808,16 @@
                         "count": 50,
                         "order": "desc"
                       }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Updated",
+                      "cell_display_mode": "bar"
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "Deleted",
+                      "cell_display_mode": "bar"
                     }
                   ],
                   "response_format": "scalar",
@@ -838,41 +827,17 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "sum"
-                    }
-                  ]
-                },
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Updated",
-                      "cell_display_mode": "bar"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "queries": [
+                    },
                     {
                       "query": "avg:postgresql.rows_updated{$db,$scope,$host} by {db}",
                       "data_source": "metrics",
-                      "name": "query1",
+                      "name": "query2",
                       "aggregator": "sum"
-                    }
-                  ]
-                },
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Deleted",
-                      "cell_display_mode": "bar"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "queries": [
+                    },
                     {
                       "query": "avg:postgresql.rows_deleted{$db,$scope,$host} by {db}",
                       "data_source": "metrics",
-                      "name": "query1",
+                      "name": "query3",
                       "aggregator": "sum"
                     }
                   ]
@@ -1242,6 +1207,11 @@
                         "count": 50,
                         "order": "desc"
                       }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Sequential Scans",
+                      "cell_display_mode": "bar"
                     }
                   ],
                   "response_format": "scalar",
@@ -1251,23 +1221,11 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
-                    }
-                  ]
-                },
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Sequential Scans",
-                      "cell_display_mode": "bar"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "queries": [
+                    },
                     {
                       "query": "avg:postgresql.seq_scans{$scope,$db,$table,$host} by {db}",
                       "data_source": "metrics",
-                      "name": "query1",
+                      "name": "query2",
                       "aggregator": "avg"
                     }
                   ]
