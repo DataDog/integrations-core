@@ -104,6 +104,10 @@ resource_filters:
 
 Category tags use the Nutanix category key as the tag name (e.g., `Environment:Production`). Set `prefix_category_tags: true` to prefix them with `ntnx_` (e.g., `ntnx_Environment:Production`) to avoid collisions with existing Datadog tags.
 
+### Duplicate hostnames
+
+The Nutanix API does not expose the real hostname of VMs. VM metrics use the VM name from Prism Central as the hostname. If the Datadog Agent is installed on a Nutanix VM, its auto-detected hostname may differ from the VM name, causing duplicate hosts in Datadog. To fix this, set `hostname` in `datadog.yaml` (or the `DD_HOSTNAME` environment variable) to match the VM name in Prism Central.
+
 ### Filtering resources
 
 Use the `resource_filters` option to control which resources are collected. Each filter requires a `resource` type and a list of regex `patterns`. Optionally, set `property` (defaults vary by resource type) and `type` (`include` or `exclude`, default: `include`). Exclude filters take precedence over include filters.
