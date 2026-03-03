@@ -16,7 +16,7 @@ excluded_paths = [
   "gssapi/**/py.typed",
 
   # --- Tests ---
- 
+
   "idlelib/idle_test/",
   "bs4/tests/",
   "Cryptodome/SelfTest/",
@@ -42,4 +42,18 @@ excluded_paths = [
   "vertica_python/tests/",
   "websocket/tests/",
   "win32com/test/",
+
+  # --- Botocore ---
+  "botocore/data/*",
+  # We use sts in several integrations for assuming roles:
+  # - amazon_msk
+  # - postres
+  # - mysql
+  "!botocore/data/sts",
+  # amazon_msk also needs the kafka client.
+  "!botocore/data/kafka",
+  # postgres and mysql also need the rds.
+  "!botocore/data/rds",
+  # Riakcs integration monitors s3.
+  "!botocore/data/s3",
 ]

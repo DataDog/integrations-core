@@ -3,7 +3,7 @@
   "app_uuid": "76054e37-5919-442f-a7a6-5a77ed5e7b0e",
   "app_id": "supabase-cloud",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

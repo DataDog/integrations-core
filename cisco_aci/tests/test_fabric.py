@@ -106,12 +106,12 @@ tagsapic1 = [
     'project:cisco_aci',
 ] + device_tags_1
 
-interface_tags_101_eth1 = tags101 + ['port:eth1/1', node101_port1]
-interface_tags_101_eth2 = tags101 + ['port:eth1/2', node101_port2]
-interface_tags_102_eth1 = tags102 + ['port:eth1/1', node102_port1]
-interface_tags_102_eth2 = tags102 + ['port:eth1/2', node102_port2]
-interface_tags_201_eth1 = tags201 + ['port:eth5/1', node201_port1]
-interface_tags_201_eth2 = tags201 + ['port:eth5/2', node201_port2]
+interface_tags_101_eth1 = tags101 + ['port:eth1/1', node101_port1, 'interface:eth1/1']
+interface_tags_101_eth2 = tags101 + ['port:eth1/2', node101_port2, 'interface:eth1/2']
+interface_tags_102_eth1 = tags102 + ['port:eth1/1', node102_port1, 'interface:eth1/1']
+interface_tags_102_eth2 = tags102 + ['port:eth1/2', node102_port2, 'interface:eth1/2']
+interface_tags_201_eth1 = tags201 + ['port:eth5/1', node201_port1, 'interface:eth5/1']
+interface_tags_201_eth2 = tags201 + ['port:eth5/2', node201_port2, 'interface:eth5/2']
 
 
 def test_fabric_mocked(aggregator):
@@ -151,6 +151,7 @@ def test_fabric_mocked(aggregator):
                 'dd.internal.resource:ndm_interface:{}:{}-{}'.format(
                     interface.device_id, interface.raw_id_type, interface.raw_id
                 ),
+                'interface:{}'.format(interface.name),
             ]
             aggregator.assert_metric('cisco_aci.fabric.port.status', value=1.0, tags=interface_tags, hostname=device_hn)
 

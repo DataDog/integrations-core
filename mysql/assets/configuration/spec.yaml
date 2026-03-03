@@ -59,6 +59,7 @@ files:
               Port to use when connecting to MySQL.
             fleet_configurable: true
             enabled: true
+            formats: ["port"]
             value:
               type: number
               example: 3306
@@ -164,10 +165,13 @@ files:
               properties:
                 - name: key
                   type: string
+                  formats: ["path"]
                 - name: cert
                   type: string
+                  formats: ["path"]
                 - name: ca
                   type: string
+                  formats: ["path"]
                 - name: check_hostname
                   type: boolean
               example:

@@ -1,1 +1,0 @@
-Fix a truthy check on AWS authentication fallback logic

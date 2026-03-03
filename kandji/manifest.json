@@ -3,7 +3,7 @@
   "app_uuid": "3677fa0b-49e4-49df-b0f2-6a3a983d6637",
   "app_id": "kandji",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

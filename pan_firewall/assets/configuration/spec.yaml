@@ -10,3 +10,5 @@ files:
       port: 10518
       service: "firewall"
       source: "pan.firewall"
+      tags:
+        - "ndm_syslog:true"

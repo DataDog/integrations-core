@@ -1,1 +1,0 @@
-Remove unused PARTITION_ACTIVITY_QUERY that was never called in the schema collector.

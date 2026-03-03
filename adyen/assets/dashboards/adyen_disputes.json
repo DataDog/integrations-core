@@ -138,7 +138,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:dispute @evt.name:NOTIFICATION_OF_CHARGEBACK $MerchantAccount $PaymentMethod"
+                                                "query": "source:adyen @evt.name:NOTIFICATION_OF_CHARGEBACK $MerchantAccount $PaymentMethod"
                                             },
                                             "storage": "hot"
                                         }
@@ -197,7 +197,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:dispute @evt.name:CHARGEBACK $MerchantAccount $PaymentMethod"
+                                                "query": "source:adyen @evt.name:CHARGEBACK $MerchantAccount $PaymentMethod"
                                             },
                                             "storage": "hot"
                                         }
@@ -256,7 +256,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:dispute @evt.name:SECOND_CHARGEBACK $MerchantAccount $PaymentMethod"
+                                                "query": "source:adyen @evt.name:SECOND_CHARGEBACK $MerchantAccount $PaymentMethod"
                                             },
                                             "storage": "hot"
                                         }
@@ -324,7 +324,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:dispute @evt.name:NOTIFICATION_OF_CHARGEBACK $MerchantAccount $PaymentMethod -@notificationItems.NotificationRequestItem.reason:\"\""
+                                                "query": "source:adyen @evt.name:NOTIFICATION_OF_CHARGEBACK $MerchantAccount $PaymentMethod -@notificationItems.NotificationRequestItem.reason:\"\""
                                             },
                                             "storage": "hot"
                                         }
@@ -391,7 +391,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:dispute @evt.name:PREARBITRATION_LOST $MerchantAccount $PaymentMethod"
+                                                "query": "source:adyen @evt.name:PREARBITRATION_LOST $MerchantAccount $PaymentMethod"
                                             },
                                             "storage": "hot"
                                         }
@@ -450,7 +450,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:dispute @evt.name:PREARBITRATION_WON $MerchantAccount $PaymentMethod"
+                                                "query": "source:adyen @evt.name:PREARBITRATION_WON $MerchantAccount $PaymentMethod"
                                             },
                                             "storage": "hot"
                                         }
@@ -509,7 +509,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:dispute @evt.name:REQUEST_FOR_INFORMATION $MerchantAccount $PaymentMethod"
+                                                "query": "source:adyen @evt.name:REQUEST_FOR_INFORMATION $MerchantAccount $PaymentMethod"
                                             },
                                             "storage": "hot"
                                         }
@@ -568,7 +568,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:dispute @evt.name:CHARGEBACK_REVERSED $MerchantAccount $PaymentMethod"
+                                                "query": "source:adyen @evt.name:CHARGEBACK_REVERSED $MerchantAccount $PaymentMethod"
                                             },
                                             "storage": "hot"
                                         }
@@ -636,7 +636,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:dispute @evt.name:SECOND_CHARGEBACK $MerchantAccount $PaymentMethod -@notificationItems.NotificationRequestItem.reason:\"\""
+                                                "query": "source:adyen @evt.name:SECOND_CHARGEBACK $MerchantAccount $PaymentMethod -@notificationItems.NotificationRequestItem.reason:\"\""
                                             },
                                             "storage": "hot"
                                         }
@@ -717,7 +717,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:dispute @evt.name:NOTIFICATION_OF_CHARGEBACK $MerchantAccount $PaymentMethod"
+                                                "query": "source:adyen @evt.name:NOTIFICATION_OF_CHARGEBACK $MerchantAccount $PaymentMethod"
                                             },
                                             "storage": "hot"
                                         }
@@ -790,7 +790,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:dispute @evt.name:NOTIFICATION_OF_FRAUD $MerchantAccount $PaymentMethod"
+                                                "query": "source:adyen @evt.name:NOTIFICATION_OF_FRAUD $MerchantAccount $PaymentMethod"
                                             },
                                             "storage": "hot"
                                         }
@@ -863,7 +863,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:dispute @evt.name:NOTIFICATION_OF_FRAUD $MerchantAccount $PaymentMethod"
+                                                "query": "source:adyen @evt.name:NOTIFICATION_OF_FRAUD $MerchantAccount $PaymentMethod"
                                             },
                                             "storage": "hot"
                                         }
@@ -927,7 +927,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:dispute @evt.name:NOTIFICATION_OF_FRAUD $MerchantAccount $PaymentMethod -@notificationItems.NotificationRequestItem.reason:\"\""
+                                                "query": "source:adyen @evt.name:NOTIFICATION_OF_FRAUD $MerchantAccount $PaymentMethod -@notificationItems.NotificationRequestItem.reason:\"\""
                                             },
                                             "storage": "hot"
                                         }

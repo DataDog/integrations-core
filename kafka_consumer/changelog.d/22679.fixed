@@ -1,0 +1,1 @@
+Don't report negative lag when data is dropped (broker offset goes down).

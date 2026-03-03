@@ -8,9 +8,6 @@ DEVICE_METADATA = [
     {
         'id': 'default:10.0.200.0',
         'id_tags': [
-            'device_ip:10.0.200.0',
-            'device_namespace:default',
-            'device_hostname:leaf101',
             'device_id:default:10.0.200.0',
         ],
         'integration': 'cisco-aci',
@@ -39,9 +36,6 @@ DEVICE_METADATA = [
     {
         'id': 'default:10.0.200.1',
         'id_tags': [
-            'device_ip:10.0.200.1',
-            'device_namespace:default',
-            'device_hostname:leaf102',
             'device_id:default:10.0.200.1',
         ],
         'integration': 'cisco-aci',
@@ -70,9 +64,6 @@ DEVICE_METADATA = [
     {
         'id': 'default:10.0.200.4',
         'id_tags': [
-            'device_ip:10.0.200.4',
-            'device_namespace:default',
-            'device_hostname:apic1',
             'device_id:default:10.0.200.4',
         ],
         'integration': 'cisco-aci',
@@ -100,9 +91,6 @@ DEVICE_METADATA = [
     {
         'id': 'default:10.0.200.5',
         'id_tags': [
-            'device_ip:10.0.200.5',
-            'device_namespace:default',
-            'device_hostname:spine201',
             'device_id:default:10.0.200.5',
         ],
         'integration': 'cisco-aci',

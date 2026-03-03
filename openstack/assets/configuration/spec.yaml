@@ -9,6 +9,7 @@ files:
         options:
           - name: keystone_server_url
             fleet_configurable: true
+            formats: ["url"]
             required: true
             description: |
               Where your identity server lives. Note that the server must support Identity API v3
