@@ -199,7 +199,12 @@ class InfrastructureMonitor:
         """
         self.check.gauge("vm.count", 1, hostname=hostname, tags=vm_tags)
 
-        # Report VM capacity metrics
+        power_state = vm.get("powerState", "$UNKNOWN")
+        status_value = 0 if power_state == "ON" else 1 if power_state == "PAUSED" else 2
+        self.check.gauge(
+            "vm.status", status_value, hostname=hostname, tags=vm_tags + [f"ntnx_power_state:{power_state}"]
+        )
+
         self._report_vm_capacity_metrics(vm, hostname, vm_tags)
 
     def _report_vm_capacity_metrics(self, vm: dict, hostname: str, vm_tags: list[str]) -> None:

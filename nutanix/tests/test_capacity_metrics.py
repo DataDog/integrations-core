@@ -291,12 +291,13 @@ class TestClusterCapacityMetrics:
             'prism_central:10.0.0.197',
         ]
 
-        # All VMs in cluster (fixture returns 3 VMs):
+        # All VMs in cluster (fixture returns 4 VMs):
         # - NTNX-10-0-0-165-PCVM-1767014640: 6 sockets * 1 core = 6 vCPUs
-        # - dd-vm: 2 sockets * 1 core = 2 vCPUs
-        # - datadog-agent-cloned: 1 socket * 1 core = 1 vCPU
-        # Total: 9 vCPUs
-        aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=10, tags=expected_tags)
+        # - ubuntu-vm: 2 sockets * 1 core = 2 vCPUs
+        # - random-vm: 2 sockets * 1 core = 2 vCPUs
+        # - test-vm-that-should-remain-off: 2 sockets * 1 core = 2 vCPUs
+        # Total: 12 vCPUs
+        aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=12, tags=expected_tags)
 
     def test_cluster_memory_allocated_bytes(self, dd_run_check, aggregator, mock_instance, mock_http_get):
         """Cluster should report total memory allocated to all VMs."""
@@ -310,9 +311,10 @@ class TestClusterCapacityMetrics:
             'prism_central:10.0.0.197',
         ]
 
-        # All VMs in cluster (fixture returns 3 VMs):
+        # All VMs in cluster (fixture returns 4 VMs):
         # - NTNX-10-0-0-165-PCVM-1767014640: 30064771072 bytes (~28GB)
-        # - dd-vm: 8589934592 bytes (8GB)
-        # - datadog-agent-cloned: 4294967296 bytes (4GB)
-        # Total: 47244640256 bytes (~40GB)
-        aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=47244640256, tags=expected_tags)
+        # - ubuntu-vm: 8589934592 bytes (8GB)
+        # - random-vm: 8589934592 bytes (8GB)
+        # - test-vm-that-should-remain-off: 8589934592 bytes (8GB)
+        # Total: 55834574848 bytes (~52GB)
+        aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=55834574848, tags=expected_tags)

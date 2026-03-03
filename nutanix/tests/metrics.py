@@ -180,6 +180,7 @@ HOST_CAPACITY_METRICS = [
 
 VM_BASIC_METRICS = [
     "nutanix.vm.count",
+    "nutanix.vm.status",
 ]
 
 # VM capacity metrics

@@ -208,11 +208,16 @@ def test_include_all_category_types_when_explicitly_configured(dd_run_check, agg
 
     for metric in vm_metrics:
         tags = metric.tags
+        # skip VM that doesn't contain any category
+        if any(tag == "ntnx_vm_name:test-vm-that-should-remain-off" for tag in tags):
+            continue
         has_system_tag = any(tag == "Environment:Testing" for tag in tags)
         has_user_tag = any(tag == "Team:agent-integrations" for tag in tags)
         if has_system_tag or has_user_tag:
-            assert has_system_tag, "Expected SYSTEM category tags when all types are included"
-            assert has_user_tag, "Expected USER category tags when all types are included"
+            assert has_system_tag, (
+                f"Expected SYSTEM category tags when all types are included, missing in metric: {metric}"
+            )
+            assert has_user_tag, f"Expected USER category tags when all types are included, missing in metric: {metric}"
 
 
 def test_default_user_category_filter_applies_with_other_resource_filters(
