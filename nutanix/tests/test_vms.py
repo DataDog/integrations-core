@@ -58,6 +58,9 @@ def test_vm_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get
 
 def test_vm_status_off(dd_run_check, aggregator, mock_instance, mock_http_get):
     """VM fixture has powerState=OFF which maps to status value 2."""
+    mock_instance["resource_filters"] = [
+        {"resource": "vm", "property": "powerState", "patterns": ["^(ON|OFF)$"]},
+    ]
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 

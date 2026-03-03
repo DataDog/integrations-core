@@ -18,17 +18,23 @@ VM_ID = "63e222ec-87ff-491b-b7ba-9247752d44a3"
 BASE_TAGS = ["nutanix", "prism_central:10.0.0.197"]
 
 
-def test_default_collects_all_infrastructure_and_only_user_category_tags(
-    dd_run_check, aggregator, mock_instance, mock_http_get
-):
+def test_default_collects_only_on_vms_and_user_category_tags(dd_run_check, aggregator, mock_instance, mock_http_get):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
     expected_tags = BASE_TAGS + ['ntnx_cluster_id:' + CLUSTER_ID, 'ntnx_cluster_name:' + CLUSTER_NAME]
     aggregator.assert_metric("nutanix.cluster.count", value=1, tags=expected_tags)
     aggregator.assert_metric("nutanix.host.count", at_least=1)
-    aggregator.assert_metric("nutanix.vm.count", at_least=1)
 
+    # Default behavior: only ON VMs are collected (3 out of 4 fixtures)
     vm_metrics = aggregator.metrics("nutanix.vm.count")
+    assert len(vm_metrics) == 3, f"Expected 3 ON VMs by default, got {len(vm_metrics)}"
+
+    # Verify the OFF VM is not collected
+    off_vm_metrics = [
+        m for m in vm_metrics if any(tag == "ntnx_vm_name:test-vm-that-should-remain-off" for tag in m.tags)
+    ]
+    assert len(off_vm_metrics) == 0, "OFF VMs should not be collected by default"
+
     vms_with_category_tags = [
         m for m in vm_metrics if any(tag.startswith("Team:") or tag.startswith("Environment:") for tag in m.tags)
     ]
@@ -65,6 +71,7 @@ def test_include_host_by_name_regex(dd_run_check, aggregator, mock_instance, moc
 
 def test_exclude_vm_by_id(dd_run_check, aggregator, mock_instance, mock_http_get):
     mock_instance["resource_filters"] = [
+        {"resource": "vm", "property": "powerState", "patterns": [".*"]},
         {"resource": "vm", "property": "extId", "type": "exclude", "patterns": [f"^{VM_ID}$"]},
     ]
     check = NutanixCheck('nutanix', {}, [mock_instance])
@@ -245,3 +252,32 @@ def test_default_user_category_filter_applies_with_other_resource_filters(
         assert not any(tag.startswith("Environment:") for tag in metric.tags), (
             "SYSTEM categories should not be included by default"
         )
+
+
+def test_default_vm_filter_applies_with_other_resource_filters(dd_run_check, aggregator, mock_instance, mock_http_get):
+    mock_instance["resource_filters"] = [
+        {"resource": "cluster", "property": "name", "patterns": ["^datadog-"]},
+    ]
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    # Default VM filter should still apply: only ON VMs collected
+    vm_metrics = aggregator.metrics("nutanix.vm.count")
+    assert len(vm_metrics) == 3, f"Expected 3 ON VMs by default, got {len(vm_metrics)}"
+
+    off_vm_metrics = [
+        m for m in vm_metrics if any(tag == "ntnx_vm_name:test-vm-that-should-remain-off" for tag in m.tags)
+    ]
+    assert len(off_vm_metrics) == 0, "OFF VMs should not be collected by default"
+
+
+def test_explicit_vm_filter_overrides_default(dd_run_check, aggregator, mock_instance, mock_http_get):
+    mock_instance["resource_filters"] = [
+        {"resource": "vm", "property": "powerState", "patterns": [".*"]},
+    ]
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    # Explicit VM filter overrides default: all 4 VMs collected
+    vm_metrics = aggregator.metrics("nutanix.vm.count")
+    assert len(vm_metrics) == 4, f"Expected all 4 VMs when explicitly overriding default, got {len(vm_metrics)}"
