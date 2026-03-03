@@ -147,6 +147,7 @@ class Fabric:
                         ndm.get_interface_dd_id(interface_metadata.device_id, interface_metadata.raw_id),
                     ),
                 )
+                tags.append('interface:{}'.format(interface_metadata.name))
                 self.submit_interface_status_metric(
                     interface_metadata.status,
                     tags,

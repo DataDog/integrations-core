@@ -1,4 +1,5 @@
 name: Traefik Mesh
+fleet_configurable: true
 files:
   - name: traefik_mesh.yaml
     options:
@@ -15,6 +16,8 @@ files:
             Endpoint exposing the Traefic Proxy Prometheus metrics. For more information refer to:
             https://doc.traefik.io/traefik/observability/metrics/prometheus/
       - name: traefik_proxy_api_endpoint
+        fleet_configurable: true
+        formats: ["url"]
         required: false
         description: URL of the Traefik Mesh proxy to query.
         value:

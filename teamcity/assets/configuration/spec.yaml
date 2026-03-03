@@ -1,4 +1,5 @@
 name: Teamcity
+fleet_configurable: true
 files:
 - name: teamcity.yaml
   options:
@@ -19,12 +20,14 @@ files:
 
           Enable in a separate instance to collect Prometheus metrics.
           This option does not collect events, service checks, or metrics from the TeamCity REST API.
+        fleet_configurable: true
         enabled: true
         value:
           type: boolean
           display_default: false
           example: true
       - name: server
+        fleet_configurable: true
         secret: true
         required: true
         description: |
@@ -39,6 +42,7 @@ files:
           Enable collection of experimental TeamCity Prometheus metrics.
           See https://www.jetbrains.com/help/teamcity/teamcity-monitoring-and-diagnostics.html#Metrics
           Only available with `use_openmetrics: true`.
+        fleet_configurable: true
         value:
           type: boolean
           example: false
@@ -121,6 +125,7 @@ files:
                         - <BUILD_CONFIG_ID_REGEX>
 
           Not available with `use_openmetrics: true`.
+        fleet_configurable: true
         value:
           type: object
           additionalProperties: true
@@ -164,6 +169,7 @@ files:
           configuration option. The `default_build_configs_limit` value is overridden when `build_config_limit`
           is configured for a given project.
           Not available with `use_openmetrics: true`.
+        fleet_configurable: true
         value:
           type: integer
           example: 5
@@ -172,6 +178,7 @@ files:
           The default maximum number of projects to discover when using the `projects`
           configuration option.
           Not available with `use_openmetrics: true`.
+        fleet_configurable: true
         value:
           type: integer
           example: 5
@@ -201,6 +208,7 @@ files:
           configurations based on the `projects` configuration. Set a lower interval if projects and build 
           configurations are subject to frequent changes on the TeamCity server. Set a higher interval if projects 
           and build configurations change less frequently. Default interval is 3600 seconds (1 hour).
+        fleet_configurable: true
         value:
           type: integer
           default: 3600
@@ -211,12 +219,14 @@ files:
 
           Configure only one of `projects` or `build_configuration` per instance.
           Not available with `use_openmetrics: true`.
+        fleet_configurable: true
         value:
           type: string
       - name: collect_events
         description: |
           Enable collection of TeamCity success and failure events for builds and deployments.
           Not available with `use_openmetrics: true`.
+        fleet_configurable: true
         value:
           type: boolean
           example: true
@@ -224,6 +234,7 @@ files:
         description: |
           Collect Build Configuration statistics per build.
           Not available with `use_openmetrics: true`.
+        fleet_configurable: true
         value:
           type: boolean
           example: true
@@ -231,6 +242,7 @@ files:
         description: |
           Collect test result statistics per build.
           Not available with `use_openmetrics: true`.
+        fleet_configurable: true
         value:
           type: boolean
           example: true
@@ -238,6 +250,7 @@ files:
         description: |
           Collect build problem service checks.
           Not available with `use_openmetrics: true`.
+        fleet_configurable: true
         value:
           type: boolean
           example: true

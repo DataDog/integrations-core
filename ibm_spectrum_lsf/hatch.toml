@@ -2,6 +2,8 @@
 check-types = true
 mypy-args = [
   "--explicit-package-bases",
+]
+mypy-files = [
   "datadog_checks/ibm_spectrum_lsf",
   "tests/",
 ]

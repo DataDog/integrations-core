@@ -9,7 +9,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into HubSpot Content Hub Activity Logs and Analytics metrics.",
+    "description": "Monitor HubSpot and enrich Datadog telemetry with CRM data.",
     "title": "HubSpot Content Hub",
     "media": [
       {
@@ -61,7 +61,10 @@
       },
       "metrics": {
         "prefix": "hubspot.content_hub.",
-        "check": ["hubspot.content_hub.breakdown.count", "hubspot.content_hub.content.count"],
+        "check": [
+          "hubspot.content_hub.breakdown.count",
+          "hubspot.content_hub.content.count"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
@@ -69,16 +72,16 @@
       }
     },
     "dashboards": {
-      "HubSpot Content Hub - Audit Activity" : "assets/dashboards/hubspot_content_hub_audit_activity.json",
-      "HubSpot Content Hub - Content Analytics" : "assets/dashboards/hubspot_content_hub_content_analytics.json",
-      "HubSpot Content Hub - Geolocation Analytics" : "assets/dashboards/hubspot_content_hub_geolocation_analytics.json",
-      "HubSpot Content Hub - Login Activity" : "assets/dashboards/hubspot_content_hub_login_activity.json",
-      "HubSpot Content Hub - Security Activity" : "assets/dashboards/hubspot_content_hub_security_activity.json",
-      "HubSpot Content Hub - Source Analytics" : "assets/dashboards/hubspot_content_hub_source_analytics.json"
+      "HubSpot Content Hub - Audit Activity": "assets/dashboards/hubspot_content_hub_audit_activity.json",
+      "HubSpot Content Hub - Content Analytics": "assets/dashboards/hubspot_content_hub_content_analytics.json",
+      "HubSpot Content Hub - Geolocation Analytics": "assets/dashboards/hubspot_content_hub_geolocation_analytics.json",
+      "HubSpot Content Hub - Login Activity": "assets/dashboards/hubspot_content_hub_login_activity.json",
+      "HubSpot Content Hub - Security Activity": "assets/dashboards/hubspot_content_hub_security_activity.json",
+      "HubSpot Content Hub - Source Analytics": "assets/dashboards/hubspot_content_hub_source_analytics.json"
     },
     "monitors": {
-      "Blog Posts Bounce Rate is High" : "assets/monitors/blog_posts_bounce_rate.json",
-      "Page Bounce Rate is High" : "assets/monitors/page_bounce_rate.json"
+      "Blog Posts Bounce Rate is High": "assets/monitors/blog_posts_bounce_rate.json",
+      "Page Bounce Rate is High": "assets/monitors/page_bounce_rate.json"
     },
     "logs": {
       "source": "hubspot-content-hub"

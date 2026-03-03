@@ -59,7 +59,7 @@
       "auto_install": true
     },
     "dashboards": {
-      "Kong Overview Openmetrics v3+": "assets/dashboards/kong_overview_openmetrics_v3",
+      "Kong Overview Openmetrics v3+": "assets/dashboards/kong_overview_openmetrics_v3.json",
       "Kong Overview OpenMetrics": "assets/dashboards/kong_overview_openmetrics.json",
       "Kong Overview": "assets/dashboards/kong_overview.json",
       "Kong API": "assets/dashboards/kong_api.json"

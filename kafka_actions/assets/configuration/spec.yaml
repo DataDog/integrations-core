@@ -1,4 +1,5 @@
 name: Kafka Actions
+fleet_configurable: true
 files:
 - name: kafka_actions.yaml
   options:
@@ -12,6 +13,7 @@ files:
         Remote configuration ID for tracking purposes.
         This ID is automatically set by the Datadog backend via remote configuration.
         This parameter is REQUIRED - the integration will not start without it.
+      fleet_configurable: true
       required: true
       value:
         type: string
@@ -20,6 +22,7 @@ files:
     - name: kafka_connect_str
       description: |
         The Kafka connection string (bootstrap servers).
+      fleet_configurable: true
       required: true
       value:
         type: string
@@ -31,6 +34,7 @@ files:
         If provided, the integration will verify that the connected Kafka cluster
         matches this ID before executing any actions. This prevents accidentally
         running actions against the wrong cluster.
+      fleet_configurable: true
       value:
         type: string
         example: MkU3OEVBNTcwNTJENDM2Qk
@@ -39,6 +43,7 @@ files:
       description: |
         Protocol used to communicate with brokers.
         Valid values: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+      fleet_configurable: true
       value:
         type: string
         example: PLAINTEXT
@@ -47,17 +52,20 @@ files:
       description: |
         SASL mechanism to use for authentication.
         Valid values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512
+      fleet_configurable: true
       value:
         type: string
         example: PLAIN
     
     - name: sasl_plain_username
       description: Username for SASL PLAIN authentication
+      fleet_configurable: true
       value:
         type: string
     
     - name: sasl_plain_password
       description: Password for SASL PLAIN authentication
+      fleet_configurable: true
       secret: true
       value:
         type: string
@@ -78,6 +86,7 @@ files:
         The check has a 20-second timeout for the entire operation.
         Supports JSON, BSON, Protobuf, and Avro with optional Schema Registry integration.
         Filtering is applied after deserialization using jq-style expressions.
+      fleet_configurable: true
       value:
         type: object
         required:
@@ -185,6 +194,7 @@ files:
     - name: create_topic
       description: |
         Configuration for creating a new Kafka topic.
+      fleet_configurable: true
       value:
         type: object
         required:

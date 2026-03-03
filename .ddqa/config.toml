@@ -71,20 +71,9 @@ jira_statuses = [
 github_team = "database-monitoring"
 github_labels = ["team/database-monitoring", "team/database-monitoring-agent"]
 
-[teams."Network Device Monitoring"]
-jira_project = "NDMII"
-jira_issue_type = "Task"
-jira_statuses = [
-  "To Do",
-  "In Progress",
-  "Done",
-]
-github_team = "network-device-monitoring"
-github_labels = ["team/network-device-monitoring"]
-
 [teams."Network Device Monitoring Core"]
-jira_project = "NDMII"
-jira_issue_type = "Task"
+jira_project = "NDMC"
+jira_issue_type = "Bug"
 jira_statuses = [
   "To Do",
   "In Progress",

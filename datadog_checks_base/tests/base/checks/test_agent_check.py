@@ -427,6 +427,22 @@ def test_normalize_tag(case, tag, expected_tag):
     assert check.normalize_tag(tag) == expected_tag, 'Failed case: {}'.format(case)
 
 
+@pytest.mark.parametrize(
+    'tag, legacy_expected, non_legacy_expected',
+    [
+        ('my-service', 'my_service', 'my-service'),
+        ('service:my-app-name', 'service:my_app_name', 'service:my-app-name'),
+    ],
+)
+def test_normalize_tag_legacy_vs_non_legacy(tag, legacy_expected, non_legacy_expected):
+    """Test that legacy normalization replaces hyphens while non-legacy preserves them."""
+    legacy_check = AgentCheck()
+    assert legacy_check.normalize_tag(tag) == legacy_expected
+
+    non_legacy_check = AgentCheck(instances=[{'enable_legacy_tags_normalization': False}])
+    assert non_legacy_check.normalize_tag(tag) == non_legacy_expected
+
+
 class TestMetrics:
     def test_namespace(self, aggregator):
         check = AgentCheck()

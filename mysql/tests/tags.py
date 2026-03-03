@@ -36,6 +36,22 @@ SC_TAGS_REPLICA = (
     'database_hostname:stubbed.hostname',
     'database_instance:stubbed.hostname',
 )
+SC_TAGS_HYBRID_PRIMARY = (
+    'port:' + str(common.PORTS_HYBRID_GROUP[0]),
+    'tag1:value1',
+    'tag2:value2',
+    'dd.internal.resource:database_instance:stubbed.hostname',
+    'database_hostname:stubbed.hostname',
+    'database_instance:stubbed.hostname',
+)
+SC_TAGS_HYBRID_TRADITIONAL_REPLICA = (
+    'port:' + str(common.PORT_HYBRID_TRADITIONAL_REPLICA),
+    'tag1:value1',
+    'tag2:value2',
+    'dd.internal.resource:database_instance:stubbed.hostname',
+    'database_hostname:stubbed.hostname',
+    'database_instance:stubbed.hostname',
+)
 SC_FAILURE_TAGS = (
     'port:unix_socket',
     *database_instance_resource_tags('stubbed.hostname'),

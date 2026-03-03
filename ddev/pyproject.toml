@@ -30,7 +30,7 @@ dependencies = [
     "click~=8.1.6",
     "coverage",
     "datadog-api-client==2.20.0",
-    "datadog-checks-dev[cli]>=35.5.0,<35.6",
+    "datadog-checks-dev[cli]~=35.6",
     "hatch>=1.8.1",
     "httpx",
     "jsonpointer",
@@ -74,7 +74,7 @@ version-file = "src/ddev/_version.py"
 [tool.hatch.build.targets.sdist]
 include = ["src"]
 
-[tool.hatch.build.targets.app]
+[tool.hatch.build.targets.binary]
 scripts = ["ddev"]
 
 # Keep Black configuration to generate models through validate

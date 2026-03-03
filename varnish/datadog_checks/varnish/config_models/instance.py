@@ -38,6 +38,7 @@ class InstanceConfig(BaseModel):
     daemon_port: Optional[int] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics_filter: Optional[tuple[str, ...]] = None
     min_collection_interval: Optional[float] = None

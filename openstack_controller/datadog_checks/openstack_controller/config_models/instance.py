@@ -408,6 +408,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     domain_id: Optional[str] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     endpoint_interface: Optional[str] = None
     endpoint_region_id: Optional[str] = None
     exclude_network_ids: Optional[tuple[str, ...]] = None
