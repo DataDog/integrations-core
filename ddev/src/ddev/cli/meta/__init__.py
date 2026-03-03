@@ -13,6 +13,7 @@ from datadog_checks.dev.tooling.commands.meta.snmp import snmp
 from datadog_checks.dev.tooling.commands.meta.windows import windows
 
 from ddev.cli.meta.scripts import scripts
+from ddev.cli.meta.auto_build import auto_build
 
 
 @click.group(short_help='Collection of useful utilities')
@@ -24,6 +25,7 @@ def meta():
     """
 
 
+prom.add_command(auto_build)
 meta.add_command(catalog)
 meta.add_command(changes)
 meta.add_command(create_example_commits)
