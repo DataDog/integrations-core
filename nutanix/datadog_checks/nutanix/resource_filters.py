@@ -4,6 +4,7 @@
 
 import logging
 import re
+from collections.abc import Callable
 from typing import Any
 
 INFRASTRUCTURE_RESOURCE_TYPES = frozenset(('cluster', 'host', 'vm'))
@@ -22,6 +23,9 @@ ACTIVITY_DEFAULT_PROPERTIES = {
 METADATA_DEFAULT_PROPERTIES = {
     'category': 'type',  # Valid values: SYSTEM, INTERNAL, USER
 }
+
+# Default property for infrastructure resources (cluster, host, vm)
+_INFRASTRUCTURE_DEFAULT_PROPERTY = 'name'
 
 
 def _get_nested_value(obj: dict[str, Any], property_path: str) -> Any | None:
@@ -43,49 +47,26 @@ def _validate_filter_structure(f: dict[str, Any]) -> bool:
     return isinstance(f, dict) and 'resource' in f and 'patterns' in f and isinstance(f.get('patterns'), list)
 
 
+def _default_property_for(resource: str) -> str:
+    """Return the default filter property for a resource type."""
+    if resource in INFRASTRUCTURE_RESOURCE_TYPES:
+        return _INFRASTRUCTURE_DEFAULT_PROPERTY
+    if resource in ACTIVITY_RESOURCE_TYPES:
+        return ACTIVITY_DEFAULT_PROPERTIES.get(resource, '')
+    if resource in METADATA_RESOURCE_TYPES:
+        return METADATA_DEFAULT_PROPERTIES.get(resource, '')
+    return ''
+
+
 def parse_resource_filters(raw_filters: list[dict[str, Any]], logger: Any) -> list[dict[str, Any]]:
     """Parse and validate resource filters, compiling regex patterns.
 
-    Resource filters allow selective collection of infrastructure resources (clusters, hosts, VMs),
+    Filters allow selective collection of infrastructure resources (clusters, hosts, VMs),
     activity data (events, tasks, alerts, audits), and metadata (categories).
+    Exclude filters take precedence over include filters.
 
-    Args:
-        raw_filters: List of filter configurations from user config
-        logger: Logger instance to use for warnings
-
-    Returns:
-        List of validated filters with compiled regex patterns
-
-    Filter Structure:
-        - resource: Type of resource to filter (cluster, host, vm, event, task, alert, audit, category)
-        - property: Property to match against (defaults based on resource type)
-        - type: 'include' (default) or 'exclude'
-        - patterns: List of regex patterns to match
-
-    Default Properties:
-        - Infrastructure (cluster, host, vm): 'name'
-        - Activity (event, task, alert, audit): specific to type (eventType, status, severity, auditType)
-        - Metadata (category): 'type' (valid values: SYSTEM, INTERNAL, USER)
-
-    Default Behavior:
-        - Categories: If no category filters are specified, only USER type categories are collected.
-          This applies even if other resource_filters are configured.
-          To collect all categories or specific types, explicitly configure category filters.
-
-    Examples:
-        # Include only SYSTEM categories
-        {"resource": "category", "property": "type", "patterns": ["^SYSTEM$"]}
-
-        # Exclude INTERNAL categories
-        {"resource": "category", "property": "type", "type": "exclude", "patterns": ["^INTERNAL$"]}
-
-        # Include specific clusters by name
-        {"resource": "cluster", "property": "name", "patterns": ["^prod-"]}
-
-        # Exclude failed tasks
-        {"resource": "task", "property": "status", "type": "exclude", "patterns": ["^FAILED$"]}
+    If no category filters are specified, only USER type categories are collected by default.
     """
-    # Check if any category filters are present in raw_filters
     has_category_filter = any(f.get('resource') == 'category' for f in raw_filters or [])
 
     result = []
@@ -104,14 +85,7 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]], logger: Any) -> li
             )
             continue
 
-        property_ = str(f.get('property', ''))
-        if not property_:
-            if resource in INFRASTRUCTURE_RESOURCE_TYPES:
-                property_ = 'name'
-            elif resource in ACTIVITY_RESOURCE_TYPES:
-                property_ = ACTIVITY_DEFAULT_PROPERTIES.get(resource, '')
-            elif resource in METADATA_RESOURCE_TYPES:
-                property_ = METADATA_DEFAULT_PROPERTIES.get(resource, '')
+        property_ = str(f.get('property', '')) or _default_property_for(resource)
 
         filter_type = str(f.get('type', 'include')).lower()
         if filter_type not in FILTER_TYPES:
@@ -137,7 +111,6 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]], logger: Any) -> li
             )
 
     # Add default category filter if no category filters were specified
-    # This ensures only USER type categories are collected by default
     if not has_category_filter:
         result.append(
             {
@@ -152,23 +125,8 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]], logger: Any) -> li
     return result
 
 
-def _matches_filter(entity: dict[str, Any], filt: dict[str, Any]) -> bool:
-    """Check if entity matches any regex pattern in the filter."""
-    property_ = filt['property']
-    value = _get_nested_value(entity, property_)
-
-    if value is None:
-        return False
-
-    val = str(value)
-    for pat in filt['patterns']:
-        if pat.search(val):
-            return True
-    return False
-
-
-def _matches_activity_filter(value_or_values: str | list[str] | None, filt: dict[str, Any]) -> bool:
-    """Check if value or any value in list matches any regex pattern in the filter."""
+def _matches_patterns(value_or_values: str | list[str] | None, filt: dict[str, Any]) -> bool:
+    """Check if value (or any value in list) matches any regex pattern in the filter."""
     if value_or_values is None:
         return False
 
@@ -177,10 +135,35 @@ def _matches_activity_filter(value_or_values: str | list[str] | None, filt: dict
     else:
         values = [str(value_or_values)]
 
-    for val in values:
-        for pat in filt['patterns']:
-            if pat.search(val):
-                return True
+    return any(pat.search(val) for val in values for pat in filt['patterns'])
+
+
+def _apply_filters(
+    resource_type: str,
+    filters: list[dict[str, Any]],
+    match_fn: Callable[[dict[str, Any]], bool],
+    entity_label: str,
+    logger: logging.Logger,
+) -> bool:
+    """Apply include/exclude filter precedence logic (exclude wins)."""
+    relevant = [f for f in filters if f['resource'] == resource_type]
+    if not relevant:
+        return True
+
+    excludes = [f for f in relevant if f['type'] == 'exclude']
+    for f in excludes:
+        if match_fn(f):
+            logger.debug("Skipping %s due to exclude filter on %s: %s", resource_type, f['property'], entity_label)
+            return False
+
+    includes = [f for f in relevant if f['type'] == 'include']
+    if not includes:
+        return True
+
+    if any(match_fn(f) for f in includes):
+        return True
+
+    logger.debug("Skipping %s due to include filter on %s: %s", resource_type, includes[0]['property'], entity_label)
     return False
 
 
@@ -191,36 +174,18 @@ def should_collect_activity(
     logger: logging.Logger,
 ) -> bool:
     """Return True if activity item passes filters (exclude takes precedence over include)."""
-    relevant = [f for f in filters if f['resource'] == item_kind]
-    if not relevant:
-        return True
-
-    item_id = item.get("extId") or item.get("operationExtId") or ""
-    excludes = [f for f in relevant if f['type'] == 'exclude']
-    includes = [f for f in relevant if f['type'] == 'include']
-
-    for f in excludes:
-        val = _get_activity_value(item, f['property'])
-        if _matches_activity_filter(val, f):
-            logger.debug("Skipping %s due to exclude filter on %s: %s", item_kind, f['property'], item_id)
-            return False
-
-    if not includes:
-        return True
-
-    for f in includes:
-        val = _get_activity_value(item, f['property'])
-        if _matches_activity_filter(val, f):
-            return True
-
-    logger.debug("Skipping %s due to include filter on %s: %s", item_kind, includes[0]['property'], item_id)
-    return False
+    return _apply_filters(
+        item_kind,
+        filters,
+        match_fn=lambda f: _matches_patterns(_get_activity_value(item, f['property']), f),
+        entity_label=item.get("extId") or item.get("operationExtId") or "",
+        logger=logger,
+    )
 
 
 def _get_activity_value(item: dict[str, Any], property_: str) -> str | list[str] | None:
-    """Extract property value from activity item, preserving lists and converting others to strings."""
+    """Extract property value from activity item, preserving lists."""
     value = _get_nested_value(item, property_)
-
     if value is None:
         return None
     if isinstance(value, list):
@@ -235,32 +200,10 @@ def should_collect_resource(
     logger: logging.Logger,
 ) -> bool:
     """Return True if infrastructure resource passes filters (exclude takes precedence over include)."""
-    relevant = [f for f in filters if f['resource'] == resource_type]
-    if not relevant:
-        return True
-
-    excludes = [f for f in relevant if f['type'] == 'exclude']
-    for f in excludes:
-        if _matches_filter(entity, f):
-            logger.debug(
-                "Skipping %s due to exclude filter on %s: %s",
-                resource_type,
-                f['property'],
-                entity.get("name") or entity.get("extId") or "",
-            )
-            return False
-
-    includes = [f for f in relevant if f['type'] == 'include']
-    if not includes:
-        return True
-
-    if any(_matches_filter(entity, f) for f in includes):
-        return True
-
-    logger.debug(
-        "Skipping %s due to include filter on %s: %s",
+    return _apply_filters(
         resource_type,
-        includes[0]['property'],
-        entity.get("name") or entity.get("extId") or "",
+        filters,
+        match_fn=lambda f: _matches_patterns(_get_nested_value(entity, f['property']), f),
+        entity_label=entity.get("name") or entity.get("extId") or "",
+        logger=logger,
     )
-    return False
