@@ -20,7 +20,6 @@ def retry_on_rate_limit(method):
             response = method(self, *args, **kwargs)
 
             if response.status_code != 429:
-                response.raise_for_status()
                 return response
 
             self.count("api.rate_limited", 1, tags=self.base_tags)
