@@ -74,7 +74,7 @@ def test_pc_ip_with_port_raises_error(mock_instance):
     with pytest.raises(ConfigurationError) as exc_info:
         NutanixCheck('nutanix', {}, [instance])
 
-    assert "Conflicting configuration" in str(exc_info.value)
+    assert "Conflicting port configuration between pc_ip (9440) and pc_port (9440)" in str(exc_info.value)
 
 
 def test_pc_ip_without_port(mock_instance):
