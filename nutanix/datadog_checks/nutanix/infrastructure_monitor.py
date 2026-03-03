@@ -642,8 +642,7 @@ class InfrastructureMonitor:
             tags.append(f"ntnx_availability_zone_id:{availability_zone_id}")
 
         is_agent_vm = is_affirmative(vm.get("isAgentVm"))
-        if is_agent_vm:
-            tags.append(f"ntnx_is_agent_vm:{is_agent_vm}")
+        tags.append(f"ntnx_is_agent_vm:{is_agent_vm}")
 
         return tags
 
