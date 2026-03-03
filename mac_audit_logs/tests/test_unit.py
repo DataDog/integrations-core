@@ -161,10 +161,15 @@ def test_collect_relevant_files(mock_get_utc, mock_isfile, mock_listdir, mock_is
 
 @pytest.mark.unit
 @patch("os.path.isdir", return_value=True)
-@patch('os.listdir', return_value=["20230401000000.20230401120000", "secure", "_hold", "some_dir", "current", "file.txt.bak"])
+@patch(
+    'os.listdir',
+    return_value=["20230401000000.20230401120000", "secure", "_hold", "some_dir", "current", "file.txt.bak"],
+)
 @patch("os.path.isfile", side_effect=lambda path: not path.endswith("some_dir"))  # some_dir is a directory
 @patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
-def test_collect_relevant_files_with_non_standard_entries(mock_get_utc, mock_isfile, mock_listdir, mock_isdir, instance):
+def test_collect_relevant_files_with_non_standard_entries(
+    mock_get_utc, mock_isfile, mock_listdir, mock_isdir, instance
+):
     """Test that non-standard files and directories are skipped without errors."""
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
     check.log = MagicMock()

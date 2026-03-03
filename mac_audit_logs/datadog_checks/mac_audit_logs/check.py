@@ -90,7 +90,9 @@ class MacAuditLogsCheck(AgentCheck):
                     relevant_files.append((start_time, file_name))
             else:
                 # Skip files that don't match the expected audit log format
-                self.log.debug(constants.LOG_TEMPLATE.format(message=f"Skipping file with unexpected format: {file_name}"))
+                self.log.debug(
+                    constants.LOG_TEMPLATE.format(message=f"Skipping file with unexpected format: {file_name}")
+                )
 
         relevant_files.sort(key=lambda x: (x[1].endswith('.not_terminated'), x[0]))
         return relevant_files
