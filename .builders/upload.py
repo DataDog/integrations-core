@@ -100,7 +100,7 @@ def collect_and_validate_wheels(wheel_dir: Path) -> list[tuple[str, email.messag
     return upload_data
 
 
-def process_wheel_for_upload(wheel: Path, artifact_type: str, project_name: str, project_metadata: email.message.Message, bucket: Bucket, prefix: str) -> tuple[str | None, str | None]:
+def process_wheel_for_upload(wheel: Path, artifact_type: str, project_name: str, project_metadata: email.message.Message, bucket: Bucket, prefix: str) -> tuple[str, str | None]:
     """Process a single wheel and determine if it needs to be uploaded."""
     padding = ' ' * (len(prefix) + 1)
     print(f'{prefix} Name: {project_metadata["Name"]}')
@@ -212,8 +212,8 @@ class Bucket:
 
     def __init__(self, bucket_name: str):
         self.bucket_name = bucket_name
-        self._client = None
-        self._bucket = None
+        self._client: storage.Client | None = None
+        self._bucket: GCSBucket | None = None
 
     def _get_bucket(self) -> GCSBucket:
         """Lazily initialize and return the bucket."""
