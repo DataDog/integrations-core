@@ -654,6 +654,6 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     for key, value in expected_http_kwargs.items():
         if key == 'headers':
             for h_key, h_value in value.items():
-                assert check.http.options['headers'].get(h_key) == h_value
+                assert check.http.get_header(h_key) == h_value
         else:
             assert check.http.options[key] == value
