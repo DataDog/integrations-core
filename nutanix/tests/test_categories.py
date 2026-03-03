@@ -72,3 +72,19 @@ def test_default_category_filter_applies_with_other_resource_filters(
         if has_user_tag or has_system_tag:
             assert has_user_tag
             assert not has_system_tag
+
+
+def test_prefix_category_tags_disabled(dd_run_check, aggregator, mock_instance, mock_http_get):
+    mock_instance['prefix_category_tags'] = False
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric_has_tag("nutanix.vm.count", "Team:agent-integrations")
+
+
+def test_prefix_category_tags_enabled(dd_run_check, aggregator, mock_instance, mock_http_get):
+    mock_instance['prefix_category_tags'] = True
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric_has_tag("nutanix.vm.count", "ntnx_Team:agent-integrations")
