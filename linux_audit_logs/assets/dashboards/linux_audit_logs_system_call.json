@@ -1,0 +1,781 @@
+{
+    "title": "Linux Audit Logs - System Call",
+    "description": "This dashboard provides insights into system calls activity.",
+    "widgets": [
+        {
+            "id": 2014017260122817,
+            "definition": {
+                "type": "image",
+                "url": "https://static.datadoghq.com/static/images/logos/linux_large.svg",
+                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/linux_reversed_large.svg",
+                "sizing": "cover",
+                "has_background": false,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 5,
+                "height": 3
+            }
+        },
+        {
+            "id": 8393506909056929,
+            "definition": {
+                "type": "note",
+                "content": "**Overview**\n\nThis dashboard provides a comprehensive view of system-level operations (syscalls) captured through Linux audit logs. It helps monitor user activity, command execution, and system resource access patterns for security and compliance.\n\nFor more information, see the [Linux Audit Logs Integration Documentation](https://docs.datadoghq.com/integrations/linux_audit_logs/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 5,
+                "y": 0,
+                "width": 7,
+                "height": 3
+            }
+        },
+        {
+            "id": 7626313237455157,
+            "definition": {
+                "title": "Total System Call Events",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:linux-audit-logs service:linux-audit-logs @type:SYSCALL $Result $Key $User-Name $Command"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "black_on_light_yellow",
+                                "custom_bg_color": "#c6f0ec"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "bars",
+                    "yaxis": {}
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 5461026520235219,
+            "definition": {
+                "title": "System Call activities by Result over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Logs",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:linux-audit-logs service:linux-audit-logs @type:SYSCALL $Result $Key $User-Name $Command"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@msg.res",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        }
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "orange",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 3,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 6062871624871401,
+            "definition": {
+                "title": "Failed System Call Events",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:linux-audit-logs service:linux-audit-logs @type:SYSCALL @success:no $Result $Key $User-Name $Command"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "black_on_light_red",
+                                "custom_bg_color": "#c6f0ec"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "area"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 2349259319255980,
+            "definition": {
+                "title": "Most Frequent System Call by Types",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:linux-audit-logs service:linux-audit-logs @type:SYSCALL $Result $Key $User-Name $Command"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@SYSCALL",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "palette": "datadog16"
+                }
+            },
+            "layout": {
+                "x": 4,
+                "y": 6,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 268435590479625,
+            "definition": {
+                "title": "Top Users Performing System Call by Result",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:linux-audit-logs service:linux-audit-logs @type:SYSCALL $Result $Key $User-Name $Command"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@msg.res",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 100,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "palette": "datadog16"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 4591978141840078,
+            "definition": {
+                "title": "Top System Call Commands  by Result",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:linux-audit-logs service:linux-audit-logs @type:SYSCALL $Result $Key $User-Name $Command"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@comm",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@msg.res",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 100,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "palette": "datadog16"
+                }
+            },
+            "layout": {
+                "x": 4,
+                "y": 9,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 1377943291970987,
+            "definition": {
+                "title": "Top System Call User Groups by Result",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:linux-audit-logs service:linux-audit-logs @type:SYSCALL $Result $Key $User-Name $Command"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@GID",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@msg.res",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 100,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "palette": "datadog16"
+                }
+            },
+            "layout": {
+                "x": 8,
+                "y": 9,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 8547786659125490,
+            "definition": {
+                "title": "Top Executable Path for System Call by Result",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:linux-audit-logs service:linux-audit-logs @type:SYSCALL $Result $Key $User-Name $Command"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@exe",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@msg.res",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 100,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "palette": "datadog16"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 727319760658928,
+            "definition": {
+                "title": "Top Audit Rule Keys by Result",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:linux-audit-logs service:linux-audit-logs @type:SYSCALL $Result $Key $User-Name $Command"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@key",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@msg.res",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 100,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "palette": "datadog16"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 13,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 6402915249152484,
+            "definition": {
+                "title": "System Call Log Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:linux-audit-logs service:linux-audit-logs @type:SYSCALL $Result $Key $User-Name $Command",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "host",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "service",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "@usr.name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "msg.res",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "content",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 17,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Result",
+            "prefix": "@msg.res",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Key",
+            "prefix": "@key",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "User-Name",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Command",
+            "prefix": "@comm",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}
