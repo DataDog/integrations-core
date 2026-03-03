@@ -76,6 +76,18 @@ The integration does not emit any service checks.
 
 Nutanix categories are attached as tags to metrics. By default, only `USER` category tags are collected. To include `SYSTEM` or `INTERNAL` categories, add an explicit category filter in `resource_filters`.
 
+To collect `SYSTEM` and `INTERNAL` categories alongside `USER`:
+
+```yaml
+resource_filters:
+  - resource: category
+    property: type
+    patterns:
+      - '^SYSTEM$'
+      - '^INTERNAL$'
+      - '^USER$'
+```
+
 Category tags use the Nutanix category key as the tag name (e.g., `Environment:Production`). Set `prefix_category_tags: true` to prefix them with `ntnx_` (e.g., `ntnx_Environment:Production`) to avoid collisions with existing Datadog tags.
 
 ### Filtering resources
