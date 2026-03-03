@@ -25,6 +25,7 @@ def retry_on_rate_limit(method):
 
                 if hasattr(response, 'status_code'):
                     if response.status_code == 429:
+                        self.count("api.rate_limited", 1, tags=self.base_tags)
                         if max_retries > 0 and attempt < max_retries - 1:
                             backoff = min(base_backoff * (2**attempt) + random.random(), max_backoff)
                             self.log.warning(
@@ -45,6 +46,7 @@ def retry_on_rate_limit(method):
             except HTTPError as e:
                 last_exception = e
                 if hasattr(e, 'response') and e.response is not None and e.response.status_code == 429:
+                    self.count("api.rate_limited", 1, tags=self.base_tags)
                     if max_retries > 0 and attempt < max_retries - 1:
                         backoff = min(base_backoff * (2**attempt) + random.random(), max_backoff)
                         self.log.warning(

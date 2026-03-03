@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+nutanix.api.rate_limited,count,,,,Count of HTTP 429 rate limit responses from the Prism Central API.,0,nutanix,rate_limited,,
 nutanix.cluster.aggregate_hypervisor.memory_usage,gauge,,,,Cluster Aggregate Hypervisor Memory Usage.,0,nutanix,usage,,
 nutanix.cluster.controller.avg_io_latency,gauge,,,,Cluster Controller Avg Io Latency.,0,nutanix,latency,,
 nutanix.cluster.controller.avg_read_io_latency,gauge,,,,Cluster Controller Avg Read Io Latency.,0,nutanix,latency,,
