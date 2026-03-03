@@ -7,7 +7,7 @@
         },
         "$objectType": "clustermgmt.v4.config.Cluster",
         "extId": "00064715-c043-5d8f-ee4b-176ec875554d",
-        "vmCount": 4,
+        "vmCount": 5,
         "backupEligibilityScore": 1,
         "name": "datadog-nutanix-dev",
         "nodes": {
@@ -456,15 +456,15 @@
             "$fv": "v1.r0"
           },
           "$objectType": "common.v1.response.ApiLink",
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters?$limit=50&$page=0",
+          "href": "https://nutanix.local:9440/api/clustermgmt/v4.0/config/clusters?$limit=50&$page=0",
           "rel": "first"
         },
         {
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters?$limit=50&$page=0",
+          "href": "https://nutanix.local:9440/api/clustermgmt/v4.0/config/clusters?$limit=50&$page=0",
           "rel": "self"
         },
         {
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters?$limit=50&$page=0",
+          "href": "https://nutanix.local:9440/api/clustermgmt/v4.0/config/clusters?$limit=50&$page=0",
           "rel": "last"
         }
       ],

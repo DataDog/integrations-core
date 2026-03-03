@@ -271,11 +271,11 @@
           "$fv": "v1.r0"
         },
         "$objectType": "common.v1.response.ApiLink",
-        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/stats/clusters/00064715-c043-5d8f-ee4b-176ec875554d",
+        "href": "https://nutanix.local:9440/api/clustermgmt/v4.0/stats/clusters/00064715-c043-5d8f-ee4b-176ec875554d",
         "rel": "self"
       },
       {
-        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters/00064715-c043-5d8f-ee4b-176ec875554d",
+        "href": "https://nutanix.local:9440/api/clustermgmt/v4.0/config/clusters/00064715-c043-5d8f-ee4b-176ec875554d",
         "rel": "cluster"
       }
     ]

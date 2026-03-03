@@ -42,14 +42,10 @@
         ],
         "title": "The PC admin user password is going to expire soon or has already expired.",
         "alertType": "A6227",
-        "classifications": [
-          "Cluster"
-        ],
+        "classifications": ["Cluster"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2026-02-20T08:38:15.524544Z",
-        "impactTypes": [
-          "CONFIGURATION"
-        ],
+        "impactTypes": ["CONFIGURATION"],
         "lastUpdatedTime": "2026-02-25T03:21:16.527841Z",
         "message": "{alert_msg}",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -163,14 +159,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-02-03T14:38:10.539471Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-25T17:28:58.461066Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -371,14 +363,10 @@
         ],
         "title": "Degraded VM Recovery Point.",
         "alertType": "A130172",
-        "classifications": [
-          "DR"
-        ],
+        "classifications": ["DR"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-13T11:06:27.166178Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-01-13T11:06:27.171819Z",
         "message": "Recovery Point for VM {vm_name} failed to capture associated policies and categories because {reason}.",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -539,9 +527,7 @@
         "alertType": "NTNX_IAMv2_Authn_Database_Connectivity_Error_Warning",
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2026-02-12T05:50:13.286083Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-12T06:38:45.185229Z",
         "message": "Postgres Database for IAM is serving requests from Authn pod in > 100ms for  66.66666666666666% of requests.",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -602,14 +588,10 @@
         ],
         "title": "Microservices Infrastructure is not in healthy state.",
         "alertType": "A200335",
-        "classifications": [
-          "Node"
-        ],
+        "classifications": ["Node"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2026-02-12T05:39:00.841752Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-12T07:38:45.352031Z",
         "message": "Microservices Infrastructure is not in healthy state. Please check for errors in logs or contact Nutanix Support",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -745,14 +727,10 @@
         ],
         "title": "IAM services are not in healthy state.",
         "alertType": "A111108",
-        "classifications": [
-          "Cluster"
-        ],
+        "classifications": ["Cluster"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2026-02-12T05:19:04.827458Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-12T07:38:45.371813Z",
         "message": "One or more IAM services have restarted within the last 15 minutes. Users may face Authentication/Authorization issues. Errors: {alert_message}",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -868,14 +846,10 @@
         ],
         "title": "Cluster Service {services} Restarting Frequently",
         "alertType": "A3034",
-        "classifications": [
-          "Cluster"
-        ],
+        "classifications": ["Cluster"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2026-02-12T04:47:55.072693Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-12T07:38:45.391012Z",
         "message": "There have been multiple service restarts of {services} across all Controller VM(s). Latest crash of these services have occurred at {timestamps} respectively.",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -1010,14 +984,10 @@
         ],
         "title": "IAM services are not in healthy state.",
         "alertType": "A111108",
-        "classifications": [
-          "Cluster"
-        ],
+        "classifications": ["Cluster"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2026-02-12T04:03:41.799566Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-12T04:39:17.161701Z",
         "message": "One or more IAM services have restarted within the last 15 minutes. Users may face Authentication/Authorization issues. Errors: {alert_message}",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -1140,9 +1110,7 @@
         "alertType": "NTNX_IAMv2_Themis_Database_Connectivity_Error_Warning",
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2026-02-12T03:58:39.555628Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-12T04:39:21.875998Z",
         "message": "Postgres Database for IAM is serving requests from Themis pod in > 100ms for  80.00000000000001% of requests.",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -1203,14 +1171,10 @@
         ],
         "title": "Prism Central VM CPU Load High",
         "alertType": "A6517",
-        "classifications": [
-          "ControllerVM"
-        ],
+        "classifications": ["ControllerVM"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2026-02-12T03:47:51.341933Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-12T09:38:45.357347Z",
         "message": "CPU load in or Prism Central VM {ip_address} is high. Load average over 5 Minutes = {load_average_5min}, number of vCPUs in CVM or Prism Central VM = {num_procs}.",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -1386,14 +1350,10 @@
         ],
         "title": "Cluster Service {services} Restarting Frequently",
         "alertType": "A3034",
-        "classifications": [
-          "Cluster"
-        ],
+        "classifications": ["Cluster"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2026-02-12T03:07:54.821675Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-12T04:39:53.018483Z",
         "message": "There have been multiple service restarts of {services} across all Controller VM(s). Latest crash of these services have occurred at {timestamps} respectively.",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -1528,14 +1488,10 @@
         ],
         "title": "Cluster Service {services} Restarting Frequently",
         "alertType": "A3034",
-        "classifications": [
-          "Cluster"
-        ],
+        "classifications": ["Cluster"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2026-02-12T02:47:56.7275Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-12T04:40:06.05676Z",
         "message": "There have been multiple service restarts of {services} across all Controller VM(s). Latest crash of these services have occurred at {timestamps} respectively.",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -1670,14 +1626,10 @@
         ],
         "title": "Prism Central VM CPU Load High",
         "alertType": "A6517",
-        "classifications": [
-          "ControllerVM"
-        ],
+        "classifications": ["ControllerVM"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2026-02-11T08:57:51.348175Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-11T10:38:45.499713Z",
         "message": "CPU load in or Prism Central VM {ip_address} is high. Load average over 5 Minutes = {load_average_5min}, number of vCPUs in CVM or Prism Central VM = {num_procs}.",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -1853,9 +1805,7 @@
         "alertType": "A400118",
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2026-02-11T08:03:58.276459Z",
-        "impactTypes": [
-          "AVAILABILITY"
-        ],
+        "impactTypes": ["AVAILABILITY"],
         "lastUpdatedTime": "2026-02-12T06:24:23.970339Z",
         "message": "Discovered that the Domain Manager internal service is not working: '{service_names}'",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -1980,14 +1930,10 @@
         ],
         "title": "RAM Usage high on {vm_type} : {ip_address}",
         "alertType": "A1056",
-        "classifications": [
-          "ControllerVM"
-        ],
+        "classifications": ["ControllerVM"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2026-02-10T22:37:48.161115Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-12T07:38:45.409499Z",
         "message": "Main memory usage in {vm_type} {ip_address} is high, {available_memory_kb} KB is free.",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -2193,14 +2139,10 @@
         ],
         "title": "RAM Usage high on {vm_type} : {ip_address}",
         "alertType": "A1056",
-        "classifications": [
-          "ControllerVM"
-        ],
+        "classifications": ["ControllerVM"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2026-02-10T19:02:48.432272Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-10T21:38:45.343403Z",
         "message": "Main memory usage in {vm_type} {ip_address} is high, {available_memory_kb} KB is free.",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -2406,14 +2348,10 @@
         ],
         "title": "RAM Usage high on {vm_type} : {ip_address}",
         "alertType": "A1056",
-        "classifications": [
-          "ControllerVM"
-        ],
+        "classifications": ["ControllerVM"],
         "clusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
         "creationTime": "2026-02-10T17:22:48.408558Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-10T18:38:45.314161Z",
         "message": "Main memory usage in {vm_type} {ip_address} is high, {available_memory_kb} KB is free.",
         "originatingClusterUUID": "d07db284-6df6-4ca2-88cd-9dd5ed71ac08",
@@ -2619,14 +2557,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-02-02T03:03:10.704609Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-03T13:53:01.090225Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -2829,14 +2763,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-31T12:48:10.644883Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-02-01T23:53:01.269719Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -3039,14 +2969,10 @@
         ],
         "title": "Disk space usage high for {mount_path} on {entity} {ip_address}",
         "alertType": "A1031",
-        "classifications": [
-          "Storage"
-        ],
+        "classifications": ["Storage"],
         "clusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
         "creationTime": "2026-01-28T07:18:10.725136Z",
-        "impactTypes": [
-          "SYSTEM_INDICATOR"
-        ],
+        "impactTypes": ["SYSTEM_INDICATOR"],
         "lastUpdatedTime": "2026-01-31T11:53:01.894175Z",
         "message": "Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}",
         "originatingClusterUUID": "00064715-c043-5d8f-ee4b-176ec875554d",
@@ -3248,15 +3174,15 @@
             "$fv": "v1.r0"
           },
           "$objectType": "common.v1.response.ApiLink",
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/alerts?$limit=50&$page=0",
+          "href": "https://nutanix.local:9440/api/monitoring/v4.0/serviceability/alerts?$limit=50&$page=0",
           "rel": "last"
         },
         {
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/alerts?$limit=50&$page=0",
+          "href": "https://nutanix.local:9440/api/monitoring/v4.0/serviceability/alerts?$limit=50&$page=0",
           "rel": "self"
         },
         {
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/monitoring/v4.0/serviceability/alerts?$limit=50&$page=0",
+          "href": "https://nutanix.local:9440/api/monitoring/v4.0/serviceability/alerts?$limit=50&$page=0",
           "rel": "first"
         }
       ],

@@ -32,9 +32,7 @@
           }
         ],
         "lastUpdatedTime": "2026-02-24T21:26:19.55619Z",
-        "clusterExtIds": [
-          "00064715-c043-5d8f-ee4b-176ec875554d"
-        ],
+        "clusterExtIds": ["00064715-c043-5d8f-ee4b-176ec875554d"],
         "isBackgroundTask": true,
         "numberOfSubtasks": 0,
         "numberOfEntitiesAffected": 1,
@@ -48,7 +46,7 @@
           },
           "$objectType": "prism.v4.config.TaskReferenceInternal",
           "extId": "ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks/ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
           "rel": "parent"
         },
         "status": "SUCCEEDED",
@@ -65,7 +63,7 @@
           },
           "$objectType": "prism.v4.config.TaskReferenceInternal",
           "extId": "ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks/ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
           "rel": "rootTask"
         }
       },
@@ -95,7 +93,7 @@
             },
             "$objectType": "prism.v4.config.TaskReferenceInternal",
             "extId": "ZXJnb24=:3e25313f-cf66-43c1-4eb2-ed3701db7b27",
-            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks/ZXJnb24=:3e25313f-cf66-43c1-4eb2-ed3701db7b27",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:3e25313f-cf66-43c1-4eb2-ed3701db7b27",
             "rel": "subtask"
           }
         ],
@@ -111,9 +109,7 @@
           }
         ],
         "lastUpdatedTime": "2026-02-24T21:26:19.798031Z",
-        "clusterExtIds": [
-          "00064715-c043-5d8f-ee4b-176ec875554d"
-        ],
+        "clusterExtIds": ["00064715-c043-5d8f-ee4b-176ec875554d"],
         "isBackgroundTask": false,
         "numberOfSubtasks": 1,
         "numberOfEntitiesAffected": 1,
@@ -162,9 +158,7 @@
           }
         ],
         "lastUpdatedTime": "2026-02-24T20:02:31.577568Z",
-        "clusterExtIds": [
-          "00064715-c043-5d8f-ee4b-176ec875554d"
-        ],
+        "clusterExtIds": ["00064715-c043-5d8f-ee4b-176ec875554d"],
         "isBackgroundTask": true,
         "numberOfSubtasks": 0,
         "numberOfEntitiesAffected": 1,
@@ -178,7 +172,7 @@
           },
           "$objectType": "prism.v4.config.TaskReferenceInternal",
           "extId": "ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks/ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
           "rel": "parent"
         },
         "status": "SUCCEEDED",
@@ -195,7 +189,7 @@
           },
           "$objectType": "prism.v4.config.TaskReferenceInternal",
           "extId": "ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks/ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
           "rel": "rootTask"
         }
       },
@@ -225,7 +219,7 @@
             },
             "$objectType": "prism.v4.config.TaskReferenceInternal",
             "extId": "ZXJnb24=:44782277-2630-4de5-51cd-403cbfcb3bc5",
-            "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks/ZXJnb24=:44782277-2630-4de5-51cd-403cbfcb3bc5",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:44782277-2630-4de5-51cd-403cbfcb3bc5",
             "rel": "subtask"
           }
         ],
@@ -241,9 +235,7 @@
           }
         ],
         "lastUpdatedTime": "2026-02-24T20:02:31.76735Z",
-        "clusterExtIds": [
-          "00064715-c043-5d8f-ee4b-176ec875554d"
-        ],
+        "clusterExtIds": ["00064715-c043-5d8f-ee4b-176ec875554d"],
         "isBackgroundTask": false,
         "numberOfSubtasks": 1,
         "numberOfEntitiesAffected": 1,
@@ -303,15 +295,15 @@
             "$fv": "v1.r0"
           },
           "$objectType": "common.v1.response.ApiLink",
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks?$page=0&$limit=50&$filter=createdTime gt 2026-02-24T17:30:15.435899Z",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks?$page=0&$limit=50&$filter=createdTime gt 2026-02-24T17:30:15.435899Z",
           "rel": "first"
         },
         {
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks?$page=0&$limit=50&$filter=createdTime gt 2026-02-24T17:30:15.435899Z",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks?$page=0&$limit=50&$filter=createdTime gt 2026-02-24T17:30:15.435899Z",
           "rel": "self"
         },
         {
-          "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/prism/v4.0/config/tasks?$page=0&$limit=50&$filter=createdTime gt 2026-02-24T17:30:15.435899Z",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks?$page=0&$limit=50&$filter=createdTime gt 2026-02-24T17:30:15.435899Z",
           "rel": "last"
         }
       ],
