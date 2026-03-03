@@ -34,7 +34,7 @@ class NutanixCheck(AgentCheck):
             host, _, port = self.pc_ip.rpartition(":")
             if port.isdigit():
                 if "pc_port" in self.instance:
-                    raise ConfigurationError(f"Conflicting configuration: pc_ip ({port}) and pc_port ({self.pc_port})")
+                    raise ConfigurationError(f"Conflicting port configuration between pc_ip ({port}) and pc_port ({self.pc_port})")
                 self.pc_ip, self.pc_port = host, int(port)
         self.pc_port = self.pc_port or 9440
 
@@ -64,7 +64,7 @@ class NutanixCheck(AgentCheck):
 
         self.health_check_url = f"{self.base_url}/console"
 
-        self.base_tags = self.instance.get("tags", [])
+        self.base_tags = list(self.instance.get("tags", []))
         self.base_tags.append("nutanix")
         self.base_tags.append(f"prism_central:{self.pc_ip}")
 
