@@ -20,12 +20,20 @@ def instance_collect_alerts():
     return True
 
 
+def instance_collect_audits():
+    return True
+
+
 def instance_collect_events():
     return True
 
 
 def instance_collect_subtasks():
     return False
+
+
+def instance_collect_tasks():
+    return True
 
 
 def instance_disable_generic_tags():
