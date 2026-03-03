@@ -9,7 +9,7 @@ files:
     options:
     - name: prefect_url
       required: true
-      description: The URL of the Prefect server.
+      description: The URL of the Prefect Server API.
       value:
         type: string
         example: http://localhost:4200/api
