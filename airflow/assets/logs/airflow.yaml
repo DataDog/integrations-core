@@ -38,11 +38,15 @@ pipeline:
           Exception: Hello world fail!
       grok:
         supportRules: |
-          _date %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp}
+          _date_legacy %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp}
+          _date_iso_offset %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):timestamp}
+          _date_iso_zulu %{date("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"):timestamp}
+          _date (%{_date_iso_offset}|%{_date_iso_zulu}|%{_date_legacy})
+          _date_any (%{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ")}|%{date("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")}|%{date("yyyy-MM-dd HH:mm:ss,SSS")})
           _file %{notSpace:filename}:%{integer:lineno}
           _base_prefix \[%{_date}\]\s+(\{\{%{_file}\}\}|\{%{_file}\})\s+%{word:level}\s+-
           # Some logs have duplicate prefixes, we only collect job_id and subtask name from first prefix if present.
-          _prefix (\[%{date("yyyy-MM-dd HH:mm:ss,SSS")}\]\s+\{\{%{notSpace}:%{integer}\}\}\s+%{word}\s+-\s+)?(Job %{integer:jobid}: Subtask %{word:subtask}\s+)?%{_base_prefix}
+          _prefix (\[%{_date_any}\]\s+(\{\{%{notSpace}:%{integer}\}\}|\{%{notSpace}:%{integer}\})\s+%{word}\s+-\s+)?(Job %{integer:jobid}: Subtask %{word:subtask}\s+)?%{_base_prefix}
 
         matchRules: |
           airflow_stacktrace %{_prefix}\s+%{data:message}\nTraceback \(most recent call last\):\n%{data:error.stack}
