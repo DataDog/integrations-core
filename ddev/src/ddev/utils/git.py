@@ -25,7 +25,7 @@ class GitRepository:
         self.__repo_root = repo_root
 
         self.__filtered_tags: dict[str, list[str]] = {}
-        self._gitignore_mtime: float | None = None
+        self._gitignore_mtime: int | None = None
         self._gitignore_spec = None
 
     @property
@@ -210,11 +210,11 @@ class GitRepository:
         gitignore_file = self.repo_root / '.gitignore'
 
         if gitignore_file.exists():
-            current_mtime = gitignore_file.stat().st_mtime
-            if not hasattr(self, '_gitignore_mtime') or self._gitignore_mtime != current_mtime:
+            current_mtime = gitignore_file.stat().st_mtime_ns
+            if self._gitignore_mtime != current_mtime:
                 self._gitignore_spec = self._load_gitignore_spec()
                 self._gitignore_mtime = current_mtime
-        elif not hasattr(self, '_gitignore_spec'):
+        elif self._gitignore_spec is not None:
             self._gitignore_spec = None
 
         if self._gitignore_spec is None:
