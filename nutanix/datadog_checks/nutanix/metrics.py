@@ -51,7 +51,7 @@ HOST_STATS_METRICS = {
     "memoryCapacityBytes": "host.memory_capacity",  # bytes
     "overallMemoryUsageBytes": "host.overall_memory_usage",  # bytes
     # "overallMemoryUsagePpm": "host.overall_memory_usage", # ppm
-    "powerConsumptionInstantWatt": "host.power.consumption.instant_watt",
+    "powerConsumptionInstantWatt": "host.power_consumption_instant_watt",
     "storageCapacityBytes": "host.storage_capacity",  # bytes
     "storageUsageBytes": "host.storage_usage",  # bytes
 }
