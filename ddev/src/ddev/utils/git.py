@@ -3,7 +3,53 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+from fnmatch import fnmatch
+
 from ddev.utils.fs import Path
+
+
+class _GitignoreSpec:
+    """Matches paths against a list of gitignore patterns using fnmatch."""
+
+    def __init__(self, patterns: list[str]):
+        self._patterns = patterns
+
+    def match(self, path: str) -> bool:
+        return any(self._match_pattern(path, p) for p in self._patterns)
+
+    @staticmethod
+    def _match_pattern(path: str, pattern: str) -> bool:
+        if pattern.startswith('/'):
+            pattern = pattern[1:]
+            return fnmatch(path, pattern) or path.startswith(pattern + '/')
+
+        if pattern.endswith('/'):
+            pattern = pattern[:-1]
+            return path == pattern or path.startswith(pattern + '/')
+
+        if fnmatch(path, pattern):
+            return True
+
+        if '/' not in pattern:
+            for part in path.split('/'):
+                if fnmatch(part, pattern):
+                    return True
+
+        return False
+
+
+def _load_gitignore(gitignore_file: Path) -> _GitignoreSpec | None:
+    if not gitignore_file.is_file():
+        return None
+
+    patterns = []
+    with open(gitignore_file, encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith('#'):
+                patterns.append(line)
+
+    return _GitignoreSpec(patterns) if patterns else None
 
 
 class GitCommit:
@@ -25,9 +71,7 @@ class GitRepository:
         self.__repo_root = repo_root
 
         self.__filtered_tags: dict[str, list[str]] = {}
-        self._gitignore_mtime: int | None = None
-        self._gitignore_size: int | None = None
-        self._gitignore_spec = None
+        self.__gitignore_spec: _GitignoreSpec | None = _load_gitignore(repo_root / '.gitignore')
 
     @property
     def repo_root(self) -> Path:
@@ -207,73 +251,15 @@ class GitRepository:
         return self.capture('merge-base', ref_a, ref_b).splitlines()[0]
 
     def is_ignored(self, path: Path) -> bool:
-        """Check if a path matches any .gitignore pattern in the repository."""
-        gitignore_file = self.repo_root / '.gitignore'
-
-        if gitignore_file.exists():
-            stat = gitignore_file.stat()
-            if self._gitignore_mtime != stat.st_mtime_ns or self._gitignore_size != stat.st_size:
-                self._gitignore_spec = self._load_gitignore_spec()
-                self._gitignore_mtime = stat.st_mtime_ns
-                self._gitignore_size = stat.st_size
-        elif self._gitignore_spec is not None:
-            self._gitignore_spec = None
-
-        if self._gitignore_spec is None:
+        """Check if a path matches a .gitignore pattern. The spec is loaded once at init."""
+        if self.__gitignore_spec is None:
             return False
 
-        try:
-            relative_path = path.relative_to(self.repo_root)
-        except ValueError:
+        if not path.is_relative_to(self.repo_root):
             return False
 
-        return self._gitignore_spec.match_file(relative_path.as_posix())
-
-    def _load_gitignore_spec(self):
-        """Load .gitignore patterns and return a matcher."""
-        gitignore_file = self.repo_root / '.gitignore'
-        if not gitignore_file.exists():
-            return None
-
-        from fnmatch import fnmatch
-
-        patterns = []
-        with open(gitignore_file, encoding='utf-8') as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith('#'):
-                    patterns.append(line)
-
-        class GitignoreSpec:
-            def __init__(self, patterns):
-                self.patterns = patterns
-
-            def match_file(self, path):
-                for pattern in self.patterns:
-                    if self._match_pattern(path, pattern):
-                        return True
-                return False
-
-            def _match_pattern(self, path, pattern):
-                if pattern.startswith('/'):
-                    pattern = pattern[1:]
-                    return fnmatch(path, pattern) or path.startswith(pattern + '/')
-
-                if pattern.endswith('/'):
-                    pattern = pattern[:-1]
-                    return path == pattern or path.startswith(pattern + '/')
-
-                if fnmatch(path, pattern):
-                    return True
-
-                if '/' not in pattern:
-                    for part in path.split('/'):
-                        if fnmatch(part, pattern):
-                            return True
-
-                return False
-
-        return GitignoreSpec(patterns)
+        rel = path.relative_to(self.repo_root)
+        return self.__gitignore_spec.match(rel.as_posix())
 
     @staticmethod
     def __is_warning_line(line):

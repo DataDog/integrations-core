@@ -309,33 +309,21 @@ def test_is_worktree(
 
 def test_is_ignored(repository):
     """Test that is_ignored correctly identifies gitignored paths."""
+    gitignore_path = repository.path / ".gitignore"
+    gitignore_path.write_text("ignored_dir/\n*.pyc\n")
+
     repo = Repository(repository.path.name, str(repository.path))
-    gitignore_path = repo.path / ".gitignore"
 
-    # Directory explicitly ignored
-    test_dir = repo.path / "test_ignored_dir"
-    test_dir.mkdir()
-    gitignore_path.write_text("test_ignored_dir/\n")
-    assert repo.git.is_ignored(test_dir) is True
+    ignored_dir = repo.path / "ignored_dir"
+    ignored_dir.mkdir()
+    assert repo.git.is_ignored(ignored_dir) is True
 
-    # Directory not in .gitignore
-    non_ignored_dir = repo.path / "test_non_ignored_dir"
-    non_ignored_dir.mkdir()
-    assert repo.git.is_ignored(non_ignored_dir) is False
+    nested = ignored_dir / "nested"
+    nested.mkdir()
+    assert repo.git.is_ignored(nested) is True
 
-    # Wildcard pattern
-    (repo.path / "test.pyc").touch()
-    gitignore_path.write_text("test_ignored_dir/\n*.pyc\n")
+    assert repo.git.is_ignored(repo.path / "kept_dir") is False
     assert repo.git.is_ignored(repo.path / "test.pyc") is True
-
-    (repo.path / "test.py").touch()
     assert repo.git.is_ignored(repo.path / "test.py") is False
-
-    # Nested directory inherits parent ignore
-    nested_dir = test_dir / "nested"
-    nested_dir.mkdir(parents=True)
-    assert repo.git.is_ignored(nested_dir) is True
-
-    # Non-existent paths
-    non_existent = repo.path / "does_not_exist"
-    assert repo.git.is_ignored(non_existent) is False
+    assert repo.git.is_ignored(repo.path / "does_not_exist") is False
+    assert repo.git.is_ignored(Path("/outside/repo")) is False
