@@ -1,0 +1,10 @@
+# Process metrics
+process_cpu_seconds: process.cpu_seconds
+process_max_fds: process.max_fds
+process_network_receive_bytes: process.network_receive_bytes
+process_network_transmit_bytes: process.network_transmit_bytes
+process_open_fds: process.open_fds
+process_resident_memory_bytes: process.resident_memory_bytes
+process_start_time_seconds: process.start_time_seconds
+process_virtual_memory_bytes: process.virtual_memory_bytes
+process_virtual_memory_max_bytes: process.virtual_memory_max_bytes
