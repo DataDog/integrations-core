@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check collects resource usage metrics from your Nutanix cluster—CPU, memory, storage, and I/O performance for clusters, hosts, and VMs. It also collects operational activity data from Prism Central, including events, tasks, audits, and alerts.
+This check collects resource usage metrics from your Nutanix cluster, CPU, memory, storage, and I/O performance for clusters, hosts, and VMs. It also collects operational activity data from Prism Central, including events, tasks, audits, and alerts.
 
 ## Setup
 
