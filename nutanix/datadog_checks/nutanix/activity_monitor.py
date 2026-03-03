@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from collections.abc import Callable
 from datetime import datetime, timedelta
 
 from requests.exceptions import HTTPError
@@ -33,69 +34,84 @@ class ActivityMonitor:
         else:
             self.alerts_v42_supported = None
 
+    def _collect(
+        self,
+        activity_kind: str,
+        list_fn: Callable[[str], list[dict]],
+        process_fn: Callable[[dict], None],
+        time_field: str,
+        cache_key: str,
+        pre_filter_fn: Callable[[list[dict]], list[dict]] | None = None,
+    ) -> int:
+        """Collect activity items of a given kind from Nutanix Prism Central."""
+        last_time = getattr(self, cache_key)
+        start_time = last_time
+        if not start_time:
+            now = get_current_datetime()
+            start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
+
+        self.check.log.debug(
+            "[PC:%s:%s] Collecting %ss since: %s", self.check.pc_ip, self.check.pc_port, activity_kind, start_time
+        )
+
+        items = list_fn(start_time)
+        if not items:
+            self.check.log.debug("[PC:%s:%s] No %ss found", self.check.pc_ip, self.check.pc_port, activity_kind)
+            return 0
+
+        self.check.log.debug(
+            "[PC:%s:%s] Fetched %d %ss from API", self.check.pc_ip, self.check.pc_port, len(items), activity_kind
+        )
+
+        items = self._filter_after_time(items, last_time, time_field)
+        if not items:
+            self.check.log.debug(
+                "[PC:%s:%s] No new %ss after filtering", self.check.pc_ip, self.check.pc_port, activity_kind
+            )
+            return 0
+
+        # Advance past all fetched items before applying resource filters
+        most_recent_time_str = self._find_max_timestamp(items, time_field)
+
+        if pre_filter_fn:
+            items = pre_filter_fn(items)
+
+        items = [i for i in items if self._should_collect_activity_item(i, activity_kind)]
+
+        self.check.log.debug(
+            "[PC:%s:%s] Processing %d %ss after filtering",
+            self.check.pc_ip,
+            self.check.pc_port,
+            len(items),
+            activity_kind,
+        )
+
+        for item in items:
+            process_fn(item)
+
+        if most_recent_time_str:
+            setattr(self, cache_key, most_recent_time_str)
+            self.check.write_persistent_cache(cache_key, most_recent_time_str)
+            self.check.log.debug(
+                "[PC:%s:%s] Updated %s to: %s",
+                self.check.pc_ip,
+                self.check.pc_port,
+                cache_key,
+                most_recent_time_str,
+            )
+
+        return len(items)
+
     def collect_events(self) -> int:
-        """Collect events from Nutanix Prism Central.
-
-        Returns:
-            Number of events collected
-        """
+        """Collect events from Nutanix Prism Central."""
         try:
-            self.check.log.debug("[PC:%s:%s] Starting events collection", self.check.pc_ip, self.check.pc_port)
-
-            start_time = self.last_event_collection_time
-            if not start_time:
-                now = get_current_datetime()
-                start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
-                self.check.log.debug(
-                    "[PC:%s:%s] First events collection, using start_time: %s",
-                    self.check.pc_ip,
-                    self.check.pc_port,
-                    start_time,
-                )
-            else:
-                self.check.log.debug(
-                    "[PC:%s:%s] Collecting events since: %s", self.check.pc_ip, self.check.pc_port, start_time
-                )
-
-            events = self._list_events(start_time)
-            if not events:
-                self.check.log.debug("[PC:%s:%s] No events found", self.check.pc_ip, self.check.pc_port)
-                return 0
-
-            self.check.log.debug(
-                "[PC:%s:%s] Fetched %d events from API", self.check.pc_ip, self.check.pc_port, len(events)
+            return self._collect(
+                activity_kind="event",
+                list_fn=lambda t: self._list_activity("api/monitoring/v4.0/serviceability/events", "creationTime", t),
+                process_fn=self._process_event,
+                time_field="creationTime",
+                cache_key="last_event_collection_time",
             )
-
-            events = self._filter_after_time(events, self.last_event_collection_time, "creationTime")
-            if not events:
-                self.check.log.debug("[PC:%s:%s] No new events after filtering", self.check.pc_ip, self.check.pc_port)
-                return 0
-
-            # Advance past all fetched events before filtering
-            most_recent_time_str = self._find_max_timestamp(events, "creationTime")
-
-            events = [e for e in events if self._should_collect_activity_item(e, "event")]
-
-            self.check.log.debug(
-                "[PC:%s:%s] Processing %d events after filtering", self.check.pc_ip, self.check.pc_port, len(events)
-            )
-
-            for event in events:
-                self._process_event(event)
-
-            if most_recent_time_str:
-                self.last_event_collection_time = most_recent_time_str
-                self.check.write_persistent_cache("last_event_collection_time", most_recent_time_str)
-                self.check.log.debug(
-                    "[PC:%s:%s] Updated last_event_collection_time to: %s",
-                    self.check.pc_ip,
-                    self.check.pc_port,
-                    most_recent_time_str,
-                )
-
-            self.check.log.debug("[PC:%s:%s] Completed events collection", self.check.pc_ip, self.check.pc_port)
-            return len(events)
-
         except HTTPError as e:
             self.check.log.error(
                 "[PC:%s:%s] Failed to collect events from endpoint 'api/monitoring/v4.0/serviceability/events': %s",
@@ -110,27 +126,136 @@ class ActivityMonitor:
             )
             return 0
 
-    def _list_events(self, start_time_str: str) -> list[dict]:
-        """Fetch events from Prism Central.
+    def collect_tasks(self) -> int:
+        """Collect tasks from Nutanix Prism Central."""
+        try:
 
-        Args:
-            start_time_str: ISO 8601 formatted start time
+            def _filter_subtasks(tasks: list[dict]) -> list[dict]:
+                if not self.check.collect_subtasks_enabled:
+                    return [t for t in tasks if not t.get("parentTask")]
+                return tasks
 
-        Returns:
-            List of event objects
-        """
-        params = {}
-        params["$filter"] = f"creationTime gt {start_time_str}"
-        params["$orderBy"] = "creationTime asc"
+            return self._collect(
+                activity_kind="task",
+                list_fn=lambda t: self._list_activity("api/prism/v4.0/config/tasks", "createdTime", t),
+                process_fn=self._process_task,
+                time_field="createdTime",
+                cache_key="last_task_collection_time",
+                pre_filter_fn=_filter_subtasks,
+            )
+        except HTTPError as e:
+            self.check.log.error(
+                "[PC:%s:%s] Failed to collect tasks from API endpoint 'api/prism/v4.0/config/tasks': HTTP %s",
+                self.check.pc_ip,
+                self.check.pc_port,
+                e.response.status_code if e.response else "error",
+            )
+            return 0
+        except Exception as e:
+            self.check.log.exception(
+                "[PC:%s:%s] Unexpected error collecting tasks: %s", self.check.pc_ip, self.check.pc_port, e
+            )
+            return 0
 
-        return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/events", params=params)
+    def collect_audits(self) -> int:
+        """Collect audits from Nutanix Prism Central."""
+        try:
+            return self._collect(
+                activity_kind="audit",
+                list_fn=lambda t: self._list_activity("api/monitoring/v4.0/serviceability/audits", "creationTime", t),
+                process_fn=self._process_audit,
+                time_field="creationTime",
+                cache_key="last_audit_collection_time",
+            )
+        except HTTPError as e:
+            self.check.log.error(
+                "[PC:%s:%s] Failed to collect audits from endpoint 'api/monitoring/v4.0/serviceability/audits': %s",
+                self.check.pc_ip,
+                self.check.pc_port,
+                e.response.status_code if e.response else "HTTP error",
+            )
+            return 0
+        except Exception as e:
+            self.check.log.exception(
+                "[PC:%s:%s] Unexpected error collecting audits: %s", self.check.pc_ip, self.check.pc_port, e
+            )
+            return 0
+
+    def collect_alerts(self) -> int:
+        """Collect alerts from Nutanix Prism Central."""
+        try:
+            return self._collect(
+                activity_kind="alert",
+                list_fn=self._list_alerts,
+                process_fn=self._process_alert,
+                time_field="creationTime",
+                cache_key="last_alert_collection_time",
+            )
+        except HTTPError as e:
+            self.check.log.error(
+                "[PC:%s:%s] Failed to collect alerts from API: HTTP %s",
+                self.check.pc_ip,
+                self.check.pc_port,
+                e.response.status_code if e.response else "error",
+            )
+            return 0
+        except Exception as e:
+            self.check.log.exception(
+                "[PC:%s:%s] Unexpected error collecting alerts: %s", self.check.pc_ip, self.check.pc_port, e
+            )
+            return 0
+
+    def _list_activity(self, endpoint: str, time_field: str, start_time_str: str) -> list[dict]:
+        """Fetch activity items from Prism Central."""
+        params = {
+            "$filter": f"{time_field} gt {start_time_str}",
+            "$orderBy": f"{time_field} asc",
+        }
+        return self.check._get_paginated_request_data(endpoint, params=params)
+
+    def _list_alerts(self, start_time_str: str) -> list[dict]:
+        """Fetch alerts from Prism Central with v4.2/v4.0 fallback."""
+        params = {
+            "$filter": f"creationTime gt {start_time_str}",
+            "$orderBy": "creationTime asc",
+        }
+
+        if self.alerts_v42_supported is False:
+            self.check.log.debug(
+                "[PC:%s:%s] Using alerts API v4.0 (v4.2 not supported)", self.check.pc_ip, self.check.pc_port
+            )
+            del params["$filter"]
+            return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/alerts", params=params)
+
+        try:
+            self.check.log.debug("[PC:%s:%s] Attempting to use alerts API v4.2", self.check.pc_ip, self.check.pc_port)
+            result = self.check._get_paginated_request_data("api/monitoring/v4.2/serviceability/alerts", params=params)
+            if self.alerts_v42_supported is None:
+                self.check.log.debug(
+                    "[PC:%s:%s] Alerts API v4.2 is supported, caching for future use",
+                    self.check.pc_ip,
+                    self.check.pc_port,
+                )
+                self.alerts_v42_supported = True
+                self.check.write_persistent_cache("alerts_v42_supported", "True")
+            return result
+        except HTTPError as e:
+            if e.response is not None and e.response.status_code == 404:
+                self.check.log.debug(
+                    "[PC:%s:%s] Alerts API v4.2 not supported, falling back to v4.0 permanently",
+                    self.check.pc_ip,
+                    self.check.pc_port,
+                )
+                self.alerts_v42_supported = False
+                self.check.write_persistent_cache("alerts_v42_supported", "False")
+                del params["$filter"]
+                return self.check._get_paginated_request_data(
+                    "api/monitoring/v4.0/serviceability/alerts", params=params
+                )
+            raise
 
     def _process_event(self, event: dict) -> None:
-        """Process and send a single event to Datadog.
-
-        Args:
-            event: Event object from API
-        """
+        """Process and send a single event to Datadog."""
         event_id = event.get("extId", "unknown")
         event_title = event.get("eventType", "Nutanix Event")
         event_message = event.get("message", "")
@@ -147,9 +272,6 @@ class ActivityMonitor:
 
         if cluster_id:
             event_tags.append(f"ntnx_cluster_id:{cluster_id}")
-            # Access cluster_names via parent check's infrastructure_monitor (which should expose it)
-            # or directly if we choose to expose it on check.
-            # Assuming check exposes access to cluster_names property/attribute
             if cluster_id in self.check.cluster_names:
                 event_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
 
@@ -186,308 +308,8 @@ class ActivityMonitor:
             }
         )
 
-    def collect_tasks(self) -> int:
-        """Collect tasks from Nutanix Prism Central.
-
-        Returns:
-            Number of tasks collected
-        """
-        try:
-            self.check.log.debug("[PC:%s:%s] Starting tasks collection", self.check.pc_ip, self.check.pc_port)
-
-            start_time = self.last_task_collection_time
-            if not start_time:
-                now = get_current_datetime()
-                start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
-                self.check.log.debug(
-                    "[PC:%s:%s] First tasks collection, using start_time: %s",
-                    self.check.pc_ip,
-                    self.check.pc_port,
-                    start_time,
-                )
-            else:
-                self.check.log.debug(
-                    "[PC:%s:%s] Collecting tasks since: %s", self.check.pc_ip, self.check.pc_port, start_time
-                )
-
-            tasks = self._list_tasks(start_time)
-            if not tasks:
-                self.check.log.debug("[PC:%s:%s] No tasks found", self.check.pc_ip, self.check.pc_port)
-                return 0
-
-            self.check.log.debug(
-                "[PC:%s:%s] Fetched %d tasks from API", self.check.pc_ip, self.check.pc_port, len(tasks)
-            )
-
-            tasks = self._filter_after_time(tasks, self.last_task_collection_time, "createdTime")
-            if not tasks:
-                self.check.log.debug("[PC:%s:%s] No new tasks after filtering", self.check.pc_ip, self.check.pc_port)
-                return 0
-
-            # Advance past all fetched tasks before filtering
-            most_recent_time_str = self._find_max_timestamp(tasks, "createdTime")
-
-            if not self.check.collect_subtasks_enabled:
-                tasks = [t for t in tasks if not t.get("parentTask")]
-
-            tasks = [t for t in tasks if self._should_collect_activity_item(t, "task")]
-
-            self.check.log.debug(
-                "[PC:%s:%s] Processing %d tasks after filtering", self.check.pc_ip, self.check.pc_port, len(tasks)
-            )
-
-            for task in tasks:
-                self._process_task(task)
-
-            if most_recent_time_str:
-                self.last_task_collection_time = most_recent_time_str
-                self.check.write_persistent_cache("last_task_collection_time", most_recent_time_str)
-                self.check.log.debug(
-                    "[PC:%s:%s] Updated last_task_collection_time to: %s",
-                    self.check.pc_ip,
-                    self.check.pc_port,
-                    most_recent_time_str,
-                )
-
-            self.check.log.debug("[PC:%s:%s] Completed tasks collection", self.check.pc_ip, self.check.pc_port)
-            return len(tasks)
-
-        except HTTPError as e:
-            self.check.log.error(
-                "[PC:%s:%s] Failed to collect tasks from API endpoint 'api/prism/v4.0/config/tasks': HTTP %s",
-                self.check.pc_ip,
-                self.check.pc_port,
-                e.response.status_code if e.response else "error",
-            )
-            return 0
-        except Exception as e:
-            self.check.log.exception(
-                "[PC:%s:%s] Unexpected error collecting tasks: %s", self.check.pc_ip, self.check.pc_port, e
-            )
-            return 0
-
-    def collect_audits(self) -> int:
-        """Collect audits from Nutanix Prism Central.
-
-        Returns:
-            Number of audits collected
-        """
-        try:
-            self.check.log.debug("[PC:%s:%s] Starting audits collection", self.check.pc_ip, self.check.pc_port)
-
-            start_time = self.last_audit_collection_time
-            if not start_time:
-                now = get_current_datetime()
-                start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
-                self.check.log.debug(
-                    "[PC:%s:%s] First audits collection, using start_time: %s",
-                    self.check.pc_ip,
-                    self.check.pc_port,
-                    start_time,
-                )
-            else:
-                self.check.log.debug(
-                    "[PC:%s:%s] Collecting audits since: %s", self.check.pc_ip, self.check.pc_port, start_time
-                )
-
-            audits = self._list_audits(start_time)
-            if not audits:
-                self.check.log.debug("[PC:%s:%s] No audits found", self.check.pc_ip, self.check.pc_port)
-                return 0
-
-            self.check.log.debug(
-                "[PC:%s:%s] Fetched %d audits from API", self.check.pc_ip, self.check.pc_port, len(audits)
-            )
-
-            audits = self._filter_after_time(audits, self.last_audit_collection_time, "creationTime")
-            if not audits:
-                self.check.log.debug("[PC:%s:%s] No new audits after filtering", self.check.pc_ip, self.check.pc_port)
-                return 0
-
-            # Advance past all fetched audits before filtering
-            most_recent_time_str = self._find_max_timestamp(audits, "creationTime")
-
-            audits = [a for a in audits if self._should_collect_activity_item(a, "audit")]
-
-            self.check.log.debug(
-                "[PC:%s:%s] Processing %d audits after filtering", self.check.pc_ip, self.check.pc_port, len(audits)
-            )
-
-            for audit in audits:
-                self._process_audit(audit)
-
-            if most_recent_time_str:
-                self.last_audit_collection_time = most_recent_time_str
-                self.check.write_persistent_cache("last_audit_collection_time", most_recent_time_str)
-                self.check.log.debug(
-                    "[PC:%s:%s] Updated last_audit_collection_time to: %s",
-                    self.check.pc_ip,
-                    self.check.pc_port,
-                    most_recent_time_str,
-                )
-
-            self.check.log.debug("[PC:%s:%s] Completed audits collection", self.check.pc_ip, self.check.pc_port)
-            return len(audits)
-
-        except HTTPError as e:
-            self.check.log.error(
-                "[PC:%s:%s] Failed to collect audits from endpoint 'api/monitoring/v4.0/serviceability/audits': %s",
-                self.check.pc_ip,
-                self.check.pc_port,
-                e.response.status_code if e.response else "HTTP error",
-            )
-            return 0
-        except Exception as e:
-            self.check.log.exception(
-                "[PC:%s:%s] Unexpected error collecting audits: %s", self.check.pc_ip, self.check.pc_port, e
-            )
-            return 0
-
-    def collect_alerts(self) -> int:
-        """Collect alerts from Nutanix Prism Central.
-
-        Returns:
-            Number of alerts collected
-        """
-        try:
-            self.check.log.debug("[PC:%s:%s] Starting alerts collection", self.check.pc_ip, self.check.pc_port)
-
-            start_time = self.last_alert_collection_time
-            if not start_time:
-                now = get_current_datetime()
-                start_time = (now - timedelta(seconds=self.check.sampling_interval)).isoformat().replace("+00:00", "Z")
-                self.check.log.debug(
-                    "[PC:%s:%s] First alerts collection, using start_time: %s",
-                    self.check.pc_ip,
-                    self.check.pc_port,
-                    start_time,
-                )
-            else:
-                self.check.log.debug(
-                    "[PC:%s:%s] Collecting alerts since: %s", self.check.pc_ip, self.check.pc_port, start_time
-                )
-
-            alerts = self._list_alerts(start_time)
-            if not alerts:
-                self.check.log.debug("[PC:%s:%s] No alerts found", self.check.pc_ip, self.check.pc_port)
-                return 0
-
-            self.check.log.debug(
-                "[PC:%s:%s] Fetched %d alerts from API", self.check.pc_ip, self.check.pc_port, len(alerts)
-            )
-
-            alerts = self._filter_after_time(alerts, self.last_alert_collection_time, "creationTime")
-            if not alerts:
-                self.check.log.debug("[PC:%s:%s] No new alerts after filtering", self.check.pc_ip, self.check.pc_port)
-                return 0
-
-            # Advance past all fetched alerts before filtering
-            most_recent_time_str = self._find_max_timestamp(alerts, "creationTime")
-
-            alerts = [a for a in alerts if self._should_collect_activity_item(a, "alert")]
-
-            self.check.log.debug(
-                "[PC:%s:%s] Processing %d alerts after filtering", self.check.pc_ip, self.check.pc_port, len(alerts)
-            )
-
-            for alert in alerts:
-                self._process_alert(alert)
-
-            if most_recent_time_str:
-                self.last_alert_collection_time = most_recent_time_str
-                self.check.write_persistent_cache("last_alert_collection_time", most_recent_time_str)
-                self.check.log.debug(
-                    "[PC:%s:%s] Updated last_alert_collection_time to: %s",
-                    self.check.pc_ip,
-                    self.check.pc_port,
-                    most_recent_time_str,
-                )
-
-            self.check.log.debug("[PC:%s:%s] Completed alerts collection", self.check.pc_ip, self.check.pc_port)
-            return len(alerts)
-
-        except HTTPError as e:
-            self.check.log.error(
-                "[PC:%s:%s] Failed to collect alerts from API: HTTP %s",
-                self.check.pc_ip,
-                self.check.pc_port,
-                e.response.status_code if e.response else "error",
-            )
-            return 0
-        except Exception as e:
-            self.check.log.exception(
-                "[PC:%s:%s] Unexpected error collecting alerts: %s", self.check.pc_ip, self.check.pc_port, e
-            )
-            return 0
-
-    def _list_audits(self, start_time_str: str) -> list[dict]:
-        """Fetch audits from Prism Central.
-
-        Args:
-            start_time_str: ISO 8601 formatted start time
-
-        Returns:
-            List of audit objects
-        """
-        params = {}
-        params["$filter"] = f"creationTime gt {start_time_str}"
-        params["$orderBy"] = "creationTime asc"
-
-        return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/audits", params=params)
-
-    def _list_alerts(self, start_time_str: str) -> list[dict]:
-        """Fetch alerts from Prism Central.
-
-        Args:
-            start_time_str: ISO 8601 formatted start time
-
-        Returns:
-            List of alert objects
-        """
-        params = {}
-        params["$filter"] = f"creationTime gt {start_time_str}"
-        params["$orderBy"] = "creationTime asc"
-
-        if self.alerts_v42_supported is False:
-            self.check.log.debug(
-                "[PC:%s:%s] Using alerts API v4.0 (v4.2 not supported)", self.check.pc_ip, self.check.pc_port
-            )
-            del params["$filter"]
-            return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/alerts", params=params)
-
-        try:
-            self.check.log.debug("[PC:%s:%s] Attempting to use alerts API v4.2", self.check.pc_ip, self.check.pc_port)
-            result = self.check._get_paginated_request_data("api/monitoring/v4.2/serviceability/alerts", params=params)
-            if self.alerts_v42_supported is None:
-                self.check.log.debug(
-                    "[PC:%s:%s] Alerts API v4.2 is supported, caching for future use",
-                    self.check.pc_ip,
-                    self.check.pc_port,
-                )
-                self.alerts_v42_supported = True
-                self.check.write_persistent_cache("alerts_v42_supported", "True")
-            return result
-        except HTTPError as e:
-            if e.response is not None and e.response.status_code == 404:
-                self.check.log.debug(
-                    "[PC:%s:%s] Alerts API v4.2 not supported, falling back to v4.0 permanently",
-                    self.check.pc_ip,
-                    self.check.pc_port,
-                )
-                self.alerts_v42_supported = False
-                self.check.write_persistent_cache("alerts_v42_supported", "False")
-                del params["$filter"]
-                return self.check._get_paginated_request_data(
-                    "api/monitoring/v4.0/serviceability/alerts", params=params
-                )
-            raise
-
     def _process_audit(self, audit: dict) -> None:
-        """Process and send a single audit to Datadog.
-
-        Args:
-            audit: Audit object from API
-        """
+        """Process and send a single audit to Datadog."""
         audit_id = audit.get("extId", "unknown")
 
         # Get cluster context for logging
@@ -575,15 +397,7 @@ class ActivityMonitor:
         )
 
     def _render_alert_message(self, message: str, parameters: list[dict]) -> str:
-        """Render template variables in alert message using parameter values.
-
-        Args:
-            message: Alert message with template variables like {param_name}
-            parameters: List of parameter objects from alert payload
-
-        Returns:
-            Rendered message with variables substituted
-        """
+        """Render template variables in alert message using parameter values."""
         if not message or not parameters:
             return message
 
@@ -611,11 +425,7 @@ class ActivityMonitor:
             return message
 
     def _process_alert(self, alert: dict) -> None:
-        """Process and send a single alert to Datadog.
-
-        Args:
-            alert: Alert object from API
-        """
+        """Process and send a single alert to Datadog."""
         alert_id = alert.get("extId", "unknown")
         title = alert.get("title", "Nutanix Alert")
         message = alert.get("message", "")
@@ -680,27 +490,8 @@ class ActivityMonitor:
             }
         )
 
-    def _list_tasks(self, start_time_str: str) -> list[dict]:
-        """Fetch tasks from Prism Central.
-
-        Args:
-            start_time_str: ISO 8601 formatted start time
-
-        Returns:
-            List of task objects
-        """
-        params = {}
-        params["$filter"] = f"createdTime gt {start_time_str}"
-        params["$orderBy"] = "createdTime asc"
-
-        return self.check._get_paginated_request_data("api/prism/v4.0/config/tasks", params=params)
-
     def _process_task(self, task: dict) -> None:
-        """Process and send a single task to Datadog as an event.
-
-        Args:
-            task: Task object from API
-        """
+        """Process and send a single task to Datadog as an event."""
         task_id = task.get("extId", "unknown")
         task_operation = task.get("operation", "Nutanix Task")
         task_description = task.get("operationDescription", "")
@@ -774,14 +565,7 @@ class ActivityMonitor:
         )
 
     def _parse_timestamp(self, timestamp_str: str) -> int | None:
-        """Parse ISO 8601 timestamp string to Unix timestamp.
-
-        Args:
-            timestamp_str: ISO 8601 formatted timestamp string
-
-        Returns:
-            Unix timestamp in seconds, or None if parsing fails
-        """
+        """Parse ISO 8601 timestamp string to Unix timestamp."""
         try:
             dt = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
             return int(dt.timestamp())
@@ -849,19 +633,7 @@ class ActivityMonitor:
         return True
 
     def _filter_after_time(self, items: list[dict], last_time_str: str | None, field_name: str) -> list[dict]:
-        """Filter items to those strictly after the last submitted time.
-
-        This provides client-side filtering as a safeguard against API edge cases
-        where items might be returned with timestamps equal to or before the last collection time.
-
-        Args:
-            items: List of items to filter
-            last_time_str: ISO 8601 formatted timestamp string of the last collection (or None)
-            field_name: Name of the timestamp field in the items
-
-        Returns:
-            List of items with timestamps strictly after last_time_str
-        """
+        """Filter items to those strictly after the last submitted time."""
         if not last_time_str:
             return items
 
@@ -894,18 +666,7 @@ class ActivityMonitor:
         return filtered
 
     def _find_max_timestamp(self, items: list[dict], field_name: str) -> str | None:
-        """Find the maximum timestamp among all items.
-
-        The Nutanix API may not return items sorted by timestamp despite the $orderBy parameter,
-        so we need to explicitly find the maximum timestamp to track the last collection time.
-
-        Args:
-            items: List of items to search
-            field_name: Name of the timestamp field in the items
-
-        Returns:
-            The maximum timestamp string, or None if no valid timestamps found
-        """
+        """Find the maximum timestamp among all items."""
         max_time = None
         max_time_str = None
 
