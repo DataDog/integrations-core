@@ -28,9 +28,7 @@ def test_retry_on_rate_limit_success_no_retry(dd_run_check, aggregator, mock_ins
 
     assert result == {"test": "data"}
     assert mock_get.call_count == 1
-    # Should not report retry metrics on success
-    aggregator.assert_metric("nutanix.api.retry.count", count=0)
-    aggregator.assert_metric("nutanix.api.retry.exhausted", count=0)
+    aggregator.assert_metric("nutanix.api.rate_limited", count=0)
 
 
 def test_retry_on_rate_limit_429_then_success(dd_run_check, aggregator, mock_instance, mocker):
@@ -62,10 +60,7 @@ def test_retry_on_rate_limit_429_then_success(dd_run_check, aggregator, mock_ins
     sleep_time = mock_sleep.call_args[0][0]
     assert 1.0 <= sleep_time <= 2.0
 
-    # Check retry metrics
-    aggregator.assert_metric("nutanix.api.retry.count", value=1, tags=['nutanix', 'prism_central:10.0.0.197'])
-    aggregator.assert_metric("nutanix.api.retry.backoff_seconds", tags=['nutanix', 'prism_central:10.0.0.197'])
-    aggregator.assert_metric("nutanix.api.retry.exhausted", count=0)
+    aggregator.assert_metric("nutanix.api.rate_limited", value=1, tags=['nutanix', 'prism_central:10.0.0.197'])
 
 
 def test_retry_on_rate_limit_max_retries_exceeded(dd_run_check, aggregator, mock_instance, mocker):
@@ -90,8 +85,7 @@ def test_retry_on_rate_limit_max_retries_exceeded(dd_run_check, aggregator, mock
     assert mock_get.call_count == 2
     assert mock_sleep.call_count == 1  # Sleep between retries (not after final failure)
 
-    # Check retry exhausted metric
-    aggregator.assert_metric("nutanix.api.retry.exhausted", value=1, tags=['nutanix', 'prism_central:10.0.0.197'])
+    aggregator.assert_metric("nutanix.api.rate_limited", tags=['nutanix', 'prism_central:10.0.0.197'])
 
 
 def test_retry_on_non_429_error_no_retry(dd_run_check, aggregator, mock_instance, mocker):
@@ -114,9 +108,7 @@ def test_retry_on_non_429_error_no_retry(dd_run_check, aggregator, mock_instance
     assert mock_get.call_count == 1
     assert mock_sleep.call_count == 0
 
-    # Should not report retry metrics
-    aggregator.assert_metric("nutanix.api.retry.count", count=0)
-    aggregator.assert_metric("nutanix.api.retry.exhausted", count=0)
+    aggregator.assert_metric("nutanix.api.rate_limited", count=0)
 
 
 def test_retry_with_custom_config(dd_run_check, aggregator, mock_instance, mocker):
@@ -217,8 +209,8 @@ def test_retry_disabled_with_zero_max_retries(dd_run_check, aggregator, mock_ins
     assert mock_get.call_count == 1
     assert mock_sleep.call_count == 0
 
-    # Should report exhausted metric immediately
-    aggregator.assert_metric("nutanix.api.retry.exhausted", value=1, tags=['nutanix', 'prism_central:10.0.0.197'])
+    # Single 429 hit before failing
+    aggregator.assert_metric("nutanix.api.rate_limited", value=1, count=1, tags=['nutanix', 'prism_central:10.0.0.197'])
 
 
 def test_health_check_with_retry(dd_run_check, aggregator, mock_instance, mocker):
