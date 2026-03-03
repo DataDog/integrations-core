@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+from datetime import datetime
+
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -22,8 +24,7 @@ class NutanixCheck(AgentCheck):
         self._initialize_check_attributes()
 
     def _parse_config(self):
-        # note: 120 second proved to be reliable during testing with the Nutanix API
-        # it allowed us to retrieve the majority of metrics for Cluster/VM stats endpoints.
+        # 120s proved reliable during testing — retrieves the majority of Cluster/VM stats
         self.sampling_interval = self.instance.get("min_collection_interval", 120)
         self.page_limit = self.instance.get("page_limit", 50)
 
@@ -84,14 +85,7 @@ class NutanixCheck(AgentCheck):
         return self.infrastructure_monitor._categories
 
     def extract_category_tags(self, entity: dict) -> list[str]:
-        """Extract category tags from an entity that has a categories field.
-
-        Args:
-            entity: Entity object that may contain categories
-
-        Returns:
-            List of category tags
-        """
+        """Extract category tags from an entity that has a categories field."""
         tags = []
         categories = entity.get("categories")
         if categories:
@@ -111,23 +105,15 @@ class NutanixCheck(AgentCheck):
     def check(self, _):
         self.log.info("Starting check for Prism Central: %s:%s", self.pc_ip, self.pc_port)
 
-        # Reset all state for new collection run
         self.infrastructure_monitor.reset_state()
 
         if not self._check_health():
             self.log.warning("[PC:%s:%s] Health check failed, aborting", self.pc_ip, self.pc_port)
             return
 
-        # init time window to sync all API calls to use the same [start_time, end_time] time window
         self.infrastructure_monitor.init_collection_time_window()
         start_time, end_time = self.infrastructure_monitor.collection_time_window
-
-        # Calculate window duration for logging
-        from datetime import datetime
-
-        start_dt = datetime.fromisoformat(start_time)
-        end_dt = datetime.fromisoformat(end_time)
-        window_seconds = (end_dt - start_dt).total_seconds()
+        window_seconds = (datetime.fromisoformat(end_time) - datetime.fromisoformat(start_time)).total_seconds()
 
         self.log.debug(
             "[PC:%s:%s] Collecting metrics for %ds time window (from %s to %s)",
@@ -138,44 +124,11 @@ class NutanixCheck(AgentCheck):
             end_time,
         )
 
-        self.log.debug("[PC:%s:%s] Collecting infrastructure metrics", self.pc_ip, self.pc_port)
         self.infrastructure_monitor.collect_cluster_metrics()
 
-        if self.collect_events_enabled:
-            self.log.debug("[PC:%s:%s] Collecting events", self.pc_ip, self.pc_port)
-            events_count = self.activity_monitor.collect_events()
-        else:
-            self.log.debug("[PC:%s:%s] Events collection disabled", self.pc_ip, self.pc_port)
-            events_count = 0
-
-        if self.collect_tasks_enabled:
-            self.log.debug("[PC:%s:%s] Collecting tasks", self.pc_ip, self.pc_port)
-            tasks_count = self.activity_monitor.collect_tasks()
-        else:
-            self.log.debug("[PC:%s:%s] Tasks collection disabled", self.pc_ip, self.pc_port)
-            tasks_count = 0
-
-        if self.collect_audits_enabled:
-            self.log.debug("[PC:%s:%s] Collecting audits", self.pc_ip, self.pc_port)
-            audits_count = self.activity_monitor.collect_audits()
-        else:
-            self.log.debug("[PC:%s:%s] Audits collection disabled", self.pc_ip, self.pc_port)
-            audits_count = 0
-
-        if self.collect_alerts_enabled:
-            self.log.debug("[PC:%s:%s] Collecting alerts", self.pc_ip, self.pc_port)
-            alerts_count = self.activity_monitor.collect_alerts()
-        else:
-            self.log.debug("[PC:%s:%s] Alerts collection disabled", self.pc_ip, self.pc_port)
-            alerts_count = 0
+        events_count, tasks_count, audits_count, alerts_count = self._collect_activity()
 
         if self.infrastructure_monitor.external_tags:
-            self.log.debug(
-                "[PC:%s:%s] Applying %d external tags",
-                self.pc_ip,
-                self.pc_port,
-                len(self.infrastructure_monitor.external_tags),
-            )
             self.set_external_tags(self.infrastructure_monitor.external_tags)
 
         self.log.info(
@@ -190,12 +143,19 @@ class NutanixCheck(AgentCheck):
             alerts_count,
         )
 
+    def _collect_activity(self) -> tuple[int, int, int, int]:
+        """Collect events, tasks, audits, and alerts if enabled."""
+        events_count = self.activity_monitor.collect_events() if self.collect_events_enabled else 0
+        tasks_count = self.activity_monitor.collect_tasks() if self.collect_tasks_enabled else 0
+        audits_count = self.activity_monitor.collect_audits() if self.collect_audits_enabled else 0
+        alerts_count = self.activity_monitor.collect_alerts() if self.collect_alerts_enabled else 0
+        return events_count, tasks_count, audits_count, alerts_count
+
     def _check_health(self):
         try:
             response = self._make_request_with_retry(self.health_check_url, method='get')
             response.raise_for_status()
             self.gauge("health.up", 1, tags=self.base_tags)
-            self.log.debug("[PC:%s:%s] Health check passed", self.pc_ip, self.pc_port)
             return True
 
         except (HTTPError, InvalidURL, ConnectionError, Timeout) as e:
@@ -210,16 +170,7 @@ class NutanixCheck(AgentCheck):
 
     @retry_on_rate_limit
     def _make_request_with_retry(self, url, method='get', **kwargs):
-        """Make an HTTP request with retry logic for rate limiting.
-
-        Args:
-            url: The URL to make the request to
-            method: The HTTP method to use (get, post, put, delete, etc.)
-            **kwargs: Additional arguments to pass to the request method (params, json, data, etc.)
-
-        Returns:
-            The response object from the request
-        """
+        """Make an HTTP request with retry logic for rate limiting."""
         self.log.debug(
             "[PC:%s:%s] HTTP request: %s %s, kwargs=%s", self.pc_ip, self.pc_port, method.upper(), url, kwargs
         )
@@ -260,7 +211,6 @@ class NutanixCheck(AgentCheck):
                 error_msg,
             )
         else:
-            # Success - log at trace level with payload
             try:
                 payload = response.json()
                 self.log.trace(
@@ -286,19 +236,15 @@ class NutanixCheck(AgentCheck):
         return response
 
     def _get_paginated_request_data(self, endpoint, params=None):
-        """Make a paginated API request to Prism Central and return the aggregated data field from all the pages."""
-
+        """Make a paginated API request and return the aggregated data from all pages."""
         all_items = []
-
         url = f"{self.base_url}/{endpoint}"
 
         # init pagination
         page = 0
         limit = self.page_limit
 
-        # copy params
         req_params = {} if params is None else params.copy()
-
         req_params["$page"] = page
         req_params["$limit"] = limit
 
@@ -334,7 +280,7 @@ class NutanixCheck(AgentCheck):
         return all_items
 
     def _get_request_data(self, endpoint, params=None):
-        """Make an API request to Prism Central and return the data field."""
+        """Make an API request and return the data field."""
         url = f"{self.base_url}/{endpoint}"
         response = self._make_request_with_retry(url, method='get', params=params)
         response.raise_for_status()
