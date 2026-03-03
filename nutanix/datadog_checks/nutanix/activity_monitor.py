@@ -839,11 +839,11 @@ class ActivityMonitor:
         # Infrastructure filters: cluster/host/vm
         if filters:
             if resources:
-                if not all(should_collect_resource(rt, entity, filters) for rt, entity in resources):
+                if not all(should_collect_resource(rt, entity, filters, self.check.log) for rt, entity in resources):
                     return False
             # Activity filters: event/task/alert/audit
             if item_kind in ("event", "task", "alert", "audit") and not should_collect_activity(
-                item_kind, item, filters
+                item_kind, item, filters, self.check.log
             ):
                 return False
         return True

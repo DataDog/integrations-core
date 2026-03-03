@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
 import re
 from typing import Any
 
@@ -183,18 +184,25 @@ def _matches_activity_filter(value_or_values: str | list[str] | None, filt: dict
     return False
 
 
-def should_collect_activity(item_kind: str, item: dict[str, Any], filters: list[dict[str, Any]]) -> bool:
+def should_collect_activity(
+    item_kind: str,
+    item: dict[str, Any],
+    filters: list[dict[str, Any]],
+    logger: logging.Logger,
+) -> bool:
     """Return True if activity item passes filters (exclude takes precedence over include)."""
     relevant = [f for f in filters if f['resource'] == item_kind]
     if not relevant:
         return True
 
+    item_id = item.get("extId") or item.get("operationExtId") or ""
     excludes = [f for f in relevant if f['type'] == 'exclude']
     includes = [f for f in relevant if f['type'] == 'include']
 
     for f in excludes:
         val = _get_activity_value(item, f['property'])
         if _matches_activity_filter(val, f):
+            logger.debug("Skipping %s due to exclude filter on %s: %s", item_kind, f['property'], item_id)
             return False
 
     if not includes:
@@ -204,6 +212,8 @@ def should_collect_activity(item_kind: str, item: dict[str, Any], filters: list[
         val = _get_activity_value(item, f['property'])
         if _matches_activity_filter(val, f):
             return True
+
+    logger.debug("Skipping %s due to include filter on %s: %s", item_kind, includes[0]['property'], item_id)
     return False
 
 
@@ -222,6 +232,7 @@ def should_collect_resource(
     resource_type: str,
     entity: dict[str, Any],
     filters: list[dict[str, Any]],
+    logger: logging.Logger,
 ) -> bool:
     """Return True if infrastructure resource passes filters (exclude takes precedence over include)."""
     relevant = [f for f in filters if f['resource'] == resource_type]
@@ -231,10 +242,25 @@ def should_collect_resource(
     excludes = [f for f in relevant if f['type'] == 'exclude']
     for f in excludes:
         if _matches_filter(entity, f):
+            logger.debug(
+                "Skipping %s due to exclude filter on %s: %s",
+                resource_type,
+                f['property'],
+                entity.get("name") or entity.get("extId") or "",
+            )
             return False
 
     includes = [f for f in relevant if f['type'] == 'include']
     if not includes:
         return True
 
-    return any(_matches_filter(entity, f) for f in includes)
+    if any(_matches_filter(entity, f) for f in includes):
+        return True
+
+    logger.debug(
+        "Skipping %s due to include filter on %s: %s",
+        resource_type,
+        includes[0]['property'],
+        entity.get("name") or entity.get("extId") or "",
+    )
+    return False

@@ -84,7 +84,9 @@ class InfrastructureMonitor:
             self.check.log.info("[%s] Found %d categories", pc_label, len(categories))
             for category in categories:
                 category_id = category.get("extId")
-                if category_id and should_collect_resource('category', category, self.check.resource_filters):
+                if category_id and should_collect_resource(
+                    'category', category, self.check.resource_filters, self.check.log
+                ):
                     self._categories[category_id] = category
 
             clusters = self._list_clusters()
@@ -110,7 +112,7 @@ class InfrastructureMonitor:
                     skipped += 1
                     continue
 
-                if not should_collect_resource("cluster", cluster, self.check.resource_filters):
+                if not should_collect_resource("cluster", cluster, self.check.resource_filters, self.check.log):
                     skipped += 1
                     continue
 
@@ -179,7 +181,7 @@ class InfrastructureMonitor:
         """
         vm_id = vm.get("extId", "unknown")
         hostname = vm.get("name")
-        if not should_collect_resource("vm", vm, self.check.resource_filters):
+        if not should_collect_resource("vm", vm, self.check.resource_filters, self.check.log):
             return
         vm_tags = self.check.base_tags + self._extract_vm_tags(vm)
 
@@ -438,7 +440,7 @@ class InfrastructureMonitor:
             self.check.log.warning("[%s][%s] Host %s has no extId, skipping", pc_label, cluster_name, host_name)
             return 0
 
-        if not should_collect_resource("host", host, self.check.resource_filters):
+        if not should_collect_resource("host", host, self.check.resource_filters, self.check.log):
             return 0
 
         # Cache host name for VM tagging
