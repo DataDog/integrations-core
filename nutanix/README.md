@@ -21,6 +21,8 @@ In Prism Central, create a user with the following roles:
 
 Then, edit the `nutanix.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample nutanix.d/conf.yaml][3] for all available configuration options.
 
+A single Agent instance connected to Prism Central is enough to monitor all clusters, hosts, and VMs managed by that Prism Central.
+
 [Restart the Agent][4] to start sending Nutanix metrics and activity data to Datadog.
 
 **Note**: The default collection interval is 120 seconds. In practice, setting the interval to 60 seconds or higher results in more reliable and consistent metric collection.
