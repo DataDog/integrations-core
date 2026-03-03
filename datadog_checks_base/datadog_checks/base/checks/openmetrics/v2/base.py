@@ -172,7 +172,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         return self._file_metrics
 
     def _load_metrics_file(self, path: Path) -> RawMetricsConfig:
-        """Load and parse a single YAML metrics file."""
         import yaml
 
         file_path = self._get_package_dir() / path
