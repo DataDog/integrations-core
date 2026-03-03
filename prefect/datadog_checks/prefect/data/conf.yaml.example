@@ -14,7 +14,7 @@ init_config:
 instances:
 
     ## @param prefect_url - string - required
-    ## The URL of the Prefect server.
+    ## The URL of the Prefect Server API.
     #
   - prefect_url: http://localhost:4200/api
 
