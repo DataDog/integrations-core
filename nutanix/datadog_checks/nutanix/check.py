@@ -34,7 +34,9 @@ class NutanixCheck(AgentCheck):
             host, _, port = self.pc_ip.rpartition(":")
             if port.isdigit():
                 if "pc_port" in self.instance:
-                    raise ConfigurationError(f"Conflicting port configuration between pc_ip ({port}) and pc_port ({self.pc_port})")
+                    raise ConfigurationError(
+                        f"Conflicting port configuration between pc_ip ({port}) and pc_port ({self.pc_port})"
+                    )
                 self.pc_ip, self.pc_port = host, int(port)
         self.pc_port = self.pc_port or 9440
 
