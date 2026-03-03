@@ -4,19 +4,23 @@
 
 import random
 import time
+from collections.abc import Callable
 from functools import wraps
 
+from requests import Response
 
-def retry_on_rate_limit(method):
+
+def retry_on_rate_limit(method: Callable[..., Response]) -> Callable[..., Response]:
     """Retry on HTTP 429 with exponential backoff and jitter."""
 
     @wraps(method)
-    def wrapper(self, *args, **kwargs):
-        max_retries = self.instance.get('pc_max_retries', 3)
-        base_backoff = self.instance.get('pc_base_backoff_seconds', 1)
-        max_backoff = self.instance.get('pc_max_backoff_seconds', 30)
+    def wrapper(self, *args, **kwargs) -> Response:
+        max_retries: int = self.instance.get('pc_max_retries', 3)
+        base_backoff: int = self.instance.get('pc_base_backoff_seconds', 1)
+        max_backoff: int = self.instance.get('pc_max_backoff_seconds', 30)
+        attempts = max(1, max_retries)
 
-        for attempt in range(max(1, max_retries)):
+        for attempt in range(attempts):
             response = method(self, *args, **kwargs)
 
             if response.status_code != 429:
@@ -24,9 +28,10 @@ def retry_on_rate_limit(method):
 
             self.count("api.rate_limited", 1, tags=self.base_tags)
 
-            if max_retries == 0 or attempt >= max_retries - 1:
+            if attempt >= attempts - 1:
                 self.log.error("Max retries exceeded for Nutanix API rate limiting")
                 response.raise_for_status()
+                return response
 
             backoff = min(base_backoff * (2**attempt) + random.random(), max_backoff)
             self.log.warning(
@@ -36,5 +41,7 @@ def retry_on_rate_limit(method):
                 backoff,
             )
             time.sleep(backoff)
+
+        return response
 
     return wrapper
