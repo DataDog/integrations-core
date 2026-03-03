@@ -334,6 +334,10 @@ class ActivityMonitor:
         message = audit.get("message", "")
         created_time = audit.get("creationTime")
 
+        # Render template variables in message from parameters
+        if parameters := audit.get("parameters"):
+            message = self._render_message(message, parameters)
+
         audit_tags = self.check.base_tags.copy()
         audit_tags.append(f"ntnx_audit_id:{audit_id}")
         audit_tags.append(f"ntnx_audit_type:{audit_type}")
@@ -396,8 +400,8 @@ class ActivityMonitor:
             }
         )
 
-    def _render_alert_message(self, message: str, parameters: list[dict]) -> str:
-        """Render template variables in alert message using parameter values."""
+    def _render_message(self, message: str, parameters: list[dict]) -> str:
+        """Render template variables in a message using parameter values."""
         if not message or not parameters:
             return message
 
@@ -435,8 +439,8 @@ class ActivityMonitor:
 
         # Render template variables in title and message from parameters
         if parameters := alert.get("parameters"):
-            title = self._render_alert_message(title, parameters)
-            message = self._render_alert_message(message, parameters)
+            title = self._render_message(title, parameters)
+            message = self._render_message(message, parameters)
 
         # map severity to alert_type
         severity_map = {

@@ -18,7 +18,7 @@ EXPECTED_AUDITS = [
     {
         'alert_type': 'info',
         'event_type': 'nutanix',
-        'msg_text': 'User {audit_user} has logged in from {ip_address}',
+        'msg_text': 'User admin has logged in from 127.0.0.1',
         'msg_title': 'Audit: LoginInfoAudit',
         'source_type_name': 'nutanix',
         'tags': [
@@ -42,7 +42,7 @@ EXPECTED_AUDITS = [
     {
         'alert_type': 'info',
         'event_type': 'nutanix',
-        'msg_text': 'User {audit_user} has logged in from {ip_address}',
+        'msg_text': 'User admin has logged in from 127.0.0.1',
         'msg_title': 'Audit: LoginInfoAudit',
         'source_type_name': 'nutanix',
         'tags': [
@@ -66,7 +66,7 @@ EXPECTED_AUDITS = [
     {
         'alert_type': 'info',
         'event_type': 'nutanix',
-        'msg_text': 'User {audit_user} has logged in from {ip_address}',
+        'msg_text': 'User admin has logged in from 127.0.0.1',
         'msg_title': 'Audit: LoginInfoAudit',
         'source_type_name': 'nutanix',
         'tags': [
@@ -90,7 +90,7 @@ EXPECTED_AUDITS = [
     {
         'alert_type': 'info',
         'event_type': 'nutanix',
-        'msg_text': 'User {audit_user} has logged in from {ip_address}',
+        'msg_text': 'User admin has logged in from 127.0.0.1',
         'msg_title': 'Audit: LoginInfoAudit',
         'source_type_name': 'nutanix',
         'tags': [
