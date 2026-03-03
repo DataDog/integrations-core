@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
+
 
 class AutoBuildOrchestrator(EventBusOrchestrator):
     def __init__(self, integration: str, endpoint: str):

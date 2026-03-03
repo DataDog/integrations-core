@@ -12,8 +12,8 @@ from datadog_checks.dev.tooling.commands.meta.prometheus import prom
 from datadog_checks.dev.tooling.commands.meta.snmp import snmp
 from datadog_checks.dev.tooling.commands.meta.windows import windows
 
-from ddev.cli.meta.scripts import scripts
 from ddev.cli.meta.auto_build import auto_build
+from ddev.cli.meta.scripts import scripts
 
 
 @click.group(short_help='Collection of useful utilities')
