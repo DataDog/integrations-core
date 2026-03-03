@@ -182,6 +182,10 @@ coverage:
         target: 75
         flags:
         - datadog_cluster_agent
+      Dell_PowerFlex:
+        target: 75
+        flags:
+        - dell_powerflex
       Directory:
         target: 75
         flags:
@@ -1053,6 +1057,11 @@ flags:
     paths:
     - ddev/src/ddev
     - ddev/tests
+  dell_powerflex:
+    carryforward: true
+    paths:
+    - dell_powerflex/datadog_checks/dell_powerflex
+    - dell_powerflex/tests
   directory:
     carryforward: true
     paths:
