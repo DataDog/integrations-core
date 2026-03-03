@@ -227,7 +227,7 @@ class GitRepository:
         except ValueError:
             return False
 
-        return self._gitignore_spec.match_file(str(relative_path))
+        return self._gitignore_spec.match_file(relative_path.as_posix())
 
     def _load_gitignore_spec(self):
         """Load .gitignore patterns and return a matcher."""
