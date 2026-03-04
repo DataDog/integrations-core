@@ -120,108 +120,82 @@ class ActivityMonitor:
 
         return len(items)
 
-    def collect_events(self) -> int:
-        """Collect events from Nutanix Prism Central."""
+    def _safe_collect(self, activity_kind: str, collect_fn: Callable[[], int]) -> int:
+        """Run a collection function with standard error handling."""
         try:
-            return self._collect(
+            return collect_fn()
+        except HTTPError as e:
+            self.check.log.error(
+                "[PC:%s:%s] Failed to collect %ss: HTTP %s",
+                self.check.pc_ip,
+                self.check.pc_port,
+                activity_kind,
+                e.response.status_code if e.response else "error",
+            )
+            return 0
+        except Exception as e:
+            self.check.log.exception(
+                "[PC:%s:%s] Unexpected error collecting %ss: %s",
+                self.check.pc_ip,
+                self.check.pc_port,
+                activity_kind,
+                e,
+            )
+            return 0
+
+    def collect_events(self) -> int:
+        return self._safe_collect(
+            "event",
+            lambda: self._collect(
                 activity_kind="event",
                 list_fn=lambda t: self._list_activity("api/monitoring/v4.0/serviceability/events", "creationTime", t),
                 process_fn=self._process_event,
                 time_field="creationTime",
                 cache_key="last_event_collection_time",
-            )
-        except HTTPError as e:
-            self.check.log.error(
-                "[PC:%s:%s] Failed to collect events from endpoint 'api/monitoring/v4.0/serviceability/events': %s",
-                self.check.pc_ip,
-                self.check.pc_port,
-                e.response.status_code if e.response else "HTTP error",
-            )
-            return 0
-        except Exception as e:
-            self.check.log.exception(
-                "[PC:%s:%s] Unexpected error collecting events: %s", self.check.pc_ip, self.check.pc_port, e
-            )
-            return 0
+            ),
+        )
 
     def collect_tasks(self) -> int:
-        """Collect tasks from Nutanix Prism Central."""
-        try:
+        def _filter_subtasks(tasks: list[dict]) -> list[dict]:
+            if not self.check.collect_subtasks_enabled:
+                return [t for t in tasks if not t.get("parentTask")]
+            return tasks
 
-            def _filter_subtasks(tasks: list[dict]) -> list[dict]:
-                if not self.check.collect_subtasks_enabled:
-                    return [t for t in tasks if not t.get("parentTask")]
-                return tasks
-
-            return self._collect(
+        return self._safe_collect(
+            "task",
+            lambda: self._collect(
                 activity_kind="task",
                 list_fn=lambda t: self._list_activity("api/prism/v4.0/config/tasks", "createdTime", t),
                 process_fn=self._process_task,
                 time_field="createdTime",
                 cache_key="last_task_collection_time",
                 pre_filter_fn=_filter_subtasks,
-            )
-        except HTTPError as e:
-            self.check.log.error(
-                "[PC:%s:%s] Failed to collect tasks from API endpoint 'api/prism/v4.0/config/tasks': HTTP %s",
-                self.check.pc_ip,
-                self.check.pc_port,
-                e.response.status_code if e.response else "error",
-            )
-            return 0
-        except Exception as e:
-            self.check.log.exception(
-                "[PC:%s:%s] Unexpected error collecting tasks: %s", self.check.pc_ip, self.check.pc_port, e
-            )
-            return 0
+            ),
+        )
 
     def collect_audits(self) -> int:
-        """Collect audits from Nutanix Prism Central."""
-        try:
-            return self._collect(
+        return self._safe_collect(
+            "audit",
+            lambda: self._collect(
                 activity_kind="audit",
                 list_fn=lambda t: self._list_activity("api/monitoring/v4.0/serviceability/audits", "creationTime", t),
                 process_fn=self._process_audit,
                 time_field="creationTime",
                 cache_key="last_audit_collection_time",
-            )
-        except HTTPError as e:
-            self.check.log.error(
-                "[PC:%s:%s] Failed to collect audits from endpoint 'api/monitoring/v4.0/serviceability/audits': %s",
-                self.check.pc_ip,
-                self.check.pc_port,
-                e.response.status_code if e.response else "HTTP error",
-            )
-            return 0
-        except Exception as e:
-            self.check.log.exception(
-                "[PC:%s:%s] Unexpected error collecting audits: %s", self.check.pc_ip, self.check.pc_port, e
-            )
-            return 0
+            ),
+        )
 
     def collect_alerts(self) -> int:
-        """Collect alerts from Nutanix Prism Central."""
-        try:
-            return self._collect(
+        return self._safe_collect(
+            "alert",
+            lambda: self._collect(
                 activity_kind="alert",
                 list_fn=self._list_alerts,
                 process_fn=self._process_alert,
                 time_field="creationTime",
                 cache_key="last_alert_collection_time",
-            )
-        except HTTPError as e:
-            self.check.log.error(
-                "[PC:%s:%s] Failed to collect alerts from API: HTTP %s",
-                self.check.pc_ip,
-                self.check.pc_port,
-                e.response.status_code if e.response else "error",
-            )
-            return 0
-        except Exception as e:
-            self.check.log.exception(
-                "[PC:%s:%s] Unexpected error collecting alerts: %s", self.check.pc_ip, self.check.pc_port, e
-            )
-            return 0
+            ),
+        )
 
     def _list_activity(self, endpoint: str, time_field: str, start_time_str: str) -> list[dict]:
         """Fetch activity items from Prism Central."""
