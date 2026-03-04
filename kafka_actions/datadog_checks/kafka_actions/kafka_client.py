@@ -7,7 +7,7 @@ import time
 from typing import Any
 
 from confluent_kafka import Consumer, KafkaException, Producer, TopicPartition
-from confluent_kafka.admin import AdminClient, ConfigResource, NewTopic, ResourceType
+from confluent_kafka.admin import AdminClient, ConfigResource, NewTopic, OffsetSpec, ResourceType
 
 
 class KafkaActionsClient:
@@ -151,16 +151,18 @@ class KafkaActionsClient:
 
             if start_offset == -1:
                 # For "latest" offset, seek back from the high watermark to read the last N existing messages.
-                tmp_partitions = [TopicPartition(topic, p) for p in partition_ids]
-                consumer.assign(tmp_partitions)
+                # Use AdminClient.list_offsets to fetch all high watermarks in a single batched call.
+                admin = self.get_admin_client()
+                offset_request = {TopicPartition(topic, p): OffsetSpec.latest() for p in partition_ids}
+                futures = admin.list_offsets(offset_request, request_timeout=10)
 
                 partitions = []
-                for p in partition_ids:
-                    low, high = consumer.get_watermark_offsets(TopicPartition(topic, p), timeout=10)
-                    seek_offset = max(low, high - max_messages)
-                    partitions.append(TopicPartition(topic, p, seek_offset))
+                for tp, future in futures.items():
+                    result = future.result()
+                    seek_offset = max(0, result.offset - max_messages)
+                    partitions.append(TopicPartition(topic, tp.partition, seek_offset))
                     self.log.debug(
-                        "Partition %d: low=%d, high=%d, seeking to %d", p, low, high, seek_offset
+                        "Partition %d: high=%d, seeking to %d", tp.partition, result.offset, seek_offset
                     )
             else:
                 partitions = [TopicPartition(topic, p, start_offset) for p in partition_ids]
