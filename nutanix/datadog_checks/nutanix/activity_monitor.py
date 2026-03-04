@@ -582,61 +582,77 @@ class ActivityMonitor:
             )
             return None
 
+    def _cluster_resource(self, cluster_id: str) -> tuple[str, dict]:
+        """Build a cluster resource tuple from a cluster ID."""
+        cluster_name = self.check.cluster_names.get(cluster_id, "")
+        return ("cluster", {"extId": cluster_id, "name": cluster_name})
+
+    def _source_entity_resource(self, item: dict) -> tuple[str, dict] | None:
+        """Extract a resource tuple from the sourceEntity field if valid."""
+        source_entity = item.get("sourceEntity")
+        if not source_entity:
+            return None
+        resource_type = source_entity.get("type")
+        if resource_type not in ("cluster", "host", "vm"):
+            return None
+        entity = {"extId": source_entity.get("extId"), "name": source_entity.get("name") or ""}
+        return (resource_type, entity)
+
+    def _extract_item_resources(self, item: dict, item_kind: str) -> list[tuple[str, dict]]:
+        """Extract filterable resources from an activity item."""
+        resources: list[tuple[str, dict]] = []
+        if item_kind == "event":
+            cluster_id = item.get("sourceClusterUUID") or item.get("clusterUUID")
+            if cluster_id:
+                resources.append(self._cluster_resource(cluster_id))
+            if source_resource := self._source_entity_resource(item):
+                resources.append(source_resource)
+        elif item_kind == "task":
+            for cluster_id in item.get("clusterExtIds") or []:
+                resources.append(self._cluster_resource(cluster_id))
+            for affected_entity in item.get("entitiesAffected") or []:
+                relation = affected_entity.get("rel", "")
+                resource_type = (
+                    "cluster"
+                    if "cluster" in relation
+                    else "host"
+                    if "host" in relation
+                    else "vm"
+                    if "vm" in relation
+                    else None
+                )
+                if resource_type:
+                    entity = {"extId": affected_entity.get("extId"), "name": affected_entity.get("name") or ""}
+                    resources.append((resource_type, entity))
+        elif item_kind == "alert":
+            if cluster_id := item.get("clusterUUID"):
+                resources.append(self._cluster_resource(cluster_id))
+            if source_resource := self._source_entity_resource(item):
+                resources.append(source_resource)
+        elif item_kind == "audit":
+            cluster_ref = item.get("clusterReference")
+            if cluster_ref:
+                cluster_id = cluster_ref.get("extId")
+                if cluster_id:
+                    cluster_name = cluster_ref.get("name") or self.check.cluster_names.get(cluster_id, "")
+                    resources.append(("cluster", {"extId": cluster_id, "name": cluster_name}))
+            if source_resource := self._source_entity_resource(item):
+                resources.append(source_resource)
+        return resources
+
     def _should_collect_activity_item(self, item: dict, item_kind: str) -> bool:
         """Return True if the activity item should be collected per resource_filters."""
-        filters = self.check.resource_filters
-        resources = []
-        if item_kind == "event":
-            cid = item.get("sourceClusterUUID") or item.get("clusterUUID")
-            if cid:
-                cluster_entity = {"extId": cid, "name": self.check.cluster_names.get(cid, "")}
-                resources.append(("cluster", cluster_entity))
-            if se := item.get("sourceEntity"):
-                rtype = se.get("type")
-                if rtype in ("cluster", "host", "vm"):
-                    entity = {"extId": se.get("extId"), "name": se.get("name") or ""}
-                    resources.append((rtype, entity))
-        elif item_kind == "task":
-            for cid in item.get("clusterExtIds") or []:
-                cluster_entity = {"extId": cid, "name": self.check.cluster_names.get(cid, "")}
-                resources.append(("cluster", cluster_entity))
-            for ent in item.get("entitiesAffected") or []:
-                rel = ent.get("rel", "")
-                rtype = "cluster" if "cluster" in rel else "host" if "host" in rel else "vm" if "vm" in rel else None
-                if rtype:
-                    entity = {"extId": ent.get("extId"), "name": ent.get("name") or ""}
-                    resources.append((rtype, entity))
-        elif item_kind == "alert":
-            if cid := item.get("clusterUUID"):
-                cluster_entity = {"extId": cid, "name": self.check.cluster_names.get(cid, "")}
-                resources.append(("cluster", cluster_entity))
-            if se := item.get("sourceEntity"):
-                rtype = se.get("type")
-                if rtype in ("cluster", "host", "vm"):
-                    entity = {"extId": se.get("extId"), "name": se.get("name") or ""}
-                    resources.append((rtype, entity))
-        elif item_kind == "audit":
-            if cr := item.get("clusterReference"):
-                cid, cname = cr.get("extId"), cr.get("name") or ""
-                if cid:
-                    cluster_entity = {"extId": cid, "name": cname or self.check.cluster_names.get(cid, "")}
-                    resources.append(("cluster", cluster_entity))
-            if se := item.get("sourceEntity"):
-                rtype = se.get("type")
-                if rtype in ("cluster", "host", "vm"):
-                    entity = {"extId": se.get("extId"), "name": se.get("name") or ""}
-                    resources.append((rtype, entity))
-
-        # Infrastructure filters: cluster/host/vm
-        if filters:
-            if resources:
-                if not all(should_collect_resource(rt, entity, filters, self.check.log) for rt, entity in resources):
-                    return False
-            # Activity filters: event/task/alert/audit
-            if item_kind in ("event", "task", "alert", "audit") and not should_collect_activity(
-                item_kind, item, filters, self.check.log
-            ):
-                return False
+        resource_filters = self.check.resource_filters
+        if not resource_filters:
+            return True
+        resources = self._extract_item_resources(item, item_kind)
+        if resources and not all(
+            should_collect_resource(resource_type, entity, resource_filters, self.check.log)
+            for resource_type, entity in resources
+        ):
+            return False
+        if not should_collect_activity(item_kind, item, resource_filters, self.check.log):
+            return False
         return True
 
     def _filter_after_time(self, items: list[dict], last_time_str: str | None, field_name: str) -> list[dict]:
