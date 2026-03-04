@@ -245,6 +245,21 @@ def mock_http_get(mocker):
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
+        # Individual alert fetch by ID (e.g. /alerts/{uuid})
+        import re
+
+        alert_id_match = re.search(r'api/monitoring/v4\.\d/serviceability/alerts/([0-9a-f-]{36})', url)
+        if alert_id_match:
+            alert_ext_id = alert_id_match.group(1)
+            all_alerts = load_fixture_page("alerts.json", 0).get('data', [])
+            alert_data = next((a for a in all_alerts if a.get('extId') == alert_ext_id), None)
+            if alert_data:
+                mock_resp.json = mocker.Mock(return_value={"data": alert_data})
+            else:
+                mock_resp.status_code = 404
+                mock_resp.raise_for_status = mocker.Mock(side_effect=Exception("404 Not Found"))
+            return mock_resp
+
         if 'api/monitoring/v4.0/serviceability/alerts' in url or 'api/monitoring/v4.2/serviceability/alerts' in url:
             response_data = load_fixture_page("alerts.json", page)
 

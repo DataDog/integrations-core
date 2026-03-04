@@ -272,6 +272,43 @@ class ActivityMonitor:
                 )
             raise
 
+    def _get_alert(self, alert_ext_id: str) -> dict | None:
+        """Get an alert by ID, from cache or fetched from the API."""
+        if alert := self._alerts.get(alert_ext_id):
+            return alert
+
+        endpoint = "api/monitoring/v4.0/serviceability/alerts"
+        if self.alerts_v42_supported is True:
+            endpoint = "api/monitoring/v4.2/serviceability/alerts"
+
+        self.check.log.debug(
+            "[PC:%s:%s] Alert %s not in cache, fetching from API",
+            self.check.pc_ip,
+            self.check.pc_port,
+            alert_ext_id,
+        )
+        try:
+            alert = self.check._get_request_data(f"{endpoint}/{alert_ext_id}")
+            if alert:
+                self._alerts[alert_ext_id] = alert
+                self.check.log.debug(
+                    "[PC:%s:%s] Fetched alert %s: %s",
+                    self.check.pc_ip,
+                    self.check.pc_port,
+                    alert_ext_id,
+                    alert.get("title", ""),
+                )
+            return alert
+        except Exception as e:
+            self.check.log.debug(
+                "[PC:%s:%s] Failed to fetch alert %s: %s",
+                self.check.pc_ip,
+                self.check.pc_port,
+                alert_ext_id,
+                e,
+            )
+            return None
+
     def _process_event(self, event: dict) -> None:
         """Process and send a single event to Datadog."""
         event_title = event.get("eventType", "Nutanix Event")
@@ -500,50 +537,51 @@ class ActivityMonitor:
         status = task.get("status", "UNKNOWN")
         is_subtask = task.get("parentTask") is not None
 
-        # alert type
-        alert_type_map = {
+        alert_type = {
             "SUCCEEDED": "success",
             "FAILED": "error",
             "RUNNING": "info",
             "QUEUED": "info",
             "CANCELED": "warning",
-        }
-        alert_type = alert_type_map.get(status, "info")
+        }.get(status, "info")
 
-        # tags
         task_tags = self.check.base_tags.copy()
         task_tags.append(f"ntnx_task_status:{status}")
 
-        # cluster info
-        cluster_ext_ids = task.get("clusterExtIds", [])
-        if cluster_ext_ids:
-            for cluster_id in cluster_ext_ids:
-                if cluster_id in self.check.cluster_names:
-                    task_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
+        for cluster_id in task.get("clusterExtIds", []):
+            if cluster_id in self.check.cluster_names:
+                task_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
 
-        # owner info
         if owner := task.get("ownedBy"):
             if owner_name := owner.get("name"):
                 task_tags.append(f"ntnx_owner_name:{owner_name}")
 
-        # affected entities
+        # Extract tags and resolve alert references from affected entities
         entities_affected = task.get("entitiesAffected", [])
+        alert_titles = []
         for entity in entities_affected:
             if entity_type := entity.get("rel"):
                 task_tags.append(f"ntnx_entity_type:{entity_type}")
             if entity_name := entity.get("name"):
                 task_tags.append(f"ntnx_entity_name:{entity_name}")
-
-            # Add category tags from affected entity
             task_tags.extend(self.check.extract_category_tags(entity))
 
-        # distinguish from other events we emit
+            # Enrich with rendered alert title when the entity is an alert
+            if entity_type == "monitoring:serviceability:alert":
+                if alert := self._get_alert(entity.get("extId", "")):
+                    title = alert.get("title", "")
+                    if parameters := alert.get("parameters"):
+                        title = self._render_message(title, parameters)
+                    if title:
+                        alert_titles.append(title)
+
         task_tags.append("ntnx_type:task")
 
-        # message text
         msg_text = task_description
         if progress := task.get("progressPercentage"):
             msg_text += f" (Progress: {progress}%)"
+        if alert_titles:
+            msg_text += "\n\nAffected alerts:\n" + "\n".join(f"- {t}" for t in alert_titles)
 
         self.check.event(
             {

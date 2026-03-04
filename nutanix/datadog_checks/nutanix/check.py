@@ -163,9 +163,9 @@ class NutanixCheck(AgentCheck):
     def _collect_activity(self) -> tuple[int, int, int, int]:
         """Collect events, tasks, audits, and alerts if enabled."""
         events_count = self.activity_monitor.collect_events() if self.collect_events_enabled else 0
+        alerts_count = self.activity_monitor.collect_alerts() if self.collect_alerts_enabled else 0
         tasks_count = self.activity_monitor.collect_tasks() if self.collect_tasks_enabled else 0
         audits_count = self.activity_monitor.collect_audits() if self.collect_audits_enabled else 0
-        alerts_count = self.activity_monitor.collect_alerts() if self.collect_alerts_enabled else 0
         return events_count, tasks_count, audits_count, alerts_count
 
     def _check_health(self):

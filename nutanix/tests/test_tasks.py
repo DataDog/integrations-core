@@ -229,3 +229,40 @@ def test_tasks_filtered_by_activity_filter_status_include(
     assert len(tasks) > 0
     # Verify that all collected tasks have the included status
     assert all("ntnx_task_status:SUCCEEDED" in t["tags"] for t in tasks)
+
+
+# Datetime covering both alert and task fixtures from March 2026
+MOCK_RESOLVE_DATETIME = datetime.fromisoformat("2026-03-04T00:40:00.000000Z")
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_task_with_alert_entity_includes_alert_message(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test that a task referencing an alert entity includes the alert rendered message."""
+    instance = mock_instance.copy()
+    instance["collect_tasks"] = True
+    instance["collect_alerts"] = True
+
+    get_current_datetime.return_value = MOCK_RESOLVE_DATETIME + timedelta(
+        seconds=instance.get("min_collection_interval", 120)
+    )
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    tasks = [t for t in aggregator.events if "ntnx_type:task" in t.get('tags', [])]
+    resolve_tasks = [t for t in tasks if t["msg_title"].endswith("RESOLVE")]
+
+    assert len(resolve_tasks) > 0, "Expected RESOLVE tasks to be collected"
+
+    # Alert 6cf0be2b-a9ab-4eae-8d04-bdc9b1f29180 is referenced by RESOLVE tasks.
+    # Its rendered title is the VM CPU Usage policy alert.
+    task = next(t for t in resolve_tasks if "VM CPU Usage" in t["msg_text"])
+
+    assert task["msg_title"] == "Task: RESOLVE"
+    assert "Resolve (Progress: 100%)" in task["msg_text"]
+    assert (
+        'NTNX-10-0-0-165-PCVM-1767014640 - VM CPU Usage for "NTNX-10-0-0-165-PCVM-1767014640" (entity type: vm).'
+        in task["msg_text"]
+    )
