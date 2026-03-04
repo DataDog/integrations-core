@@ -322,7 +322,7 @@ def clean_wheel(wheel_path: Path) -> bool:
 
     return True
 
-def add_dependency(dependencies: dict[str, str], sizes: dict[str, WheelSizes], wheel: Path) -> None:
+def add_dependency(dependencies: dict[str, str], sizes: dict[str, VersionedWheelSizes], wheel: Path) -> None:
     project_metadata = extract_metadata(wheel)
     project_name = normalize_project_name(project_metadata['Name'])
     project_version = project_metadata['Version']
