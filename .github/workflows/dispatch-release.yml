@@ -17,11 +17,6 @@ on:
         description: "Commit SHA or ref to build from"
         required: false
         type: string
-      batch-size:
-        description: "Max integrations per dispatch (default: 200)"
-        required: false
-        type: number
-        default: 200
 
 permissions:
   id-token: write
@@ -72,5 +67,4 @@ jobs:
           INTEGRATIONS: ${{ steps.detect.outputs.integrations }}
           SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
           REF: ${{ inputs.source-repo-ref || github.sha }}
-          BATCH_SIZE: ${{ inputs.batch-size }}
         run: python .github/workflows/scripts/dispatch-release.py

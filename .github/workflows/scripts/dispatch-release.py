@@ -8,9 +8,6 @@ Required environment variables:
   INTEGRATIONS  JSON array of integration names
   SOURCE_REPO   source repository name (e.g. integrations-core)
   REF           commit SHA or ref to build from
-
-Optional environment variables:
-  BATCH_SIZE    max integrations per dispatch (default: 200)
 """
 import json
 import os
@@ -18,10 +15,7 @@ import sys
 import urllib.error
 import urllib.request
 
-BATCH_SIZE = int(os.environ.get("BATCH_SIZE", 200))
-if BATCH_SIZE <= 0:
-    print("BATCH_SIZE must be a positive integer", file=sys.stderr)
-    sys.exit(1)
+BATCH_SIZE = 200
 DISPATCH_URL = "https://api.github.com/repos/DataDog/agent-integration-wheels-release/dispatches"
 
 
