@@ -46,8 +46,10 @@ def test_vm_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get
         aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
 
 
-def test_batch_vm_collection_skips_off_vms(dd_run_check, aggregator, mock_instance, mock_http_get):
-    """Batch mode skips VMs with powerState OFF by default."""
+@pytest.mark.parametrize("batch_vm_collection", [True, False])
+def test_off_vms_skipped_by_default(dd_run_check, aggregator, mock_instance, mock_http_get, batch_vm_collection):
+    """VMs with powerState OFF are skipped by default regardless of collection mode."""
+    mock_instance["batch_vm_collection"] = batch_vm_collection
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
