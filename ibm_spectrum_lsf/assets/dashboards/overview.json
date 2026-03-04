@@ -412,6 +412,11 @@
                                     }
                                 }
                             ],
+                            "time": {
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 1
+                            },
                             "title": "Host info",
                             "title_align": "left",
                             "title_size": "16",
@@ -460,7 +465,8 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Free memory",
+                            "time": {},
+                            "title": "Free space in /tmp",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
@@ -1193,7 +1199,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Mbatchd processed requests",
                             "title_align": "left",
                             "title_size": "16",
@@ -2355,6 +2360,11 @@
                                     }
                                 }
                             ],
+                            "time": {
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 1
+                            },
                             "title": "Number of jobs in each state in each queue",
                             "title_align": "left",
                             "title_size": "16",
