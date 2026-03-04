@@ -232,23 +232,16 @@ class InfrastructureMonitor:
         stats: dict | list,
         metrics_map: dict[str, str],
         tags: list[str],
-        log_level: str = "info",
         hostname: str | None = None,
         entity_type: EntityType | None = None,
     ) -> None:
-        """Submit stats metrics for any entity type and log a summary."""
+        """Submit stats metrics for any entity type."""
         if not stats:
             self.check.log.warning("No stats returned for %s", entity_name)
             return
 
         # Handle list vs dict stats (VMs return list, others return dict)
         is_list_stats = isinstance(stats, list)
-        sample_stats = stats[0] if is_list_stats else stats
-
-        actual_keys = set(sample_stats.keys())
-        expected_keys = set(metrics_map.keys())
-        matching_keys = actual_keys & expected_keys
-        missing_keys = expected_keys - actual_keys
 
         # Submit metrics
         metrics_submitted = self._submit_stats_metrics(stats, metrics_map, tags, hostname, is_list_stats)
@@ -260,22 +253,6 @@ class InfrastructureMonitor:
             self.host_metrics_count += metrics_submitted
         elif entity_type == 'vm':
             self.vm_metrics_count += metrics_submitted
-
-        # Log summary
-        log_fn = getattr(self.check.log, log_level)
-        log_fn(
-            "%s - returned_keys=%d, expected_keys=%d, matching=%d, missing=%d, metrics_submitted=%d",
-            entity_name,
-            len(actual_keys),
-            len(expected_keys),
-            len(matching_keys),
-            len(missing_keys),
-            metrics_submitted,
-        )
-
-        if metrics_submitted == 0:
-            self.check.log.warning("%s - No metrics submitted. API keys: %s", entity_name, list(actual_keys)[:5])
-            self.check.log.trace("%s - Full stats payload: %s", entity_name, stats)
 
     def _submit_stats_metrics(
         self, stats: dict | list, metrics_map: dict[str, str], tags: list[str], hostname: str | None, is_list: bool
@@ -310,7 +287,6 @@ class InfrastructureMonitor:
             stats,
             CLUSTER_STATS_METRICS,
             cluster_tags,
-            log_level="info",
             entity_type="cluster",
         )
 
@@ -325,7 +301,6 @@ class InfrastructureMonitor:
                 stats,
                 VM_STATS_METRICS,
                 vm_tags,
-                log_level="debug",
                 hostname=hostname,
                 entity_type="vm",
             )
@@ -385,7 +360,6 @@ class InfrastructureMonitor:
                 stats,
                 HOST_STATS_METRICS,
                 host_tags,
-                log_level="info",
                 hostname=host_name,
                 entity_type="host",
             )
