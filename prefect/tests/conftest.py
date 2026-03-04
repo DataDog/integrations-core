@@ -24,7 +24,7 @@ E2E_METADATA = {
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
+def dd_environment(instance: Callable[[str], dict[str, str | dict[str, list[str]] | None | bool | int]]):
     port = find_free_port(get_docker_hostname())
     prefect_url = f"http://{get_docker_hostname()}:{port}/api"
 
@@ -48,9 +48,7 @@ def dd_environment():
         mount_logs=True,
     ):
         yield (
-            {
-                "instances": [{"prefect_url": prefect_url, "min_collection_interval": 600, "collect_events": True}],
-            },
+            {"instances": [instance(prefect_url)]},
             E2E_METADATA,
         )
 
@@ -66,8 +64,8 @@ def check(instance: Callable[[str], dict[str, str]]) -> PrefectCheck:
     return check
 
 
-@pytest.fixture
-def instance() -> Callable[[str], dict[str, str | dict[str, list[str]] | None | bool]]:
+@pytest.fixture(scope='session')
+def instance() -> Callable[[str], dict[str, str | dict[str, list[str]] | None | bool | int]]:
     def builder(
         prefect_url: str,
         work_pool_names: dict[str, list[str]] | None = None,
@@ -75,7 +73,8 @@ def instance() -> Callable[[str], dict[str, str | dict[str, list[str]] | None | 
         deployment_names: dict[str, list[str]] | None = None,
         event_names: dict[str, list[str]] | None = None,
         collect_events: bool = True,
-    ) -> dict[str, str | dict[str, list[str]] | None | bool]:
+        min_collection_interval: int = 600,
+    ) -> dict[str, str | dict[str, list[str]] | None | bool | int]:
         return {
             "prefect_url": prefect_url,
             "work_pool_names": work_pool_names,
@@ -83,6 +82,7 @@ def instance() -> Callable[[str], dict[str, str | dict[str, list[str]] | None | 
             "deployment_names": deployment_names,
             "event_names": event_names,
             "collect_events": collect_events,
+            "min_collection_interval": min_collection_interval,
         }
 
     return builder
@@ -104,7 +104,7 @@ def apply_mock_from_file(filename: str) -> dict[str, MockResponse]:
     return processed_metrics
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_http_responses(mock_http_response_per_endpoint: Callable) -> None:
     mock_http_response_per_endpoint(apply_mock_from_file("get_metrics.json"))
     mock_http_response_per_endpoint(apply_mock_from_file("post_metrics.json"), method="requests.Session.post")

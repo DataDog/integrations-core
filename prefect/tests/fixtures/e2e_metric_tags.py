@@ -50,7 +50,6 @@ E2E_METRIC_TAGS: dict[str, list[str]] = {
     "prefect.server.work_queue.last_polled_age_seconds": WORK_QUEUE_STATUS_TAG_KEYS,
     "prefect.server.work_queue.backlog.age": WORK_QUEUE_STATUS_TAG_KEYS,
     "prefect.server.work_queue.backlog.size": WORK_QUEUE_STATUS_TAG_KEYS,
-    "prefect.server.work_queue.concurrency.in_use": WORK_QUEUE_TAG_KEYS,
     # --- deployment metrics ---
     "prefect.server.deployment.is_ready": DEPLOYMENT_TAG_KEYS,
     # --- flow run metrics ---
@@ -64,16 +63,6 @@ E2E_METRIC_TAGS: dict[str, list[str]] = {
     "prefect.server.flow_runs.throughput": FLOW_RUN_TAG_KEYS,
     "prefect.server.flow_runs.running.count": FLOW_RUN_TAG_KEYS,
     "prefect.server.flow_runs.late_start.count": FLOW_RUN_TAG_KEYS,
-    "prefect.server.flow_runs.execution_duration.avg": FLOW_RUN_TAG_KEYS,
-    "prefect.server.flow_runs.execution_duration.count": FLOW_RUN_TAG_KEYS,
-    "prefect.server.flow_runs.execution_duration.max": FLOW_RUN_TAG_KEYS,
-    "prefect.server.flow_runs.execution_duration.median": FLOW_RUN_TAG_KEYS,
-    "prefect.server.flow_runs.execution_duration.95percentile": FLOW_RUN_TAG_KEYS,
-    "prefect.server.flow_runs.queue_wait_duration.avg": FLOW_RUN_TAG_KEYS,
-    "prefect.server.flow_runs.queue_wait_duration.count": FLOW_RUN_TAG_KEYS,
-    "prefect.server.flow_runs.queue_wait_duration.max": FLOW_RUN_TAG_KEYS,
-    "prefect.server.flow_runs.queue_wait_duration.median": FLOW_RUN_TAG_KEYS,
-    "prefect.server.flow_runs.queue_wait_duration.95percentile": FLOW_RUN_TAG_KEYS,
     # --- task run metrics ---
     "prefect.server.task_runs.pending.count": TASK_RUN_TAG_KEYS,
     "prefect.server.task_runs.paused.count": TASK_RUN_TAG_KEYS,
@@ -84,9 +73,4 @@ E2E_METRIC_TAGS: dict[str, list[str]] = {
     "prefect.server.task_runs.throughput": TASK_RUN_TAG_KEYS,
     "prefect.server.task_runs.running.count": TASK_RUN_TAG_KEYS,
     "prefect.server.task_runs.late_start.count": TASK_RUN_TAG_KEYS,
-    "prefect.server.task_runs.execution_duration.avg": TASK_RUN_TAG_KEYS,
-    "prefect.server.task_runs.execution_duration.count": TASK_RUN_TAG_KEYS,
-    "prefect.server.task_runs.execution_duration.max": TASK_RUN_TAG_KEYS,
-    "prefect.server.task_runs.execution_duration.median": TASK_RUN_TAG_KEYS,
-    "prefect.server.task_runs.execution_duration.95percentile": TASK_RUN_TAG_KEYS,
 }

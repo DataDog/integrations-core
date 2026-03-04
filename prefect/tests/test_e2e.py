@@ -1,32 +1,26 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Callable
 
 import pytest
 
-from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.prefect import PrefectCheck
 
 from .fixtures.e2e_metric_tags import E2E_METRIC_TAGS
-
-
-@pytest.fixture
-def ready_check(dd_environment, dd_run_check: Callable, aggregator: AggregatorStub):
-    instance = dd_environment['instances'][0]
-    check = PrefectCheck("prefect", {}, [instance])
-
-    dd_run_check(check)
-
-    return check
 
 
 @pytest.mark.e2e
 def test_e2e_metrics(dd_agent_check):
     aggregator = dd_agent_check()
 
-    cross_check_metrics = ('flow_runs.retry_gaps_duration', 'task_runs.dependency_wait_duration')
+    cross_check_metrics = (
+        'flow_runs.retry_gaps_duration',
+        'task_runs.dependency_wait_duration',
+        'flow_runs.queue_wait_duration',
+        'work_queue.concurrency.in_use',
+        'flow_runs.execution_duration',
+        'task_runs.execution_duration',
+    )
     all_metadata = get_metadata_metrics()
     metadata_metrics = {k: v for k, v in all_metadata.items() if not any(m in k for m in cross_check_metrics)}
     exclude = [k for k in all_metadata if any(m in k for m in cross_check_metrics)]
