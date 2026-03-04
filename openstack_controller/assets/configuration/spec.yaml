@@ -50,7 +50,6 @@ files:
             type: string
         - name: user
           hidden: true
-          fleet_configurable: true
           secret: true
           description: |
            Password authentication is the only auth method supported
@@ -256,7 +255,6 @@ files:
             display_default: true
             type: boolean
         - name: collect_network_metrics
-          fleet_configurable: true
           legacy: true
           hidden: true
           description: |
@@ -274,7 +272,6 @@ files:
             display_default: true
             type: boolean
         - name: collect_server_diagnostic_metrics
-          fleet_configurable: true
           legacy: true
           hidden: true
           description: |

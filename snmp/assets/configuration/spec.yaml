@@ -432,7 +432,6 @@ files:
           type: integer
           example: 5
       - name: enforce_mib_constraints
-        fleet_configurable: true
         legacy: true
         description: |
           If set to false, the the values returned are not checked to ensure they meet the MIB constraints.
@@ -441,7 +440,6 @@ files:
           type: boolean
           example: true
       - name: bulk_threshold
-        fleet_configurable: true
         legacy: true
         description: |
           The number of symbols in each table that triggers a BULK request.
@@ -451,7 +449,6 @@ files:
           type: integer
           example: 0
       - name: refresh_oids_cache_interval
-        fleet_configurable: true
         legacy: true
         description: |
           Note: Beta feature, only available using python SNMP integration.

@@ -97,7 +97,6 @@ files:
               example: <INSTANCE_NAME>
               type: string
           - name: user
-            fleet_configurable: true
             secret: true
             required: true
             description: |
