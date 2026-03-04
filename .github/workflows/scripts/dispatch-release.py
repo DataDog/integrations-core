@@ -1,10 +1,16 @@
-"""Send a repository_dispatch event to agent-integration-wheels-release.
+"""Send repository_dispatch events to agent-integration-wheels-release.
+
+Integrations are split into batches and dispatched as separate workflow runs
+to stay within payload size limits.
 
 Required environment variables:
   GH_TOKEN      short-lived token from dd-octo-sts
   INTEGRATIONS  JSON array of integration names
   SOURCE_REPO   source repository name (e.g. integrations-core)
   REF           commit SHA or ref to build from
+
+Optional environment variables:
+  BATCH_SIZE    max integrations per dispatch (default: 200)
 """
 import json
 import os
@@ -12,21 +18,19 @@ import sys
 import urllib.error
 import urllib.request
 
+BATCH_SIZE = int(os.environ.get("BATCH_SIZE", 200))
+if BATCH_SIZE <= 0:
+    print("BATCH_SIZE must be a positive integer", file=sys.stderr)
+    sys.exit(1)
+DISPATCH_URL = "https://api.github.com/repos/DataDog/agent-integration-wheels-release/dispatches"
 
-def main() -> None:
-    integrations = json.loads(os.environ["INTEGRATIONS"])
-    source_repo = os.environ["SOURCE_REPO"]
-    ref = os.environ["REF"]
 
-    print(f"Releasing {len(integrations)} integration(s) from {source_repo}@{ref}:")
-    for name in integrations:
-        print(f"  - {name}")
-
+def dispatch(batch: list[str], source_repo: str, ref: str) -> None:
     payload = json.dumps(
         {
             "event_type": "build-integrations",
             "client_payload": {
-                "integrations": integrations,
+                "integrations": batch,
                 "source_repo": source_repo,
                 "source_repo_ref": ref,
             },
@@ -34,7 +38,7 @@ def main() -> None:
     ).encode()
 
     req = urllib.request.Request(
-        "https://api.github.com/repos/DataDog/agent-integration-wheels-release/dispatches",
+        DISPATCH_URL,
         data=payload,
         headers={
             "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
@@ -45,10 +49,26 @@ def main() -> None:
     )
     try:
         with urllib.request.urlopen(req) as resp:
-            print(f"Dispatched: HTTP {resp.status}")
+            print(f"  Dispatched: HTTP {resp.status}")
     except urllib.error.HTTPError as e:
         print(e.read().decode(), file=sys.stderr)
         raise
+
+
+def main() -> None:
+    integrations = json.loads(os.environ["INTEGRATIONS"])
+    source_repo = os.environ["SOURCE_REPO"]
+    ref = os.environ["REF"]
+
+    batches = [integrations[i : i + BATCH_SIZE] for i in range(0, len(integrations), BATCH_SIZE)]
+
+    print(f"Releasing {len(integrations)} integration(s) from {source_repo}@{ref} in {len(batches)} batch(es):")
+    for name in integrations:
+        print(f"  - {name}")
+
+    for i, batch in enumerate(batches, 1):
+        print(f"Batch {i}/{len(batches)} ({len(batch)} integrations)")
+        dispatch(batch, source_repo, ref)
 
 
 if __name__ == "__main__":
