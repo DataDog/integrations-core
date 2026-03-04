@@ -14,7 +14,7 @@ os-service-types @ https://agent-int-packages.datadoghq.com/built/os-service-typ
 pbr @ https://agent-int-packages.datadoghq.com/built/pbr/pbr-7.0.3-20260227113323-py2.py3-none-any.whl#sha256=1544652b80307f0b4c491bd66f58f969cb0656994e632365f90e8e044c223b4e
 psutil @ https://agent-int-packages.datadoghq.com/built/psutil/psutil-6.0.0-20250929144630-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=af8dd07e6f1bf1d41381ad59dff0a0a36153c7dd5a69becc765010329f17db01
 psycopg-c @ https://agent-int-packages.datadoghq.com/built/psycopg-c/psycopg_c-3.2.10-20260213173635-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=a9cb370b30d036717b02cad0d4ff9757e073d5cd00cd26d4757cc0d0352c4504
-pymongo @ https://agent-int-packages.datadoghq.com/built/pymongo/pymongo-4.8.0-20260205172803-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=6f8f45ea6e2f35ddef1c616e6521c14551ef6c2b4b75f9c3d3b3fdc6b36e723b
+pymongo @ https://agent-int-packages.datadoghq.com/built/pymongo/pymongo-4.8.0-20260302081351-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=6f8f45ea6e2f35ddef1c616e6521c14551ef6c2b4b75f9c3d3b3fdc6b36e723b
 pymqi @ https://agent-int-packages.datadoghq.com/built/pymqi/pymqi-1.12.11-20260205172803-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=61bb09f79017711217dc002ec0d936769fdab0d7d0423f5f9f7a0536bbea7121
 pyodbc @ https://agent-int-packages.datadoghq.com/built/pyodbc/pyodbc-5.2.0-20260213173636-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=6ae3db198ce96c45e942aa93dae4cda35bb7e8a490bd22d011db9065d3533b80
 pyvmomi @ https://agent-int-packages.datadoghq.com/built/pyvmomi/pyvmomi-8.0.3.0.1-20251222105430-py2.py3-none-manylinux2014_x86_64.whl#sha256=145317e450fd919ead2224a4bc539dd4ee4c5d6a2b6d78f7b229d223d8de6d72
@@ -50,8 +50,9 @@ dogpile-cache @ https://agent-int-packages.datadoghq.com/external/dogpile-cache/
 durationpy @ https://agent-int-packages.datadoghq.com/external/durationpy/durationpy-0.10-py3-none-any.whl#sha256=3b41e1b601234296b4fb368338fdcd3e13e0b4fb5b67345948f4f2bf9868b286
 envier @ https://agent-int-packages.datadoghq.com/external/envier/envier-0.6.1-py3-none-any.whl#sha256=73609040a76be48bbcb97074d9969666484aa0de706183a6e9ef773156a8a6a9
 fastavro @ https://agent-int-packages.datadoghq.com/external/fastavro/fastavro-1.12.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl#sha256=6a172655add31882cab4e1a96b7d49f419906b465b4c2165081db7b1db79852f
-filelock @ https://agent-int-packages.datadoghq.com/external/filelock/filelock-3.24.3-py3-none-any.whl#sha256=426e9a4660391f7f8a810d71b0555bce9008b0a1cc342ab1f6947d37639e002d
+filelock @ https://agent-int-packages.datadoghq.com/external/filelock/filelock-3.25.0-py3-none-any.whl#sha256=5ccf8069f7948f494968fc0713c10e5c182a9c9d9eef3a636307a20c2490f047
 google-auth @ https://agent-int-packages.datadoghq.com/external/google-auth/google_auth-2.48.0-py3-none-any.whl#sha256=2e2a537873d449434252a9632c28bfc268b0adb1e53f9fb62afc5333a975903f
+grpcio @ https://agent-int-packages.datadoghq.com/external/grpcio/grpcio-1.78.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=735e38e176a88ce41840c21bb49098ab66177c64c82426e24e0082500cc68af5
 hazelcast-python-client @ https://agent-int-packages.datadoghq.com/external/hazelcast-python-client/hazelcast_python_client-5.5.0-py3-none-any.whl#sha256=c797c23c219971d225f8590f6359692c14059c26baa15c2762c95667ae38b90a
 idna @ https://agent-int-packages.datadoghq.com/external/idna/idna-3.11-py3-none-any.whl#sha256=771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea
 importlib-metadata @ https://agent-int-packages.datadoghq.com/external/importlib-metadata/importlib_metadata-8.7.1-py3-none-any.whl#sha256=5a1f80bf1daa489495071efbb095d75a634cf28a8bc299581244063b53176151

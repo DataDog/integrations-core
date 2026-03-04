@@ -48,8 +48,9 @@ dogpile-cache @ https://agent-int-packages.datadoghq.com/external/dogpile-cache/
 durationpy @ https://agent-int-packages.datadoghq.com/external/durationpy/durationpy-0.10-py3-none-any.whl#sha256=3b41e1b601234296b4fb368338fdcd3e13e0b4fb5b67345948f4f2bf9868b286
 envier @ https://agent-int-packages.datadoghq.com/external/envier/envier-0.6.1-py3-none-any.whl#sha256=73609040a76be48bbcb97074d9969666484aa0de706183a6e9ef773156a8a6a9
 fastavro @ https://agent-int-packages.datadoghq.com/external/fastavro/fastavro-1.12.0-cp313-cp313-win_amd64.whl#sha256=cf153531191bcfc445c21e05dd97232a634463aa717cf99fb2214a51b9886bff
-filelock @ https://agent-int-packages.datadoghq.com/external/filelock/filelock-3.24.3-py3-none-any.whl#sha256=426e9a4660391f7f8a810d71b0555bce9008b0a1cc342ab1f6947d37639e002d
+filelock @ https://agent-int-packages.datadoghq.com/external/filelock/filelock-3.25.0-py3-none-any.whl#sha256=5ccf8069f7948f494968fc0713c10e5c182a9c9d9eef3a636307a20c2490f047
 google-auth @ https://agent-int-packages.datadoghq.com/external/google-auth/google_auth-2.48.0-py3-none-any.whl#sha256=2e2a537873d449434252a9632c28bfc268b0adb1e53f9fb62afc5333a975903f
+grpcio @ https://agent-int-packages.datadoghq.com/external/grpcio/grpcio-1.78.0-cp313-cp313-win_amd64.whl#sha256=f2d4e43ee362adfc05994ed479334d5a451ab7bc3f3fee1b796b8ca66895acb4
 hazelcast-python-client @ https://agent-int-packages.datadoghq.com/external/hazelcast-python-client/hazelcast_python_client-5.5.0-py3-none-any.whl#sha256=c797c23c219971d225f8590f6359692c14059c26baa15c2762c95667ae38b90a
 idna @ https://agent-int-packages.datadoghq.com/external/idna/idna-3.11-py3-none-any.whl#sha256=771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea
 importlib-metadata @ https://agent-int-packages.datadoghq.com/external/importlib-metadata/importlib_metadata-8.7.1-py3-none-any.whl#sha256=5a1f80bf1daa489495071efbb095d75a634cf28a8bc299581244063b53176151
