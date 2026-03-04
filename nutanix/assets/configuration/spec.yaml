@@ -79,8 +79,8 @@ files:
           - name: resource_filters
             description: |
               Filter which resources are collected using regex patterns on resource properties.
-              Each filter requires: 'resource' (type), 'patterns' (regex list).
-              Optional: 'property' (defaults per type), 'type' (include|exclude, default: include).
+              Each filter requires: 'resource' (type), 'property' (API field name), 'patterns' (regex list).
+              Optional: 'type' (include|exclude, default: include).
               Exclude takes precedence over include.
 
               IMPORTANT Default: Only USER category tags are collected.
@@ -89,8 +89,16 @@ files:
               Resources: cluster, host, vm, event, task, alert, audit, category
               Property access: Use API property names (case-sensitive).
               Nested properties: 'parent/child' (e.g., 'userReference/name')
-              Default properties: name (infrastructure), type (category),
-              eventType|status|severity|auditType (activities)
+
+              Common property names per resource:
+                cluster: name, extId
+                host: hostName, extId
+                vm: name, extId, powerState
+                category: type (SYSTEM, INTERNAL, USER)
+                event: eventType
+                task: status
+                alert: severity, alertType
+                audit: auditType
 
               Examples:
                 # Infrastructure - include clusters by name, exclude hosts
@@ -98,7 +106,7 @@ files:
                   property: name
                   patterns: ['^prod-']
                 - resource: host
-                  property: name
+                  property: hostName
                   type: exclude
                   patterns: ['^standby-']
                 # Category - include SYSTEM type (overrides USER default)

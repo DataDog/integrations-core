@@ -112,9 +112,9 @@ The Nutanix API does not expose the real hostname of VMs. VM metrics use the VM 
 
 ### Filtering resources
 
-Use the `resource_filters` option to control which resources are collected. Each filter requires a `resource` type and a list of regex `patterns`. Optionally, set `property` (defaults vary by resource type) and `type` (`include` or `exclude`, default: `include`). Exclude filters take precedence over include filters.
+Use the `resource_filters` option to control which resources are collected. Each filter requires a `resource` type, a `property` (the API field name to match against), and a list of regex `patterns`. Optionally, set `type` (`include` or `exclude`, default: `include`). Exclude filters take precedence over include filters.
 
-Supported resource types: `cluster`, `host`, `vm`, `event`, `task`, `alert`, `audit`, `category`. Infrastructure resources (`cluster`, `host`, `vm`) default to matching on `name`. Nested properties are supported using `/` as a separator (e.g., `userReference/name`).
+Supported resource types: `cluster`, `host`, `vm`, `event`, `task`, `alert`, `audit`, `category`. Nested properties are supported using `/` as a separator (e.g., `userReference/name`). Note that hosts use `hostName` as the API field for the host name, not `name`.
 
 ```yaml
 resource_filters:
@@ -123,7 +123,7 @@ resource_filters:
     patterns:
       - '^prod-'
   - resource: host
-    property: name
+    property: hostName
     type: exclude
     patterns:
       - '^standby-'

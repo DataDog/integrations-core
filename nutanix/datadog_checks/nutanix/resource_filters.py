@@ -13,20 +13,6 @@ METADATA_RESOURCE_TYPES = frozenset(('category',))
 RESOURCE_TYPES = INFRASTRUCTURE_RESOURCE_TYPES | ACTIVITY_RESOURCE_TYPES | METADATA_RESOURCE_TYPES
 FILTER_TYPES = frozenset(('include', 'exclude'))
 
-ACTIVITY_DEFAULT_PROPERTIES = {
-    'event': 'eventType',
-    'task': 'status',
-    'alert': 'severity',
-    'audit': 'auditType',
-}
-
-METADATA_DEFAULT_PROPERTIES = {
-    'category': 'type',  # Valid values: SYSTEM, INTERNAL, USER
-}
-
-# Default property for infrastructure resources (cluster, host, vm)
-_INFRASTRUCTURE_DEFAULT_PROPERTY = 'name'
-
 
 def _get_nested_value(obj: dict[str, Any], property_path: str) -> Any | None:
     """Navigate nested properties using "/" separator, returns None if path doesn't exist."""
@@ -43,19 +29,14 @@ def _get_nested_value(obj: dict[str, Any], property_path: str) -> Any | None:
 
 
 def _validate_filter_structure(f: dict[str, Any]) -> bool:
-    """Check if filter has required 'resource' and 'patterns' fields."""
-    return isinstance(f, dict) and 'resource' in f and 'patterns' in f and isinstance(f.get('patterns'), list)
-
-
-def _default_property_for(resource: str) -> str:
-    """Return the default filter property for a resource type."""
-    if resource in INFRASTRUCTURE_RESOURCE_TYPES:
-        return _INFRASTRUCTURE_DEFAULT_PROPERTY
-    if resource in ACTIVITY_RESOURCE_TYPES:
-        return ACTIVITY_DEFAULT_PROPERTIES.get(resource, '')
-    if resource in METADATA_RESOURCE_TYPES:
-        return METADATA_DEFAULT_PROPERTIES.get(resource, '')
-    return ''
+    """Check if filter has required 'resource', 'property', and 'patterns' fields."""
+    return (
+        isinstance(f, dict)
+        and 'resource' in f
+        and 'property' in f
+        and 'patterns' in f
+        and isinstance(f.get('patterns'), list)
+    )
 
 
 def parse_resource_filters(raw_filters: list[dict[str, Any]], logger: Any) -> list[dict[str, Any]]:
@@ -65,6 +46,7 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]], logger: Any) -> li
     activity data (events, tasks, alerts, audits), and metadata (categories).
     Exclude filters take precedence over include filters.
 
+    Each filter requires 'resource', 'property', and 'patterns' fields.
     If no category filters are specified, only USER type categories are collected by default.
     """
     has_category_filter = any(f.get('resource') == 'category' for f in raw_filters or [])
@@ -72,7 +54,10 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]], logger: Any) -> li
     result = []
     for f in raw_filters or []:
         if not _validate_filter_structure(f):
-            logger.error("Invalid filter structure (missing required fields 'resource' or 'patterns'), skipping: %s", f)
+            logger.error(
+                "Invalid filter structure (missing 'resource', 'property', or 'patterns'), skipping: %s",
+                f,
+            )
             continue
 
         resource = str(f.get('resource', '')).lower()
@@ -85,7 +70,7 @@ def parse_resource_filters(raw_filters: list[dict[str, Any]], logger: Any) -> li
             )
             continue
 
-        property_ = str(f.get('property', '')) or _default_property_for(resource)
+        property_ = str(f['property'])
 
         filter_type = str(f.get('type', 'include')).lower()
         if filter_type not in FILTER_TYPES:
