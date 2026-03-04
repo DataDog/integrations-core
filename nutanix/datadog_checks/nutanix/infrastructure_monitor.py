@@ -88,8 +88,8 @@ class InfrastructureMonitor:
         # Fetch and cache categories for VM tagging
         try:
             categories = self._list_categories()
-        except Exception as e:
-            self.check.log.error("[%s] Failed to fetch categories: %s", pc_label, e)
+        except Exception:
+            self.check.log.exception("[%s] Failed to fetch categories", pc_label)
             categories = []
 
         self.check.log.info("[%s] Found %d categories", pc_label, len(categories))
@@ -102,8 +102,8 @@ class InfrastructureMonitor:
 
         try:
             clusters = self._list_clusters()
-        except Exception as e:
-            self.check.log.error("[%s] Failed to fetch clusters, aborting: %s", pc_label, e)
+        except Exception:
+            self.check.log.exception("[%s] Failed to fetch clusters, aborting", pc_label)
             return
 
         if not clusters:
@@ -122,8 +122,8 @@ class InfrastructureMonitor:
             try:
                 self._build_vms_by_host_cache()
                 self.check.log.info("[%s] Cached VMs for %d hosts", pc_label, len(self._vms_by_host))
-            except Exception as e:
-                self.check.log.error("[%s] Failed to fetch all VMs: %s", pc_label, e)
+            except Exception:
+                self.check.log.exception("[%s] Failed to fetch all VMs", pc_label)
 
         # Process each cluster
         processed, skipped = 0, 0
@@ -159,8 +159,14 @@ class InfrastructureMonitor:
                 self._report_cluster_capacity_metrics(cluster_tags)
 
                 processed += 1
-            except Exception as e:
-                self.check.log.error("[%s][%s] Failed to process cluster: %s", pc_label, cluster_name, e)
+            except Exception:
+                cluster_id = cluster.get("extId", "unknown")
+                self.check.log.exception(
+                    "[%s][%s] Failed to process cluster (id=%s)",
+                    pc_label,
+                    cluster_name,
+                    cluster_id,
+                )
 
         if skipped > 0:
             self.check.log.info("[%s] Processed %d clusters (%d skipped)", pc_label, processed, skipped)
@@ -363,8 +369,8 @@ class InfrastructureMonitor:
                     hostname=host_name,
                     entity_type="host",
                 )
-        except Exception as e:
-            self.check.log.error("[%s][%s] Failed to fetch stats for host %s: %s", pc_label, cluster_name, host_name, e)
+        except Exception:
+            self.check.log.exception("[%s][%s] Failed to fetch stats for host %s", pc_label, cluster_name, host_name)
 
         # Process VMs on this host
         if self.check.batch_vm_collection:
@@ -372,10 +378,8 @@ class InfrastructureMonitor:
         else:
             try:
                 vms = self._list_vms(host_id)
-            except Exception as e:
-                self.check.log.error(
-                    "[%s][%s] Failed to list VMs for host %s: %s", pc_label, cluster_name, host_name, e
-                )
+            except Exception:
+                self.check.log.exception("[%s][%s] Failed to list VMs for host %s", pc_label, cluster_name, host_name)
                 return 0
 
         self.check.log.debug("[%s][%s] Host %s has %d VMs", pc_label, cluster_name, host_name, len(vms))

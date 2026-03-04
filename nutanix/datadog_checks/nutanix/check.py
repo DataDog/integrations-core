@@ -178,8 +178,8 @@ class NutanixCheck(AgentCheck):
             return True
         except (HTTPError, InvalidURL, ConnectionError, Timeout) as e:
             self.log.error("[PC:%s:%s] Failed to connect: %s", self.pc_ip, self.pc_port, str(e))
-        except Exception as e:
-            self.log.error("[PC:%s:%s] Unexpected connection error: %s", self.pc_ip, self.pc_port, e)
+        except Exception:
+            self.log.exception("[PC:%s:%s] Unexpected connection error", self.pc_ip, self.pc_port)
 
         self.gauge("health.up", 0, tags=self.base_tags)
         return False
@@ -277,7 +277,10 @@ class NutanixCheck(AgentCheck):
 
             # check next page
             links = payload.get("metadata", {}).get("links", [])
-            next_link = next((link.get("href") for link in links if link.get("rel") == "next"), None)
+            next_link = next(
+                (link.get("href") for link in links if isinstance(link, dict) and link.get("rel") == "next"),
+                None,
+            )
 
             if not next_link:
                 break
