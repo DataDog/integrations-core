@@ -343,19 +343,31 @@ class InfrastructureMonitor:
         self._report_host_capacity_metrics(host, host_name, host_tags)
 
         # Report host stats
-        stats = self._get_stats(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id}")
-        if stats:
-            self._report_stats(
-                f"[{pc_label}][{cluster_name}] Host {host_name}",
-                stats,
-                HOST_STATS_METRICS,
-                host_tags,
-                hostname=host_name,
-                entity_type="host",
+        try:
+            stats = self._get_stats(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id}")
+            if stats:
+                self._report_stats(
+                    f"[{pc_label}][{cluster_name}] Host {host_name}",
+                    stats,
+                    HOST_STATS_METRICS,
+                    host_tags,
+                    hostname=host_name,
+                    entity_type="host",
+                )
+        except Exception as e:
+            self.check.log.exception(
+                "[%s][%s] Failed to fetch stats for host %s: %s", pc_label, cluster_name, host_name, e
             )
 
         # Process VMs on this host
-        vms = self._list_vms_by_host(host_id)
+        try:
+            vms = self._list_vms_by_host(host_id)
+        except Exception as e:
+            self.check.log.exception(
+                "[%s][%s] Failed to list VMs for host %s: %s", pc_label, cluster_name, host_name, e
+            )
+            return 0
+
         self.check.log.debug("[%s][%s] Host %s has %d VMs", pc_label, cluster_name, host_name, len(vms))
 
         for vm in vms:
