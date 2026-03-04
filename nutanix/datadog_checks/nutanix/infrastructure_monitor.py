@@ -185,7 +185,7 @@ class InfrastructureMonitor:
         """Process and report metrics for a single VM."""
         vm_id = vm.get("extId", "unknown")
         hostname = vm.get("name")
-        if not self.check.batch_vm_collection and not self._should_collect_vm(vm):
+        if not self._should_collect_vm(vm):
             return
         vm_tags = self.check.base_tags + self._extract_vm_tags(vm)
 
