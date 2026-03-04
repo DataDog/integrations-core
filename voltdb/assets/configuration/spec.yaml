@@ -30,6 +30,7 @@ files:
               example: false
 
           - name: statistics_components
+            fleet_configurable: true
             description: |
               List VoltDB components to collect metrics. A subset of components are collected by default.
               See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php
