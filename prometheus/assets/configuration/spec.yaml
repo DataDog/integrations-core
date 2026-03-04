@@ -125,6 +125,7 @@ files:
           Can either be only the path to the certificate where you specify the private key
           or it can be the path to a file containing both the certificate and the private key.
         fleet_configurable: true
+        legacy: true
         value:
           example: <CERT_PATH>
           type: string
@@ -133,6 +134,7 @@ files:
           Needed if the certificate does not include the private key.
           WARNING: The private key to your local certificate must be unencrypted.
         fleet_configurable: true
+        legacy: true
         value:
           example: <KEY_PATH>
           type: string
@@ -141,6 +143,7 @@ files:
           The path to the trusted CA used for generating custom certificates. Set this to false to disable SSL
           certificate verification.
         fleet_configurable: true
+        legacy: true
         value:
           example: <CA_CERT_PATH>
           type: string
