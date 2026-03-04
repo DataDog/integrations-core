@@ -1,0 +1,7 @@
++ echo 'this job fails'
+this job fails
++ date
+Mon Mar  2 21:04:46 UTC 2026
++ echo 'ERROR: simulated failure'
+ERROR: simulated failure
++ exit 2

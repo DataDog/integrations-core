@@ -15,6 +15,7 @@ from _pytest.monkeypatch import MonkeyPatch
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.control_m import ControlMCheck
+from datadog_checks.control_m.logs import LogShipper, parse_job_log
 from datadog_checks.control_m.metrics import (
     build_run_key,
     duration_ms,
@@ -504,6 +505,239 @@ def test_active_runs_cleaned_on_terminal(
     aggregator.assert_metric('control_m.job.run.count', value=1, count=1)
 
 
+def test_events_disabled_by_default(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    check = _make_check(instance)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [{'jobId': 'ev1', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'fail_job', 'status': 'Ended Not OK'}],
+    )
+    check._job_collector.collect()
+
+    aggregator.assert_metric('control_m.job.run.count', count=1)
+    assert len(aggregator.events) == 0
+
+
+def test_event_on_failure(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+    }
+    check = _make_check(inst)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [
+            {
+                'jobId': 'ev2',
+                'numberOfRuns': 1,
+                'ctm': 'srv1',
+                'name': 'fail_job',
+                'folder': 'nightly',
+                'status': 'Ended Not OK',
+            }
+        ],
+    )
+    check._job_collector.collect()
+
+    assert len(aggregator.events) == 1
+    aggregator.assert_event(
+        'Result: failed',
+        exact_match=False,
+        msg_title='Control-M job failed: fail_job',
+        alert_type='error',
+        event_type='control_m.job.completion',
+    )
+
+
+def test_event_on_cancellation(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+    }
+    check = _make_check(inst)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [{'jobId': 'ev3', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'cancel_job', 'status': 'Cancelled'}],
+    )
+    check._job_collector.collect()
+
+    assert len(aggregator.events) == 1
+    aggregator.assert_event(
+        'Result: canceled',
+        exact_match=False,
+        msg_title='Control-M job canceled: cancel_job',
+        alert_type='warning',
+    )
+
+
+def test_event_success_suppressed_by_default(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+    }
+    check = _make_check(inst)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [{'jobId': 'ev4', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'ok_job', 'status': 'Ended OK'}],
+    )
+    check._job_collector.collect()
+
+    aggregator.assert_metric('control_m.job.run.count', count=1)
+    assert len(aggregator.events) == 0
+
+
+def test_event_success_when_opted_in(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+        'emit_success_events': True,
+    }
+    check = _make_check(inst)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [{'jobId': 'ev5', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'ok_job', 'status': 'Ended OK'}],
+    )
+    check._job_collector.collect()
+
+    assert len(aggregator.events) == 1
+    aggregator.assert_event(
+        'Result: ok',
+        exact_match=False,
+        msg_title='Control-M job ok: ok_job',
+        alert_type='success',
+    )
+
+
+def test_slow_run_event(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+        'slow_run_threshold_ms': 60000,
+    }
+    check = _make_check(inst)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [
+            {
+                'jobId': 'ev6',
+                'numberOfRuns': 1,
+                'ctm': 'srv1',
+                'name': 'slow_job',
+                'status': 'Ended OK',
+                'startTime': '20260115100000',
+                'endTime': '20260115103000',
+            }
+        ],
+    )
+    check._job_collector.collect()
+
+    # Success event suppressed (emit_success_events=False), but slow run event fires
+    assert len(aggregator.events) == 1
+    aggregator.assert_event(
+        'Result: ok',
+        exact_match=False,
+        event_type='control_m.job.slow_run',
+        alert_type='warning',
+    )
+    assert '1800000ms' in aggregator.events[0]['msg_title']
+
+
+def test_slow_run_below_threshold_no_event(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+        'slow_run_threshold_ms': 9999999,
+    }
+    check = _make_check(inst)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [
+            {
+                'jobId': 'ev7',
+                'numberOfRuns': 1,
+                'ctm': 'srv1',
+                'name': 'fast_job',
+                'status': 'Ended OK',
+                'startTime': '20260115100000',
+                'endTime': '20260115100001',
+            }
+        ],
+    )
+    check._job_collector.collect()
+
+    assert len(aggregator.events) == 0
+
+
+def test_event_includes_high_cardinality_in_text(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+    }
+    check = _make_check(inst)
+    _mock_job_response(
+        check,
+        monkeypatch,
+        [
+            {
+                'jobId': 'wb:0042',
+                'numberOfRuns': 3,
+                'ctm': 'srv1',
+                'name': 'fail_job',
+                'folder': 'nightly',
+                'status': 'Ended Not OK',
+                'startTime': '20260115100000',
+                'endTime': '20260115103000',
+            }
+        ],
+    )
+    check._job_collector.collect()
+
+    assert len(aggregator.events) == 1
+    text = aggregator.events[0]['msg_text']
+    assert 'Job ID: wb:0042' in text
+    assert 'Run #: 3' in text
+    assert 'Folder: nightly' in text
+    assert 'Start: Jan 15, 2026, 10:00:00 AM' in text
+    assert 'Duration: 1800000ms' in text
+
+
+def test_event_deduplicated_with_finalized_runs(aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'emit_job_events': True,
+    }
+    check = _make_check(inst)
+    job = [{'jobId': 'ev_dup', 'numberOfRuns': 1, 'ctm': 'srv1', 'name': 'dup_job', 'status': 'Ended Not OK'}]
+
+    _mock_job_response(check, monkeypatch, job)
+    check._job_collector.collect()
+    assert len(aggregator.events) == 1
+
+    aggregator.reset()
+
+    _mock_job_response(check, monkeypatch, job)
+    check._job_collector.collect()
+    assert len(aggregator.events) == 0
+
+
 @pytest.mark.parametrize(
     'bad_instance, match',
     [
@@ -802,3 +1036,221 @@ def test_check_collects_core_job_telemetry(
     aggregator.assert_metric(
         'control_m.job.run.duration_ms', value=60000, tags=workbench_tags + ['job_name:job_ok', 'result:ok'], count=1
     )
+
+
+def test_parse_job_log_ended_ok() -> None:
+    text = (FIXTURE_DIR / 'job_log_ended_ok.txt').read_text()
+    entries = parse_job_log(text)
+    assert len(entries) == 9
+    assert entries[0]['event_time'] == '21:04:46 2-Mar-2026'
+    assert entries[0]['message'] == 'RUN JOB:17142; DAILY FORCED, ODATE 20260302'
+    assert entries[0]['code'] == '5065'
+    assert entries[6]['code'] == '5133'
+    assert 'ENDED OK' in entries[6]['message']
+
+
+def test_parse_job_log_ended_not_ok() -> None:
+    text = (FIXTURE_DIR / 'job_log_ended_not_ok.txt').read_text()
+    entries = parse_job_log(text)
+    assert len(entries) == 10
+    assert entries[7]['code'] == '5134'
+    assert 'ENDED NOTOK' in entries[7]['message']
+    assert entries[6]['code'] == '5169'
+    assert 'Message from Agent' in entries[6]['message']
+
+
+def test_parse_job_log_empty() -> None:
+    assert parse_job_log('') == []
+    assert parse_job_log('Event Time            Message\tCode\n\n') == []
+
+
+def test_log_shipper_disabled_by_default(instance: dict[str, Any]) -> None:
+    check = _make_check(instance)
+    shipper = LogShipper(check, check._client)
+    assert not shipper.enabled
+
+
+def test_log_shipper_enabled_failed_mode() -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'collect_job_logs': 'failed',
+    }
+    check = _make_check(inst)
+    shipper = LogShipper(check, check._client)
+    assert shipper.enabled
+    assert shipper._should_collect('failed')
+    assert shipper._should_collect('canceled')
+    assert not shipper._should_collect('ok')
+
+
+def test_log_shipper_enabled_all_mode() -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'collect_job_logs': 'all',
+    }
+    check = _make_check(inst)
+    shipper = LogShipper(check, check._client)
+    assert shipper.enabled
+    assert shipper._should_collect('ok')
+    assert shipper._should_collect('failed')
+
+
+def test_log_shipper_ships_event_log(monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'collect_job_logs': 'failed',
+    }
+    check = _make_check(inst)
+    shipper = LogShipper(check, check._client)
+
+    log_text = (FIXTURE_DIR / 'job_log_ended_not_ok.txt').read_text()
+    mock_response = Mock(ok=True, text=log_text)
+    monkeypatch.setattr(check._client, 'request', Mock(return_value=mock_response))
+
+    sent_logs: list[dict] = []
+    monkeypatch.setattr(check, 'send_log', lambda data, **kw: sent_logs.append(data))
+
+    job = {
+        'jobId': 'wb:0042',
+        'name': 'fail_job',
+        'folder': 'nightly',
+        'numberOfRuns': 1,
+        'type': 'Command',
+    }
+    shipper.ship(job, 'failed', 'workbench', ['control_m_instance:test', 'result:failed'])
+
+    assert len(sent_logs) == 10
+    assert sent_logs[0]['job_id'] == 'wb:0042'
+    assert sent_logs[0]['job_name'] == 'fail_job'
+    assert sent_logs[0]['ctm_server'] == 'workbench'
+    assert sent_logs[0]['result'] == 'failed'
+    assert sent_logs[0]['event_code'] == '5065'
+    assert 'RUN JOB' in sent_logs[0]['message']
+
+
+def test_log_shipper_skips_success_in_failed_mode(monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'collect_job_logs': 'failed',
+    }
+    check = _make_check(inst)
+    shipper = LogShipper(check, check._client)
+
+    sent_logs: list[dict] = []
+    monkeypatch.setattr(check, 'send_log', lambda data, **kw: sent_logs.append(data))
+
+    job = {'jobId': 'wb:0001', 'name': 'ok_job', 'type': 'Command'}
+    shipper.ship(job, 'ok', 'workbench', [])
+
+    assert len(sent_logs) == 0
+
+
+def test_log_shipper_skips_folder_type(monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'collect_job_logs': 'all',
+    }
+    check = _make_check(inst)
+    shipper = LogShipper(check, check._client)
+
+    request_mock = Mock()
+    monkeypatch.setattr(check._client, 'request', request_mock)
+
+    job = {'jobId': 'wb:0001', 'name': 'MyFolder', 'type': 'Folder'}
+    shipper.ship(job, 'failed', 'workbench', [])
+
+    request_mock.assert_not_called()
+
+
+def test_log_shipper_ships_output_for_failure(monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'collect_job_logs': 'failed',
+        'collect_job_output': True,
+    }
+    check = _make_check(inst)
+    shipper = LogShipper(check, check._client)
+
+    log_text = (FIXTURE_DIR / 'job_log_ended_not_ok.txt').read_text()
+    output_text = (FIXTURE_DIR / 'job_output_failed.txt').read_text()
+
+    def fake_request(_method: str, url: str, **_kw: Any) -> Mock:
+        if '/log' in url:
+            return Mock(ok=True, text=log_text)
+        if '/output' in url:
+            return Mock(ok=True, text=output_text)
+        return Mock(ok=False, status_code=404)
+
+    monkeypatch.setattr(check._client, 'request', fake_request)
+
+    sent_logs: list[dict] = []
+    monkeypatch.setattr(check, 'send_log', lambda data, **kw: sent_logs.append(data))
+
+    job = {'jobId': 'wb:0042', 'name': 'fail_job', 'folder': 'nightly', 'type': 'Command'}
+    shipper.ship(job, 'failed', 'workbench', ['result:failed'])
+
+    log_entries = [lg for lg in sent_logs if lg.get('log_type') != 'job_output']
+    output_entries = [lg for lg in sent_logs if lg.get('log_type') == 'job_output']
+    assert len(log_entries) == 10
+    assert len(output_entries) == 1
+    assert 'ERROR: simulated failure' in output_entries[0]['message']
+
+
+def test_log_shipper_output_truncated(monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'collect_job_logs': 'failed',
+        'collect_job_output': True,
+        'max_output_bytes': 50,
+    }
+    check = _make_check(inst)
+    shipper = LogShipper(check, check._client)
+
+    long_output = 'x' * 200
+
+    def fake_request(_method: str, url: str, **_kw: Any) -> Mock:
+        if '/log' in url:
+            return Mock(ok=True, text='Event Time\tCode\n\n')
+        if '/output' in url:
+            return Mock(ok=True, text=long_output)
+        return Mock(ok=False, status_code=404)
+
+    monkeypatch.setattr(check._client, 'request', fake_request)
+
+    sent_logs: list[dict] = []
+    monkeypatch.setattr(check, 'send_log', lambda data, **kw: sent_logs.append(data))
+
+    job = {'jobId': 'wb:0001', 'name': 'big_output', 'type': 'Command'}
+    shipper.ship(job, 'failed', 'workbench', [])
+
+    output_entries = [lg for lg in sent_logs if lg.get('log_type') == 'job_output']
+    assert len(output_entries) == 1
+    assert output_entries[0]['message'].endswith('... [truncated]')
+    assert len(output_entries[0]['message']) < 200
+
+
+def test_log_shipper_handles_fetch_error(monkeypatch: MonkeyPatch) -> None:
+    inst = {
+        'control_m_api_endpoint': 'https://example.com/automation-api',
+        'headers': {'Authorization': 'Bearer test'},
+        'collect_job_logs': 'failed',
+    }
+    check = _make_check(inst)
+    shipper = LogShipper(check, check._client)
+
+    monkeypatch.setattr(check._client, 'request', Mock(return_value=Mock(ok=False, status_code=500)))
+
+    sent_logs: list[dict] = []
+    monkeypatch.setattr(check, 'send_log', lambda data, **kw: sent_logs.append(data))
+
+    job = {'jobId': 'wb:0001', 'name': 'err_job', 'type': 'Command'}
+    shipper.ship(job, 'failed', 'workbench', [])
+
+    assert not sent_logs
