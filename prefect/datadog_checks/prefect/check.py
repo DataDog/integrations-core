@@ -78,7 +78,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self.last_check_time_iso = last_check
             self.last_check_time = parsed_last_check
         else:
-            self.log.debug("Last check time not found, setting to now - min_collection_interval")
+            self.log.warning("Last check time not found, setting to now - min_collection_interval")
             self.last_check_time = datetime.now(timezone.utc) - timedelta(seconds=self.config.min_collection_interval)
             self.last_check_time_iso = self.last_check_time.isoformat()
 
@@ -179,7 +179,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         filtered_tags.extend(self.base_tags)
 
         if removed_tags:
-            self.log.warning("Tags %s were not found for metric %s", removed_tags, name)
+            self.log.error("Tags %s were not found for metric %s", removed_tags, name)
 
         if mtype == "gauge":
             self.gauge(name, value, tags=list(filtered_tags))
@@ -187,8 +187,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self.count(name, value, tags=list(filtered_tags))
         elif mtype == "histogram":
             self.histogram(name, value, tags=list(filtered_tags))
-        else:
-            self.log.debug("Metric %s not found in metrics spec", name)
 
     def _aggregate_metric(self, name: str, value: float, tags: list[str]):
         tags_sorted = sorted(tags)
@@ -207,7 +205,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         try:
             self.set_metadata('version', self.api_get("/version"))
         except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
-            self.log.warning("Failed to retrieve Prefect version: %s", e)
+            self.log.error("Failed to retrieve Prefect version: %s", e)
 
         # Flows that complete in this run of the check so that they are removed from the
         # flow_runs_tags cache after task runs are collected
@@ -260,14 +258,14 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             health = self.api_get("/health")
             self._emit_metric("health", 1.0 if health is True else 0.0, [])
         except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
-            self.log.warning("Failed to retrieve Prefect health status: %s", e)
+            self.log.error("Failed to retrieve Prefect health status: %s", e)
             self._emit_metric("health", 0.0, [])
 
         try:
             self.api_get("/ready")
             self._emit_metric("ready", 1.0, [])
         except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
-            self.log.warning("Failed to retrieve Prefect ready status: %s", e)
+            self.log.error("Failed to retrieve Prefect ready status: %s", e)
             self._emit_metric("ready", 0.0, [])
 
     def _collect_work_pool_metrics(self, now: datetime):
@@ -530,6 +528,14 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             if not self.filter_metrics.is_event_included(event_manager):
                 continue
 
+            if event_manager.occurred is None:
+                self.log.error(
+                    "Could not parse occurred timestamp %s for event %s",
+                    event_manager.event.get('occurred', ''),
+                    event_manager.id,
+                )
+                continue
+
             self._check_retry_gaps(event_manager)
             self._check_dependency_wait(event_manager)
             self._collect_task_run_metrics_from_events(event_manager)
@@ -538,7 +544,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
     def _emit_event_metrics(self, event_manager: EventManager):
         if event_manager.occurred is None:
-            self.log.warning("Could not find occurred timestamp for event %s", event_manager.id)
             return
 
         self.event(
@@ -555,7 +560,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
     def _check_retry_gaps(self, event_manager: EventManager) -> None:
         if event_manager.occurred is None:
-            self.log.error("Could not find occurred timestamp for flow run %s", event_manager.follows)
             return
         if event_manager.event_type == 'prefect.flow-run.AwaitingRetry':
             self.flows_awaiting_retry[event_manager.id] = event_manager.occurred.isoformat()
@@ -567,7 +571,12 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             await_retry_timestamp = _parse_time(self.flows_awaiting_retry.pop(event_manager.follows, None), self.log)
 
             if not await_retry_timestamp:
-                self.log.error("Could not find await retry timestamp for flow run %s", event_manager.follows)
+                self.log.error(
+                    "Could not find awaitingRetry timestamp for flow run %s in the cache, "
+                    "skipping retry gap metric for retried flow run %s",
+                    event_manager.follows,
+                    event_manager.resource_id,
+                )
                 return
             retry_gap = (event_manager.occurred - await_retry_timestamp).total_seconds()
 
@@ -655,19 +664,33 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         if last_polled:
             age = (now - last_polled).total_seconds()
             self._emit_metric("work_queue.last_polled_age_seconds", max(0, age), tags)
+        else:
+            self.log.error(
+                "Could not parse last polled time %s for queue %s, skipping queue last polled age metric",
+                queue.get('last_polled', ''),
+                queue.get('name', ''),
+            )
 
     def _add_worker_heartbeat_age_seconds(self, worker: dict, now: datetime, tags: list[str]):
         last_heartbeat = _parse_time(worker.get('last_heartbeat_time'), self.log)
         if last_heartbeat:
             age = (now - last_heartbeat).total_seconds()
             self._emit_metric("work_pool.worker.heartbeat_age_seconds", max(0, age), tags)
+        else:
+            self.log.error(
+                "Could not parse last heartbeat time %s for worker %s, skipping worker heartbeat age metric",
+                worker.get('last_heartbeat_time', ''),
+                worker.get('id', ''),
+            )
 
     def _aggregate_queue_backlog_metrics(
         self, state_type: str, expected_start_time: datetime, pname: str, qname: str, now: datetime
     ):
         queue = self.queues_by_name.get((pname, qname), {})
         if not queue:
-            self.log.warning("Could not find queue for pool %s and queue %s", pname, qname)
+            self.log.error(
+                "Could not find queue for pool %s and queue %s in cache, skipping queue backlog metrics", pname, qname
+            )
             return
         if (
             state_type in ['SCHEDULED', 'PENDING']
@@ -682,7 +705,11 @@ class PrefectCheck(AgentCheck, ConfigMixin):
     def _aggregate_concurrency_in_use_metric(self, state_type: str, pname: str, qname: str):
         queue = self.queues_by_name.get((pname, qname), {})
         if not queue:
-            self.log.warning("Could not find queue for pool %s and queue %s", pname, qname)
+            self.log.error(
+                "Could not find queue for pool %s and queue %s in cache, skipping concurrency in use metric",
+                pname,
+                qname,
+            )
             return
         if state_type == 'RUNNING':
             queue['concurrency_in_use'] = queue.get('concurrency_in_use', 0) + 1
