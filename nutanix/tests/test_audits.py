@@ -24,16 +24,12 @@ EXPECTED_AUDITS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_audit_id:529bb5f3-fb9f-412c-9452-1dbff8a5b1fc',
             'ntnx_audit_type:LoginInfoAudit',
             'ntnx_operation_type:$UNKNOWN',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_IAM_id:admin',
             'ntnx_IAM_name:admin',
             'ntnx_user_name:admin',
             'ntnx_affected_entity_type:IAM',
-            'ntnx_affected_entity_id:admin',
             'ntnx_affected_entity_name:admin',
             'ntnx_type:audit',
         ],
@@ -48,16 +44,12 @@ EXPECTED_AUDITS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_audit_id:cee0bd9d-ec29-4f47-a7f8-3a341a7e56c4',
             'ntnx_audit_type:LoginInfoAudit',
             'ntnx_operation_type:$UNKNOWN',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_IAM_id:admin',
             'ntnx_IAM_name:admin',
             'ntnx_user_name:admin',
             'ntnx_affected_entity_type:IAM',
-            'ntnx_affected_entity_id:admin',
             'ntnx_affected_entity_name:admin',
             'ntnx_type:audit',
         ],
@@ -72,16 +64,12 @@ EXPECTED_AUDITS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_audit_id:c583fa23-d8fd-42af-a0f3-3425bd2e4300',
             'ntnx_audit_type:LoginInfoAudit',
             'ntnx_operation_type:$UNKNOWN',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_IAM_id:admin',
             'ntnx_IAM_name:admin',
             'ntnx_user_name:admin',
             'ntnx_affected_entity_type:IAM',
-            'ntnx_affected_entity_id:admin',
             'ntnx_affected_entity_name:admin',
             'ntnx_type:audit',
         ],
@@ -96,16 +84,12 @@ EXPECTED_AUDITS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_audit_id:f13a286e-6a73-492d-bc91-c9e6041cf4a2',
             'ntnx_audit_type:LoginInfoAudit',
             'ntnx_operation_type:$UNKNOWN',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_IAM_id:admin',
             'ntnx_IAM_name:admin',
             'ntnx_user_name:admin',
             'ntnx_affected_entity_type:IAM',
-            'ntnx_affected_entity_id:admin',
             'ntnx_affected_entity_name:admin',
             'ntnx_type:audit',
         ],
@@ -204,7 +188,7 @@ def test_audits_filtered_by_resource_filters_include_cluster(
 
     audits = [e for e in aggregator.events if "ntnx_type:audit" in e.get("tags", [])]
     assert len(audits) == 4
-    assert all("ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d" in e["tags"] for e in audits)
+    assert all("ntnx_cluster_name:datadog-nutanix-dev" in e["tags"] for e in audits)
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")

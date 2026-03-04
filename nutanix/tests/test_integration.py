@@ -40,7 +40,6 @@ def test_cluster_metrics(dd_run_check, aggregator, instance):
     dd_run_check(check)
 
     expected_tags = [
-        'ntnx_cluster_id',
         'ntnx_cluster_name',
         'prism_central',
     ]
@@ -56,7 +55,6 @@ def test_cluster_stats_metrics(dd_run_check, aggregator, instance):
     dd_run_check(check)
 
     expected_tags = [
-        'ntnx_cluster_id',
         'ntnx_cluster_name',
         'prism_central',
     ]
@@ -72,13 +70,11 @@ def test_host_metrics(dd_run_check, aggregator, instance):
     dd_run_check(check)
 
     expected_tags = [
-        'ntnx_cluster_id',
         'ntnx_cluster_name',
         'ntnx_host_name',
         'ntnx_host_type',
         'ntnx_hypervisor_name',
         'ntnx_hypervisor_type',
-        'ntnx_host_id',
         'prism_central',
     ]
 
@@ -94,13 +90,11 @@ def test_host_stats_metrics(dd_run_check, aggregator, instance):
     dd_run_check(check)
 
     expected_tags = [
-        'ntnx_cluster_id',
         'ntnx_cluster_name',
         'ntnx_host_name',
         'ntnx_host_type',
         'ntnx_hypervisor_name',
         'ntnx_hypervisor_type',
-        'ntnx_host_id',
         'prism_central',
     ]
 
@@ -116,14 +110,9 @@ def test_vm_metrics(dd_run_check, aggregator, instance):
     dd_run_check(check)
 
     expected_tags = [
-        'ntnx_cluster_id',
         'ntnx_cluster_name',
-        'ntnx_generation_uuid',
-        'ntnx_host_id',
         'ntnx_host_name',
         'ntnx_is_agent_vm',
-        'ntnx_owner_id',
-        'ntnx_vm_id',
         'ntnx_vm_name',
         'prism_central',
     ]
@@ -140,14 +129,9 @@ def test_vm_stats_metrics(dd_run_check, aggregator, instance):
     dd_run_check(check)
 
     expected_tags = [
-        'ntnx_cluster_id',
         'ntnx_cluster_name',
-        'ntnx_generation_uuid',
-        'ntnx_host_id',
         'ntnx_host_name',
         'ntnx_is_agent_vm',
-        'ntnx_owner_id',
-        'ntnx_vm_id',
         'ntnx_vm_name',
         'prism_central',
     ]

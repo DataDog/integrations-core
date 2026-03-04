@@ -25,8 +25,6 @@ EXPECTED_EVENTS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_event_id:9dba574f-90c0-473f-b91b-9be33f1d4732',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'ntnx_event_classification:UserAction',
             'ntnx_type:event',
@@ -42,8 +40,6 @@ EXPECTED_EVENTS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_event_id:1f4d5f21-8bdd-4b15-8886-d232b5d030d8',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'ntnx_event_classification:UserAction',
             'ntnx_type:event',
@@ -59,8 +55,6 @@ EXPECTED_EVENTS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_event_id:4b7625c6-8a8d-4816-8ef1-019e8636f498',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'ntnx_event_classification:UserAction',
             'ntnx_type:event',
@@ -76,8 +70,6 @@ EXPECTED_EVENTS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_event_id:14f94d80-4404-4f1e-869d-fe22cbb4d00a',
-            'ntnx_cluster_id:b6d83094-9404-48de-9c74-ca6bddc3a01d',
             'ntnx_cluster_name:Unnamed',
             'ntnx_event_classification:UserAction',
             'ntnx_type:event',
@@ -93,8 +85,6 @@ EXPECTED_EVENTS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_event_id:0e7621b9-db61-4344-8978-3001cf386c3d',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'ntnx_event_classification:UserAction',
             'ntnx_type:event',
@@ -110,8 +100,6 @@ EXPECTED_EVENTS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_event_id:3c3da430-7670-406e-8f03-d29bdbc173f5',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'ntnx_event_classification:UserAction',
             'ntnx_type:event',
@@ -127,8 +115,6 @@ EXPECTED_EVENTS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_event_id:348a9873-f3c4-47f7-95bb-5ff52ad069cc',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'ntnx_event_classification:UserAction',
             'ntnx_type:event',
@@ -144,8 +130,6 @@ EXPECTED_EVENTS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_event_id:57d23178-e257-497d-9db4-9aa2ccbcd89e',
-            'ntnx_cluster_id:b6d83094-9404-48de-9c74-ca6bddc3a01d',
             'ntnx_cluster_name:Unnamed',
             'ntnx_event_classification:UserAction',
             'ntnx_type:event',
@@ -161,8 +145,6 @@ EXPECTED_EVENTS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_event_id:48c8d441-040e-480c-a36f-a05c5f276d35',
-            'ntnx_cluster_id:b6d83094-9404-48de-9c74-ca6bddc3a01d',
             'ntnx_cluster_name:Unnamed',
             'ntnx_event_classification:UserAction',
             'ntnx_type:event',
@@ -178,8 +160,6 @@ EXPECTED_EVENTS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_event_id:f1e41e4e-3a4b-4e22-970d-6df49f008e4c',
-            'ntnx_cluster_id:b6d83094-9404-48de-9c74-ca6bddc3a01d',
             'ntnx_cluster_name:Unnamed',
             'ntnx_event_classification:UserAction',
             'ntnx_type:event',
@@ -258,7 +238,7 @@ def test_events_filtered_by_resource_filters_exclude_cluster(
     dd_run_check(check)
 
     events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
-    assert not any("ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d" in e.get("tags", []) for e in events)
+    assert not any("ntnx_cluster_name:datadog-nutanix-dev" in e.get("tags", []) for e in events)
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
@@ -279,7 +259,7 @@ def test_events_filtered_by_resource_filters_include_cluster(
 
     events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
     assert len(events) >= 0  # May not have events in test fixture
-    assert all("ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d" in e.get("tags", []) for e in events)
+    assert all("ntnx_cluster_name:datadog-nutanix-dev" in e.get("tags", []) for e in events)
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")

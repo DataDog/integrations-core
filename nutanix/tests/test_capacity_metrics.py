@@ -26,14 +26,9 @@ class TestVMCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:vm',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_generation_uuid:d45a36e7-1c4c-40d6-ba6f-c2f52c211460',
-            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
             'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_is_agent_vm:False',
-            'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
-            'ntnx_vm_id:63e222ec-87ff-491b-b7ba-9247752d44a3',
             'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
             'nutanix',
             'prism_central:10.0.0.197',
@@ -49,14 +44,9 @@ class TestVMCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:vm',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_generation_uuid:d45a36e7-1c4c-40d6-ba6f-c2f52c211460',
-            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
             'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_is_agent_vm:False',
-            'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
-            'ntnx_vm_id:63e222ec-87ff-491b-b7ba-9247752d44a3',
             'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
             'nutanix',
             'prism_central:10.0.0.197',
@@ -72,14 +62,9 @@ class TestVMCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:vm',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_generation_uuid:d45a36e7-1c4c-40d6-ba6f-c2f52c211460',
-            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
             'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_is_agent_vm:False',
-            'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
-            'ntnx_vm_id:63e222ec-87ff-491b-b7ba-9247752d44a3',
             'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
             'nutanix',
             'prism_central:10.0.0.197',
@@ -95,14 +80,9 @@ class TestVMCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:vm',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_generation_uuid:d45a36e7-1c4c-40d6-ba6f-c2f52c211460',
-            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
             'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_is_agent_vm:False',
-            'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
-            'ntnx_vm_id:63e222ec-87ff-491b-b7ba-9247752d44a3',
             'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
             'nutanix',
             'prism_central:10.0.0.197',
@@ -118,14 +98,9 @@ class TestVMCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:vm',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_generation_uuid:d45a36e7-1c4c-40d6-ba6f-c2f52c211460',
-            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
             'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_is_agent_vm:False',
-            'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
-            'ntnx_vm_id:63e222ec-87ff-491b-b7ba-9247752d44a3',
             'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
             'nutanix',
             'prism_central:10.0.0.197',
@@ -145,13 +120,11 @@ class TestHostCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:host',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_host_type:HYPER_CONVERGED',
             'ntnx_hypervisor_name:AHV 10.3',
             'ntnx_hypervisor_type:AHV',
-            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
@@ -168,13 +141,11 @@ class TestHostCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:host',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_host_type:HYPER_CONVERGED',
             'ntnx_hypervisor_name:AHV 10.3',
             'ntnx_hypervisor_type:AHV',
-            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
@@ -191,13 +162,11 @@ class TestHostCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:host',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_host_type:HYPER_CONVERGED',
             'ntnx_hypervisor_name:AHV 10.3',
             'ntnx_hypervisor_type:AHV',
-            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
@@ -214,13 +183,11 @@ class TestHostCapacityMetrics:
 
         expected_tags = [
             'ntnx_type:host',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'ntnx_host_name:10-0-0-103-aws-us-east-1a',
             'ntnx_host_type:HYPER_CONVERGED',
             'ntnx_hypervisor_name:AHV 10.3',
             'ntnx_hypervisor_type:AHV',
-            'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
             'nutanix',
             'prism_central:10.0.0.197',
         ]
@@ -240,7 +207,6 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'nutanix',
             'prism_central:10.0.0.197',
@@ -255,7 +221,6 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'nutanix',
             'prism_central:10.0.0.197',
@@ -270,7 +235,6 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'nutanix',
             'prism_central:10.0.0.197',
@@ -285,7 +249,6 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'nutanix',
             'prism_central:10.0.0.197',
@@ -300,7 +263,6 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'nutanix',
             'prism_central:10.0.0.197',

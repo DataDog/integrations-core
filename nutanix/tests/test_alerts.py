@@ -26,13 +26,10 @@ EXPECTED_ALERTS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_alert_id:5bfd312f-dff9-4c08-a0fe-e059d2167606',
             'ntnx_alert_type:A1031',
             'ntnx_alert_severity:WARNING',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_alert_classification:Storage',
             'ntnx_alert_impact:SYSTEM_INDICATOR',
-            'ntnx_node_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
             'ntnx_node_name:10-0-0-103-aws-us-east-1a',
             'ntnx_type:alert',
         ],
@@ -47,13 +44,10 @@ EXPECTED_ALERTS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_alert_id:ebf72745-2c84-4e5a-a94e-7bec727a206c',
             'ntnx_alert_type:A1031',
             'ntnx_alert_severity:WARNING',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_alert_classification:Storage',
             'ntnx_alert_impact:SYSTEM_INDICATOR',
-            'ntnx_node_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
             'ntnx_node_name:10-0-0-103-aws-us-east-1a',
             'ntnx_type:alert',
         ],
@@ -69,13 +63,10 @@ EXPECTED_ALERTS = [
         'tags': [
             'nutanix',
             'prism_central:10.0.0.197',
-            'ntnx_alert_id:c17420bd-d048-4a3a-ba02-fb485cae2aaf',
             'ntnx_alert_type:A130172',
             'ntnx_alert_severity:INFO',
-            'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
             'ntnx_alert_classification:DR',
             'ntnx_alert_impact:SYSTEM_INDICATOR',
-            'ntnx_vm_id:7b9d5b24-b99a-4c62-516c-0fe0c20411dd',
             'ntnx_vm_name:ubuntu-vm',
             'ntnx_type:alert',
         ],
@@ -103,7 +94,7 @@ def test_alerts_collection(get_current_datetime, dd_run_check, aggregator, mock_
         assert alert['event_type'] == 'nutanix'
         assert alert['source_type_name'] == 'nutanix'
         assert 'ntnx_type:alert' in alert['tags']
-        assert 'ntnx_alert_id' in str(alert['tags'])
+        assert 'ntnx_alert_type' in str(alert['tags'])
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
@@ -154,7 +145,7 @@ def test_alerts_filtered_by_resource_filters_exclude_cluster(
 
     alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
     # No alerts should have the excluded cluster
-    assert all("ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d" not in e["tags"] for e in alerts)
+    assert all("ntnx_cluster_name:datadog-nutanix-dev" not in e["tags"] for e in alerts)
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
@@ -176,7 +167,7 @@ def test_alerts_filtered_by_resource_filters_include_cluster(
     alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
     assert len(alerts) > 0, "Expected some alerts to be collected"
     # All collected alerts should have the included cluster ID
-    assert all("ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d" in e["tags"] for e in alerts)
+    assert all("ntnx_cluster_name:datadog-nutanix-dev" in e["tags"] for e in alerts)
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
@@ -311,8 +302,7 @@ def test_alert_a1031_disk_space_complete_output(
     assert "ntnx_alert_severity:WARNING" in alert["tags"]
     assert "ntnx_alert_classification:Storage" in alert["tags"]
     assert "ntnx_alert_impact:SYSTEM_INDICATOR" in alert["tags"]
-    assert any("ntnx_cluster_id:" in tag for tag in alert["tags"])
-    assert any("ntnx_node_id:" in tag for tag in alert["tags"])
+    assert any("ntnx_cluster_name:" in tag for tag in alert["tags"])
     assert any("ntnx_node_name:" in tag for tag in alert["tags"])
 
 
@@ -358,7 +348,6 @@ def test_alert_a130172_vm_recovery_complete_output(
     assert "ntnx_alert_severity:INFO" in alert["tags"]
     assert "ntnx_alert_classification:DR" in alert["tags"]
     assert "ntnx_alert_impact:SYSTEM_INDICATOR" in alert["tags"]
-    assert "ntnx_vm_id:7b9d5b24-b99a-4c62-516c-0fe0c20411dd" in alert["tags"]
     assert "ntnx_vm_name:ubuntu-vm" in alert["tags"]
 
 
@@ -400,7 +389,7 @@ def test_alert_a6227_password_expiry_complete_output(
     assert "ntnx_alert_severity:WARNING" in alert["tags"]
     assert "ntnx_alert_classification:Cluster" in alert["tags"]
     assert "ntnx_alert_impact:CONFIGURATION" in alert["tags"]
-    assert "ntnx_cluster_id:d07db284-6df6-4ca2-88cd-9dd5ed71ac08" in alert["tags"]
+    assert "ntnx_cluster_name:prism-central-deployment" in alert["tags"]
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")

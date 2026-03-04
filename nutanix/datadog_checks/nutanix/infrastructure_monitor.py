@@ -437,12 +437,6 @@ class InfrastructureMonitor:
 
         tags.append("ntnx_type:host")
 
-        if tenant_id := host.get("tenantId"):
-            tags.append(f"ntnx_tenant_id:{tenant_id}")
-
-        if host_id := host.get("extId"):
-            tags.append(f"ntnx_host_id:{host_id}")
-
         if host_name := host.get("hostName"):
             tags.append(f"ntnx_host_name:{host_name}")
 
@@ -465,19 +459,9 @@ class InfrastructureMonitor:
         """Extract tags from a cluster object."""
         tags = []
 
-        cluster_id = cluster.get("extId")
-        if cluster_id:
-            tags.append(f"ntnx_cluster_id:{cluster_id}")
-
         cluster_name = cluster.get("name")
         if cluster_name:
             tags.append(f"ntnx_cluster_name:{cluster_name}")
-
-        if tenant_id := cluster.get("tenantId"):
-            tags.append(f"ntnx_tenant_id:{tenant_id}")
-
-        if cluster_profile_id := cluster.get("clusterProfileExtId"):
-            tags.append(f"ntnx_cluster_profile_id:{cluster_profile_id}")
 
         # Add category tags
         tags.extend(self.check.extract_category_tags(cluster))
@@ -490,40 +474,20 @@ class InfrastructureMonitor:
 
         tags.append("ntnx_type:vm")
 
-        vm_id = vm.get("extId")
-        if vm_id:
-            tags.append(f"ntnx_vm_id:{vm_id}")
-
         vm_name = vm.get("name")
         if vm_name:
             tags.append(f"ntnx_vm_name:{vm_name}")
 
-        vm_generation_uuid = vm.get("generationUuid")
-        if vm_generation_uuid:
-            tags.append(f"ntnx_generation_uuid:{vm_generation_uuid}")
-
         # Add category tags
         tags.extend(self.check.extract_category_tags(vm))
 
-        owner_id = vm.get("ownershipInfo", {}).get("owner", {}).get("extId")
-        if owner_id:
-            tags.append(f"ntnx_owner_id:{owner_id}")
-
         host_id = vm.get("host", {}).get("extId")
-        if host_id:
-            tags.append(f"ntnx_host_id:{host_id}")
-            if host_id in self.host_names:
-                tags.append(f"ntnx_host_name:{self.host_names[host_id]}")
+        if host_id and host_id in self.host_names:
+            tags.append(f"ntnx_host_name:{self.host_names[host_id]}")
 
         cluster_id = vm.get("cluster", {}).get("extId")
-        if cluster_id:
-            tags.append(f"ntnx_cluster_id:{cluster_id}")
-            if cluster_id in self.cluster_names:
-                tags.append(f"ntnx_cluster_name:{self.cluster_names[cluster_id]}")
-
-        availability_zone_id = vm.get("availabilityZone", {}).get("extId")
-        if availability_zone_id:
-            tags.append(f"ntnx_availability_zone_id:{availability_zone_id}")
+        if cluster_id and cluster_id in self.cluster_names:
+            tags.append(f"ntnx_cluster_name:{self.cluster_names[cluster_id]}")
 
         is_agent_vm = is_affirmative(vm.get("isAgentVm"))
         tags.append(f"ntnx_is_agent_vm:{is_agent_vm}")

@@ -256,7 +256,6 @@ class ActivityMonitor:
 
     def _process_event(self, event: dict) -> None:
         """Process and send a single event to Datadog."""
-        event_id = event.get("extId", "unknown")
         event_title = event.get("eventType", "Nutanix Event")
         event_message = event.get("message", "")
         created_time = event.get("creationTime")
@@ -270,24 +269,16 @@ class ActivityMonitor:
         # Extract entity information for tagging
         event_tags = self.check.base_tags.copy()
 
-        event_tags.append(f"ntnx_event_id:{event_id}")
-
         cluster_id = event.get("sourceClusterUUID", event.get("clusterUUID"))
 
-        if cluster_id:
-            event_tags.append(f"ntnx_cluster_id:{cluster_id}")
-            if cluster_id in self.check.cluster_names:
-                event_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
+        if cluster_id and cluster_id in self.check.cluster_names:
+            event_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
 
         for classification in classifications:
             event_tags.append(f"ntnx_event_classification:{classification}")
 
         if source_entity := event.get("sourceEntity"):
             if entity_type := source_entity.get("type"):
-                entity_id = source_entity.get("extId")
-                if entity_id:
-                    event_tags.append(f"ntnx_{entity_type}_id:{entity_id}")
-
                 entity_name = source_entity.get("name")
                 if entity_name:
                     event_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
@@ -343,7 +334,6 @@ class ActivityMonitor:
             message = self._render_message(message, parameters)
 
         audit_tags = self.check.base_tags.copy()
-        audit_tags.append(f"ntnx_audit_id:{audit_id}")
         audit_tags.append(f"ntnx_audit_type:{audit_type}")
         if operation_type:
             audit_tags.append(f"ntnx_operation_type:{operation_type}")
@@ -351,20 +341,13 @@ class ActivityMonitor:
         if cluster_ref := audit.get("clusterReference"):
             cluster_id = cluster_ref.get("extId")
             cluster_name = cluster_ref.get("name")
-            if cluster_id:
-                audit_tags.append(f"ntnx_cluster_id:{cluster_id}")
-                if cluster_id in self.check.cluster_names:
-                    audit_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
-                elif cluster_name:
-                    audit_tags.append(f"ntnx_cluster_name:{cluster_name}")
+            if cluster_id and cluster_id in self.check.cluster_names:
+                audit_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
             elif cluster_name:
                 audit_tags.append(f"ntnx_cluster_name:{cluster_name}")
 
         if source_entity := audit.get("sourceEntity"):
             if entity_type := source_entity.get("type"):
-                entity_id = source_entity.get("extId")
-                if entity_id:
-                    audit_tags.append(f"ntnx_{entity_type}_id:{entity_id}")
                 entity_name = source_entity.get("name")
                 if entity_name:
                     audit_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
@@ -380,8 +363,6 @@ class ActivityMonitor:
         for entity in affected_entities:
             if entity_type := entity.get("type"):
                 audit_tags.append(f"ntnx_affected_entity_type:{entity_type}")
-            if entity_id := entity.get("extId"):
-                audit_tags.append(f"ntnx_affected_entity_id:{entity_id}")
             if entity_name := entity.get("name"):
                 audit_tags.append(f"ntnx_affected_entity_name:{entity_name}")
 
@@ -434,7 +415,6 @@ class ActivityMonitor:
 
     def _process_alert(self, alert: dict) -> None:
         """Process and send a single alert to Datadog."""
-        alert_id = alert.get("extId", "unknown")
         title = alert.get("title", "Nutanix Alert")
         message = alert.get("message", "")
         created_time = alert.get("creationTime")
@@ -455,14 +435,12 @@ class ActivityMonitor:
         event_alert_type = severity_map.get(severity, "info")
 
         alert_tags = self.check.base_tags.copy()
-        alert_tags.append(f"ntnx_alert_id:{alert_id}")
         if alert_type:
             alert_tags.append(f"ntnx_alert_type:{alert_type}")
         if severity:
             alert_tags.append(f"ntnx_alert_severity:{severity}")
 
         if cluster_id := alert.get("clusterUUID"):
-            alert_tags.append(f"ntnx_cluster_id:{cluster_id}")
             if cluster_id in self.check.cluster_names:
                 alert_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
 
@@ -474,8 +452,6 @@ class ActivityMonitor:
 
         if source_entity := alert.get("sourceEntity"):
             if entity_type := source_entity.get("type"):
-                if entity_id := source_entity.get("extId"):
-                    alert_tags.append(f"ntnx_{entity_type}_id:{entity_id}")
                 if entity_name := source_entity.get("name"):
                     alert_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
 
@@ -500,7 +476,6 @@ class ActivityMonitor:
 
     def _process_task(self, task: dict) -> None:
         """Process and send a single task to Datadog as an event."""
-        task_id = task.get("extId", "unknown")
         task_operation = task.get("operation", "Nutanix Task")
         task_description = task.get("operationDescription", "")
         created_time = task.get("createdTime")
@@ -519,14 +494,12 @@ class ActivityMonitor:
 
         # tags
         task_tags = self.check.base_tags.copy()
-        task_tags.append(f"ntnx_task_id:{task_id}")
         task_tags.append(f"ntnx_task_status:{status}")
 
         # cluster info
         cluster_ext_ids = task.get("clusterExtIds", [])
         if cluster_ext_ids:
             for cluster_id in cluster_ext_ids:
-                task_tags.append(f"ntnx_cluster_id:{cluster_id}")
                 if cluster_id in self.check.cluster_names:
                     task_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
 
@@ -534,16 +507,12 @@ class ActivityMonitor:
         if owner := task.get("ownedBy"):
             if owner_name := owner.get("name"):
                 task_tags.append(f"ntnx_owner_name:{owner_name}")
-            if owner_id := owner.get("extId"):
-                task_tags.append(f"ntnx_owner_id:{owner_id}")
 
         # affected entities
         entities_affected = task.get("entitiesAffected", [])
         for entity in entities_affected:
             if entity_type := entity.get("rel"):
                 task_tags.append(f"ntnx_entity_type:{entity_type}")
-            if entity_id := entity.get("extId"):
-                task_tags.append(f"ntnx_entity_id:{entity_id}")
             if entity_name := entity.get("name"):
                 task_tags.append(f"ntnx_entity_name:{entity_name}")
 

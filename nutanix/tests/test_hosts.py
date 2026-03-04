@@ -17,13 +17,11 @@ def test_host_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
 
     expected_tags = [
         'ntnx_type:host',
-        'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
         'ntnx_cluster_name:datadog-nutanix-dev',
         'ntnx_host_name:10-0-0-103-aws-us-east-1a',
         'ntnx_host_type:HYPER_CONVERGED',
         'ntnx_hypervisor_name:AHV 10.3',
         'ntnx_hypervisor_type:AHV',
-        'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
         'nutanix',
         'prism_central:10.0.0.197',
     ]
@@ -37,13 +35,11 @@ def test_host_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_g
 
     expected_tags = [
         'ntnx_type:host',
-        'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
         'ntnx_cluster_name:datadog-nutanix-dev',
         'ntnx_host_name:10-0-0-103-aws-us-east-1a',
         'ntnx_host_type:HYPER_CONVERGED',
         'ntnx_hypervisor_name:AHV 10.3',
         'ntnx_hypervisor_type:AHV',
-        'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
         'nutanix',
         'prism_central:10.0.0.197',
     ]
@@ -59,13 +55,11 @@ def test_host_status_metrics(dd_run_check, aggregator, mock_instance, mock_http_
 
     expected_tags = [
         'ntnx_type:host',
-        'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
         'ntnx_cluster_name:datadog-nutanix-dev',
         'ntnx_host_name:10-0-0-103-aws-us-east-1a',
         'ntnx_host_type:HYPER_CONVERGED',
         'ntnx_hypervisor_name:AHV 10.3',
         'ntnx_hypervisor_type:AHV',
-        'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
         'ntnx_node_status:NORMAL',
         'nutanix',
         'prism_central:10.0.0.197',
@@ -83,13 +77,11 @@ def test_external_tags_for_host(dd_run_check, aggregator, mock_instance, mock_ht
         {
             'nutanix': [
                 'ntnx_type:host',
-                'ntnx_cluster_id:00064715-c043-5d8f-ee4b-176ec875554d',
                 'ntnx_cluster_name:datadog-nutanix-dev',
                 'ntnx_host_name:10-0-0-103-aws-us-east-1a',
                 'ntnx_host_type:HYPER_CONVERGED',
                 'ntnx_hypervisor_name:AHV 10.3',
                 'ntnx_hypervisor_type:AHV',
-                'ntnx_host_id:d8787814-4fe8-4ba5-931f-e1ee31c294a6',
                 'nutanix',
                 'prism_central:10.0.0.197',
             ]
