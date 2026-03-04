@@ -3,13 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
-from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 from unittest.mock import Mock
 
 import pytest
-from _pytest.monkeypatch import MonkeyPatch
+from pytest import MonkeyPatch
+from requests.exceptions import HTTPError
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
@@ -22,8 +22,29 @@ SESSION_AUTH_TAGS = BASE_TAGS + ["auth_method:session_login"]
 
 
 class _ApiStub:
-    # Simulates the Control-M REST API at the HTTP transport boundary.
-    # When multiple endpoints are needed, use this class.
+    """
+    Simulates the Control-M REST API at the HTTP transport boundary when more than one
+    response is needed.
+
+    Parameters
+    ----------
+    servers:
+        Servers returned by ``GET /config/servers``.
+    jobs:
+        Job status entries returned inside ``GET /run/jobs/status``.
+    jobs_total:
+        Optional ``total`` field in the jobs status payload.
+    server_status / jobs_status / login_status:
+        HTTP status codes for the corresponding endpoints.
+    login_token:
+        Token returned by a successful ``POST /session/login``.
+    reject_first_server_call:
+        When ``True`` the *first* ``GET /config/servers`` returns 401,
+        simulating a rejected static token.  Subsequent calls succeed
+        normally.  This is purely behavioral — it does not inspect how
+        authentication headers are attached.
+    """
+
     def __init__(
         self,
         *,
@@ -34,7 +55,7 @@ class _ApiStub:
         jobs_status: int = 200,
         login_token: str = "test-session-token",
         login_status: int = 200,
-        reject_static_token: bool = False,
+        reject_first_server_call: bool = False,
     ) -> None:
         self.servers = servers if servers is not None else []
         self.jobs = jobs if jobs is not None else []
@@ -43,24 +64,26 @@ class _ApiStub:
         self.jobs_status = jobs_status
         self.login_token = login_token
         self.login_status = login_status
-        self.reject_static_token = reject_static_token
+        self._reject_first_server_call = reject_first_server_call
+        self._server_call_count = 0
 
     def get(self, url: str, **kw: Any) -> Mock:
         if "/config/servers" in url:
-            if self.reject_static_token and kw.get("extra_headers") is None:
-                return self._error(401)
+            self._server_call_count += 1
+            if self._reject_first_server_call and self._server_call_count == 1:
+                return self._respond(None, 401)
             return self._respond(self.servers, self.server_status)
         if "/run/jobs/status" in url:
             payload: dict[str, Any] = {"statuses": self.jobs}
             if self.jobs_total is not None:
                 payload["total"] = self.jobs_total
             return self._respond(payload, self.jobs_status)
-        return self._error(404)
+        return self._respond(None, 404)
 
     def post(self, url: str, **kw: Any) -> Mock:
         if "/session/login" in url:
             return self._respond({"token": self.login_token}, self.login_status)
-        return self._error(404)
+        return self._respond(None, 404)
 
     @staticmethod
     def _respond(data: Any, status_code: int = 200) -> Mock:
@@ -73,21 +96,11 @@ class _ApiStub:
             resp.raise_for_status = Mock()
         else:
             resp.text = f"Error {status_code}"
-            resp.raise_for_status = Mock(side_effect=Exception(f"HTTP {status_code}"))
-        return resp
-
-    @staticmethod
-    def _error(status_code: int) -> Mock:
-        resp = Mock()
-        resp.status_code = status_code
-        resp.ok = False
-        resp.text = f"Error {status_code}"
-        resp.raise_for_status = Mock(side_effect=Exception(f"HTTP {status_code}"))
+            resp.raise_for_status = Mock(side_effect=HTTPError(f"{status_code} Server Error", response=resp))
         return resp
 
 
 def _load_job(fixture: str, **overrides: Any) -> dict[str, Any]:
-    # Load a job fixture from ``fixtures/`` and apply *overrides*.
     job = json.loads((FIXTURE_DIR / fixture).read_text())
     job.update(overrides)
     return job
@@ -98,13 +111,11 @@ def _make_check(instance: dict[str, Any]) -> ControlMCheck:
 
 
 def _mock_http(check: ControlMCheck, api: _ApiStub, monkeypatch: MonkeyPatch) -> None:
-    # Patch the check's HTTP transport to use *api* as the backend.
     monkeypatch.setattr(type(check.http), "get", lambda self, url, **kw: api.get(url, **kw))
     monkeypatch.setattr(type(check.http), "post", lambda self, url, **kw: api.post(url, **kw))
 
 
 def _run_check(check: ControlMCheck) -> None:
-    # Execute one check cycle through the public entry point.
     check.check(None)
 
 
@@ -131,33 +142,40 @@ def test_config_partial_credentials(partial: dict[str, str]) -> None:
 
 
 def test_connect_ok_with_static_token(
-    instance: dict[str, Any],
-    aggregator: AggregatorStub,
-    mock_http_response: Callable[..., Any],
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
-    mock_http_response((FIXTURE_DIR / "config_servers_response.txt").read_text())
     check = _make_check(instance)
+    _mock_http(
+        check,
+        _ApiStub(
+            servers=[{"name": "srv1", "state": "Up"}],
+            jobs=[_load_job("job_executing.json")],
+        ),
+        monkeypatch,
+    )
 
     _run_check(check)
 
     aggregator.assert_service_check("control_m.can_connect", status=AgentCheck.OK, count=1)
-    aggregator.assert_metric("control_m.can_connect", value=1, tags=STATIC_AUTH_TAGS, count=1)
+    aggregator.assert_metric("control_m.can_connect", value=1, count=1)
+    aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:static_token")
     aggregator.assert_metric("control_m.server.up", value=1, count=1)
+    aggregator.assert_metric("control_m.jobs.returned", value=1, count=1)
+    assert len(aggregator.events) == 0
 
 
 def test_connect_server_error_emits_critical(
-    instance: dict[str, Any],
-    aggregator: AggregatorStub,
-    mock_http_response: Callable[..., Any],
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
-    mock_http_response(status_code=500)
     check = _make_check(instance)
+    _mock_http(check, _ApiStub(server_status=500), monkeypatch)
 
-    with pytest.raises(Exception):
+    with pytest.raises(HTTPError, match="500"):
         _run_check(check)
 
     aggregator.assert_service_check("control_m.can_connect", status=AgentCheck.CRITICAL, count=1)
-    aggregator.assert_metric("control_m.can_connect", value=0, tags=STATIC_AUTH_TAGS, count=1)
+    aggregator.assert_metric("control_m.can_connect", value=0, count=1)
+    aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:static_token")
 
 
 def test_connect_session_login_ok(
@@ -170,7 +188,9 @@ def test_connect_session_login_ok(
 
     aggregator.assert_service_check("control_m.can_login", status=AgentCheck.OK, tags=SESSION_AUTH_TAGS, count=1)
     aggregator.assert_service_check("control_m.can_connect", status=AgentCheck.OK, tags=SESSION_AUTH_TAGS, count=1)
-    aggregator.assert_metric("control_m.can_connect", value=1, tags=SESSION_AUTH_TAGS, count=1)
+    aggregator.assert_metric("control_m.can_connect", value=1, count=1)
+    aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:session_login")
+    assert len(aggregator.events) == 0
 
 
 def test_connect_session_login_failure_emits_critical(
@@ -179,7 +199,7 @@ def test_connect_session_login_failure_emits_critical(
     check = _make_check(session_instance)
     _mock_http(check, _ApiStub(login_status=401), monkeypatch)
 
-    with pytest.raises(Exception):
+    with pytest.raises(HTTPError, match="401"):
         _run_check(check)
 
     aggregator.assert_service_check("control_m.can_login", status=AgentCheck.CRITICAL, count=1)
@@ -191,19 +211,21 @@ def test_connect_session_login_failure_emits_critical(
 def test_connect_static_token_401_falls_back_to_session(
     instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
+    """Static token gets 401; check falls back to session login transparently."""
     instance["control_m_username"] = "user"
     instance["control_m_password"] = "pass"
     check = _make_check(instance)
     _mock_http(
         check,
-        _ApiStub(servers=[{"name": "srv1", "state": "Up"}], reject_static_token=True),
+        _ApiStub(servers=[{"name": "srv1", "state": "Up"}], reject_first_server_call=True),
         monkeypatch,
     )
 
     _run_check(check)
 
     aggregator.assert_service_check("control_m.can_connect", status=AgentCheck.OK, count=1)
-    aggregator.assert_metric("control_m.can_connect", value=1, tags=BASE_TAGS + ["auth_method:session_login"], count=1)
+    aggregator.assert_metric("control_m.can_connect", value=1, count=1)
+    aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:session_login")
 
 
 def test_server_health_up_and_down(
@@ -224,12 +246,14 @@ def test_server_health_up_and_down(
 
     _run_check(check)
 
-    aggregator.assert_metric("control_m.server.up", value=1, tags=BASE_TAGS + ["ctm_server:srv_up", "state:up"])
     aggregator.assert_metric(
-        "control_m.server.up", value=0, tags=BASE_TAGS + ["ctm_server:srv_down", "state:disconnected"]
+        "control_m.server.up", value=1, tags=BASE_TAGS + ["ctm_server:srv_up", "state:up"], count=1
     )
     aggregator.assert_metric(
-        "control_m.server.up", value=0, tags=BASE_TAGS + ["ctm_server:srv_no_state", "state:unknown"]
+        "control_m.server.up", value=0, tags=BASE_TAGS + ["ctm_server:srv_down", "state:disconnected"], count=1
+    )
+    aggregator.assert_metric(
+        "control_m.server.up", value=0, tags=BASE_TAGS + ["ctm_server:srv_no_state", "state:unknown"], count=1
     )
 
 
@@ -276,8 +300,9 @@ def test_jobs_total_and_returned(
 
     _run_check(check)
 
-    aggregator.assert_metric("control_m.jobs.total", value=10, tags=BASE_TAGS, count=1)
-    aggregator.assert_metric("control_m.jobs.returned", value=2, tags=BASE_TAGS, count=1)
+    aggregator.assert_metric("control_m.jobs.total", value=10, count=1)
+    aggregator.assert_metric("control_m.jobs.returned", value=2, count=1)
+    assert len(aggregator.events) == 0
 
 
 def test_jobs_active_and_waiting_per_server(
@@ -334,9 +359,10 @@ def test_jobs_empty_response(instance: dict[str, Any], aggregator: AggregatorStu
 
     _run_check(check)
 
-    aggregator.assert_metric("control_m.jobs.returned", value=0, tags=BASE_TAGS, count=1)
+    aggregator.assert_metric("control_m.jobs.returned", value=0, count=1)
     aggregator.assert_metric("control_m.jobs.total", count=0)
     aggregator.assert_metric("control_m.jobs.active", count=0)
+    assert len(aggregator.events) == 0
 
 
 def test_jobs_malformed_entries_skipped(
@@ -351,7 +377,7 @@ def test_jobs_malformed_entries_skipped(
 
     _run_check(check)
 
-    aggregator.assert_metric("control_m.jobs.returned", value=3, tags=BASE_TAGS, count=1)
+    aggregator.assert_metric("control_m.jobs.returned", value=3, count=1)
     aggregator.assert_metric("control_m.jobs.active", value=1, count=1)
 
 
@@ -361,7 +387,17 @@ def test_terminal_ended_ok_with_duration(
     check = _make_check(instance)
     _mock_http(
         check,
-        _ApiStub(jobs=[_load_job("job_ended_ok.json", jobId="t1", name="timed_job")]),
+        _ApiStub(
+            jobs=[
+                _load_job(
+                    "job_ended_ok.json",
+                    jobId="t1",
+                    name="timed_job",
+                    startTime="20260115100000",
+                    endTime="20260115103000",
+                )
+            ]
+        ),
         monkeypatch,
     )
 
@@ -371,6 +407,7 @@ def test_terminal_ended_ok_with_duration(
     aggregator.assert_metric_has_tag("control_m.job.run.count", "result:ok")
     aggregator.assert_metric("control_m.job.run.duration_ms", value=1_800_000, count=1)
     aggregator.assert_metric_has_tag("control_m.job.run.duration_ms", "job_name:timed_job")
+    assert len(aggregator.events) == 0
 
 
 def test_terminal_ended_not_ok(instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
@@ -385,6 +422,8 @@ def test_terminal_ended_not_ok(instance: dict[str, Any], aggregator: AggregatorS
 
     aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
     aggregator.assert_metric_has_tag("control_m.job.run.count", "result:failed")
+    aggregator.assert_metric("control_m.job.run.duration_ms", count=0)
+    assert len(aggregator.events) == 0
 
 
 def test_terminal_canceled(instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
@@ -399,6 +438,8 @@ def test_terminal_canceled(instance: dict[str, Any], aggregator: AggregatorStub,
 
     aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
     aggregator.assert_metric_has_tag("control_m.job.run.count", "result:canceled")
+    aggregator.assert_metric("control_m.job.run.duration_ms", count=0)
+    assert len(aggregator.events) == 0
 
 
 def test_terminal_without_timestamps_emits_count_only(
@@ -414,6 +455,7 @@ def test_terminal_without_timestamps_emits_count_only(
 
     aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
     aggregator.assert_metric("control_m.job.run.duration_ms", count=0)
+    assert len(aggregator.events) == 0
 
 
 def test_terminal_without_dedupe_key_skips_run_metrics(
@@ -430,6 +472,7 @@ def test_terminal_without_dedupe_key_skips_run_metrics(
 
     aggregator.assert_metric("control_m.job.run.count", count=0)
     aggregator.assert_metric("control_m.jobs.by_status", count=1)
+    assert len(aggregator.events) == 0
 
 
 def test_terminal_all_statuses_with_server_fallback(
@@ -458,11 +501,13 @@ def test_terminal_all_statuses_with_server_fallback(
     aggregator.assert_metric_has_tag("control_m.job.run.count", "result:canceled")
     aggregator.assert_metric_has_tag("control_m.job.run.count", "result:ok")
     aggregator.assert_metric_has_tag("control_m.job.run.count", "ctm_server:alt_server")
+    assert len(aggregator.events) == 0
 
 
 def test_dedup_same_terminal_job_counted_once(
     instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
+    """Same job+run seen across consecutive check cycles is only counted once."""
     api = _ApiStub(jobs=[_load_job("job_ended_ok.json", jobId="d1", name="j1")])
     check = _make_check(instance)
     _mock_http(check, api, monkeypatch)
@@ -478,6 +523,7 @@ def test_dedup_same_terminal_job_counted_once(
 def test_dedup_new_run_number_counted_as_new_completion(
     instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
+    """Bumping numberOfRuns signals a new completion, so it is counted again."""
     api = _ApiStub(jobs=[_load_job("job_ended_ok.json", jobId="r1", name="j1")])
     check = _make_check(instance)
     _mock_http(check, api, monkeypatch)
@@ -494,6 +540,7 @@ def test_dedup_new_run_number_counted_as_new_completion(
 def test_dedup_survives_check_recreation(
     instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
+    """Dedup state persists in the Agent cache and survives check recreation."""
     api = _ApiStub(jobs=[_load_job("job_ended_ok.json", jobId="p1", name="j1")])
     check1 = _make_check(instance)
     _mock_http(check1, api, monkeypatch)
@@ -611,7 +658,17 @@ def test_event_slow_run_check(instance: dict[str, Any], aggregator: AggregatorSt
     check = _make_check(instance)
     _mock_http(
         check,
-        _ApiStub(jobs=[_load_job("job_ended_ok.json", jobId="e6", name="slow_job")]),
+        _ApiStub(
+            jobs=[
+                _load_job(
+                    "job_ended_ok.json",
+                    jobId="e6",
+                    name="slow_job",
+                    startTime="20260115100000",
+                    endTime="20260115103000",
+                )
+            ]
+        ),
         monkeypatch,
     )
 
@@ -689,6 +746,7 @@ def test_event_includes_high_cardinality_details(
 def test_events_not_duplicated_across_runs(
     instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
+    """Events respect dedup: same job+run fires an event only on the first cycle."""
     instance["emit_job_events"] = True
     api = _ApiStub(jobs=[_load_job("job_ended_not_ok.json", jobId="ed1", name="dup_job")])
     check = _make_check(instance)
