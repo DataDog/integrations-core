@@ -7,6 +7,9 @@ on:
     branches:
       - master
       - "[0-9]+.[0-9]+.x"
+    paths:
+      - '*/CHANGELOG.md'
+      - '*/src/datadog_checks/*/__about__.py'
   workflow_dispatch:
     inputs:
       integrations:
@@ -17,7 +20,6 @@ on:
         description: "Commit SHA or ref to build from"
         required: true
         type: string
-  pull_request:
 
 jobs:
   dispatch:

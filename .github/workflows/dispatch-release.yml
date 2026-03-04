@@ -8,7 +8,9 @@ on:
         required: false
         type: string
       integrations:
-        description: "JSON array of integration names (optional — auto-detected if omitted)"
+        description: >-
+          Integration list to release. Accepts a JSON array (e.g. '["postgres","mysql"]'),
+          'all' to release every integration in the repo, or omit to auto-detect from new tags.
         required: false
         type: string
       source-repo-ref:
@@ -31,13 +33,19 @@ jobs:
           fetch-depth: 0 # ddev needs full tag history
 
       - name: Install ddev
-        run: pip install ddev
+        run: pip install ddev==14.3.2
 
-      - name: Tag releases and detect integration list
+      - name: Tag releases
+        if: inputs.integrations == ''
+        id: tag
+        run: python .github/workflows/scripts/tag-releases.py
+
+      - name: Detect integration list
+        if: inputs.integrations != '' || steps.tag.outputs.tagged == 'true'
         id: detect
         env:
           MANUAL_INTEGRATIONS: ${{ inputs.integrations }}
-        run: python .github/workflows/scripts/tag-and-detect.py
+        run: python .github/workflows/scripts/detect-integrations.py
 
       - name: Get GitHub token via dd-octo-sts
         if: >-
