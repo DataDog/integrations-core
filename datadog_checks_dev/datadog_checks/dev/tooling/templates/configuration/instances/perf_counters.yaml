@@ -13,6 +13,7 @@
 - name: password
   description: |
     The password of `username`.
+  secret: true
   fleet_configurable: true
   value:
     type: string

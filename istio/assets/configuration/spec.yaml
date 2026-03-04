@@ -1,4 +1,5 @@
 name: Istio
+fleet_configurable: true
 files:
   - name: istio.yaml
     options:
@@ -10,17 +11,49 @@ files:
         - name: use_openmetrics
           description: |
             Use the OpenMetrics V2 implementation for more features and better performance.
-            This implementation is only available for Istio >= 1.5, and should be used with 
+            This implementation is only available for Istio >= 1.5, and should be used with
             `istiod_endpoint` or `istio_mesh_endpoint`.
+          fleet_configurable: true
           value:
             example: true
             display_default: false
             type: boolean
           enabled: true
+        - name: istio_mode
+          description: |
+            Specify the Istio data plane mode to monitor.
+            - `sidecar`: Monitor Istio sidecar proxies (traditional mode)
+            - `ambient`: Monitor Istio ambient mode components (ztunnel, waypoint proxies)
+          value:
+            example: sidecar
+            display_default: sidecar
+            type: string
+          enabled: true
+        - name: ztunnel_endpoint
+          description: |
+            Endpoint to collect ztunnel metrics in Istio ambient mode.
+            Ztunnel is the L4 proxy that provides zero-trust tunneling and mTLS for ambient mesh.
+            Only used when `istio_mode` is set to `ambient`.
+            Ztunnel metrics are exposed on port 15020.
+          value:
+            display_default: null
+            example: http://ztunnel.istio-system:15020/stats/prometheus
+            type: string
+        - name: waypoint_endpoint
+          description: |
+            Endpoint to collect waypoint proxy metrics in Istio ambient mode.
+            Waypoint proxies provide optional L7 processing (HTTP/gRPC traffic management) in ambient mesh.
+            Only used when `istio_mode` is set to `ambient`.
+            Waypoint metrics are exposed on port 15020.
+          value:
+            display_default: null
+            example: http://waypoint.istio-system:15020/stats/prometheus
+            type: string
         - name: istiod_endpoint
           description: |
             Collect mixer, galley, pilot, and citadel metrics available from the istiod deployment.
             Only available for Istio >= v1.5. Cannot be used in combination with `istio_mesh_endpoint` in the same instance.
+          fleet_configurable: true
           value:
             display_default: null
             example: http://istiod.istio-system:15014/metrics
@@ -35,6 +68,7 @@ files:
 
             When collecting mesh metrics in Istio < v1.5, use
             istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
+          fleet_configurable: true
           value:
             display_default: null
             example: http://istio-proxy.istio-system:15020/stats/prometheus
@@ -81,21 +115,33 @@ files:
     - template: instances
       options:
       - name: use_openmetrics
+        fleet_configurable: true
         description: |
           Use the OpenMetrics V2 implementation for more features and better performance.
-          This implementation is only available for Istio >= 1.5, and should be used with 
+          This implementation is only available for Istio >= 1.5, and should be used with
           `istiod_endpoint` or `istio_mesh_endpoint`.
         value:
           example: true
           display_default: false
           type: boolean
+      - name: istio_mode
+        description: |
+          Specify the Istio data plane mode to monitor.
+          - `sidecar`: Monitor Istio sidecar proxies (traditional mode)
+          - `ambient`: Monitor Istio ambient mode components (ztunnel, waypoint proxies)
+        value:
+          example: sidecar
+          display_default: sidecar
+          type: string
       - name: send_histograms_buckets
         description: Set send_histograms_buckets to true to send the histograms bucket from Istio.
+        fleet_configurable: true
         enabled: true
         value:
           type: boolean
           example: true
       - name: istio_mesh_endpoint
+        fleet_configurable: true
         description: To enable Istio metrics you must specify the url exposing the API.
         enabled: true
         value:
@@ -103,6 +149,7 @@ files:
           example: http://%%host%%:15020/stats/prometheus
           type: string
       - name: tag_by_endpoint
+        fleet_configurable: true
         description: Wether to include an endpoint tag or not. This only applies if `use openmentrics` is enabled.
         enabled: true
         value:

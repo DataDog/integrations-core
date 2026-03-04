@@ -1,1 +1,0 @@
-Fix type checking in `ddev test -s` by analyzing all files when none are explicitly specified.

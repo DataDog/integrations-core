@@ -30,6 +30,7 @@
     Setting this implicitly sets `tls_verify` to true.
 - name: tls_private_key
   fleet_configurable: true
+  secret: true
   value:
     example: <PRIVATE_KEY_PATH>
     type: string

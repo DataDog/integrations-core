@@ -57,6 +57,7 @@ files:
         options:
           - name: inference_api_url
             fleet_configurable: true
+            formats: ["url"]
             required: false
             description: The TorchServe Inference API url to connect to.
             value:
@@ -69,6 +70,7 @@ files:
         options:
           - name: management_api_url
             fleet_configurable: true
+            formats: ["url"]
             required: false
             description: The TorchServe Management API url to connect to.
             value:
@@ -100,7 +102,7 @@ files:
                 type: string
           - name: interval
             description: |
-              Refresh interval in second to use for the models to be 'autodiscovered'. 
+              Refresh interval, in seconds, for models to be 'autodiscovered'.
               By default, we refresh the list each time the check runs.
             fleet_configurable: true
             value:

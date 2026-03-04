@@ -1,3 +1,18 @@
+## Datadog Agent version [7.75.4](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7754)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.75.3](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7753)
+
+### Integration Updates
+* Datadog Checks Base [37.28.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Kafka Actions [2.1.0](https://github.com/DataDog/integrations-core/blob/master/kafka_actions/CHANGELOG.md)
+* Kafka Consumer [6.12.0](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+
+## Datadog Agent version [7.75.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7752)
+
+* There were no integration updates for this version of the Agent.
+
 ## Datadog Agent version [7.75.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7751)
 
 * There were no integration updates for this version of the Agent.

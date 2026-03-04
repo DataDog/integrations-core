@@ -1,4 +1,5 @@
 name: CoreDNS
+fleet_configurable: true
 files:
 - name: coredns.yaml
   options:
@@ -63,12 +64,14 @@ files:
         example:
           - "dns-pod:%%host%%"
     - name: send_histograms_buckets
+      fleet_configurable: true
       description: (Legacy OpenMetricsBaseCheckV1) Set send_histograms_buckets to true to send the histograms bucket.
       legacy: true
       value:
         type: boolean
         example: True
     - name: send_monotonic_counter
+      fleet_configurable: true
       description: |
         (Legacy OpenMetricsBaseCheckV1) To send counters as monotonic counter
         see: https://github.com/DataDog/integrations-core/issues/1303

@@ -13,6 +13,7 @@ files:
         Full URL of your LDAP server. Use `ldaps` or `ldap` to indicate whether to
         use TLS or not, or `ldapi` to connect to a UNIX socket.
       fleet_configurable: true
+      formats: ["url"]
       required: True
       value:
         example: ldaps://localhost:636
@@ -71,6 +72,7 @@ files:
                                           Don't specify this option if you want to use the same user as
                                           for the monitor backend. Set to empty string `""` for an anonymous bind.
         * `password` - string - optional: The password associated with `username`.
+      secret: true
       fleet_configurable: true
       value:
         type: array

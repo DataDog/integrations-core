@@ -5,6 +5,7 @@
 import xml.etree.ElementTree as ET
 from time import time
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
@@ -62,7 +63,7 @@ class Deadlocks(DBMAsyncJob):
         self._is_azure_sql_database = False
         super(Deadlocks, self).__init__(
             check,
-            run_sync=True,
+            run_sync=is_affirmative(self._config.deadlocks_config.get('run_sync', False)),
             enabled=self._config.deadlocks_config.get('enabled', False),
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,

@@ -1,0 +1,1 @@
+Fix `procedure_name` tag missing from query metrics when the `CONNECT` permission hasn't been granted to the datadog user.

@@ -14,16 +14,64 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "avg:postgresql.rows_fetched{$scope}"
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:postgresql.rows_fetched{$scope}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
                     },
                     {
-                        "q": "avg:postgresql.rows_returned{$scope}"
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:postgresql.rows_returned{$scope}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
                     },
                     {
-                        "q": "avg:postgresql.rows_inserted{$scope}"
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:postgresql.rows_inserted{$scope}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
                     },
                     {
-                        "q": "avg:postgresql.rows_updated{$scope}"
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:postgresql.rows_updated{$scope}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
                     }
                 ],
                 "type": "timeseries",
@@ -34,7 +82,19 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "avg:postgresql.connections{$scope} by {db}"
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:postgresql.connections{$scope} by {db}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
                     }
                 ],
                 "type": "timeseries",
@@ -45,7 +105,35 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "postgresql.rows_inserted{$scope},postgresql.rows_deleted{$scope},postgresql.rows_updated{$scope}"
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "postgresql.rows_inserted{$scope}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "postgresql.rows_deleted{$scope}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query3",
+                                "query": "postgresql.rows_updated{$scope}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            },
+                            {
+                                "formula": "query2"
+                            },
+                            {
+                                "formula": "query3"
+                            }
+                        ]
                     }
                 ],
                 "type": "timeseries",
@@ -56,7 +144,19 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "avg:system.io.util{$scope}"
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:system.io.util{$scope}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
                     }
                 ],
                 "type": "timeseries",
@@ -67,13 +167,49 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "system.load.1{$scope}"
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "system.load.1{$scope}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
                     },
                     {
-                        "q": "system.load.5{$scope}"
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "system.load.5{$scope}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
                     },
                     {
-                        "q": "system.load.15{$scope}"
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "system.load.15{$scope}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
                     }
                 ],
                 "type": "timeseries",
@@ -84,7 +220,59 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "system.cpu.idle{$scope}, system.cpu.system{$scope}, system.cpu.iowait{$scope}, system.cpu.user{$scope}, system.cpu.stolen{$scope}, system.cpu.guest{$scope}"
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "system.cpu.idle{$scope}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "system.cpu.system{$scope}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query3",
+                                "query": "system.cpu.iowait{$scope}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query4",
+                                "query": "system.cpu.user{$scope}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query5",
+                                "query": "system.cpu.stolen{$scope}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query6",
+                                "query": "system.cpu.guest{$scope}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            },
+                            {
+                                "formula": "query2"
+                            },
+                            {
+                                "formula": "query3"
+                            },
+                            {
+                                "formula": "query4"
+                            },
+                            {
+                                "formula": "query5"
+                            },
+                            {
+                                "formula": "query6"
+                            }
+                        ]
                     }
                 ],
                 "type": "timeseries",
@@ -95,7 +283,19 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "max:system.cpu.iowait{$scope}"
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "max:system.cpu.iowait{$scope}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
                     }
                 ],
                 "type": "timeseries",
@@ -106,7 +306,27 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "sum:system.mem.usable{$scope},sum:system.mem.total{$scope}-sum:system.mem.usable{$scope}"
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:system.mem.usable{$scope}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:system.mem.total{$scope}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            },
+                            {
+                                "formula": "query2 - query1"
+                            }
+                        ]
                     }
                 ],
                 "type": "timeseries",
@@ -117,10 +337,34 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "sum:system.net.bytes_rcvd{$scope}"
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:system.net.bytes_rcvd{$scope}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
                     },
                     {
-                        "q": "sum:system.net.bytes_sent{$scope}"
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:system.net.bytes_sent{$scope}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
                     }
                 ],
                 "type": "timeseries",
