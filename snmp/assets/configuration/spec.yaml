@@ -91,6 +91,7 @@ files:
               definition_file: cisco-asr.yaml
         hidden: true
       - name: refresh_oids_cache_interval
+        legacy: true
         description: |
           Note: Beta feature, only available using python SNMP integration.
           Set this option to enable caching of OIDs. The value is the number of seconds before the
