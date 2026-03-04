@@ -4,6 +4,7 @@
 """Kafka client wrapper for kafka_actions check."""
 
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
 from confluent_kafka import Consumer, KafkaException, Producer, TopicPartition
@@ -151,12 +152,28 @@ class KafkaActionsClient:
 
             if start_offset == -1:
                 # For "latest" offset, seek back from the high watermark to read the last N existing messages
-                partitions = []
-                # Temporarily assign partitions to query watermarks
                 tmp_partitions = [TopicPartition(topic, p) for p in partition_ids]
                 consumer.assign(tmp_partitions)
+
+                remaining = max(0.5, global_timeout_s - (time.time() - start_time))
+                per_call_timeout = remaining
+
+                def _get_watermark(pid: int) -> tuple[int, int, int]:
+                    low, high = consumer.get_watermark_offsets(
+                        TopicPartition(topic, pid), timeout=per_call_timeout
+                    )
+                    return pid, low, high
+
+                watermarks: dict[int, tuple[int, int]] = {}
+                with ThreadPoolExecutor(max_workers=len(partition_ids)) as pool:
+                    futures = {pool.submit(_get_watermark, p): p for p in partition_ids}
+                    for future in as_completed(futures, timeout=remaining):
+                        pid, low, high = future.result()
+                        watermarks[pid] = (low, high)
+
+                partitions = []
                 for p in partition_ids:
-                    low, high = consumer.get_watermark_offsets(TopicPartition(topic, p), timeout=10)
+                    low, high = watermarks[p]
                     seek_offset = max(low, high - max_messages)
                     partitions.append(TopicPartition(topic, p, seek_offset))
                     self.log.debug(
