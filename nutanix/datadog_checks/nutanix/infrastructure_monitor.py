@@ -240,11 +240,17 @@ class InfrastructureMonitor:
             self.check.log.warning("No stats returned for %s", entity_name)
             return
 
-        # Handle list vs dict stats (VMs return list, others return dict)
-        is_list_stats = isinstance(stats, list)
+        is_list = isinstance(stats, list)
+        metrics_submitted = 0
 
-        # Submit metrics
-        metrics_submitted = self._submit_stats_metrics(stats, metrics_map, tags, hostname, is_list_stats)
+        for key, metric_name in metrics_map.items():
+            entries = stats if is_list else stats.get(key, [])
+            value_field = key if is_list else "value"
+            for entry in entries:
+                value = entry.get(value_field)
+                if value is not None:
+                    self.check.gauge(metric_name, value, hostname=hostname, tags=tags)
+                    metrics_submitted += 1
 
         # Track metrics by type
         if entity_type == 'cluster':
@@ -253,31 +259,6 @@ class InfrastructureMonitor:
             self.host_metrics_count += metrics_submitted
         elif entity_type == 'vm':
             self.vm_metrics_count += metrics_submitted
-
-    def _submit_stats_metrics(
-        self, stats: dict | list, metrics_map: dict[str, str], tags: list[str], hostname: str | None, is_list: bool
-    ) -> int:
-        """Submit metrics from stats payload and return count submitted."""
-        metrics_submitted = 0
-
-        for key, metric_name in metrics_map.items():
-            if is_list:
-                # VM stats: list of stat entries
-                for entry in stats:
-                    value = entry.get(key)
-                    if value is not None:
-                        self.check.gauge(metric_name, value, hostname=hostname, tags=tags)
-                        metrics_submitted += 1
-            else:
-                # Cluster/Host stats: dict with arrays of values
-                entries = stats.get(key, [])
-                for entry in entries:
-                    value = entry.get("value")
-                    if value is not None:
-                        self.check.gauge(metric_name, value, hostname=hostname, tags=tags)
-                        metrics_submitted += 1
-
-        return metrics_submitted
 
     def _report_cluster_stats(self, cluster_name: str, cluster_id: str, cluster_tags: list[str], pc_label: str) -> None:
         """Report time-series stats for a cluster."""
@@ -496,7 +477,7 @@ class InfrastructureMonitor:
 
     def _build_stats_params(self) -> dict[str, str | int]:
         """Build the common query parameters for stats API calls."""
-        start_time, end_time = self._get_collection_time_window()
+        start_time, end_time = self.collection_time_window
         return {
             "$startTime": start_time,
             "$endTime": end_time,
@@ -532,20 +513,9 @@ class InfrastructureMonitor:
         )
         return vm_stats_dict
 
-    def _calculate_collection_time_window(self) -> tuple[str, str]:
-        """Calculate the time window for Nutanix v4 API queries."""
+    def init_collection_time_window(self) -> None:
+        """Calculate and set the collection time window for this check run."""
         now = datetime.now(timezone.utc)
         end_time = now - timedelta(seconds=self.check.sampling_interval)
         start_time = end_time - timedelta(seconds=self.check.sampling_interval)
-
-        return start_time.isoformat(), end_time.isoformat()
-
-    def init_collection_time_window(self) -> None:
-        """Set the collection time window once per check run."""
-        self.collection_time_window = self._calculate_collection_time_window()
-
-    def _get_collection_time_window(self) -> tuple[str, str]:
-        """Return cached collection time window for this check run."""
-        if self.collection_time_window is None:
-            self.collection_time_window = self._calculate_collection_time_window()
-        return self.collection_time_window
+        self.collection_time_window = start_time.isoformat(), end_time.isoformat()

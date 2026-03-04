@@ -174,16 +174,13 @@ class NutanixCheck(AgentCheck):
             response.raise_for_status()
             self.gauge("health.up", 1, tags=self.base_tags)
             return True
-
         except (HTTPError, InvalidURL, ConnectionError, Timeout) as e:
             self.log.error("[PC:%s:%s] Failed to connect: %s", self.pc_ip, self.pc_port, str(e))
-            self.gauge("health.up", 0, tags=self.base_tags)
-            return False
-
         except Exception as e:
             self.log.exception("[PC:%s:%s] Unexpected connection error: %s", self.pc_ip, self.pc_port, e)
-            self.gauge("health.up", 0, tags=self.base_tags)
-            return False
+
+        self.gauge("health.up", 0, tags=self.base_tags)
+        return False
 
     @retry_on_rate_limit
     def _make_request_with_retry(self, url, method='get', **kwargs):

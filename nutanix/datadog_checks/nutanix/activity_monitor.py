@@ -298,22 +298,12 @@ class ActivityMonitor:
         # Extract entity information for tagging
         event_tags = self.check.base_tags.copy()
 
-        cluster_id = event.get("sourceClusterUUID", event.get("clusterUUID"))
-
-        if cluster_id and cluster_id in self.check.cluster_names:
-            event_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
+        self._add_cluster_name_tag(event_tags, event.get("sourceClusterUUID", event.get("clusterUUID")))
 
         for classification in classifications:
             event_tags.append(f"ntnx_event_classification:{classification}")
 
-        if source_entity := event.get("sourceEntity"):
-            if entity_type := source_entity.get("type"):
-                entity_name = source_entity.get("name")
-                if entity_name:
-                    event_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
-
-            # Add category tags from source entity
-            event_tags.extend(self.check.extract_category_tags(source_entity))
+        self._add_source_entity_tags(event_tags, event)
 
         # Distinguish Prism Central events from tasks
         event_tags.append("ntnx_type:event")
@@ -336,9 +326,10 @@ class ActivityMonitor:
         """Process and send a single audit to Datadog."""
         audit_id = audit.get("extId", "unknown")
 
-        # Get cluster context for logging
+        # Get cluster context for logging and tagging
+        cluster_ref = audit.get("clusterReference")
         cluster_label = ""
-        if cluster_ref := audit.get("clusterReference"):
+        if cluster_ref:
             cluster_id = cluster_ref.get("extId")
             if cluster_id and cluster_id in self.check.cluster_names:
                 cluster_label = f"[{self.check.cluster_names[cluster_id]}]"
@@ -367,22 +358,10 @@ class ActivityMonitor:
         if operation_type:
             audit_tags.append(f"ntnx_operation_type:{operation_type}")
 
-        if cluster_ref := audit.get("clusterReference"):
-            cluster_id = cluster_ref.get("extId")
-            cluster_name = cluster_ref.get("name")
-            if cluster_id and cluster_id in self.check.cluster_names:
-                audit_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
-            elif cluster_name:
-                audit_tags.append(f"ntnx_cluster_name:{cluster_name}")
+        if cluster_ref:
+            self._add_cluster_name_tag(audit_tags, cluster_ref.get("extId"), cluster_ref.get("name"))
 
-        if source_entity := audit.get("sourceEntity"):
-            if entity_type := source_entity.get("type"):
-                entity_name = source_entity.get("name")
-                if entity_name:
-                    audit_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
-
-            # Add category tags from source entity
-            audit_tags.extend(self.check.extract_category_tags(source_entity))
+        self._add_source_entity_tags(audit_tags, audit)
 
         if user_ref := audit.get("userReference"):
             if user_name := user_ref.get("name"):
@@ -469,9 +448,7 @@ class ActivityMonitor:
         if severity:
             alert_tags.append(f"ntnx_alert_severity:{severity}")
 
-        if cluster_id := alert.get("clusterUUID"):
-            if cluster_id in self.check.cluster_names:
-                alert_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
+        self._add_cluster_name_tag(alert_tags, alert.get("clusterUUID"))
 
         for classification in alert.get("classifications", []) or []:
             alert_tags.append(f"ntnx_alert_classification:{classification}")
@@ -479,13 +456,7 @@ class ActivityMonitor:
         for impact in alert.get("impactTypes", []) or []:
             alert_tags.append(f"ntnx_alert_impact:{impact}")
 
-        if source_entity := alert.get("sourceEntity"):
-            if entity_type := source_entity.get("type"):
-                if entity_name := source_entity.get("name"):
-                    alert_tags.append(f"ntnx_{entity_type}_name:{entity_name}")
-
-            # Add category tags from source entity
-            alert_tags.extend(self.check.extract_category_tags(source_entity))
+        self._add_source_entity_tags(alert_tags, alert)
 
         alert_tags.append("ntnx_type:alert")
 
@@ -523,8 +494,7 @@ class ActivityMonitor:
         task_tags.append(f"ntnx_task_status:{status}")
 
         for cluster_id in task.get("clusterExtIds", []):
-            if cluster_id in self.check.cluster_names:
-                task_tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
+            self._add_cluster_name_tag(task_tags, cluster_id)
 
         if owner := task.get("ownedBy"):
             if owner_name := owner.get("name"):
@@ -571,16 +541,37 @@ class ActivityMonitor:
             }
         )
 
-    def _parse_timestamp(self, timestamp_str: str) -> int | None:
-        """Parse ISO 8601 timestamp string to Unix timestamp."""
+    def _parse_iso(self, timestamp_str: str) -> datetime | None:
+        """Parse an ISO 8601 timestamp string to a datetime object."""
         try:
-            dt = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
-            return int(dt.timestamp())
+            return datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
         except (ValueError, AttributeError):
             self.check.log.warning(
                 "[PC:%s:%s] Failed to parse timestamp: %s", self.check.pc_ip, self.check.pc_port, timestamp_str
             )
             return None
+
+    def _parse_timestamp(self, timestamp_str: str) -> int | None:
+        """Parse ISO 8601 timestamp string to Unix timestamp."""
+        dt = self._parse_iso(timestamp_str)
+        return int(dt.timestamp()) if dt else None
+
+    def _add_source_entity_tags(self, tags: list[str], item: dict) -> None:
+        """Add source entity type/name and category tags."""
+        if source_entity := item.get("sourceEntity"):
+            if entity_type := source_entity.get("type"):
+                if entity_name := source_entity.get("name"):
+                    tags.append(f"ntnx_{entity_type}_name:{entity_name}")
+            tags.extend(self.check.extract_category_tags(source_entity))
+
+    def _add_cluster_name_tag(self, tags: list[str], cluster_id: str | None, fallback_name: str | None = None) -> None:
+        """Add cluster name tag from ID lookup, with optional fallback."""
+        if not cluster_id:
+            return
+        if cluster_id in self.check.cluster_names:
+            tags.append(f"ntnx_cluster_name:{self.check.cluster_names[cluster_id]}")
+        elif fallback_name:
+            tags.append(f"ntnx_cluster_name:{fallback_name}")
 
     def _cluster_resource(self, cluster_id: str) -> tuple[str, dict]:
         """Build a cluster resource tuple from a cluster ID."""
@@ -660,15 +651,8 @@ class ActivityMonitor:
         if not last_time_str:
             return items
 
-        try:
-            last_time = datetime.fromisoformat(last_time_str.replace("Z", "+00:00"))
-        except (ValueError, AttributeError):
-            self.check.log.warning(
-                "[PC:%s:%s] Failed to parse last collection time: %s",
-                self.check.pc_ip,
-                self.check.pc_port,
-                last_time_str,
-            )
+        last_time = self._parse_iso(last_time_str)
+        if not last_time:
             return items
 
         filtered = []
@@ -676,14 +660,8 @@ class ActivityMonitor:
             item_time_str = item.get(field_name)
             if not item_time_str:
                 continue
-            try:
-                item_time = datetime.fromisoformat(item_time_str.replace("Z", "+00:00"))
-            except (ValueError, AttributeError):
-                self.check.log.warning(
-                    "[PC:%s:%s] Failed to parse item timestamp: %s", self.check.pc_ip, self.check.pc_port, item_time_str
-                )
-                continue
-            if item_time > last_time:
+            item_time = self._parse_iso(item_time_str)
+            if item_time and item_time > last_time:
                 filtered.append(item)
 
         return filtered
@@ -697,15 +675,9 @@ class ActivityMonitor:
             item_time_str = item.get(field_name)
             if not item_time_str:
                 continue
-            try:
-                item_time = datetime.fromisoformat(item_time_str.replace("Z", "+00:00"))
-                if max_time is None or item_time > max_time:
-                    max_time = item_time
-                    max_time_str = item_time_str
-            except (ValueError, AttributeError):
-                self.check.log.warning(
-                    "[PC:%s:%s] Failed to parse item timestamp: %s", self.check.pc_ip, self.check.pc_port, item_time_str
-                )
-                continue
+            item_time = self._parse_iso(item_time_str)
+            if item_time and (max_time is None or item_time > max_time):
+                max_time = item_time
+                max_time_str = item_time_str
 
         return max_time_str
