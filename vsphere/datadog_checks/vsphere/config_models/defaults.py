@@ -72,6 +72,10 @@ def instance_hostname_transform():
     return 'default'
 
 
+def instance_http_connection_timeout():
+    return 60
+
+
 def instance_include_datastore_cluster_folder_tag():
     return True
 

@@ -8,6 +8,7 @@ import pytest
 from mock import ANY, MagicMock, patch
 from pyVmomi import vim, vmodl
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.cache import InfrastructureCache
@@ -237,6 +238,27 @@ def test_connect_failure(realtime_instance):
             sslContext=ANY,
         )
         version_info.assert_called_once()
+
+
+def test_connect_with_http_connection_timeout(
+    aggregator, realtime_instance, service_instance, dd_run_check
+):
+    realtime_instance['http_connection_timeout'] = 120
+
+    with patch('datadog_checks.vsphere.api.connect') as connect:
+        connect.SmartConnect = MagicMock(return_value=service_instance)
+
+        check = VSphereCheck('vsphere', {}, [realtime_instance])
+        dd_run_check(check)
+
+        connect.SmartConnect.assert_called_once_with(
+            host=realtime_instance['host'],
+            user=realtime_instance['username'],
+            pwd=realtime_instance['password'],
+            sslContext=ANY,
+            httpConnectionTimeout=120,
+        )
+    aggregator.assert_service_check('vsphere.can_connect', AgentCheck.OK, tags=['vcenter_server:FAKE'])
 
 
 def test_get_infrastructure(realtime_instance):
