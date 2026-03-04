@@ -82,7 +82,7 @@ class InfrastructureMonitor:
         try:
             categories = self._list_categories()
         except Exception as e:
-            self.check.log.exception("[%s] Failed to fetch categories: %s", pc_label, e)
+            self.check.log.error("[%s] Failed to fetch categories: %s", pc_label, e)
             categories = []
 
         self.check.log.info("[%s] Found %d categories", pc_label, len(categories))
@@ -96,7 +96,7 @@ class InfrastructureMonitor:
         try:
             clusters = self._list_clusters()
         except Exception as e:
-            self.check.log.exception("[%s] Failed to fetch clusters, aborting: %s", pc_label, e)
+            self.check.log.error("[%s] Failed to fetch clusters, aborting: %s", pc_label, e)
             return
 
         if not clusters:
@@ -146,7 +146,7 @@ class InfrastructureMonitor:
 
                 processed += 1
             except Exception as e:
-                self.check.log.exception("[%s][%s] Failed to process cluster: %s", pc_label, cluster_name, e)
+                self.check.log.error("[%s][%s] Failed to process cluster: %s", pc_label, cluster_name, e)
 
         if skipped > 0:
             self.check.log.info("[%s] Processed %d clusters (%d skipped)", pc_label, processed, skipped)
@@ -355,17 +355,13 @@ class InfrastructureMonitor:
                     entity_type="host",
                 )
         except Exception as e:
-            self.check.log.exception(
-                "[%s][%s] Failed to fetch stats for host %s: %s", pc_label, cluster_name, host_name, e
-            )
+            self.check.log.error("[%s][%s] Failed to fetch stats for host %s: %s", pc_label, cluster_name, host_name, e)
 
         # Process VMs on this host
         try:
             vms = self._list_vms_by_host(host_id)
         except Exception as e:
-            self.check.log.exception(
-                "[%s][%s] Failed to list VMs for host %s: %s", pc_label, cluster_name, host_name, e
-            )
+            self.check.log.error("[%s][%s] Failed to list VMs for host %s: %s", pc_label, cluster_name, host_name, e)
             return 0
 
         self.check.log.debug("[%s][%s] Host %s has %d VMs", pc_label, cluster_name, host_name, len(vms))
