@@ -7,13 +7,13 @@ import re
 import time
 from hashlib import sha256
 from pathlib import Path, PurePosixPath
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING
 from zipfile import ZipFile
 
 from google.cloud import storage
 
 if TYPE_CHECKING:
-    from google.cloud.storage.blob import Blob
+    from google.cloud.storage.bucket import Bucket as GCSBucket
 
 BUCKET_NAME = 'deps-agent-int-datadoghq-com'
 STORAGE_URL = 'https://agent-int-packages.datadoghq.com'
@@ -76,9 +76,9 @@ def hash_file(path: Path) -> str:
         return sha256(f.read()).hexdigest()
 
 
-def _build_number_of_wheel_blob(wheel_path: Blob) -> int:
-    """Extract the build number from a blob object representing a wheel."""
-    wheel_name = PurePosixPath(wheel_path.name).stem
+def _build_number_of_wheel(wheel_info: dict) -> int:
+    """Extract the build number from wheel information."""
+    wheel_name = PurePosixPath(wheel_info['name']).stem
     _name, _version, *build_number, _python_tag, _abi_tag, _platform_tag = wheel_name.split('-')
     return int(build_number[0]) if build_number else -1
 
@@ -100,7 +100,7 @@ def collect_and_validate_wheels(wheel_dir: Path) -> list[tuple[str, email.messag
     return upload_data
 
 
-def process_wheel_for_upload(wheel: Path, artifact_type: str, project_name: str, project_metadata: email.message.Message, bucket, prefix: str) -> tuple[str | None, str | None]:
+def process_wheel_for_upload(wheel: Path, artifact_type: str, project_name: str, project_metadata: email.message.Message, bucket: Bucket, prefix: str) -> tuple[str, str | None]:
     """Process a single wheel and determine if it needs to be uploaded."""
     padding = ' ' * (len(prefix) + 1)
     print(f'{prefix} Name: {project_metadata["Name"]}')
@@ -111,28 +111,28 @@ def process_wheel_for_upload(wheel: Path, artifact_type: str, project_name: str,
 
     if artifact_type == 'external':
         artifact_name = wheel.name
-        artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
+        blob_path = f'{artifact_type}/{project_name}/{artifact_name}'
 
-        if artifact.exists():
+        if bucket.blob_exists(blob_path):
             print(f'{prefix} {project_name}=={project_metadata["Version"]} already exists')
-            artifact.reload()
-            existing_sha256 = artifact.metadata['sha256']
+            metadata = bucket.get_blob_metadata(blob_path)
+            existing_sha256 = metadata['sha256']
             return f'{project_name} @ {index_url}/{artifact_name}#sha256={existing_sha256}', None
         else:
             return f'{project_name} @ {index_url}/{artifact_name}#sha256={sha256_digest}', artifact_name
     else:
         name, version, *_build_tag, python_tag, abi_tag, platform_tag = wheel.stem.split('-')
-        existing_wheels = list(bucket.list_blobs(
+        existing_wheels = bucket.find_matching_wheels(
             match_glob=(f'{artifact_type}/{project_name}/'
-                        f'{name}-{version}*-{python_tag}-{abi_tag}-{platform_tag}.whl'),
-        ))
+                        f'{name}-{version}*-{python_tag}-{abi_tag}-{platform_tag}.whl')
+        )
 
         if existing_wheels:
-            most_recent_wheel = max(existing_wheels, key=_build_number_of_wheel_blob)
-            if most_recent_wheel.metadata['sha256'] == sha256_digest:
+            most_recent_wheel = max(existing_wheels, key=_build_number_of_wheel)
+            if most_recent_wheel['metadata']['sha256'] == sha256_digest:
                 print(f'{prefix} {project_name}=={project_metadata["Version"]} already exists '
                       'with the same hash')
-                existing_artifact_name = PurePosixPath(most_recent_wheel.name).name
+                existing_artifact_name = PurePosixPath(most_recent_wheel['name']).name
                 return f'{project_name} @ {index_url}/{existing_artifact_name}#sha256={sha256_digest}', None
 
         build_number = timestamp_build_number()
@@ -140,18 +140,16 @@ def process_wheel_for_upload(wheel: Path, artifact_type: str, project_name: str,
         return f'{project_name} @ {index_url}/{artifact_name}#sha256={sha256_digest}', artifact_name
 
 
-def upload_wheel_to_bucket(wheel: Path, artifact_type: str, project_name: str, artifact_name: str, project_metadata: email.message.Message, bucket, padding: str):
+def upload_wheel_to_bucket(wheel: Path, artifact_type: str, project_name: str, artifact_name: str, project_metadata: email.message.Message, bucket: Bucket, padding: str):
     """Upload a wheel file to the bucket."""
     print(f'{padding}Artifact: {artifact_name}')
-    artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
-    artifact.upload_from_filename(str(wheel))
+    blob_path = f'{artifact_type}/{project_name}/{artifact_name}'
     sha256_digest = hash_file(wheel)
     requires_python = project_metadata.get('Requires-Python', '').replace('<', '&lt;').replace('>', '&gt;')
-    artifact.metadata = {'requires-python': requires_python, 'sha256': sha256_digest}
-    artifact.patch()
+    bucket.upload_file(str(wheel), blob_path, metadata={'requires-python': requires_python, 'sha256': sha256_digest})
 
 
-def generate_artifact_listings(artifact_types: set[str], bucket):
+def generate_artifact_listings(artifact_types: set[str], bucket: Bucket):
     """Generate HTML listings for all artifact types."""
     for artifact_type in sorted(artifact_types):
         display_message_block(f'Updating {artifact_type} listing')
@@ -162,16 +160,15 @@ def generate_artifact_listings(artifact_types: set[str], bucket):
             '  <body>',
             '    <h1>Agent integrations dependencies</h1>',
         ]
-        project_artifacts: dict[str, list[Blob]] = {}
-        for blob in bucket.list_blobs(prefix=f'{artifact_type}/'):
-            if blob.name.endswith('.whl'):
-                project_artifacts.setdefault(blob.name.split('/')[1], []).append(blob)
+        project_artifacts: dict[str, list[dict]] = {}
+        for wheel_info in bucket.list_wheels_with_prefix(prefix=f'{artifact_type}/'):
+            project_artifacts.setdefault(wheel_info['project'], []).append(wheel_info)
 
         for project, artifacts in sorted(project_artifacts.items()):
             print(project)
             root_listing_lines.append(f'    <a href="{project}/">{project}</a><br>')
 
-            artifacts.sort(key=lambda b: b.name.casefold())
+            artifacts.sort(key=lambda w: w['name'].casefold())
             project_listing_lines = [
                 '<!DOCTYPE html>',
                 '<html>',
@@ -180,10 +177,9 @@ def generate_artifact_listings(artifact_types: set[str], bucket):
             ]
 
             for artifact in artifacts:
-                artifact.reload()
-                requires_python = artifact.metadata['requires-python']
-                sha256_digest = artifact.metadata['sha256']
-                artifact_name = artifact.name.split('/')[2]
+                requires_python = artifact['metadata']['requires-python']
+                sha256_digest = artifact['metadata']['sha256']
+                artifact_name = artifact['name'].split('/')[2]
                 attribute = f' data-requires-python="{requires_python}"' if requires_python else ''
 
                 project_listing_lines.append(
@@ -191,16 +187,92 @@ def generate_artifact_listings(artifact_types: set[str], bucket):
                 )
 
             project_listing_lines.extend(('  </body>', '</html>', ''))
-            project_listing = bucket.blob(f'{artifact_type}/{project}/')
-            project_listing.upload_from_string('\n'.join(project_listing_lines), content_type='text/html')
-            project_listing.cache_control = CACHE_CONTROL
-            project_listing.patch()
+            bucket.upload_string(
+                '\n'.join(project_listing_lines),
+                f'{artifact_type}/{project}/',
+                content_type='text/html',
+                cache_control=CACHE_CONTROL
+            )
 
         root_listing_lines.extend(('  </body>', '</html>', ''))
-        root_listing = bucket.blob(f'{artifact_type}/')
-        root_listing.upload_from_string('\n'.join(root_listing_lines), content_type='text/html')
-        root_listing.cache_control = CACHE_CONTROL
-        root_listing.patch()
+        bucket.upload_string(
+            '\n'.join(root_listing_lines),
+            f'{artifact_type}/',
+            content_type='text/html',
+            cache_control=CACHE_CONTROL
+        )
+
+
+class Bucket:
+    """
+    Wrap interactions with Google Storage Bucket.
+
+    This makes for easier testing and separates bucket interaction from the business logic.
+    """
+
+    def __init__(self, bucket_name: str):
+        self.bucket_name = bucket_name
+        self._client: storage.Client | None = None
+        self._bucket: GCSBucket | None = None
+
+    def _get_bucket(self) -> GCSBucket:
+        """Lazily initialize and return the bucket."""
+        if self._bucket is None:
+            if self._client is None:
+                self._client = storage.Client()
+            self._bucket = self._client.bucket(self.bucket_name)
+        return self._bucket
+
+    def blob_exists(self, path: str) -> bool:
+        """Check if a blob exists."""
+        return self._get_bucket().blob(path).exists()
+
+    def get_blob_metadata(self, path: str) -> dict:
+        """Get metadata for a blob."""
+        blob = self._get_bucket().blob(path)
+        blob.reload()
+        return blob.metadata
+
+    def find_matching_wheels(self, match_glob: str) -> list[dict]:
+        """Find wheels matching a glob pattern and return their information."""
+        wheels = []
+        for blob in self._get_bucket().list_blobs(match_glob=match_glob):
+            blob.reload()
+            wheels.append({
+                'name': blob.name,
+                'metadata': blob.metadata
+            })
+        return wheels
+
+    def list_wheels_with_prefix(self, prefix: str) -> list[dict]:
+        """List all wheel files under a prefix and return their information."""
+        wheels = []
+        for blob in self._get_bucket().list_blobs(prefix=prefix):
+            if blob.name.endswith('.whl'):
+                blob.reload()
+                project = blob.name.split('/')[1]
+                wheels.append({
+                    'name': blob.name,
+                    'project': project,
+                    'metadata': blob.metadata
+                })
+        return wheels
+
+    def upload_file(self, local_path: str, blob_path: str, metadata: dict | None = None) -> None:
+        """Upload a file to the bucket with optional metadata."""
+        blob = self._get_bucket().blob(blob_path)
+        blob.upload_from_filename(local_path)
+        if metadata:
+            blob.metadata = metadata
+            blob.patch()
+
+    def upload_string(self, content: str, blob_path: str, content_type: str = 'text/plain', cache_control: str | None = None) -> None:
+        """Upload string content to the bucket with optional cache control."""
+        blob = self._get_bucket().blob(blob_path)
+        blob.upload_from_string(content, content_type=content_type)
+        if cache_control:
+            blob.cache_control = cache_control
+            blob.patch()
 
 
 def generate_lockfiles(targets_dir, lockfiles):
@@ -233,9 +305,8 @@ def generate_lockfiles(targets_dir, lockfiles):
         f.write(f'{contents}\n')
 
 
-def upload(targets_dir):
-    client = storage.Client()
-    bucket = client.bucket(BUCKET_NAME)
+def upload(targets_dir: Path, bucket: Bucket | None = None) -> dict[str, list[str]]:
+    bucket = bucket or Bucket(BUCKET_NAME)
     artifact_types: set[str] = set()
     lockfiles = {}
 
