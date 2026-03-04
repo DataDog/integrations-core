@@ -18,7 +18,7 @@ class NutanixCheck(AgentCheck):
     __NAMESPACE__ = 'nutanix'
 
     def __init__(self, name, init_config, instances):
-        super(NutanixCheck, self).__init__(name, init_config, instances)
+        super().__init__(name, init_config, instances)
 
         self._parse_config()
         self._initialize_check_attributes()
