@@ -46,7 +46,7 @@ user = ""
 auth = "*****"
 
 [trello]
-key = ""
+key = "*****"
 token = "*****"
 
 [terminal.styles]
@@ -57,6 +57,9 @@ warning = "bold yellow"
 waiting = "bold magenta"
 debug = "bold"
 spinner = "simpleDotsScrolling"
+
+[dynamicd]
+llm_api_key = "*****"
 """
 
 EXPECTED_NON_SCRUBBED_OUTPUT = f"""
@@ -87,15 +90,15 @@ log_url = ""
 
 [github]
 user = ""
-token = ""
+token = "github_token"
 
 [pypi]
 user = ""
 auth = ""
 
 [trello]
-key = ""
-token = ""
+key = "trello_key"
+token = "trello_token"
 
 [terminal.styles]
 info = "bold"
@@ -105,6 +108,9 @@ warning = "bold yellow"
 waiting = "bold magenta"
 debug = "bold"
 spinner = "simpleDotsScrolling"
+
+[dynamicd]
+llm_api_key = "dynamicd_key"
 """
 
 
@@ -113,7 +119,9 @@ def valid_config_file(config_file):
     config_file.restore()
     config_file.model.orgs['default']['api_key'] = 'foo'
     config_file.model.orgs['default']['app_key'] = 'bar'
-    config_file.model.github = {'user': '', 'token': ''}
+    config_file.model.github = {'user': '', 'token': 'github_token'}
+    config_file.model.trello = {'key': 'trello_key', 'token': 'trello_token'}
+    config_file.model.dynamicd = {'llm_api_key': 'dynamicd_key'}
     config_file.save()
 
 
@@ -182,6 +190,9 @@ def build_expected_output_with_line_sources(expected: str, config_file: ConfigFi
         42: 'GlobalConfig:43',
         43: 'GlobalConfig:44',
         44: 'GlobalConfig:45',
+        # Blank line
+        46: 'GlobalConfig:47',
+        47: 'GlobalConfig:48',
     }
 
     # Add a blank line at the end to match the expected output

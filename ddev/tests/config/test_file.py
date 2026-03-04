@@ -8,7 +8,10 @@ from ddev.config.file import (
     build_line_index_with_multiple_entries,
     deep_merge_with_list_handling,
 )
+from ddev.config.model import ConfigurationError
+from ddev.config.trust import get_trust_store_path, local_config_sha256
 from ddev.utils.fs import Path
+from ddev.utils.toml import dumps_toml_data
 
 
 def test_no_local_file(config_file: ConfigFileWithOverrides):
@@ -405,3 +408,149 @@ def test_overrides_path_permission_error(tmp_path: PathLibPath, monkeypatch):
 
         # Assert that the returned path is the one where PermissionError occurred
         assert result_path == parent_dir
+
+
+def test_untrusted_local_file_strips_command_fields(
+    config_file: ConfigFileWithOverrides, helpers, overrides_config: Path
+):
+    overrides_config.write_text(
+        helpers.dedent(
+            """
+            [github]
+            user = "test_user"
+            token = "safe_token"
+            token_command = "unsafe command"
+
+            [trello]
+            key_command = "unsafe trello key"
+            token_command = "unsafe trello token"
+
+            [dynamicd]
+            llm_api_key_command = "unsafe dynamicd key"
+            """
+        )
+    )
+
+    config_file.load()
+
+    assert config_file.combined_model.github.token == "safe_token"
+    assert "token_command" not in config_file.overrides_model.raw_data["github"]
+    assert "key_command" not in config_file.overrides_model.raw_data["trello"]
+    assert "token_command" not in config_file.overrides_model.raw_data["trello"]
+    assert "llm_api_key_command" not in config_file.overrides_model.raw_data["dynamicd"]
+
+    blocked_fields = config_file.combined_model.non_secret_metadata["trust_blocked_command_fields"]
+    assert "github.token_command" in blocked_fields
+    assert "trello.key_command" in blocked_fields
+    assert "trello.token_command" in blocked_fields
+    assert "dynamicd.llm_api_key_command" in blocked_fields
+
+
+def test_trusted_local_file_preserves_command_fields(
+    config_file: ConfigFileWithOverrides, helpers, overrides_config: Path, monkeypatch, tmp_path: PathLibPath
+):
+    monkeypatch.setenv("DDEV_DATA_DIR", str(tmp_path / "ddev-data"))
+    overrides_config.write_text(
+        helpers.dedent(
+            """
+            [github]
+            token_command = "safe command"
+            """
+        )
+    )
+
+    canonical_overrides_path = str(overrides_config.expand().resolve())
+    trust_store_path = get_trust_store_path()
+    trust_store_path.parent.mkdir(parents=True, exist_ok=True)
+    trust_store_path.write_text(
+        dumps_toml_data(
+            {
+                "records": [
+                    {
+                        "path": canonical_overrides_path,
+                        "sha256": local_config_sha256(overrides_config),
+                    }
+                ]
+            }
+        )
+    )
+
+    config_file.load()
+
+    assert config_file.overrides_model.raw_data["github"]["token_command"] == "safe command"
+
+
+def test_changed_local_file_after_trust_strips_command_fields(
+    config_file: ConfigFileWithOverrides, helpers, overrides_config: Path, monkeypatch, tmp_path: PathLibPath
+):
+    monkeypatch.setenv("DDEV_DATA_DIR", str(tmp_path / "ddev-data"))
+    overrides_config.write_text(
+        helpers.dedent(
+            """
+            [github]
+            token_command = "safe command"
+            """
+        )
+    )
+
+    canonical_overrides_path = str(overrides_config.expand().resolve())
+    trust_store_path = get_trust_store_path()
+    trust_store_path.parent.mkdir(parents=True, exist_ok=True)
+    trust_store_path.write_text(
+        dumps_toml_data(
+            {
+                "records": [
+                    {
+                        "path": canonical_overrides_path,
+                        "sha256": local_config_sha256(overrides_config),
+                    }
+                ]
+            }
+        )
+    )
+
+    overrides_config.write_text(
+        helpers.dedent(
+            """
+            [github]
+            token_command = "safe command changed"
+            """
+        )
+    )
+
+    config_file.load()
+
+    assert "token_command" not in config_file.overrides_model.raw_data["github"]
+    assert "github.token_command" in config_file.combined_model.non_secret_metadata["trust_blocked_command_fields"]
+
+    monkeypatch.delenv("DD_GITHUB_TOKEN", raising=False)
+    monkeypatch.delenv("GH_TOKEN", raising=False)
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+
+    with pytest.raises(
+        ConfigurationError,
+        match=r"blocked-untrusted-local-config.*ddev config allow.*ddev config deny",
+    ):
+        _ = config_file.combined_model.github.token
+
+
+def test_missing_local_file_is_untrusted(config_file: ConfigFileWithOverrides, monkeypatch, tmp_path: PathLibPath):
+    monkeypatch.setenv("DDEV_DATA_DIR", str(tmp_path / "ddev-data"))
+    trust_store_path = get_trust_store_path()
+    trust_store_path.parent.mkdir(parents=True, exist_ok=True)
+    trust_store_path.write_text(
+        dumps_toml_data(
+            {
+                "records": [
+                    {
+                        "path": str((tmp_path / "missing" / DDEV_TOML).resolve()),
+                        "sha256": "deadbeef",
+                    }
+                ]
+            }
+        )
+    )
+
+    config_file.load()
+
+    assert config_file.combined_model.raw_data == config_file.global_model.raw_data

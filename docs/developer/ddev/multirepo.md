@@ -14,6 +14,41 @@ When you run a `ddev` command, it searches for a `.ddev.toml` file in the curren
 *   **Discovery:** `ddev` automatically finds the closest `.ddev.toml` by traversing up the directory tree from your current location.
 *   **Use Case:** Ideal for setting a specific `repo` path for a project checkout, managing different worktrees of the same repository, or defining other project-specific configurations without altering the global settings.
 
+## Command-based secrets in local overrides
+
+Repo-local command fields (`*_command`) are blocked by default until you trust that local `.ddev.toml` file.
+
+Example local override:
+
+```toml
+# .ddev.toml
+
+[github]
+token_command = "<COMMAND_THAT_PRINTS_GITHUB_TOKEN>"
+```
+
+If this file is not trusted yet, `ddev` ignores the local command field and falls back to other available sources.
+
+Trust the current local config file:
+
+```bash
+ddev config allow
+```
+
+Revoke trust for the current local config file:
+
+```bash
+ddev config deny
+```
+
+Trust is hash-bound to the current file content. If you edit `.ddev.toml`, trust is automatically invalidated and you must run `ddev config allow` again.
+
+Safety guidance:
+
+*   Only trust `.ddev.toml` files in repositories and branches you reviewed.
+*   Avoid trusting local command fields in unknown, freshly cloned, or shared directories until you inspect them.
+*   Use `ddev config deny` to quickly reset trust when changing context.
+
 ## The `override` command
 
 The `ddev config override` command creates the `.ddev.toml` file in your working directory and initializes it with the repo set to the same directory. The command tries to identify the repo you are in by reading the `[tool.ddev]` table in the `pyproject.toml` file in the current repo root directory.
