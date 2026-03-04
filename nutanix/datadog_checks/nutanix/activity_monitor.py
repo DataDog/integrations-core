@@ -25,6 +25,11 @@ class ActivityMonitor:
         self.last_task_collection_time = self.check.read_persistent_cache("last_task_collection_time")
         self.last_audit_collection_time = self.check.read_persistent_cache("last_audit_collection_time")
         self.last_alert_collection_time = self.check.read_persistent_cache("last_alert_collection_time")
+        # In-memory caches: id -> raw item (reset each check run)
+        self._events: dict[str, dict] = {}
+        self._audits: dict[str, dict] = {}
+        self._alerts: dict[str, dict] = {}
+        self._tasks: dict[str, dict] = {}
         # Read boolean flag from cache (stored as string)
         cached_value = self.check.read_persistent_cache("alerts_v42_supported")
         if cached_value == "True":
@@ -33,6 +38,13 @@ class ActivityMonitor:
             self.alerts_v42_supported = False
         else:
             self.alerts_v42_supported = None
+
+    def reset_state(self) -> None:
+        """Reset in-memory caches for a new collection run."""
+        self._events = {}
+        self._audits = {}
+        self._alerts = {}
+        self._tasks = {}
 
     def _collect(
         self,
@@ -77,6 +89,12 @@ class ActivityMonitor:
             items = pre_filter_fn(items)
 
         items = [i for i in items if self._should_collect_activity_item(i, activity_kind)]
+
+        # Cache collected items by ID
+        cache = getattr(self, f"_{activity_kind}s")
+        for item in items:
+            if ext_id := item.get("extId"):
+                cache[ext_id] = item
 
         self.check.log.debug(
             "[PC:%s:%s] Processing %d %ss after filtering",

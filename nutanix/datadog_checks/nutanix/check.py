@@ -84,6 +84,22 @@ class NutanixCheck(AgentCheck):
     def categories(self):
         return self.infrastructure_monitor._categories
 
+    @property
+    def events(self):
+        return self.activity_monitor._events
+
+    @property
+    def audits(self):
+        return self.activity_monitor._audits
+
+    @property
+    def alerts(self):
+        return self.activity_monitor._alerts
+
+    @property
+    def tasks(self):
+        return self.activity_monitor._tasks
+
     def extract_category_tags(self, entity: dict) -> list[str]:
         """Extract category tags from an entity that has a categories field."""
         tags = []
@@ -106,6 +122,7 @@ class NutanixCheck(AgentCheck):
         self.log.info("Starting check for Prism Central: %s:%s", self.pc_ip, self.pc_port)
 
         self.infrastructure_monitor.reset_state()
+        self.activity_monitor.reset_state()
 
         if not self._check_health():
             self.log.warning("[PC:%s:%s] Health check failed, aborting", self.pc_ip, self.pc_port)
