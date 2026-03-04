@@ -145,9 +145,25 @@ class KafkaActionsClient:
                 if topic not in metadata.topics:
                     raise ValueError(f"Topic '{topic}' not found")
 
-                partitions = [TopicPartition(topic, p, start_offset) for p in metadata.topics[topic].partitions.keys()]
+                partition_ids = list(metadata.topics[topic].partitions.keys())
             else:
-                partitions = [TopicPartition(topic, partition, start_offset)]
+                partition_ids = [partition]
+
+            if start_offset == -1:
+                # For "latest" offset, seek back from the high watermark to read the last N existing messages
+                partitions = []
+                # Temporarily assign partitions to query watermarks
+                tmp_partitions = [TopicPartition(topic, p) for p in partition_ids]
+                consumer.assign(tmp_partitions)
+                for p in partition_ids:
+                    low, high = consumer.get_watermark_offsets(TopicPartition(topic, p), timeout=10)
+                    seek_offset = max(low, high - max_messages)
+                    partitions.append(TopicPartition(topic, p, seek_offset))
+                    self.log.debug(
+                        "Partition %d: low=%d, high=%d, seeking to %d", p, low, high, seek_offset
+                    )
+            else:
+                partitions = [TopicPartition(topic, p, start_offset) for p in partition_ids]
 
             self.log.debug("Assigning partitions: %s", partitions)
             consumer.assign(partitions)
