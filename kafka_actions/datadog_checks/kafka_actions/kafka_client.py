@@ -161,9 +161,7 @@ class KafkaActionsClient:
                     result = future.result()
                     seek_offset = max(0, result.offset - max_messages)
                     partitions.append(TopicPartition(topic, tp.partition, seek_offset))
-                    self.log.debug(
-                        "Partition %d: high=%d, seeking to %d", tp.partition, result.offset, seek_offset
-                    )
+                    self.log.debug("Partition %d: high=%d, seeking to %d", tp.partition, result.offset, seek_offset)
             else:
                 partitions = [TopicPartition(topic, p, start_offset) for p in partition_ids]
 

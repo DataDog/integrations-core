@@ -383,5 +383,192 @@ class TestReadMessagesAdvancedFiltering:
         assert message_events[0]['remote_config_id'] == 'test-nested-filter-001'
 
 
+class TestConsumeMessagesOffsetHandling:
+    """Test consume_messages offset resolution in KafkaActionsClient."""
+
+    def _make_client(self):
+        import logging
+
+        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
+
+        return KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
+
+    def _mock_consumer(self, messages):
+        """Create a mock consumer that returns messages from a list then None."""
+        from unittest.mock import MagicMock
+
+        consumer = MagicMock()
+        message_iter = iter(messages)
+
+        def poll_side_effect(timeout=1.0):
+            try:
+                return next(message_iter)
+            except StopIteration:
+                return None
+
+        consumer.poll.side_effect = poll_side_effect
+        return consumer
+
+    def _mock_metadata(self, topic, partition_ids):
+        from unittest.mock import MagicMock
+
+        metadata = MagicMock()
+        partitions = {pid: MagicMock() for pid in partition_ids}
+        topic_metadata = MagicMock()
+        topic_metadata.partitions = partitions
+        metadata.topics = {topic: topic_metadata}
+        return metadata
+
+    def test_latest_offset_uses_list_offsets(self):
+        """When start_offset=-1, list_offsets is called to resolve high watermarks."""
+        from unittest.mock import MagicMock
+
+        messages = [
+            MockKafkaMessage(key=b'k1', value=b'v1', partition=0, offset=95),
+            MockKafkaMessage(key=b'k2', value=b'v2', partition=0, offset=96),
+        ]
+
+        client = self._make_client()
+        consumer = self._mock_consumer(messages)
+        consumer.list_topics.return_value = self._mock_metadata('test-topic', [0])
+
+        # Mock list_offsets via admin client
+        mock_admin = MagicMock()
+        mock_future = MagicMock()
+        mock_result = MagicMock()
+        mock_result.offset = 100
+        mock_future.result.return_value = mock_result
+        mock_tp = MagicMock()
+        mock_tp.partition = 0
+        mock_admin.list_offsets.return_value = {mock_tp: mock_future}
+
+        with (
+            patch.object(client, 'get_consumer', return_value=consumer),
+            patch.object(client, 'get_admin_client', return_value=mock_admin),
+        ):
+            result = list(
+                client.consume_messages(
+                    topic='test-topic', partition=-1, start_offset=-1, max_messages=10, timeout_ms=5000
+                )
+            )
+
+        mock_admin.list_offsets.assert_called_once()
+        assert len(result) == 2
+
+        # Verify assigned partition has offset = max(0, 100 - 10) = 90
+        assign_call = consumer.assign.call_args[0][0]
+        assert len(assign_call) == 1
+        assert assign_call[0].offset == 90
+        assert assign_call[0].partition == 0
+
+    def test_latest_offset_multiple_partitions(self):
+        """list_offsets is called once with all partitions when start_offset=-1."""
+        from unittest.mock import MagicMock
+
+        messages = [
+            MockKafkaMessage(key=b'k1', value=b'v1', partition=0, offset=45),
+            MockKafkaMessage(key=b'k2', value=b'v2', partition=1, offset=195),
+        ]
+
+        client = self._make_client()
+        consumer = self._mock_consumer(messages)
+        consumer.list_topics.return_value = self._mock_metadata('test-topic', [0, 1])
+
+        mock_admin = MagicMock()
+        mock_tp0 = MagicMock()
+        mock_tp0.partition = 0
+        mock_result0 = MagicMock()
+        mock_result0.offset = 50
+        mock_future0 = MagicMock()
+        mock_future0.result.return_value = mock_result0
+
+        mock_tp1 = MagicMock()
+        mock_tp1.partition = 1
+        mock_result1 = MagicMock()
+        mock_result1.offset = 200
+        mock_future1 = MagicMock()
+        mock_future1.result.return_value = mock_result1
+
+        mock_admin.list_offsets.return_value = {mock_tp0: mock_future0, mock_tp1: mock_future1}
+
+        with (
+            patch.object(client, 'get_consumer', return_value=consumer),
+            patch.object(client, 'get_admin_client', return_value=mock_admin),
+        ):
+            result = list(
+                client.consume_messages(
+                    topic='test-topic', partition=-1, start_offset=-1, max_messages=5, timeout_ms=5000
+                )
+            )
+
+        mock_admin.list_offsets.assert_called_once()
+        # Verify the request contained both partitions
+        call_args = mock_admin.list_offsets.call_args[0][0]
+        assert len(call_args) == 2
+
+        assert len(result) == 2
+
+        # Verify assigned offsets: partition 0 = max(0, 50-5)=45, partition 1 = max(0, 200-5)=195
+        assign_call = consumer.assign.call_args[0][0]
+        offsets_by_partition = {tp.partition: tp.offset for tp in assign_call}
+        assert offsets_by_partition[0] == 45
+        assert offsets_by_partition[1] == 195
+
+    def test_latest_offset_clamps_to_zero(self):
+        """When high watermark < max_messages, seek offset is clamped to 0."""
+        from unittest.mock import MagicMock
+
+        client = self._make_client()
+        consumer = self._mock_consumer([])
+        consumer.list_topics.return_value = self._mock_metadata('test-topic', [0])
+
+        mock_admin = MagicMock()
+        mock_tp = MagicMock()
+        mock_tp.partition = 0
+        mock_result = MagicMock()
+        mock_result.offset = 3  # Less than max_messages
+        mock_future = MagicMock()
+        mock_future.result.return_value = mock_result
+        mock_admin.list_offsets.return_value = {mock_tp: mock_future}
+
+        with (
+            patch.object(client, 'get_consumer', return_value=consumer),
+            patch.object(client, 'get_admin_client', return_value=mock_admin),
+        ):
+            list(
+                client.consume_messages(
+                    topic='test-topic', partition=-1, start_offset=-1, max_messages=100, timeout_ms=1000
+                )
+            )
+
+        assign_call = consumer.assign.call_args[0][0]
+        assert assign_call[0].offset == 0
+
+    def test_earliest_offset_does_not_call_list_offsets(self):
+        """When start_offset=-2 (earliest), list_offsets should not be called."""
+        from unittest.mock import MagicMock
+
+        client = self._make_client()
+        consumer = self._mock_consumer([])
+        consumer.list_topics.return_value = self._mock_metadata('test-topic', [0])
+
+        mock_admin = MagicMock()
+
+        with (
+            patch.object(client, 'get_consumer', return_value=consumer),
+            patch.object(client, 'get_admin_client', return_value=mock_admin),
+        ):
+            list(
+                client.consume_messages(
+                    topic='test-topic', partition=-1, start_offset=-2, max_messages=10, timeout_ms=1000
+                )
+            )
+
+        mock_admin.list_offsets.assert_not_called()
+
+        assign_call = consumer.assign.call_args[0][0]
+        assert assign_call[0].offset == -2
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-vv'])
