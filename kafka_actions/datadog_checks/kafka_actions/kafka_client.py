@@ -151,17 +151,18 @@ class KafkaActionsClient:
 
             if start_offset == -1:
                 # For "latest" offset, seek back from the high watermark to read the last N existing messages.
-                # Use offsets_for_times with offset=-1 to resolve high watermarks for all partitions in one call.
-                remaining = max(0.5, global_timeout_s - (time.time() - start_time))
-                query_partitions = [TopicPartition(topic, p, -1) for p in partition_ids]
-                resolved = consumer.offsets_for_times(query_partitions, timeout=remaining)
+                # Assign first so get_watermark_offsets can query the broker, then compute seek positions.
+                tmp_partitions = [TopicPartition(topic, p) for p in partition_ids]
+                consumer.assign(tmp_partitions)
 
                 partitions = []
-                for tp in resolved:
-                    seek_offset = max(0, tp.offset - max_messages)
-                    partitions.append(TopicPartition(topic, tp.partition, seek_offset))
+                for p in partition_ids:
+                    remaining = max(0.5, global_timeout_s - (time.time() - start_time))
+                    low, high = consumer.get_watermark_offsets(TopicPartition(topic, p), timeout=remaining)
+                    seek_offset = max(low, high - max_messages)
+                    partitions.append(TopicPartition(topic, p, seek_offset))
                     self.log.debug(
-                        "Partition %d: high=%d, seeking to %d", tp.partition, tp.offset, seek_offset
+                        "Partition %d: low=%d, high=%d, seeking to %d", p, low, high, seek_offset
                     )
             else:
                 partitions = [TopicPartition(topic, p, start_offset) for p in partition_ids]
