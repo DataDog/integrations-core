@@ -69,7 +69,7 @@ def instance_min_collection_interval():
 
 
 def instance_page_limit():
-    return 50
+    return 100
 
 
 def instance_pc_base_backoff_seconds():

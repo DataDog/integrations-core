@@ -26,7 +26,7 @@ class NutanixCheck(AgentCheck):
     def _parse_config(self):
         # 120s proved reliable during testing — retrieves the majority of Cluster/VM stats
         self.sampling_interval = self.instance.get("min_collection_interval", 120)
-        self.page_limit = self.instance.get("page_limit", 50)
+        self.page_limit = self.instance.get("page_limit", 100)
 
         # setup
         self.pc_ip = self.instance.get("pc_ip")

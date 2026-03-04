@@ -41,12 +41,12 @@ instances:
     #
     pc_password: <PC_PASSWORD>
 
-    ## @param page_limit - integer - optional - default: 50
+    ## @param page_limit - integer - optional - default: 100
     ## The maximum number of items to retrieve per page when making paginated API requests.
     ## This controls the page size for API calls to Prism Central.
     ## Default is 50. Increase this value to reduce the number of API calls for large environments.
     #
-    # page_limit: 50
+    # page_limit: 100
 
     ## @param pc_max_retries - integer - optional - default: 3
     ## The maximum number of retry attempts for API requests when rate limited by Prism Central API.

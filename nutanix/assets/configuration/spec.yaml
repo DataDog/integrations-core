@@ -52,7 +52,7 @@ files:
             display_priority: 1
             value:
               type: integer
-              example: 50
+              example: 100
           - name: pc_max_retries
             description: |
               The maximum number of retry attempts for API requests when rate limited by Prism Central API.
