@@ -1253,4 +1253,4 @@ def test_log_shipper_handles_fetch_error(monkeypatch: MonkeyPatch) -> None:
     job = {'jobId': 'wb:0001', 'name': 'err_job', 'type': 'Command'}
     shipper.ship(job, 'failed', 'workbench', [])
 
-    assert len(sent_logs) == 0
+    assert not sent_logs
