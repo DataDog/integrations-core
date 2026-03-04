@@ -20,21 +20,17 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
 
-      - name: Verify build_agent.yaml needs updating
+      - name: Verify preconditions
         run: |-
           if ! grep -qE '^\s+branch:\s+main\s*$' .gitlab/build_agent.yaml; then
             echo "build_agent.yaml already points to the release branch — nothing to do."
             exit 0
           fi
-          echo "needs_update=true" >> "$GITHUB_ENV"
-
-      - name: Verify agent branch exists
-        if: env.needs_update == 'true'
-        run: |-
           if ! git ls-remote --exit-code --heads https://github.com/DataDog/datadog-agent.git "$BRANCH" >/dev/null 2>&1; then
             echo "::error::Agent branch '$BRANCH' does not exist in DataDog/datadog-agent yet."
             exit 1
           fi
+          echo "needs_update=true" >> "$GITHUB_ENV"
 
       - name: Update build_agent.yaml
         if: env.needs_update == 'true'
