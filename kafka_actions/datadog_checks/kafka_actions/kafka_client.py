@@ -4,7 +4,6 @@
 """Kafka client wrapper for kafka_actions check."""
 
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
 from confluent_kafka import Consumer, KafkaException, Producer, TopicPartition
@@ -151,33 +150,18 @@ class KafkaActionsClient:
                 partition_ids = [partition]
 
             if start_offset == -1:
-                # For "latest" offset, seek back from the high watermark to read the last N existing messages
-                tmp_partitions = [TopicPartition(topic, p) for p in partition_ids]
-                consumer.assign(tmp_partitions)
-
+                # For "latest" offset, seek back from the high watermark to read the last N existing messages.
+                # Use offsets_for_times with offset=-1 to resolve high watermarks for all partitions in one call.
                 remaining = max(0.5, global_timeout_s - (time.time() - start_time))
-                per_call_timeout = remaining
-
-                def _get_watermark(pid: int) -> tuple[int, int, int]:
-                    low, high = consumer.get_watermark_offsets(
-                        TopicPartition(topic, pid), timeout=per_call_timeout
-                    )
-                    return pid, low, high
-
-                watermarks: dict[int, tuple[int, int]] = {}
-                with ThreadPoolExecutor(max_workers=len(partition_ids)) as pool:
-                    futures = {pool.submit(_get_watermark, p): p for p in partition_ids}
-                    for future in as_completed(futures, timeout=remaining):
-                        pid, low, high = future.result()
-                        watermarks[pid] = (low, high)
+                query_partitions = [TopicPartition(topic, p, -1) for p in partition_ids]
+                resolved = consumer.offsets_for_times(query_partitions, timeout=remaining)
 
                 partitions = []
-                for p in partition_ids:
-                    low, high = watermarks[p]
-                    seek_offset = max(low, high - max_messages)
-                    partitions.append(TopicPartition(topic, p, seek_offset))
+                for tp in resolved:
+                    seek_offset = max(0, tp.offset - max_messages)
+                    partitions.append(TopicPartition(topic, tp.partition, seek_offset))
                     self.log.debug(
-                        "Partition %d: low=%d, high=%d, seeking to %d", p, low, high, seek_offset
+                        "Partition %d: high=%d, seeking to %d", tp.partition, tp.offset, seek_offset
                     )
             else:
                 partitions = [TopicPartition(topic, p, start_offset) for p in partition_ids]
