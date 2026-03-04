@@ -12,6 +12,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+
 def set_output(key: str, value: str) -> None:
     with open(os.environ["GITHUB_OUTPUT"], "a") as f:
         f.write(f"{key}={value}\n")
@@ -19,7 +20,7 @@ def set_output(key: str, value: str) -> None:
 
 def get_all_integrations() -> list[str]:
     return sorted(
-        {path.parent.name for path in Path(".").glob("*/src/datadog_checks/*/__about__.py")}
+        {path.parent.name for path in Path(".").glob("*/datadog_checks/*/__about__.py")}
     )
 
 
@@ -32,9 +33,10 @@ def detect_from_tags() -> list[str]:
 
 def main() -> None:
     manual = os.environ.get("MANUAL_INTEGRATIONS", "").strip()
+    all_integrations = get_all_integrations()
 
     if manual.lower() == "all":
-        integrations = get_all_integrations()
+        integrations = all_integrations
     elif manual:
         try:
             integrations = json.loads(manual)
@@ -43,6 +45,11 @@ def main() -> None:
             sys.exit(1)
     else:
         integrations = detect_from_tags()
+
+    unknown = set(integrations).difference(set(all_integrations))
+    if unknown:
+        print(f"Unknown integrations: {', '.join(unknown)}", file=sys.stderr)
+        sys.exit(1)
 
     set_output("integrations", json.dumps(integrations))
 
