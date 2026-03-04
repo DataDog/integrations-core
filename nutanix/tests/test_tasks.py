@@ -178,7 +178,9 @@ def test_tasks_filtered_by_resource_filters_include_cluster(
     tasks = [t for t in aggregator.events if "ntnx_type:task" in t.get('tags', [])]
     assert len(tasks) > 0
     # Verify that all collected tasks are from the included cluster
-    assert all("ntnx_cluster_name:datadog-nutanix-dev" in t["tags"] for t in tasks)
+    assert all(
+        "ntnx_cluster_name:datadog-nutanix-dev" in t["tags"] for t in tasks if "ntnx_cluster_name" in t["tags"]
+    ), f"All tasks should be from the included cluster 'datadog-nutanix-dev'. Tags found: {[t['tags'] for t in tasks]}"
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")

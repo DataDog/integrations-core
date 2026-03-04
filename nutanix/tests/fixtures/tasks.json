@@ -2,18 +2,207 @@
   {
     "data": [
       {
-        "extId": "ZXJnb24=:3e25313f-cf66-43c1-4eb2-ed3701db7b27",
-        "operation": "LogCollectionWithDownloadLink",
-        "operationDescription": "Collect logs",
-        "createdTime": "2026-02-24T20:11:08.60048Z",
-        "startedTime": "2026-02-24T20:11:11.799971Z",
-        "completedTime": "2026-02-24T21:26:19.556191Z",
+        "extId": "ZXJnb24=:65c3524e-0f94-460b-6e17-79ba71a572ff",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-04T00:49:39.317871Z",
+        "startedTime": "2026-03-04T00:49:39.317871Z",
+        "completedTime": "2026-03-04T00:49:39.338921Z",
         "progressPercentage": 100,
         "entitiesAffected": [
           {
-            "extId": "00064715-c043-5d8f-ee4b-176ec875554d",
-            "rel": "clustermgmt:config:cluster",
-            "name": "datadog-nutanix-dev",
+            "extId": "52ff1701-756a-475d-ae6f-93db54397fe7",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          },
+          {
+            "extId": "6cf0be2b-a9ab-4eae-8d04-bdc9b1f29180",
+            "rel": "monitoring:serviceability:alert"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:49:39.33892Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 2,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:ebee0877-78bf-4613-460d-9bfb08e33176",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:ebee0877-78bf-4613-460d-9bfb08e33176",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:ebee0877-78bf-4613-460d-9bfb08e33176",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:ebee0877-78bf-4613-460d-9bfb08e33176",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:ebee0877-78bf-4613-460d-9bfb08e33176",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-04T00:49:39.306082Z",
+        "startedTime": "2026-03-04T00:49:39.306082Z",
+        "completedTime": "2026-03-04T00:49:39.346866Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "52ff1701-756a-475d-ae6f-93db54397fe7",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          },
+          {
+            "extId": "6cf0be2b-a9ab-4eae-8d04-bdc9b1f29180",
+            "rel": "monitoring:serviceability:alert"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:65c3524e-0f94-460b-6e17-79ba71a572ff",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:65c3524e-0f94-460b-6e17-79ba71a572ff",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:49:39.346865Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 2,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:cb4bbc63-7797-4d62-734a-f8b62449fe46",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-04T00:49:39.013527Z",
+        "startedTime": "2026-03-04T00:49:39.013527Z",
+        "completedTime": "2026-03-04T00:49:39.040578Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "52ff1701-756a-475d-ae6f-93db54397fe7",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          },
+          {
+            "extId": "6cf0be2b-a9ab-4eae-8d04-bdc9b1f29180",
+            "rel": "monitoring:serviceability:alert"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:49:39.040577Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 2,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:4af84103-82ff-4dfa-790e-f990afb9bb04",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:4af84103-82ff-4dfa-790e-f990afb9bb04",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:4af84103-82ff-4dfa-790e-f990afb9bb04",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:4af84103-82ff-4dfa-790e-f990afb9bb04",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:4af84103-82ff-4dfa-790e-f990afb9bb04",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-04T00:49:39.000844Z",
+        "startedTime": "2026-03-04T00:49:39.000844Z",
+        "completedTime": "2026-03-04T00:49:39.051436Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "52ff1701-756a-475d-ae6f-93db54397fe7",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          },
+          {
+            "extId": "6cf0be2b-a9ab-4eae-8d04-bdc9b1f29180",
+            "rel": "monitoring:serviceability:alert"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:cb4bbc63-7797-4d62-734a-f8b62449fe46",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:cb4bbc63-7797-4d62-734a-f8b62449fe46",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:49:39.051435Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 2,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:7895aa11-4601-4b9e-779e-bc5cdb61f80d",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-04T00:43:30.650153Z",
+        "startedTime": "2026-03-04T00:43:30.650153Z",
+        "completedTime": "2026-03-04T00:43:30.672892Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "52ff1701-756a-475d-ae6f-93db54397fe7",
+            "rel": "monitoring:serviceability:alert",
             "$reserved": {
               "$fv": "v4.r1"
             },
@@ -21,19 +210,8 @@
           }
         ],
         "isCancelable": false,
-        "completionDetails": [
-          {
-            "value": "efcc2f7a-54b3-45b5-598a-02be77ebed49",
-            "$reserved": {
-              "$fv": "v1.r0"
-            },
-            "$objectType": "common.v1.config.KVPair",
-            "name": "LogExtId"
-          }
-        ],
-        "lastUpdatedTime": "2026-02-24T21:26:19.55619Z",
-        "clusterExtIds": ["00064715-c043-5d8f-ee4b-176ec875554d"],
-        "isBackgroundTask": true,
+        "lastUpdatedTime": "2026-03-04T00:43:30.672891Z",
+        "isBackgroundTask": false,
         "numberOfSubtasks": 0,
         "numberOfEntitiesAffected": 1,
         "$reserved": {
@@ -45,8 +223,1422 @@
             "$fv": "v4.r1"
           },
           "$objectType": "prism.v4.config.TaskReferenceInternal",
-          "extId": "ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
-          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
+          "extId": "ZXJnb24=:1140dc41-8501-452e-5bb0-db2d822006e5",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:1140dc41-8501-452e-5bb0-db2d822006e5",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:1140dc41-8501-452e-5bb0-db2d822006e5",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:1140dc41-8501-452e-5bb0-db2d822006e5",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:1140dc41-8501-452e-5bb0-db2d822006e5",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-04T00:43:30.638267Z",
+        "startedTime": "2026-03-04T00:43:30.638267Z",
+        "completedTime": "2026-03-04T00:43:30.687011Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "52ff1701-756a-475d-ae6f-93db54397fe7",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:7895aa11-4601-4b9e-779e-bc5cdb61f80d",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:7895aa11-4601-4b9e-779e-bc5cdb61f80d",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:43:30.68701Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:7836dc87-3ba1-4d4b-79a8-284e78ae44ea",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-04T00:43:30.318745Z",
+        "startedTime": "2026-03-04T00:43:30.318745Z",
+        "completedTime": "2026-03-04T00:43:30.345827Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "52ff1701-756a-475d-ae6f-93db54397fe7",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:43:30.345826Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:e61c12fe-a872-4599-5dc0-f31c4efea7ee",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:e61c12fe-a872-4599-5dc0-f31c4efea7ee",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:e61c12fe-a872-4599-5dc0-f31c4efea7ee",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:e61c12fe-a872-4599-5dc0-f31c4efea7ee",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:e61c12fe-a872-4599-5dc0-f31c4efea7ee",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-04T00:43:30.305606Z",
+        "startedTime": "2026-03-04T00:43:30.305606Z",
+        "completedTime": "2026-03-04T00:43:30.354725Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "52ff1701-756a-475d-ae6f-93db54397fe7",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:7836dc87-3ba1-4d4b-79a8-284e78ae44ea",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:7836dc87-3ba1-4d4b-79a8-284e78ae44ea",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:43:30.354724Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:9072cbeb-2fdd-4635-5386-8afd81e4c2ef",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-04T00:43:27.446611Z",
+        "startedTime": "2026-03-04T00:43:27.446611Z",
+        "completedTime": "2026-03-04T00:43:27.461111Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "e7a07f24-108d-46c6-9b51-12d6b6920fab",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:43:27.46111Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:495e7a21-201c-4f4c-599a-fc8de1565393",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:495e7a21-201c-4f4c-599a-fc8de1565393",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:495e7a21-201c-4f4c-599a-fc8de1565393",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:495e7a21-201c-4f4c-599a-fc8de1565393",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:495e7a21-201c-4f4c-599a-fc8de1565393",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-04T00:43:27.433808Z",
+        "startedTime": "2026-03-04T00:43:27.433808Z",
+        "completedTime": "2026-03-04T00:43:27.473441Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "e7a07f24-108d-46c6-9b51-12d6b6920fab",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:9072cbeb-2fdd-4635-5386-8afd81e4c2ef",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:9072cbeb-2fdd-4635-5386-8afd81e4c2ef",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:43:27.47344Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:4e79dd41-12e8-44fd-4a82-0286f255db35",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-04T00:43:27.103932Z",
+        "startedTime": "2026-03-04T00:43:27.103932Z",
+        "completedTime": "2026-03-04T00:43:27.12728Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "e7a07f24-108d-46c6-9b51-12d6b6920fab",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:43:27.12728Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:5a83cc24-461a-4112-6105-7feacb3a160d",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:5a83cc24-461a-4112-6105-7feacb3a160d",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:5a83cc24-461a-4112-6105-7feacb3a160d",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:5a83cc24-461a-4112-6105-7feacb3a160d",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:5a83cc24-461a-4112-6105-7feacb3a160d",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-04T00:43:27.091238Z",
+        "startedTime": "2026-03-04T00:43:27.091238Z",
+        "completedTime": "2026-03-04T00:43:27.138231Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "e7a07f24-108d-46c6-9b51-12d6b6920fab",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:4e79dd41-12e8-44fd-4a82-0286f255db35",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:4e79dd41-12e8-44fd-4a82-0286f255db35",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:43:27.138231Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:cb620443-5015-4e65-4c30-b0a5c0919996",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-04T00:32:14.541548Z",
+        "startedTime": "2026-03-04T00:32:14.541548Z",
+        "completedTime": "2026-03-04T00:32:14.559982Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "6ae1d581-f35a-4f25-be28-613aad1775d3",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:32:14.559981Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:e97bb8ab-9f94-46bd-7589-9da3b5a68a87",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:e97bb8ab-9f94-46bd-7589-9da3b5a68a87",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:e97bb8ab-9f94-46bd-7589-9da3b5a68a87",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:e97bb8ab-9f94-46bd-7589-9da3b5a68a87",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:e97bb8ab-9f94-46bd-7589-9da3b5a68a87",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-04T00:32:14.531177Z",
+        "startedTime": "2026-03-04T00:32:14.531177Z",
+        "completedTime": "2026-03-04T00:32:14.578866Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "6ae1d581-f35a-4f25-be28-613aad1775d3",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:cb620443-5015-4e65-4c30-b0a5c0919996",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:cb620443-5015-4e65-4c30-b0a5c0919996",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:32:14.578865Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:698368a2-08a9-43bc-7026-88a18ac29e1b",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-04T00:32:14.219871Z",
+        "startedTime": "2026-03-04T00:32:14.219871Z",
+        "completedTime": "2026-03-04T00:32:14.243831Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "6ae1d581-f35a-4f25-be28-613aad1775d3",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:32:14.243831Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:9f4bb41b-ff8d-4316-4f48-2a2ecad7f580",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:9f4bb41b-ff8d-4316-4f48-2a2ecad7f580",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:9f4bb41b-ff8d-4316-4f48-2a2ecad7f580",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:9f4bb41b-ff8d-4316-4f48-2a2ecad7f580",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:9f4bb41b-ff8d-4316-4f48-2a2ecad7f580",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-04T00:32:14.207512Z",
+        "startedTime": "2026-03-04T00:32:14.207512Z",
+        "completedTime": "2026-03-04T00:32:14.25175Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "6ae1d581-f35a-4f25-be28-613aad1775d3",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:698368a2-08a9-43bc-7026-88a18ac29e1b",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:698368a2-08a9-43bc-7026-88a18ac29e1b",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:32:14.25175Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:24d232e5-af39-4eb0-7966-bad97ee8b66f",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-04T00:20:04.695557Z",
+        "startedTime": "2026-03-04T00:20:04.695557Z",
+        "completedTime": "2026-03-04T00:20:04.801756Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "ca546858-5236-48f6-ac95-de5102a88bfe",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:20:04.801756Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:a45b5b6e-4b9c-452d-6520-9864bf9a755c",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:a45b5b6e-4b9c-452d-6520-9864bf9a755c",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:a45b5b6e-4b9c-452d-6520-9864bf9a755c",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:a45b5b6e-4b9c-452d-6520-9864bf9a755c",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:a45b5b6e-4b9c-452d-6520-9864bf9a755c",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-04T00:20:04.683808Z",
+        "startedTime": "2026-03-04T00:20:04.683808Z",
+        "completedTime": "2026-03-04T00:20:05.015781Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "ca546858-5236-48f6-ac95-de5102a88bfe",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:24d232e5-af39-4eb0-7966-bad97ee8b66f",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:24d232e5-af39-4eb0-7966-bad97ee8b66f",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:20:05.01578Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:8175d3d0-0a59-4104-7693-079786685aeb",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-04T00:20:04.049372Z",
+        "startedTime": "2026-03-04T00:20:04.049372Z",
+        "completedTime": "2026-03-04T00:20:04.276938Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "ca546858-5236-48f6-ac95-de5102a88bfe",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:20:04.276936Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:8c0c5ae0-994a-41aa-7b7c-2322835a1835",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:8c0c5ae0-994a-41aa-7b7c-2322835a1835",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:8c0c5ae0-994a-41aa-7b7c-2322835a1835",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:8c0c5ae0-994a-41aa-7b7c-2322835a1835",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:8c0c5ae0-994a-41aa-7b7c-2322835a1835",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-04T00:20:04.03454Z",
+        "startedTime": "2026-03-04T00:20:04.03454Z",
+        "completedTime": "2026-03-04T00:20:04.493228Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "ca546858-5236-48f6-ac95-de5102a88bfe",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:8175d3d0-0a59-4104-7693-079786685aeb",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:8175d3d0-0a59-4104-7693-079786685aeb",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:20:04.493227Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:f349c154-96f4-4a2c-4e71-c89f88aa3707",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-04T00:07:47.864733Z",
+        "startedTime": "2026-03-04T00:07:47.864733Z",
+        "completedTime": "2026-03-04T00:07:47.878673Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "6ae1d581-f35a-4f25-be28-613aad1775d3",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:07:47.878673Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:5ddebd66-4767-4b5c-7d55-940213e2f7e3",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:5ddebd66-4767-4b5c-7d55-940213e2f7e3",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:5ddebd66-4767-4b5c-7d55-940213e2f7e3",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:5ddebd66-4767-4b5c-7d55-940213e2f7e3",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:5ddebd66-4767-4b5c-7d55-940213e2f7e3",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-04T00:07:47.853525Z",
+        "startedTime": "2026-03-04T00:07:47.853525Z",
+        "completedTime": "2026-03-04T00:07:47.884604Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "6ae1d581-f35a-4f25-be28-613aad1775d3",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:f349c154-96f4-4a2c-4e71-c89f88aa3707",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:f349c154-96f4-4a2c-4e71-c89f88aa3707",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:07:47.884603Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:e5e0283a-bc84-4382-613c-ed4d31f5c6cf",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-04T00:07:47.537087Z",
+        "startedTime": "2026-03-04T00:07:47.537087Z",
+        "completedTime": "2026-03-04T00:07:47.572679Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "6ae1d581-f35a-4f25-be28-613aad1775d3",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:07:47.572679Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:5f150e49-dd81-4b30-5ccb-427999b303b4",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:5f150e49-dd81-4b30-5ccb-427999b303b4",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:5f150e49-dd81-4b30-5ccb-427999b303b4",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:5f150e49-dd81-4b30-5ccb-427999b303b4",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:5f150e49-dd81-4b30-5ccb-427999b303b4",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-04T00:07:47.52586Z",
+        "startedTime": "2026-03-04T00:07:47.52586Z",
+        "completedTime": "2026-03-04T00:07:47.580424Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "6ae1d581-f35a-4f25-be28-613aad1775d3",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:e5e0283a-bc84-4382-613c-ed4d31f5c6cf",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:e5e0283a-bc84-4382-613c-ed4d31f5c6cf",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-04T00:07:47.580423Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:caa1d1c0-e58c-4a1b-438f-6a6a114f80ba",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-03T23:48:40.363187Z",
+        "startedTime": "2026-03-03T23:48:40.363187Z",
+        "completedTime": "2026-03-03T23:48:40.384232Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "7f486083-3dde-4a52-8b1f-e2d2e75b2846",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T23:48:40.384231Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:ae00f592-008e-4bcc-5711-37d8fba0d4e2",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:ae00f592-008e-4bcc-5711-37d8fba0d4e2",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:ae00f592-008e-4bcc-5711-37d8fba0d4e2",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:ae00f592-008e-4bcc-5711-37d8fba0d4e2",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:ae00f592-008e-4bcc-5711-37d8fba0d4e2",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-03T23:48:40.352863Z",
+        "startedTime": "2026-03-03T23:48:40.352863Z",
+        "completedTime": "2026-03-03T23:48:40.392042Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "7f486083-3dde-4a52-8b1f-e2d2e75b2846",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:caa1d1c0-e58c-4a1b-438f-6a6a114f80ba",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:caa1d1c0-e58c-4a1b-438f-6a6a114f80ba",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T23:48:40.392042Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:b2dd329e-f792-4c3c-53da-4a108272ed5a",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-03T23:48:40.048116Z",
+        "startedTime": "2026-03-03T23:48:40.048116Z",
+        "completedTime": "2026-03-03T23:48:40.078266Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "7f486083-3dde-4a52-8b1f-e2d2e75b2846",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T23:48:40.078265Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:1f0d67d1-9f73-44a7-554c-41bfea878e9c",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:1f0d67d1-9f73-44a7-554c-41bfea878e9c",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:1f0d67d1-9f73-44a7-554c-41bfea878e9c",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:1f0d67d1-9f73-44a7-554c-41bfea878e9c",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:1f0d67d1-9f73-44a7-554c-41bfea878e9c",
+        "operation": "RESOLVE",
+        "operationDescription": "Resolve",
+        "createdTime": "2026-03-03T23:48:40.03408Z",
+        "startedTime": "2026-03-03T23:48:40.03408Z",
+        "completedTime": "2026-03-03T23:48:40.085505Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "7f486083-3dde-4a52-8b1f-e2d2e75b2846",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:b2dd329e-f792-4c3c-53da-4a108272ed5a",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:b2dd329e-f792-4c3c-53da-4a108272ed5a",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T23:48:40.085505Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:2f6fc3cd-6d83-4668-761a-bcc4afb75971",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-03T23:48:38.844684Z",
+        "startedTime": "2026-03-03T23:48:38.844684Z",
+        "completedTime": "2026-03-03T23:48:38.856571Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "7f486083-3dde-4a52-8b1f-e2d2e75b2846",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T23:48:38.85657Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:a3a0d154-ce85-47e3-7696-c83a95f8ddc3",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:a3a0d154-ce85-47e3-7696-c83a95f8ddc3",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:a3a0d154-ce85-47e3-7696-c83a95f8ddc3",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:a3a0d154-ce85-47e3-7696-c83a95f8ddc3",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:a3a0d154-ce85-47e3-7696-c83a95f8ddc3",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-03T23:48:38.83213Z",
+        "startedTime": "2026-03-03T23:48:38.83213Z",
+        "completedTime": "2026-03-03T23:48:38.868904Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "7f486083-3dde-4a52-8b1f-e2d2e75b2846",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:2f6fc3cd-6d83-4668-761a-bcc4afb75971",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:2f6fc3cd-6d83-4668-761a-bcc4afb75971",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T23:48:38.868903Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:61da0b86-e46c-4b95-6f26-cf51b9b8b2ec",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-03T23:48:38.528632Z",
+        "startedTime": "2026-03-03T23:48:38.528632Z",
+        "completedTime": "2026-03-03T23:48:38.543882Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "7f486083-3dde-4a52-8b1f-e2d2e75b2846",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T23:48:38.543882Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:0f3b92bb-ac20-4b07-44f3-8787a77c1b0d",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:0f3b92bb-ac20-4b07-44f3-8787a77c1b0d",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:0f3b92bb-ac20-4b07-44f3-8787a77c1b0d",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:0f3b92bb-ac20-4b07-44f3-8787a77c1b0d",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:0f3b92bb-ac20-4b07-44f3-8787a77c1b0d",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-03T23:48:38.517335Z",
+        "startedTime": "2026-03-03T23:48:38.517335Z",
+        "completedTime": "2026-03-03T23:48:38.550548Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "7f486083-3dde-4a52-8b1f-e2d2e75b2846",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:61da0b86-e46c-4b95-6f26-cf51b9b8b2ec",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:61da0b86-e46c-4b95-6f26-cf51b9b8b2ec",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T23:48:38.550547Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:a49de325-e288-4bed-725d-89f0af5b2cd2",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-03T23:48:36.55356Z",
+        "startedTime": "2026-03-03T23:48:36.55356Z",
+        "completedTime": "2026-03-03T23:48:36.569035Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "7f486083-3dde-4a52-8b1f-e2d2e75b2846",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T23:48:36.569035Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:fda7d8b7-16c9-44dc-6916-944aad4c8283",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:fda7d8b7-16c9-44dc-6916-944aad4c8283",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:fda7d8b7-16c9-44dc-6916-944aad4c8283",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:fda7d8b7-16c9-44dc-6916-944aad4c8283",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:fda7d8b7-16c9-44dc-6916-944aad4c8283",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-03T23:48:36.54129Z",
+        "startedTime": "2026-03-03T23:48:36.54129Z",
+        "completedTime": "2026-03-03T23:48:36.578773Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "7f486083-3dde-4a52-8b1f-e2d2e75b2846",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:a49de325-e288-4bed-725d-89f0af5b2cd2",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:a49de325-e288-4bed-725d-89f0af5b2cd2",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T23:48:36.578773Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:9e53e67f-0039-404c-46f9-d665af1bf15f",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-03T23:48:36.22009Z",
+        "startedTime": "2026-03-03T23:48:36.22009Z",
+        "completedTime": "2026-03-03T23:48:36.247759Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "7f486083-3dde-4a52-8b1f-e2d2e75b2846",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T23:48:36.247758Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:8c7dfd9f-9ae8-4cc0-64b8-a3ffdc6f7e88",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:8c7dfd9f-9ae8-4cc0-64b8-a3ffdc6f7e88",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:8c7dfd9f-9ae8-4cc0-64b8-a3ffdc6f7e88",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:8c7dfd9f-9ae8-4cc0-64b8-a3ffdc6f7e88",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:8c7dfd9f-9ae8-4cc0-64b8-a3ffdc6f7e88",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-03T23:48:36.206336Z",
+        "startedTime": "2026-03-03T23:48:36.206336Z",
+        "completedTime": "2026-03-03T23:48:36.259733Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "7f486083-3dde-4a52-8b1f-e2d2e75b2846",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:9e53e67f-0039-404c-46f9-d665af1bf15f",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:9e53e67f-0039-404c-46f9-d665af1bf15f",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T23:48:36.259732Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
+      },
+      {
+        "extId": "ZXJnb24=:e1ee5ff2-bf2a-4c97-ad75-b216386f9354",
+        "operation": "kVmDelete",
+        "operationDescription": "Delete VM",
+        "createdTime": "2026-03-03T17:44:36.553475Z",
+        "startedTime": "2026-03-03T17:44:36.559849Z",
+        "completedTime": "2026-03-03T17:44:36.729759Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "1d12dbf8-9f5a-45fb-a939-4dc71f257a7e",
+            "rel": "vmm:ahv:config:vm",
+            "name": "4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          },
+          {
+            "extId": "dfc114a1-eaef-4d5e-bca0-5f99d4ac2957",
+            "rel": "vmm:ahv:config:vm:disk",
+            "name": "4f4372e4-65f9-4342-95cc-a9eb7a14976c.scsi.0"
+          },
+          {
+            "extId": "213bed41-c0b6-4468-84b0-f1cc978b9e17",
+            "rel": "vmm:ahv:config:vm:cdrom",
+            "name": "4f4372e4-65f9-4342-95cc-a9eb7a14976c.ide.0"
+          },
+          {
+            "extId": "110af52d-f3c0-416a-a426-5c4a0eea555f",
+            "rel": "networking:config:subnet"
+          },
+          {
+            "extId": "efc485b9-6cac-4da9-9d11-d9a6d331643b",
+            "rel": "vmm:ahv:config:vm:nic"
+          }
+        ],
+        "isCancelable": true,
+        "lastUpdatedTime": "2026-03-03T17:44:36.729757Z",
+        "clusterExtIds": [
+          "00064715-c043-5d8f-ee4b-176ec875554d"
+        ],
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 5,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:06cde808-c07d-4c52-63a4-4e421a1ae0c3",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:06cde808-c07d-4c52-63a4-4e421a1ae0c3",
           "rel": "parent"
         },
         "status": "SUCCEEDED",
@@ -62,61 +1654,70 @@
             "$fv": "v4.r1"
           },
           "$objectType": "prism.v4.config.TaskReferenceInternal",
-          "extId": "ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
-          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
+          "extId": "ZXJnb24=:6899408a-632c-4390-6a24-2b45fb4b02a0",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:6899408a-632c-4390-6a24-2b45fb4b02a0",
           "rel": "rootTask"
         }
       },
       {
-        "extId": "ZXJnb24=:cfe62787-644c-43c3-5b85-25c6d4c16bc0",
-        "operation": "LogCollectionFromPC",
-        "operationDescription": "Collect logs",
-        "createdTime": "2026-02-24T20:11:08.50709Z",
-        "startedTime": "2026-02-24T20:11:08.530197Z",
-        "completedTime": "2026-02-24T21:26:19.798031Z",
+        "extId": "ZXJnb24=:08e85f67-d581-42a9-84e7-aefd4fdcdce2",
+        "operation": "kVmClone",
+        "operationDescription": "Clone VM",
+        "createdTime": "2026-03-03T17:44:35.256291Z",
+        "startedTime": "2026-03-03T17:44:35.264433Z",
+        "completedTime": "2026-03-03T17:44:35.925777Z",
         "progressPercentage": 100,
         "entitiesAffected": [
           {
-            "extId": "00064715-c043-5d8f-ee4b-176ec875554d",
-            "rel": "clustermgmt:config:cluster",
-            "name": "datadog-nutanix-dev",
+            "extId": "1d12dbf8-9f5a-45fb-a939-4dc71f257a7e",
+            "rel": "vmm:ahv:config:vm",
+            "name": "4f4372e4-65f9-4342-95cc-a9eb7a14976c",
             "$reserved": {
               "$fv": "v4.r1"
             },
             "$objectType": "prism.v4.config.EntityReference"
-          }
-        ],
-        "subTasks": [
+          },
           {
-            "$reserved": {
-              "$fv": "v4.r1"
-            },
-            "$objectType": "prism.v4.config.TaskReferenceInternal",
-            "extId": "ZXJnb24=:3e25313f-cf66-43c1-4eb2-ed3701db7b27",
-            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:3e25313f-cf66-43c1-4eb2-ed3701db7b27",
-            "rel": "subtask"
+            "extId": "2e59dd98-3bf9-4369-838f-3a589ee1d6df",
+            "rel": "vmm:ahv:config:vm"
+          },
+          {
+            "extId": "2e59dd98-3bf9-4369-838f-3a589ee1d6df",
+            "rel": "vmm:ahv:config:vm",
+            "name": "test-vm-that-should-remain-off"
+          },
+          {
+            "extId": "b74b582c-8d7d-4b6b-9af0-be8e53b38242",
+            "rel": "vmm:ahv:config:vm:disk",
+            "name": "test-vm-that-should-remain-off.scsi.0"
+          },
+          {
+            "extId": "37e415c9-dc22-4859-b8d2-0843da8aee4d",
+            "rel": "vmm:ahv:config:vm:cdrom",
+            "name": "test-vm-that-should-remain-off.ide.0"
           }
         ],
         "isCancelable": false,
-        "completionDetails": [
-          {
-            "value": "efcc2f7a-54b3-45b5-598a-02be77ebed49",
-            "$reserved": {
-              "$fv": "v1.r0"
-            },
-            "$objectType": "common.v1.config.KVPair",
-            "name": "LogExtId"
-          }
+        "lastUpdatedTime": "2026-03-03T17:44:35.925774Z",
+        "clusterExtIds": [
+          "00064715-c043-5d8f-ee4b-176ec875554d"
         ],
-        "lastUpdatedTime": "2026-02-24T21:26:19.798031Z",
-        "clusterExtIds": ["00064715-c043-5d8f-ee4b-176ec875554d"],
         "isBackgroundTask": false,
-        "numberOfSubtasks": 1,
-        "numberOfEntitiesAffected": 1,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 8,
         "$reserved": {
           "$fv": "v4.r1"
         },
         "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:2c126472-4b67-422c-61d1-f481cd6fb21e",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:2c126472-4b67-422c-61d1-f481cd6fb21e",
+          "rel": "parent"
+        },
         "status": "SUCCEEDED",
         "ownedBy": {
           "extId": "773ffab1-a60b-52e7-bdab-a62c75151cb1",
@@ -125,21 +1726,361 @@
             "$fv": "v4.r1"
           },
           "$objectType": "prism.v4.config.OwnerReference"
+        },
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "rel": "rootTask"
         }
       },
       {
-        "extId": "ZXJnb24=:44782277-2630-4de5-51cd-403cbfcb3bc5",
-        "operation": "LogCollectionWithDownloadLink",
-        "operationDescription": "Collect logs",
-        "createdTime": "2026-02-24T19:56:16.785607Z",
-        "startedTime": "2026-02-24T19:56:18.758428Z",
-        "completedTime": "2026-02-24T20:02:31.57757Z",
+        "extId": "ZXJnb24=:ba190e5a-0941-4f97-7bde-8b6ece8b3560",
+        "operation": "ProcessVmClone",
+        "operationDescription": "Clone VM",
+        "createdTime": "2026-03-03T17:44:34.956028Z",
+        "startedTime": "2026-03-03T17:44:34.990835Z",
+        "completedTime": "2026-03-03T17:44:36.293399Z",
         "progressPercentage": 100,
         "entitiesAffected": [
           {
-            "extId": "00064715-c043-5d8f-ee4b-176ec875554d",
-            "rel": "clustermgmt:config:cluster",
-            "name": "datadog-nutanix-dev",
+            "extId": "2e59dd98-3bf9-4369-838f-3a589ee1d6df",
+            "rel": "vmm:ahv:config:vm",
+            "name": "test-vm-that-should-remain-off",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          },
+          {
+            "extId": "1d12dbf8-9f5a-45fb-a939-4dc71f257a7e",
+            "rel": "vmm:ahv:config:vm",
+            "name": "4f4372e4-65f9-4342-95cc-a9eb7a14976c"
+          },
+          {
+            "extId": "b74b582c-8d7d-4b6b-9af0-be8e53b38242",
+            "rel": "vmm:ahv:config:vm:disk",
+            "name": "test-vm-that-should-remain-off.scsi.0"
+          },
+          {
+            "extId": "37e415c9-dc22-4859-b8d2-0843da8aee4d",
+            "rel": "vmm:ahv:config:vm:cdrom",
+            "name": "test-vm-that-should-remain-off.ide.0"
+          },
+          {
+            "extId": "3875e54e-a977-42c4-9529-ea3028a8121b",
+            "rel": "vmm:ahv:config:vm:cdrom",
+            "name": "test-vm-that-should-remain-off.ide.1"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T17:44:36.293398Z",
+        "clusterExtIds": [
+          "00064715-c043-5d8f-ee4b-176ec875554d"
+        ],
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 7,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:de4be022-a07b-46b4-9f35-50cbf014060f",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:de4be022-a07b-46b4-9f35-50cbf014060f",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "ownedBy": {
+          "extId": "773ffab1-a60b-52e7-bdab-a62c75151cb1",
+          "name": "noueman",
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.OwnerReference"
+        },
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:de4be022-a07b-46b4-9f35-50cbf014060f",
+        "operation": "kVmTemplateVersionDeploy",
+        "operationDescription": "Deploy VM Template Version",
+        "createdTime": "2026-03-03T17:44:34.440503Z",
+        "startedTime": "2026-03-03T17:44:34.448816Z",
+        "completedTime": "2026-03-03T17:44:36.319186Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "5c618468-a845-4396-8233-583d14a89cfd",
+            "rel": "vmm:content:template",
+            "name": "dd-agent-vm",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          },
+          {
+            "extId": "2e59dd98-3bf9-4369-838f-3a589ee1d6df",
+            "rel": "vmm:ahv:config:vm",
+            "name": "test-vm-that-should-remain-off"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:ba190e5a-0941-4f97-7bde-8b6ece8b3560",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:ba190e5a-0941-4f97-7bde-8b6ece8b3560",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T17:44:36.319185Z",
+        "clusterExtIds": [
+          "00064715-c043-5d8f-ee4b-176ec875554d"
+        ],
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 2,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "ownedBy": {
+          "extId": "773ffab1-a60b-52e7-bdab-a62c75151cb1",
+          "name": "noueman",
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.OwnerReference"
+        },
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:5770c7a6-4511-4fb3-ad76-b8a4f281664e",
+        "operation": "update_vm_intentful",
+        "operationDescription": "Update the VM",
+        "createdTime": "2026-03-03T17:44:31.404551Z",
+        "startedTime": "2026-03-03T17:44:31.586055Z",
+        "completedTime": "2026-03-03T17:44:34.422521Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "1d12dbf8-9f5a-45fb-a939-4dc71f257a7e",
+            "rel": "vmm:ahv:config:vm",
+            "name": "4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T17:44:34.42252Z",
+        "clusterExtIds": [
+          "00064715-c043-5d8f-ee4b-176ec875554d"
+        ],
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED",
+        "ownedBy": {
+          "extId": "00000000-0000-0000-0000-000000000000",
+          "name": "admin",
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.OwnerReference"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:0185cb92-a505-4d4f-a015-baf8481b71b7",
+        "operation": "kVmCreate",
+        "operationDescription": "Create VM",
+        "createdTime": "2026-03-03T17:44:29.180959Z",
+        "startedTime": "2026-03-03T17:44:29.193108Z",
+        "completedTime": "2026-03-03T17:44:29.744853Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "1d12dbf8-9f5a-45fb-a939-4dc71f257a7e",
+            "rel": "vmm:ahv:config:vm",
+            "name": "4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          },
+          {
+            "extId": "dfc114a1-eaef-4d5e-bca0-5f99d4ac2957",
+            "rel": "vmm:ahv:config:vm:disk",
+            "name": "4f4372e4-65f9-4342-95cc-a9eb7a14976c.scsi.0"
+          },
+          {
+            "extId": "213bed41-c0b6-4468-84b0-f1cc978b9e17",
+            "rel": "vmm:ahv:config:vm:cdrom",
+            "name": "4f4372e4-65f9-4342-95cc-a9eb7a14976c.ide.0"
+          },
+          {
+            "extId": "efc485b9-6cac-4da9-9d11-d9a6d331643b",
+            "rel": "vmm:ahv:config:vm:nic"
+          },
+          {
+            "extId": "110af52d-f3c0-416a-a426-5c4a0eea555f",
+            "rel": "networking:config:subnet"
+          }
+        ],
+        "isCancelable": true,
+        "lastUpdatedTime": "2026-03-03T17:44:29.744851Z",
+        "clusterExtIds": [
+          "00064715-c043-5d8f-ee4b-176ec875554d"
+        ],
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 5,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:b5998cad-18ec-4dda-584a-75c98adbb92f",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:b5998cad-18ec-4dda-584a-75c98adbb92f",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "ownedBy": {
+          "extId": "00000000-0000-0000-0000-000000000000",
+          "name": "admin",
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.OwnerReference"
+        },
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:b995a8c4-6e69-4bde-8495-6e48cd4e2092",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:b995a8c4-6e69-4bde-8495-6e48cd4e2092",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:b995a8c4-6e69-4bde-8495-6e48cd4e2092",
+        "operation": "create_vm_intentful",
+        "operationDescription": "Create a VM",
+        "createdTime": "2026-03-03T17:44:27.891574Z",
+        "startedTime": "2026-03-03T17:44:28.058425Z",
+        "completedTime": "2026-03-03T17:44:31.099516Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "1d12dbf8-9f5a-45fb-a939-4dc71f257a7e",
+            "rel": "vmm:ahv:config:vm",
+            "name": "4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          },
+          {
+            "extId": "dfc114a1-eaef-4d5e-bca0-5f99d4ac2957",
+            "rel": "vmm:ahv:config:vm:disk",
+            "name": "4f4372e4-65f9-4342-95cc-a9eb7a14976c.scsi.0"
+          },
+          {
+            "extId": "213bed41-c0b6-4468-84b0-f1cc978b9e17",
+            "rel": "vmm:ahv:config:vm:cdrom",
+            "name": "4f4372e4-65f9-4342-95cc-a9eb7a14976c.ide.0"
+          },
+          {
+            "extId": "efc485b9-6cac-4da9-9d11-d9a6d331643b",
+            "rel": "vmm:ahv:config:vm:nic"
+          },
+          {
+            "extId": "110af52d-f3c0-416a-a426-5c4a0eea555f",
+            "rel": "networking:config:subnet"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T17:44:31.099515Z",
+        "clusterExtIds": [
+          "00064715-c043-5d8f-ee4b-176ec875554d"
+        ],
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 5,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED",
+        "ownedBy": {
+          "extId": "00000000-0000-0000-0000-000000000000",
+          "name": "admin",
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.OwnerReference"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:47a763d3-5f3d-4843-87e6-3cb0f5f361c4",
+        "operation": "RestoreVmRecoveryPoint",
+        "operationDescription": "Restore VM Recovery Point",
+        "createdTime": "2026-03-03T17:44:27.501304Z",
+        "startedTime": "2026-03-03T17:44:27.510978Z",
+        "completedTime": "2026-03-03T17:44:31.191151Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "5c084734-e71d-4f67-9aed-dcef8c0da7e8",
+            "rel": "dataprotection:config:vm-recovery-point",
+            "name": "VmTemplateRP_5c618468-a845-4396-8233-583d14a89cfd_0",
             "$reserved": {
               "$fv": "v4.r1"
             },
@@ -149,17 +2090,20 @@
         "isCancelable": false,
         "completionDetails": [
           {
-            "value": "70d7be38-0cf4-4282-5587-0bee9d54390d",
+            "value": "7b9d5b24-b99a-4c62-516c-0fe0c20411dd",
             "$reserved": {
               "$fv": "v1.r0"
             },
             "$objectType": "common.v1.config.KVPair",
-            "name": "LogExtId"
+            "name": "sourceVmExtId"
+          },
+          {
+            "value": "1d12dbf8-9f5a-45fb-a939-4dc71f257a7e",
+            "name": "vmExtId"
           }
         ],
-        "lastUpdatedTime": "2026-02-24T20:02:31.577568Z",
-        "clusterExtIds": ["00064715-c043-5d8f-ee4b-176ec875554d"],
-        "isBackgroundTask": true,
+        "lastUpdatedTime": "2026-03-03T17:44:31.191151Z",
+        "isBackgroundTask": false,
         "numberOfSubtasks": 0,
         "numberOfEntitiesAffected": 1,
         "$reserved": {
@@ -171,8 +2115,8 @@
             "$fv": "v4.r1"
           },
           "$objectType": "prism.v4.config.TaskReferenceInternal",
-          "extId": "ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
-          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
+          "extId": "ZXJnb24=:547a5ec8-573b-4036-a819-db1b81d1b7f6",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:547a5ec8-573b-4036-a819-db1b81d1b7f6",
           "rel": "parent"
         },
         "status": "SUCCEEDED",
@@ -188,28 +2132,149 @@
             "$fv": "v4.r1"
           },
           "$objectType": "prism.v4.config.TaskReferenceInternal",
-          "extId": "ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
-          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
+          "extId": "ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
           "rel": "rootTask"
         }
       },
       {
-        "extId": "ZXJnb24=:c56ed819-5a46-41cc-5346-777bca9e086b",
-        "operation": "LogCollectionFromPC",
-        "operationDescription": "Collect logs",
-        "createdTime": "2026-02-24T19:56:16.540895Z",
-        "startedTime": "2026-02-24T19:56:16.573508Z",
-        "completedTime": "2026-02-24T20:02:31.76735Z",
+        "extId": "ZXJnb24=:aa424f95-f9ca-4825-ac0d-66eef560b9a4",
+        "operation": "EntitySnapshotRestore",
+        "operationDescription": "Restore VM Recovery Point",
+        "createdTime": "2026-03-03T17:44:27.34976Z",
+        "startedTime": "2026-03-03T17:44:27.394223Z",
+        "completedTime": "2026-03-03T17:44:34.432943Z",
         "progressPercentage": 100,
         "entitiesAffected": [
           {
-            "extId": "00064715-c043-5d8f-ee4b-176ec875554d",
-            "rel": "clustermgmt:config:cluster",
-            "name": "datadog-nutanix-dev",
+            "extId": "5c084734-e71d-4f67-9aed-dcef8c0da7e8",
+            "rel": "dataprotection:config:vm-recovery-point",
+            "name": "VmTemplateRP_5c618468-a845-4396-8233-583d14a89cfd_0",
             "$reserved": {
               "$fv": "v4.r1"
             },
             "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": true,
+        "lastUpdatedTime": "2026-03-03T17:44:34.432942Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "ownedBy": {
+          "name": "System",
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.OwnerReference"
+        },
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:4407fdbd-a308-4ed9-82c5-020187d53897",
+        "operation": "kVmTemplateVersionReplicate",
+        "operationDescription": "Replicate VM Template Version",
+        "createdTime": "2026-03-03T17:44:26.822887Z",
+        "startedTime": "2026-03-03T17:44:26.831952Z",
+        "completedTime": "2026-03-03T17:44:27.245149Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "5c618468-a845-4396-8233-583d14a89cfd",
+            "rel": "vmm:content:template",
+            "name": "dd-agent-vm",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          },
+          {
+            "extId": "21f35a92-b02b-48f4-8d2a-a29a5dba8566",
+            "rel": "vmm:content:template:version",
+            "name": "Initial Version"
+          }
+        ],
+        "isCancelable": true,
+        "lastUpdatedTime": "2026-03-03T17:44:27.245149Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 2,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "ownedBy": {
+          "extId": "773ffab1-a60b-52e7-bdab-a62c75151cb1",
+          "name": "noueman",
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.OwnerReference"
+        },
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:4f4372e4-65f9-4342-95cc-a9eb7a14976c",
+        "operation": "kVmTemplateDeploy",
+        "operationDescription": "Deploy VM Template",
+        "createdTime": "2026-03-03T17:44:26.798214Z",
+        "startedTime": "2026-03-03T17:44:26.81181Z",
+        "completedTime": "2026-03-03T17:44:36.382164Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "5c618468-a845-4396-8233-583d14a89cfd",
+            "rel": "vmm:content:template",
+            "name": "dd-agent-vm",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          },
+          {
+            "extId": "2e59dd98-3bf9-4369-838f-3a589ee1d6df",
+            "rel": "vmm:ahv:config:vm",
+            "name": "test-vm-that-should-remain-off"
           }
         ],
         "subTasks": [
@@ -218,27 +2283,29 @@
               "$fv": "v4.r1"
             },
             "$objectType": "prism.v4.config.TaskReferenceInternal",
-            "extId": "ZXJnb24=:44782277-2630-4de5-51cd-403cbfcb3bc5",
-            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:44782277-2630-4de5-51cd-403cbfcb3bc5",
+            "extId": "ZXJnb24=:4407fdbd-a308-4ed9-82c5-020187d53897",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:4407fdbd-a308-4ed9-82c5-020187d53897",
+            "rel": "subtask"
+          },
+          {
+            "extId": "ZXJnb24=:aa424f95-f9ca-4825-ac0d-66eef560b9a4",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:aa424f95-f9ca-4825-ac0d-66eef560b9a4",
+            "rel": "subtask"
+          },
+          {
+            "extId": "ZXJnb24=:de4be022-a07b-46b4-9f35-50cbf014060f",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:de4be022-a07b-46b4-9f35-50cbf014060f",
             "rel": "subtask"
           }
         ],
         "isCancelable": false,
-        "completionDetails": [
-          {
-            "value": "70d7be38-0cf4-4282-5587-0bee9d54390d",
-            "$reserved": {
-              "$fv": "v1.r0"
-            },
-            "$objectType": "common.v1.config.KVPair",
-            "name": "LogExtId"
-          }
+        "lastUpdatedTime": "2026-03-03T17:44:36.382164Z",
+        "clusterExtIds": [
+          "00064715-c043-5d8f-ee4b-176ec875554d"
         ],
-        "lastUpdatedTime": "2026-02-24T20:02:31.76735Z",
-        "clusterExtIds": ["00064715-c043-5d8f-ee4b-176ec875554d"],
         "isBackgroundTask": false,
-        "numberOfSubtasks": 1,
-        "numberOfEntitiesAffected": 1,
+        "numberOfSubtasks": 3,
+        "numberOfEntitiesAffected": 2,
         "$reserved": {
           "$fv": "v4.r1"
         },
@@ -252,6 +2319,93 @@
           },
           "$objectType": "prism.v4.config.OwnerReference"
         }
+      },
+      {
+        "extId": "ZXJnb24=:f5aeea8d-ba4f-4b04-4c24-8e865a5bb672",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-03T12:22:33.003798Z",
+        "startedTime": "2026-03-03T12:22:33.003798Z",
+        "completedTime": "2026-03-03T12:22:33.023453Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "7f486083-3dde-4a52-8b1f-e2d2e75b2846",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T12:22:33.023452Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 0,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "parentTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:053b905b-f24a-42fa-7dc1-beabfe7aaf65",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:053b905b-f24a-42fa-7dc1-beabfe7aaf65",
+          "rel": "parent"
+        },
+        "status": "SUCCEEDED",
+        "rootTask": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "prism.v4.config.TaskReferenceInternal",
+          "extId": "ZXJnb24=:053b905b-f24a-42fa-7dc1-beabfe7aaf65",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:053b905b-f24a-42fa-7dc1-beabfe7aaf65",
+          "rel": "rootTask"
+        }
+      },
+      {
+        "extId": "ZXJnb24=:053b905b-f24a-42fa-7dc1-beabfe7aaf65",
+        "operation": "ACKNOWLEDGE",
+        "operationDescription": "Acknowledge",
+        "createdTime": "2026-03-03T12:22:32.991433Z",
+        "startedTime": "2026-03-03T12:22:32.991433Z",
+        "completedTime": "2026-03-03T12:22:33.03216Z",
+        "progressPercentage": 100,
+        "entitiesAffected": [
+          {
+            "extId": "7f486083-3dde-4a52-8b1f-e2d2e75b2846",
+            "rel": "monitoring:serviceability:alert",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.EntityReference"
+          }
+        ],
+        "subTasks": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "prism.v4.config.TaskReferenceInternal",
+            "extId": "ZXJnb24=:f5aeea8d-ba4f-4b04-4c24-8e865a5bb672",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks/ZXJnb24=:f5aeea8d-ba4f-4b04-4c24-8e865a5bb672",
+            "rel": "subtask"
+          }
+        ],
+        "isCancelable": false,
+        "lastUpdatedTime": "2026-03-03T12:22:33.032158Z",
+        "isBackgroundTask": false,
+        "numberOfSubtasks": 1,
+        "numberOfEntitiesAffected": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Task",
+        "status": "SUCCEEDED"
       }
     ],
     "$reserved": {
@@ -282,7 +2436,7 @@
           },
           "$objectType": "common.v1.config.Flag",
           "name": "isTruncated",
-          "value": false
+          "value": true
         }
       ],
       "$reserved": {
@@ -295,19 +2449,32 @@
             "$fv": "v1.r0"
           },
           "$objectType": "common.v1.response.ApiLink",
-          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks?$page=0&$limit=50&$filter=createdTime gt 2026-02-24T17:30:15.435899Z",
-          "rel": "first"
-        },
-        {
-          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks?$page=0&$limit=50&$filter=createdTime gt 2026-02-24T17:30:15.435899Z",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks?$page=0&$limit=50&$filter=createdTime gt 2026-03-03T00:59:42.374814Z",
           "rel": "self"
         },
         {
-          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks?$page=0&$limit=50&$filter=createdTime gt 2026-02-24T17:30:15.435899Z",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks?$page=0&$limit=50&$filter=createdTime gt 2026-03-03T00:59:42.374814Z",
           "rel": "last"
+        },
+        {
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/tasks?$page=0&$limit=50&$filter=createdTime gt 2026-03-03T00:59:42.374814Z",
+          "rel": "first"
         }
       ],
-      "totalAvailableResults": 4
+      "totalAvailableResults": 49,
+      "extraInfo": [
+        {
+          "value": [
+            "37",
+            "38"
+          ],
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.KVPair",
+          "name": "truncatedIndexes"
+        }
+      ]
     }
   }
 ]

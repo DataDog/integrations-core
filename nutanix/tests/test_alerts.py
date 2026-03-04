@@ -257,7 +257,7 @@ def test_alert_message_template_rendering(get_current_datetime, dd_run_check, ag
     msg_text = alert["msg_text"]
 
     assert "{alert_msg}" not in msg_text, "Template variable should be rendered"
-    assert "Admin user password will expire soon" in msg_text, "Rendered message should contain actual value"
+    assert "Admin user password has expired." in msg_text, "Rendered message should contain actual value"
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
@@ -373,20 +373,20 @@ def test_alert_a6227_password_expiry_complete_output(
     alert = alerts[0]
 
     # Verify message rendering
-    expected_message = "Admin user password will expire soon. Please change the admin password."
+    expected_message = "Admin user password has expired. Please change the admin password."
     assert alert["msg_text"] == expected_message
     assert "{alert_msg}" not in alert["msg_text"]
 
     # Verify alert structure
     assert alert["event_type"] == "nutanix"
-    assert alert["alert_type"] == "warning"
+    assert alert["alert_type"] == "error"
     assert alert["source_type_name"] == "nutanix"
     assert alert["msg_title"] == "Alert: The PC admin user password is going to expire soon or has already expired."
 
     # Verify tags
     assert "ntnx_type:alert" in alert["tags"]
     assert "ntnx_alert_type:A6227" in alert["tags"]
-    assert "ntnx_alert_severity:WARNING" in alert["tags"]
+    assert "ntnx_alert_severity:CRITICAL" in alert["tags"]
     assert "ntnx_alert_classification:Cluster" in alert["tags"]
     assert "ntnx_alert_impact:CONFIGURATION" in alert["tags"]
     assert "ntnx_cluster_name:prism-central-deployment" in alert["tags"]
