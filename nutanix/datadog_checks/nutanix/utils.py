@@ -31,7 +31,6 @@ def retry_on_rate_limit(method: Callable[..., Response]) -> Callable[..., Respon
             if attempt >= attempts - 1:
                 self.log.error("Max retries exceeded for Nutanix API rate limiting")
                 response.raise_for_status()
-                return response
 
             backoff = min(base_backoff * (2**attempt) + random.random(), max_backoff)
             self.log.warning(

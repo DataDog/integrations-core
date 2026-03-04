@@ -82,23 +82,23 @@ class NutanixCheck(AgentCheck):
 
     @property
     def categories(self):
-        return self.infrastructure_monitor._categories
+        return self.infrastructure_monitor.categories
 
     @property
     def events(self):
-        return self.activity_monitor._events
+        return self.activity_monitor.events
 
     @property
     def audits(self):
-        return self.activity_monitor._audits
+        return self.activity_monitor.audits
 
     @property
     def alerts(self):
-        return self.activity_monitor._alerts
+        return self.activity_monitor.alerts
 
     @property
     def tasks(self):
-        return self.activity_monitor._tasks
+        return self.activity_monitor.tasks
 
     def extract_category_tags(self, entity: dict) -> list[str]:
         """Extract category tags from an entity that has a categories field."""
@@ -177,7 +177,7 @@ class NutanixCheck(AgentCheck):
         except (HTTPError, InvalidURL, ConnectionError, Timeout) as e:
             self.log.error("[PC:%s:%s] Failed to connect: %s", self.pc_ip, self.pc_port, str(e))
         except Exception as e:
-            self.log.exception("[PC:%s:%s] Unexpected connection error: %s", self.pc_ip, self.pc_port, e)
+            self.log.error("[PC:%s:%s] Unexpected connection error: %s", self.pc_ip, self.pc_port, e)
 
         self.gauge("health.up", 0, tags=self.base_tags)
         return False
@@ -275,7 +275,7 @@ class NutanixCheck(AgentCheck):
 
             # check next page
             links = payload.get("metadata", {}).get("links", [])
-            next_link = next((l.get("href") for l in links if l.get("rel") == "next"), None)
+            next_link = next((link.get("href") for link in links if link.get("rel") == "next"), None)
 
             if not next_link:
                 break

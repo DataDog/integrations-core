@@ -2,13 +2,18 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.nutanix.metrics import CLUSTER_STATS_METRICS, HOST_STATS_METRICS, VM_STATS_METRICS
 from datadog_checks.nutanix.resource_filters import should_collect_resource
+
+if TYPE_CHECKING:
+    from datadog_checks.nutanix.check import NutanixCheck
 
 # Entity types for metrics counting
 EntityType = Literal['cluster', 'host', 'vm']
@@ -48,12 +53,12 @@ class ClusterCapacity:
 
 
 class InfrastructureMonitor:
-    def __init__(self, check):
+    def __init__(self, check: NutanixCheck):
         self.check = check
         self.external_tags = []
         self.cluster_names = {}  # cluster_id -> cluster_name
         self.host_names = {}  # host_id -> host_name
-        self._categories = {}  # category_id -> category object
+        self.categories = {}  # category_id -> category object
         self.collection_time_window = None
         # Metrics counters
         self.cluster_metrics_count = 0
@@ -66,7 +71,7 @@ class InfrastructureMonitor:
         """Reset all caches and counters for a new collection run."""
         self.cluster_names = {}
         self.host_names = {}
-        self._categories = {}
+        self.categories = {}
         self.external_tags = []
         self.collection_time_window = None
         self.cluster_metrics_count = 0
@@ -91,7 +96,7 @@ class InfrastructureMonitor:
             if category_id and should_collect_resource(
                 'category', category, self.check.resource_filters, self.check.log
             ):
-                self._categories[category_id] = category
+                self.categories[category_id] = category
 
         try:
             clusters = self._list_clusters()

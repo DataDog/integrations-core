@@ -2,13 +2,19 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import annotations
+
 from collections.abc import Callable
 from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
 
 from requests.exceptions import HTTPError
 
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.nutanix.resource_filters import should_collect_activity, should_collect_resource
+
+if TYPE_CHECKING:
+    from datadog_checks.nutanix.check import NutanixCheck
 
 
 class _SafeDict(dict):
@@ -19,17 +25,17 @@ class _SafeDict(dict):
 
 
 class ActivityMonitor:
-    def __init__(self, check):
+    def __init__(self, check: NutanixCheck):
         self.check = check
         self.last_event_collection_time = self.check.read_persistent_cache("last_event_collection_time")
         self.last_task_collection_time = self.check.read_persistent_cache("last_task_collection_time")
         self.last_audit_collection_time = self.check.read_persistent_cache("last_audit_collection_time")
         self.last_alert_collection_time = self.check.read_persistent_cache("last_alert_collection_time")
         # In-memory caches: id -> raw item (reset each check run)
-        self._events: dict[str, dict] = {}
-        self._audits: dict[str, dict] = {}
-        self._alerts: dict[str, dict] = {}
-        self._tasks: dict[str, dict] = {}
+        self.events: dict[str, dict] = {}
+        self.audits: dict[str, dict] = {}
+        self.alerts: dict[str, dict] = {}
+        self.tasks: dict[str, dict] = {}
         # Read boolean flag from cache (stored as string)
         cached_value = self.check.read_persistent_cache("alerts_v42_supported")
         if cached_value == "True":
@@ -41,10 +47,10 @@ class ActivityMonitor:
 
     def reset_state(self) -> None:
         """Reset in-memory caches for a new collection run."""
-        self._events = {}
-        self._audits = {}
-        self._alerts = {}
-        self._tasks = {}
+        self.events = {}
+        self.audits = {}
+        self.alerts = {}
+        self.tasks = {}
 
     def _collect(
         self,
@@ -91,7 +97,7 @@ class ActivityMonitor:
         items = [i for i in items if self._should_collect_activity_item(i, activity_kind)]
 
         # Cache collected items by ID
-        cache = getattr(self, f"_{activity_kind}s")
+        cache = getattr(self, f"{activity_kind}s")
         for item in items:
             if ext_id := item.get("extId"):
                 cache[ext_id] = item
@@ -134,7 +140,7 @@ class ActivityMonitor:
             )
             return 0
         except Exception as e:
-            self.check.log.exception(
+            self.check.log.error(
                 "[PC:%s:%s] Unexpected error collecting %ss: %s",
                 self.check.pc_ip,
                 self.check.pc_port,
@@ -248,7 +254,7 @@ class ActivityMonitor:
 
     def _get_alert(self, alert_ext_id: str) -> dict | None:
         """Get an alert by ID, from cache or fetched from the API."""
-        if alert := self._alerts.get(alert_ext_id):
+        if alert := self.alerts.get(alert_ext_id):
             return alert
 
         endpoint = "api/monitoring/v4.0/serviceability/alerts"
@@ -264,7 +270,7 @@ class ActivityMonitor:
         try:
             alert = self.check._get_request_data(f"{endpoint}/{alert_ext_id}")
             if alert:
-                self._alerts[alert_ext_id] = alert
+                self.alerts[alert_ext_id] = alert
                 self.check.log.debug(
                     "[PC:%s:%s] Fetched alert %s: %s",
                     self.check.pc_ip,
