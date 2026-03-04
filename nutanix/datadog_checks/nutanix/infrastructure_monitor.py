@@ -78,46 +78,56 @@ class InfrastructureMonitor:
         """Collect metrics from all Nutanix clusters."""
         pc_label = f"PC:{self.check.pc_ip}"
 
+        # Fetch and cache categories for VM tagging
         try:
-            # Fetch and cache categories for VM tagging
             categories = self._list_categories()
-            self.check.log.info("[%s] Found %d categories", pc_label, len(categories))
-            for category in categories:
-                category_id = category.get("extId")
-                if category_id and should_collect_resource(
-                    'category', category, self.check.resource_filters, self.check.log
-                ):
-                    self._categories[category_id] = category
+        except Exception as e:
+            self.check.log.exception("[%s] Failed to fetch categories: %s", pc_label, e)
+            categories = []
 
+        self.check.log.info("[%s] Found %d categories", pc_label, len(categories))
+        for category in categories:
+            category_id = category.get("extId")
+            if category_id and should_collect_resource(
+                'category', category, self.check.resource_filters, self.check.log
+            ):
+                self._categories[category_id] = category
+
+        try:
             clusters = self._list_clusters()
-            if not clusters:
-                self.check.log.warning("[%s] No clusters found", pc_label)
-                return
+        except Exception as e:
+            self.check.log.exception("[%s] Failed to fetch clusters, aborting: %s", pc_label, e)
+            return
 
-            self.check.log.info("[%s] Found %d clusters", pc_label, len(clusters))
+        if not clusters:
+            self.check.log.warning("[%s] No clusters found", pc_label)
+            return
 
-            # Cache cluster names for VM/audit tagging
-            for cluster in clusters:
-                cluster_id, cluster_name = cluster.get("extId"), cluster.get("name")
-                if cluster_id and cluster_name:
-                    self.cluster_names[cluster_id] = cluster_name
+        self.check.log.info("[%s] Found %d clusters", pc_label, len(clusters))
 
-            # Process each cluster
-            processed, skipped = 0, 0
-            for cluster in clusters:
-                cluster_name = cluster.get("name", "unknown")
+        # Cache cluster names for VM/audit tagging
+        for cluster in clusters:
+            cluster_id, cluster_name = cluster.get("extId"), cluster.get("name")
+            if cluster_id and cluster_name:
+                self.cluster_names[cluster_id] = cluster_name
 
-                if self._is_prism_central_cluster(cluster):
-                    self.check.log.info("[%s] Skipping Prism Central cluster: %s", pc_label, cluster_name)
-                    skipped += 1
-                    continue
+        # Process each cluster
+        processed, skipped = 0, 0
+        for cluster in clusters:
+            cluster_name = cluster.get("name", "unknown")
 
-                if not should_collect_resource("cluster", cluster, self.check.resource_filters, self.check.log):
-                    skipped += 1
-                    continue
+            if self._is_prism_central_cluster(cluster):
+                self.check.log.info("[%s] Skipping Prism Central cluster: %s", pc_label, cluster_name)
+                skipped += 1
+                continue
 
-                self.check.log.info("[%s][%s] Processing cluster", pc_label, cluster_name)
+            if not should_collect_resource("cluster", cluster, self.check.resource_filters, self.check.log):
+                skipped += 1
+                continue
 
+            self.check.log.info("[%s][%s] Processing cluster", pc_label, cluster_name)
+
+            try:
                 # Reset capacity accumulator for this cluster
                 self._cluster_capacity.reset()
 
@@ -135,14 +145,13 @@ class InfrastructureMonitor:
                 self._report_cluster_capacity_metrics(cluster_tags)
 
                 processed += 1
+            except Exception as e:
+                self.check.log.exception("[%s][%s] Failed to process cluster: %s", pc_label, cluster_name, e)
 
-            if skipped > 0:
-                self.check.log.info("[%s] Processed %d clusters (%d skipped)", pc_label, processed, skipped)
-            else:
-                self.check.log.info("[%s] Processed %d clusters", pc_label, processed)
-
-        except Exception as e:
-            self.check.log.exception("[%s] Failed to collect cluster metrics: %s", pc_label, e)
+        if skipped > 0:
+            self.check.log.info("[%s] Processed %d clusters (%d skipped)", pc_label, processed, skipped)
+        else:
+            self.check.log.info("[%s] Processed %d clusters", pc_label, processed)
 
     def _is_prism_central_cluster(self, cluster: dict) -> bool:
         """Check if cluster is a Prism Central cluster (should be skipped)."""
