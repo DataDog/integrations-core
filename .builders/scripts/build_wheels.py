@@ -172,52 +172,23 @@ def wheel_was_built(wheel: Path) -> bool:
     return file_hash != wheel_hashes[wheel.name]
 
 
-def remove_test_files(wheel_path: Path) -> bool:
-    '''
-    Unpack the wheel, remove excluded test files, then repack it to rebuild RECORD correctly.
-    '''
-    # First, check whether the wheel contains any files that should be excluded. If not, leave it untouched.
-    with ZipFile(wheel_path, 'r') as zf:
-        excluded_members = [name for name in zf.namelist() if is_excluded_from_wheel(name)]
-
-    if not excluded_members:
-        # Nothing to strip, so skip rewriting the wheel
-        return False
-    with TemporaryDirectory() as td:
-        td_path = Path(td)
-
-        # Unpack the wheel into temp dir
-        unpack_wheel(wheel_path, dest_dir=td_path)
-        unpacked_dir = next(td_path.iterdir())
-        # Remove excluded files/folders
-        for root, dirs, files in unpacked_dir.walk(top_down=False):
-            for d in list(dirs):
-                full_dir = root / d
-                rel = full_dir.relative_to(unpacked_dir).as_posix()
-                if is_excluded_from_wheel(rel):
-                    shutil.rmtree(full_dir)
-                    dirs.remove(d)
-            for f in files:
-                rel = (root / f).relative_to(unpacked_dir).as_posix()
-                if is_excluded_from_wheel(rel):
-                    (root / f).unlink()
-
-        print(f'Tests removed from {wheel_path.name}')
-
-        dest_dir = wheel_path.parent
-        before = {p.resolve() for p in dest_dir.glob("*.whl")}
-        # Repack to same directory, regenerating RECORD
-        pack_wheel(unpacked_dir, dest_dir=dest_dir)
-
-        # The wheel might not be platform-specific, so repacking restores its original name.
-        # We need to move the repacked wheel to wheel_path, which was changed to be platform-specific.
-        after = {p.resolve() for p in wheel_path.parent.glob("*.whl")}
-        new_files = sorted(after - before, key=lambda p: p.stat().st_mtime, reverse=True)
-
-        if new_files:
-            shutil.move(str(new_files[0]), str(wheel_path))
-
-    return True
+def _remove_test_files_from_dir(unpacked_dir: Path) -> bool:
+    """Remove excluded test files and directories from an unpacked wheel directory."""
+    removed_any = False
+    for root, dirs, files in unpacked_dir.walk(top_down=False):
+        for d in list(dirs):
+            full_dir = root / d
+            rel = full_dir.relative_to(unpacked_dir).as_posix()
+            if is_excluded_from_wheel(rel):
+                shutil.rmtree(full_dir)
+                dirs.remove(d)
+                removed_any = True
+        for f in files:
+            rel = (root / f).relative_to(unpacked_dir).as_posix()
+            if is_excluded_from_wheel(rel):
+                (root / f).unlink()
+                removed_any = True
+    return removed_any
 
 
 @cache
@@ -279,67 +250,71 @@ def _get_matching_rules(wheel_name: str) -> list[dict]:
     return matching
 
 
-def strip_lines_from_wheel(wheel_path: Path) -> bool:
-    '''
-    Create a temp dir and then unpack the wheel. Iterate over the contents of the wheel. 
-    Find the files matching the file pattern and iterate over the contents of each file.
-    Use regex to find all lines of the matching lines and filter them out.
-    Rewrite the unfiltered lines back to the file.
-    Repack the wheel to the original directory.
-    '''
+def _strip_lines_from_dir(unpacked_dir: Path, rules: list[dict]) -> bool:
+    """Strip matching lines from files in an unpacked wheel directory."""
+    modified = False
+    for rule in rules:
+        file_pattern = rule.get('file_pattern', '*.py')
+        compiled_patterns = rule['_compiled_patterns']
 
-    rules = _get_matching_rules(wheel_path.name)
-    if not rules:
+        for py_file in unpacked_dir.rglob(file_pattern):
+            if not py_file.is_file():
+                continue
+
+            try:
+                original_content = py_file.read_text(encoding='utf-8')
+            except UnicodeDecodeError:
+                continue
+
+            lines = original_content.splitlines(keepends=True)
+            kept_lines = [
+                line for line in lines
+                if not any(pattern.search(line) for pattern in compiled_patterns)
+            ]
+
+            if len(kept_lines) != len(lines):
+                py_file.write_text(''.join(kept_lines), encoding='utf-8')
+                modified = True
+    return modified
+
+
+def clean_wheel(wheel_path: Path) -> bool:
+    """
+    Unpack the wheel at most once, remove excluded test files and strip
+    matching lines, then repack only if changes were made.
+    """
+    with ZipFile(wheel_path, 'r') as zf:
+        has_excluded_files = any(is_excluded_from_wheel(name) for name in zf.namelist())
+
+    line_removal_rules = _get_matching_rules(wheel_path.name)
+
+    if not has_excluded_files and not line_removal_rules:
         return False
 
-    modified = False
+    with TemporaryDirectory() as td:
+        td_path = Path(td)
+        unpack_wheel(wheel_path, dest_dir=td_path)
+        unpacked_dir = next(td_path.iterdir())
 
-    with TemporaryDirectory() as temp_dir:
-        temp_dir_path = Path(temp_dir)
-
-        # Unpack the wheel into temp dir
-        unpack(wheel_path, dest=temp_dir_path)
-        unpacked_dir = next(temp_dir_path.iterdir())
-
-        # Process files according to rules
-        for rule in rules:
-            file_pattern = rule.get('file_pattern', '*.py')
-            compiled_patterns = rule['_compiled_patterns']
-
-            for py_file in unpacked_dir.rglob(file_pattern):
-                if not py_file.is_file():
-                    continue
-
-                try:
-                    original_content = py_file.read_text(encoding='utf-8')
-                except UnicodeDecodeError:
-                    continue
-
-                lines = original_content.splitlines(keepends=True)
-                # Keep lines that don't match regex patterns
-                kept_lines = []
-                for line in lines:
-                    if not any(pattern.search(line) for pattern in compiled_patterns):
-                        kept_lines.append(line)
-
-                if len(kept_lines) != len(lines):
-                    py_file.write_text(''.join(kept_lines), encoding='utf-8')
-                    modified = True
+        modified = False
+        if has_excluded_files:
+            if _remove_test_files_from_dir(unpacked_dir):
+                print(f'Tests removed from {wheel_path.name}')
+                modified = True
+        if line_removal_rules:
+            if _strip_lines_from_dir(unpacked_dir, line_removal_rules):
+                print(f'Stripped lines from {wheel_path.name}')
+                modified = True
 
         if not modified:
             return False
 
-        print(f'Stripped lines from {wheel_path.name}')
-
         dest_dir = wheel_path.parent
-        before = set()
-        for p in dest_dir.glob("*.whl"):
-            before.add(p.resolve())
-        pack(unpacked_dir, dest_dir=dest_dir, build_number=None)
-
-        after = set()
-        for p in wheel_path.parent.glob("*.whl"):
-            after.add(p.resolve())
+        before = {p.resolve() for p in dest_dir.glob("*.whl")}
+        pack_wheel(unpacked_dir, dest_dir=dest_dir)
+        # Repacking may restore the wheel's original (non-platform-specific) name.
+        # Move the repacked wheel back to the platform-specific path.
+        after = {p.resolve() for p in dest_dir.glob("*.whl")}
         new_files = sorted(after - before, key=lambda p: p.stat().st_mtime, reverse=True)
 
         if new_files:
@@ -466,16 +441,13 @@ def main():
 
     # Handle wheels already in the built directory
     for wheel in iter_wheels(built_wheels_dir):
-        remove_test_files(wheel)
-        strip_lines_from_wheel(wheel)
+        clean_wheel(wheel)
         add_dependency(dependencies, sizes, wheel)
 
     # Handle wheels currently in the external directory and move them to the built directory if they were modified
     for wheel in iter_wheels(external_wheels_dir):
-        was_modified = remove_test_files(wheel)
-        was_modified = strip_lines_from_wheel(wheel) or was_modified
+        was_modified = clean_wheel(wheel)
         if was_modified:
-            # A modified wheel is no longer external → move it to built directory
             new_path = built_wheels_dir / wheel.name
             wheel.rename(new_path)
             wheel = new_path
