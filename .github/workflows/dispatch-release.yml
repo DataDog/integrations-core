@@ -42,7 +42,7 @@ jobs:
         run: python .github/workflows/scripts/tag-releases.py
 
       - name: Detect integration list
-        if: inputs.integrations != '' || steps.tag.outputs.tagged == 'true'
+        if: inputs.integrations != '' || steps.tag.outcome == 'success'
         id: detect
         env:
           MANUAL_INTEGRATIONS: ${{ inputs.integrations }}

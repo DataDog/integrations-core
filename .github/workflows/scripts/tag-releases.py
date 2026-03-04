@@ -1,14 +1,11 @@
 """Run ddev release tag all and push new tags to origin.
 
 Exit codes:
-  0  new tags created and pushed (sets tagged=true)
-  0  nothing to tag (sets tagged=false, caller should skip dispatch)
+  0  success — tags created, already existed, or nothing to tag
   *  propagated from ddev / git on unexpected failure
 """
 import subprocess
 import sys
-
-from utils import set_output
 
 
 def main() -> None:
@@ -25,15 +22,9 @@ def main() -> None:
             ["ddev", "release", "tag", "all", "--skip-prerelease", "--push", "--no-fetch"]
         )
 
-    if result.returncode == 2:
-        print("No new releases — skipping dispatch")
-        set_output("tagged", "false")
-        return
-
-    if result.returncode != 0:
+    # exit 2 means nothing new to tag — not an error, tags may already exist on HEAD
+    if result.returncode not in (0, 2):
         sys.exit(result.returncode)
-
-    set_output("tagged", "true")
 
 
 if __name__ == "__main__":

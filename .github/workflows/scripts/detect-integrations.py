@@ -12,7 +12,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-from utils import set_output
+def set_output(key: str, value: str) -> None:
+    with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+        f.write(f"{key}={value}\n")
 
 
 def get_all_integrations() -> list[str]:
