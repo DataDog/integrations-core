@@ -16,6 +16,10 @@ def instance_auth_type():
     return 'basic'
 
 
+def instance_batch_vm_collection():
+    return True
+
+
 def instance_collect_alerts():
     return True
 

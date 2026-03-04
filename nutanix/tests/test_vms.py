@@ -46,8 +46,20 @@ def test_vm_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get
         aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
 
 
+def test_batch_vm_collection_skips_off_vms(dd_run_check, aggregator, mock_instance, mock_http_get):
+    """Batch mode skips VMs with powerState OFF by default."""
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    vm_metrics = aggregator.metrics("nutanix.vm.count")
+    assert len(vm_metrics) == 3
+    vm_names = {tag.split(":")[1] for m in vm_metrics for tag in m.tags if tag.startswith("ntnx_vm_name:")}
+    assert "test-vm-that-should-remain-off" not in vm_names
+
+
 def test_vm_status_off(dd_run_check, aggregator, mock_instance, mock_http_get):
     """VM fixture has powerState=OFF which maps to status value 2."""
+    mock_instance["batch_vm_collection"] = False
     mock_instance["resource_filters"] = [
         {"resource": "vm", "property": "powerState", "patterns": ["^(ON|OFF)$"]},
     ]

@@ -72,6 +72,7 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str] = None
     aws_region: Optional[str] = None
     aws_service: Optional[str] = None
+    batch_vm_collection: Optional[bool] = None
     collect_alerts: Optional[bool] = None
     collect_audits: Optional[bool] = None
     collect_events: Optional[bool] = None

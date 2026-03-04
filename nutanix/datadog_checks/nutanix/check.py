@@ -58,6 +58,8 @@ class NutanixCheck(AgentCheck):
         self.collect_alerts_enabled = is_affirmative(self.instance.get("collect_alerts", True))
         self.collect_subtasks_enabled = is_affirmative(self.instance.get("collect_subtasks", False))
 
+        self.batch_vm_collection = is_affirmative(self.instance.get("batch_vm_collection", True))
+
         self.prefix_category_tags = is_affirmative(self.instance.get("prefix_category_tags", False))
 
         self.resource_filters = parse_resource_filters(self.instance.get("resource_filters") or [], self.log)

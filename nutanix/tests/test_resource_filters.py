@@ -269,7 +269,21 @@ def test_default_vm_power_state_filter_applies_with_vm_name_filter(
     assert len(aggregator.metrics("nutanix.vm.count")) == 3
 
 
+def test_batch_vm_collection_applies_resource_filters(dd_run_check, aggregator, mock_instance, mock_http_get):
+    mock_instance["resource_filters"] = [
+        {"resource": "vm", "property": "name", "type": "exclude", "patterns": ["^ubuntu-vm$"]},
+    ]
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    vm_metrics = aggregator.metrics("nutanix.vm.count")
+    assert len(vm_metrics) == 2
+    vm_names = {tag.split(":")[1] for m in vm_metrics for tag in m.tags if tag.startswith("ntnx_vm_name:")}
+    assert "ubuntu-vm" not in vm_names
+
+
 def test_explicit_vm_power_state_filter_overrides_default(dd_run_check, aggregator, mock_instance, mock_http_get):
+    mock_instance["batch_vm_collection"] = False
     mock_instance["resource_filters"] = [
         {"resource": "vm", "property": "powerState", "patterns": [".*"]},
     ]

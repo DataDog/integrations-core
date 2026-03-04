@@ -66,6 +66,7 @@ class InfrastructureMonitor:
         self.vm_metrics_count = 0
         # Cluster capacity accumulator
         self._cluster_capacity = ClusterCapacity()
+        self._vms_by_host: dict[str, list[dict]] = {}
 
     def reset_state(self) -> None:
         """Reset all caches and counters for a new collection run."""
@@ -78,6 +79,7 @@ class InfrastructureMonitor:
         self.host_metrics_count = 0
         self.vm_metrics_count = 0
         self._cluster_capacity.reset()
+        self._vms_by_host = {}
 
     def collect_cluster_metrics(self) -> None:
         """Collect metrics from all Nutanix clusters."""
@@ -115,6 +117,13 @@ class InfrastructureMonitor:
             cluster_id, cluster_name = cluster.get("extId"), cluster.get("name")
             if cluster_id and cluster_name:
                 self.cluster_names[cluster_id] = cluster_name
+
+        if self.check.batch_vm_collection:
+            try:
+                self._build_vms_by_host_cache()
+                self.check.log.info("[%s] Cached VMs for %d hosts", pc_label, len(self._vms_by_host))
+            except Exception as e:
+                self.check.log.error("[%s] Failed to fetch all VMs: %s", pc_label, e)
 
         # Process each cluster
         processed, skipped = 0, 0
@@ -176,12 +185,7 @@ class InfrastructureMonitor:
         """Process and report metrics for a single VM."""
         vm_id = vm.get("extId", "unknown")
         hostname = vm.get("name")
-        has_power_state_filter = any(
-            f['resource'] == 'vm' and f['property'] == 'powerState' for f in self.check.resource_filters
-        )
-        if not has_power_state_filter and vm.get("powerState") != "ON":
-            return
-        if not should_collect_resource("vm", vm, self.check.resource_filters, self.check.log):
+        if not self.check.batch_vm_collection and not self._should_collect_vm(vm):
             return
         vm_tags = self.check.base_tags + self._extract_vm_tags(vm)
 
@@ -363,11 +367,16 @@ class InfrastructureMonitor:
             self.check.log.error("[%s][%s] Failed to fetch stats for host %s: %s", pc_label, cluster_name, host_name, e)
 
         # Process VMs on this host
-        try:
-            vms = self._list_vms_by_host(host_id)
-        except Exception as e:
-            self.check.log.error("[%s][%s] Failed to list VMs for host %s: %s", pc_label, cluster_name, host_name, e)
-            return 0
+        if self.check.batch_vm_collection:
+            vms = self._vms_by_host.get(host_id, [])
+        else:
+            try:
+                vms = self._list_vms(host_id)
+            except Exception as e:
+                self.check.log.error(
+                    "[%s][%s] Failed to list VMs for host %s: %s", pc_label, cluster_name, host_name, e
+                )
+                return 0
 
         self.check.log.debug("[%s][%s] Host %s has %d VMs", pc_label, cluster_name, host_name, len(vms))
 
@@ -480,6 +489,24 @@ class InfrastructureMonitor:
 
         self.external_tags.append((hostname, {self.check.__NAMESPACE__: tags}))
 
+    def _should_collect_vm(self, vm: dict) -> bool:
+        """Check if a VM should be collected based on power state and resource filters."""
+        has_power_state_filter = any(
+            f['resource'] == 'vm' and f['property'] == 'powerState' for f in self.check.resource_filters
+        )
+        if not has_power_state_filter and vm.get("powerState") != "ON":
+            return False
+        if not should_collect_resource("vm", vm, self.check.resource_filters, self.check.log):
+            return False
+        return True
+
+    def _build_vms_by_host_cache(self) -> None:
+        """Fetch all VMs and group them by host, applying filters."""
+        for vm in self._list_vms():
+            host_id = vm.get("host", {}).get("extId")
+            if host_id and self._should_collect_vm(vm):
+                self._vms_by_host.setdefault(host_id, []).append(vm)
+
     def _list_clusters(self) -> list[dict]:
         """Fetch all clusters from Prism Central."""
         return self.check._get_paginated_request_data("api/clustermgmt/v4.0/config/clusters")
@@ -488,9 +515,9 @@ class InfrastructureMonitor:
         """Fetch all categories from Prism Central."""
         return self.check._get_paginated_request_data("api/prism/v4.0/config/categories")
 
-    def _list_vms_by_host(self, host_id: str) -> list[dict]:
-        """Fetch all VMs for a specific host."""
-        params = {"$filter": f"host/extId eq '{host_id}'"}
+    def _list_vms(self, host_id: str | None = None) -> list[dict]:
+        """Fetch VMs from Prism Central, optionally filtered by host."""
+        params = {"$filter": f"host/extId eq '{host_id}'"} if host_id else None
         return self.check._get_paginated_request_data("api/vmm/v4.0/ahv/config/vms", params=params)
 
     def _list_hosts_by_cluster(self, cluster_id: str) -> list[dict]:

@@ -191,6 +191,16 @@ files:
             value:
               type: boolean
               example: false
+          - name: batch_vm_collection
+            description: |
+              Whether to fetch all VMs in a single paginated API call instead of per-host.
+              When true, VMs are fetched once and grouped by host in-memory, significantly
+              reducing the number of API calls to the rate-limited List VMs endpoint.
+              When false, VMs are fetched individually per host (legacy behavior).
+              Default is true.
+            value:
+              type: boolean
+              example: true
           - template: instances/http
           - template: instances/default
             overrides:

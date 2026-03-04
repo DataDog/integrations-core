@@ -167,6 +167,15 @@ instances:
     #
     # collect_subtasks: false
 
+    ## @param batch_vm_collection - boolean - optional - default: true
+    ## Whether to fetch all VMs in a single paginated API call instead of per-host.
+    ## When true, VMs are fetched once and grouped by host in-memory, significantly
+    ## reducing the number of API calls to the rate-limited List VMs endpoint.
+    ## When false, VMs are fetched individually per host (legacy behavior).
+    ## Default is true.
+    #
+    # batch_vm_collection: true
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
