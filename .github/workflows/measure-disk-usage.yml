@@ -2,14 +2,10 @@ name: Measure Disk Usage
 run-name: "Measure Disk Usage [${{ github.event.workflow_run.head_sha }}]"
 
 on:
-  pull_request:
-    branches:
-    - master
-# on:
-#   workflow_run:
-#     workflows: ['Resolve Dependencies and Build Wheels']
-#     types:
-#       - completed
+  workflow_run:
+    workflows: ['Resolve Dependencies and Build Wheels']
+    types:
+      - completed
 env:
   PYTHON_VERSION: "3.13"
 
@@ -42,10 +38,8 @@ jobs:
     - name: Measure disk usage (Uncompressed)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
-        # HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-        # HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
       run: |
         echo "Running for locked uncompressed sizes"
         ddev -v size status --commit "$HEAD_SHA" --to-dd-key ${{ secrets.DD_API_KEY }} --branch "$HEAD_BRANCH"
@@ -55,10 +49,9 @@ jobs:
     - name: Measure disk usage (Compressed)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
-        # HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-        # HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+
       run: |
         echo "Running for locked compressed sizes"
         ddev -v size status --commit "$HEAD_SHA" --to-dd-key ${{ secrets.DD_API_KEY }} --branch "$HEAD_BRANCH" --compressed

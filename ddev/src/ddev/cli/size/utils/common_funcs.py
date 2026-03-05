@@ -990,7 +990,6 @@ def send_metrics_to_dd(
     app.display_debug(f"Branch: {branch}")
     app.display_debug(f"Size source: {size_source}")
 
-
     dispatch_metrics(app, org, key, size_metrics, "Metrics")
     dispatch_metrics(app, org, key, n_integrations_metrics, "N integrations metrics")
     dispatch_metrics(app, org, key, n_dependencies_metrics, "N dependencies metrics")
