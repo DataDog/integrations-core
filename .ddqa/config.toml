@@ -79,8 +79,8 @@ jira_statuses = [
   "In Progress",
   "Done",
 ]
-github_team = "ndm-core"
-github_labels = ["team/ndm-core"]
+github_team = "network-device-monitoring-core"
+github_labels = ["team/network-device-monitoring-core"]
 
 [teams."Network Device Monitoring Integrations"]
 jira_project = "NDINT"
