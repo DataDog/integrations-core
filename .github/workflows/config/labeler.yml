@@ -998,6 +998,10 @@ integration/ntp:
 - changed-files:
   - any-glob-to-any-file:
     - ntp/**/*
+integration/nutanix:
+- changed-files:
+  - any-glob-to-any-file:
+    - nutanix/**/*
 integration/nvidia_jetson:
 - changed-files:
   - any-glob-to-any-file:
@@ -1334,10 +1338,6 @@ integration/sqlserver:
 - changed-files:
   - any-glob-to-any-file:
     - sqlserver/**/*
-integration/storage_management:
-- changed-files:
-  - any-glob-to-any-file:
-    - storage_management/**/*
 integration/squid:
 - changed-files:
   - any-glob-to-any-file:
@@ -1350,6 +1350,10 @@ integration/statsd:
 - changed-files:
   - any-glob-to-any-file:
     - statsd/**/*
+integration/storage_management:
+- changed-files:
+  - any-glob-to-any-file:
+    - storage_management/**/*
 integration/streamnative:
 - changed-files:
   - any-glob-to-any-file:
