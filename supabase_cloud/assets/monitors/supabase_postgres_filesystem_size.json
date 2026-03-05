@@ -1,7 +1,7 @@
 {
-  "version": 2,
+  "version": 3,
   "created_at": "2026-01-08",
-  "last_updated_at": "2026-01-08",
+  "last_updated_at": "2026-03-05",
   "title": "Postgres server filesystem size exceeds alert threshold",
   "description": "The amount of free disk space on a filesystem of the Postgres server has become low.",
   "definition": {
@@ -11,13 +11,14 @@
 	"query": "avg(last_5m):100 - ((avg:supabase.cloud.node.filesystem.avail.bytes{*} by {mountpoint,supabase_project_ref} * 100) / avg:supabase.cloud.node.filesystem.size.bytes{*} by {mountpoint,supabase_project_ref}) > 85",
 	"message": "The Postgres server filesystem {{mountpoint.name}} for project {{supabase_project_ref.name}} {{#is_alert}}is over 85% utilized{{/is_alert}}{{#is_alert_recovery}} is back under 85% utilization{{/is_alert_recovery}}. @example@example.com",
 	"tags": [
-		"source:supabase-cloud"
+		"integration:supabase_cloud"
 	],
 	"options": {
 		"thresholds": {
 			"critical": 85
 		},
 		"notify_audit": false,
+		"evaluation_delay": 60,
 		"on_missing_data": "default",
 		"include_tags": false,
 		"require_full_window": true,
@@ -27,6 +28,6 @@
 	"draft_status": "published"
   },
   "tags": [
-    "integration:supabase-cloud"
+    "integration:supabase_cloud"
   ]
 }
