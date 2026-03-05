@@ -59,11 +59,7 @@ class KafkaActionsConfig:
         return None
 
     def validate_config(self):
-        """Validate the entire configuration.
-
-        Raises:
-            ConfigurationError: If configuration is invalid
-        """
+        """Validate the entire configuration."""
         if not self.remote_config_id:
             raise ConfigurationError(
                 "remote_config_id is required. This integration must be configured via Remote Configuration."
@@ -71,6 +67,8 @@ class KafkaActionsConfig:
 
         if not self.kafka_connect_str:
             raise ConfigurationError("kafka_connect_str is required")
+
+        self._validate_auth()
 
         if not self.action:
             raise ConfigurationError(
@@ -93,6 +91,49 @@ class KafkaActionsConfig:
             self._validate_update_consumer_group_offsets()
         elif self.action == 'produce_message':
             self._validate_produce_message()
+
+    def _validate_auth(self):
+        """Validate authentication configuration."""
+        sasl_mechanism = self.instance.get('sasl_mechanism')
+        if sasl_mechanism == 'OAUTHBEARER':
+            sasl_oauth = self.instance.get('sasl_oauth_token_provider')
+            if sasl_oauth is None:
+                raise ConfigurationError("sasl_oauth_token_provider required for OAUTHBEARER sasl")
+            if not isinstance(sasl_oauth, dict):
+                raise ConfigurationError(f"sasl_oauth_token_provider must be a dictionary. Got: {type(sasl_oauth)}")
+            method = sasl_oauth.get('method', 'oidc')
+            if method == 'aws_msk_iam':
+                aws_region = sasl_oauth.get('aws_region')
+                if not aws_region:
+                    try:
+                        import boto3
+
+                        detected_region = boto3.session.Session().region_name
+                        if not detected_region:
+                            self.log.warning(
+                                "AWS region cannot be detected automatically for MSK IAM authentication. "
+                                "Consider specifying 'aws_region' in sasl_oauth_token_provider configuration."
+                            )
+                    except ImportError:
+                        raise ConfigurationError(
+                            "AWS MSK IAM authentication requires 'boto3' and 'aws-msk-iam-sasl-signer-python' "
+                            "libraries. Install them with: pip install boto3 aws-msk-iam-sasl-signer-python"
+                        )
+            elif method == 'oidc':
+                if sasl_oauth.get('url') is None:
+                    raise ConfigurationError("The `url` setting of `sasl_oauth_token_provider` is required for OIDC")
+                if sasl_oauth.get('client_id') is None:
+                    raise ConfigurationError(
+                        "The `client_id` setting of `sasl_oauth_token_provider` is required for OIDC"
+                    )
+                if sasl_oauth.get('client_secret') is None:
+                    raise ConfigurationError(
+                        "The `client_secret` setting of `sasl_oauth_token_provider` is required for OIDC"
+                    )
+            else:
+                raise ConfigurationError(
+                    f"Invalid method '{method}' for sasl_oauth_token_provider. Must be 'aws_msk_iam' or 'oidc'"
+                )
 
     def _validate_read_messages(self):
         """Validate read_messages action configuration."""

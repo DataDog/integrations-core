@@ -3,42 +3,105 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Kafka client wrapper for kafka_actions check."""
 
+import os
 import time
 from typing import Any
 
 from confluent_kafka import Consumer, KafkaException, Producer, TopicPartition
 from confluent_kafka.admin import AdminClient, ConfigResource, NewTopic, OffsetSpec, ResourceType
 
+try:
+    import boto3
+    from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
+
+    AWS_MSK_IAM_AVAILABLE = True
+except ImportError:
+    AWS_MSK_IAM_AVAILABLE = False
+
 
 class KafkaActionsClient:
     """Kafka client for performing actions on Kafka clusters."""
 
     def __init__(self, config: dict[str, Any], log):
-        """Initialize Kafka client with configuration.
-
-        Args:
-            config: Kafka configuration dictionary
-            log: Logger instance
-        """
         self.config = config
         self.log = log
         self.consumer = None
         self.producer = None
         self.admin_client = None
 
-    def _get_kafka_config(self) -> dict[str, str]:
+    def _get_kafka_config(self) -> dict[str, Any]:
         """Build Kafka configuration from check config."""
+        config = self.config
         kafka_config = {
-            'bootstrap.servers': self.config.get('kafka_connect_str', 'localhost:9092'),
-            'security.protocol': self.config.get('security_protocol', 'PLAINTEXT'),
+            'bootstrap.servers': config.get('kafka_connect_str', 'localhost:9092'),
+            'security.protocol': config.get('security_protocol', 'PLAINTEXT'),
         }
 
-        if self.config.get('sasl_mechanism'):
-            kafka_config['sasl.mechanism'] = self.config['sasl_mechanism']
-        if self.config.get('sasl_plain_username'):
-            kafka_config['sasl.username'] = self.config['sasl_plain_username']
-        if self.config.get('sasl_plain_password'):
-            kafka_config['sasl.password'] = self.config['sasl_plain_password']
+        extras = {
+            'ssl.ca.location': config.get('tls_ca_cert'),
+            'ssl.certificate.location': config.get('tls_cert'),
+            'ssl.key.location': config.get('tls_private_key'),
+            'ssl.key.password': config.get('tls_private_key_password'),
+            'ssl.endpoint.identification.algorithm': ('https' if config.get('tls_validate_hostname', True) else 'none'),
+            'ssl.crl.location': config.get('tls_crlfile'),
+            'sasl.mechanism': config.get('sasl_mechanism'),
+            'sasl.username': config.get('sasl_plain_username'),
+            'sasl.password': config.get('sasl_plain_password'),
+            'sasl.kerberos.keytab': config.get('sasl_kerberos_keytab', os.environ.get('KRB5_CLIENT_KTNAME')),
+            'sasl.kerberos.principal': config.get('sasl_kerberos_principal'),
+            'sasl.kerberos.service.name': config.get('sasl_kerberos_service_name'),
+        }
+
+        tls_verify = config.get('tls_verify')
+        if tls_verify is not None:
+            extras['enable.ssl.certificate.verification'] = 'true' if tls_verify else 'false'
+
+        sasl_mechanism = config.get('sasl_mechanism')
+        sasl_oauth_token_provider = config.get('sasl_oauth_token_provider')
+
+        if sasl_mechanism == 'OAUTHBEARER' and sasl_oauth_token_provider:
+            method = sasl_oauth_token_provider.get('method', 'oidc')
+
+            if method == 'aws_msk_iam':
+                if not AWS_MSK_IAM_AVAILABLE:
+                    raise Exception(
+                        "AWS MSK IAM authentication requires 'aws-msk-iam-sasl-signer-python' library. "
+                        "Install it with: pip install aws-msk-iam-sasl-signer-python"
+                    )
+
+                def _aws_msk_iam_oauth_cb(oauth_config):
+                    try:
+                        region = sasl_oauth_token_provider.get('aws_region')
+                        if not region:
+                            region = boto3.session.Session().region_name
+                        if not region:
+                            raise Exception(
+                                "AWS region could not be determined. Please specify 'aws_region' in "
+                                "sasl_oauth_token_provider configuration."
+                            )
+                        auth_token, expiry_ms = MSKAuthTokenProvider.generate_auth_token(region)
+                        self.log.debug("Generated AWS MSK IAM token for region %s", region)
+                        return auth_token, expiry_ms / 1000
+                    except Exception as e:
+                        self.log.error("Failed to generate AWS MSK IAM token: %s", e)
+                        raise
+
+                extras['oauth_cb'] = _aws_msk_iam_oauth_cb
+
+            elif method == 'oidc':
+                extras['sasl.oauthbearer.method'] = 'oidc'
+                extras['sasl.oauthbearer.client.id'] = sasl_oauth_token_provider.get('client_id')
+                extras['sasl.oauthbearer.token.endpoint.url'] = sasl_oauth_token_provider.get('url')
+                extras['sasl.oauthbearer.client.secret'] = sasl_oauth_token_provider.get('client_secret')
+                extras['sasl.oauthbearer.scope'] = sasl_oauth_token_provider.get('scope')
+                extras['sasl.oauthbearer.extensions'] = sasl_oauth_token_provider.get('extensions')
+                oauth_tls_ca = sasl_oauth_token_provider.get('tls_ca_cert')
+                if oauth_tls_ca:
+                    extras['https.ca.location'] = oauth_tls_ca
+
+        for key, value in extras.items():
+            if value:
+                kafka_config[key] = value
 
         return kafka_config
 
