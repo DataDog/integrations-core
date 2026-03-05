@@ -273,7 +273,10 @@ class NutanixCheck(AgentCheck):
             if not data:
                 break
 
-            all_items.extend(data)
+            if isinstance(data, dict):
+                all_items.append(data)
+            else:
+                all_items.extend(data)
 
             # check next page
             links = payload.get("metadata", {}).get("links", [])
