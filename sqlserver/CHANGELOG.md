@@ -6,7 +6,7 @@
 
 ***Fixed***:
 
-* Cancel SQLServer agent history job on check cancel ([#22753](https://github.com/DataDog/integrations-core/pull/22753))
+* Cancel SQLServer Agent history job on check cancellation ([#22753](https://github.com/DataDog/integrations-core/pull/22753))
 
 ## 22.13.0 / 2026-02-19
 
