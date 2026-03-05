@@ -21,7 +21,7 @@ If your Postgres log volume exceeds 200 messages per second, Datadog recommends 
 
 **Important**: If you have a Datadog Log Drain configured for your Supabase project, disable it before enabling log collection via this integration to avoid duplicate logs.
 
-### Retrieve the service_role API key
+### Retrieve the API Key
 
 1. Log in to [Supabase][2] as an administrator.
 2. Navigate to **Project Settings** > **API Keys**.
