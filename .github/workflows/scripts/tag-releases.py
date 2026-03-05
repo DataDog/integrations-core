@@ -5,7 +5,7 @@ Exit codes:
   *  propagated from ddev / git on unexpected failure
 
 Environment variables:
-  DRY_RUN  if 'true', create tags locally but do not push to origin
+  TARGET  target environment ('prod' pushes tags to origin; 'dev' creates tags locally only)
 """
 import os
 import subprocess
@@ -13,9 +13,9 @@ import sys
 
 
 def main() -> None:
-    dry_run = os.environ.get("DRY_RUN", "").lower() == "true"
-    if dry_run:
-        print("Dry-run mode: tags will be created locally but not pushed to origin")
+    target = os.environ.get("TARGET", "dev")
+    if target != "prod":
+        print(f"Target '{target}': tags will be created locally but not pushed to origin")
 
     subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True)
     subprocess.run(
@@ -23,7 +23,7 @@ def main() -> None:
         check=True,
     )
 
-    push_flag = "--no-push" if dry_run else "--push"
+    push_flag = "--push" if target == "prod" else "--no-push"
     base_cmd = ["ddev", "release", "tag", "all", "--skip-prerelease", push_flag]
 
     result = subprocess.run(base_cmd)

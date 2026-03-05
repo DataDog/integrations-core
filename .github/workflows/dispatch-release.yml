@@ -17,11 +17,11 @@ on:
         description: "Commit SHA or ref to build from"
         required: false
         type: string
-      dry-run:
-        description: "Do not push any tags and do not upload anything to S3"
+      target:
+        description: "Target environment (dev = no tag push, dev S3; prod = push tags, prod S3)"
         required: false
-        type: boolean
-        default: false
+        type: string
+        default: dev # TODO: switch default to prod once the new pipeline is validated
 
 permissions:
   id-token: write
@@ -45,7 +45,7 @@ jobs:
         if: inputs.integrations == ''
         id: tag
         env:
-          DRY_RUN: ${{ inputs.dry-run }}
+          TARGET: ${{ inputs.target }}
         run: python .github/workflows/scripts/tag-releases.py
 
       - name: Detect integration list
@@ -74,4 +74,5 @@ jobs:
           INTEGRATIONS: ${{ steps.detect.outputs.integrations }}
           SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
           REF: ${{ inputs.source-repo-ref || github.sha }}
+          TARGET: ${{ inputs.target }}
         run: python .github/workflows/scripts/dispatch-release.py

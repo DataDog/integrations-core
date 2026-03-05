@@ -8,6 +8,7 @@ Required environment variables:
   INTEGRATIONS  JSON array of integration names
   SOURCE_REPO   source repository name (e.g. integrations-core)
   REF           commit SHA or ref to build from
+  TARGET        target environment ('dev' or 'prod')
 """
 import json
 import os
@@ -19,7 +20,7 @@ BATCH_SIZE = 200
 DISPATCH_URL = "https://api.github.com/repos/DataDog/agent-integration-wheels-release/dispatches"
 
 
-def dispatch(batch: list[str], source_repo: str, ref: str) -> None:
+def dispatch(batch: list[str], source_repo: str, ref: str, target: str) -> None:
     payload = json.dumps(
         {
             "event_type": "build-integrations",
@@ -27,6 +28,7 @@ def dispatch(batch: list[str], source_repo: str, ref: str) -> None:
                 "integrations": batch,
                 "source_repo": source_repo,
                 "source_repo_ref": ref,
+                "target": target,
             },
         }
     ).encode()
@@ -53,6 +55,7 @@ def main() -> None:
     integrations = json.loads(os.environ["INTEGRATIONS"])
     source_repo = os.environ["SOURCE_REPO"]
     ref = os.environ["REF"]
+    target = os.environ["TARGET"]
 
     batches = [integrations[i : i + BATCH_SIZE] for i in range(0, len(integrations), BATCH_SIZE)]
 
@@ -62,7 +65,7 @@ def main() -> None:
 
     for i, batch in enumerate(batches, 1):
         print(f"Batch {i}/{len(batches)} ({len(batch)} integrations)")
-        dispatch(batch, source_repo, ref)
+        dispatch(batch, source_repo, ref, target)
 
 
 if __name__ == "__main__":

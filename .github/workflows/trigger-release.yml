@@ -20,11 +20,14 @@ on:
         description: "Commit SHA or ref to build from"
         required: true
         type: string
-      dry-run:
-        description: "Do not push any tags and do not upload anything to S3"
+      target:
+        description: "Target environment (dev or prod)"
         required: false
-        type: boolean
-        default: false
+        type: choice
+        options:
+          - dev
+          - prod
+        default: dev
 
 jobs:
   dispatch:
@@ -34,7 +37,7 @@ jobs:
       source-repo: integrations-core
       integrations: ${{ inputs.integrations || '' }}
       source-repo-ref: ${{ inputs.source-repo-ref || github.sha }}
-      dry-run: true # TODO: remove once the new pipeline is validated
+      target: ${{ inputs.target || 'dev' }} # TODO: switch default to prod once the new pipeline is validated
     permissions:
       id-token: write
       contents: write
