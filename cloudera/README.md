@@ -21,6 +21,9 @@ No additional installation is needed on your server.
 The Cloudera check requires version 7 of Cloudera Manager.
 
 #### Prepare Cloudera Manager
+
+As a best practice, Datadog recommends creating the machine user with read-only access to limit the permissions granted to the Datadog Agent.
+
 1. In Cloudera Data Platform, navigate to the Management Console and click on the **User Management** tab.
 ![User Management][10]
 
