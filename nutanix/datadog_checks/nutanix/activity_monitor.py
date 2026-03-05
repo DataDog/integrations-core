@@ -139,13 +139,12 @@ class ActivityMonitor:
                 e.response.status_code if e.response else "error",
             )
             return 0
-        except Exception as e:
-            self.check.log.error(
-                "[PC:%s:%s] Unexpected error collecting %ss: %s",
+        except Exception:
+            self.check.log.exception(
+                "[PC:%s:%s] Unexpected error collecting %ss",
                 self.check.pc_ip,
                 self.check.pc_port,
                 activity_kind,
-                e,
             )
             return 0
 
