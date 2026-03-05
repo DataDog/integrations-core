@@ -17,6 +17,11 @@ on:
         description: "Commit SHA or ref to build from"
         required: false
         type: string
+      dry-run:
+        description: "Tag releases locally without pushing to origin (dispatch step still runs)"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   id-token: write
@@ -39,6 +44,8 @@ jobs:
       - name: Tag releases
         if: inputs.integrations == ''
         id: tag
+        env:
+          DRY_RUN: ${{ inputs.dry-run }}
         run: python .github/workflows/scripts/tag-releases.py
 
       - name: Detect integration list
