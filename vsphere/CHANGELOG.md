@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 9.4.0-beta.1 / 2026-03-05
+
+***Added***:
+
+* Add `ssl_ciphers` support for the SOAP connection to allow configuring TLS cipher suites when connecting to vCenter. ([#22723](https://github.com/DataDog/integrations-core/pull/22723))
+* Add support for http_connection_timeout parameter. ([#22800](https://github.com/DataDog/integrations-core/pull/22800))
+
 ## 9.3.0 / 2026-02-19
 
 ***Added***:
