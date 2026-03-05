@@ -12,12 +12,7 @@ The Nutanix check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-In Prism Central, create a user with the following roles:
-
-- Cluster Viewer
-- Virtual Machine Viewer
-- Prism Viewer
-- Monitoring Admin
+In Prism Central, create a user with the following role `Prism Viewer`.
 
 Then, edit the `nutanix.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample nutanix.d/conf.yaml][3] for all available configuration options.
 
