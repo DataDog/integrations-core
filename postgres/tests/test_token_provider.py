@@ -159,9 +159,7 @@ def test_aws_fetch_token_with_role_arn(mock_boto3_client, mock_boto3_session, mo
         aws_session_token="session_token",
         region_name="us-east-1",
     )
-    mock_rds.generate_db_auth_token.assert_called_once_with(
-        DBHostname="test-host", Port=5432, DBUsername="testuser"
-    )
+    mock_rds.generate_db_auth_token.assert_called_once_with(DBHostname="test-host", Port=5432, DBUsername="testuser")
 
 
 @patch('datadog_checks.base.utils.db.postgres_connection.time')
@@ -183,9 +181,7 @@ def test_aws_fetch_token_without_role_arn(mock_boto3_session, mock_time):
     assert token == "aws_token_456"
     assert expires_at == 1900.0
     mock_boto3_session.assert_called_once_with(region_name="us-east-1")
-    mock_rds.generate_db_auth_token.assert_called_once_with(
-        DBHostname="test-host", Port=5432, DBUsername="testuser"
-    )
+    mock_rds.generate_db_auth_token.assert_called_once_with(DBHostname="test-host", Port=5432, DBUsername="testuser")
 
 
 def test_aws_token_provider_integration():
