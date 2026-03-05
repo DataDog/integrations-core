@@ -1,0 +1,1 @@
+Refactor TokenProvider, AWSTokenProvider, AzureTokenProvider, TokenAwareConnection, and PostgresConnectionArgs to datadog_checks_base for shared use.

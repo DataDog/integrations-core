@@ -190,6 +190,10 @@ coverage:
         target: 75
         flags:
         - disk
+      Do_Query_Actions:
+        target: 75
+        flags:
+        - do_query_actions
       Druid:
         target: 75
         flags:
@@ -1076,6 +1080,11 @@ flags:
     paths:
     - dns_check/datadog_checks/dns_check
     - dns_check/tests
+  do_query_actions:
+    carryforward: true
+    paths:
+    - do_query_actions/datadog_checks/do_query_actions
+    - do_query_actions/tests
   dotnetclr:
     carryforward: true
     paths:

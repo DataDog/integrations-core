@@ -20,7 +20,7 @@ instances:
 
     ## @param port - integer - optional
     ## The database port to connect to.
-    ## If not specified, defaults to 5432 for PostgreSQL or 3306 for MySQL.
+    ## If not specified, defaults to 5432.
     #
     # port: <PORT>
 
@@ -82,7 +82,7 @@ instances:
 
     ## @param db_type - string - required
     ## The type of database to connect to.
-    ## Must be either 'postgres' or 'mysql'.
+    ## Currently only 'postgres' is supported.
     #
     db_type: postgres
 
