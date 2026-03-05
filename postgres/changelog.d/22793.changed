@@ -1,1 +1,1 @@
-Refactor TokenProvider, AWSTokenProvider, AzureTokenProvider, TokenAwareConnection, and PostgresConnectionArgs to datadog_checks_base for shared use.
+Move shared PostgreSQL connection primitives (`TokenProvider`, `AWSTokenProvider`, `AzureTokenProvider`, `TokenAwareConnection`, `PostgresConnectionArgs`) to `datadog_checks_base` for reuse by other integrations. All existing imports from `datadog_checks.postgres.connection_pool` continue to work via re-exports.

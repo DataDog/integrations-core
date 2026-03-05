@@ -1,1 +1,1 @@
-Add new Do Query Actions integration for executing SQL queries on customer databases via Remote Configuration.
+Add Data Observability query actions integration, enabling the Datadog Agent to execute SQL queries on customer-monitored Postgres databases on behalf of Data Observability monitors configured in the Datadog UI. Query results are streamed back to the Data Observability platform via Remote Configuration, unlocking Data Quality and Source-To-Target monitors for databases that are only reachable from within customer infrastructure.
