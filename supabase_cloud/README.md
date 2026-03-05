@@ -26,7 +26,8 @@ If your Postgres log volume exceeds 200 messages per second, Datadog recommends 
 1. Log in to [Supabase][2] as an administrator.
 2. Navigate to **Project Settings** > **API Keys**.
 3. On the **Publishable and secret API keys** tab:
-   4. Under **Secret keys**, either retrieve the `default` API key or create a new secret key using the **+ New secret key** button.
+
+   1. Under **Secret keys**, either retrieve the `default` API key or create a new secret key using the **+ New secret key** button.
 
 ### Generate a Personal Access Token
 A Personal Access Token (PAT) is required to access the Supabase Management API and collect logs.
