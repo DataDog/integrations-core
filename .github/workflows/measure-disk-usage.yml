@@ -45,13 +45,12 @@ jobs:
         HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
         # HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-        # EVENT_NAME: ${{ github.event.workflow_run.event }}
         # HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
       run: |
         echo "Running for locked uncompressed sizes"
-        ddev -v size status --commit \"$HEAD_SHA\" --to-dd-key ${{ secrets.DD_API_KEY }} --branch \"$HEAD_BRANCH\"
+        ddev -v size status --commit "$HEAD_SHA" --to-dd-key ${{ secrets.DD_API_KEY }} --branch "$HEAD_BRANCH"
         echo "Running for declared uncompressed sizes"
-        ddev -v size status --commit \"$HEAD_SHA\" --to-dd-key ${{ secrets.DD_API_KEY }} --branch \"$HEAD_BRANCH\" --format json --declared
+        ddev -v size status --commit "$HEAD_SHA" --to-dd-key ${{ secrets.DD_API_KEY }} --branch "$HEAD_BRANCH" --format json --declared
 
     - name: Measure disk usage (Compressed)
       env:
@@ -62,9 +61,9 @@ jobs:
         # HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
       run: |
         echo "Running for locked compressed sizes"
-        ddev -v size status --commit \"$HEAD_SHA\" --to-dd-key ${{ secrets.DD_API_KEY }} --branch \"$HEAD_BRANCH\" --compressed
+        ddev -v size status --commit "$HEAD_SHA" --to-dd-key ${{ secrets.DD_API_KEY }} --branch "$HEAD_BRANCH" --compressed
         echo "Running for declared compressed sizes"
-        ddev -v size status --commit \"$HEAD_SHA\" --to-dd-key ${{ secrets.DD_API_KEY }} --branch \"$HEAD_BRANCH\" --compressed --format json --declared
+        ddev -v size status --commit "$HEAD_SHA" --to-dd-key ${{ secrets.DD_API_KEY }} --branch "$HEAD_BRANCH" --compressed --format json --declared
 
     - name: Upload JSON uncompressed sizes artifact
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
