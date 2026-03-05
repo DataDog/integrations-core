@@ -20,6 +20,11 @@ on:
         description: "Commit SHA or ref to build from"
         required: true
         type: string
+      dry-run:
+        description: "Do not push any tags and do not upload anything to S3"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   dispatch:
