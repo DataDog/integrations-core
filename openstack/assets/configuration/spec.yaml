@@ -104,6 +104,7 @@ files:
               example: <INSTANCE_NAME>
               type: string
           - name: user
+            secret: true
             fleet_configurable: true
             required: true
             description: |

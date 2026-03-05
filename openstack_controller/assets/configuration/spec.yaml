@@ -50,6 +50,7 @@ files:
             type: string
         - name: user
           hidden: true
+          secret: true
           fleet_configurable: true
           description: |
            Password authentication is the only auth method supported
@@ -70,12 +71,14 @@ files:
             For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
             integration by setting this field to "true".
           fleet_configurable: true
+          legacy: true
           enabled: true
           value:
               type: boolean
               example: false
         - name: whitelist_project_names
           fleet_configurable: true
+          legacy: true
           hidden: true
           description: |
            IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
@@ -91,6 +94,7 @@ files:
               type: string
         - name: blacklist_project_names
           fleet_configurable: true
+          legacy: true
           hidden: true
           description: |
            IDs of projects to blacklist for monitoring (by default the agent collects limit metrics from all projects)
@@ -106,6 +110,7 @@ files:
               type: string
         - name: exclude_server_ids
           fleet_configurable: true
+          legacy: true
           hidden: true
           description: |
            IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)
@@ -120,6 +125,7 @@ files:
               type: string
         - name: exclude_network_ids
           fleet_configurable: true
+          legacy: true
           hidden: true
           description: |
            IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the
@@ -218,6 +224,7 @@ files:
             display_default: null
         - name: collect_hypervisor_load
           fleet_configurable: true
+          legacy: true
           hidden: true
           description: |
            Collects hypervisor_load.1/5/15 for each hypervisor
@@ -230,6 +237,7 @@ files:
             type: boolean
         - name: collect_hypervisor_metrics
           fleet_configurable: true
+          legacy: true
           hidden: true
           description: |
            Collects hypervisor metrics (including hypervisor_load).
@@ -248,6 +256,7 @@ files:
             display_default: true
             type: boolean
         - name: collect_network_metrics
+          legacy: true
           fleet_configurable: true
           hidden: true
           description: |
@@ -265,6 +274,7 @@ files:
             display_default: true
             type: boolean
         - name: collect_server_diagnostic_metrics
+          legacy: true
           fleet_configurable: true
           hidden: true
           description: |
