@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Literal
 from datadog_checks.base import is_affirmative
 from datadog_checks.nutanix.metrics import CLUSTER_STATS_METRICS, HOST_STATS_METRICS, VM_STATS_METRICS
 from datadog_checks.nutanix.resource_filters import should_collect_resource
+from datadog_checks.nutanix.utils import get_nested
 
 if TYPE_CHECKING:
     from datadog_checks.nutanix.check import NutanixCheck
@@ -123,7 +124,7 @@ class InfrastructureMonitor:
                 self._build_vms_by_host_cache()
                 self.check.log.info("[%s] Cached VMs for %d hosts", pc_label, len(self._vms_by_host))
             except Exception:
-                self.check.log.exception("[%s] Failed to fetch all VMs", pc_label)
+                self.check.log.exception("[%s] Failed to build VM cache", pc_label)
 
         # Process each cluster
         processed, skipped = 0, 0
@@ -139,6 +140,12 @@ class InfrastructureMonitor:
                 skipped += 1
                 continue
 
+            cluster_id = cluster.get("extId")
+            if not cluster_id:
+                self.check.log.warning("[%s][%s] Cluster has no extId, skipping", pc_label, cluster_name)
+                skipped += 1
+                continue
+
             self.check.log.info("[%s][%s] Processing cluster", pc_label, cluster_name)
 
             try:
@@ -148,7 +155,6 @@ class InfrastructureMonitor:
                 self._process_cluster(cluster, pc_label)
 
                 # Fetch VM stats for entire cluster in one call
-                cluster_id = cluster.get("extId")
                 vm_stats = self._get_vm_stats_by_cluster_id(cluster_id, pc_label, cluster_name)
                 self.check.log.debug("[%s][%s] Fetched stats for %d VMs", pc_label, cluster_name, len(vm_stats))
 
@@ -160,7 +166,6 @@ class InfrastructureMonitor:
 
                 processed += 1
             except Exception:
-                cluster_id = cluster.get("extId", "unknown")
                 self.check.log.exception(
                     "[%s][%s] Failed to process cluster (id=%s)",
                     pc_label,
@@ -175,8 +180,8 @@ class InfrastructureMonitor:
 
     def _is_prism_central_cluster(self, cluster: dict) -> bool:
         """Check if cluster is a Prism Central cluster (should be skipped)."""
-        cluster_function = cluster.get("config", {}).get("clusterFunction", [])
-        return len(cluster_function) == 1 and cluster_function[0] == "PRISM_CENTRAL"
+        cluster_function = get_nested(cluster, "config/clusterFunction") or []
+        return "PRISM_CENTRAL" in cluster_function
 
     def _process_cluster(self, cluster: dict, pc_label: str) -> None:
         """Process and report metrics for a single cluster."""
@@ -189,8 +194,11 @@ class InfrastructureMonitor:
 
     def _process_vm(self, vm: dict, vm_stats_dict: dict, cluster_name: str, pc_label: str) -> None:
         """Process and report metrics for a single VM."""
-        vm_id = vm.get("extId", "unknown")
+        vm_id = vm.get("extId")
         hostname = vm.get("name")
+        if not vm_id or not hostname:
+            self.check.log.debug("[%s][%s] Skipping VM missing extId or name: %r", pc_label, cluster_name, vm)
+            return
         if not self._should_collect_vm(vm):
             return
         vm_tags = self.check.base_tags + self._extract_vm_tags(vm)
@@ -232,9 +240,9 @@ class InfrastructureMonitor:
 
     def _report_cluster_basic_metrics(self, cluster: dict, cluster_tags: list[str]) -> None:
         """Report basic cluster metrics (counts)."""
-        nbr_nodes = int(cluster.get("nodes", {}).get("numberOfNodes", 0))
-        vm_count = int(cluster.get("vmCount", 0))
-        inefficient_vm_count = int(cluster.get("inefficientVmCount", 0))
+        nbr_nodes = int(get_nested(cluster, "nodes/numberOfNodes") or 0)
+        vm_count = int(cluster.get("vmCount") or 0)
+        inefficient_vm_count = int(cluster.get("inefficientVmCount") or 0)
 
         self.check.gauge("cluster.count", 1, tags=cluster_tags)
         self.check.gauge("cluster.nbr_nodes", nbr_nodes, tags=cluster_tags)
@@ -271,7 +279,7 @@ class InfrastructureMonitor:
             entries = stats if is_list else stats.get(key, [])
             value_field = key if is_list else "value"
             for entry in entries:
-                value = entry.get(value_field)
+                value = get_nested(entry, value_field)
                 if value is not None:
                     self.check.gauge(metric_name, value, hostname=hostname, tags=tags)
                     metrics_submitted += 1
@@ -434,10 +442,9 @@ class InfrastructureMonitor:
             tags.append(f"ntnx_host_type:{host_type}")
 
         # hypervisor tags
-        hypervisor = host.get("hypervisor", {})
-        if hypervisor_name := hypervisor.get("fullName"):
+        if hypervisor_name := get_nested(host, "hypervisor/fullName"):
             tags.append(f"ntnx_hypervisor_name:{hypervisor_name}")
-        if hypervisor_type := hypervisor.get("type"):
+        if hypervisor_type := get_nested(host, "hypervisor/type"):
             tags.append(f"ntnx_hypervisor_type:{hypervisor_type}")
 
         # Add category tags
@@ -471,11 +478,11 @@ class InfrastructureMonitor:
         # Add category tags
         tags.extend(self.check.extract_category_tags(vm))
 
-        host_id = vm.get("host", {}).get("extId")
+        host_id = get_nested(vm, "host/extId")
         if host_id and host_id in self.host_names:
             tags.append(f"ntnx_host_name:{self.host_names[host_id]}")
 
-        cluster_id = vm.get("cluster", {}).get("extId")
+        cluster_id = get_nested(vm, "cluster/extId")
         if cluster_id and cluster_id in self.cluster_names:
             tags.append(f"ntnx_cluster_name:{self.cluster_names[cluster_id]}")
 
@@ -507,7 +514,7 @@ class InfrastructureMonitor:
     def _build_vms_by_host_cache(self) -> None:
         """Fetch all VMs and group them by host, applying filters."""
         for vm in self._list_vms():
-            host_id = vm.get("host", {}).get("extId")
+            host_id = get_nested(vm, "host/extId")
             if host_id and self._should_collect_vm(vm):
                 self._vms_by_host.setdefault(host_id, []).append(vm)
 

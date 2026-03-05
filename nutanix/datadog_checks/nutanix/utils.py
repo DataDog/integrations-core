@@ -6,8 +6,19 @@ import random
 import time
 from collections.abc import Callable
 from functools import wraps
+from typing import Any
 
 from requests import Response
+
+
+def get_nested(obj: dict, path: str, default: Any = None) -> Any:
+    """Walk a slash-separated path through nested dicts, returning default if any level is absent or not a dict."""
+    current: Any = obj
+    for key in path.split("/"):
+        if not isinstance(current, dict):
+            return default
+        current = current.get(key)
+    return current
 
 
 def retry_on_rate_limit(method: Callable[..., Response]) -> Callable[..., Response]:
