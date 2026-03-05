@@ -135,6 +135,7 @@ class InstanceConfig(BaseModel):
     ignore_tags: Optional[tuple[str, ...]] = None
     include_labels: Optional[tuple[str, ...]] = None
     istio_mesh_endpoint: Optional[str] = None
+    istio_mode: Optional[str] = None
     istiod_endpoint: Optional[str] = None
     kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
     kerberos_cache: Optional[str] = None
@@ -191,6 +192,8 @@ class InstanceConfig(BaseModel):
     use_openmetrics: Optional[bool] = None
     use_process_start_time: Optional[bool] = None
     username: Optional[str] = None
+    waypoint_endpoint: Optional[str] = None
+    ztunnel_endpoint: Optional[str] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
