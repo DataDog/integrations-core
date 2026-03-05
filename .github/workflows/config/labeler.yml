@@ -994,6 +994,10 @@ integration/ntp:
 - changed-files:
   - any-glob-to-any-file:
     - ntp/**/*
+integration/nutanix:
+- changed-files:
+  - any-glob-to-any-file:
+    - nutanix/**/*
 integration/nvidia_jetson:
 - changed-files:
   - any-glob-to-any-file:

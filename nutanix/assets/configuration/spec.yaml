@@ -1,0 +1,208 @@
+name: Nutanix
+files:
+  - name: nutanix.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: pc_ip
+            description: |
+              The IP address or FQDN of the Prism Central.
+              This is required to connect to your Nutanix Prism Central instance.
+
+              You can optionally include the port in this field (e.g., 'prism-central.example.com:9440').
+              If a port is specified here, do not set the pc_port option, as this will cause a configuration error.
+            required: true
+            display_priority: 5
+            value:
+              type: string
+              example: prism-central.example.com
+          - name: pc_port
+            description: |
+              The port of the Prism Central API.
+              Default is 9440 for HTTPS.
+
+              Note: If you include the port in the pc_ip field (e.g., 'prism-central.example.com:9440'),
+              do not set this option as it will cause a configuration error.
+            display_priority: 4
+            value:
+              type: integer
+              example: 9440
+          - name: pc_username
+            description: |
+              The username to authenticate with Prism Central.
+            required: true
+            display_priority: 3
+            value:
+              type: string
+          - name: pc_password
+            description: |
+              The password to authenticate with Prism Central.
+            required: true
+            display_priority: 2
+            value:
+              type: string
+          - name: page_limit
+            description: |
+              The maximum number of items to retrieve per page when making paginated API requests.
+              This controls the page size for API calls to Prism Central.
+              Default is 50. Increase this value to reduce the number of API calls for large environments.
+            display_priority: 1
+            value:
+              type: integer
+              example: 100
+          - name: pc_max_retries
+            description: |
+              The maximum number of retry attempts for API requests when rate limited by Prism Central API.
+              Set to 0 to disable retries. Default is 3.
+            value:
+              type: integer
+              example: 3
+          - name: pc_base_backoff_seconds
+            description: |
+              The initial backoff duration in seconds when retrying rate-limited requests.
+              The actual backoff time uses exponential backoff: base * (2 ^ attempt) + jitter.
+              Default is 1 second.
+            value:
+              type: number
+              example: 1
+          - name: pc_max_backoff_seconds
+            description: |
+              The maximum backoff duration in seconds when retrying rate-limited requests.
+              This caps the exponential backoff calculation to prevent excessive wait times.
+              Default is 30 seconds.
+            value:
+              type: number
+              example: 30
+          - name: resource_filters
+            description: |
+              Filter which resources are collected using regex patterns on resource properties.
+              Each filter requires: 'resource' (type), 'property' (API field name), 'patterns' (regex list).
+              Optional: 'type' (include|exclude, default: include).
+              Exclude takes precedence over include.
+
+              IMPORTANT Default: Only USER category tags are collected.
+              For SYSTEM/INTERNAL categories, explicitly configure category filters.
+
+              Resources: cluster, host, vm, event, task, alert, audit, category
+              Property access: Use API property names (case-sensitive).
+              Nested properties: 'parent/child' (e.g., 'userReference/name')
+
+              Common property names per resource:
+                cluster: name, extId
+                host: hostName, extId
+                vm: name, extId, powerState
+                category: type (SYSTEM, INTERNAL, USER)
+                event: eventType
+                task: status
+                alert: severity, alertType
+                audit: auditType
+
+              Examples:
+                # Infrastructure - include clusters by name, exclude hosts
+                - resource: cluster
+                  property: name
+                  patterns: ['^prod-']
+                - resource: host
+                  property: hostName
+                  type: exclude
+                  patterns: ['^standby-']
+                # Category - include SYSTEM type (overrides USER default)
+                - resource: category
+                  property: type
+                  patterns: ['^SYSTEM$']
+                # Activity - filter by severity, nested property, multiple patterns
+                - resource: alert
+                  property: severity
+                  patterns: ['^WARNING$', '^CRITICAL$']
+                - resource: audit
+                  property: userReference/name
+                  type: exclude
+                  patterns: ['^admin$', '^system$']
+            value:
+              type: array
+              items:
+                type: object
+                properties:
+                  - name: resource
+                    type: string
+                  - name: patterns
+                    type: array
+                    items:
+                      type: string
+                  - name: type
+                    type: string
+                  - name: property
+                    type: string
+              example:
+                - resource: cluster
+                  property: name
+                  patterns: ['^prod-']
+                - resource: category
+                  property: type
+                  patterns: ['^SYSTEM$']
+                - resource: alert
+                  property: severity
+                  patterns: ['^WARNING$', '^CRITICAL$']
+          - name: prefix_category_tags
+            description: |
+              Whether to prefix Nutanix category tags with 'ntnx_'.
+              When false, category tags use the Nutanix category key directly (e.g., 'Environment:Production').
+              When true, tags are prefixed with 'ntnx_' (e.g., 'ntnx_Environment:Production').
+              Default is false.
+            value:
+              type: boolean
+              example: false
+          - name: collect_events
+            description: |
+              Whether to collect events from Prism Central.
+              Default is true.
+            value:
+              type: boolean
+              example: true
+          - name: collect_tasks
+            description: |
+              Whether to collect tasks from Prism Central.
+              Default is true.
+            value:
+              type: boolean
+              example: true
+          - name: collect_audits
+            description: |
+              Whether to collect audit logs from Prism Central.
+              Default is true.
+            value:
+              type: boolean
+              example: true
+          - name: collect_alerts
+            description: |
+              Whether to collect alerts from Prism Central.
+              Default is true.
+            value:
+              type: boolean
+              example: true
+          - name: collect_subtasks
+            description: |
+              Whether to collect subtasks in addition to parent tasks.
+              When false, only top-level tasks are collected.
+              Default is false.
+            value:
+              type: boolean
+              example: false
+          - name: batch_vm_collection
+            description: |
+              Whether to fetch all VMs in a single paginated API call instead of per-host.
+              When true, VMs are fetched once and grouped by host in-memory, significantly
+              reducing the number of API calls to the rate-limited List VMs endpoint.
+              When false, VMs are fetched individually per host (legacy behavior).
+              Default is true.
+            value:
+              type: boolean
+              example: true
+          - template: instances/http
+          - template: instances/default
+            overrides:
+              min_collection_interval.value.example: 120
+              min_collection_interval.enabled: true
