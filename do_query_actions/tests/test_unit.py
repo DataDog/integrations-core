@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -184,8 +185,6 @@ def test_event_platform_event_payload(dd_run_check, aggregator, postgres_instanc
         dd_run_check(check)
 
     mock_epe.assert_called_once()
-    import json
-
     raw_event = mock_epe.call_args[0][0]
     event_type = mock_epe.call_args[0][1]
     payload = json.loads(raw_event)
@@ -338,3 +337,118 @@ def test_aws_iam_token_provider(postgres_instance):
     assert provider.host == 'localhost'
     assert provider.region == 'us-east-1'
     assert provider.role_arn == 'arn:aws:iam::role/test'
+
+
+def test_azure_managed_identity_token_provider(postgres_instance):
+    """Azure managed identity config creates an AzureTokenProvider."""
+    postgres_instance['managed_authentication'] = {
+        'enabled': True,
+        'client_id': 'my-client-id',
+        'identity_scope': 'https://custom.scope/.default',
+    }
+
+    check = DoQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+    provider = check._build_token_provider()
+
+    from datadog_checks.base.utils.db.postgres_connection import AzureTokenProvider
+
+    assert isinstance(provider, AzureTokenProvider)
+    assert provider.client_id == 'my-client-id'
+    assert provider.identity_scope == 'https://custom.scope/.default'
+
+
+def test_token_provider_sets_pool_kwargs(postgres_instance):
+    """When a token provider is configured, it is passed to the ConnectionPool."""
+    postgres_instance['aws'] = {
+        'region': 'us-east-1',
+        'managed_authentication': {'enabled': True},
+    }
+
+    check = DoQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool') as MockPool:
+        MockPool.return_value = MagicMock()
+        check._create_postgres_pool()
+
+    pool_kwargs = MockPool.call_args.kwargs['kwargs']
+    assert 'token_provider' in pool_kwargs
+
+
+def test_do_query_cursor_prepends_comment():
+    """DoQueryCursor.execute prepends the datadog-agent SQL comment to string queries."""
+    import psycopg
+
+    from datadog_checks.do_query_actions.check import DoQueryCursor
+
+    captured = []
+
+    with patch.object(psycopg.Cursor, 'execute', lambda self, q, p=None, **kw: captured.append(q)):
+        cursor = DoQueryCursor.__new__(DoQueryCursor)
+        cursor.execute('SELECT 1')
+
+    assert len(captured) == 1
+    assert 'datadog-agent' in captured[0]
+    assert 'SELECT 1' in captured[0]
+
+
+def test_rollback_exception_swallowed(dd_run_check, aggregator, postgres_instance):
+    """If rollback raises after a query error, the exception is swallowed."""
+    mock_pool, mock_conn = _make_mock_pool()
+    mock_cursor = mock_conn.cursor.return_value
+
+    mock_cursor.execute.side_effect = Exception("query failed")
+    mock_conn.rollback.side_effect = Exception("rollback also failed")
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DoQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+        dd_run_check(check)
+
+    aggregator.assert_metric('do_query_actions.query_success', value=0)
+    aggregator.assert_service_check('do_query_actions.query_status', AgentCheck.CRITICAL)
+
+
+def test_event_payload_entity_model_dump(postgres_instance):
+    """Entity with model_dump() method (pydantic model) is serialized correctly."""
+    check = DoQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+
+    entity_mock = MagicMock()
+    entity_mock.model_dump.return_value = {'platform': 'gcp', 'table': 'users'}
+    query_spec = dict(postgres_instance['queries'][0])
+    query_spec['entity'] = entity_mock
+
+    result = {
+        'status': 'success',
+        'columns': ['count'],
+        'rows': [[1]],
+        'row_count': 1,
+        'duration_s': 0.1,
+        'error': None,
+    }
+    payload = check._build_event_payload(query_spec, result)
+
+    entity_mock.model_dump.assert_called_once_with(exclude_none=True)
+    assert payload['entity'] == {'platform': 'gcp', 'table': 'users'}
+
+
+def test_event_payload_entity_non_dict(postgres_instance):
+    """Entity that is neither dict nor pydantic model is cast via dict()."""
+    check = DoQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+
+    class TupleEntity:
+        def __iter__(self):
+            return iter([('platform', 'azure'), ('table', 'events')])
+
+    query_spec = dict(postgres_instance['queries'][0])
+    query_spec['entity'] = TupleEntity()
+
+    result = {
+        'status': 'success',
+        'columns': ['count'],
+        'rows': [[1]],
+        'row_count': 1,
+        'duration_s': 0.1,
+        'error': None,
+    }
+    payload = check._build_event_payload(query_spec, result)
+
+    assert payload['entity'] == {'platform': 'azure', 'table': 'events'}
