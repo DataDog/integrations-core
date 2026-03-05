@@ -336,7 +336,7 @@
               "hide_zero_counts": true,
               "show_status": true,
               "last_triggered_format": "relative",
-              "query": "tag:integration:supabase_cloud",
+              "query": "tag:integration:supabase-cloud",
               "sort": "status,asc",
               "count": 50,
               "start": 0,
