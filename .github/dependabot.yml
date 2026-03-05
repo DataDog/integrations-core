@@ -8,6 +8,9 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "06:00"
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
     # Group all actions updates together in the same PR
     groups:
       actions:
@@ -23,6 +26,9 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "06:00"
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
     # Group all actions updates together in the same PR
     groups:
       actions:
