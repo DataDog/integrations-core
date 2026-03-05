@@ -1,6 +1,6 @@
 import pytest
 
-from ddev.config.secret_command import reset_secret_command_cache
+from ddev.config.secret_command import SecretCommandError, reset_secret_command_cache, run_secret_command
 from ddev.config.secret_resolution import SecretResolutionError, resolve_required_secret
 
 
@@ -206,6 +206,16 @@ def test_failed_command_is_not_cached(monkeypatch):
         )
 
     assert len(calls) == 2
+
+
+def test_run_secret_command_non_zero_includes_stderr_summary(monkeypatch):
+    def fake_run(*args, **kwargs):
+        return type('P', (), {'returncode': 7, 'stdout': '', 'stderr': ' failed to fetch token '})()
+
+    monkeypatch.setattr('ddev.config.secret_command.subprocess.run', fake_run)
+
+    with pytest.raises(SecretCommandError, match='exit code 7; stderr: failed to fetch token'):
+        run_secret_command('python token.py')
 
 
 def _parse_error():

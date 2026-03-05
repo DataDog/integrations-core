@@ -18,6 +18,7 @@ class SecretCommandError(Exception):
 
 
 def parse_secret_command(command: str) -> list[str]:
+    """Parse a command string into argv using platform-appropriate shlex mode."""
     try:
         argv = shlex.split(command, posix=os.name != 'nt')
     except ValueError as e:
@@ -30,6 +31,7 @@ def parse_secret_command(command: str) -> list[str]:
 
 
 def run_secret_command(command: str, *, timeout: float | None = None) -> str:
+    """Run a secret provider command and cache successful stdout by command+timeout."""
     timeout = DEFAULT_SECRET_COMMAND_TIMEOUT if timeout is None else timeout
     cache_key = (command, timeout)
     if cache_key in _SECRET_COMMAND_CACHE:
@@ -54,7 +56,11 @@ def run_secret_command(command: str, *, timeout: float | None = None) -> str:
         raise SecretCommandError('command could not be started', reason='start_error') from e
 
     if process.returncode != 0:
-        raise SecretCommandError(f'command failed with exit code {process.returncode}', reason='non_zero_exit')
+        stderr_summary = _summarize_stderr(getattr(process, 'stderr', ''))
+        stderr_suffix = f'; stderr: {stderr_summary}' if stderr_summary else ''
+        raise SecretCommandError(
+            f'command failed with exit code {process.returncode}{stderr_suffix}', reason='non_zero_exit'
+        )
 
     secret = process.stdout.strip()
     _SECRET_COMMAND_CACHE[cache_key] = secret
@@ -63,3 +69,14 @@ def run_secret_command(command: str, *, timeout: float | None = None) -> str:
 
 def reset_secret_command_cache() -> None:
     _SECRET_COMMAND_CACHE.clear()
+
+
+def _summarize_stderr(stderr: str) -> str:
+    collapsed = ' '.join(stderr.split())
+    if not collapsed:
+        return ''
+
+    max_length = 200
+    if len(collapsed) > max_length:
+        return f'{collapsed[: max_length - 3]}...'
+    return collapsed

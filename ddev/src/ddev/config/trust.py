@@ -5,12 +5,18 @@ from __future__ import annotations
 
 import hashlib
 import os
+import sys
 from dataclasses import dataclass
 from typing import Any
 
 from ddev.config.constants import ConfigEnvVars
 from ddev.utils.fs import Path
 from ddev.utils.toml import dumps_toml_data, load_toml_data
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 TRUST_STORE_FILENAME = 'trusted-local-configs.toml'
 
@@ -43,7 +49,7 @@ def load_trust_records(trust_store_path: Path | None = None) -> dict[str, TrustR
 
     try:
         trust_data = load_toml_data(path.read_text())
-    except Exception:
+    except (OSError, tomllib.TOMLDecodeError):
         return {}
 
     records: dict[str, TrustRecord] = {}
@@ -60,6 +66,7 @@ def load_trust_records(trust_store_path: Path | None = None) -> dict[str, TrustR
 
 
 def save_trust_records(records: dict[str, TrustRecord], trust_store_path: Path | None = None) -> None:
+    """Persist trust records sorted by canonical path."""
     path = trust_store_path or get_trust_store_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     serialized_records = [
@@ -69,6 +76,7 @@ def save_trust_records(records: dict[str, TrustRecord], trust_store_path: Path |
 
 
 def trust_local_config(local_config_path: Path, trust_store_path: Path | None = None) -> bool:
+    """Trust the current file content and return whether it was already trusted."""
     if not local_config_path.is_file():
         return False
 
@@ -78,8 +86,9 @@ def trust_local_config(local_config_path: Path, trust_store_path: Path | None = 
     existing_record = records.get(canonical_path)
     already_trusted = existing_record is not None and existing_record.sha256 == current_hash
 
-    records[canonical_path] = TrustRecord(path=canonical_path, sha256=current_hash)
-    save_trust_records(records, trust_store_path)
+    if not already_trusted:
+        records[canonical_path] = TrustRecord(path=canonical_path, sha256=current_hash)
+        save_trust_records(records, trust_store_path)
     return already_trusted
 
 
@@ -89,7 +98,7 @@ def deny_local_config(local_config_path: Path, trust_store_path: Path | None = N
     if canonical_path not in records:
         return False
 
-    records.pop(canonical_path, None)
+    del records[canonical_path]
     save_trust_records(records, trust_store_path)
     return True
 

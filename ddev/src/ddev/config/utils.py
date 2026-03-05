@@ -37,7 +37,8 @@ def load_toml_data(path: Path) -> dict:
     return tomlkit.loads(path.read_text())
 
 
-def scrub_config(config: dict):
+def scrub_config(config: dict) -> None:
+    """Scrub sensitive config fields in-place using `SCRUBBED_GLOBS`."""
     _scrub_path(config, ())
 
 

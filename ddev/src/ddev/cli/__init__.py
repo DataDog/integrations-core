@@ -38,6 +38,7 @@ SECRET_RESOLUTION_ERROR_PATTERN = re.compile(
 
 
 def format_secret_resolution_error(error: ConfigurationError) -> str | None:
+    """Return an actionable secret error summary, or None if the error is unrelated."""
     match = SECRET_RESOLUTION_ERROR_PATTERN.search(str(error))
     if match is None:
         return None

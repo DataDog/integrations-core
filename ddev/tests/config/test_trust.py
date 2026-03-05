@@ -74,3 +74,22 @@ def test_is_local_config_trusted_false_when_file_missing(monkeypatch, tmp_path):
     local_config = Path(tmp_path) / '.ddev.toml'
 
     assert is_local_config_trusted(local_config) is False
+
+
+def test_trust_local_config_does_not_write_when_already_trusted(monkeypatch, tmp_path, mocker):
+    monkeypatch.setenv('DDEV_DATA_DIR', str(tmp_path / 'ddev-data'))
+    local_config = Path(tmp_path) / '.ddev.toml'
+    local_config.write_text('[github]\ntoken_command = "python token.py"\n')
+    trust_local_config(local_config)  # first call — writes
+
+    save_mock = mocker.patch('ddev.config.trust.save_trust_records')
+    trust_local_config(local_config)  # second call — should skip write
+
+    save_mock.assert_not_called()
+
+
+def test_load_trust_records_returns_empty_for_invalid_toml(tmp_path):
+    trust_store_path = Path(tmp_path) / 'trusted-local-configs.toml'
+    trust_store_path.write_text('records = [\n')
+
+    assert load_trust_records(trust_store_path) == {}

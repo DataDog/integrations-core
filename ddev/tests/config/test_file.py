@@ -327,7 +327,7 @@ def test_append_line_sources(helpers, config_file: ConfigFileWithOverrides):
     assert config_file._build_read_string(lines, lines_sources) == expected
 
 
-def test_append_line_sources_with_scaped_characters(helpers, config_file: ConfigFileWithOverrides):
+def test_append_line_sources_with_escaped_characters(helpers, config_file: ConfigFileWithOverrides):
     lines = ["repo = 'core'", "agent = 'dev'", "org = 'default'", "", "something: 'something\\else'"]
 
     lines_sources = {
@@ -371,6 +371,56 @@ def test_build_line_index_with_empty_lines():
     index = build_line_index_with_multiple_entries(content)
 
     assert index == {"line1": [1], "": [2, 4], "line2": [3], "line3": [5]}
+
+
+def test_process_combined_configs_handles_exhausted_line_indices(config_file: ConfigFileWithOverrides):
+    config_file.combined_model = object()
+    config_file.combined_content = "line\nline\nline"
+    config_file.global_content = "line"
+    config_file.overrides_content = "line"
+
+    result = config_file._process_combined_configs(scrubbed=False)
+
+    assert result.line_sources is None
+    assert result.combined_content == "line\nline\nline"
+
+
+def test_save_preserves_explicit_empty_content(config_file: ConfigFileWithOverrides):
+    config_file.reset()
+
+    config_file.save("")
+
+    assert config_file.global_path.read_text() == ""
+
+
+def test_load_ignores_overrides_when_read_fails(tmp_path: PathLibPath, monkeypatch):
+    tmp_path = Path(tmp_path)
+    project_dir = tmp_path / "project"
+    project_dir.mkdir()
+    global_config_path = tmp_path / "config.toml"
+    overrides_path = project_dir / DDEV_TOML
+    overrides_path.write_text("[github]\ntoken = 'override-token'\n")
+
+    config_file = ConfigFileWithOverrides(global_config_path)
+    config_file.reset()
+    config_file.global_model.github.token = "fake-test-token"
+    config_file.save()
+
+    original_read_text = Path.read_text
+
+    def flaky_read_text(path: Path, *args, **kwargs) -> str:
+        if path == overrides_path:
+            raise OSError("simulated read failure")
+        return original_read_text(path, *args, **kwargs)
+
+    with monkeypatch.context() as m:
+        m.chdir(project_dir)
+        m.setattr(Path, "read_text", flaky_read_text)
+        config_file.load()
+
+    assert config_file.overrides_content == ""
+    assert config_file.overrides_model.raw_data == {}
+    assert config_file.combined_model.raw_data == config_file.global_model.raw_data
 
 
 def test_overrides_path_permission_error(tmp_path: PathLibPath, monkeypatch):
@@ -484,6 +534,10 @@ def test_changed_local_file_after_trust_strips_command_fields(
     config_file: ConfigFileWithOverrides, helpers, overrides_config: Path, monkeypatch, tmp_path: PathLibPath
 ):
     monkeypatch.setenv("DDEV_DATA_DIR", str(tmp_path / "ddev-data"))
+    # This test expects no fallback token source once local command fields are stripped.
+    config_file.model.github.token = ""
+    config_file.save()
+
     overrides_config.write_text(
         helpers.dedent(
             """
@@ -554,3 +608,12 @@ def test_missing_local_file_is_untrusted(config_file: ConfigFileWithOverrides, m
     config_file.load()
 
     assert config_file.combined_model.raw_data == config_file.global_model.raw_data
+
+
+def test_read_scrubbed_does_not_mutate_model(config_file: ConfigFileWithOverrides):
+    config_file.load()
+
+    config_file.read_scrubbed()
+
+    assert config_file.combined_model.raw_data['github']['token'] == 'fake-test-token'
+    assert config_file.global_model.raw_data['github']['token'] == 'fake-test-token'
