@@ -449,6 +449,7 @@ class RequestsWrapper(object):
         self._https_adapters = {}
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
+        """Look up a request header by name. Lookup is case-sensitive."""
         return self.options['headers'].get(name, default)
 
     def set_header(self, name: str, value: str) -> None:
