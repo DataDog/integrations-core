@@ -240,9 +240,7 @@ def test_connect_failure(realtime_instance):
         version_info.assert_called_once()
 
 
-def test_connect_with_http_connection_timeout(
-    aggregator, realtime_instance, service_instance, dd_run_check
-):
+def test_connect_with_http_connection_timeout(aggregator, realtime_instance, service_instance, dd_run_check):
     realtime_instance['http_connection_timeout'] = 120
 
     with patch('datadog_checks.vsphere.api.connect') as connect:
