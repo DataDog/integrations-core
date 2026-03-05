@@ -117,12 +117,24 @@ def test_aws_token_provider_initialization_without_role_arn():
     assert provider.role_arn is None
 
 
-@patch('datadog_checks.postgres.connection_pool.time.time')
-@patch('datadog_checks.postgres.aws.generate_rds_iam_token')
-def test_aws_fetch_token_with_role_arn(mock_generate_token, mock_time):
+@patch('datadog_checks.base.utils.db.postgres_connection.time')
+@patch('boto3.Session')
+@patch('boto3.client')
+def test_aws_fetch_token_with_role_arn(mock_boto3_client, mock_boto3_session, mock_time):
     """Test AWS token fetching with role_arn."""
-    mock_time.return_value = 1000.0
-    mock_generate_token.return_value = "aws_token_123"
+    mock_time.time.return_value = 1000.0
+
+    mock_sts = MagicMock()
+    mock_sts.assume_role.return_value = {
+        "Credentials": {"AccessKeyId": "key", "SecretAccessKey": "secret", "SessionToken": "session_token"}
+    }
+    mock_boto3_client.return_value = mock_sts
+
+    mock_rds = MagicMock()
+    mock_rds.generate_db_auth_token.return_value = "aws_token_123"
+    mock_session = MagicMock()
+    mock_session.client.return_value = mock_rds
+    mock_boto3_session.return_value = mock_session
 
     provider = AWSTokenProvider(
         host="test-host",
@@ -136,21 +148,33 @@ def test_aws_fetch_token_with_role_arn(mock_generate_token, mock_time):
 
     assert token == "aws_token_123"
     assert expires_at == 1900.0  # 1000.0 + 900 (TOKEN_TTL_SECONDS)
-    mock_generate_token.assert_called_once_with(
-        host="test-host",
-        port=5432,
-        username="testuser",
-        region="us-east-1",
-        role_arn="arn:aws:iam::123456789012:role/test-role",
+    mock_boto3_client.assert_called_once_with("sts")
+    mock_sts.assume_role.assert_called_once_with(
+        RoleArn="arn:aws:iam::123456789012:role/test-role",
+        RoleSessionName="datadog-rds-iam-auth-session",
+    )
+    mock_boto3_session.assert_called_once_with(
+        aws_access_key_id="key",
+        aws_secret_access_key="secret",
+        aws_session_token="session_token",
+        region_name="us-east-1",
+    )
+    mock_rds.generate_db_auth_token.assert_called_once_with(
+        DBHostname="test-host", Port=5432, DBUsername="testuser"
     )
 
 
-@patch('datadog_checks.postgres.connection_pool.time.time')
-@patch('datadog_checks.postgres.aws.generate_rds_iam_token')
-def test_aws_fetch_token_without_role_arn(mock_generate_token, mock_time):
+@patch('datadog_checks.base.utils.db.postgres_connection.time')
+@patch('boto3.Session')
+def test_aws_fetch_token_without_role_arn(mock_boto3_session, mock_time):
     """Test AWS token fetching without role_arn."""
-    mock_time.return_value = 1000.0
-    mock_generate_token.return_value = "aws_token_456"
+    mock_time.time.return_value = 1000.0
+
+    mock_rds = MagicMock()
+    mock_rds.generate_db_auth_token.return_value = "aws_token_456"
+    mock_session = MagicMock()
+    mock_session.client.return_value = mock_rds
+    mock_boto3_session.return_value = mock_session
 
     provider = AWSTokenProvider(host="test-host", port=5432, username="testuser", region="us-east-1")
 
@@ -158,27 +182,32 @@ def test_aws_fetch_token_without_role_arn(mock_generate_token, mock_time):
 
     assert token == "aws_token_456"
     assert expires_at == 1900.0
-    mock_generate_token.assert_called_once_with(
-        host="test-host", port=5432, username="testuser", region="us-east-1", role_arn=None
+    mock_boto3_session.assert_called_once_with(region_name="us-east-1")
+    mock_rds.generate_db_auth_token.assert_called_once_with(
+        DBHostname="test-host", Port=5432, DBUsername="testuser"
     )
 
 
 def test_aws_token_provider_integration():
     """Test AWSTokenProvider integration with get_token()."""
-    with patch('datadog_checks.postgres.aws.generate_rds_iam_token') as mock_generate:
-        mock_generate.return_value = "integration_token"
+    with patch('boto3.Session') as mock_session_class:
+        mock_rds = MagicMock()
+        mock_rds.generate_db_auth_token.return_value = "integration_token"
+        mock_session = MagicMock()
+        mock_session.client.return_value = mock_rds
+        mock_session_class.return_value = mock_session
 
         provider = AWSTokenProvider(host="test-host", port=5432, username="testuser", region="us-east-1")
 
         # First call should fetch token
         token1 = provider.get_token()
         assert token1 == "integration_token"
-        assert mock_generate.call_count == 1
+        assert mock_rds.generate_db_auth_token.call_count == 1
 
         # Second call should use cached token
         token2 = provider.get_token()
         assert token2 == "integration_token"
-        assert mock_generate.call_count == 1
+        assert mock_rds.generate_db_auth_token.call_count == 1
 
 
 def test_azure_token_provider_initialization():
@@ -196,7 +225,7 @@ def test_azure_token_provider_initialization_without_scope():
     assert provider.identity_scope is None
 
 
-@patch('datadog_checks.postgres.azure.ManagedIdentityCredential')
+@patch('azure.identity.ManagedIdentityCredential')
 def test_azure_fetch_token_with_scope(mock_credential_class):
     """Test Azure token fetching with custom scope."""
     mock_token = Mock()
@@ -217,7 +246,7 @@ def test_azure_fetch_token_with_scope(mock_credential_class):
     mock_credential.get_token.assert_called_once_with("https://custom.scope/.default")
 
 
-@patch('datadog_checks.postgres.azure.ManagedIdentityCredential')
+@patch('azure.identity.ManagedIdentityCredential')
 def test_azure_fetch_token_without_scope(mock_credential_class):
     """Test Azure token fetching without custom scope (uses default)."""
     mock_token = Mock()
@@ -240,7 +269,7 @@ def test_azure_fetch_token_without_scope(mock_credential_class):
 
 def test_azure_token_provider_integration():
     """Test AzureTokenProvider integration with get_token()."""
-    with patch('datadog_checks.postgres.azure.ManagedIdentityCredential') as mock_credential_class:
+    with patch('azure.identity.ManagedIdentityCredential') as mock_credential_class:
         mock_token = Mock()
         mock_token.token = "integration_azure_token"
         mock_token.expires_on = time.time() + 3600
