@@ -150,10 +150,6 @@ coverage:
         target: 75
         flags:
         - consul
-      Control-M:
-        target: 75
-        flags:
-        - control_m
       CoreDNS:
         target: 75
         flags:
@@ -790,6 +786,10 @@ coverage:
         target: 75
         flags:
         - checkpoint_harmony_endpoint
+      control_m:
+        target: 75
+        flags:
+        - control_m
       datadog_csi_driver:
         target: 75
         flags:
