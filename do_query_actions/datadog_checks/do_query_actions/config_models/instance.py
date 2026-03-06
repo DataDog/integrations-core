@@ -61,13 +61,13 @@ class Entity(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    account_id: Optional[str] = None
-    database: Optional[str] = None
-    measure: Optional[str] = None
-    metric_config_id: Optional[int] = None
-    platform: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias='schema')
-    table: Optional[str] = None
+    account_id: str
+    database: str
+    measure: str
+    metric_config_id: int
+    platform: str
+    schema_: str = Field(..., alias='schema')
+    table: str
 
 
 class Query(BaseModel):
@@ -75,11 +75,11 @@ class Query(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    entity: Optional[Entity] = None
-    interval_seconds: Optional[int] = None
-    monitor_id: Optional[int] = None
-    query: Optional[str] = None
-    timeout_seconds: Optional[int] = None
+    entity: Entity
+    interval_seconds: int
+    monitor_id: int
+    query: str
+    timeout_seconds: int
 
 
 class InstanceConfig(BaseModel):

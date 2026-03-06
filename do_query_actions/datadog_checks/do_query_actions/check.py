@@ -131,10 +131,8 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
         now = time.time()
         due = []
         for q in self.config.queries:
-            monitor_id = q.monitor_id or 0
-            interval = q.interval_seconds or 0
-            last_run = self._last_execution.get(monitor_id, 0.0)
-            if now - last_run >= interval:
+            last_run = self._last_execution.get(q.monitor_id, 0.0)
+            if now - last_run >= q.interval_seconds:
                 due.append(q)
         return due
 
@@ -145,9 +143,9 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
 
     def _execute_single_query(self, conn: Any, query_spec: Any) -> dict[str, Any]:
         """Execute a single query and return a structured result dict."""
-        sql = query_spec.query or ''
-        timeout = query_spec.timeout_seconds or 30
-        monitor_id = query_spec.monitor_id or 0
+        sql = query_spec.query
+        timeout = query_spec.timeout_seconds
+        monitor_id = query_spec.monitor_id
         start = time.time()
 
         try:
@@ -183,11 +181,7 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
             }
 
     def _build_event_payload(self, query_spec: Any, result: dict[str, Any]) -> dict[str, Any]:
-        entity = query_spec.entity
-        if entity is not None:
-            entity = entity.model_dump(exclude_none=True)
-        else:
-            entity = {}
+        entity = query_spec.entity.model_dump(exclude_none=True)
 
         return {
             'timestamp': int(time.time() * 1000),
@@ -196,8 +190,8 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
             'db_host': self.config.host,
             'db_port': self.config.port,
             'db_name': self.config.dbname,
-            'monitor_id': query_spec.monitor_id or 0,
-            'query': query_spec.query or '',
+            'monitor_id': query_spec.monitor_id,
+            'query': query_spec.query,
             'entity': entity,
             'status': result['status'],
             'columns': result['columns'],
@@ -219,8 +213,7 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
             with self._acquire_connection() as conn:
                 now = time.time()
                 for q in due_queries:
-                    monitor_id = q.monitor_id or 0
-                    tags = base_tags + [f'monitor_id:{monitor_id}']
+                    tags = base_tags + [f'monitor_id:{q.monitor_id}']
 
                     result = self._execute_single_query(conn, q)
 
@@ -237,17 +230,16 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
 
                     payload = self._build_event_payload(q, result)
                     raw_event = json.dumps(payload, default=default_json_event_encoding)
-                    self.log.debug("Query result for monitor_id=%d: %s", monitor_id, raw_event)
+                    self.log.debug("Query result for monitor_id=%d: %s", q.monitor_id, raw_event)
                     self.event_platform_event(raw_event, EVENT_TRACK_TYPE)
 
-                    self._last_execution[monitor_id] = now
+                    self._last_execution[q.monitor_id] = now
 
         except Exception as e:
             error_msg = str(e)
             self.log.exception("Check execution failed")
             for q in due_queries:
-                monitor_id = q.monitor_id or 0
-                tags = base_tags + [f'monitor_id:{monitor_id}']
+                tags = base_tags + [f'monitor_id:{q.monitor_id}']
                 self.gauge('query_execution_time', 0, tags=tags)
                 self.gauge('query_success', 0, tags=tags)
                 self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=tags, message=error_msg)
