@@ -57,6 +57,7 @@ UNEXPLAINABLE_COMMANDS = frozenset(
         "profile",  # command to get profile level
         "listCollections",
         "listDatabases",
+        "listIndexes",
         'dbStats',
         'createIndexes',
         'shardCollection',

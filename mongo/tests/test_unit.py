@@ -899,6 +899,13 @@ def load_json_fixture(name):
             True,
             id='ns with no collection',
         ),
+        pytest.param(
+            "test.test",
+            "command",
+            {"listIndexes": "test", "$db": "test"},
+            False,
+            id='no explain listIndexes',
+        ),
     ],
 )
 def test_should_explain_operation(namespace, op, command, should_explain):
