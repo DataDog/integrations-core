@@ -1,14 +1,6 @@
-"""Send repository_dispatch events to agent-integration-wheels-release.
+"""Dispatch build-integrations events to agent-integration-wheels-release in batches.
 
-Integrations are split into batches and dispatched as separate workflow runs
-to stay within payload size limits.
-
-Required environment variables:
-  GH_TOKEN      short-lived token from dd-octo-sts
-  INTEGRATIONS  JSON array of integration names
-  SOURCE_REPO   source repository name (e.g. integrations-core)
-  REF           commit SHA or ref to build from
-  TARGET        target environment ('dev' or 'prod')
+Environment variables: GH_TOKEN, INTEGRATIONS, SOURCE_REPO, REF, TARGET.
 """
 import json
 import os
@@ -20,7 +12,7 @@ BATCH_SIZE = 200
 DISPATCH_URL = "https://api.github.com/repos/DataDog/agent-integration-wheels-release/dispatches"
 
 
-def dispatch(batch: list[str], source_repo: str, ref: str, target: str) -> None:
+def dispatch(batch: list[str], source_repo: str, ref: str, target: str, token: str) -> None:
     payload = json.dumps(
         {
             "event_type": "build-integrations",
@@ -37,7 +29,7 @@ def dispatch(batch: list[str], source_repo: str, ref: str, target: str) -> None:
         DISPATCH_URL,
         data=payload,
         headers={
-            "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
+            "Authorization": f"Bearer {token}",
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
         },
@@ -56,6 +48,7 @@ def main() -> None:
     source_repo = os.environ["SOURCE_REPO"]
     ref = os.environ["REF"]
     target = os.environ["TARGET"]
+    token = os.environ["GH_TOKEN"]
 
     batches = [integrations[i : i + BATCH_SIZE] for i in range(0, len(integrations), BATCH_SIZE)]
 
@@ -65,7 +58,7 @@ def main() -> None:
 
     for i, batch in enumerate(batches, 1):
         print(f"Batch {i}/{len(batches)} ({len(batch)} integrations)")
-        dispatch(batch, source_repo, ref, target)
+        dispatch(batch, source_repo, ref, target, token)
 
 
 if __name__ == "__main__":

@@ -1,11 +1,7 @@
-"""Run ddev release tag all and push new tags to origin.
-
-Exit codes:
-  0  success — tags created, already existed, or nothing to tag
-  *  propagated from ddev / git on unexpected failure
+"""Tag all unreleased integrations via ddev and optionally push to origin.
 
 Environment variables:
-  TARGET  target environment ('prod' pushes tags to origin; 'dev' creates tags locally only)
+  TARGET  'prod' pushes tags; 'dev' (default) creates them locally only.
 """
 import os
 import subprocess

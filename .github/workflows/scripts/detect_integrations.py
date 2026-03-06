@@ -13,9 +13,10 @@ import sys
 from pathlib import Path
 
 
-def set_output(key: str, value: str) -> None:
+def set_outputs(**kwargs: str) -> None:
     with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-        f.write(f"{key}={value}\n")
+        for key, value in kwargs.items():
+            f.write(f"{key}={value}\n")
 
 
 def get_all_integrations() -> list[str]:
@@ -46,12 +47,15 @@ def main() -> None:
     else:
         integrations = detect_from_tags()
 
-    unknown = set(integrations).difference(set(all_integrations))
+    unknown = set(integrations) - set(all_integrations)
     if unknown:
         print(f"Unknown integrations: {', '.join(unknown)}", file=sys.stderr)
         sys.exit(1)
 
-    set_output("integrations", json.dumps(integrations))
+    set_outputs(
+        integrations=json.dumps(integrations),
+        has_integrations="true" if integrations else "false",
+    )
 
 
 if __name__ == "__main__":

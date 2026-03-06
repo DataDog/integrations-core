@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       source-repo:
-        description: "Source repo name (integrations-extras or marketplace)"
+        description: "Source repository name (e.g. integrations-core, integrations-extras, marketplace)"
         required: false
         type: string
       integrations:
@@ -46,19 +46,24 @@ jobs:
         id: tag
         env:
           TARGET: ${{ inputs.target }}
-        run: python .github/workflows/scripts/tag-releases.py
+        run: python .github/workflows/scripts/tag_releases.py
 
       - name: Detect integration list
         if: inputs.integrations != '' || steps.tag.outcome == 'success'
         id: detect
         env:
           MANUAL_INTEGRATIONS: ${{ inputs.integrations }}
-        run: python .github/workflows/scripts/detect-integrations.py
+        run: python .github/workflows/scripts/detect_integrations.py
+
+      - name: Validate release readiness
+        if: steps.detect.outputs.has_integrations == 'true'
+        env:
+          INTEGRATIONS: ${{ steps.detect.outputs.integrations }}
+          SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
+        run: python .github/workflows/scripts/validate_release.py
 
       - name: Get GitHub token via dd-octo-sts
-        if: >-
-          steps.detect.outputs.integrations != '' &&
-          steps.detect.outputs.integrations != '[]'
+        if: steps.detect.outputs.has_integrations == 'true'
         id: octo-sts
         uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
         with:
@@ -66,13 +71,11 @@ jobs:
           policy: integrations-core.dispatch-wheel-builds
 
       - name: Dispatch release
-        if: >-
-          steps.detect.outputs.integrations != '' &&
-          steps.detect.outputs.integrations != '[]'
+        if: steps.detect.outputs.has_integrations == 'true'
         env:
           GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
           INTEGRATIONS: ${{ steps.detect.outputs.integrations }}
           SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
           REF: ${{ inputs.source-repo-ref || github.sha }}
           TARGET: ${{ inputs.target }}
-        run: python .github/workflows/scripts/dispatch-release.py
+        run: python .github/workflows/scripts/dispatch_release.py
