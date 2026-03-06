@@ -239,7 +239,7 @@ jobs:
 
     - name: Restore cache
       if: inputs.repo == 'core'
-      uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
         key: >-
@@ -333,14 +333,14 @@ jobs:
 
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}test-results-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
     - name: Upload local_clone debug info (ddev only)
       if: always() && inputs.target == 'ddev'
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}local-clone-debug-${{ inputs.platform }}"
         path: "local_clone_debug.txt"
@@ -352,7 +352,7 @@ jobs:
         always() &&
         inputs.pytest-args != '-m flaky'
       # Flaky tests will have low coverage, don't include in artifacts to avoid pipeline issues
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}coverage-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
         path: "${{ inputs.target }}/coverage.xml"

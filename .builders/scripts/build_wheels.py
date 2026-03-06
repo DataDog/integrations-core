@@ -302,6 +302,8 @@ def main():
         env_vars['DD_ENV_FILE'] = str(ENV_FILE)
 
         # Off is on, see: https://github.com/pypa/pip/issues/5735
+        # We don't want pip build isolation because we manage have one env for everything.
+        # We manage our build dependencies in .builders/deps/build_dependencies.txt.
         env_vars['PIP_NO_BUILD_ISOLATION'] = '0'
 
         # Spaces are used to separate multiple values which means paths themselves cannot contain spaces, see:

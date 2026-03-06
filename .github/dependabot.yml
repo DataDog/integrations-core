@@ -18,7 +18,7 @@ updates:
       - qa/skip-qa
 
   - package-ecosystem: "github-actions"
-    directory: "/actions/tag-job"
+    directory: "/.github/actions/tag-job"
     schedule:
       interval: "weekly"
       day: "monday"
