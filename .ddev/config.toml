@@ -213,4 +213,4 @@ __pycache__ = false
 krakend = ["linux", "windows", "mac_os"]
 lustre = ["linux", "windows", "mac_os"]
 n8n = ["linux", "windows", "mac_os"]
-control-m = ["linux", "windows", "mac_os"]
+control_m = ["linux", "windows", "mac_os"]
