@@ -172,30 +172,32 @@ def test_query_signature_matches_samples_pipeline(check_with_dbm):
 
     for raw_query in test_queries:
         # Metrics pipeline: _normalize_queries -> _obfuscate_query(raw_query) -> query_signature
-        rows = [{
-            'normalized_query_hash': '12345',
-            'query': raw_query,
-            'user': 'default',
-            'query_type': 'Select',
-            'exception_code': '',
-            'databases': 'default',
-            'dd_tables': [],
-            'count': 1,
-            'total_time': 10.0,
-            'mean_time': 10.0,
-            'p50_time': 10.0,
-            'p90_time': 10.0,
-            'p95_time': 10.0,
-            'p99_time': 10.0,
-            'result_rows': 0,
-            'read_rows': 0,
-            'read_bytes': 0,
-            'written_rows': 0,
-            'written_bytes': 0,
-            'result_bytes': 0,
-            'memory_usage': 0,
-            'peak_memory_usage': 0,
-        }]
+        rows = [
+            {
+                'normalized_query_hash': '12345',
+                'query': raw_query,
+                'user': 'default',
+                'query_type': 'Select',
+                'exception_code': '',
+                'databases': 'default',
+                'dd_tables': [],
+                'count': 1,
+                'total_time': 10.0,
+                'mean_time': 10.0,
+                'p50_time': 10.0,
+                'p90_time': 10.0,
+                'p95_time': 10.0,
+                'p99_time': 10.0,
+                'result_rows': 0,
+                'read_rows': 0,
+                'read_bytes': 0,
+                'written_rows': 0,
+                'written_bytes': 0,
+                'result_bytes': 0,
+                'memory_usage': 0,
+                'peak_memory_usage': 0,
+            }
+        ]
         normalized = metrics._normalize_queries(rows)
         assert len(normalized) == 1
         metrics_signature = normalized[0]['query_signature']

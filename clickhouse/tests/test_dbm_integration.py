@@ -294,9 +294,7 @@ def test_samples_event_structure(instance):
             'current_database': 'default',
         }
     ]
-    active_connections = [
-        {'user': 'default', 'query_kind': 'Select', 'current_database': 'default', 'connections': 1}
-    ]
+    active_connections = [{'user': 'default', 'query_kind': 'Select', 'current_database': 'default', 'connections': 1}]
 
     with mock.patch('datadog_checks.clickhouse.statement_samples.datadog_agent') as mock_agent:
         mock_agent.get_version.return_value = '7.64.0'
