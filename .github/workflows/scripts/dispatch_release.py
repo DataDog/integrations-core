@@ -40,7 +40,7 @@ def dispatch(batch: list[str], source_repo: str, ref: str, target: str, token: s
             print(f"  Dispatched: HTTP {resp.status}")
     except urllib.error.HTTPError as e:
         print(e.read().decode(), file=sys.stderr)
-        raise
+        sys.exit(1)
 
 
 def main() -> None:
