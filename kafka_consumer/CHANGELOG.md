@@ -11,7 +11,7 @@
 * Kafka consumer connects to oauth provider with ca certificate in custom path ([#22602](https://github.com/DataDog/integrations-core/pull/22602))
 * Bump confluent-kafka to 2.13.0 ([#22630](https://github.com/DataDog/integrations-core/pull/22630))
 
-## 6.13.0 / 2026-02-04
+## 6.13.0 / 2026-02-04 / Agent 7.76.0
 
 ***Security***:
 
