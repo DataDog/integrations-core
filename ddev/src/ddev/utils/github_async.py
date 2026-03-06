@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Async GitHub API client with 1:1 endpoint mapping."""
+
 from __future__ import annotations
 
 import asyncio
@@ -10,6 +11,8 @@ from typing import Any
 
 import httpx
 
+from ddev.config.file import ConfigFileWithOverrides
+
 
 class GitHubAsyncClient:
     """Async GitHub API client with direct endpoint mapping."""
@@ -17,14 +20,26 @@ class GitHubAsyncClient:
     API_VERSION = '2022-11-28'
     BASE_URL = 'https://api.github.com'
 
-    def __init__(self, token: str, timeout: float = 30.0):
+    def __init__(self, token: str | None = None, timeout: float = 30.0):
         """
         Initialize the async GitHub client.
 
         Args:
-            token: GitHub personal access token
+            token: GitHub personal access token. If not provided, loads from ddev config.
             timeout: Request timeout in seconds
         """
+        if token is None:
+            config_file = ConfigFileWithOverrides()
+            config_file.load()
+            token = config_file.combined_model.github.token
+
+        if not token:
+            msg = (
+                "GitHub token not found. Please provide a token or set one of: "
+                "DD_GITHUB_TOKEN, GH_TOKEN, or GITHUB_TOKEN environment variable"
+            )
+            raise ValueError(msg)
+
         self._token = token
         self._timeout = timeout
         self._client: httpx.AsyncClient | None = None
@@ -136,9 +151,7 @@ class GitHubAsyncClient:
         """
         await self._request('POST', f'/repos/{owner}/{repo}/actions/runs/{run_id}/cancel')
 
-    async def list_workflow_run_jobs(
-        self, owner: str, repo: str, run_id: int, **kwargs: Any
-    ) -> dict[str, Any]:
+    async def list_workflow_run_jobs(self, owner: str, repo: str, run_id: int, **kwargs: Any) -> dict[str, Any]:
         """
         List jobs for a workflow run.
 
