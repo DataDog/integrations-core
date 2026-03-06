@@ -28,12 +28,16 @@ class KafkaActionsConfig:
         self._sasl_kerberos_principal = instance.get('sasl_kerberos_principal', 'kafkaclient')
         self._sasl_oauth_token_provider = instance.get('sasl_oauth_token_provider')
 
-        self._tls_ca_cert = instance.get('tls_ca_cert')
-        self._tls_cert = instance.get('tls_cert')
-        self._tls_private_key = instance.get('tls_private_key')
-        self._tls_private_key_password = instance.get('tls_private_key_password')
-        self._tls_validate_hostname = is_affirmative(instance.get('tls_validate_hostname', True))
-        self._crlfile = instance.get('tls_crlfile')
+        self._tls_ca_cert = instance.get("tls_ca_cert") or instance.get("ssl_cafile")
+        self._tls_cert = instance.get("tls_cert") or instance.get("ssl_certfile")
+        self._tls_private_key = instance.get("tls_private_key") or instance.get("ssl_keyfile")
+        self._tls_private_key_password = instance.get("tls_private_key_password") or instance.get("ssl_password")
+        self._tls_validate_hostname = (
+            is_affirmative(instance.get("tls_validate_hostname", True))
+            if "tls_validate_hostname" in instance
+            else is_affirmative(instance.get("ssl_check_hostname", True))
+        )
+        self._crlfile = instance.get('ssl_crlfile', instance.get('tls_crlfile'))
 
         if self._tls_cert or self._tls_ca_cert or self._tls_private_key or self._tls_private_key_password:
             self._tls_verify = "true"
