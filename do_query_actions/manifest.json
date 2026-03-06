@@ -10,7 +10,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Execute SQL queries against databases and report success/failure",
-    "title": "Do Query Actions",
+    "title": "DO Query Actions",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -25,7 +25,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 28902500,
-      "source_type_name": "Do Query Actions",
+      "source_type_name": "DO Query Actions",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },

@@ -1,4 +1,4 @@
-name: Do Query Actions
+name: DO Query Actions
 files:
 - name: do_query_actions.yaml
   options:

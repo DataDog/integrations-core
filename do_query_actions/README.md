@@ -1,14 +1,14 @@
-# Agent Check: Do Query Actions
+# Agent Check: DO Query Actions
 
 ## Overview
 
-The Do Query Actions check executes SQL queries against PostgreSQL and reports success/failure metrics. This check is designed to receive configuration via Remote Config and execute queries on demand.
+The DO Query Actions check executes SQL queries against PostgreSQL and reports success/failure metrics. This check is designed to receive configuration via Remote Config and execute queries on demand.
 
 ## Setup
 
 ### Installation
 
-The Do Query Actions check is included in the Datadog Agent package.
+The DO Query Actions check is included in the Datadog Agent package.
 
 ### Dependencies
 
@@ -52,7 +52,7 @@ Returns `CRITICAL` if the query execution fails. Returns `OK` otherwise.
 
 ### Events
 
-The Do Query Actions check does not include any events.
+The DO Query Actions check does not include any events.
 
 ## Troubleshooting
 

@@ -134,12 +134,14 @@ class DoQueryActionsCheck(AgentCheck):
 
     def _get_or_create_postgres_pool(self) -> ConnectionPool:
         if self._pool is None:
+            self.log.debug("Creating connection pool for %s:%s/%s", self._host, self._port, self._dbname)
             self._pool = self._create_postgres_pool()
         return self._pool
 
     @contextlib.contextmanager
     def _acquire_connection(self) -> Iterator[Any]:
         if self._db_type != 'postgres':
+            self.log.error("Unsupported db_type: %r. Only 'postgres' is supported.", self._db_type)
             raise ValueError(f"Unsupported db_type: {self._db_type!r}. Only 'postgres' is supported.")
         with self._get_or_create_postgres_pool().connection() as conn:
             yield conn
@@ -182,10 +184,16 @@ class DoQueryActionsCheck(AgentCheck):
             }
         except Exception as e:
             duration = time.time() - start
+            self.log.warning(
+                "Query failed for monitor_id=%d (%.3fs): %s",
+                query_spec.get('monitor_id', 0),
+                duration,
+                e,
+            )
             try:
                 conn.rollback()
-            except Exception:
-                pass
+            except Exception as rollback_err:
+                self.log.debug("Rollback failed: %s", rollback_err)
             return {
                 'status': 'error',
                 'columns': [],
@@ -257,7 +265,7 @@ class DoQueryActionsCheck(AgentCheck):
 
         except Exception as e:
             error_msg = str(e)
-            self.log.error("Connection failed: %s", error_msg)
+            self.log.exception("Connection failed")
             for q in due_queries:
                 monitor_id = q.get('monitor_id', 0)
                 tags = base_tags + [f'monitor_id:{monitor_id}']

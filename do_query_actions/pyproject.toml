@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "datadog-do-query-actions"
-description = "The Do Query Actions check"
+description = "The DO Query Actions check"
 readme = "README.md"
 license = "BSD-3-Clause"
 requires-python = ">=3.12"
