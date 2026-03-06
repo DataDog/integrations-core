@@ -15,7 +15,12 @@ from datadog_checks.clickhouse import ClickhouseCheck
 
 from .common import CLICKHOUSE_VERSION
 
-UNSUPPORTED_DBM_VERSIONS = {'18', '19', '20', '22.7'}
+# DBM features require ClickHouse 21.8+ for normalized_query_hash, query_kind, etc.
+# 21.8 itself is excluded because:
+#   - fromUnixTimestamp64Micro() requires explicit Int64 cast (fixed in later versions)
+#   - system.processes is missing the query_kind column
+# 22.7 is excluded because query_kind column in system.processes is not available in all builds
+UNSUPPORTED_DBM_VERSIONS = {'18', '19', '20', '21.8', '22.7'}
 
 CLOSE_TO_ZERO_INTERVAL = 0.0000001
 
