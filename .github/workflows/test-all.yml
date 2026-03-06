@@ -823,10 +823,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j4e71418:
+  j7c68dcb:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: control_m
+      job-name: Control-M
       target: control_m
       platform: linux
       runner: '["ubuntu-22.04"]'
