@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
+
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.clickhouse.statements import ClickhouseStatementMetrics, _row_key
 
@@ -165,7 +165,8 @@ def test_query_signature_matches_samples_pipeline(check_with_dbm):
 
     test_queries = [
         'SELECT * FROM users WHERE user_id = 12345',
-        'SELECT i.sku, count(s.id), sum(s.quantity) FROM inventory_items i LEFT JOIN shipments s ON i.sku = s.sku GROUP BY i.sku ORDER BY shipment_count DESC LIMIT 100',
+        'SELECT i.sku, count(s.id), sum(s.quantity) FROM inventory_items i'
+        ' LEFT JOIN shipments s ON i.sku = s.sku GROUP BY i.sku ORDER BY shipment_count DESC LIMIT 100',
         "INSERT INTO events (ts, data) VALUES ('2026-01-01', 'hello world')",
         'SELECT count(*) FROM inventory_items WHERE sku = 42',
     ]
