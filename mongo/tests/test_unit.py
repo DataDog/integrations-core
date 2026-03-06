@@ -925,7 +925,9 @@ def test_should_explain_operation(namespace, op, command, should_explain):
         pytest.param({"delete": "coll", "$db": "test"}, True, id="delete_adds_cursor"),
         pytest.param({"update": "coll", "$db": "test"}, True, id="update_adds_cursor"),
         pytest.param({"aggregate": "coll", "$db": "test", "pipeline": []}, False, id="aggregate_no_cursor"),
-        pytest.param({"find": "coll", "$db": "test", "cursor": {"batchSize": 10}}, False, id="find_preserves_existing_cursor"),
+        pytest.param(
+            {"find": "coll", "$db": "test", "cursor": {"batchSize": 10}}, False, id="find_preserves_existing_cursor"
+        ),
     ],
 )
 def test_get_explain_plan_adds_cursor_for_mongo7(command, expected_cursor):
