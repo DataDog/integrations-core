@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 14.3.2 / 2026-03-03
+
+***Fixed***:
+
+* Changelog check ignores the builders folder. We don't need a changelog for it. ([#22737](https://github.com/DataDog/integrations-core/pull/22737))
+
+## 14.3.1 / 2026-02-20
+
+***Fixed***:
+
+* Stop writing the GitHub username and token to the config file. Read them directly from environment variables instead. ([#22691](https://github.com/DataDog/integrations-core/pull/22691))
+
 ## 14.3.0 / 2026-02-13
 
 ***Added***:

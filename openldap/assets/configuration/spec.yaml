@@ -13,6 +13,7 @@ files:
         Full URL of your LDAP server. Use `ldaps` or `ldap` to indicate whether to
         use TLS or not, or `ldapi` to connect to a UNIX socket.
       fleet_configurable: true
+      formats: ["url"]
       required: True
       value:
         example: ldaps://localhost:636
