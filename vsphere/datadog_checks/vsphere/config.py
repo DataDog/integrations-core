@@ -64,6 +64,7 @@ class VSphereConfig(object):
         self.ssl_capath = instance.get('ssl_capath')
         self.ssl_cafile = instance.get('ssl_cafile')
         self.tls_ignore_warning = instance.get('tls_ignore_warning', False)
+        self.ssl_ciphers = instance.get('ssl_ciphers')
 
         self.rest_api_options = {
             'username': self.username,

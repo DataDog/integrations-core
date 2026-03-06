@@ -502,6 +502,10 @@ coverage:
         target: 75
         flags:
         - network
+      Nutanix:
+        target: 75
+        flags:
+        - nutanix
       Nvidia_Triton:
         target: 75
         flags:
@@ -810,6 +814,10 @@ coverage:
         target: 75
         flags:
         - kyverno
+      n8n:
+        target: 75
+        flags:
+        - n8n
       nvidia_nim:
         target: 75
         flags:
@@ -1462,6 +1470,11 @@ flags:
     paths:
     - mysql/datadog_checks/mysql
     - mysql/tests
+  n8n:
+    carryforward: true
+    paths:
+    - n8n/datadog_checks/n8n
+    - n8n/tests
   nagios:
     carryforward: true
     paths:
@@ -1487,6 +1500,11 @@ flags:
     paths:
     - nginx_ingress_controller/datadog_checks/nginx_ingress_controller
     - nginx_ingress_controller/tests
+  nutanix:
+    carryforward: true
+    paths:
+    - nutanix/datadog_checks/nutanix
+    - nutanix/tests
   nvidia_nim:
     carryforward: true
     paths:

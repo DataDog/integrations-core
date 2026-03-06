@@ -15,11 +15,13 @@ win32_event_log = "Windows Event Log"
 krakend = "KrakenD"
 lustre = "Lustre"
 prefect = "Prefect"
+n8n = "n8n"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
 lustre = "lustre."
 prefect = "prefect.server."
+n8n = "n8n."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -211,3 +213,4 @@ __pycache__ = false
 krakend = ["linux", "windows", "mac_os"]
 lustre = ["linux", "windows", "mac_os"]
 prefect = ["linux", "windows", "mac_os"]
+n8n = ["linux", "windows", "mac_os"]
