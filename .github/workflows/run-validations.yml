@@ -144,10 +144,12 @@ jobs:
       run: pip install ddev${{ inputs.ddev-version }}
 
     - name: Configure ddev
+      env:
+        REPO_NAME: ${{ inputs.repo }}
       run: |
         ddev config set upgrade_check false
-        ddev config set repos.${{ inputs.repo }} .
-        ddev config set repo ${{ inputs.repo }}
+        ddev config set repos.${REPO_NAME} .
+        ddev config set repo ${REPO_NAME}
         ddev config set orgs.ci.dd_url "https://app.datadoghq.com"
         ddev config set org ci
 
