@@ -107,6 +107,27 @@ instances:
     #
     # active_ttl_seconds: 21600
 
+    ## @param emit_job_events - boolean - optional - default: false
+    ## Emit Datadog events for terminal job runs. When enabled, events are
+    ## created for failed and canceled jobs. Success events and slow-run
+    ## events are controlled by additional flags below.
+    #
+    # emit_job_events: false
+
+    ## @param emit_success_events - boolean - optional - default: false
+    ## Include successful job completions in events. Only applies when
+    ## `emit_job_events` is enabled. Off by default because success events
+    ## are high-volume in most estates.
+    #
+    # emit_success_events: false
+
+    ## @param slow_run_threshold_ms - integer - optional
+    ## Emit a warning event when a terminal job's duration exceeds this
+    ## threshold in milliseconds. Only applies when `emit_job_events` is
+    ## enabled. When not set, no slow-run events are emitted.
+    #
+    # slow_run_threshold_ms: <SLOW_RUN_THRESHOLD_MS>
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

@@ -39,7 +39,7 @@ UP_STATES = {"up", "available", "connected", "active"}
 _FINALIZED_RUNS_CACHE_KEY = "finalized_runs_control_m"
 _ACTIVE_RUNS_CACHE_KEY = "active_runs_control_m"
 _ALERT_TYPE = {"ok": "success", "failed": "error", "canceled": "warning", "unknown": "warning"}
-_SOURCE_TYPE_NAME = "control-m" # needs to match app_id
+_SOURCE_TYPE_NAME = "control-m"  # needs to match app_id
 
 
 def normalize_status(status: Any) -> str:

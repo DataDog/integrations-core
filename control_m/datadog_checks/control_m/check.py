@@ -27,7 +27,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         if self._client.use_session_login:
             try:
                 self._client.ensure_token()
-            except Exception as e:
+            except Exception:
                 self.gauge("can_login", 0, tags=auth_tags)
                 self.gauge("can_connect", 0, tags=auth_tags)
                 raise
@@ -37,7 +37,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
             response = self._client.request("get", f"{self._client.api_endpoint}/config/servers")
             response.raise_for_status()
             servers = response.json()
-        except Exception as e:
+        except Exception:
             auth_tags = self._auth_tags()
             self.gauge("can_connect", 0, tags=auth_tags)
             raise
