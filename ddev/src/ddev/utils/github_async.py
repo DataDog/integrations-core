@@ -89,6 +89,7 @@ class GitHubAsyncClient:
             httpx.Response object
         """
         await self._ensure_client()
+        assert self._client is not None  # Set by _ensure_client()
 
         response = await self._client.request(method, url, params=params, json=json)
 
