@@ -31,6 +31,10 @@ def changelog_entry_suffix(pr_number: int, pr_url: str) -> str:
 
 
 def requires_changelog(target: str, files: Iterator[str]) -> bool:
+    # Ignore changes in .builders directory
+    if target == '.builders':
+        return False
+
     if target == 'ddev':
         source = 'src/ddev/'
     else:
@@ -45,6 +49,7 @@ def requires_changelog(target: str, files: Iterator[str]) -> bool:
 
         source = f'datadog_checks/{directory}/'
 
+    # Check for source files or pyproject.toml in integration folders
     return any(f.startswith(source) or f == 'pyproject.toml' for f in files)
 
 

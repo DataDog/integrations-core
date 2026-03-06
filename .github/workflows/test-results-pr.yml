@@ -44,7 +44,7 @@ jobs:
 
     - name: Publish test results
       if: steps.download.outcome == 'success'
-      uses: EnricoMi/publish-unit-test-result-action@27d65e188ec43221b20d26de30f4892fad91df2f # v2.22.0
+      uses: EnricoMi/publish-unit-test-result-action@c950f6fb443cb5af20a377fd0dfaa78838901040 # v2.23.0
       with:
         commit: ${{ github.event.workflow_run.head_sha }}
         event_file: artifacts/github-event/event.json

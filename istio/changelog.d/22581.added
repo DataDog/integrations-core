@@ -1,0 +1,1 @@
+Add support for Istio ambient mode (v1.24+) with ztunnel and waypoint proxy metrics collection
