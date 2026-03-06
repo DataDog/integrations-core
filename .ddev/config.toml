@@ -15,13 +15,13 @@ win32_event_log = "Windows Event Log"
 krakend = "KrakenD"
 lustre = "Lustre"
 n8n = "n8n"
-control-m = "Control-M"
+control_m = "Control-M"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
 lustre = "lustre."
 n8n = "n8n."
-control-m = "control_m."
+control_m = "control_m."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
