@@ -16,14 +16,10 @@ _PRE_RELEASE_RE = re.compile(r"\d+\.\d+\.\d+(a|b|rc)\d+")
 
 
 def get_version(integration: str) -> str | None:
-    about_files = list(Path(integration).glob("datadog_checks/*/__about__.py"))
-    if not about_files:
+    about = next(Path(integration).glob("datadog_checks/*/__about__.py"), None)
+    if about is None:
         return None
-    # Files have a fixed 3-line license header; __version__ is always on line 4.
-    lines = about_files[0].read_text().splitlines()
-    if len(lines) < 4:
-        return None
-    match = re.match(r'__version__\s*=\s*["\']([^"\']+)["\']', lines[3])
+    match = re.search(r'__version__\s*=\s*["\']([^"\']+)["\']', about.read_text())
     return match.group(1) if match else None
 
 
