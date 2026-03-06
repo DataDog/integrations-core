@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
-
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.clickhouse.statements import ClickhouseStatementMetrics, _row_key
 
