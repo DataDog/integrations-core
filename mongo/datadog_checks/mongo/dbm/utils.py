@@ -47,20 +47,6 @@ COMMAND_COLLECTION_KEY = frozenset(
     ]
 )
 
-# Commands that require a 'cursor' option when used with explain on MongoDB 7+.
-# aggregate is explicitly exempt per MongoDB docs.
-EXPLAIN_CURSOR_REQUIRED_COMMANDS = frozenset(
-    [
-        "find",
-        "count",
-        "distinct",
-        "findAndModify",
-        "delete",
-        "update",
-        "mapReduce",
-    ]
-)
-
 UNEXPLAINABLE_COMMANDS = frozenset(
     [
         "getMore",
@@ -188,9 +174,9 @@ def get_explain_plan(
     try:
         for key in EXPLAIN_COMMAND_EXCLUDE_KEYS:
             command.pop(key, None)
-        # MongoDB 7+ requires a 'cursor' option for cursor-based commands under explain.
-        # aggregate is exempt. We always add it when missing as it is harmless on older versions.
-        if any(key in command for key in EXPLAIN_CURSOR_REQUIRED_COMMANDS) and "cursor" not in command:
+        # The aggregate command requires 'cursor' when wrapped in the explain command form.
+        # Other commands (find, count, distinct, etc.) reject 'cursor' as an unknown field.
+        if "aggregate" in command and "cursor" not in command:
             command["cursor"] = {}
         try:
             explain_plan = api_client.explain_command(dbname, command, verbosity)

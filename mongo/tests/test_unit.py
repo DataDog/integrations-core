@@ -918,20 +918,19 @@ def test_should_explain_operation(namespace, op, command, should_explain):
 @pytest.mark.parametrize(
     "command,expected_cursor",
     [
-        pytest.param({"find": "coll", "$db": "test"}, True, id="find_adds_cursor"),
-        pytest.param({"count": "coll", "$db": "test"}, True, id="count_adds_cursor"),
-        pytest.param({"distinct": "coll", "$db": "test"}, True, id="distinct_adds_cursor"),
-        pytest.param({"findAndModify": "coll", "$db": "test"}, True, id="findAndModify_adds_cursor"),
-        pytest.param({"delete": "coll", "$db": "test"}, True, id="delete_adds_cursor"),
-        pytest.param({"update": "coll", "$db": "test"}, True, id="update_adds_cursor"),
-        pytest.param({"aggregate": "coll", "$db": "test", "pipeline": []}, False, id="aggregate_no_cursor"),
+        pytest.param({"find": "coll", "$db": "test"}, False, id="find_no_cursor"),
+        pytest.param({"count": "coll", "$db": "test"}, False, id="count_no_cursor"),
+        pytest.param({"distinct": "coll", "$db": "test"}, False, id="distinct_no_cursor"),
+        pytest.param({"aggregate": "coll", "$db": "test", "pipeline": []}, True, id="aggregate_adds_cursor"),
         pytest.param(
-            {"find": "coll", "$db": "test", "cursor": {"batchSize": 10}}, False, id="find_preserves_existing_cursor"
+            {"aggregate": "coll", "$db": "test", "pipeline": [], "cursor": {"batchSize": 10}},
+            False,
+            id="aggregate_preserves_existing_cursor",
         ),
     ],
 )
-def test_get_explain_plan_adds_cursor_for_mongo7(command, expected_cursor):
-    """Verify that get_explain_plan adds cursor: {} for cursor-based commands (MongoDB 7+ compat)."""
+def test_get_explain_plan_adds_cursor_for_aggregate(command, expected_cursor):
+    """Verify that get_explain_plan adds cursor: {} only for aggregate commands."""
     captured_command = {}
 
     def mock_explain_command(db_name, cmd, verbosity, session=None):
