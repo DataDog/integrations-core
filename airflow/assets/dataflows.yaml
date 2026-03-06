@@ -1,6 +1,6 @@
 provides:
   - id: airflow-metrics
-    always_on: false
+    always_on: true
     data_type: metrics
     direction: inbound
   - id: airflow-logs
