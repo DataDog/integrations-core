@@ -39,6 +39,7 @@ UP_STATES = {"up", "available", "connected", "active"}
 _FINALIZED_RUNS_CACHE_KEY = "finalized_runs_control_m"
 _ACTIVE_RUNS_CACHE_KEY = "active_runs_control_m"
 _ALERT_TYPE = {"ok": "success", "failed": "error", "canceled": "warning", "unknown": "warning"}
+_SOURCE_TYPE_NAME = "control-m" # needs to match app_id
 
 
 def normalize_status(status: Any) -> str:
@@ -336,7 +337,7 @@ class JobCollector:
                     "msg_title": f"Control-M job {result}: {job_name}",
                     "msg_text": _build_event_text(job, result, ctm_server, job_duration),
                     "alert_type": _ALERT_TYPE.get(result, "info"),
-                    "source_type_name": "control_m",
+                    "source_type_name": _SOURCE_TYPE_NAME,
                     "tags": tags,
                     "aggregation_key": agg_key,
                 }
@@ -354,7 +355,7 @@ class JobCollector:
                     "msg_title": f"Control-M slow run: {job_name} ({job_duration}ms > {self._slow_run_threshold_ms}ms)",
                     "msg_text": _build_event_text(job, result, ctm_server, job_duration),
                     "alert_type": "warning",
-                    "source_type_name": "control_m",
+                    "source_type_name": _SOURCE_TYPE_NAME,
                     "tags": tags,
                     "aggregation_key": agg_key,
                 }

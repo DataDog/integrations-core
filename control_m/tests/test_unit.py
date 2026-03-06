@@ -11,7 +11,6 @@ import pytest
 from pytest import MonkeyPatch
 from requests.exceptions import HTTPError
 
-from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.control_m import ControlMCheck
 
@@ -156,7 +155,6 @@ def test_connect_ok_with_static_token(
 
     _run_check(check)
 
-    aggregator.assert_service_check("control_m.can_connect", status=AgentCheck.OK, count=1)
     aggregator.assert_metric("control_m.can_connect", value=1, count=1)
     aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:static_token")
     aggregator.assert_metric("control_m.server.up", value=1, count=1)
@@ -173,7 +171,6 @@ def test_connect_server_error_emits_critical(
     with pytest.raises(HTTPError, match="500"):
         _run_check(check)
 
-    aggregator.assert_service_check("control_m.can_connect", status=AgentCheck.CRITICAL, count=1)
     aggregator.assert_metric("control_m.can_connect", value=0, count=1)
     aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:static_token")
 
@@ -186,8 +183,6 @@ def test_connect_session_login_ok(
 
     _run_check(check)
 
-    aggregator.assert_service_check("control_m.can_login", status=AgentCheck.OK, tags=SESSION_AUTH_TAGS, count=1)
-    aggregator.assert_service_check("control_m.can_connect", status=AgentCheck.OK, tags=SESSION_AUTH_TAGS, count=1)
     aggregator.assert_metric("control_m.can_connect", value=1, count=1)
     aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:session_login")
     assert len(aggregator.events) == 0
@@ -202,8 +197,6 @@ def test_connect_session_login_failure_emits_critical(
     with pytest.raises(HTTPError, match="401"):
         _run_check(check)
 
-    aggregator.assert_service_check("control_m.can_login", status=AgentCheck.CRITICAL, count=1)
-    aggregator.assert_service_check("control_m.can_connect", status=AgentCheck.CRITICAL, count=1)
     aggregator.assert_metric("control_m.can_login", value=0, count=1)
     aggregator.assert_metric("control_m.can_connect", value=0, count=1)
 
@@ -223,7 +216,6 @@ def test_connect_static_token_401_falls_back_to_session(
 
     _run_check(check)
 
-    aggregator.assert_service_check("control_m.can_connect", status=AgentCheck.OK, count=1)
     aggregator.assert_metric("control_m.can_connect", value=1, count=1)
     aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:session_login")
 
@@ -816,7 +808,6 @@ def test_full_cycle_with_fixture_data(
 
     wb_tags = BASE_TAGS + ["ctm_server:workbench"]
 
-    aggregator.assert_service_check("control_m.can_connect", status=AgentCheck.OK)
     aggregator.assert_metric("control_m.server.up", value=1, tags=BASE_TAGS + ["ctm_server:workbench", "state:up"])
     aggregator.assert_metric("control_m.jobs.total", value=3, tags=BASE_TAGS, count=1)
     aggregator.assert_metric("control_m.jobs.returned", value=3, tags=BASE_TAGS, count=1)

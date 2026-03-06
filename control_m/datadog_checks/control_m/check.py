@@ -10,9 +10,6 @@ from datadog_checks.control_m.client import ControlMClient
 from datadog_checks.control_m.config_models import ConfigMixin
 from datadog_checks.control_m.metrics import UP_STATES, JobCollector
 
-_SERVICE_CHECK_CAN_LOGIN = "can_login"
-_SERVICE_CHECK_CAN_CONNECT = "can_connect"
-
 
 class ControlMCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = "control_m"
@@ -31,22 +28,9 @@ class ControlMCheck(AgentCheck, ConfigMixin):
             try:
                 self._client.ensure_token()
             except Exception as e:
-                self.service_check(
-                    _SERVICE_CHECK_CAN_LOGIN,
-                    self.CRITICAL,
-                    tags=auth_tags,
-                    message=f"Failed to authenticate to Control-M API: {e}",
-                )
-                self.service_check(
-                    _SERVICE_CHECK_CAN_CONNECT,
-                    self.CRITICAL,
-                    tags=auth_tags,
-                    message=f"Failed to authenticate to Control-M API: {e}",
-                )
                 self.gauge("can_login", 0, tags=auth_tags)
                 self.gauge("can_connect", 0, tags=auth_tags)
                 raise
-            self.service_check(_SERVICE_CHECK_CAN_LOGIN, self.OK, tags=auth_tags)
             self.gauge("can_login", 1, tags=auth_tags)
 
         try:
@@ -55,17 +39,10 @@ class ControlMCheck(AgentCheck, ConfigMixin):
             servers = response.json()
         except Exception as e:
             auth_tags = self._auth_tags()
-            self.service_check(
-                _SERVICE_CHECK_CAN_CONNECT,
-                self.CRITICAL,
-                tags=auth_tags,
-                message=f"Failed to connect to Control-M API: {e}",
-            )
             self.gauge("can_connect", 0, tags=auth_tags)
             raise
 
         auth_tags = self._auth_tags()
-        self.service_check(_SERVICE_CHECK_CAN_CONNECT, self.OK, tags=auth_tags)
         self.gauge("can_connect", 1, tags=auth_tags)
 
         self._collect_server_health(servers)

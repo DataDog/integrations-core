@@ -105,7 +105,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 #### Histogram: `control_m.job.run.duration_ms`
 
-The `job.run.duration_ms` metric is submitted as a [histogram][10]. The Datadog Agent expands it into multiple aggregated metrics based on the [`histogram_aggregates`][11] and [`histogram_percentiles`][11] settings in the main `datadog.yaml`:
+The `job.run.duration_ms` metric is submitted as a [histogram][9]. The Datadog Agent expands it into multiple aggregated metrics based on the [`histogram_aggregates`][10] and [`histogram_percentiles`][10] settings in the main `datadog.yaml`:
 
 | Generated metric | Type | Default |
 |---|---|---|
@@ -130,10 +130,6 @@ histogram_percentiles:
 
 These settings are Agent-level and apply to all histograms from all integrations.
 
-### Service Checks
-
-See [service_checks.json][8] for a list of service checks provided by this integration.
-
 ### Events
 
 When `emit_job_events` is enabled, the check emits Datadog events for terminal job completions:
@@ -151,7 +147,7 @@ Events respect deduplication — the same job+run combination only fires an even
 
 ## Troubleshooting
 
-### The check reports `can_connect` CRITICAL
+### The `can_connect` metric reports 0
 
 - Verify the `control_m_api_endpoint` is reachable from the Agent host: `curl -s -o /dev/null -w '%{http_code}' https://your-host:8443/automation-api/config/servers -H 'Authorization: Bearer <TOKEN>'`
 - Check that the API token or credentials are valid.
@@ -171,7 +167,7 @@ Events respect deduplication — the same job+run combination only fires an even
 
 - The check persists dedup state to the Agent's cache. If the cache was cleared (e.g., a clean reinstall), previously reported terminal jobs may be re-emitted once. Increase `finalized_ttl_seconds` if completed jobs remain visible in the Control-M status feed for longer than 24 hours.
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][8].
 
 
 [1]: https://www.bmc.com/it-solutions/control-m.html
@@ -181,7 +177,6 @@ Need help? Contact [Datadog support][9].
 [5]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/control_m/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/control_m/assets/service_checks.json
-[9]: https://docs.datadoghq.com/help/
-[10]: https://docs.datadoghq.com/metrics/types/?tab=histogram
-[11]: https://github.com/DataDog/datadog-agent/blob/main/pkg/config/config_template.yaml#L210-L227
+[8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/metrics/types/?tab=histogram
+[10]: https://github.com/DataDog/datadog-agent/blob/main/pkg/config/config_template.yaml#L210-L227
