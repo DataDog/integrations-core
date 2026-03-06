@@ -12,16 +12,10 @@ The DO Query Actions check is included in the Datadog Agent package.
 
 ### Dependencies
 
-This check requires database client libraries:
+This check requires the PostgreSQL client library:
 
-**For PostgreSQL:**
 ```bash
-sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install 'psycopg[c,pool]==3.2.10'
-```
-
-**For MySQL:**
-```bash
-sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install pymysql==1.1.2
+sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install 'psycopg[c,pool]==3.3.3'
 ```
 
 ### Configuration
@@ -42,7 +36,6 @@ Run the Agent's status subcommand and look for `do_query_actions` under the Chec
 |--------|------|-------------|
 | `do_query_actions.query_execution_time` | gauge | Time taken to execute the query in seconds |
 | `do_query_actions.query_success` | gauge | 1 if query succeeded, 0 if failed |
-| `do_query_actions.rows_affected` | gauge | Number of rows affected by the query |
 
 ### Service Checks
 
@@ -52,7 +45,7 @@ Returns `CRITICAL` if the query execution fails. Returns `OK` otherwise.
 
 ### Events
 
-The DO Query Actions check does not include any events.
+Query results are sent as events via the `do-query-results` event track type, containing query output, execution metadata, and entity information.
 
 ## Troubleshooting
 

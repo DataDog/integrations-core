@@ -2,6 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .__about__ import __version__
-from .check import DoQueryActionsCheck
+from .check import DOQueryActionsCheck
 
-__all__ = ['__version__', 'DoQueryActionsCheck']
+__all__ = ['__version__', 'DOQueryActionsCheck']

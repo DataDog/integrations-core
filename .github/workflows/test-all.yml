@@ -1023,10 +1023,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j903495d:
+  j297b771:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Do Query Actions
+      job-name: DO Query Actions
       target: do_query_actions
       platform: linux
       runner: '["ubuntu-22.04"]'

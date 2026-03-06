@@ -166,6 +166,10 @@ coverage:
         target: 75
         flags:
         - dns_check
+      DO_Query_Actions:
+        target: 75
+        flags:
+        - do_query_actions
       Datadog_Checks_Base:
         target: 75
         flags:
@@ -190,10 +194,6 @@ coverage:
         target: 75
         flags:
         - disk
-      Do_Query_Actions:
-        target: 75
-        flags:
-        - do_query_actions
       Druid:
         target: 75
         flags:

@@ -12,15 +12,15 @@ import psycopg
 from psycopg_pool import ConnectionPool
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.db.sql_commenter import add_sql_comment
+from datadog_checks.base.utils.db.utils import default_json_event_encoding
+from datadog_checks.do_query_actions.config_models import ConfigMixin
 from datadog_checks.do_query_actions.postgres_connection import (
     AWSTokenProvider,
     AzureTokenProvider,
     PostgresConnectionArgs,
     TokenAwareConnection,
-    TokenProvider,
 )
-from datadog_checks.base.utils.db.sql_commenter import add_sql_comment
-from datadog_checks.base.utils.db.utils import default_json_event_encoding
 
 EVENT_TRACK_TYPE = 'do-query-results'
 
@@ -36,7 +36,7 @@ class DoQueryCursor(psycopg.Cursor):
         return super().execute(query, params, **kwargs)
 
 
-class DoQueryActionsCheck(AgentCheck):
+class DOQueryActionsCheck(AgentCheck, ConfigMixin):
     """Execute SQL queries against databases on individual schedules."""
 
     __NAMESPACE__ = 'do_query_actions'
@@ -44,77 +44,56 @@ class DoQueryActionsCheck(AgentCheck):
 
     def __init__(self, name: str, init_config: dict[str, Any], instances: list[dict[str, Any]]) -> None:
         super().__init__(name, init_config, instances)
-
-        self._host: str = self.instance.get('host', '')
-        self._port: int | None = self.instance.get('port')
-        self._username: str = self.instance.get('username', '')
-        self._password: str = self.instance.get('password', '')
-        self._dbname: str = self.instance.get('dbname', '')
-        self._remote_config_id: str = self.instance.get('remote_config_id', '')
-        self._db_type: str = self.instance.get('db_type', '')
-        self._queries: list[dict[str, Any]] = list(self.instance.get('queries', []))
-
-        # SSL
-        self._ssl: str | None = self.instance.get('ssl')
-        self._ssl_cert: str | None = self.instance.get('ssl_cert')
-        self._ssl_root_cert: str | None = self.instance.get('ssl_root_cert')
-        self._ssl_key: str | None = self.instance.get('ssl_key')
-        self._ssl_password: str | None = self.instance.get('ssl_password')
-
-        # AWS / Azure auth
-        self._aws: dict[str, Any] = self.instance.get('aws') or {}
-        self._managed_authentication: dict[str, Any] = self.instance.get('managed_authentication') or {}
-
         self._last_execution: dict[int, float] = {}
         self._pool: ConnectionPool | None = None
 
     def _build_base_tags(self) -> list[str]:
-        tags = list(self.instance.get('tags', []))
-        if self._remote_config_id:
-            tags.append(f'remote_config_id:{self._remote_config_id}')
-        if self._db_type:
-            tags.append(f'db_type:{self._db_type}')
-        if self._dbname:
-            tags.append(f'db_name:{self._dbname}')
-        if self._host:
-            tags.append(f'db_host:{self._host}')
-        if self._port:
-            tags.append(f'port:{self._port}')
+        tags = list(self.config.tags) if self.config.tags else []
+        if self.config.remote_config_id:
+            tags.append(f'remote_config_id:{self.config.remote_config_id}')
+        if self.config.db_type:
+            tags.append(f'db_type:{self.config.db_type}')
+        if self.config.dbname:
+            tags.append(f'db_name:{self.config.dbname}')
+        if self.config.host:
+            tags.append(f'db_host:{self.config.host}')
+        if self.config.port:
+            tags.append(f'port:{self.config.port}')
         return tags
 
-    def _build_token_provider(self) -> TokenProvider | None:
-        aws_managed = self._aws.get('managed_authentication') or {}
-        if aws_managed.get('enabled'):
+    def _build_token_provider(self) -> AWSTokenProvider | AzureTokenProvider | None:
+        aws = self.config.aws
+        if aws and aws.managed_authentication and aws.managed_authentication.enabled:
             return AWSTokenProvider(
-                host=self._host,
-                port=self._port or 5432,
-                username=self._username,
-                region=self._aws.get('region', ''),
-                role_arn=aws_managed.get('role_arn'),
+                host=self.config.host,
+                port=self.config.port or 5432,
+                username=self.config.username,
+                region=aws.region or '',
+                role_arn=aws.managed_authentication.role_arn,
             )
 
-        azure_managed = self._managed_authentication
-        if azure_managed.get('enabled'):
+        managed_auth = self.config.managed_authentication
+        if managed_auth and managed_auth.enabled:
             return AzureTokenProvider(
-                client_id=azure_managed.get('client_id', ''),
-                identity_scope=azure_managed.get('identity_scope'),
+                client_id=managed_auth.client_id or '',
+                identity_scope=managed_auth.identity_scope,
             )
 
         return None
 
     def _create_postgres_pool(self) -> ConnectionPool:
         conn_args = PostgresConnectionArgs(
-            username=self._username,
-            host=self._host,
-            port=self._port,
-            password=self._password,
-            ssl_mode=self._ssl,
-            ssl_cert=self._ssl_cert,
-            ssl_root_cert=self._ssl_root_cert,
-            ssl_key=self._ssl_key,
-            ssl_password=self._ssl_password,
+            username=self.config.username,
+            host=self.config.host,
+            port=self.config.port,
+            password=self.config.password,
+            ssl_mode=self.config.ssl,
+            ssl_cert=self.config.ssl_cert,
+            ssl_root_cert=self.config.ssl_root_cert,
+            ssl_key=self.config.ssl_key,
+            ssl_password=self.config.ssl_password,
         )
-        kwargs = conn_args.as_kwargs(dbname=self._dbname)
+        kwargs = conn_args.as_kwargs(dbname=self.config.dbname)
         kwargs['autocommit'] = True
         kwargs['cursor_factory'] = DoQueryCursor
 
@@ -134,37 +113,41 @@ class DoQueryActionsCheck(AgentCheck):
 
     def _get_or_create_postgres_pool(self) -> ConnectionPool:
         if self._pool is None:
-            self.log.debug("Creating connection pool for %s:%s/%s", self._host, self._port, self._dbname)
+            self.log.debug(
+                "Creating connection pool for %s:%s/%s", self.config.host, self.config.port, self.config.dbname
+            )
             self._pool = self._create_postgres_pool()
         return self._pool
 
     @contextlib.contextmanager
     def _acquire_connection(self) -> Iterator[Any]:
-        if self._db_type != 'postgres':
-            self.log.error("Unsupported db_type: %r. Only 'postgres' is supported.", self._db_type)
-            raise ValueError(f"Unsupported db_type: {self._db_type!r}. Only 'postgres' is supported.")
+        if self.config.db_type != 'postgres':
+            self.log.error("Unsupported db_type: %r. Only 'postgres' is supported.", self.config.db_type)
+            raise ValueError(f"Unsupported db_type: {self.config.db_type!r}. Only 'postgres' is supported.")
         with self._get_or_create_postgres_pool().connection() as conn:
             yield conn
 
-    def _get_due_queries(self) -> list[dict[str, Any]]:
+    def _get_due_queries(self) -> list[Any]:
         now = time.time()
         due = []
-        for q in self._queries:
-            monitor_id = q.get('monitor_id', 0)
-            interval = q.get('interval_seconds', 0)
+        for q in self.config.queries:
+            monitor_id = q.monitor_id or 0
+            interval = q.interval_seconds or 0
             last_run = self._last_execution.get(monitor_id, 0.0)
             if now - last_run >= interval:
                 due.append(q)
         return due
 
     def _set_query_timeout(self, conn: Any, timeout_seconds: int) -> None:
+        timeout_ms = timeout_seconds * 1000
         with conn.cursor() as cursor:
-            cursor.execute(f"SET statement_timeout = {int(timeout_seconds) * 1000}")
+            cursor.execute("SET statement_timeout = %s", [timeout_ms])
 
-    def _execute_single_query(self, conn: Any, query_spec: dict[str, Any]) -> dict[str, Any]:
+    def _execute_single_query(self, conn: Any, query_spec: Any) -> dict[str, Any]:
         """Execute a single query and return a structured result dict."""
-        sql = query_spec.get('query', '')
-        timeout = query_spec.get('timeout_seconds', 30)
+        sql = query_spec.query or ''
+        timeout = query_spec.timeout_seconds or 30
+        monitor_id = query_spec.monitor_id or 0
         start = time.time()
 
         try:
@@ -186,14 +169,10 @@ class DoQueryActionsCheck(AgentCheck):
             duration = time.time() - start
             self.log.warning(
                 "Query failed for monitor_id=%d (%.3fs): %s",
-                query_spec.get('monitor_id', 0),
+                monitor_id,
                 duration,
                 e,
             )
-            try:
-                conn.rollback()
-            except Exception as rollback_err:
-                self.log.debug("Rollback failed: %s", rollback_err)
             return {
                 'status': 'error',
                 'columns': [],
@@ -203,22 +182,22 @@ class DoQueryActionsCheck(AgentCheck):
                 'error': str(e),
             }
 
-    def _build_event_payload(self, query_spec: dict[str, Any], result: dict[str, Any]) -> dict[str, Any]:
-        entity = query_spec.get('entity') or {}
-        if hasattr(entity, 'model_dump'):
+    def _build_event_payload(self, query_spec: Any, result: dict[str, Any]) -> dict[str, Any]:
+        entity = query_spec.entity
+        if entity is not None:
             entity = entity.model_dump(exclude_none=True)
-        elif not isinstance(entity, dict):
-            entity = dict(entity)
+        else:
+            entity = {}
 
         return {
             'timestamp': int(time.time() * 1000),
-            'remote_config_id': self._remote_config_id,
-            'db_type': self._db_type,
-            'db_host': self._host,
-            'db_port': self._port,
-            'db_name': self._dbname,
-            'monitor_id': query_spec.get('monitor_id', 0),
-            'query': query_spec.get('query', ''),
+            'remote_config_id': self.config.remote_config_id or '',
+            'db_type': self.config.db_type,
+            'db_host': self.config.host,
+            'db_port': self.config.port,
+            'db_name': self.config.dbname,
+            'monitor_id': query_spec.monitor_id or 0,
+            'query': query_spec.query or '',
             'entity': entity,
             'status': result['status'],
             'columns': result['columns'],
@@ -240,7 +219,7 @@ class DoQueryActionsCheck(AgentCheck):
             with self._acquire_connection() as conn:
                 now = time.time()
                 for q in due_queries:
-                    monitor_id = q.get('monitor_id', 0)
+                    monitor_id = q.monitor_id or 0
                     tags = base_tags + [f'monitor_id:{monitor_id}']
 
                     result = self._execute_single_query(conn, q)
@@ -265,15 +244,19 @@ class DoQueryActionsCheck(AgentCheck):
 
         except Exception as e:
             error_msg = str(e)
-            self.log.exception("Connection failed")
+            self.log.exception("Check execution failed")
             for q in due_queries:
-                monitor_id = q.get('monitor_id', 0)
+                monitor_id = q.monitor_id or 0
                 tags = base_tags + [f'monitor_id:{monitor_id}']
                 self.gauge('query_execution_time', 0, tags=tags)
                 self.gauge('query_success', 0, tags=tags)
                 self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=tags, message=error_msg)
 
     def cancel(self) -> None:
-        if self._pool is not None:
-            self._pool.close()
-            self._pool = None
+        pool = self._pool
+        self._pool = None
+        if pool is not None:
+            try:
+                pool.close()
+            except Exception:
+                self.log.debug("Failed to close connection pool", exc_info=True)
