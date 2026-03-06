@@ -66,7 +66,9 @@ class AWSTokenProvider(TokenProvider):
 
         if self.role_arn:
             sts_client = boto3.client("sts")
-            assumed_role = sts_client.assume_role(RoleArn=self.role_arn, RoleSessionName="datadog-rds-iam-auth-session")
+            assumed_role = sts_client.assume_role(
+                RoleArn=self.role_arn, RoleSessionName="datadog-rds-iam-auth-session"
+            )
             credentials = assumed_role["Credentials"]
             session = boto3.Session(
                 aws_access_key_id=credentials["AccessKeyId"],

@@ -12,7 +12,7 @@ import psycopg
 from psycopg_pool import ConnectionPool
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.db.postgres_connection import (
+from datadog_checks.do_query_actions.postgres_connection import (
     AWSTokenProvider,
     AzureTokenProvider,
     PostgresConnectionArgs,

@@ -331,7 +331,7 @@ def test_aws_iam_token_provider(postgres_instance):
     check = DoQueryActionsCheck('do_query_actions', {}, [postgres_instance])
     provider = check._build_token_provider()
 
-    from datadog_checks.base.utils.db.postgres_connection import AWSTokenProvider
+    from datadog_checks.do_query_actions.postgres_connection import AWSTokenProvider
 
     assert isinstance(provider, AWSTokenProvider)
     assert provider.host == 'localhost'
@@ -350,7 +350,7 @@ def test_azure_managed_identity_token_provider(postgres_instance):
     check = DoQueryActionsCheck('do_query_actions', {}, [postgres_instance])
     provider = check._build_token_provider()
 
-    from datadog_checks.base.utils.db.postgres_connection import AzureTokenProvider
+    from datadog_checks.do_query_actions.postgres_connection import AzureTokenProvider
 
     assert isinstance(provider, AzureTokenProvider)
     assert provider.client_id == 'my-client-id'

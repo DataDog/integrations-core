@@ -4,31 +4,162 @@
 
 import threading
 import time
+from abc import ABC, abstractmethod
 from collections import OrderedDict
-from typing import Any, Dict, Optional, Tuple
+from dataclasses import dataclass
+from typing import Any, Dict, Optional, Tuple, Union
 
 from psycopg import Connection
 from psycopg_pool import ConnectionPool
 
-from datadog_checks.base.utils.db.postgres_connection import (
-    AWSTokenProvider,
-    AzureTokenProvider,
-    PostgresConnectionArgs,
-    TokenAwareConnection,
-    TokenProvider,
-)
-
 from .cursor import CommenterCursor, SQLASCIITextLoader
 
-# Re-export so existing imports from this module continue to work
-__all__ = [
-    'AWSTokenProvider',
-    'AzureTokenProvider',
-    'LRUConnectionPoolManager',
-    'PostgresConnectionArgs',
-    'TokenAwareConnection',
-    'TokenProvider',
-]
+
+class TokenProvider(ABC):
+    """
+    Interface for providing a token for managed authentication.
+    """
+
+    def __init__(self, *, skew_seconds: int = 60):
+        self._skew = skew_seconds
+        self._lock = threading.Lock()
+        self._token: str | None = None
+        self._expires_at: float = 0.0
+
+    def get_token(self) -> str:
+        """
+        Get a token for managed authentication.
+        """
+        now = time.time()
+        with self._lock:
+            if self._token is None or now >= self._expires_at - self._skew:
+                token, expires_at = self._fetch_token()
+                self._token = token
+                self._expires_at = float(expires_at)
+            return self._token  # type: ignore[return-value]
+
+    @abstractmethod
+    def _fetch_token(self) -> Tuple[str, float]:
+        """
+        Return (token, expires_at_epoch_seconds).
+        Implementations should return the absolute expiry; if the provider
+        has a fixed TTL, compute expires_at = time.time() + ttl_seconds.
+        """
+
+
+class AWSTokenProvider(TokenProvider):
+    """
+    Token provider for AWS IAM authentication.
+    """
+
+    TOKEN_TTL_SECONDS = 900  # 15 minutes
+
+    def __init__(
+        self, host: str, port: int, username: str, region: str, *, role_arn: str = None, skew_seconds: int = 60
+    ):
+        super().__init__(skew_seconds=skew_seconds)
+        self.host = host
+        self.port = port
+        self.username = username
+        self.region = region
+        self.role_arn = role_arn
+
+    def _fetch_token(self) -> Tuple[str, float]:
+        # Import aws only when this method is called
+        from .aws import generate_rds_iam_token
+
+        token = generate_rds_iam_token(
+            host=self.host, port=self.port, username=self.username, region=self.region, role_arn=self.role_arn
+        )
+        return token, time.time() + self.TOKEN_TTL_SECONDS
+
+
+class AzureTokenProvider(TokenProvider):
+    """
+    Token provider for Azure Managed Identity.
+    """
+
+    def __init__(self, client_id: str, identity_scope: str = None, skew_seconds: int = 60):
+        super().__init__(skew_seconds=skew_seconds)
+        self.client_id = client_id
+        self.identity_scope = identity_scope
+
+    def _fetch_token(self) -> Tuple[str, float]:
+        # Import azure only when this method is called
+        from .azure import generate_managed_identity_token
+
+        token = generate_managed_identity_token(client_id=self.client_id, identity_scope=self.identity_scope)
+        return token.token, float(token.expires_on)
+
+
+class TokenAwareConnection(Connection):
+    """
+    Connection that can be used for managed authentication.
+    """
+
+    @classmethod
+    def connect(cls, *args, **kwargs):
+        """
+        Override the connection method to pass a refreshable token as the connection password.
+
+        The token_provider can be passed via the 'token_provider' kwarg and will be used
+        to dynamically fetch authentication tokens.
+        """
+        token_provider = kwargs.pop("token_provider", None)
+        if token_provider:
+            kwargs["password"] = token_provider.get_token()
+        return super().connect(*args, **kwargs)
+
+
+@dataclass(frozen=True)
+class PostgresConnectionArgs:
+    """
+    Immutable PostgreSQL connection arguments.
+    """
+
+    application_name: str
+    username: str
+    host: Optional[str] = None
+    port: Optional[int] = None
+    password: Optional[str] = None
+    token_provider: Optional[TokenProvider] = None
+    ssl_mode: Optional[str] = "allow"
+    ssl_cert: Optional[str] = None
+    ssl_root_cert: Optional[str] = None
+    ssl_key: Optional[str] = None
+    ssl_password: Optional[str] = None
+
+    def as_kwargs(self, dbname: str) -> Dict[str, Union[str, int]]:
+        """
+        Return a dictionary of connection arguments for psycopg.
+
+        Args:
+            dbname (str): The database name to connect to.
+
+        Returns:
+            Dict[str, Union[str, int]]: Connection arguments dictionary with string and integer values.
+        """
+        kwargs = {
+            "application_name": self.application_name,
+            "user": self.username,
+            "dbname": dbname,
+            "sslmode": self.ssl_mode,
+        }
+        if self.host:
+            kwargs["host"] = self.host
+        if self.password:
+            kwargs["password"] = self.password
+        if self.port:
+            kwargs["port"] = self.port
+        if self.ssl_cert:
+            kwargs["sslcert"] = self.ssl_cert
+        if self.ssl_root_cert:
+            kwargs["sslrootcert"] = self.ssl_root_cert
+        if self.ssl_key:
+            kwargs["sslkey"] = self.ssl_key
+        if self.ssl_password:
+            kwargs["sslpassword"] = self.ssl_password
+        return kwargs
 
 
 class LRUConnectionPoolManager:

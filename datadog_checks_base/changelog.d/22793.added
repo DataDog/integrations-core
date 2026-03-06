@@ -1,1 +1,0 @@
-Add shared `postgres_connection` module providing reusable PostgreSQL connection primitives (`TokenProvider`, `AWSTokenProvider`, `AzureTokenProvider`, `TokenAwareConnection`, `PostgresConnectionArgs`) for use across integrations that connect to Postgres databases.
