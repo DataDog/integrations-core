@@ -1,30 +1,55 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 
-from datadog_checks.base import ConfigurationError
+from datadog_checks.base import ConfigurationError, is_affirmative
 
 
 class KafkaActionsConfig:
-    """Configuration validator for Kafka Actions integration.
-
-    This class centralizes all configuration validation logic,
-    following the same pattern as kafka_consumer integration.
-    """
+    """Configuration validator for Kafka Actions integration."""
 
     def __init__(self, instance, log):
-        """Initialize configuration.
-
-        Args:
-            instance: Instance configuration dictionary
-            log: Logger instance
-        """
         self.instance = instance
         self.log = log
 
         self.remote_config_id = instance.get('remote_config_id')
         self.kafka_connect_str = instance.get('kafka_connect_str')
         self.tags = instance.get('tags', [])
+
+        # Authentication fields (same pattern as kafka_consumer)
+        self._security_protocol = instance.get('security_protocol', 'PLAINTEXT')
+        self._sasl_mechanism = instance.get('sasl_mechanism')
+        self._sasl_plain_username = instance.get('sasl_plain_username')
+        self._sasl_plain_password = instance.get('sasl_plain_password')
+        self._sasl_kerberos_service_name = instance.get('sasl_kerberos_service_name', 'kafka')
+        self._sasl_kerberos_domain_name = instance.get('sasl_kerberos_domain_name')
+        self._sasl_kerberos_keytab = instance.get('sasl_kerberos_keytab', os.environ.get("KRB5_CLIENT_KTNAME"))
+        self._sasl_kerberos_principal = instance.get('sasl_kerberos_principal', 'kafkaclient')
+        self._sasl_oauth_token_provider = instance.get('sasl_oauth_token_provider')
+
+        self._tls_ca_cert = instance.get('tls_ca_cert')
+        self._tls_cert = instance.get('tls_cert')
+        self._tls_private_key = instance.get('tls_private_key')
+        self._tls_private_key_password = instance.get('tls_private_key_password')
+        self._tls_validate_hostname = is_affirmative(instance.get('tls_validate_hostname', True))
+        self._crlfile = instance.get('tls_crlfile')
+
+        if self._tls_cert or self._tls_ca_cert or self._tls_private_key or self._tls_private_key_password:
+            self._tls_verify = "true"
+        else:
+            self._tls_verify = "true" if is_affirmative(instance.get("tls_verify", True)) else "false"
+
+        if (
+            not self._tls_ca_cert
+            and os.name != 'nt'
+            and os.path.exists('/opt/datadog-agent/embedded/ssl/certs/cacert.pem')
+        ):
+            self._tls_ca_cert = '/opt/datadog-agent/embedded/ssl/certs/cacert.pem'
+
+        self._sasl_oauth_tls_ca_cert = (
+            self._sasl_oauth_token_provider.get("tls_ca_cert") if self._sasl_oauth_token_provider else None
+        )
 
         self.read_messages = instance.get('read_messages')
         self.create_topic = instance.get('create_topic')
@@ -94,16 +119,19 @@ class KafkaActionsConfig:
 
     def _validate_auth(self):
         """Validate authentication configuration."""
-        sasl_mechanism = self.instance.get('sasl_mechanism')
-        if sasl_mechanism == 'OAUTHBEARER':
-            sasl_oauth = self.instance.get('sasl_oauth_token_provider')
-            if sasl_oauth is None:
+        if self._sasl_mechanism == 'OAUTHBEARER':
+            if self._sasl_oauth_token_provider is None:
                 raise ConfigurationError("sasl_oauth_token_provider required for OAUTHBEARER sasl")
-            if not isinstance(sasl_oauth, dict):
-                raise ConfigurationError(f"sasl_oauth_token_provider must be a dictionary. Got: {type(sasl_oauth)}")
-            method = sasl_oauth.get('method', 'oidc')
+
+            if not isinstance(self._sasl_oauth_token_provider, dict):
+                raise ConfigurationError(
+                    f"sasl_oauth_token_provider must be a dictionary. Got: {type(self._sasl_oauth_token_provider)}"
+                )
+
+            method = self._sasl_oauth_token_provider.get('method', 'oidc')
+
             if method == 'aws_msk_iam':
-                aws_region = sasl_oauth.get('aws_region')
+                aws_region = self._sasl_oauth_token_provider.get('aws_region')
                 if not aws_region:
                     try:
                         import boto3
@@ -120,16 +148,14 @@ class KafkaActionsConfig:
                             "libraries. Install them with: pip install boto3 aws-msk-iam-sasl-signer-python"
                         )
             elif method == 'oidc':
-                if sasl_oauth.get('url') is None:
-                    raise ConfigurationError("The `url` setting of `sasl_oauth_token_provider` is required for OIDC")
-                if sasl_oauth.get('client_id') is None:
-                    raise ConfigurationError(
-                        "The `client_id` setting of `sasl_oauth_token_provider` is required for OIDC"
-                    )
-                if sasl_oauth.get('client_secret') is None:
-                    raise ConfigurationError(
-                        "The `client_secret` setting of `sasl_oauth_token_provider` is required for OIDC"
-                    )
+                if self._sasl_oauth_token_provider.get('url') is None:
+                    raise ConfigurationError("The `url` setting of `auth_token` reader is required")
+
+                if self._sasl_oauth_token_provider.get('client_id') is None:
+                    raise ConfigurationError("The `client_id` setting of `auth_token` reader is required")
+
+                if self._sasl_oauth_token_provider.get('client_secret') is None:
+                    raise ConfigurationError("The `client_secret` setting of `auth_token` reader is required")
             else:
                 raise ConfigurationError(
                     f"Invalid method '{method}' for sasl_oauth_token_provider. Must be 'aws_msk_iam' or 'oidc'"
