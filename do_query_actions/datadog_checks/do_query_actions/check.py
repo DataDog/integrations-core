@@ -49,14 +49,14 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
 
     def _build_base_tags(self) -> list[str]:
         tags = list(self.config.tags) if self.config.tags else []
-        if self.config.remote_config_id:
-            tags.append(f'remote_config_id:{self.config.remote_config_id}')
+        if self.config.config_id:
+            tags.append(f'config_id:{self.config.config_id}')
         if self.config.db_type:
             tags.append(f'db_type:{self.config.db_type}')
-        if self.config.dbname:
-            tags.append(f'db_name:{self.config.dbname}')
-        if self.config.host:
-            tags.append(f'db_host:{self.config.host}')
+        if self.config.db_identifier.dbname:
+            tags.append(f'db_name:{self.config.db_identifier.dbname}')
+        if self.config.db_identifier.host:
+            tags.append(f'db_host:{self.config.db_identifier.host}')
         if self.config.port:
             tags.append(f'port:{self.config.port}')
         return tags
@@ -65,7 +65,7 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
         aws = self.config.aws
         if aws and aws.managed_authentication and aws.managed_authentication.enabled:
             return AWSTokenProvider(
-                host=self.config.host,
+                host=self.config.db_identifier.host,
                 port=self.config.port or 5432,
                 username=self.config.username,
                 region=aws.region or '',
@@ -84,7 +84,7 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
     def _create_postgres_pool(self) -> ConnectionPool:
         conn_args = PostgresConnectionArgs(
             username=self.config.username,
-            host=self.config.host,
+            host=self.config.db_identifier.host,
             port=self.config.port,
             password=self.config.password,
             ssl_mode=self.config.ssl,
@@ -93,7 +93,7 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
             ssl_key=self.config.ssl_key,
             ssl_password=self.config.ssl_password,
         )
-        kwargs = conn_args.as_kwargs(dbname=self.config.dbname)
+        kwargs = conn_args.as_kwargs(dbname=self.config.db_identifier.dbname)
         kwargs['autocommit'] = True
         kwargs['cursor_factory'] = DoQueryCursor
 
@@ -114,7 +114,10 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
     def _get_or_create_postgres_pool(self) -> ConnectionPool:
         if self._pool is None:
             self.log.debug(
-                "Creating connection pool for %s:%s/%s", self.config.host, self.config.port, self.config.dbname
+                "Creating connection pool for %s:%s/%s",
+                self.config.db_identifier.host,
+                self.config.port,
+                self.config.db_identifier.dbname,
             )
             self._pool = self._create_postgres_pool()
         return self._pool
@@ -137,9 +140,9 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
         return due
 
     def _set_query_timeout(self, conn: Any, timeout_seconds: int) -> None:
-        timeout_ms = timeout_seconds * 1000
+        timeout_ms = int(timeout_seconds) * 1000
         with conn.cursor() as cursor:
-            cursor.execute("SET statement_timeout = %s", [timeout_ms])
+            cursor.execute(f"SET statement_timeout = {timeout_ms}")
 
     def _execute_single_query(self, conn: Any, query_spec: Any) -> dict[str, Any]:
         """Execute a single query and return a structured result dict."""
@@ -181,18 +184,24 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
             }
 
     def _build_event_payload(self, query_spec: Any, result: dict[str, Any]) -> dict[str, Any]:
-        entity = query_spec.entity.model_dump(exclude_none=True)
+        entity = query_spec.entity.model_dump(exclude_none=True, by_alias=True)
+        custom_fields = (
+            query_spec.custom_sql_select_fields.model_dump(exclude_none=True)
+            if query_spec.custom_sql_select_fields
+            else None
+        )
 
         return {
             'timestamp': int(time.time() * 1000),
-            'remote_config_id': self.config.remote_config_id or '',
+            'config_id': self.config.config_id or '',
             'db_type': self.config.db_type,
-            'db_host': self.config.host,
+            'db_host': self.config.db_identifier.host,
             'db_port': self.config.port,
-            'db_name': self.config.dbname,
+            'db_name': self.config.db_identifier.dbname,
             'monitor_id': query_spec.monitor_id,
             'query': query_spec.query,
             'entity': entity,
+            'custom_sql_select_fields': custom_fields,
             'status': result['status'],
             'columns': result['columns'],
             'rows': result['rows'],

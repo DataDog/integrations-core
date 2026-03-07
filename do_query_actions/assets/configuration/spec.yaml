@@ -7,19 +7,26 @@ files:
     - template: init_config/default
   - template: instances
     options:
-    - name: host
+    - name: db_identifier
       required: true
       description: |
-        The database hostname to connect to.
+        Identifies the target database for this query configuration.
       value:
-        example: "localhost"
-        type: string
-    - name: port
-      description: |
-        The database port to connect to.
-        If not specified, defaults to 5432.
-      value:
-        type: integer
+        type: object
+        required:
+          - type
+          - host
+          - dbname
+          - agent_hostname
+        properties:
+        - name: type
+          type: string
+        - name: host
+          type: string
+        - name: dbname
+          type: string
+        - name: agent_hostname
+          type: string
     - name: username
       required: true
       description: |
@@ -33,13 +40,12 @@ files:
         The database password for authentication.
       value:
         type: string
-    - name: dbname
-      required: true
+    - name: port
       description: |
-        The name of the database to connect to.
+        The database port to connect to.
+        If not specified, defaults to 5432.
       value:
-        example: "mydb"
-        type: string
+        type: integer
     - name: ssl
       description: |
         SSL mode for PostgreSQL connections.
@@ -94,7 +100,7 @@ files:
           type: string
         - name: identity_scope
           type: string
-    - name: remote_config_id
+    - name: config_id
       description: |
         An identifier for tracking this query configuration via Remote Config.
       value:
@@ -123,6 +129,8 @@ files:
             - timeout_seconds
             - entity
           properties:
+          - name: type
+            type: string
           - name: monitor_id
             type: integer
           - name: query
@@ -135,16 +143,14 @@ files:
             type: object
             required:
               - platform
-              - account_id
+              - account
               - database
               - schema
               - table
-              - metric_config_id
-              - measure
             properties:
             - name: platform
               type: string
-            - name: account_id
+            - name: account
               type: string
             - name: database
               type: string
@@ -152,8 +158,11 @@ files:
               type: string
             - name: table
               type: string
+          - name: custom_sql_select_fields
+            type: object
+            properties:
             - name: metric_config_id
               type: integer
-            - name: measure
+            - name: entity_id
               type: string
     - template: instances/default

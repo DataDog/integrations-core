@@ -23,8 +23,8 @@ E2E_METADATA = {
 
 def connect_to_pg():
     psycopg.connect(
-        host='localhost',
-        dbname=common.POSTGRES_INSTANCE['dbname'],
+        host=common.POSTGRES_INSTANCE['db_identifier']['host'],
+        dbname=common.POSTGRES_INSTANCE['db_identifier']['dbname'],
         user=common.POSTGRES_INSTANCE['username'],
         port=common.POSTGRES_INSTANCE['port'],
         password=common.POSTGRES_INSTANCE['password'],

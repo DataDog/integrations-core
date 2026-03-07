@@ -36,7 +36,7 @@ def _make_mock_pool(rows=None, description=None):
 def test_empty_instance(dd_run_check):
     with pytest.raises(
         Exception,
-        match='host\n  Field required',
+        match='db_identifier\n  Field required',
     ):
         check = DOQueryActionsCheck('do_query_actions', {}, [{}])
         dd_run_check(check)
@@ -50,7 +50,13 @@ def test_missing_db_type(dd_run_check):
         check = DOQueryActionsCheck(
             'do_query_actions',
             {},
-            [{'host': 'localhost', 'username': 'test', 'dbname': 'test', 'queries': []}],
+            [
+                {
+                    'db_identifier': {'type': 'postgres', 'host': 'localhost', 'dbname': 'test', 'agent_hostname': 'h'},
+                    'username': 'test',
+                    'queries': [],
+                }
+            ],
         )
         dd_run_check(check)
 
@@ -174,10 +180,9 @@ def test_per_query_timeout_is_set(dd_run_check, aggregator, postgres_instance):
         check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
         dd_run_check(check)
 
-    timeout_calls = [(sql, args) for sql, args in execute_calls if 'statement_timeout' in str(sql)]
+    timeout_calls = [sql for sql, args in execute_calls if 'statement_timeout' in str(sql)]
     assert len(timeout_calls) == 1
-    assert timeout_calls[0][0] == 'SET statement_timeout = %s'
-    assert timeout_calls[0][1] == ([10000],)
+    assert 'SET statement_timeout = 10000' in timeout_calls[0]
 
 
 def test_event_platform_event_payload(dd_run_check, aggregator, postgres_instance):
@@ -196,7 +201,7 @@ def test_event_platform_event_payload(dd_run_check, aggregator, postgres_instanc
     payload = json.loads(raw_event)
 
     assert event_type == 'do-query-results'
-    assert payload['remote_config_id'] == 'test-config-123'
+    assert payload['config_id'] == 'test-config-123'
     assert payload['db_type'] == 'postgres'
     assert payload['db_host'] == 'localhost'
     assert payload['db_name'] == 'test_db'
@@ -210,6 +215,8 @@ def test_event_platform_event_payload(dd_run_check, aggregator, postgres_instanc
     assert 'entity' in payload
     assert payload['entity']['platform'] == 'aws'
     assert payload['entity']['table'] == 'orders'
+    assert payload['entity']['schema'] == 'public'
+    assert 'schema_' not in payload['entity']
 
 
 def test_tags_include_monitor_id(dd_run_check, aggregator, postgres_instance):
@@ -220,7 +227,7 @@ def test_tags_include_monitor_id(dd_run_check, aggregator, postgres_instance):
         dd_run_check(check)
 
     expected_tags = [
-        'remote_config_id:test-config-123',
+        'config_id:test-config-123',
         'db_type:postgres',
         'db_name:test_db',
         'db_host:localhost',
@@ -275,11 +282,10 @@ def test_query_failure_does_not_block_subsequent_queries(dd_run_check, aggregato
     assert len(service_checks) == 2
 
 
-def test_cancel_closes_pool(dd_run_check, postgres_instance):
+def test_cancel_closes_pool(postgres_instance):
     mock_pool = MagicMock()
 
     check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
-    dd_run_check(check)
     check._pool = mock_pool
     check.cancel()
 
@@ -287,13 +293,12 @@ def test_cancel_closes_pool(dd_run_check, postgres_instance):
     assert check._pool is None
 
 
-def test_cancel_handles_close_error(dd_run_check, postgres_instance):
+def test_cancel_handles_close_error(postgres_instance):
     """cancel() should not raise even if pool.close() fails."""
     mock_pool = MagicMock()
     mock_pool.close.side_effect = Exception("close failed")
 
     check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
-    dd_run_check(check)
     check._pool = mock_pool
     check.cancel()
 
@@ -362,7 +367,7 @@ def test_aws_iam_token_provider(dd_run_check, postgres_instance):
     from datadog_checks.do_query_actions.postgres_connection import AWSTokenProvider
 
     assert isinstance(provider, AWSTokenProvider)
-    assert provider.host == 'localhost'
+    assert provider.host == check.config.db_identifier.host
     assert provider.region == 'us-east-1'
     assert provider.role_arn == 'arn:aws:iam::role/test'
 

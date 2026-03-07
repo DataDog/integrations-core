@@ -37,6 +37,17 @@ class Aws(BaseModel):
     region: Optional[str] = None
 
 
+class DbIdentifier(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    agent_hostname: str
+    dbname: str
+    host: str
+    type: str
+
+
 class ManagedAuthentication1(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -56,15 +67,22 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class CustomSqlSelectFields(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    entity_id: Optional[str] = None
+    metric_config_id: Optional[int] = None
+
+
 class Entity(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    account_id: str
+    account: str
     database: str
-    measure: str
-    metric_config_id: int
     platform: str
     schema_: str = Field(..., alias='schema')
     table: str
@@ -75,11 +93,13 @@ class Query(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    custom_sql_select_fields: Optional[CustomSqlSelectFields] = None
     entity: Entity
     interval_seconds: int
     monitor_id: int
     query: str
     timeout_seconds: int
+    type: Optional[str] = None
 
 
 class InstanceConfig(BaseModel):
@@ -89,19 +109,18 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     aws: Optional[Aws] = None
+    config_id: Optional[str] = None
+    db_identifier: DbIdentifier
     db_type: str
-    dbname: str
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
-    host: str
     managed_authentication: Optional[ManagedAuthentication1] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     password: Optional[str] = None
     port: Optional[int] = None
     queries: tuple[Query, ...]
-    remote_config_id: Optional[str] = None
     service: Optional[str] = None
     ssl: Optional[str] = None
     ssl_cert: Optional[str] = None
