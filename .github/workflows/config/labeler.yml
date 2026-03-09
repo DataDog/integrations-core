@@ -362,6 +362,10 @@ integration/contentful:
 - changed-files:
   - any-glob-to-any-file:
     - contentful/**/*
+integration/control_m:
+- changed-files:
+  - any-glob-to-any-file:
+    - control_m/**/*
 integration/coredns:
 - changed-files:
   - any-glob-to-any-file:
