@@ -1,21 +1,19 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from time import time
-
 import httpx
 import pytest
 
-from ddev.utils.github_async import GitHubAsyncClient
+from ddev.utils.github_async import AsyncGitHubClient
 
 
-class TestGitHubAsyncClient:
+class TestAsyncGitHubClient:
     """Tests for the async GitHub client."""
 
     @pytest.mark.asyncio
     async def test_context_manager(self):
         """Test that the client can be used as an async context manager."""
-        async with GitHubAsyncClient(token='test_token') as client:
+        async with AsyncGitHubClient(token='test_token') as client:
             assert client._client is not None
 
     @pytest.mark.asyncio
@@ -43,12 +41,12 @@ class TestGitHubAsyncClient:
             )
         )
 
-        async with GitHubAsyncClient(token='test_token') as client:
+        async with AsyncGitHubClient(token='test_token') as client:
             result = await client.list_workflow_runs(owner, repo, status='completed', per_page=10)
 
-            assert result['total_count'] == 1
-            assert len(result['workflow_runs']) == 1
-            assert result['workflow_runs'][0]['id'] == 123456
+            assert result.data['total_count'] == 1
+            assert len(result.data['workflow_runs']) == 1
+            assert result.data['workflow_runs'][0]['id'] == 123456
 
     @pytest.mark.asyncio
     async def test_get_workflow_run(self, respx_mock):
@@ -67,11 +65,11 @@ class TestGitHubAsyncClient:
             )
         )
 
-        async with GitHubAsyncClient(token='test_token') as client:
+        async with AsyncGitHubClient(token='test_token') as client:
             result = await client.get_workflow_run(owner, repo, run_id)
 
-            assert result['id'] == run_id
-            assert result['status'] == 'completed'
+            assert result.data['id'] == run_id
+            assert result.data['status'] == 'completed'
 
     @pytest.mark.asyncio
     async def test_cancel_workflow_run(self, respx_mock):
@@ -82,7 +80,7 @@ class TestGitHubAsyncClient:
             return_value=httpx.Response(202)
         )
 
-        async with GitHubAsyncClient(token='test_token') as client:
+        async with AsyncGitHubClient(token='test_token') as client:
             # Should not raise
             await client.cancel_workflow_run(owner, repo, run_id)
 
@@ -104,11 +102,11 @@ class TestGitHubAsyncClient:
             )
         )
 
-        async with GitHubAsyncClient(token='test_token') as client:
+        async with AsyncGitHubClient(token='test_token') as client:
             result = await client.list_workflow_run_jobs(owner, repo, run_id)
 
-            assert result['total_count'] == 2
-            assert len(result['jobs']) == 2
+            assert result.data['total_count'] == 2
+            assert len(result.data['jobs']) == 2
 
     @pytest.mark.asyncio
     async def test_create_workflow_dispatch(self, respx_mock):
@@ -119,29 +117,33 @@ class TestGitHubAsyncClient:
             return_value=httpx.Response(204)
         )
 
-        async with GitHubAsyncClient(token='test_token') as client:
+        async with AsyncGitHubClient(token='test_token') as client:
             # Should not raise
             await client.create_workflow_dispatch(owner, repo, workflow_id, ref='main', inputs={'test': 'value'})
 
     @pytest.mark.asyncio
-    async def test_rate_limit_handling(self, respx_mock):
-        """Test that rate limiting is handled properly."""
+    async def test_throttling_handling(self, respx_mock):
+        """Test that throttling (secondary rate limit) is handled properly."""
         owner, repo = 'DataDog', 'integrations-core'
 
-        # First request hits rate limit
+        # First request hits secondary rate limit (throttling)
         respx_mock.get(f'https://api.github.com/repos/{owner}/{repo}/actions/runs').mock(
             side_effect=[
                 httpx.Response(
-                    403,
+                    429,
                     headers={
-                        'X-RateLimit-Remaining': '0',
-                        'X-RateLimit-Reset': str(int(time() + 0.1)),  # Reset in 0.1s
+                        'Retry-After': '1',  # Wait 1 second
                     },
                 ),
-                httpx.Response(200, json={'total_count': 0, 'workflow_runs': []}),
+                httpx.Response(
+                    200,
+                    json={'total_count': 0, 'workflow_runs': []},
+                ),
             ]
         )
 
-        async with GitHubAsyncClient(token='test_token') as client:
+        async with AsyncGitHubClient(token='test_token') as client:
             result = await client.list_workflow_runs(owner, repo)
-            assert result['total_count'] == 0
+            assert result.data['total_count'] == 0
+            # After successful retry, retry_after should be None
+            assert result.rate_limit.retry_after is None
