@@ -373,10 +373,28 @@ pipeline:
           target: ocsf.actor.process.name
           replaceMissing: false
         - type: string-builder-processor
+          name: Add ocsf.actor.process.uid
+          enabled: true
+          template: "jvm-gc-process"
+          target: ocsf.actor.process.uid
+          replaceMissing: false
+        - type: string-builder-processor
           name: Add ocsf.process.name
           enabled: true
           template: "java"
           target: ocsf.process.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add ocsf.process.uid
+          enabled: true
+          template: "jvm-gc-process"
+          target: ocsf.process.uid
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add ocsf.device.name
+          enabled: true
+          template: "unknown"
+          target: ocsf.device.name
           replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 1004
@@ -418,6 +436,14 @@ pipeline:
               sources:
                 - ocsf.duration
               target: ocsf.duration
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.device.name` to `ocsf.device.name`
+              sources:
+                - ocsf.device.name
+              target: ocsf.device.name
               preserveSource: true
               overrideOnConflict: true
             - type: schema-category-mapper
@@ -438,10 +464,24 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
+              name: Map `ocsf.actor.process.uid` to `ocsf.actor.process.uid`
+              sources:
+                - ocsf.actor.process.uid
+              target: ocsf.actor.process.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
               name: Map `ocsf.process.name` to `ocsf.process.name`
               sources:
                 - ocsf.process.name
               target: ocsf.process.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.process.uid` to `ocsf.process.uid`
+              sources:
+                - ocsf.process.uid
+              target: ocsf.process.uid
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
