@@ -82,6 +82,61 @@ facets:
     unit:
       family: bytes
       name: mebibyte
+  - groups:
+      - OCSF
+    name: Activity ID
+    path: ocsf.activity_id
+    source: log
+  - groups:
+      - OCSF
+    name: Category ID
+    path: ocsf.category_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Category
+    path: ocsf.category_name
+    source: log
+  - groups:
+      - OCSF
+    name: Class ID
+    path: ocsf.class_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Class
+    path: ocsf.class_name
+    source: log
+  - groups:
+      - OCSF
+    name: Source IP Address
+    path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Status
+    path: ocsf.status
+    source: log
+  - groups:
+      - OCSF
+    name: Status ID
+    path: ocsf.status_id
+    source: log
+  - groups:
+      - OCSF
+    name: Severity
+    path: ocsf.severity
+    source: log
+  - groups:
+      - OCSF
+    name: Severity ID
+    path: ocsf.severity_id
+    source: log
+  - groups:
+      - OCSF
+    name: HTTP URL
+    path: ocsf.http_request.url.url_string
+    source: log
 pipeline:
   type: pipeline
   name: Tomcat
@@ -150,9 +205,9 @@ pipeline:
       enabled: true
       source: message
       samples:
-        - '2019-03-20T14:36:30.111+0000: 41.098: [GC concurrent-mark-end, 0.0272767 secs]'
-        - '2019-03-20T14:36:30.111+0000: 41.071: [GC concurrent-mark-start]'
-        - '2019-03-20T14:36:30.111+0000: 41.099: [Finalize Marking, 0.0011661 secs]'
+        - "2019-03-20T14:36:30.111+0000: 41.098: [GC concurrent-mark-end, 0.0272767 secs]"
+        - "2019-03-20T14:36:30.111+0000: 41.071: [GC concurrent-mark-start]"
+        - "2019-03-20T14:36:30.111+0000: 41.099: [Finalize Marking, 0.0011661 secs]"
       grok:
         supportRules: |
           _gc_event_phase_duration %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):timestamp}: %{notSpace}\s\[GC\s%{notSpace:gc.action}(\s%{regex("([^,]*)"):gc.phase},)?(\s%{number:duration:scale(1000000000)}\ssecs)?]
@@ -233,16 +288,16 @@ pipeline:
       enabled: true
       categories:
         - filter:
-            query: '@http.status_code:[200 TO 299]'
+            query: "@http.status_code:[200 TO 299]"
           name: OK
         - filter:
-            query: '@http.status_code:[300 TO 399]'
+            query: "@http.status_code:[300 TO 399]"
           name: notice
         - filter:
-            query: '@http.status_code:[400 TO 499]'
+            query: "@http.status_code:[400 TO 499]"
           name: warning
         - filter:
-            query: '@http.status_code:[500 TO 599]'
+            query: "@http.status_code:[500 TO 599]"
           name: error
       target: http.status_category
     - type: status-remapper
@@ -257,13 +312,13 @@ pipeline:
       sources:
         - msg
     - type: url-parser
-      name: ''
+      name: ""
       enabled: true
       sources:
         - http.url
       target: http.url_details
     - type: user-agent-parser
-      name: ''
+      name: ""
       enabled: true
       sources:
         - http.useragent
@@ -276,3 +331,417 @@ pipeline:
       expression: (heap.memory_before - heap.memory_after)
       target: gc.memory_freed
       replaceMissing: false
+
+    - type: pipeline
+      name: OCSF pre transformations
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "*"
+      processors:
+        - type: string-builder-processor
+          name: Add product name
+          enabled: true
+          template: "Apache Tomcat"
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add product vendor
+          enabled: true
+          template: "Apache Software Foundation"
+          target: ocsf.metadata.product.vendor_name
+          replaceMissing: false
+    - type: pipeline
+      name: OCSF sub pipeline for class Memory Activity [1004]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@gc.action:*"
+      processors:
+        - type: arithmetic-processor
+          name: Convert GC duration to milliseconds
+          enabled: true
+          expression: duration / 1000000
+          target: ocsf.duration
+          replaceMissing: false
+        - type: schema-processor
+          name: Apply OCSF schema for 1004
+          enabled: true
+          mappers:
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@gc.action:pause"
+                  name: Allocate Page
+                  id: 1
+                - filter:
+                    query: "@gc.action:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-remapper
+              name: Map `gc.action` to `ocsf.message`
+              sources:
+                - gc.action
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.duration` to `ocsf.duration`
+              sources:
+                - ocsf.duration
+              target: ocsf.duration
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Memory Activity
+            classUid: 1004
+            extensions: []
+            profiles: []
+
+    - type: pipeline
+      name: OCSF sub pipeline for class HTTP Activity [4002]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@http.method:*"
+      processors:
+        - type: schema-processor
+          name: Apply OCSF schema for 4002
+          enabled: true
+          mappers:
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@http.method:CONNECT"
+                  name: Connect
+                  id: 1
+                - filter:
+                    query: "@http.method:DELETE"
+                  name: Delete
+                  id: 2
+                - filter:
+                    query: "@http.method:GET"
+                  name: Get
+                  id: 3
+                - filter:
+                    query: "@http.method:HEAD"
+                  name: Head
+                  id: 4
+                - filter:
+                    query: "@http.method:OPTIONS"
+                  name: Options
+                  id: 5
+                - filter:
+                    query: "@http.method:POST"
+                  name: Post
+                  id: 6
+                - filter:
+                    query: "@http.method:PUT"
+                  name: Put
+                  id: 7
+                - filter:
+                    query: "@http.method:TRACE"
+                  name: Trace
+                  id: 8
+                - filter:
+                    query: "@http.method:PATCH"
+                  name: Patch
+                  id: 9
+                - filter:
+                    query: "@http.method:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@http.status_code:[200 TO 399]"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@http.status_code:[400 TO 599]"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-remapper
+              name: Map `http.method` to `ocsf.http_request.http_method`
+              sources:
+                - http.method
+              target: ocsf.http_request.http_method
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `http.url` to `ocsf.http_request.url.url_string`
+              sources:
+                - http.url
+              target: ocsf.http_request.url.url_string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `http.url_details.path` to `ocsf.http_request.url.path`
+              sources:
+                - http.url_details.path
+              target: ocsf.http_request.url.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `http.version` to `ocsf.http_request.version`
+              sources:
+                - http.version
+              target: ocsf.http_request.version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `http.useragent` to `ocsf.http_request.user_agent`
+              sources:
+                - http.useragent
+              target: ocsf.http_request.user_agent
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `http.referer` to `ocsf.http_request.referrer`
+              sources:
+                - http.referer
+              target: ocsf.http_request.referrer
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `http.status_code` to `ocsf.http_response.code`
+              sources:
+                - http.status_code
+              target: ocsf.http_response.code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.ip` to `ocsf.src_endpoint.ip`
+              sources:
+                - network.client.ip
+              target: ocsf.src_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.bytes_written` to `ocsf.traffic.bytes_out`
+              sources:
+                - network.bytes_written
+              target: ocsf.traffic.bytes_out
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: HTTP Activity
+            classUid: 4002
+            extensions: []
+            profiles: []
+
+    - type: pipeline
+      name: OCSF sub pipeline for class Application Lifecycle [6002]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@logger.name:* -@status:ERROR"
+      processors:
+        - type: schema-processor
+          name: Apply OCSF schema for 6002
+          enabled: true
+          mappers:
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@logger.name:*restart*"
+                  name: Restart
+                  id: 5
+                - filter:
+                    query: "@logger.name:*start*"
+                  name: Start
+                  id: 3
+                - filter:
+                    query: "@logger.name:*stop*"
+                  name: Stop
+                  id: 4
+                - filter:
+                    query: "@logger.name:*install*"
+                  name: Install
+                  id: 1
+                - filter:
+                    query: "@logger.name:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-remapper
+              name: Map `logger.name` to `ocsf.app.name`
+              sources:
+                - logger.name
+              target: ocsf.app.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `message` to `ocsf.message`
+              sources:
+                - message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `status` to `ocsf.status`
+              sources:
+                - status
+              target: ocsf.status
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Application Lifecycle
+            classUid: 6002
+            extensions: []
+            profiles: []
+    - type: pipeline
+      name: OCSF sub pipeline for class Application Error [6008]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@logger.name:* @status:ERROR"
+      processors:
+        - type: schema-processor
+          name: Apply OCSF schema for 6008
+          enabled: true
+          mappers:
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@status:*"
+                  name: General Error
+                  id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-remapper
+              name: Map `logger.name` to `ocsf.app.name`
+              sources:
+                - logger.name
+              target: ocsf.app.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `message` to `ocsf.message`
+              sources:
+                - message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `status` to `ocsf.status`
+              sources:
+                - status
+              target: ocsf.status
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Application Error
+            classUid: 6008
+            extensions: []
+            profiles: []
