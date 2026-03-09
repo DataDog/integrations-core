@@ -42,6 +42,7 @@ files:
         prometheus_url.required: false
     - name: url
       fleet_configurable: true
+      formats: ["url"]
       enabled: true
       legacy: true
       value:

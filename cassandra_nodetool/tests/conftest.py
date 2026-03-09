@@ -8,6 +8,7 @@ import subprocess
 import pytest
 
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.docker import get_container_ip
 
 from . import common
@@ -22,6 +23,21 @@ E2E_METADATA = {
 }
 
 
+def create_keyspace():
+    subprocess.check_call(
+        [
+            "docker",
+            "exec",
+            common.CASSANDRA_CONTAINER_NAME,
+            "cqlsh",
+            "-e",
+            "CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION={'class':'SimpleStrategy', 'replication_factor':2}",
+            "--request-timeout",
+            "20",
+        ]
+    )
+
+
 @pytest.fixture(scope="session")
 def dd_environment():
     """Start the cassandra cluster with required configuration."""
@@ -32,6 +48,7 @@ def dd_environment():
 
     with docker_run(
         compose_file,
+        build=True,
         service_name=common.CASSANDRA_CONTAINER_NAME,
         waith_for_health=True,
     ):
@@ -41,18 +58,6 @@ def dd_environment():
             compose_file,
             service_name=common.CASSANDRA_CONTAINER_NAME_2,
             waith_for_health=True,
+            conditions=[WaitFor(create_keyspace, attempts=10, wait=10)],
         ):
-            subprocess.check_call(
-                [
-                    "docker",
-                    "exec",
-                    common.CASSANDRA_CONTAINER_NAME,
-                    "cqlsh",
-                    "-e",
-                    "CREATE KEYSPACE IF NOT EXISTS test \
-                WITH REPLICATION={'class':'SimpleStrategy', 'replication_factor':2}",
-                    "--request-timeout",
-                    "20",
-                ]
-            )
             yield common.CONFIG_INSTANCE, E2E_METADATA

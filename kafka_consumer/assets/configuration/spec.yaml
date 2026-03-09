@@ -220,29 +220,40 @@ files:
           Settings for when `sasl_mechanism` is set to `OAUTHBEARER`.
         fleet_configurable: true
         options:
+        - name: method
+          description: |
+            The OAuth method to use. Either `aws_msk_iam` for AWS MSK IAM authentication
+            or `oidc` for standard OIDC authentication. Defaults to `oidc` for backwards compatibility.
+          value:
+            type: string
+            example: aws_msk_iam
+            display_default: oidc
+        - name: aws_region
+          description: |
+            AWS region for MSK IAM authentication. Required when method is `aws_msk_iam` and the region
+            cannot be automatically detected from the environment
+            (for example, through `AWS_REGION` or instance metadata).
+            If not specified, attempts to detect the region automatically.
+          value:
+            type: string
+            example: us-west-2
         - name: url
           fleet_configurable: true
-          required: true
-          enabled: false
           description: |
-            The token endpoint.
+            The token endpoint. Required when method is `oidc`.
           value:
             type: string
         - name: client_id
           fleet_configurable: true
-          required: true
-          enabled: false
           description: |
-            The client identifier.
+            The client identifier. Required when method is `oidc`.
           value:
             type: string
         - name: client_secret
           fleet_configurable: true
           secret: true
-          required: true
-          enabled: false
           description: |
-            The client secret.
+            The client secret. Required when method is `oidc`.
           value:
             type: string
         - name: scope
@@ -362,3 +373,61 @@ files:
         value:
           type: string
           example: /path/to/client_key.pem
+      - name: schema_registry_oauth_token_provider
+        description: |
+          OAuth token provider settings for Schema Registry authentication.
+          When configured, the check will fetch an OAuth token and use it as a Bearer token
+          for Schema Registry HTTP requests.
+        fleet_configurable: true
+        options:
+        - name: url
+          fleet_configurable: true
+          required: true
+          enabled: false
+          description: |
+            The token endpoint.
+          value:
+            type: string
+        - name: client_id
+          fleet_configurable: true
+          required: true
+          enabled: false
+          description: |
+            The client identifier.
+          value:
+            type: string
+        - name: client_secret
+          fleet_configurable: true
+          secret: true
+          required: true
+          enabled: false
+          description: |
+            The client secret.
+          value:
+            type: string
+        - name: scope
+          enabled: false
+          description: |
+            The OAuth scope to request.
+          value:
+            type: string
+        - name: custom_headers
+          enabled: false
+          description: |
+            Additional HTTP headers to include in Schema Registry requests.
+            For Confluent Cloud, this typically includes the identity pool ID and
+            the Schema Registry cluster ID.
+            Example:
+              Confluent-Identity-Pool-Id: pool-xxxxx
+              target-sr-cluster: lsrc-xxxxx
+          value:
+            type: object
+            additionalProperties:
+              type: string
+        - name: tls_ca_cert
+          enabled: false
+          description: |
+            Path to a CA certificate file used to verify the OIDC token endpoint's TLS certificate.
+          value:
+            type: string
+            example: /path/to/oauth_ca_cert.pem

@@ -12,6 +12,7 @@ files:
     - name: url
       description: The Harbor HTTP url.
       fleet_configurable: true
+      formats: ["url"]
       required: true
       value:
         type: string

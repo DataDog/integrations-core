@@ -112,12 +112,38 @@ jobs:
 
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    # We run this for EVERYONE to ensure the scripts are moved
-    # from the action folder to the expected workspace path.
-    # It should cover all repos using this workflow and respect the context if the
-    # workflow is being called with a pinned version.
-    - name: Install workflow scripts
+    # When called as a reusable workflow from other repos, `uses: ./` resolves
+    # from the caller's repo where the actions don't exist. We checkout the
+    # actions from integrations-core so they are available locally.
+    # Note: github.workflow_sha/workflow_ref point to the caller, not to
+    # integrations-core, so we cannot dynamically pin the ref.
+    - name: Resolve integrations-core ref
+      if: inputs.repo != 'core'
+      id: ic-ref
+      shell: bash
+      run: |
+        # GITHUB_WORKFLOW_REF is available in the environment automatically
+        echo "GITHUB_WORKFLOW_REF: $GITHUB_WORKFLOW_REF"
+        echo "ref=${GITHUB_WORKFLOW_REF##*@}" >> "$GITHUB_OUTPUT"
+
+    - name: Checkout integrations-core actions
+      if: inputs.repo != 'core'
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        repository: "DataDog/integrations-core"
+        ref: master
+        fetch-depth: 1
+        sparse-checkout: .github/actions
+        # Use a specific sub-folder
+        path: core-temp
+
+    - name: Install workflow scripts (core)
+      if: inputs.repo == 'core'
       uses: ./.github/actions/setup-test-target-scripts
+
+    - name: Install workflow scripts (non-core)
+      if: inputs.repo != 'core'
+      uses: ./core-temp/.github/actions/setup-test-target-scripts
 
     - name: Set environment variables
       # This step sets the following environment variables for the entire workflow via setup-test-env.sh:
@@ -213,7 +239,7 @@ jobs:
 
     - name: Restore cache
       if: inputs.repo == 'core'
-      uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
         key: >-
@@ -255,6 +281,9 @@ jobs:
     - name: Prepare for testing
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       run: ddev ci setup ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
+
+    - name: Ensure Docker is running
+      run: bash .github/workflows/scripts/ensure-docker.sh
 
     - name: Run Unit & Integration tests
       if: inputs.latest != true
@@ -304,14 +333,14 @@ jobs:
 
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}test-results-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
     - name: Upload local_clone debug info (ddev only)
       if: always() && inputs.target == 'ddev'
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}local-clone-debug-${{ inputs.platform }}"
         path: "local_clone_debug.txt"
@@ -323,7 +352,7 @@ jobs:
         always() &&
         inputs.pytest-args != '-m flaky'
       # Flaky tests will have low coverage, don't include in artifacts to avoid pipeline issues
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}coverage-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
         path: "${{ inputs.target }}/coverage.xml"

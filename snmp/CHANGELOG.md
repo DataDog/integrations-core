@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 12.3.0 / 2026-02-19
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Add type metadata field to `_generic-if` profile ([#22496](https://github.com/DataDog/integrations-core/pull/22496))
+
+***Fixed***:
+
+* Fix infoblox-ipam profile collecting duplicate cpu/memory metrics ([#22459](https://github.com/DataDog/integrations-core/pull/22459))
+
 ## 12.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
