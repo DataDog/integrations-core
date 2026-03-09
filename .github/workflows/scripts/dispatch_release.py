@@ -1,6 +1,6 @@
-"""Dispatch build-integrations events to agent-integration-wheels-release in batches.
+"""Dispatch build-wheels events to agent-integration-wheels-release in batches.
 
-Environment variables: GH_TOKEN, INTEGRATIONS, SOURCE_REPO, REF, TARGET.
+Environment variables: GH_TOKEN, PACKAGES, SOURCE_REPO, REF, TARGET.
 """
 import json
 import os
@@ -15,9 +15,9 @@ DISPATCH_URL = "https://api.github.com/repos/DataDog/agent-integration-wheels-re
 def dispatch(batch: list[str], source_repo: str, ref: str, target: str, token: str) -> None:
     payload = json.dumps(
         {
-            "event_type": "build-integrations",
+            "event_type": "build-wheels",
             "client_payload": {
-                "integrations": batch,
+                "packages": batch,
                 "source_repo": source_repo,
                 "source_repo_ref": ref,
                 "target": target,
@@ -44,20 +44,25 @@ def dispatch(batch: list[str], source_repo: str, ref: str, target: str, token: s
 
 
 def main() -> None:
-    integrations = json.loads(os.environ["INTEGRATIONS"])
+    packages = json.loads(os.environ["PACKAGES"])
     source_repo = os.environ["SOURCE_REPO"]
     ref = os.environ["REF"]
     target = os.environ["TARGET"]
-    token = os.environ["GH_TOKEN"]
+    dry_run = os.environ.get("DRY_RUN", "").lower() != "false"
 
-    batches = [integrations[i : i + BATCH_SIZE] for i in range(0, len(integrations), BATCH_SIZE)]
-
-    print(f"Releasing {len(integrations)} integration(s) from {source_repo}@{ref} in {len(batches)} batch(es):")
-    for name in integrations:
+    bucket = f"https://agent-integration-wheels-{target}.s3.amazonaws.com"
+    print(f"Releasing {len(packages)} package(s) from {source_repo}@{ref} → {bucket}:")
+    for name in packages:
         print(f"  - {name}")
 
+    if dry_run:
+        print("\nDRY RUN: no tags pushed, no builds triggered")
+        return
+
+    token = os.environ["GH_TOKEN"]
+    batches = [packages[i : i + BATCH_SIZE] for i in range(0, len(packages), BATCH_SIZE)]
     for i, batch in enumerate(batches, 1):
-        print(f"Batch {i}/{len(batches)} ({len(batch)} integrations)")
+        print(f"Batch {i}/{len(batches)} ({len(batch)} packages)")
         dispatch(batch, source_repo, ref, target, token)
 
 

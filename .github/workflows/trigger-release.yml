@@ -1,6 +1,7 @@
 name: Trigger Wheel Builds
 
 # Thin wrapper — all tagging and dispatch logic lives in dispatch-release.yml.
+# The pipeline can build wheels for any Python package in the repo.
 
 on:
   push:
@@ -12,8 +13,10 @@ on:
       - "*/src/datadog_checks/*/__about__.py"
   workflow_dispatch:
     inputs:
-      integrations:
-        description: "JSON array of integration names (optional — auto-detected if omitted)"
+      packages:
+        description: >-
+          Packages to release. JSON array (e.g. '["postgres","datadog_checks_base"]'),
+          'all' to release every Python package in the repo, or omit to auto-detect from new tags.
         required: false
         type: string
       source-repo-ref:
@@ -35,7 +38,7 @@ jobs:
     uses: ./.github/workflows/dispatch-release.yml
     with:
       source-repo: integrations-core
-      integrations: ${{ inputs.integrations || '' }}
+      packages: ${{ inputs.packages || '' }}
       source-repo-ref: ${{ inputs.source-repo-ref || github.sha }}
       target: ${{ inputs.target || 'dev' }} # TODO: switch default to prod once the new pipeline is validated
     permissions:

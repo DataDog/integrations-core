@@ -7,10 +7,10 @@ on:
         description: "Source repository name (e.g. integrations-core, integrations-extras, marketplace)"
         required: false
         type: string
-      integrations:
+      packages:
         description: >-
-          Integration list to release. Accepts a JSON array (e.g. '["postgres","mysql"]'),
-          'all' to release every integration in the repo, or omit to auto-detect from new tags.
+          Packages to release. Accepts a JSON array (e.g. '["postgres","datadog_checks_base"]'),
+          'all' to release every Python package in the repo, or omit to auto-detect from new tags.
         required: false
         type: string
       source-repo-ref:
@@ -22,6 +22,13 @@ on:
         required: false
         type: string
         default: dev # TODO: switch default to prod once the new pipeline is validated
+      dry-run:
+        description: >-
+          When true, print what would be released and where without pushing tags
+          or triggering downstream wheel builds.
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   id-token: write
@@ -42,28 +49,29 @@ jobs:
         run: pip install ddev==14.3.2
 
       - name: Tag releases
-        if: inputs.integrations == ''
+        if: inputs.packages == ''
         id: tag
         env:
           TARGET: ${{ inputs.target }}
+          DRY_RUN: ${{ inputs.dry-run }}
         run: python .github/workflows/scripts/tag_releases.py
 
-      - name: Detect integration list
-        if: inputs.integrations != '' || steps.tag.outcome == 'success'
+      - name: Detect package list
+        if: inputs.packages != '' || steps.tag.outcome == 'success'
         id: detect
         env:
-          MANUAL_INTEGRATIONS: ${{ inputs.integrations }}
-        run: python .github/workflows/scripts/detect_integrations.py
+          MANUAL_PACKAGES: ${{ inputs.packages }}
+        run: python .github/workflows/scripts/detect_packages.py
 
       - name: Validate release readiness
-        if: steps.detect.outputs.has_integrations == 'true'
+        if: steps.detect.outputs.has_packages == 'true'
         env:
-          INTEGRATIONS: ${{ steps.detect.outputs.integrations }}
+          PACKAGES: ${{ steps.detect.outputs.packages }}
           SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
         run: python .github/workflows/scripts/validate_release.py
 
       - name: Get GitHub token via dd-octo-sts
-        if: steps.detect.outputs.has_integrations == 'true'
+        if: steps.detect.outputs.has_packages == 'true' && !inputs.dry-run
         id: octo-sts
         uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
         with:
@@ -71,11 +79,12 @@ jobs:
           policy: integrations-core.dispatch-wheel-builds
 
       - name: Dispatch release
-        if: steps.detect.outputs.has_integrations == 'true'
+        if: steps.detect.outputs.has_packages == 'true'
         env:
           GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
-          INTEGRATIONS: ${{ steps.detect.outputs.integrations }}
+          PACKAGES: ${{ steps.detect.outputs.packages }}
           SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
           REF: ${{ inputs.source-repo-ref || github.sha }}
           TARGET: ${{ inputs.target }}
+          DRY_RUN: ${{ inputs.dry-run }}
         run: python .github/workflows/scripts/dispatch_release.py

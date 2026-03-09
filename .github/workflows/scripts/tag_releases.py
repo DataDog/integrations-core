@@ -1,7 +1,8 @@
-"""Tag all unreleased integrations via ddev and optionally push to origin.
+"""Tag all unreleased packages via ddev and optionally push to origin.
 
 Environment variables:
-  TARGET  'prod' pushes tags; 'dev' (default) creates them locally only.
+  TARGET   'prod' pushes tags; 'dev' (default) creates them locally only.
+  DRY_RUN  When true, tags are created locally but never pushed.
 """
 import os
 import subprocess
@@ -10,7 +11,11 @@ import sys
 
 def main() -> None:
     target = os.environ.get("TARGET", "dev")
-    if target != "prod":
+    dry_run = os.environ.get("DRY_RUN", "").lower() != "false"
+
+    if dry_run:
+        print("DRY RUN: tags will be created locally but not pushed to origin")
+    elif target != "prod":
         print(f"Target '{target}': tags will be created locally but not pushed to origin")
 
     subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True)
@@ -19,7 +24,7 @@ def main() -> None:
         check=True,
     )
 
-    push_flag = "--push" if target == "prod" else "--no-push"
+    push_flag = "--push" if (target == "prod" and not dry_run) else "--no-push"
     base_cmd = ["ddev", "release", "tag", "all", "--skip-prerelease", push_flag]
 
     result = subprocess.run(base_cmd)

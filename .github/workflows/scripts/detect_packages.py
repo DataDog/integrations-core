@@ -1,7 +1,7 @@
-"""Determine which integrations to release and emit the list to GITHUB_OUTPUT.
+"""Determine which packages to release and emit the list to GITHUB_OUTPUT.
 
-Resolution order for MANUAL_INTEGRATIONS:
-  'all' / 'ALL'  → every integration found in the repo (glob for __about__.py)
+Resolution order for MANUAL_PACKAGES:
+  'all' / 'ALL'  → every Python package found in the repo (glob for __about__.py)
   JSON array     → use the provided list as-is
   (empty)        → detect from git tags created at HEAD in this run
 """
@@ -19,7 +19,7 @@ def set_outputs(**kwargs: str) -> None:
             f.write(f"{key}={value}\n")
 
 
-def get_all_integrations() -> list[str]:
+def get_all_packages() -> list[str]:
     return sorted(
         {path.parent.name for path in Path(".").glob("*/datadog_checks/*/__about__.py")}
     )
@@ -33,28 +33,28 @@ def detect_from_tags() -> list[str]:
 
 
 def main() -> None:
-    manual = os.environ.get("MANUAL_INTEGRATIONS", "").strip()
-    all_integrations = get_all_integrations()
+    manual = os.environ.get("MANUAL_PACKAGES", "").strip()
+    all_packages = get_all_packages()
 
     if manual.lower() == "all":
-        integrations = all_integrations
+        packages = all_packages
     elif manual:
         try:
-            integrations = json.loads(manual)
+            packages = json.loads(manual)
         except json.JSONDecodeError as e:
-            print(f"MANUAL_INTEGRATIONS is not valid JSON: {e}", file=sys.stderr)
+            print(f"MANUAL_PACKAGES is not valid JSON: {e}", file=sys.stderr)
             sys.exit(1)
     else:
-        integrations = detect_from_tags()
+        packages = detect_from_tags()
 
-    unknown = set(integrations) - set(all_integrations)
+    unknown = set(packages) - set(all_packages)
     if unknown:
-        print(f"Unknown integrations: {', '.join(unknown)}", file=sys.stderr)
+        print(f"Unknown packages: {', '.join(unknown)}", file=sys.stderr)
         sys.exit(1)
 
     set_outputs(
-        integrations=json.dumps(integrations),
-        has_integrations="true" if integrations else "false",
+        packages=json.dumps(packages),
+        has_packages="true" if packages else "false",
     )
 
 

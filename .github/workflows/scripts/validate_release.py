@@ -1,9 +1,9 @@
-"""Validate that integrations are ready to release.
+"""Validate that packages are ready to release.
 
 Runs ``ddev validate version`` (integrations-core only), then checks that
-changelog.d/ is empty for every non-pre-release integration.
+changelog.d/ is empty for every non-pre-release package.
 
-Environment variables: INTEGRATIONS, SOURCE_REPO.
+Environment variables: PACKAGES, SOURCE_REPO.
 """
 import json
 import os
@@ -15,37 +15,37 @@ from pathlib import Path
 _PRE_RELEASE_RE = re.compile(r"\d+\.\d+\.\d+(a|b|rc)\d+")
 
 
-def get_version(integration: str) -> str | None:
-    about = next(Path(integration).glob("datadog_checks/*/__about__.py"), None)
+def get_version(package: str) -> str | None:
+    about = next(Path(package).glob("datadog_checks/*/__about__.py"), None)
     if about is None:
         return None
     match = re.search(r'__version__\s*=\s*["\']([^"\']+)["\']', about.read_text())
     return match.group(1) if match else None
 
 
-def has_changelog_fragments(integration: str) -> bool:
-    changelog_dir = Path(integration) / "changelog.d"
+def has_changelog_fragments(package: str) -> bool:
+    changelog_dir = Path(package) / "changelog.d"
     if not changelog_dir.is_dir():
         return False
     return any(changelog_dir.iterdir())
 
 
 def main() -> None:
-    integrations = json.loads(os.environ["INTEGRATIONS"])
+    packages = json.loads(os.environ["PACKAGES"])
     source_repo = os.environ["SOURCE_REPO"]
 
     if source_repo == "integrations-core":
-        result = subprocess.run(["ddev", "validate", "version"] + integrations)
+        result = subprocess.run(["ddev", "validate", "version"] + packages)
         if result.returncode != 0:
             sys.exit(result.returncode)
 
     errors = []
-    for integration in integrations:
-        raw = get_version(integration)
+    for package in packages:
+        raw = get_version(package)
         if raw is None or _PRE_RELEASE_RE.search(raw):
             continue
-        if has_changelog_fragments(integration):
-            errors.append(f"{integration} ({raw}): changelog.d/ contains unreleased fragments")
+        if has_changelog_fragments(package):
+            errors.append(f"{package} ({raw}): changelog.d/ contains unreleased fragments")
 
     if errors:
         print("Release validation failed:", file=sys.stderr)
@@ -57,7 +57,7 @@ def main() -> None:
         )
         sys.exit(1)
 
-    print(f"All {len(integrations)} integration(s) passed release validation.")
+    print(f"All {len(packages)} package(s) passed release validation.")
 
 
 if __name__ == "__main__":
