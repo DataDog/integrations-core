@@ -171,6 +171,9 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /mongo/                                             @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /mongo/*.md                                         @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /mongo/manifest.json                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/clickhouse/                                        @DataDog/database-monitoring-agent @DataDog/agent-integrations
+/clickhouse/*.md                                    @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/clickhouse/manifest.json                           @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 
 # Data Streams Monitoring
 /kafka_actions/                                     @DataDog/data-streams-monitoring @DataDog/agent-integrations
