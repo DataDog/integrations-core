@@ -428,6 +428,16 @@ pipeline:
       filter:
         query: "@http.method:*"
       processors:
+        - type: grok-parser
+          name: Parsing `ocsf.http_request.url.query_string` from `http.url`
+          enabled: true
+          source: http.url
+          samples:
+            - /datadoghq/company?test=var1%20Pl
+          grok:
+            supportRules: ""
+            matchRules: |
+              extract_query_string %{regex("[^?]+")}\?%{regex(".*"):ocsf.http_request.url.query_string}
         - type: schema-processor
           name: Apply OCSF schema for 4002
           enabled: true
@@ -518,6 +528,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
+              name: Map `ocsf.http_request.url.query_string` to `ocsf.http_request.url.query_string`
+              sources:
+                - ocsf.http_request.url.query_string
+              target: ocsf.http_request.url.query_string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
               name: Map `http.version` to `ocsf.http_request.version`
               sources:
                 - http.version
@@ -580,7 +597,6 @@ pipeline:
             classUid: 4002
             extensions: []
             profiles: []
-
     - type: pipeline
       name: OCSF sub pipeline for class Application Lifecycle [6002]
       enabled: true
