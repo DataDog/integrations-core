@@ -108,14 +108,11 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     check = ClickhouseCheck('clickhouse', {}, [dbm_instance])
     client = _get_clickhouse_client(dbm_instance)
 
-
     client.query(query)
     time.sleep(2)
 
-
     dd_run_check(check)
     dd_run_check(check)
-
 
     obfuscated = obfuscate_sql_with_metadata(query, check.statement_metrics._obfuscate_options)
     query_signature = compute_sql_signature(obfuscated['query'])
