@@ -1,0 +1,41 @@
+{
+  "ProdLikeDemo": {
+    "Type": "Folder",
+    "RunAs": "workbench",
+
+    "FastOK": {
+      "Type": "Job:Command",
+      "Command": "echo \"fast ok\"; date; exit 0",
+      "RunAs": "workbench"
+    },
+
+    "LongOK": {
+      "Type": "Job:Command",
+      "Command": "echo \"long ok start\"; date; sleep 120; echo \"long ok end\"; date; exit 0",
+      "RunAs": "workbench"
+    },
+
+    "DeterministicFail": {
+      "Type": "Job:Command",
+      "Command": "echo \"this job fails\"; date; echo \"ERROR: simulated failure\" 1>&2; exit 2",
+      "RunAs": "workbench"
+    },
+
+    "IntermittentFail": {
+      "Type": "Job:Command",
+      "Command": "echo \"intermittent start\"; date; r=$((RANDOM % 4)); echo \"roll=$r\"; if [ \"$r\" -eq 0 ]; then echo \"ERROR: intermittent failure\" 1>&2; exit 1; fi; echo \"ok\"; exit 0",
+      "RunAs": "workbench"
+    },
+
+    "NoisyOutput": {
+      "Type": "Job:Command",
+      "Command": "echo \"noisy start\"; date; i=0; while [ $i -lt 200 ]; do echo \"INFO line $i\"; i=$((i+1)); done; echo \"noisy end\"; date; exit 0",
+      "RunAs": "workbench"
+    },
+
+    "Flow": {
+      "Type": "Flow",
+      "Sequence": ["FastOK", "LongOK", "DeterministicFail", "IntermittentFail", "NoisyOutput"]
+    }
+  }
+}
