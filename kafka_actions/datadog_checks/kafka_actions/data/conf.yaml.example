@@ -35,7 +35,8 @@ instances:
 
     ## @param security_protocol - string - optional - default: PLAINTEXT
     ## Protocol used to communicate with brokers.
-    ## Valid values: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+    ## Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL.
+    ## Default: PLAINTEXT.
     #
     # security_protocol: PLAINTEXT
 
@@ -59,6 +60,8 @@ instances:
     ## Path to Kerberos keytab file.
     ## Note: If this config option is not used, the check will attempt to find
     ## the keytab file using the environment variable KRB5_CLIENT_KTNAME.
+    ## Using `sasl_kerberos_keytab` will eventually be required and using the
+    ## environment variable directly will be deprecated.
     #
     # sasl_kerberos_keytab: <SASL_KERBEROS_KEYTAB>
 
@@ -112,6 +115,7 @@ instances:
 
         ## @param scope - string - optional
         ## The OAuth scope to request. Required by most identity providers.
+        ## For example, a custom scope like 'kafka' or 'api://default'.
         #
         # scope: <SCOPE>
 

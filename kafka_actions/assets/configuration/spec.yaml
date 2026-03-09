@@ -42,11 +42,13 @@ files:
     - name: security_protocol
       description: |
         Protocol used to communicate with brokers.
-        Valid values: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+        Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL.
+        Default: PLAINTEXT.
       fleet_configurable: true
       value:
         type: string
         example: PLAINTEXT
+        display_default: PLAINTEXT
     
     - name: sasl_mechanism
       description: |
@@ -78,6 +80,8 @@ files:
         Path to Kerberos keytab file.
         Note: If this config option is not used, the check will attempt to find
         the keytab file using the environment variable KRB5_CLIENT_KTNAME.
+        Using `sasl_kerberos_keytab` will eventually be required and using the
+        environment variable directly will be deprecated.
       fleet_configurable: true
       value:
         type: string
@@ -150,6 +154,7 @@ files:
         enabled: false
         description: |
           The OAuth scope to request. Required by most identity providers.
+          For example, a custom scope like 'kafka' or 'api://default'.
         value:
           type: string
       - name: extensions
