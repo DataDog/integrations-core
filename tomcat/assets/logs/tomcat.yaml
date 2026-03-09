@@ -134,7 +134,7 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: HTTP URL
+    name: Request URL String
     path: ocsf.http_request.url.url_string
     source: log
 pipeline:
