@@ -119,6 +119,7 @@ class TestHostCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
+            'Team:agent-integrations',
             'ntnx_type:host',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'ntnx_host_name:10-0-0-103-aws-us-east-1a',
@@ -140,6 +141,7 @@ class TestHostCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
+            'Team:agent-integrations',
             'ntnx_type:host',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'ntnx_host_name:10-0-0-103-aws-us-east-1a',
@@ -161,6 +163,7 @@ class TestHostCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
+            'Team:agent-integrations',
             'ntnx_type:host',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'ntnx_host_name:10-0-0-103-aws-us-east-1a',
@@ -182,6 +185,7 @@ class TestHostCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
+            'Team:agent-integrations',
             'ntnx_type:host',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'ntnx_host_name:10-0-0-103-aws-us-east-1a',
@@ -207,6 +211,7 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
+            'Team:agent-integrations',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'nutanix',
             'prism_central:10.0.0.197',
@@ -221,6 +226,7 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
+            'Team:agent-integrations',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'nutanix',
             'prism_central:10.0.0.197',
@@ -235,6 +241,7 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
+            'Team:agent-integrations',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'nutanix',
             'prism_central:10.0.0.197',
@@ -249,6 +256,7 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
+            'Team:agent-integrations',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'nutanix',
             'prism_central:10.0.0.197',
@@ -263,6 +271,7 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         expected_tags = [
+            'Team:agent-integrations',
             'ntnx_cluster_name:datadog-nutanix-dev',
             'nutanix',
             'prism_central:10.0.0.197',
