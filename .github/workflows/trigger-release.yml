@@ -31,6 +31,11 @@ on:
           - dev
           - prod
         default: dev
+      dry-run:
+        description: "Print what would be released without pushing tags or starting builds"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   dispatch:
@@ -41,6 +46,7 @@ jobs:
       packages: ${{ inputs.packages || '' }}
       source-repo-ref: ${{ inputs.source-repo-ref || github.sha }}
       target: ${{ inputs.target || 'dev' }} # TODO: switch default to prod once the new pipeline is validated
+      dry-run: ${{ inputs.dry-run || false }}
     permissions:
       id-token: write
       contents: write
