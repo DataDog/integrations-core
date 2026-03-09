@@ -6,15 +6,34 @@
 from __future__ import annotations
 
 import asyncio
-from time import time
-from typing import Any
+from typing import Any, Generic, TypeVar
 
 import httpx
+from pydantic import BaseModel, ConfigDict
 
 from ddev.config.file import ConfigFileWithOverrides
 
+T = TypeVar('T')
 
-class GitHubAsyncClient:
+
+class RateLimitInfo(BaseModel):
+    """GitHub API throttling information from response headers."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    retry_after: int | None = None
+
+
+class GitHubResponse(BaseModel, Generic[T]):
+    """Response wrapper containing data and throttling information."""
+
+    model_config = ConfigDict(extra="ignore", arbitrary_types_allowed=True)
+
+    data: T
+    rate_limit: RateLimitInfo
+
+
+class AsyncGitHubClient:
     """Async GitHub API client with direct endpoint mapping."""
 
     API_VERSION = '2022-11-28'
@@ -69,6 +88,12 @@ class GitHubAsyncClient:
             await self._client.aclose()
             self._client = None
 
+    def _extract_rate_limit(self, headers: httpx.Headers) -> RateLimitInfo:
+        """Extract throttling information from response headers."""
+        return RateLimitInfo(
+            retry_after=int(headers['Retry-After']) if 'Retry-After' in headers else None,
+        )
+
     async def _request(
         self,
         method: str,
@@ -77,7 +102,7 @@ class GitHubAsyncClient:
         json: dict[str, Any] | None = None,
     ) -> httpx.Response:
         """
-        Make an async HTTP request with rate limit handling.
+        Make an async HTTP request with secondary rate limit (throttling) handling.
 
         Args:
             method: HTTP method (GET, POST, etc.)
@@ -93,11 +118,10 @@ class GitHubAsyncClient:
 
         response = await self._client.request(method, url, params=params, json=json)
 
-        # Handle GitHub rate limiting
-        if response.status_code == 403 and response.headers.get('X-RateLimit-Remaining') == '0':
-            reset_time = float(response.headers.get('X-RateLimit-Reset', 0))
-            wait_time = reset_time - time() + 1
-            await asyncio.sleep(wait_time)
+        # Handle secondary rate limiting (throttling) via Retry-After header
+        if response.status_code in (403, 429) and 'Retry-After' in response.headers:
+            retry_after = int(response.headers['Retry-After'])
+            await asyncio.sleep(retry_after)
             # Retry after waiting
             response = await self._client.request(method, url, params=params, json=json)
 
@@ -112,7 +136,7 @@ class GitHubAsyncClient:
         repo: str,
         workflow_id: str | int | None = None,
         **kwargs: Any,
-    ) -> dict[str, Any]:
+    ) -> GitHubResponse[dict[str, Any]]:
         """
         List workflow runs.
 
@@ -125,7 +149,7 @@ class GitHubAsyncClient:
             **kwargs: Additional query parameters (status, branch, event, per_page, etc.)
 
         Returns:
-            Dict with 'workflow_runs' list
+            GitHubResponse with dict containing 'workflow_runs' list and throttling info
         """
         if workflow_id:
             url = f'/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs'
@@ -133,26 +157,35 @@ class GitHubAsyncClient:
             url = f'/repos/{owner}/{repo}/actions/runs'
 
         response = await self._request('GET', url, params=kwargs)
-        return response.json()
+        return GitHubResponse(data=response.json(), rate_limit=self._extract_rate_limit(response.headers))
 
-    async def get_workflow_run(self, owner: str, repo: str, run_id: int) -> dict[str, Any]:
+    async def get_workflow_run(self, owner: str, repo: str, run_id: int) -> GitHubResponse[dict[str, Any]]:
         """
         Get a workflow run.
 
         https://docs.github.com/en/rest/actions/workflow-runs#get-a-workflow-run
+
+        Returns:
+            GitHubResponse with workflow run data and throttling info
         """
         response = await self._request('GET', f'/repos/{owner}/{repo}/actions/runs/{run_id}')
-        return response.json()
+        return GitHubResponse(data=response.json(), rate_limit=self._extract_rate_limit(response.headers))
 
-    async def cancel_workflow_run(self, owner: str, repo: str, run_id: int) -> None:
+    async def cancel_workflow_run(self, owner: str, repo: str, run_id: int) -> GitHubResponse[None]:
         """
         Cancel a workflow run.
 
         https://docs.github.com/en/rest/actions/workflow-runs#cancel-a-workflow-run
-        """
-        await self._request('POST', f'/repos/{owner}/{repo}/actions/runs/{run_id}/cancel')
 
-    async def list_workflow_run_jobs(self, owner: str, repo: str, run_id: int, **kwargs: Any) -> dict[str, Any]:
+        Returns:
+            GitHubResponse with None data and throttling info
+        """
+        response = await self._request('POST', f'/repos/{owner}/{repo}/actions/runs/{run_id}/cancel')
+        return GitHubResponse(data=None, rate_limit=self._extract_rate_limit(response.headers))
+
+    async def list_workflow_run_jobs(
+        self, owner: str, repo: str, run_id: int, **kwargs: Any
+    ) -> GitHubResponse[dict[str, Any]]:
         """
         List jobs for a workflow run.
 
@@ -165,16 +198,16 @@ class GitHubAsyncClient:
             **kwargs: Additional query parameters (filter, per_page, page)
 
         Returns:
-            Dict with 'jobs' list
+            GitHubResponse with dict containing 'jobs' list and throttling info
         """
         response = await self._request('GET', f'/repos/{owner}/{repo}/actions/runs/{run_id}/jobs', params=kwargs)
-        return response.json()
+        return GitHubResponse(data=response.json(), rate_limit=self._extract_rate_limit(response.headers))
 
     # Workflows API - https://docs.github.com/en/rest/actions/workflows
 
     async def create_workflow_dispatch(
         self, owner: str, repo: str, workflow_id: str | int, ref: str, inputs: dict[str, Any] | None = None
-    ) -> None:
+    ) -> GitHubResponse[None]:
         """
         Trigger a workflow dispatch event.
 
@@ -186,9 +219,15 @@ class GitHubAsyncClient:
             workflow_id: Workflow ID or filename (e.g., 'test.yml')
             ref: Git ref (branch or tag name)
             inputs: Optional workflow inputs
+
+        Returns:
+            GitHubResponse with None data and throttling info
         """
         json_data: dict[str, Any] = {'ref': ref}
         if inputs:
             json_data['inputs'] = inputs
 
-        await self._request('POST', f'/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', json=json_data)
+        response = await self._request(
+            'POST', f'/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', json=json_data
+        )
+        return GitHubResponse(data=None, rate_limit=self._extract_rate_limit(response.headers))
