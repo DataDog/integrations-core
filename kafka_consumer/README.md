@@ -81,15 +81,18 @@ instances:
 
 ### Kafka ACL Permissions
 
-| Resource type | Resource name | Operation | Required for |
-|--------------|---------------|-----------|-------------|
-| Cluster | `kafka-cluster` | DESCRIBE | All setups |
-| Topic | `*` | DESCRIBE | All setups |
-| Consumer group | `*` | DESCRIBE, READ | All setups |
-| Cluster | `kafka-cluster` | DESCRIBE_CONFIGS | `enable_cluster_monitoring` |
-| Topic | `*` | DESCRIBE_CONFIGS | `enable_cluster_monitoring` |
-| Topic | `*` | READ, WRITE | [Kafka messages][21] |
-| Consumer group | `datadog-agent-` (PREFIXED) | READ | [Kafka messages][21] |
+**Cluster** (`kafka-cluster`)
+- DESCRIBE
+- DESCRIBE_CONFIGS (cluster monitoring only)
+
+**Topic** (`*`)
+- DESCRIBE
+- DESCRIBE_CONFIGS (cluster monitoring only)
+- READ, WRITE ([Kafka messages][21] only)
+
+**Consumer group** (`*`)
+- DESCRIBE
+- READ
 
 ### Validation
 
