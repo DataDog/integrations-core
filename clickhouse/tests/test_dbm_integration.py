@@ -66,7 +66,6 @@ pytestmark = [
 
 @pytest.fixture
 def dbm_instance(instance):
-    instance = deepcopy(instance)
     instance['dbm'] = True
     instance['query_metrics'] = {
         'enabled': True,
@@ -105,28 +104,19 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     2. All numeric metric columns are present with correct types
     3. A matching FQT (Full Query Text) event is emitted with the same query_signature
     4. The FQT event has the correct structure and metadata
-
-    This is the ClickHouse equivalent of MySQL's test_statement_metrics and Postgres's
-    test_statement_metrics: a single end-to-end test that proves metrics and FQT events
-    are consistent for a given query, in a single collection cycle.
     """
     check = ClickhouseCheck('clickhouse', {}, [dbm_instance])
     client = _get_clickhouse_client(dbm_instance)
 
-    # Execute the query so it lands in system.query_log.
-    # Unlike pg_stat_statements / performance_schema (synchronous in-memory views),
-    # ClickHouse flushes query_log asynchronously, so we need a brief wait.
+
     client.query(query)
     time.sleep(2)
 
-    # First check run seeds the checkpoint; second run collects the window.
-    # This mirrors MySQL/Postgres needing two runs for derivative computation,
-    # though ClickHouse uses checkpoint-based collection instead.
+
     dd_run_check(check)
     dd_run_check(check)
 
-    # Compute the expected signature the same way the agent does:
-    # raw SQL -> obfuscate_sql_with_metadata -> compute_sql_signature
+
     obfuscated = obfuscate_sql_with_metadata(query, check.statement_metrics._obfuscate_options)
     query_signature = compute_sql_signature(obfuscated['query'])
 
