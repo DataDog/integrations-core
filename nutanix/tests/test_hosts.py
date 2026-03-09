@@ -16,6 +16,7 @@ def test_host_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
     dd_run_check(check)
 
     expected_tags = [
+        'Team:agent-integrations',
         'ntnx_type:host',
         'ntnx_cluster_name:datadog-nutanix-dev',
         'ntnx_host_name:10-0-0-103-aws-us-east-1a',
@@ -34,6 +35,7 @@ def test_host_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_g
     dd_run_check(check)
 
     expected_tags = [
+        'Team:agent-integrations',
         'ntnx_type:host',
         'ntnx_cluster_name:datadog-nutanix-dev',
         'ntnx_host_name:10-0-0-103-aws-us-east-1a',
@@ -54,6 +56,7 @@ def test_host_status_metrics(dd_run_check, aggregator, mock_instance, mock_http_
     dd_run_check(check)
 
     expected_tags = [
+        'Team:agent-integrations',
         'ntnx_type:host',
         'ntnx_cluster_name:datadog-nutanix-dev',
         'ntnx_host_name:10-0-0-103-aws-us-east-1a',
@@ -76,6 +79,7 @@ def test_external_tags_for_host(dd_run_check, aggregator, mock_instance, mock_ht
         '10-0-0-103-aws-us-east-1a',
         {
             'nutanix': [
+                'Team:agent-integrations',
                 'ntnx_type:host',
                 'ntnx_cluster_name:datadog-nutanix-dev',
                 'ntnx_host_name:10-0-0-103-aws-us-east-1a',
