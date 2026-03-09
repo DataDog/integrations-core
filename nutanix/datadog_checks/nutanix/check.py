@@ -108,16 +108,33 @@ class NutanixCheck(AgentCheck):
         categories = entity.get("categories")
         if categories:
             for c in categories:
-                category_id = c.get("extId")
-                if category_id and category_id in self.categories:
-                    category = self.categories[category_id]
-                    key = category.get("key")
-                    value = category.get("value")
-                    if key and value:
-                        if self.prefix_category_tags:
-                            tags.append(f"ntnx_{key}:{value}")
-                        else:
-                            tags.append(f"{key}:{value}")
+                if isinstance(c, dict):
+                    category_id = c.get("extId")
+                elif isinstance(c, str):
+                    category_id = c
+                else:
+                    self.log.debug(
+                        "Skipping unexpected category entry type=%s value=%r",
+                        type(c),
+                        c,
+                    )
+                    continue
+
+                if not category_id:
+                    continue
+
+                category = self.categories.get(category_id)
+                if not isinstance(category, dict):
+                    continue
+
+                key = category.get("key")
+                value = category.get("value")
+
+                if key and value:
+                    if self.prefix_category_tags:
+                        tags.append(f"ntnx_{key}:{value}")
+                    else:
+                        tags.append(f"{key}:{value}")
         return tags
 
     def check(self, _):
