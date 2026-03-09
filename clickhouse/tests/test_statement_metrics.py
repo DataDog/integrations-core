@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.base.utils.db.sql import compute_sql_signature
+from datadog_checks.base.utils.db.utils import obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.clickhouse.statements import ClickhouseStatementMetrics, _row_key
@@ -150,6 +152,66 @@ def test_normalize_queries(check_with_dbm):
     # Verify other fields are preserved
     assert row['count'] == 10
     assert row['total_time'] == 1000.0
+
+
+def test_query_signature_matches_samples_pipeline(check_with_dbm):
+    """Test that query_signature from metrics pipeline matches what the samples pipeline would produce.
+
+    The metrics pipeline (statements.py) and samples pipeline (statement_samples.py) must produce
+    the same query_signature for the same query, otherwise the UI cannot correlate metrics with
+    samples. Both pipelines should: raw SQL -> Datadog obfuscator -> compute_sql_signature().
+    """
+    metrics = check_with_dbm.statement_metrics
+
+    test_queries = [
+        'SELECT * FROM users WHERE user_id = 12345',
+        'SELECT i.sku, count(s.id), sum(s.quantity) FROM inventory_items i'
+        ' LEFT JOIN shipments s ON i.sku = s.sku GROUP BY i.sku ORDER BY shipment_count DESC LIMIT 100',
+        "INSERT INTO events (ts, data) VALUES ('2026-01-01', 'hello world')",
+        'SELECT count(*) FROM inventory_items WHERE sku = 42',
+    ]
+
+    for raw_query in test_queries:
+        # Metrics pipeline: _normalize_queries -> _obfuscate_query(raw_query) -> query_signature
+        rows = [
+            {
+                'normalized_query_hash': '12345',
+                'query': raw_query,
+                'user': 'default',
+                'query_type': 'Select',
+                'exception_code': '',
+                'databases': 'default',
+                'dd_tables': [],
+                'count': 1,
+                'total_time': 10.0,
+                'mean_time': 10.0,
+                'p50_time': 10.0,
+                'p90_time': 10.0,
+                'p95_time': 10.0,
+                'p99_time': 10.0,
+                'result_rows': 0,
+                'read_rows': 0,
+                'read_bytes': 0,
+                'written_rows': 0,
+                'written_bytes': 0,
+                'result_bytes': 0,
+                'memory_usage': 0,
+                'peak_memory_usage': 0,
+            }
+        ]
+        normalized = metrics._normalize_queries(rows)
+        assert len(normalized) == 1
+        metrics_signature = normalized[0]['query_signature']
+
+        # Samples pipeline: obfuscate_sql_with_metadata(raw_query) -> compute_sql_signature()
+        obfuscated = obfuscate_sql_with_metadata(raw_query, metrics._obfuscate_options)['query']
+        samples_signature = compute_sql_signature(obfuscated)
+
+        assert metrics_signature == samples_signature, (
+            f"query_signature mismatch for query: {raw_query!r}\n"
+            f"  metrics pipeline: {metrics_signature}\n"
+            f"  samples pipeline: {samples_signature}"
+        )
 
 
 def test_row_key():
