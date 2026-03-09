@@ -366,6 +366,18 @@ pipeline:
           expression: duration / 1000000
           target: ocsf.duration
           replaceMissing: false
+        - type: string-builder-processor
+          name: Add ocsf.actor.process.name
+          enabled: true
+          template: "java"
+          target: ocsf.actor.process.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add ocsf.process.name
+          enabled: true
+          template: "java"
+          target: ocsf.process.name
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 1004
           enabled: true
@@ -384,6 +396,16 @@ pipeline:
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@gc.action:*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
             - type: schema-remapper
               name: Map `gc.action` to `ocsf.message`
               sources:
@@ -396,6 +418,37 @@ pipeline:
               sources:
                 - ocsf.duration
               target: ocsf.duration
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "@gc.action:*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+            - type: schema-remapper
+              name: Map `ocsf.actor.process.name` to `ocsf.actor.process.name`
+              sources:
+                - ocsf.actor.process.name
+              target: ocsf.actor.process.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.process.name` to `ocsf.process.name`
+              sources:
+                - ocsf.process.name
+              target: ocsf.process.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `timestamp` to `ocsf.time`
+              sources:
+                - timestamp
+              target: ocsf.time
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -489,6 +542,16 @@ pipeline:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
             - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@http.method:*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-category-mapper
               name: ocsf.status_id
               categories:
                 - filter:
@@ -574,6 +637,13 @@ pipeline:
               sources:
                 - network.bytes_written
               target: ocsf.traffic.bytes_out
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `timestamp` to `ocsf.time`
+              sources:
+                - timestamp
+              target: ocsf.time
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -667,6 +737,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
+              name: Map `timestamp` to `ocsf.time`
+              sources:
+                - timestamp
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
               name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
                 - ocsf.metadata.product.name
@@ -720,13 +797,6 @@ pipeline:
                 name: ocsf.severity
                 id: ocsf.severity_id
             - type: schema-remapper
-              name: Map `logger.name` to `ocsf.app.name`
-              sources:
-                - logger.name
-              target: ocsf.app.name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
               name: Map `message` to `ocsf.message`
               sources:
                 - message
@@ -738,6 +808,13 @@ pipeline:
               sources:
                 - status
               target: ocsf.status
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `timestamp` to `ocsf.time`
+              sources:
+                - timestamp
+              target: ocsf.time
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
