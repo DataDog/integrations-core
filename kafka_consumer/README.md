@@ -79,6 +79,18 @@ instances:
     schema_registry_url: http://localhost:8081  # optional
 ```
 
+### Kafka ACL Permissions
+
+| Resource type | Resource name | Operation | Required for |
+|--------------|---------------|-----------|-------------|
+| Cluster | `kafka-cluster` | DESCRIBE | All setups |
+| Topic | `*` | DESCRIBE | All setups |
+| Consumer group | `*` | DESCRIBE, READ | All setups |
+| Cluster | `kafka-cluster` | DESCRIBE_CONFIGS | `enable_cluster_monitoring` |
+| Topic | `*` | DESCRIBE_CONFIGS | `enable_cluster_monitoring` |
+| Topic | `*` | READ, WRITE | [Kafka messages][21] |
+| Consumer group | `datadog-agent-` (PREFIXED) | READ | [Kafka messages][21] |
+
 ### Validation
 
 1. [Run the Agent's status subcommand][8] and look for `kafka_consumer` under the Checks section.
