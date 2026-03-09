@@ -36,8 +36,20 @@ def instance_disable_generic_tags():
     return False
 
 
+def instance_emit_job_events():
+    return False
+
+
+def instance_emit_success_events():
+    return False
+
+
 def instance_empty_default_hostname():
     return False
+
+
+def instance_enable_legacy_tags_normalization():
+    return True
 
 
 def instance_finalized_ttl_seconds():

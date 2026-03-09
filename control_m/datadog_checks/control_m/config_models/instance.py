@@ -67,7 +67,10 @@ class InstanceConfig(BaseModel):
     control_m_password: Optional[str] = None
     control_m_username: Optional[str] = None
     disable_generic_tags: Optional[bool] = None
+    emit_job_events: Optional[bool] = None
+    emit_success_events: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     finalized_ttl_seconds: Optional[int] = None
     headers: Optional[MappingProxyType[str, Any]] = None
@@ -91,6 +94,7 @@ class InstanceConfig(BaseModel):
     request_size: Optional[float] = None
     service: Optional[str] = None
     skip_proxy: Optional[bool] = None
+    slow_run_threshold_ms: Optional[int] = None
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[float] = None
     tls_ca_cert: Optional[str] = None
