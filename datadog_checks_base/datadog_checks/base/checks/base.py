@@ -27,7 +27,11 @@ from datadog_checks.base.utils.agent.utils import should_profile_memory
 from datadog_checks.base.utils.common import ensure_bytes, to_native_string
 from datadog_checks.base.utils.fips import enable_fips
 from datadog_checks.base.utils.format import json
-from datadog_checks.base.utils.models.validation.security import SecurityConfig, check_field_trusted_provider
+from datadog_checks.base.utils.models.validation.security import (
+    DEFAULT_TRUSTED_PROVIDERS,
+    SecurityConfig,
+    check_field_trusted_provider,
+)
 from datadog_checks.base.utils.tagging import GENERIC_TAGS
 from datadog_checks.base.utils.tracing import traced_class
 
@@ -437,7 +441,7 @@ class AgentCheck(object):
                 ignore_untrusted_file_params=bool(datadog_agent.get_config('integration_ignore_untrusted_file_params')),
                 file_paths_allowlist=datadog_agent.get_config('integration_file_paths_allowlist') or [],
                 trusted_providers=datadog_agent.get_config('integration_trusted_providers')
-                or ['file', 'remote-config'],
+                or DEFAULT_TRUSTED_PROVIDERS,
                 excluded_checks=datadog_agent.get_config('integration_security_excluded_checks') or [],
             )
 

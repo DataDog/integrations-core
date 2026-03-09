@@ -134,22 +134,14 @@ def _fix_types(model_file_lines):
 
 def _add_secure_fields_constant(model_file_lines, require_trusted_providers):
     """Add SECURE_FIELD_NAMES constant before the first class definition."""
-    # Find the first class definition
-    class_line_index = None
-    for i, line in enumerate(model_file_lines):
-        if line.startswith('class '):
-            class_line_index = i
-            break
-
+    class_line_index = next((i for i, line in enumerate(model_file_lines) if line.startswith('class ')), None)
     if class_line_index is not None:
-        # Build the set of normalized field names
-        field_names = sorted(normalized_name for normalized_name, _ in require_trusted_providers)
-        fields_str = ', '.join(f'{name!r}' for name in field_names)
-
-        # Insert the constant before the first class, with blank lines for readability
-        model_file_lines.insert(class_line_index, '')
-        model_file_lines.insert(class_line_index, f'SECURE_FIELD_NAMES = frozenset([{fields_str}])')
-        model_file_lines.insert(class_line_index, '')
+        fields_str = ', '.join(f'{name!r}' for name in sorted(require_trusted_providers))
+        model_file_lines[class_line_index:class_line_index] = [
+            '',
+            f'SECURE_FIELD_NAMES = frozenset([{fields_str}])',
+            '',
+        ]
 
 
 def _define_deprecation_functions(model_id, section_name):
