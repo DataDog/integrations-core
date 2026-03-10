@@ -1,0 +1,9 @@
+provides:
+  - id: argo_rollouts-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: argo_rollouts-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

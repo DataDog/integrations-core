@@ -1,0 +1,5 @@
+provides:
+  - id: ecs_fargate-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound

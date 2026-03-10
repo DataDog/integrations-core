@@ -1,0 +1,9 @@
+provides:
+  - id: appgate_sdp-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: appgate_sdp-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

@@ -1,0 +1,5 @@
+provides:
+  - id: delinea_secret_server-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

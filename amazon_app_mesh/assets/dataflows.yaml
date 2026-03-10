@@ -1,0 +1,9 @@
+provides:
+  - id: amazon_app_mesh-logs
+    always_on: false
+    data_type: logs
+    direction: inbound
+  - id: amazon_app_mesh-events
+    always_on: true
+    data_type: events
+    direction: inbound

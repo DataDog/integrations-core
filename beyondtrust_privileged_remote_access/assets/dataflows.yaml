@@ -1,0 +1,5 @@
+provides:
+  - id: beyondtrust_privileged_remote_access-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

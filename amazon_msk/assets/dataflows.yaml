@@ -1,0 +1,5 @@
+provides:
+  - id: amazon_msk-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound

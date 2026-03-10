@@ -1,0 +1,9 @@
+provides:
+  - id: confluent_platform-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: confluent_platform-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

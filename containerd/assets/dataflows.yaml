@@ -1,0 +1,9 @@
+provides:
+  - id: containerd-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: containerd-events
+    always_on: true
+    data_type: events
+    direction: inbound

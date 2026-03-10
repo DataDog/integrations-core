@@ -1,0 +1,5 @@
+provides:
+  - id: cloud_foundry_api-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound

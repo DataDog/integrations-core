@@ -1,0 +1,5 @@
+provides:
+  - id: eset_protect-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

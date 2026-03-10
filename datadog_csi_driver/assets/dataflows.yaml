@@ -1,0 +1,5 @@
+provides:
+  - id: datadog_csi_driver-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound

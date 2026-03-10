@@ -1,0 +1,5 @@
+provides:
+  - id: cisco_secure_client-logs
+    always_on: false
+    data_type: logs
+    direction: inbound
