@@ -425,9 +425,10 @@ class TestSchemaRegistryIntegration:
         '{"name": "author", "type": "string"}]}'
     )
 
+    # Base64-encoded FileDescriptorProto (what Schema Registry ?format=serialized returns)
     PROTOBUF_SCHEMA_B64 = (
-        'CmoKDHNjaGVtYS5wcm90bxIIY29tLmJvb2siSAoEQm9vaxISCgRpc2JuGAEgASgDUgRpc2Ju'
-        'EhQKBXRpdGxlGAIgASgJUgV0aXRsZRIWCgZhdXRob3IYAyABKAlSBmF1dGhvcmIGcHJvdG8z'
+        'CgxzY2hlbWEucHJvdG8SCGNvbS5ib29rIkgKBEJvb2sSEgoEaXNibhgBIAEoA1IEaXNibhIU'
+        'CgV0aXRsZRgCIAEoCVIFdGl0bGUSFgoGYXV0aG9yGAMgASgJUgZhdXRob3JiBnByb3RvMw=='
     )
 
     # Avro-encoded Book: isbn=9780134190440, title="The Go Programming Language", author="Alan Donovan"

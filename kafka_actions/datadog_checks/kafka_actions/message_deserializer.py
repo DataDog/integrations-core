@@ -159,7 +159,7 @@ class MessageDeserializer:
             message = message[5:]  # Skip the magic byte and schema ID bytes
 
             actual_format = message_format
-            if self.schema_registry is not None:
+            if self.schema_registry is not None and message_format in ('avro', 'protobuf'):
                 schema, actual_format = self._fetch_and_build_schema(schema_id, message_format)
 
             return self._deserialize_bytes(message, actual_format, schema, uses_schema_registry=True), schema_id
@@ -328,17 +328,19 @@ class MessageDeserializer:
         }
         actual_format = registry_type_map.get(schema_type, message_format)
 
-        schema = self._get_or_build_schema(actual_format, schema_str)
+        schema = self._get_or_build_schema(actual_format, schema_str, from_registry=True)
         result = (schema, actual_format)
         self._registry_schema_cache[cache_key] = result
         return result
 
-    def _get_or_build_schema(self, message_format: str, schema_str: str):
+    def _get_or_build_schema(self, message_format: str, schema_str: str, from_registry: bool = False):
         """Get cached schema or build it if not in cache.
 
         Args:
             message_format: 'protobuf' or 'avro'
             schema_str: Schema definition string
+            from_registry: If True, schema comes from Schema Registry (FileDescriptorProto for protobuf).
+                           If False, schema is inline config (FileDescriptorSet for protobuf).
 
         Returns:
             Schema object (cached or newly built)
@@ -351,22 +353,25 @@ class MessageDeserializer:
             return self._schema_cache[cache_key]
 
         self.log.debug("Building new schema for %s (hash: %s...)", message_format, schema_hash[:8])
-        schema = self._build_schema(message_format, schema_str)
+        schema = self._build_schema(message_format, schema_str, from_registry)
 
         self._schema_cache[cache_key] = schema
         return schema
 
-    def _build_schema(self, message_format: str, schema_str: str):
+    def _build_schema(self, message_format: str, schema_str: str, from_registry: bool = False):
         """Build schema object from schema string.
 
         Args:
             message_format: 'protobuf' or 'avro'
             schema_str: Schema definition string
+            from_registry: If True, use registry format (FileDescriptorProto for protobuf)
 
         Returns:
             Schema object
         """
         if message_format == 'protobuf':
+            if from_registry:
+                return self._build_protobuf_schema_from_registry(schema_str)
             return self._build_protobuf_schema(schema_str)
         elif message_format == 'avro':
             return self._build_avro_schema(schema_str)
@@ -382,12 +387,29 @@ class MessageDeserializer:
         return schema
 
     def _build_protobuf_schema(self, schema_str: str):
+        """Build a Protobuf schema from a base64-encoded FileDescriptorSet.
+
+        Used for inline schemas provided via configuration (value_schema/key_schema).
+
+        Returns:
+            Tuple of (descriptor_pool, file_descriptor_set) for use with
+            _get_protobuf_message_class to select the correct message type.
+        """
+        schema_bytes = base64.b64decode(schema_str)
+        descriptor_set = descriptor_pb2.FileDescriptorSet()
+        descriptor_set.ParseFromString(schema_bytes)
+
+        pool = descriptor_pool.DescriptorPool()
+        for fd_proto in descriptor_set.file:
+            pool.Add(fd_proto)
+
+        return (pool, descriptor_set)
+
+    def _build_protobuf_schema_from_registry(self, schema_str: str):
         """Build a Protobuf schema from a base64-encoded FileDescriptorProto.
 
         The Confluent Schema Registry's ?format=serialized endpoint returns a
-        base64-encoded FileDescriptorProto (single file). We parse it and wrap
-        it in a FileDescriptorSet for consistent handling with
-        _get_protobuf_message_class.
+        base64-encoded FileDescriptorProto (single file), not a FileDescriptorSet.
 
         Returns:
             Tuple of (descriptor_pool, file_descriptor_set) for use with
