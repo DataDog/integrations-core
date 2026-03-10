@@ -10,6 +10,7 @@ from datadog_checks.base import AgentCheck
 from .config import KafkaActionsConfig
 from .kafka_client import KafkaActionsClient
 from .message_deserializer import DeserializedMessage, MessageDeserializer
+from .schema_registry import SchemaRegistryClient
 
 
 class KafkaActionsCheck(AgentCheck):
@@ -33,7 +34,13 @@ class KafkaActionsCheck(AgentCheck):
         self.cluster = 'unknown'  # Will be set by action handlers
 
         self.kafka_client = KafkaActionsClient(self.instance, self.log)
-        self.deserializer = MessageDeserializer(self.log)
+
+        schema_registry = None
+        schema_registry_url = self.instance.get('schema_registry_url')
+        if schema_registry_url:
+            schema_registry = SchemaRegistryClient(self.http, schema_registry_url, self.log, self.instance)
+
+        self.deserializer = MessageDeserializer(self.log, schema_registry=schema_registry)
 
         self.action_handlers = {
             'read_messages': self._action_read_messages,

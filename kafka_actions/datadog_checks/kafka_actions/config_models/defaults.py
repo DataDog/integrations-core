@@ -32,5 +32,25 @@ def instance_sasl_mechanism():
     return 'PLAIN'
 
 
+def instance_schema_registry_tls_ca_cert():
+    return '/path/to/ca_cert.pem'
+
+
+def instance_schema_registry_tls_cert():
+    return '/path/to/client_cert.pem'
+
+
+def instance_schema_registry_tls_key():
+    return '/path/to/client_key.pem'
+
+
+def instance_schema_registry_tls_verify():
+    return True
+
+
+def instance_schema_registry_url():
+    return 'http://localhost:8081'
+
+
 def instance_security_protocol():
     return 'PLAINTEXT'
