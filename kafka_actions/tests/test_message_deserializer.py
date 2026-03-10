@@ -450,9 +450,9 @@ class TestSchemaRegistryIntegration:
         return header + payload
 
     @staticmethod
-    def _mock_registry(schema_str: str, schema_type: str = 'AVRO') -> MagicMock:
+    def _mock_registry(schema_str: str, schema_type: str = 'AVRO', dep_schemas: list[str] | None = None) -> MagicMock:
         registry = MagicMock()
-        registry.get_schema.return_value = (schema_str, schema_type)
+        registry.get_schema.return_value = (schema_str, schema_type, dep_schemas or [])
         return registry
 
     def test_avro_with_schema_registry_fetch(self):

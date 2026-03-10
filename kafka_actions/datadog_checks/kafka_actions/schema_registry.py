@@ -88,12 +88,18 @@ class SchemaRegistryClient:
 
         self._log.debug("Schema Registry OAuth token refreshed, expires at %s", self._oauth_token_expiry)
 
-    def get_schema(self, schema_id: int) -> tuple[str, str]:
-        """Fetch schema by ID from the registry. Returns (schema_string, schema_type).
+    def get_schema(self, schema_id: int) -> tuple[str, str, list[tuple[str, str]]]:
+        """Fetch schema by ID from the registry.
 
-        For PROTOBUF schemas, requests format=serialized to get a base64-encoded
-        FileDescriptorProto that can be parsed directly by the protobuf library.
-        For AVRO/JSON schemas, returns the raw schema string.
+        Returns (schema_string, schema_type, dep_schemas) where:
+        - schema_string: The schema definition
+        - schema_type: 'AVRO', 'PROTOBUF', or 'JSON'
+        - dep_schemas: List of base64-encoded FileDescriptorProtos for protobuf
+          dependencies (in dependency order, to be added to the pool before the
+          main schema). Empty list for non-PROTOBUF schemas.
+
+        For PROTOBUF schemas, requests format=serialized to get base64-encoded
+        FileDescriptorProtos. References (imports) are resolved recursively.
 
         Schemas are immutable in the registry, so results are cached forever.
         """
@@ -112,16 +118,71 @@ class SchemaRegistryClient:
 
         schema_str = data['schema']
         schema_type = data.get('schemaType', 'AVRO')
+        dep_schemas = []
 
-        # For protobuf, re-fetch with format=serialized to get a base64-encoded
-        # FileDescriptorProto instead of raw .proto text.
         if schema_type == 'PROTOBUF':
             serialized_url = f"{url}?format=serialized"
             self._log.debug("Fetching protobuf schema %d in serialized format", schema_id)
             serialized_response = self._http.get(serialized_url)
             serialized_response.raise_for_status()
-            schema_str = serialized_response.json()['schema']
+            serialized_data = serialized_response.json()
+            schema_str = serialized_data['schema']
 
-        result = (schema_str, schema_type)
+            references = serialized_data.get('references', [])
+            if references:
+                dep_schemas = self._resolve_protobuf_references(references)
+
+        result = (schema_str, schema_type, dep_schemas)
         self._schema_cache[schema_id] = result
+        return result
+
+    def _resolve_protobuf_references(self, references: list[dict]) -> list[tuple[str, str]]:
+        """Recursively resolve protobuf schema references.
+
+        Each reference has 'name', 'subject' and 'version'. We look up the
+        schema ID for each, fetch its serialized FileDescriptorProto, and
+        recursively resolve its own references.
+
+        Returns list of (name, base64_schema) tuples in dependency order
+        (dependencies before dependents). The name is the import path
+        (e.g., 'google/protobuf/timestamp.proto') used to fix the
+        FileDescriptorProto's name field, which the registry sets to 'default'.
+        """
+        result = []
+        seen = set()
+
+        def resolve(refs):
+            for ref in refs:
+                name = ref['name']
+                subject = ref['subject']
+                version = ref['version']
+                ref_key = (subject, version)
+                if ref_key in seen:
+                    continue
+                seen.add(ref_key)
+
+                self._refresh_oauth_token()
+
+                # Look up schema by subject/version to get its ID and references
+                subject_url = f"{self._base_url}/subjects/{subject}/versions/{version}"
+                self._log.debug("Resolving reference %s version %d", subject, version)
+                resp = self._http.get(subject_url)
+                resp.raise_for_status()
+                subject_data = resp.json()
+                ref_id = subject_data['id']
+
+                # Fetch serialized form
+                serialized_url = f"{self._base_url}/schemas/ids/{ref_id}?format=serialized"
+                ser_resp = self._http.get(serialized_url)
+                ser_resp.raise_for_status()
+                ser_data = ser_resp.json()
+
+                # Resolve nested references first (depth-first)
+                nested_refs = ser_data.get('references', [])
+                if nested_refs:
+                    resolve(nested_refs)
+
+                result.append((name, ser_data['schema']))
+
+        resolve(references)
         return result

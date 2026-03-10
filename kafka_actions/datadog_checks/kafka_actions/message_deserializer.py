@@ -318,7 +318,7 @@ class MessageDeserializer:
         if cached is not None:
             return cached
 
-        schema_str, schema_type = self.schema_registry.get_schema(schema_id)
+        schema_str, schema_type, dep_schemas = self.schema_registry.get_schema(schema_id)
 
         # Map Schema Registry type names to our format names
         registry_type_map = {
@@ -328,12 +328,14 @@ class MessageDeserializer:
         }
         actual_format = registry_type_map.get(schema_type, message_format)
 
-        schema = self._get_or_build_schema(actual_format, schema_str, from_registry=True)
+        schema = self._get_or_build_schema(actual_format, schema_str, from_registry=True, dep_schemas=dep_schemas)
         result = (schema, actual_format)
         self._registry_schema_cache[cache_key] = result
         return result
 
-    def _get_or_build_schema(self, message_format: str, schema_str: str, from_registry: bool = False):
+    def _get_or_build_schema(
+        self, message_format: str, schema_str: str, from_registry: bool = False, dep_schemas: list[str] | None = None
+    ):
         """Get cached schema or build it if not in cache.
 
         Args:
@@ -341,6 +343,8 @@ class MessageDeserializer:
             schema_str: Schema definition string
             from_registry: If True, schema comes from Schema Registry (FileDescriptorProto for protobuf).
                            If False, schema is inline config (FileDescriptorSet for protobuf).
+            dep_schemas: For protobuf from registry, base64-encoded FileDescriptorProtos
+                         for dependencies (in dependency order).
 
         Returns:
             Schema object (cached or newly built)
@@ -353,25 +357,28 @@ class MessageDeserializer:
             return self._schema_cache[cache_key]
 
         self.log.debug("Building new schema for %s (hash: %s...)", message_format, schema_hash[:8])
-        schema = self._build_schema(message_format, schema_str, from_registry)
+        schema = self._build_schema(message_format, schema_str, from_registry, dep_schemas)
 
         self._schema_cache[cache_key] = schema
         return schema
 
-    def _build_schema(self, message_format: str, schema_str: str, from_registry: bool = False):
+    def _build_schema(
+        self, message_format: str, schema_str: str, from_registry: bool = False, dep_schemas: list[str] | None = None
+    ):
         """Build schema object from schema string.
 
         Args:
             message_format: 'protobuf' or 'avro'
             schema_str: Schema definition string
             from_registry: If True, use registry format (FileDescriptorProto for protobuf)
+            dep_schemas: For protobuf from registry, dependency FileDescriptorProtos.
 
         Returns:
             Schema object
         """
         if message_format == 'protobuf':
             if from_registry:
-                return self._build_protobuf_schema_from_registry(schema_str)
+                return self._build_protobuf_schema_from_registry(schema_str, dep_schemas or [])
             return self._build_protobuf_schema(schema_str)
         elif message_format == 'avro':
             return self._build_avro_schema(schema_str)
@@ -405,25 +412,45 @@ class MessageDeserializer:
 
         return (pool, descriptor_set)
 
-    def _build_protobuf_schema_from_registry(self, schema_str: str):
-        """Build a Protobuf schema from a base64-encoded FileDescriptorProto.
+    def _build_protobuf_schema_from_registry(self, schema_str: str, dep_schemas: list):
+        """Build a Protobuf schema from base64-encoded FileDescriptorProtos.
 
         The Confluent Schema Registry's ?format=serialized endpoint returns a
-        base64-encoded FileDescriptorProto (single file), not a FileDescriptorSet.
+        base64-encoded FileDescriptorProto (single file). Schemas with imports
+        (e.g., google/protobuf/timestamp.proto) have references that must be
+        added to the descriptor pool before the main schema.
+
+        The registry sets all FileDescriptorProto names to 'default', so we
+        fix dependency names to match their import paths (e.g.,
+        'google/protobuf/timestamp.proto') before adding to the pool.
+
+        Args:
+            schema_str: Base64-encoded FileDescriptorProto for the main schema.
+            dep_schemas: List of (name, base64_schema) tuples for dependencies,
+                         in dependency order (deps of deps come first). The name
+                         is the import path used to fix the descriptor name.
 
         Returns:
             Tuple of (descriptor_pool, file_descriptor_set) for use with
             _get_protobuf_message_class to select the correct message type.
         """
-        schema_bytes = base64.b64decode(schema_str)
+        pool = descriptor_pool.DescriptorPool()
+        descriptor_set = descriptor_pb2.FileDescriptorSet()
 
+        # Add dependencies first (in dependency order), fixing names
+        for dep_name, dep_b64 in dep_schemas:
+            dep_bytes = base64.b64decode(dep_b64)
+            dep_proto = descriptor_pb2.FileDescriptorProto()
+            dep_proto.ParseFromString(dep_bytes)
+            # Fix the name from 'default' to the actual import path
+            dep_proto.name = dep_name
+            pool.Add(dep_proto)
+
+        # Add the main schema
+        schema_bytes = base64.b64decode(schema_str)
         fd_proto = descriptor_pb2.FileDescriptorProto()
         fd_proto.ParseFromString(schema_bytes)
-
-        descriptor_set = descriptor_pb2.FileDescriptorSet()
         descriptor_set.file.append(fd_proto)
-
-        pool = descriptor_pool.DescriptorPool()
         pool.Add(fd_proto)
 
         return (pool, descriptor_set)
