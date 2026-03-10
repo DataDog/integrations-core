@@ -317,6 +317,53 @@ def test_report_markdown(ddev, fake_repo, mock_async_http_get_json, tmp_path):
     assert '| dep-a | 1.0.0 | 1.2.3 |' in content
 
 
+def test_report_screen(ddev, fake_repo, mock_async_http_get_json):
+    create_integration(fake_repo, 'foo', ['dep-a==1.0.0', 'dep-b==3.1.4'])
+    create_integration(fake_repo, 'datadog_checks_base', ['dep-a==1.0.0', 'dep-b==3.1.4'])
+    create_integration(fake_repo, 'datadog_checks_downloader', ['dep-a==1.0.0', 'dep-b==3.1.4'])
+    (fake_repo / 'agent_requirements.in').write_text('dep-a==1.0.0\ndep-b==3.1.4')
+
+    mock_async_http_get_json(
+        'https://pypi.org/pypi/dep-a/json',
+        {
+            'info': {'name': 'dep-a'},
+            'releases': {v: [{'python_version': 'py2.py3', 'requires_python': '>=2.7'}] for v in ['1.0.0', '1.2.3']},
+        },
+    )
+    mock_async_http_get_json(
+        'https://pypi.org/pypi/dep-b/json',
+        {
+            'info': {'name': 'dep-b'},
+            'releases': {v: [{'python_version': 'py2.py3', 'requires_python': '>=2.7'}] for v in ['3.1.0', '3.1.4']},
+        },
+    )
+
+    result = ddev('dep', 'updates', '--sync', '--report')
+
+    assert result.exit_code == 0
+    assert 'dep-a' in result.output
+    assert '1.0.0' in result.output
+    assert '1.2.3' in result.output
+
+
+def test_report_screen_no_updates(ddev, fake_repo, mock_async_http_get_json):
+    create_integration(fake_repo, 'foo', ['dep-a==1.2.3'])
+    (fake_repo / 'agent_requirements.in').write_text('dep-a==1.2.3')
+
+    mock_async_http_get_json(
+        'https://pypi.org/pypi/dep-a/json',
+        {
+            'info': {'name': 'dep-a'},
+            'releases': {v: [{'python_version': 'py2.py3', 'requires_python': '>=2.7'}] for v in ['1.0.0', '1.2.3']},
+        },
+    )
+
+    result = ddev('dep', 'updates', '--sync', '--report')
+
+    assert result.exit_code == 0
+    assert 'No dependency version changes detected.' in result.output
+
+
 def test_report_no_updates(ddev, fake_repo, mock_async_http_get_json, tmp_path):
     create_integration(fake_repo, 'foo', ['dep-a==1.2.3'])
     (fake_repo / 'agent_requirements.in').write_text('dep-a==1.2.3')

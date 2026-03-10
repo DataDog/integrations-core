@@ -23,13 +23,20 @@ from ddev.utils.fs import Path
 @click.option('--sync', '-s', 'sync_dependencies', is_flag=True, help='Update the dependency definitions')
 @click.option('--include-security-deps', '-i', is_flag=True, help="Attempt to update security dependencies")
 @click.option('--batch-size', '-b', type=int, help='The maximum number of dependencies to upgrade if syncing')
-@click.option('--report', default=None, help='Path to write the dependency update report.')
+@click.option(
+    '--report',
+    is_flag=False,
+    flag_value='',
+    default=None,
+    metavar='PATH',
+    help='Write a dependency update report to PATH, or omit PATH to print to screen.',
+)
 @click.option(
     '--report-type',
     type=click.Choice(['json', 'markdown']),
     default='json',
     show_default=True,
-    help='Format of the report file.',
+    help='Format of the report file (only applies when a PATH is given).',
 )
 @click.pass_context
 @click.pass_obj
@@ -77,36 +84,52 @@ def updates(app, ctx, sync_dependencies, include_security_deps, batch_size, repo
         if dependency_definition != new_dependency_definition:
             version_updates[name][package_version].add(python_version)
             updated_packages.add(name)
-            report_entries.append(
-                {
-                    'package': name,
-                    'old_version': str(Requirement(dependency_definition).specifier).lstrip('='),
-                    'new_version': str(package_version),
-                }
-            )
+            if report is not None:
+                report_entries.append(
+                    {
+                        'package': name,
+                        'old_version': str(Requirement(dependency_definition).specifier).lstrip('='),
+                        'new_version': str(package_version),
+                    }
+                )
 
-    if report:
-        if report_type == 'json':
-            _write_json_report(report_entries, report)
-        else:
-            _write_markdown_report(report_entries, report)
+    if report is None:
+        pass
+    elif report == '':
+        _print_table_report(app, report_entries)
+    elif report_type == 'json':
+        _write_json_report(report_entries, report)
+    else:
+        _write_markdown_report(report_entries, report)
 
     if sync_dependencies:
         if updated_packages:
             update_agent_dependencies(app.repo, new_dependencies)
             ctx.invoke(sync)
             app.display_info(f'Updated {len(updated_packages)} dependencies')
+    elif updated_packages:
+        app.display_error(f"{len(updated_packages)} dependencies are out of sync:")
+        for name, versions in version_updates.items():
+            for package_version, python_versions in versions.items():
+                app.display_error(
+                    f'{name} can be updated to version {package_version} on {" and ".join(sorted(python_versions))}'
+                )
+        app.abort()
     else:
-        if updated_packages:
-            app.display_error(f"{len(updated_packages)} dependencies are out of sync:")
-            for name, versions in version_updates.items():
-                for package_version, python_versions in versions.items():
-                    app.display_error(
-                        f'{name} can be updated to version {package_version} on {" and ".join(sorted(python_versions))}'
-                    )
-            app.abort()
-        else:
-            app.display_info('All dependencies are up to date')
+        app.display_info('All dependencies are up to date')
+
+
+def _print_table_report(app, entries: list[dict]) -> None:
+    sorted_entries = sorted(entries, key=lambda e: e['package'])
+    if not sorted_entries:
+        app.display_info('No dependency version changes detected.')
+        return
+    columns = {
+        'Package': {i: e['package'] for i, e in enumerate(sorted_entries)},
+        'Old Version': {i: e['old_version'] for i, e in enumerate(sorted_entries)},
+        'New Version': {i: e['new_version'] for i, e in enumerate(sorted_entries)},
+    }
+    app.display_table('Dependency Bumps', columns, show_lines=True)
 
 
 def _write_json_report(entries: list[dict], path: str) -> None:
