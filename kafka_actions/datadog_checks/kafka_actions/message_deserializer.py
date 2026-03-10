@@ -159,7 +159,7 @@ class MessageDeserializer:
             message = message[5:]  # Skip the magic byte and schema ID bytes
 
             actual_format = message_format
-            if self.schema_registry is not None and message_format not in ('json', 'string', 'bson'):
+            if self.schema_registry is not None:
                 schema, actual_format = self._fetch_and_build_schema(schema_id, message_format)
 
             return self._deserialize_bytes(message, actual_format, schema, uses_schema_registry=True), schema_id

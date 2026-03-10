@@ -488,10 +488,11 @@ class TestSchemaRegistryIntegration:
         result = json.loads(result_str)
         assert result['title'] == 'The Go Programming Language'
 
-    def test_json_with_schema_registry_no_fetch(self):
-        """JSON message with schema registry format doesn't need registry fetch."""
+    def test_json_with_schema_registry_fetch(self):
+        """JSON message with schema registry format fetches type from registry."""
         log = MagicMock()
-        registry = MagicMock()
+        json_schema = '{"type": "object"}'
+        registry = self._mock_registry(json_schema, 'JSON')
         deserializer = MessageDeserializer(log, schema_registry=registry)
 
         payload = json.dumps({"hello": "world"}).encode()
@@ -499,7 +500,7 @@ class TestSchemaRegistryIntegration:
 
         result_str, schema_id = deserializer.deserialize_message(raw, 'json', None, True)
         assert schema_id == 7
-        registry.get_schema.assert_not_called()
+        registry.get_schema.assert_called_once_with(7)
 
         result = json.loads(result_str)
         assert result['hello'] == 'world'

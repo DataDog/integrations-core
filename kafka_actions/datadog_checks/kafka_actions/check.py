@@ -242,7 +242,7 @@ class KafkaActionsCheck(AgentCheck):
             'value_format': config.get('value_format', 'json'),
             'value_schema': config.get('value_schema'),
             'value_uses_schema_registry': config.get('value_uses_schema_registry', False),
-            'key_format': config.get('key_format', 'json'),
+            'key_format': config.get('key_format', 'string'),
             'key_schema': config.get('key_schema'),
             'key_uses_schema_registry': config.get('key_uses_schema_registry', False),
         }
