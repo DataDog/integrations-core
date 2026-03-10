@@ -16,15 +16,23 @@ from ddev.cli.dep.common import (
     scrape_version_data,
     update_agent_dependencies,
 )
-
+from ddev.utils.fs import Path
 
 @click.command(short_help='Automatically check for dependency updates')
 @click.option('--sync', '-s', 'sync_dependencies', is_flag=True, help='Update the dependency definitions')
 @click.option('--include-security-deps', '-i', is_flag=True, help="Attempt to update security dependencies")
 @click.option('--batch-size', '-b', type=int, help='The maximum number of dependencies to upgrade if syncing')
+@click.option('--report', default=None, help='Path to write the dependency update report.')
+@click.option(
+    '--report-type',
+    type=click.Choice(['json', 'markdown']),
+    default='json',
+    show_default=True,
+    help='Format of the report file.',
+)
 @click.pass_context
 @click.pass_obj
-def updates(app, ctx, sync_dependencies, include_security_deps, batch_size):
+def updates(app, ctx, sync_dependencies, include_security_deps, batch_size, report, report_type):
     ignore_deps = set(app.repo.config.get('/overrides/dep/updates/exclude', []))
 
     if not include_security_deps:
@@ -45,6 +53,7 @@ def updates(app, ctx, sync_dependencies, include_security_deps, batch_size):
     new_dependencies = copy.deepcopy(dependencies)
     version_updates = defaultdict(lambda: defaultdict(set))
     updated_packages = set()
+    report_entries: list[dict] = []
     for name, python_versions in sorted(new_dependencies.items()):
         if name in ignore_deps:
             continue
@@ -67,6 +76,17 @@ def updates(app, ctx, sync_dependencies, include_security_deps, batch_size):
         if dependency_definition != new_dependency_definition:
             version_updates[name][package_version].add(python_version)
             updated_packages.add(name)
+            report_entries.append({
+                'package': name,
+                'old_version': str(Requirement(dependency_definition).specifier).lstrip('='),
+                'new_version': str(package_version),
+            })
+
+    if report:
+        if report_type == 'json':
+            _write_json_report(report_entries, report)
+        else:
+            _write_markdown_report(report_entries, report)
 
     if sync_dependencies:
         if updated_packages:
@@ -84,3 +104,27 @@ def updates(app, ctx, sync_dependencies, include_security_deps, batch_size):
             app.abort()
         else:
             app.display_info('All dependencies are up to date')
+
+
+def _write_json_report(entries: list[dict], path: str) -> None:
+    import json
+
+    Path(path).write_text(json.dumps(sorted(entries, key=lambda e: e['package']), indent=2))
+
+
+def _write_markdown_report(entries: list[dict], path: str) -> None:
+    if sorted_entries := sorted(entries, key=lambda e: e['package']):
+        lines = [
+            '### Dependency Bumps',
+            '',
+            '| Package | Old Version | New Version |',
+            '|---------|-------------|-------------|',
+        ]
+        lines.extend(
+            f"| {e['package']} | {e['old_version']} | {e['new_version']} |"
+            for e in sorted_entries
+        )
+        content = '\n'.join(lines)
+    else:
+        content = '_No dependency version changes detected._'
+    Path(path).write_text(content)
