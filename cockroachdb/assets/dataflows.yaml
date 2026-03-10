@@ -1,9 +1,9 @@
 provides:
-  - id: cockroachdb-metrics
+  - id: core-cockroachdb-metrics
     always_on: true
     data_type: metrics
     direction: inbound
-  - id: cockroachdb-logs
+  - id: core-cockroachdb-logs
     always_on: false
     data_type: logs
     direction: inbound
