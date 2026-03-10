@@ -18,6 +18,7 @@ from ddev.cli.dep.common import (
 )
 from ddev.utils.fs import Path
 
+
 @click.command(short_help='Automatically check for dependency updates')
 @click.option('--sync', '-s', 'sync_dependencies', is_flag=True, help='Update the dependency definitions')
 @click.option('--include-security-deps', '-i', is_flag=True, help="Attempt to update security dependencies")
@@ -76,11 +77,13 @@ def updates(app, ctx, sync_dependencies, include_security_deps, batch_size, repo
         if dependency_definition != new_dependency_definition:
             version_updates[name][package_version].add(python_version)
             updated_packages.add(name)
-            report_entries.append({
-                'package': name,
-                'old_version': str(Requirement(dependency_definition).specifier).lstrip('='),
-                'new_version': str(package_version),
-            })
+            report_entries.append(
+                {
+                    'package': name,
+                    'old_version': str(Requirement(dependency_definition).specifier).lstrip('='),
+                    'new_version': str(package_version),
+                }
+            )
 
     if report:
         if report_type == 'json':
@@ -120,10 +123,7 @@ def _write_markdown_report(entries: list[dict], path: str) -> None:
             '| Package | Old Version | New Version |',
             '|---------|-------------|-------------|',
         ]
-        lines.extend(
-            f"| {e['package']} | {e['old_version']} | {e['new_version']} |"
-            for e in sorted_entries
-        )
+        lines.extend(f"| {e['package']} | {e['old_version']} | {e['new_version']} |" for e in sorted_entries)
         content = '\n'.join(lines)
     else:
         content = '_No dependency version changes detected._'

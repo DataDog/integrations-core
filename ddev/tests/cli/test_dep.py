@@ -262,11 +262,17 @@ def test_report_json(ddev, fake_repo, mock_async_http_get_json, tmp_path):
 
     mock_async_http_get_json(
         'https://pypi.org/pypi/dep-a/json',
-        {'info': {'name': 'dep-a'}, 'releases': {v: [{'python_version': 'py2.py3', 'requires_python': '>=2.7'}] for v in ['1.0.0', '1.2.3']}},
+        {
+            'info': {'name': 'dep-a'},
+            'releases': {v: [{'python_version': 'py2.py3', 'requires_python': '>=2.7'}] for v in ['1.0.0', '1.2.3']},
+        },
     )
     mock_async_http_get_json(
         'https://pypi.org/pypi/dep-b/json',
-        {'info': {'name': 'dep-b'}, 'releases': {v: [{'python_version': 'py2.py3', 'requires_python': '>=2.7'}] for v in ['3.1.0', '3.1.4']}},
+        {
+            'info': {'name': 'dep-b'},
+            'releases': {v: [{'python_version': 'py2.py3', 'requires_python': '>=2.7'}] for v in ['3.1.0', '3.1.4']},
+        },
     )
 
     report_path = tmp_path / 'report.json'
@@ -288,11 +294,17 @@ def test_report_markdown(ddev, fake_repo, mock_async_http_get_json, tmp_path):
 
     mock_async_http_get_json(
         'https://pypi.org/pypi/dep-a/json',
-        {'info': {'name': 'dep-a'}, 'releases': {v: [{'python_version': 'py2.py3', 'requires_python': '>=2.7'}] for v in ['1.0.0', '1.2.3']}},
+        {
+            'info': {'name': 'dep-a'},
+            'releases': {v: [{'python_version': 'py2.py3', 'requires_python': '>=2.7'}] for v in ['1.0.0', '1.2.3']},
+        },
     )
     mock_async_http_get_json(
         'https://pypi.org/pypi/dep-b/json',
-        {'info': {'name': 'dep-b'}, 'releases': {v: [{'python_version': 'py2.py3', 'requires_python': '>=2.7'}] for v in ['3.1.0', '3.1.4']}},
+        {
+            'info': {'name': 'dep-b'},
+            'releases': {v: [{'python_version': 'py2.py3', 'requires_python': '>=2.7'}] for v in ['3.1.0', '3.1.4']},
+        },
     )
 
     report_path = tmp_path / 'report.md'
@@ -311,7 +323,10 @@ def test_report_no_updates(ddev, fake_repo, mock_async_http_get_json, tmp_path):
 
     mock_async_http_get_json(
         'https://pypi.org/pypi/dep-a/json',
-        {'info': {'name': 'dep-a'}, 'releases': {v: [{'python_version': 'py2.py3', 'requires_python': '>=2.7'}] for v in ['1.0.0', '1.2.3']}},
+        {
+            'info': {'name': 'dep-a'},
+            'releases': {v: [{'python_version': 'py2.py3', 'requires_python': '>=2.7'}] for v in ['1.0.0', '1.2.3']},
+        },
     )
 
     report_path = tmp_path / 'report.md'
