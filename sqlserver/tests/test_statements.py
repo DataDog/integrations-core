@@ -70,6 +70,10 @@ def dbm_instance(instance_docker):
         'enabled': True,
         'run_sync': True,
         'collection_interval': CLOSE_TO_ZERO_INTERVAL,
+        # The near-zero collection_interval produces a ~1s lookback window (math.ceil(~0 * 2) = 1).
+        # Set an explicit lookback_window so test queries aren't missed when the check's preliminary
+        # steps take longer than 1 second (e.g. on SQL Server 2025).
+        'lookback_window': 60,
         # in tests sometimes things can slow down so we don't want this short deadline causing some events
         # to fail to be collected on time
         'enforce_collection_interval_deadline': False,
