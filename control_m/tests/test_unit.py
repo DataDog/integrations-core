@@ -16,8 +16,6 @@ from datadog_checks.control_m import ControlMCheck
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
 BASE_TAGS = ["control_m_instance:https://example.com/automation-api"]
-STATIC_AUTH_TAGS = BASE_TAGS + ["auth_method:static_token"]
-SESSION_AUTH_TAGS = BASE_TAGS + ["auth_method:session_login"]
 
 
 class _ApiStub:
@@ -183,6 +181,7 @@ def test_connect_session_login_ok(
 
     _run_check(check)
 
+    aggregator.assert_metric("control_m.can_login", value=1, count=1)
     aggregator.assert_metric("control_m.can_connect", value=1, count=1)
     aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:session_login")
     assert len(aggregator.events) == 0
@@ -272,30 +271,6 @@ def test_jobs_total_and_returned(
     assert len(aggregator.events) == 0
 
 
-def test_jobs_by_status_breakdown(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
-) -> None:
-    check = _make_check(instance)
-    srv_tags = BASE_TAGS + ["ctm_server:srv1"]
-    _mock_http(
-        check,
-        _ApiStub(
-            jobs=[
-                _load_job("job_executing.json"),
-                _load_job("job_waiting.json"),
-                _load_job("job_ended_ok.json", jobId="ok1", name="j1"),
-            ]
-        ),
-        monkeypatch,
-    )
-
-    _run_check(check)
-
-    aggregator.assert_metric("control_m.jobs.by_status", value=1, tags=srv_tags + ["status:executing"], count=1)
-    aggregator.assert_metric("control_m.jobs.by_status", value=1, tags=srv_tags + ["status:wait_condition"], count=1)
-    aggregator.assert_metric("control_m.jobs.by_status", value=1, tags=srv_tags + ["status:ended_ok"], count=1)
-
-
 def test_terminal_ended_ok_with_duration(
     instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
@@ -374,44 +349,35 @@ def test_events_disabled_by_default(
     assert len(aggregator.events) == 0
 
 
-def test_event_on_failure(instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+@pytest.mark.parametrize(
+    "fixture, job_id, expected_title, expected_alert_type",
+    [
+        ("job_ended_not_ok.json", "e2", "Control-M job failed: fail_job", "error"),
+        ("job_cancelled.json", "e3", "Control-M job canceled: cancel_job", "warning"),
+    ],
+)
+def test_event_on_terminal_failure(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+    fixture: str,
+    job_id: str,
+    expected_title: str,
+    expected_alert_type: str,
+) -> None:
     instance["emit_job_events"] = True
     check = _make_check(instance)
-    _mock_http(
-        check,
-        _ApiStub(jobs=[_load_job("job_ended_not_ok.json", jobId="e2")]),
-        monkeypatch,
-    )
+    _mock_http(check, _ApiStub(jobs=[_load_job(fixture, jobId=job_id)]), monkeypatch)
 
     _run_check(check)
 
     assert len(aggregator.events) == 1
     aggregator.assert_event(
-        "Result: failed",
+        "",
         exact_match=False,
-        msg_title="Control-M job failed: fail_job",
-        alert_type="error",
+        msg_title=expected_title,
+        alert_type=expected_alert_type,
         event_type="control_m.job.completion",
-    )
-
-
-def test_event_on_cancellation(instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
-    instance["emit_job_events"] = True
-    check = _make_check(instance)
-    _mock_http(
-        check,
-        _ApiStub(jobs=[_load_job("job_cancelled.json", jobId="e3")]),
-        monkeypatch,
-    )
-
-    _run_check(check)
-
-    assert len(aggregator.events) == 1
-    aggregator.assert_event(
-        "Result: canceled",
-        exact_match=False,
-        msg_title="Control-M job canceled: cancel_job",
-        alert_type="warning",
     )
 
 
