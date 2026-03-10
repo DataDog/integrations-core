@@ -1,14 +1,15 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 import time
 
 import mock
 import pytest
-from datadog_checks.base import AgentCheck
-from datadog_checks.dev.utils import get_metadata_metrics
 
 from datadog_checks.aerospike import AerospikeCheck
+from datadog_checks.base import AgentCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
     EXPECTED_PROMETHEUS_METRICS,
