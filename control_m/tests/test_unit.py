@@ -203,7 +203,6 @@ def test_connect_session_login_failure_emits_critical(
 def test_connect_static_token_401_falls_back_to_session(
     instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
-    """Static token gets 401; check falls back to session login transparently."""
     instance["control_m_username"] = "user"
     instance["control_m_password"] = "pass"
     check = _make_check(instance)
@@ -303,7 +302,6 @@ def test_terminal_ended_ok_with_duration(
 def test_dedup_same_terminal_job_counted_once(
     instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
-    """Same job+run seen across consecutive check cycles is only counted once."""
     api = _ApiStub(jobs=[_load_job("job_ended_ok.json", jobId="d1", name="j1")])
     check = _make_check(instance)
     _mock_http(check, api, monkeypatch)
@@ -319,7 +317,6 @@ def test_dedup_same_terminal_job_counted_once(
 def test_dedup_new_run_number_counted_as_new_completion(
     instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
-    """Bumping numberOfRuns signals a new completion, so it is counted again."""
     api = _ApiStub(jobs=[_load_job("job_ended_ok.json", jobId="r1", name="j1")])
     check = _make_check(instance)
     _mock_http(check, api, monkeypatch)
