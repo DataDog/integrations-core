@@ -138,6 +138,9 @@ class AerospikeCheck(AgentCheck):
         # https://www.aerospike.com/docs/reference/info/#namespaces
         namespaces = self.get_namespaces()
 
+        # call the new function and print output
+        sindex_namespaces = self.parse_sindex_namespaces(self.get_info('sindex-list:'))
+
         for ns in namespaces:
             namespace_tags = ['namespace:{}'.format(ns)]
             namespace_tags.extend(self._tags)
@@ -154,11 +157,7 @@ class AerospikeCheck(AgentCheck):
             # https://aerospike.com/docs/database/reference/info?search=sindex-list
             # https://aerospike.com/docs/database/reference/info?search=sindex-stat
 
-            # sindex = self.get_info('sindex/{}'.format(ns))
-            # sindex-list introduced in 3.3x so will safely work in 4x and above server versions
-            sindex = self.get_info('sindex-list:')
-
-            for idx in parse_namespace(sindex, ns, 'indexname'):
+            for idx in sindex_namespaces.get(ns, []):
                 sindex_tags = ['sindex:{}'.format(idx)]
                 sindex_tags.extend(namespace_tags)
                 # self.collect_info('sindex/{}/{}'.format(ns, idx), SINDEX_METRIC_TYPE, tags=sindex_tags)
@@ -233,6 +232,30 @@ class AerospikeCheck(AgentCheck):
 
         for key, value in required_data.items():
             self.send(metric_type, key, value, tags)
+
+    def parse_sindex_namespaces(self, data):
+        sindex_map = defaultdict(list)
+        if not data:
+            return {}
+
+        if isinstance(data, str):
+            if ';' in data:
+                chunks = data.strip().strip(';').split(';')
+                lines = [chunk.strip() for chunk in chunks if chunk.strip()]
+            else:
+                lines = [line.strip() for line in data.splitlines() if line.strip()]
+        else:
+            lines = list(data)
+
+        for line in lines:
+            match = re.match(r'^ns=([^:]+):.*indexname=([^:]+):', line)
+            if match is None:
+                continue
+            namespace, index_name = match.groups()
+            if index_name not in sindex_map[namespace]:
+                sindex_map[namespace].append(index_name)
+
+        return dict(sindex_map)
 
     def get_namespaces(self):
         namespaces = self.get_info('namespaces')

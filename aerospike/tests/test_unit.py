@@ -88,7 +88,6 @@ def test_sindex_metrics(aggregator, dd_run_check):
     print("\t *** aggregator --> ",aggregator.metric_names)
 
     for metric in common.INDEXES_METRICS:
-        print("\t *** metric --> ",metric)
         aggregator.assert_metric(metric, tags=['namespace:test', 'sindex:idx_characters_name'])
 
 
