@@ -319,6 +319,8 @@ def mock_http(mocker):
         'verify': True,
         'allow_redirects': True,
     }
+    client.get_header.side_effect = lambda name, default=None: client.options['headers'].get(name, default)
+    client.set_header.side_effect = lambda name, value: client.options['headers'].__setitem__(name, value)
     client.options_method.side_effect = NotImplementedError('HTTP OPTIONS not yet supported in mock_http')
     mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
     return client
