@@ -1,0 +1,9 @@
+provides:
+  - id: kube-apiserver-metrics-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: kube-apiserver-metrics-events
+    always_on: true
+    data_type: events
+    direction: inbound
