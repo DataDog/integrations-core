@@ -3,3 +3,7 @@ provides:
     always_on: true
     data_type: metrics
     direction: inbound
+  - id: cloud_foundry_api-events
+    always_on: true
+    data_type: events
+    direction: inbound
