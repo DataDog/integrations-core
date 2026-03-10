@@ -1,5 +1,5 @@
 provides:
-  - id: cert_manager-metrics
+  - id: cert-manager-metrics
     always_on: true
     data_type: metrics
     direction: inbound

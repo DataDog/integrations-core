@@ -1,5 +1,5 @@
 provides:
-  - id: agent_metrics-metrics
+  - id: agent-metrics-metrics
     always_on: true
     data_type: metrics
     direction: inbound

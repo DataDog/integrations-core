@@ -1,5 +1,5 @@
 provides:
-  - id: arctic_wolf_aurora_endpoint_security-logs
+  - id: arctic-wolf-aurora-endpoint-security-logs
     always_on: false
     data_type: logs
     direction: inbound

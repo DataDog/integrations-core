@@ -1,9 +1,9 @@
 provides:
-  - id: citrix_hypervisor-metrics
+  - id: citrix-hypervisor-metrics
     always_on: true
     data_type: metrics
     direction: inbound
-  - id: citrix_hypervisor-logs
+  - id: citrix-hypervisor-logs
     always_on: false
     data_type: logs
     direction: inbound

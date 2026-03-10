@@ -1,5 +1,5 @@
 provides:
-  - id: datadog_operator-metrics
+  - id: datadog-operator-metrics
     always_on: true
     data_type: metrics
     direction: inbound

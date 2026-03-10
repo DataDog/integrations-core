@@ -1,9 +1,9 @@
 provides:
-  - id: fly_io-metrics
+  - id: fly-io-metrics
     always_on: true
     data_type: metrics
     direction: inbound
-  - id: fly_io-logs
+  - id: fly-io-logs
     always_on: false
     data_type: logs
     direction: inbound

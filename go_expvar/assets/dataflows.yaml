@@ -1,5 +1,5 @@
 provides:
-  - id: go_expvar-metrics
+  - id: go-expvar-metrics
     always_on: true
     data_type: metrics
     direction: inbound

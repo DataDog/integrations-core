@@ -1,5 +1,5 @@
 provides:
-  - id: cisco_asa-logs
+  - id: cisco-asa-logs
     always_on: false
     data_type: logs
     direction: inbound

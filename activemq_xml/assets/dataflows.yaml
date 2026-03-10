@@ -1,9 +1,9 @@
 provides:
-  - id: activemq_xml-metrics
+  - id: activemq-xml-metrics
     always_on: true
     data_type: metrics
     direction: inbound
-  - id: activemq_xml-logs
+  - id: activemq-xml-logs
     always_on: false
     data_type: logs
     direction: inbound

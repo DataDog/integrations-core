@@ -1,5 +1,5 @@
 provides:
-  - id: amazon_app_mesh-logs
+  - id: amazon-app-mesh-logs
     always_on: false
     data_type: logs
     direction: inbound

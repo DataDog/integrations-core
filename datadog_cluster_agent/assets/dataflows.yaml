@@ -1,5 +1,5 @@
 provides:
-  - id: datadog_cluster_agent-metrics
+  - id: datadog-cluster-agent-metrics
     always_on: true
     data_type: metrics
     direction: inbound

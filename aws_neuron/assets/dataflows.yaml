@@ -1,9 +1,9 @@
 provides:
-  - id: aws_neuron-metrics
+  - id: aws-neuron-metrics
     always_on: true
     data_type: metrics
     direction: inbound
-  - id: aws_neuron-logs
+  - id: aws-neuron-logs
     always_on: false
     data_type: logs
     direction: inbound

@@ -1,5 +1,5 @@
 provides:
-  - id: cassandra_nodetool-metrics
+  - id: cassandra-nodetool-metrics
     always_on: true
     data_type: metrics
     direction: inbound

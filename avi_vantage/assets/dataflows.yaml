@@ -1,5 +1,5 @@
 provides:
-  - id: avi_vantage-metrics
+  - id: avi-vantage-metrics
     always_on: true
     data_type: metrics
     direction: inbound

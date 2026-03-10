@@ -1,5 +1,5 @@
 provides:
-  - id: external_dns-metrics
+  - id: external-dns-metrics
     always_on: true
     data_type: metrics
     direction: inbound

@@ -1,5 +1,5 @@
 provides:
-  - id: barracuda_secure_edge-logs
+  - id: barracuda-secure-edge-logs
     always_on: false
     data_type: logs
     direction: inbound

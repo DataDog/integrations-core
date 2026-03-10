@@ -1,5 +1,5 @@
 provides:
-  - id: cloudgen_firewall-logs
+  - id: cloudgen-firewall-logs
     always_on: false
     data_type: logs
     direction: inbound

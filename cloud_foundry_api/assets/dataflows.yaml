@@ -1,9 +1,9 @@
 provides:
-  - id: cloud_foundry_api-metrics
+  - id: cloud-foundry-api-metrics
     always_on: true
     data_type: metrics
     direction: inbound
-  - id: cloud_foundry_api-events
+  - id: cloud-foundry-api-events
     always_on: true
     data_type: events
     direction: inbound

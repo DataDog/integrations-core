@@ -1,5 +1,5 @@
 provides:
-  - id: azure_active_directory-logs
+  - id: azure-active-directory-logs
     always_on: false
     data_type: logs
     direction: inbound

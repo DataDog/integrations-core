@@ -1,9 +1,9 @@
 provides:
-  - id: checkpoint_harmony_endpoint-metrics
+  - id: checkpoint-harmony-endpoint-metrics
     always_on: true
     data_type: metrics
     direction: inbound
-  - id: checkpoint_harmony_endpoint-logs
+  - id: checkpoint-harmony-endpoint-logs
     always_on: false
     data_type: logs
     direction: inbound

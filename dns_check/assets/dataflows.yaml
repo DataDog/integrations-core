@@ -1,5 +1,5 @@
 provides:
-  - id: dns_check-metrics
+  - id: dns-check-metrics
     always_on: true
     data_type: metrics
     direction: inbound

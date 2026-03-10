@@ -1,5 +1,5 @@
 provides:
-  - id: delinea_privilege_manager-logs
+  - id: delinea-privilege-manager-logs
     always_on: false
     data_type: logs
     direction: inbound
