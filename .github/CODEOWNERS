@@ -118,20 +118,20 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /cisco_sdwan/                                                      @DataDog/ndm-integrations @DataDog/agent-integrations
 /cisco_sdwan/*.md                                                  @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
 /cisco_sdwan/manifest.json                                         @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
-/snmp/                                                             @DataDog/ndm-core @DataDog/agent-integrations
-/snmp/*.md                                                         @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
-/snmp/manifest.json                                                @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
-/snmp_*/                                                           @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
-/snmp_*/*.md                                                       @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
-/snmp_*/manifest.json                                              @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
+/snmp/                                                             @DataDog/network-device-monitoring-core @DataDog/agent-integrations
+/snmp/*.md                                                         @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
+/snmp/manifest.json                                                @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
+/snmp_*/                                                           @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
+/snmp_*/*.md                                                       @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
+/snmp_*/manifest.json                                              @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
 /network_path/                                                     @DataDog/network-path @DataDog/Networks @DataDog/agent-integrations
 /network_path/*.md                                                 @DataDog/network-path @DataDog/Networks @DataDog/agent-integrations @DataDog/documentation
 /network_path/assets                                               @DataDog/network-path @DataDog/Networks @DataDog/agent-integrations @DataDog/documentation
 /network_path/manifest.json                                        @DataDog/network-path @DataDog/Networks @DataDog/agent-integrations @DataDog/documentation
 /versa/                                                            @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
 
-/datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/ndm-core @DataDog/agent-integrations
-/docs/developer/tutorials/snmp/                                    @DataDog/ndm-core @DataDog/agent-integrations
+/datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/network-device-monitoring-core @DataDog/agent-integrations
+/docs/developer/tutorials/snmp/                                    @DataDog/network-device-monitoring-core @DataDog/agent-integrations
 
 # System checks
 /disk/                                    @DataDog/agent-integrations @DataDog/windows-products
