@@ -1,0 +1,47 @@
+{
+  "version": 2,
+  "created_at": "2026-03-10",
+  "last_updated_at": "2026-03-10",
+  "title": "Upstream active health check failures",
+  "description": "Alerts when NGINX Plus active health checks mark backend peers as unhealthy, providing an early warning before real traffic is affected. Requires Nginx Plus with active health checks configured.",
+  "definition": {
+    "name": "[NGINX] Upstream **{{upstream.name}}** has active health check failures",
+    "type": "query alert",
+    "query": "sum(last_5m):sum:nginx.upstream.peers.health_checks.unhealthy_count{$env} by {upstream} > 0",
+    "message": "{{#is_alert}}\n## 🚨 What's happening?\n\nNGINX Plus active health checks have marked one or more peers in upstream **{{upstream.name}}** as unhealthy **{{value}}** time(s) in the last 5 minutes (threshold: `{{threshold}}`). Affected peers have been removed from the load balancing rotation. This is a proactive signal — health check failures detect backend unavailability before real client traffic is rejected, unlike passive fail-count monitors.\n{{/is_alert}}\n\n{{#is_recovery}}\n## ✅ Recovered\n\nAll peers in upstream **{{upstream.name}}** have passed active health checks and returned to the rotation. Current value: `{{value}}`.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## 📈 Impact\n\nPeers marked unhealthy are immediately removed from load balancing. Depending on the upstream pool size, this reduces capacity and increases load on remaining healthy peers. If all peers fail health checks simultaneously, NGINX will return 502 Bad Gateway to all clients served by this upstream.\n\n---\n\n## Why?\n\nPossible causes:\n* **Backend service is down or restarting** — The upstream server is not listening on the expected port or is in a crash-restart loop.\n* **Health check endpoint returning a non-2xx response** — The backend application has degraded to a state where its health endpoint returns 4xx/5xx, even if it is still partially functional.\n* **Network connectivity issue** — The NGINX host cannot reach the upstream peer due to firewall changes, security group updates, or network partitioning.\n* **Misconfigured health check parameters** — The health check interval, timeout, or expected response does not match the backend's actual behavior (e.g., slow startup, custom status codes).\n\n---\n\n## How to troubleshoot/solve the issue?\n\n1. **Identify the scope** — Determine which specific peer(s) in `{{upstream.name}}` are failing by inspecting `nginx.upstream.peers.health_checks.unhealthy` broken down by `upstream_server` tag.\n2. **Test the health check endpoint manually** — Replicate the health check from the NGINX host to confirm connectivity and response:\n   ```bash\n   curl -v http://<upstream-host>:<port><health-check-uri>\n   ```\n3. **Review NGINX error logs** — Check for health check failure messages:\n   ```bash\n   grep 'health' /var/log/nginx/error.log\n   ```\n4. **Check backend application health** — Review the upstream service's own logs and metrics for errors, restarts, or degraded states.\n5. **Verify health check configuration** — Review the `health_check` directive in NGINX Plus config and confirm `match` conditions align with the current backend behavior.\n\n### Cause and Resolution\n\n| Cause | Resolution |\n| ----- | ---------- |\n| Backend service down or restarting | Restart the backend service; investigate crash root cause; add process supervision. |\n| Health endpoint returning non-2xx | Fix the backend health endpoint; temporarily adjust the `match` directive if the endpoint uses non-standard status codes. |\n| Network or firewall blocking probe | Update security group rules or firewall to permit health check traffic from the NGINX host. |\n| Misconfigured health check | Review and adjust `interval`, `fails`, `passes`, and `match` in the health_check directive to match actual backend behavior. |\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/nginx/)\n* [Metrics Explorer](/metric/explorer)\n* [Infrastructure](/infrastructure)\n* [Logs](/logs)\n{{/is_recovery}}",
+    "tags": [
+      "$env"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 0
+      },
+      "notify_audit": false,
+      "require_full_window": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "include_tags": true,
+      "new_group_delay": 60,
+      "on_missing_data": "default",
+      "avalanche_window": 10,
+      "silenced": {}
+    },
+    "priority": null,
+    "restricted_roles": null
+  },
+  "template_variables": [
+    {
+      "name": "env",
+      "prefix": "env",
+      "available_values": [],
+      "defaults": ["*"]
+    },
+    {
+      "name": "upstream",
+      "prefix": "upstream",
+      "available_values": [],
+      "defaults": ["*"]
+    }
+  ],
+  "tags": ["integration:nginx"]
+}

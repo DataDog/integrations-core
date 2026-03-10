@@ -1,0 +1,47 @@
+{
+  "version": 2,
+  "created_at": "2026-03-10",
+  "last_updated_at": "2026-03-10",
+  "title": "Worker process crashes",
+  "description": "Alerts when NGINX worker processes are abnormally respawning due to OOM kills, segfaults, or broken config reloads. Any non-zero respawn rate is always abnormal. Requires Nginx Plus.",
+  "definition": {
+    "name": "[NGINX] Worker processes are respawning on {{host.name}}",
+    "type": "query alert",
+    "query": "sum(last_5m):sum:nginx.processes.respawned_count{$env} by {host} > 0",
+    "message": "{{#is_alert}}\n## 🚨 What's happening?\n\nNGINX worker processes on **{{host.name}}** have been abnormally respawned **{{value}}** time(s) in the last 5 minutes (threshold: `{{threshold}}`). Each respawn drops all in-flight requests handled by that worker. Any non-zero respawn count in a stable NGINX deployment indicates a process-level failure.\n{{/is_alert}}\n\n{{#is_recovery}}\n## ✅ Recovered\n\nNGINX worker process respawns on **{{host.name}}** have stopped. Current value: `{{value}}`.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## 📈 Impact\n\nEach worker crash immediately drops all connections and in-flight requests assigned to that worker, causing client-visible errors (connection resets, incomplete responses). Repeated respawns reduce the effective worker pool, increasing load on surviving workers and potentially triggering a cascade of further crashes under high traffic.\n\n---\n\n## Why?\n\nPossible causes:\n* **Out-of-memory (OOM) kill** — The OS kernel OOM killer terminates worker processes when system memory is exhausted, typically from memory leaks or insufficient `worker_rlimit_nofile` settings.\n* **Segmentation fault (segfault)** — A bug in NGINX, a third-party module, or a Lua/njs script causes a worker to crash with a segfault.\n* **Broken configuration reload** — A `nginx -s reload` with a faulty configuration can cause workers handling existing connections to exit ungracefully.\n* **Signal sent to worker** — An external process, script, or operator error sent a `SIGKILL` or `SIGTERM` directly to a worker PID.\n\n---\n\n## How to troubleshoot/solve the issue?\n\n1. **Identify the scope** — Confirm which `{{host.name}}` host is affected. Check whether respawns correlate with high memory usage or recent config reloads.\n2. **Check system OOM logs** — Look for OOM kill events in the kernel logs:\n   ```bash\n   dmesg | grep -i \"oom\\|killed process\"\n   journalctl -k | grep -i oom\n   ```\n3. **Review NGINX error logs** — Check for segfault or signal-related messages:\n   ```bash\n   grep -E 'signal|segfault|exit' /var/log/nginx/error.log\n   ```\n4. **Review recent config changes** — Check whether a recent `nginx -s reload` introduced a faulty configuration and verify with `nginx -t`.\n5. **Inspect module logs** — If Lua, njs, or third-party modules are in use, look for script-level errors in the error log.\n6. **Correlate with `nginx.processes.respawned` metric** — Use the gauge variant to understand the cumulative count trajectory.\n\n### Cause and Resolution\n\n| Cause | Resolution |\n| ----- | ---------- |\n| OOM kill | Increase system memory or reduce `worker_processes`; set `worker_rlimit_nofile` appropriately; fix memory leaks in modules or scripts. |\n| Segfault in NGINX or module | Upgrade NGINX to the latest stable/plus release; identify and update or remove the offending module; capture core dumps for analysis. |\n| Broken config reload | Always validate config with `nginx -t` before reloading; implement config validation in CI/CD pipelines. |\n| External signal to worker | Audit scripts and automation that interact with NGINX PIDs; ensure only `nginx -s reload/quit` is used for graceful management. |\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/nginx/)\n* [Metrics Explorer](/metric/explorer)\n* [Infrastructure](/infrastructure)\n* [Logs](/logs)\n{{/is_recovery}}",
+    "tags": [
+      "$env"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 0
+      },
+      "notify_audit": false,
+      "require_full_window": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "include_tags": true,
+      "new_group_delay": 60,
+      "on_missing_data": "default",
+      "avalanche_window": 10,
+      "silenced": {}
+    },
+    "priority": null,
+    "restricted_roles": null
+  },
+  "template_variables": [
+    {
+      "name": "env",
+      "prefix": "env",
+      "available_values": [],
+      "defaults": ["*"]
+    },
+    {
+      "name": "host",
+      "prefix": "host",
+      "available_values": [],
+      "defaults": ["*"]
+    }
+  ],
+  "tags": ["integration:nginx"]
+}
