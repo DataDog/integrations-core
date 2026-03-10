@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import time
+from collections import Counter, defaultdict
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlencode
@@ -245,9 +246,9 @@ class JobCollector:
                 self._persist_cache(_ACTIVE_RUNS_CACHE_KEY, self._active_runs)
             return
 
-        status_counts: dict[tuple[str, str], int] = {}
-        active_by_server: dict[str, int] = {}
-        waiting_by_server: dict[str, int] = {}
+        status_counts: Counter[tuple[str, str]] = Counter()
+        active_by_server: defaultdict[str, int] = defaultdict(int)
+        waiting_by_server: defaultdict[str, int] = defaultdict(int)
 
         for job in statuses:
             if not isinstance(job, dict):
@@ -256,11 +257,11 @@ class JobCollector:
             normalized = normalize_status(job.get("status"))
             ctm_server = str(job.get("ctm") or job.get("server") or "unknown")
 
-            _increment(status_counts, (ctm_server, normalized))
+            status_counts[(ctm_server, normalized)] += 1
             if normalized not in TERMINAL_STATUSES:
-                _increment(active_by_server, ctm_server)
+                active_by_server[ctm_server] += 1
             if normalized in WAITING_STATUSES:
-                _increment(waiting_by_server, ctm_server)
+                waiting_by_server[ctm_server] += 1
 
             dedupe_key = build_run_key(job)
 
@@ -392,7 +393,3 @@ class JobCollector:
             self._check.write_persistent_cache(cache_key, json.dumps(state_map))
         except Exception as e:
             self._check.log.warning("Could not persist cache %s: %s", cache_key, e)
-
-
-def _increment(counter: dict, key: object) -> None:
-    counter[key] = counter.get(key, 0) + 1
