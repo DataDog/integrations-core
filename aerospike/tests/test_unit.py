@@ -55,7 +55,7 @@ def test_xdr_metrics(aggregator):
 def test_sindex_metrics(aggregator, dd_run_check):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
     original_get_info = check.get_info
-    print("\t *** original_get_info --> ",original_get_info)
+    print("\t *** original_get_info --> ", original_get_info)
 
     def mock_get_info(command, separator=";"):
         if command == "sindex/test":
@@ -85,8 +85,6 @@ def test_sindex_metrics(aggregator, dd_run_check):
     check.collect_latency = mock.MagicMock()
     dd_run_check(check)
 
-    print("\t *** aggregator --> ",aggregator.metric_names)
-
     for metric in common.INDEXES_METRICS:
         aggregator.assert_metric(metric, tags=['namespace:test', 'sindex:idx_characters_name'])
 
@@ -106,7 +104,7 @@ def test_multiple_xdr_metrics(aggregator):
     check.collect_xdr()
     for host in ['ip-10-10-17-247.ec2.internal', 'ip-10-10-17-144.ec2.internal']:
         for metric in common.XDR_DC_METRICS:
-            aggregator.assert_metric(   
+            aggregator.assert_metric(
                 metric, tags=['datacenter:test', 'remote_dc_port:3000', 'remote_dc_host:{}'.format(host)]
             )
 
