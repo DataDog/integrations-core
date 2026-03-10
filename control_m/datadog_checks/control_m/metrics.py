@@ -287,7 +287,7 @@ class JobCollector:
         self._check.gauge("jobs.waiting.total", global_waiting, tags=self._base_tags)
         for ctm_server, count in waiting_by_server.items():
             tags = self._base_tags + [f"ctm_server:{ctm_server}"]
-            self._check.gauge("jobs.waiting.total", count, tags=tags)
+            self._check.gauge("jobs.waiting.by_server", count, tags=tags)
 
         if finalized_changed:
             self._persist_cache(_FINALIZED_RUNS_CACHE_KEY, self._finalized_runs)

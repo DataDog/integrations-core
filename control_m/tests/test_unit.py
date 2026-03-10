@@ -499,6 +499,7 @@ def test_full_cycle_with_fixture_data(
     aggregator.assert_metric("control_m.jobs.returned", value=3, tags=BASE_TAGS, count=1)
     aggregator.assert_metric("control_m.jobs.active", value=2, tags=wb_tags, count=1)
     aggregator.assert_metric("control_m.jobs.waiting.total", value=1, tags=BASE_TAGS, count=1)
+    aggregator.assert_metric("control_m.jobs.waiting.by_server", value=1, tags=wb_tags, count=1)
     aggregator.assert_metric("control_m.jobs.by_status", value=1, tags=wb_tags + ["status:ended_ok"], count=1)
     aggregator.assert_metric("control_m.jobs.by_status", value=1, tags=wb_tags + ["status:wait_condition"], count=1)
     aggregator.assert_metric("control_m.jobs.by_status", value=1, tags=wb_tags + ["status:executing"], count=1)
