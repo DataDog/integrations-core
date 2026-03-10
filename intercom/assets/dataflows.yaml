@@ -1,0 +1,9 @@
+provides:
+  - id: intercom-logs
+    always_on: false
+    data_type: logs
+    direction: inbound
+  - id: intercom-events
+    always_on: true
+    data_type: events
+    direction: inbound
