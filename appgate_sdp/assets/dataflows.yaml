@@ -3,7 +3,3 @@ provides:
     always_on: true
     data_type: metrics
     direction: inbound
-  - id: appgate-sdp-logs
-    always_on: false
-    data_type: logs
-    direction: inbound
