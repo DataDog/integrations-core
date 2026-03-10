@@ -1,0 +1,9 @@
+provides:
+  - id: ide-shepherd-logs
+    always_on: false
+    data_type: logs
+    direction: inbound
+  - id: ide-shepherd-events
+    always_on: true
+    data_type: events
+    direction: inbound

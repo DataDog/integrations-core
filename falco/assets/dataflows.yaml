@@ -1,0 +1,5 @@
+provides:
+  - id: falco-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
