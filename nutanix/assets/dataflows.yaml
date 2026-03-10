@@ -1,0 +1,9 @@
+provides:
+  - id: nutanix-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: nutanix-events
+    always_on: true
+    data_type: events
+    direction: inbound
