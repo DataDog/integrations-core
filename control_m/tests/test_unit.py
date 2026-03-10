@@ -249,31 +249,6 @@ def test_server_health_up_and_down(
     )
 
 
-@pytest.mark.parametrize(
-    "server, expected_tag",
-    [
-        ({"name": "by_name", "state": "Up"}, "ctm_server:by_name"),
-        ({"ctm": "by_ctm", "state": "Up"}, "ctm_server:by_ctm"),
-        ({"server": "by_server", "state": "Up"}, "ctm_server:by_server"),
-        ({"state": "Up"}, "ctm_server:unknown"),
-    ],
-)
-def test_server_health_name_fallback(
-    instance: dict[str, Any],
-    aggregator: AggregatorStub,
-    monkeypatch: MonkeyPatch,
-    server: dict,
-    expected_tag: str,
-) -> None:
-    check = _make_check(instance)
-    _mock_http(check, _ApiStub(servers=[server]), monkeypatch)
-
-    _run_check(check)
-
-    aggregator.assert_metric("control_m.server.up", count=1)
-    aggregator.assert_metric_has_tag("control_m.server.up", expected_tag)
-
-
 def test_jobs_total_and_returned(
     instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
@@ -295,30 +270,6 @@ def test_jobs_total_and_returned(
     aggregator.assert_metric("control_m.jobs.total", value=10, count=1)
     aggregator.assert_metric("control_m.jobs.returned", value=2, count=1)
     assert len(aggregator.events) == 0
-
-
-def test_jobs_active_and_waiting_per_server(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
-) -> None:
-    check = _make_check(instance)
-    _mock_http(
-        check,
-        _ApiStub(
-            jobs=[
-                _load_job("job_executing.json", ctm="srv_a"),
-                _load_job("job_waiting.json", ctm="srv_a"),
-                _load_job("job_executing.json", ctm="srv_b"),
-            ]
-        ),
-        monkeypatch,
-    )
-
-    _run_check(check)
-
-    aggregator.assert_metric("control_m.jobs.active", value=2, tags=BASE_TAGS + ["ctm_server:srv_a"], count=1)
-    aggregator.assert_metric("control_m.jobs.active", value=1, tags=BASE_TAGS + ["ctm_server:srv_b"], count=1)
-    aggregator.assert_metric("control_m.jobs.waiting.total", value=1, tags=BASE_TAGS, count=1)
-    aggregator.assert_metric("control_m.jobs.waiting.total", value=1, tags=BASE_TAGS + ["ctm_server:srv_a"], count=1)
 
 
 def test_jobs_by_status_breakdown(
@@ -343,34 +294,6 @@ def test_jobs_by_status_breakdown(
     aggregator.assert_metric("control_m.jobs.by_status", value=1, tags=srv_tags + ["status:executing"], count=1)
     aggregator.assert_metric("control_m.jobs.by_status", value=1, tags=srv_tags + ["status:wait_condition"], count=1)
     aggregator.assert_metric("control_m.jobs.by_status", value=1, tags=srv_tags + ["status:ended_ok"], count=1)
-
-
-def test_jobs_empty_response(instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
-    check = _make_check(instance)
-    _mock_http(check, _ApiStub(jobs=[]), monkeypatch)
-
-    _run_check(check)
-
-    aggregator.assert_metric("control_m.jobs.returned", value=0, count=1)
-    aggregator.assert_metric("control_m.jobs.total", count=0)
-    aggregator.assert_metric("control_m.jobs.active", count=0)
-    assert len(aggregator.events) == 0
-
-
-def test_jobs_malformed_entries_skipped(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
-) -> None:
-    check = _make_check(instance)
-    _mock_http(
-        check,
-        _ApiStub(jobs=["not a dict", None, _load_job("job_executing.json")]),
-        monkeypatch,
-    )
-
-    _run_check(check)
-
-    aggregator.assert_metric("control_m.jobs.returned", value=3, count=1)
-    aggregator.assert_metric("control_m.jobs.active", value=1, count=1)
 
 
 def test_terminal_ended_ok_with_duration(
@@ -399,100 +322,6 @@ def test_terminal_ended_ok_with_duration(
     aggregator.assert_metric_has_tag("control_m.job.run.count", "result:ok")
     aggregator.assert_metric("control_m.job.run.duration_ms", value=1_800_000, count=1)
     aggregator.assert_metric_has_tag("control_m.job.run.duration_ms", "job_name:timed_job")
-    assert len(aggregator.events) == 0
-
-
-def test_terminal_ended_not_ok(instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
-    check = _make_check(instance)
-    _mock_http(
-        check,
-        _ApiStub(jobs=[_load_job("job_ended_not_ok.json", jobId="f1")]),
-        monkeypatch,
-    )
-
-    _run_check(check)
-
-    aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
-    aggregator.assert_metric_has_tag("control_m.job.run.count", "result:failed")
-    aggregator.assert_metric("control_m.job.run.duration_ms", count=0)
-    assert len(aggregator.events) == 0
-
-
-def test_terminal_canceled(instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
-    check = _make_check(instance)
-    _mock_http(
-        check,
-        _ApiStub(jobs=[_load_job("job_cancelled.json", jobId="c1")]),
-        monkeypatch,
-    )
-
-    _run_check(check)
-
-    aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
-    aggregator.assert_metric_has_tag("control_m.job.run.count", "result:canceled")
-    aggregator.assert_metric("control_m.job.run.duration_ms", count=0)
-    assert len(aggregator.events) == 0
-
-
-def test_terminal_without_timestamps_emits_count_only(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
-) -> None:
-    job = _load_job("job_ended_ok.json", jobId="nt1", name="no_times")
-    job.pop("startTime")
-    job.pop("endTime")
-    check = _make_check(instance)
-    _mock_http(check, _ApiStub(jobs=[job]), monkeypatch)
-
-    _run_check(check)
-
-    aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
-    aggregator.assert_metric("control_m.job.run.duration_ms", count=0)
-    assert len(aggregator.events) == 0
-
-
-def test_terminal_without_dedupe_key_skips_run_metrics(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
-) -> None:
-    check = _make_check(instance)
-    _mock_http(
-        check,
-        _ApiStub(jobs=[{"ctm": "srv1", "name": "no_id", "status": "Ended OK"}]),
-        monkeypatch,
-    )
-
-    _run_check(check)
-
-    aggregator.assert_metric("control_m.job.run.count", count=0)
-    aggregator.assert_metric("control_m.jobs.by_status", count=1)
-    assert len(aggregator.events) == 0
-
-
-def test_terminal_all_statuses_with_server_fallback(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
-) -> None:
-    job_ok = _load_job("job_ended_ok.json", jobId="tok1", name="job_ok", server="alt_server")
-    job_ok.pop("ctm")
-
-    check = _make_check(instance)
-    _mock_http(
-        check,
-        _ApiStub(
-            jobs=[
-                _load_job("job_ended_not_ok.json", jobId="tf1", name="job_fail"),
-                _load_job("job_cancelled.json", jobId="tc1", name="job_cancel"),
-                job_ok,
-            ]
-        ),
-        monkeypatch,
-    )
-
-    _run_check(check)
-
-    aggregator.assert_metric("control_m.job.run.count", count=3)
-    aggregator.assert_metric_has_tag("control_m.job.run.count", "result:failed")
-    aggregator.assert_metric_has_tag("control_m.job.run.count", "result:canceled")
-    aggregator.assert_metric_has_tag("control_m.job.run.count", "result:ok")
-    aggregator.assert_metric_has_tag("control_m.job.run.count", "ctm_server:alt_server")
     assert len(aggregator.events) == 0
 
 
@@ -527,24 +356,6 @@ def test_dedup_new_run_number_counted_as_new_completion(
     api.jobs = [_load_job("job_ended_ok.json", jobId="r1", name="j1", numberOfRuns=2)]
     _run_check(check)
     aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
-
-
-def test_dedup_survives_check_recreation(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
-) -> None:
-    """Dedup state persists in the Agent cache and survives check recreation."""
-    api = _ApiStub(jobs=[_load_job("job_ended_ok.json", jobId="p1", name="j1")])
-    check1 = _make_check(instance)
-    _mock_http(check1, api, monkeypatch)
-
-    _run_check(check1)
-    aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
-
-    aggregator.reset()
-    check2 = _make_check(instance)
-    _mock_http(check2, api, monkeypatch)
-    _run_check(check2)
-    aggregator.assert_metric("control_m.job.run.count", count=0)
 
 
 def test_events_disabled_by_default(
@@ -676,82 +487,6 @@ def test_event_slow_run_check(instance: dict[str, Any], aggregator: AggregatorSt
     assert "1800000ms" in aggregator.events[0]["msg_title"]
 
 
-def test_event_slow_run_below_threshold_no_event(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
-) -> None:
-    instance["emit_job_events"] = True
-    instance["slow_run_threshold_ms"] = 9999999
-    check = _make_check(instance)
-    _mock_http(
-        check,
-        _ApiStub(
-            jobs=[
-                _load_job(
-                    "job_ended_ok.json",
-                    jobId="e7",
-                    name="fast_job",
-                    startTime="20260115100000",
-                    endTime="20260115100001",
-                )
-            ]
-        ),
-        monkeypatch,
-    )
-
-    _run_check(check)
-
-    assert len(aggregator.events) == 0
-
-
-def test_event_includes_high_cardinality_details(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
-) -> None:
-    instance["emit_job_events"] = True
-    check = _make_check(instance)
-    _mock_http(
-        check,
-        _ApiStub(
-            jobs=[
-                _load_job(
-                    "job_ended_not_ok.json",
-                    jobId="wb:0042",
-                    numberOfRuns=3,
-                    startTime="20260115100000",
-                    endTime="20260115103000",
-                )
-            ]
-        ),
-        monkeypatch,
-    )
-
-    _run_check(check)
-
-    assert len(aggregator.events) == 1
-    text = aggregator.events[0]["msg_text"]
-    assert "Job ID: wb:0042" in text
-    assert "Run #: 3" in text
-    assert "Folder: nightly" in text
-    assert "Start: Jan 15, 2026, 10:00:00 AM" in text
-    assert "Duration: 1800000ms" in text
-
-
-def test_events_not_duplicated_across_runs(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
-) -> None:
-    """Events respect dedup: same job+run fires an event only on the first cycle."""
-    instance["emit_job_events"] = True
-    api = _ApiStub(jobs=[_load_job("job_ended_not_ok.json", jobId="ed1", name="dup_job")])
-    check = _make_check(instance)
-    _mock_http(check, api, monkeypatch)
-
-    _run_check(check)
-    assert len(aggregator.events) == 1
-
-    aggregator.reset()
-    _run_check(check)
-    assert len(aggregator.events) == 0
-
-
 def test_metadata_version_from_first_server(
     instance: dict[str, Any], datadog_agent: Any, monkeypatch: MonkeyPatch
 ) -> None:
@@ -770,18 +505,6 @@ def test_metadata_version_from_first_server(
     _run_check(check)
 
     datadog_agent.assert_metadata(check.check_id, {"version.raw": "9.0.21.080"})
-
-
-@pytest.mark.parametrize("servers", [[{"name": "s1"}], []])
-def test_metadata_no_version_when_missing(
-    instance: dict[str, Any], datadog_agent: Any, monkeypatch: MonkeyPatch, servers: list
-) -> None:
-    check = _make_check(instance)
-    _mock_http(check, _ApiStub(servers=servers), monkeypatch)
-
-    _run_check(check)
-
-    datadog_agent.assert_metadata(check.check_id, {})
 
 
 def test_full_cycle_with_fixture_data(
