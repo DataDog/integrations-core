@@ -29,6 +29,10 @@ on:
         required: false
         type: boolean
         default: false
+      ddev-version:
+        description: "ddev version specifier (e.g. ==14.3.2). Defaults to latest."
+        required: false
+        type: string
 
 permissions:
   id-token: write
@@ -46,7 +50,7 @@ jobs:
           fetch-depth: 0 # ddev needs full tag history
 
       - name: Install ddev
-        run: pip install ddev==14.3.2
+        run: pip install ddev${{ inputs.ddev-version }}
 
       - name: Tag releases
         if: inputs.packages == ''
