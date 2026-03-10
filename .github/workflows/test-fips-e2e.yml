@@ -104,14 +104,14 @@ jobs:
 
     - name: Run E2E tests with FIPS disabled
       env:
-        DDEV_E2E_AGENT: "${{ inputs.agent-image || 'datadog/agent-dev:master-py3' }}"
+        DDEV_E2E_AGENT: "${{ inputs.agent-image || 'registry.datadoghq.com/agent-dev:master-py3' }}"
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
         ddev env test --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -m "fips_off"
 
     - name: Run E2E tests with FIPS enabled
       env:
-        DDEV_E2E_AGENT: "${{ inputs.agent-image-fips || 'datadog/agent-dev:master-fips' }}"
+        DDEV_E2E_AGENT: "${{ inputs.agent-image-fips || 'registry.datadoghq.com/agent-dev:master-fips' }}" 
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
         ddev env test --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_on"
