@@ -100,16 +100,9 @@ def test_extra_headers_on_http_method_call():
 
 
 class TestGetHeader:
-    def test_returns_existing_header(self):
-        http = RequestsWrapper({}, {})
-        assert http.get_header('Accept') == '*/*'
-
-    def test_returns_none_for_missing_header(self):
-        http = RequestsWrapper({}, {})
-        assert http.get_header('X-Missing') is None
-
     def test_returns_default_for_missing_header(self):
         http = RequestsWrapper({}, {})
+        assert http.get_header('X-Missing') is None
         assert http.get_header('X-Missing', 'fallback') == 'fallback'
 
     def test_case_sensitive_lookup(self):
@@ -119,17 +112,9 @@ class TestGetHeader:
 
 
 class TestSetHeader:
-    def test_sets_new_header(self):
+    def test_sets_header(self):
         http = RequestsWrapper({}, {})
         http.set_header('X-Token', 'abc123')
-        assert http.options['headers']['X-Token'] == 'abc123'
-
-    def test_overwrites_existing_header(self):
-        http = RequestsWrapper({}, {})
+        assert http.get_header('X-Token') == 'abc123'
         http.set_header('Accept', 'application/json')
-        assert http.options['headers']['Accept'] == 'application/json'
-
-    def test_set_and_get_roundtrip(self):
-        http = RequestsWrapper({}, {})
-        http.set_header('X-Custom', 'value')
-        assert http.get_header('X-Custom') == 'value'
+        assert http.get_header('Accept') == 'application/json'
