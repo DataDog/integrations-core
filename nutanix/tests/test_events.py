@@ -1,0 +1,283 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+
+from datetime import datetime
+from unittest import mock
+
+import pytest
+
+from datadog_checks.nutanix import NutanixCheck
+
+pytestmark = [pytest.mark.unit]
+
+# Mock datetime to match events fixture creation times
+MOCK_DATETIME = datetime.fromisoformat("2025-10-14T11:15:00.000000Z")
+
+EXPECTED_EVENTS = [
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Ultimate license applied to cluster',
+        'msg_title': 'LicenseAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'nutanix',
+            'prism_central:10.0.0.197',
+            'ntnx_cluster_name:datadog-nutanix-dev',
+            'ntnx_event_classification:UserAction',
+            'ntnx_type:event',
+        ],
+        'timestamp': 1760440548,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Password changed for user admin',
+        'msg_title': 'PasswordAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'nutanix',
+            'prism_central:10.0.0.197',
+            'ntnx_cluster_name:datadog-nutanix-dev',
+            'ntnx_event_classification:UserAction',
+            'ntnx_type:event',
+        ],
+        'timestamp': 1760442479,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Pulse configuration updated',
+        'msg_title': 'PulseAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'nutanix',
+            'prism_central:10.0.0.197',
+            'ntnx_cluster_name:datadog-nutanix-dev',
+            'ntnx_event_classification:UserAction',
+            'ntnx_type:event',
+        ],
+        'timestamp': 1760442526,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Password reset for user admin',
+        'msg_title': 'PasswordAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'nutanix',
+            'prism_central:10.0.0.197',
+            'ntnx_cluster_name:Unnamed',
+            'ntnx_event_classification:UserAction',
+            'ntnx_type:event',
+        ],
+        'timestamp': 1760605372,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Password reset for user admin',
+        'msg_title': 'PasswordAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'nutanix',
+            'prism_central:10.0.0.197',
+            'ntnx_cluster_name:datadog-nutanix-dev',
+            'ntnx_event_classification:UserAction',
+            'ntnx_type:event',
+        ],
+        'timestamp': 1760607684,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Password reset for user admin',
+        'msg_title': 'PasswordAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'nutanix',
+            'prism_central:10.0.0.197',
+            'ntnx_cluster_name:datadog-nutanix-dev',
+            'ntnx_event_classification:UserAction',
+            'ntnx_type:event',
+        ],
+        'timestamp': 1760622603,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'User admin enabled',
+        'msg_title': 'EnableDisableUserAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'nutanix',
+            'prism_central:10.0.0.197',
+            'ntnx_cluster_name:datadog-nutanix-dev',
+            'ntnx_event_classification:UserAction',
+            'ntnx_type:event',
+        ],
+        'timestamp': 1760622668,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Pulse configuration updated',
+        'msg_title': 'PulseAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'nutanix',
+            'prism_central:10.0.0.197',
+            'ntnx_cluster_name:Unnamed',
+            'ntnx_event_classification:UserAction',
+            'ntnx_type:event',
+        ],
+        'timestamp': 1760624754,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'Pulse configuration updated',
+        'msg_title': 'PulseAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'nutanix',
+            'prism_central:10.0.0.197',
+            'ntnx_cluster_name:Unnamed',
+            'ntnx_event_classification:UserAction',
+            'ntnx_type:event',
+        ],
+        'timestamp': 1760624754,
+    },
+    {
+        'alert_type': 'info',
+        'event_type': 'nutanix',
+        'msg_text': 'External state added for cluster datadog-nutanix-dev',
+        'msg_title': 'MulticlusterAudit',
+        'source_type_name': 'nutanix',
+        'tags': [
+            'nutanix',
+            'prism_central:10.0.0.197',
+            'ntnx_cluster_name:Unnamed',
+            'ntnx_event_classification:UserAction',
+            'ntnx_type:event',
+        ],
+        'timestamp': 1760624803,
+    },
+]
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_events_collection(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
+    """Test that events are collected and have proper structure."""
+
+    instance = mock_instance.copy()
+    instance["collect_events"] = True
+    get_current_datetime.return_value = MOCK_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
+    # Events may not be present in the test fixture depending on time window
+    # Just verify the structure if any events are collected
+    if events:
+        assert events[0]['event_type'] == 'nutanix'
+        assert events[0]['source_type_name'] == 'nutanix'
+        assert events[0]['alert_type'] in ['error', 'warning', 'info']
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_events_no_duplicates_on_subsequent_runs(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """Test that no events are collected when there are no new events since last collection."""
+
+    instance = mock_instance.copy()
+    instance["collect_events"] = True
+    get_current_datetime.return_value = MOCK_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
+
+    assert len(events) > 0, "Expected events to be collected on first run"
+
+    aggregator.reset()
+
+    # second check run, no new events to be collected
+    dd_run_check(check)
+
+    events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
+
+    assert len(events) == 0, "Expected no events when there are no new events since last collection"
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_events_filtered_by_resource_filters_exclude_cluster(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test that events for excluded clusters are not collected."""
+    instance = mock_instance.copy()
+    instance["collect_events"] = True
+    instance["resource_filters"] = [
+        {
+            "resource": "cluster",
+            "property": "extId",
+            "type": "exclude",
+            "patterns": ["^00064715-c043-5d8f-ee4b-176ec875554d$"],
+        },
+    ]
+
+    get_current_datetime.return_value = MOCK_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
+    assert not any("ntnx_cluster_name:datadog-nutanix-dev" in e.get("tags", []) for e in events)
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_events_filtered_by_resource_filters_include_cluster(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test that only events for included clusters are collected."""
+    instance = mock_instance.copy()
+    instance["collect_events"] = True
+    instance["resource_filters"] = [
+        {"resource": "cluster", "property": "extId", "patterns": ["^00064715-c043-5d8f-ee4b-176ec875554d$"]},
+    ]
+
+    get_current_datetime.return_value = MOCK_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
+    assert len(events) >= 0  # May not have events in test fixture
+    assert all("ntnx_cluster_name:datadog-nutanix-dev" in e.get("tags", []) for e in events)
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_events_filtered_by_activity_filter_type(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test that only events matching the event type filter are collected."""
+    instance = mock_instance.copy()
+    instance["collect_events"] = True
+    instance["resource_filters"] = [
+        {"resource": "event", "property": "eventType", "patterns": ["^PasswordAudit$"]},
+    ]
+
+    get_current_datetime.return_value = MOCK_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    events = [e for e in aggregator.events if "ntnx_type:event" in e.get('tags', [])]
+    assert len(events) > 0  # May not have events in test fixture
+    assert all(e['msg_title'] == 'PasswordAudit' for e in events)

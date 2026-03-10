@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 22.13.1 / 2026-02-27
+
+***Fixed***:
+
+* Cancel SQLServer Agent history job on check cancellation ([#22753](https://github.com/DataDog/integrations-core/pull/22753))
+
 ## 22.13.0 / 2026-02-19
 
 ***Added***:
@@ -14,6 +20,13 @@
 * Clarifies the default ADO provider in conf.yaml.example ([#21364](https://github.com/DataDog/integrations-core/pull/21364))
 * Updates collect_raw_query_statements config description ([#22611](https://github.com/DataDog/integrations-core/pull/22611))
 * Fix AgentJobs, Deadlocks and XE collections to run async by default ([#22633](https://github.com/DataDog/integrations-core/pull/22633))
+
+## 22.12.5 / 2026-02-27
+
+***Fixed***:
+
+* Fix AgentJobs, Deadlocks and XE collections to run async by default ([#22633](https://github.com/DataDog/integrations-core/pull/22633))
+* Cancel SQLServer agent history job on check cancel ([#22753](https://github.com/DataDog/integrations-core/pull/22753))
 
 ## 22.12.4 / 2026-02-05
 
