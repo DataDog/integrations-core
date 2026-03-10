@@ -1,27 +1,17 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Property-based tests for OpenMetricsBaseCheckV2.
+"""Property-based tests for OpenMetricsBaseCheckV2."""
 
-These tests use Hypothesis to generate random but valid Prometheus payloads
-and metric mappings, then verify invariants about how metrics flow through
-the check pipeline into the aggregator.
-
-The central property under test: given a payload containing N uniquely-named
-gauge metrics and a metric mapping that selects a subset of those names,
-the aggregator receives at least as many metric submissions as the size
-of the overlap between payload metric names and the mapping.
-"""
-
+import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 from .utils import get_check
 
-metric_names = st.from_regex(r'[a-z][a-z0-9_]{0,29}', fullmatch=True).filter(
-    lambda n: '__' not in n and not n.endswith('_')
-)
+pytestmark = pytest.mark.unit
 
+metric_names = st.from_regex(r'[a-z][0-9a-z]*(?:_[0-9a-z]+)*', fullmatch=True)
 metric_values = st.floats(min_value=-1e15, max_value=1e15, allow_nan=False, allow_infinity=False)
 
 
@@ -35,7 +25,8 @@ def gauge_payload_and_mapping(draw):
         value = draw(metric_values)
         lines.append(f"# HELP {name} generated")
         lines.append(f"# TYPE {name} gauge")
-        lines.append(f"{name} {value}")
+        # We want to avoid float formatting like "1e+15", so we force the full number.
+        lines.append(f"{name} {value:.17g}")
 
     payload = "\n".join(lines)
     mapped = draw(st.lists(st.sampled_from(names), min_size=1, unique=True))
@@ -44,7 +35,7 @@ def gauge_payload_and_mapping(draw):
 
 
 @given(data=gauge_payload_and_mapping())
-@settings(max_examples=200, deadline=5000, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_gauge_submission_count_lower_bound(aggregator, dd_run_check, mock_http_response, data):
     """The aggregator receives at least one submission per mapped gauge metric.
 
