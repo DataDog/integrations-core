@@ -31,7 +31,8 @@ from datadog_checks.clickhouse.query_log_job import ClickhouseQueryLogJob, agent
 # - Uses event_date predicate for partition pruning optimization
 # - Uses is_initial_query=1 to only count queries once (not sub-queries)
 # - Uses type != 'QueryStart' to get one record per completed query
-# - Uses normalizeQuery() to get query text with wildcards representing the entire set
+# - Uses any(query) to get raw query text for obfuscation (not normalizeQuery(), which would
+#   produce a different query_signature than the samples pipeline)
 # - Uses quantiles() to calculate p50, p90, p95, p99 simultaneously
 # - Returns max(event_time_microseconds) to track the latest query timestamp in each batch
 #
@@ -44,7 +45,7 @@ from datadog_checks.clickhouse.query_log_job import ClickhouseQueryLogJob, agent
 STATEMENTS_QUERY = """
 SELECT
     normalized_query_hash,
-    normalizeQuery(any(query)) as query_text,
+    any(query) as query_text,
     any(user) as query_user,
     any(type) as query_type,
     any(exception_code) as exception_code,
