@@ -5,7 +5,6 @@ import os
 from copy import deepcopy
 
 import pytest
-
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.conditions import CheckCommandOutput, WaitFor
 from datadog_checks.dev.docker import CheckDockerLogs, docker_run

@@ -5,10 +5,10 @@ import time
 
 import mock
 import pytest
-
-from datadog_checks.aerospike import AerospikeCheck
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
+
+from datadog_checks.aerospike import AerospikeCheck
 
 from .common import (
     EXPECTED_PROMETHEUS_METRICS,
