@@ -113,7 +113,9 @@ def test_update_python_version_invalid_hash_format(fake_repo, ddev, mocker, mock
     assert 'Invalid Linux SHA256 hash format' in result.output
 
 
-def test_upgrade_reports_error_when_pbs_release_unavailable(fake_repo, ddev, mocker, mock_python_version, mock_sha256_hashes):
+def test_upgrade_reports_error_when_pbs_release_unavailable(
+    fake_repo, ddev, mocker, mock_python_version, mock_sha256_hashes
+):
     mocker.patch('ddev.cli.meta.scripts.upgrade_python.get_latest_python_version', return_value='3.13.9')
     mocker.patch('ddev.cli.meta.scripts.upgrade_python.get_pbs_release_info', return_value=None)
 
