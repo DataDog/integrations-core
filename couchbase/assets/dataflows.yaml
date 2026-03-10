@@ -7,3 +7,7 @@ provides:
     always_on: false
     data_type: logs
     direction: inbound
+  - id: couchbase-events
+    always_on: true
+    data_type: events
+    direction: inbound
