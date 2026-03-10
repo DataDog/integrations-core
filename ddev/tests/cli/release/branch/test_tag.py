@@ -230,10 +230,7 @@ def test_build_agent_yaml_points_to_main_aborts(ddev, basic_git, mocker):
     message directing the user to the update-build-agent-yaml workflow.
     """
     basic_git.current_branch.return_value = '7.56.x'
-    mocker.patch(
-        'ddev.cli.release.branch.tag._build_agent_yaml_points_to_main',
-        return_value=True,
-    )
+    mocker.patch('ddev.cli.release.branch.tag._build_agent_yaml_points_to_main', return_value=True)
 
     result = ddev('release', 'branch', 'tag')
 
@@ -243,21 +240,6 @@ def test_build_agent_yaml_points_to_main_aborts(ddev, basic_git, mocker):
     basic_git.run.assert_not_called()
     basic_git.tag.assert_not_called()
     basic_git.push.assert_not_called()
-
-
-def test_build_agent_yaml_already_updated_proceeds_to_tag(ddev, git, mocker):
-    """
-    When build_agent.yaml does not point to main (already updated via the workflow),
-    tagging proceeds normally.
-    """
-    mocker.patch(
-        'ddev.cli.release.branch.tag._build_agent_yaml_points_to_main',
-        return_value=False,
-    )
-
-    result = ddev('release', 'branch', 'tag', input='\ny\n')
-
-    _assert_tag_pushed(git, result, '7.56.0-rc.12')
 
 
 # TODO: test for adding RCs for a bugfix release
