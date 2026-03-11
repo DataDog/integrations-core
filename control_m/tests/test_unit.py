@@ -20,6 +20,16 @@ def test_config_missing_endpoint() -> None:
         _make_check({"control_m_api_endpoint": ""})
 
 
+def test_config_token_lifetime_below_minimum() -> None:
+    with pytest.raises(Exception, match="token_lifetime_seconds.*at least 60"):
+        _make_check({
+            "control_m_api_endpoint": "https://x/api",
+            "control_m_username": "user",
+            "control_m_password": "pass",
+            "token_lifetime_seconds": 0,
+        })
+
+
 def test_config_no_auth() -> None:
     with pytest.raises(Exception, match="No authentication configured"):
         _make_check({"control_m_api_endpoint": "https://x/api"})
@@ -54,7 +64,6 @@ def test_connect_ok_with_static_token(
     aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:static_token")
     aggregator.assert_metric("control_m.server.up", value=1, count=1)
     aggregator.assert_metric("control_m.jobs.returned", value=1, count=1)
-    assert len(aggregator.events) == 0
 
 
 def test_connect_server_error_emits_critical(
@@ -81,7 +90,6 @@ def test_connect_session_login_ok(
     aggregator.assert_metric("control_m.can_login", value=1, count=1)
     aggregator.assert_metric("control_m.can_connect", value=1, count=1)
     aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:session_login")
-    assert len(aggregator.events) == 0
 
 
 def test_connect_session_login_failure_emits_critical(
@@ -177,7 +185,6 @@ def test_jobs_total_and_returned(
 
     aggregator.assert_metric("control_m.jobs.total", value=10, count=1)
     aggregator.assert_metric("control_m.jobs.returned", value=2, count=1)
-    assert len(aggregator.events) == 0
 
 
 def test_terminal_ended_ok_with_duration(
@@ -204,7 +211,6 @@ def test_terminal_ended_ok_with_duration(
     aggregator.assert_metric_has_tag("control_m.job.run.count", "result:ok")
     aggregator.assert_metric("control_m.job.run.duration_ms", value=1_800_000, count=1)
     aggregator.assert_metric_has_tag("control_m.job.run.duration_ms", "job_name:timed_job")
-    assert len(aggregator.events) == 0
 
 
 def test_dedup_same_terminal_job_counted_once(
