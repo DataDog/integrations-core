@@ -8,6 +8,6 @@ provides:
     data_type: logs
     direction: inbound
   - id: torchserve-events
-    always_on: true
+    always_on: false
     data_type: events
     direction: inbound
