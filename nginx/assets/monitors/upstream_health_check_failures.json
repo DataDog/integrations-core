@@ -1,21 +1,25 @@
 {
   "version": 2,
-  "created_at": "2026-03-10",
-  "last_updated_at": "2026-03-10",
+  "created_at": "2026-03-11",
+  "last_updated_at": "2026-03-11",
   "title": "Upstream active health check failures",
-  "description": "Alerts when NGINX Plus active health checks mark backend peers as unhealthy, providing an early warning before real traffic is affected. Requires NGINX Plus with active health checks configured.",
+  "description": "Detects when NGINX Plus active health checks mark upstream peers as unhealthy at an abnormal rate, providing early warning of backend degradation before real traffic is affected.",
   "definition": {
-    "name": "[NGINX] Upstream **{{upstream.name}}** has active health check failures",
+    "name": "[NGINX] Upstream active health check failures",
     "type": "query alert",
-    "query": "min(last_5m):min:nginx.upstream.peers.health_checks.last_passed{$env} by {upstream,upstream_server} < 1",
-    "message": "{{#is_alert}}\n## 🚨 What's happening?\n\nNGINX Plus active health checks for peer **{{upstream_server.name}}** in upstream **{{upstream.name}}** are failing (`last_passed`: `{{value}}`). The peer has been removed from the load balancing rotation. This is a proactive signal — active health check failures detect backend unavailability before real client traffic is rejected.\n{{/is_alert}}\n\n{{#is_recovery}}\n## ✅ Recovered\n\nPeer **{{upstream_server.name}}** in upstream **{{upstream.name}}** has resumed passing active health checks and returned to the rotation. Current value: `{{value}}`.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## 📈 Impact\n\nPeers marked unhealthy are immediately removed from load balancing. Depending on the upstream pool size, this reduces capacity and increases load on remaining healthy peers. If all peers fail health checks simultaneously, NGINX returns 502 Bad Gateway to all clients served by this upstream.\n\n---\n\n## Why?\n\nPossible causes:\n* **Backend service is down or restarting** — The upstream server is not listening on the expected port or is in a crash-restart loop.\n* **Health check endpoint returning a non-2xx response** — The backend application has degraded to a state where its health endpoint returns 4xx/5xx, even if it is still partially functional.\n* **Network connectivity issue** — The NGINX host cannot reach the upstream peer due to firewall changes, security group updates, or network partitioning.\n* **Misconfigured health check parameters** — The health check interval, timeout, or expected response does not match the backend's actual behavior (e.g., slow startup, custom status codes).\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. **Identify the scope** — Confirm which peer (`{{upstream_server.name}}`) in upstream `{{upstream.name}}` is failing by inspecting `nginx.upstream.peers.health_checks.last_passed` broken down by `upstream_server` tag.\n2. **Test the health check endpoint manually** — Replicate the health check from the NGINX host to confirm connectivity and response:\n   ```bash\n   curl -v http://<upstream-host>:<port><health-check-uri>\n   ```\n3. **Review NGINX error logs** — Check for health check failure messages:\n   ```bash\n   grep 'health' /var/log/nginx/error.log\n   ```\n4. **Check backend application health** — Review the upstream service's own logs and metrics for errors, restarts, or degraded states.\n5. **Verify health check configuration** — Review the `health_check` directive in NGINX Plus config and confirm `match` conditions align with the current backend behavior.\n\n### Cause and Resolution\n\n| Cause | Resolution |\n| ----- | ---------- |\n| Backend service down or restarting | Restart the backend service; investigate crash root cause; add process supervision. |\n| Health endpoint returning non-2xx | Fix the backend health endpoint; temporarily adjust the `match` directive if the endpoint uses non-standard status codes. |\n| Network or firewall blocking probe | Update security group rules or firewall to permit health check traffic from the NGINX host. |\n| Misconfigured health check | Review and adjust `interval`, `fails`, `passes`, and `match` in the health_check directive to match actual backend behavior. |\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/nginx/)\n* [Metrics Explorer](/metric/explorer)\n* [Infrastructure](/infrastructure)\n* [Logs](/logs)\n{{/is_recovery}}",
+    "query": "avg(last_1h):anomalies(avg:nginx.upstream.peers.health_checks.unhealthy{$env} by {upstream}, 'basic', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
+    "message": "{{#is_alert}}\n## 🚨 What's happening?\n\nNGINX Plus active health checks are marking peers in upstream group **{{upstream.name}}** as unhealthy at an abnormal rate. Current value: {{value}} (threshold: {{threshold}}).\n{{/is_alert}}\n\n{{#is_recovery}}\n## ✅ Recovered\n\n`nginx.upstream.peers.health_checks.unhealthy` on {{upstream.name}} has resolved. Current value: {{value}}.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## 📈 Impact\n\nUnhealthy peers are removed from the load balancing pool by NGINX Plus, reducing upstream capacity. If multiple peers are marked unhealthy simultaneously, remaining peers absorb disproportionate traffic and may cascade into further failures and elevated `nginx.upstream.peers.responses.5xx` for end users.\n\n---\n\n## Why?\n\nPossible causes:\n* **Backend process crash or restart** — The upstream application server is down or mid-restart, causing the configured health check probe to fail.\n* **Health check endpoint returning errors** — The backend's health check path is returning a non-2xx response due to an application error or misconfiguration of the health check `match` block.\n* **Network partition between NGINX and upstream** — NGINX Plus cannot reach the backend host due to firewall rules, routing changes, or host-level network issues.\n* **Upstream resource exhaustion** — The upstream server is too overloaded (CPU, memory, thread pool) to respond to active health check probes within the configured timeout.\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. **Identify the scope** — Check which upstream group `{{upstream.name}}` and which specific peers are failing using `nginx.upstream.peers.health_checks.fails` per peer.\n2. **Review recent metrics** — Inspect `nginx.upstream.peers.health_checks.unhealthy` in [Metrics Explorer](/metric/explorer?exp_metric=nginx.upstream.peers.health_checks.unhealthy&exp_scope=upstream:{{upstream.name}},env:{{env.name}}&exp_agg=avg&exp_type=line).\n3. **Manually probe the health check endpoint** — Curl the configured health check URI on the affected upstream hosts to confirm whether they return a healthy response.\n4. **Correlate with passive fail signals** — Review `nginx.upstream.peers.fails` and `nginx.upstream.peers.responses.5xx` to determine if real traffic is also being affected.\n\n### Cause and Resolution\n\n| Cause | Resolution |\n| ----- | ---------- |\n| Backend process crash | Restart the upstream service and investigate application crash logs |\n| Health check endpoint returning errors | Fix the application error on the health check path or correct the `match` block |\n| Network partition | Restore connectivity; check firewall rules and routing between NGINX and upstream |\n| Upstream resource exhaustion | Scale upstream capacity or reduce load; investigate CPU and memory on backend hosts |\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/nginx/)\n* [Metrics Explorer](/metric/explorer?exp_metric=nginx.upstream.peers.health_checks.unhealthy&exp_scope=upstream:{{upstream.name}},env:{{env.name}}&exp_agg=avg&exp_type=line)\n* [Infrastructure](/infrastructure?filters=env:{{env.name}})\n* [Logs](/logs?query=upstream:{{upstream.name}}+env:{{env.name}})\n{{/is_recovery}}",
     "tags": [
-      "$env",
-      "$upstream_server"
+      "$env"
     ],
     "options": {
       "thresholds": {
-        "critical": 1
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "threshold_windows": {
+        "trigger_window": "last_15m",
+        "recovery_window": "last_15m"
       },
       "notify_audit": false,
       "require_full_window": false,
@@ -42,13 +46,9 @@
       "prefix": "upstream",
       "available_values": [],
       "defaults": ["*"]
-    },
-    {
-      "name": "upstream_server",
-      "prefix": "upstream_server",
-      "available_values": [],
-      "defaults": ["*"]
     }
   ],
-  "tags": ["integration:nginx"]
+  "tags": [
+    "integration:nginx"
+  ]
 }

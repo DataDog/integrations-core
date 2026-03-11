@@ -1,21 +1,25 @@
 {
   "version": 2,
-  "created_at": "2026-03-10",
-  "last_updated_at": "2026-03-10",
-  "title": "Connection drop rate high",
-  "description": "Alerts when NGINX is dropping client connections at a sustained rate, indicating worker_connections exhaustion or OS socket backlog overflow — a silent traffic-shedding condition with zero prior open-source monitor coverage.",
+  "created_at": "2026-03-11",
+  "last_updated_at": "2026-03-11",
+  "title": "Connection drop rate is high",
+  "description": "Monitors for an abnormal rate of dropped client connections on open-source NGINX, indicating worker_connections exhaustion or socket backlog overflow that silently sheds traffic.",
   "definition": {
     "name": "[NGINX] Connection drop rate is high",
     "type": "query alert",
-    "query": "avg(last_5m):avg:nginx.net.conn_dropped_per_s{$env} by {host} > 5",
-    "message": "{{#is_alert}}\n## 🚨 What's happening?\n\nNGINX on **{{host.name}}** is dropping **{{value}}** connections/sec (threshold: `{{threshold}}`). Workers are actively rejecting new client connections, indicating `worker_connections` exhaustion or OS socket backlog overflow. Traffic is being shed silently with no HTTP response sent to clients.\n{{/is_alert}}\n\n{{#is_warning}}\n## ⚠️ What's happening?\n\nNGINX on **{{host.name}}** is dropping **{{value}}** connections/sec (warning threshold: `{{warn_threshold}}`). The connection drop rate is elevated — `worker_connections` may be approaching saturation.\n{{/is_warning}}\n\n{{#is_recovery}}\n## ✅ Recovered\n\nThe connection drop rate on **{{host.name}}** has resolved. Current value: `{{value}}` connections/sec.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## 📈 Impact\n\nDropped connections mean incoming client requests are silently refused before any HTTP response can be sent. Users experience connection timeouts or immediate TCP resets. For busy services, even brief saturation can cascade into service unavailability and SLA breaches.\n\n---\n\n## Why?\n\nPossible causes:\n* **`worker_connections` limit reached** — The total number of simultaneous connections across all workers has hit the configured `worker_connections` value. NGINX begins dropping new connections immediately.\n* **OS TCP backlog overflow** — The kernel `net.core.somaxconn` or `net.ipv4.tcp_max_syn_backlog` limit is lower than the NGINX `backlog` parameter, causing the OS to drop SYN packets before they reach NGINX.\n* **Sudden traffic spike** — An unexpected burst of incoming connections exhausted available worker slots faster than existing connections could be closed.\n* **Slow upstream responses holding connections open** — Long-lived connections waiting on upstream responses fill worker slots, leaving none available for new clients.\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. **Identify the scope** — Check which `{{host.name}}` is affected and correlate with recent traffic spikes using `nginx.net.conn_opened_per_s`.\n2. **Review current connection counts** — Inspect `nginx.net.connections` (active) vs `worker_processes × worker_connections` to determine headroom.\n3. **Check NGINX configuration** — Verify `worker_connections` in `nginx.conf` (under the `events` block):\n   ```bash\n   grep -E 'worker_connections|worker_processes' /etc/nginx/nginx.conf\n   ```\n4. **Increase `worker_connections`** if the system has available file descriptors (`ulimit -n`); also ensure `worker_rlimit_nofile` is set accordingly.\n5. **Tune OS TCP backlog** — Increase kernel parameters if the drop is OS-level:\n   ```bash\n   sysctl -w net.core.somaxconn=65535\n   sysctl -w net.ipv4.tcp_max_syn_backlog=65535\n   ```\n6. **Reduce upstream hold time** — If upstreams are slow, tune `keepalive_timeout`, `proxy_read_timeout`, and add upstream capacity.\n\n### Cause and Resolution\n\n| Cause | Resolution |\n| ----- | ---------- |\n| `worker_connections` limit reached | Increase `worker_connections` in `nginx.conf`; verify `worker_rlimit_nofile` matches. |\n| OS socket backlog overflow | Increase `net.core.somaxconn` and `net.ipv4.tcp_max_syn_backlog` with sysctl. |\n| Traffic spike exceeding capacity | Scale NGINX horizontally or enable autoscaling; review upstream load balancer thresholds. |\n| Slow upstreams holding worker slots | Reduce `keepalive_timeout`; add upstream capacity; tune `proxy_read_timeout`. |\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/nginx/)\n* [Metrics Explorer](/metric/explorer)\n* [Infrastructure](/infrastructure)\n* [Logs](/logs)\n{{/is_recovery}}",
+    "query": "avg(last_1h):anomalies(avg:nginx.net.conn_dropped_per_s{$env} by {host}, 'basic', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
+    "message": "{{#is_alert}}\n## 🚨 What's happening?\n\nNGINX on **{{host.name}}** is dropping client connections at an abnormal rate. Current value: {{value}} connections/s (threshold: {{threshold}}).\n{{/is_alert}}\n\n{{#is_recovery}}\n## ✅ Recovered\n\n`nginx.net.conn_dropped_per_s` on {{host.name}} has resolved. Current value: {{value}}.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## 📈 Impact\n\nDropped connections mean active client requests are being silently rejected — end users see connection errors or timeouts and traffic is shed without any upstream error signal.\n\n---\n\n## Why?\n\nPossible causes:\n* **`worker_connections` limit reached** — The total number of simultaneous connections allowed per worker process is exhausted; new connections are dropped immediately.\n* **Socket backlog overflow** — The OS-level `listen` backlog queue (`net.core.somaxconn`) is full; the kernel rejects new SYN packets before NGINX sees them.\n* **Too few worker processes** — `worker_processes` is set lower than available CPU cores, under-utilizing capacity during traffic spikes.\n* **Sudden traffic surge** — A burst of inbound connections exceeds current NGINX capacity before load balancing can redistribute.\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. **Identify the scope** — Check which `{{host.name}}` is affected and correlate with `nginx.net.connections` and `nginx.net.request_per_s`.\n2. **Review recent metrics** — Inspect `nginx.net.conn_dropped_per_s` in [Metrics Explorer](/metric/explorer?exp_metric=nginx.net.conn_dropped_per_s&exp_scope=host:{{host.name}},env:{{env.name}}&exp_agg=avg&exp_type=line).\n3. **Check the nginx error log** — Look for `worker_connections are not enough` messages in `/var/log/nginx/error.log` on `{{host.name}}`.\n4. **Tune nginx.conf** — Raise `worker_connections`, set `worker_processes auto`, and reload NGINX with `nginx -s reload`.\n\n### Cause and Resolution\n\n| Cause | Resolution |\n| ----- | ---------- |\n| `worker_connections` limit reached | Increase `worker_connections` in `nginx.conf` and reload |\n| Socket backlog overflow | Increase `net.core.somaxconn` and add `listen ... backlog=N` |\n| Too few worker processes | Set `worker_processes auto` in `nginx.conf` |\n| Traffic spike beyond capacity | Scale horizontally or add upstream load balancing |\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/nginx/)\n* [Metrics Explorer](/metric/explorer?exp_metric=nginx.net.conn_dropped_per_s&exp_scope=host:{{host.name}},env:{{env.name}}&exp_agg=avg&exp_type=line)\n* [Infrastructure](/infrastructure?filters=host:{{host.name}})\n* [Logs](/logs?query=host:{{host.name}}+env:{{env.name}})\n{{/is_recovery}}",
     "tags": [
       "$env"
     ],
     "options": {
       "thresholds": {
-        "critical": 5,
-        "warning": 1
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "threshold_windows": {
+        "trigger_window": "last_15m",
+        "recovery_window": "last_15m"
       },
       "notify_audit": false,
       "require_full_window": false,
@@ -44,5 +48,7 @@
       "defaults": ["*"]
     }
   ],
-  "tags": ["integration:nginx"]
+  "tags": [
+    "integration:nginx"
+  ]
 }
