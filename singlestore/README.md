@@ -22,6 +22,10 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+#### Prepare SingleStore
+
+As a best practice, Datadog recommends using a read-only user to monitor your SingleStore instance. This limits the access granted to the Datadog Agent.
+
 #### Host
 
 ##### Metric collection

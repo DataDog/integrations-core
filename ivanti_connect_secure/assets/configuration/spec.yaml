@@ -1,4 +1,5 @@
 name: Ivanti Connect Secure
+fleet_configurable: true
 files:
 - name: ivanti_connect_secure.yaml
   options:

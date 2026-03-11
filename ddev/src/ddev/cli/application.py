@@ -94,6 +94,11 @@ class Application(Terminal):
         self.__config['color'] = not self.console.no_color
         self.__config['dd_api_key'] = self.config.orgs.get('default', {}).get('api_key', '')
         self.__config['dd_app_key'] = self.config.orgs.get('default', {}).get('app_key', '')
+        # Ensure GitHub config is available for old CLI commands that need it
+        self.__config['github'] = {
+            'user': self.config.github.user,
+            'token': self.config.github.token,
+        }
         # Make sure that envvar overrides of repo make it into config.
         self.__config['repo'] = self.repo.name
         # Transfer the -x/--here flag to the old CLI.

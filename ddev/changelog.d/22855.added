@@ -1,0 +1,3 @@
+Added `--report` and `--report-type` options to `ddev dep updates`:
+  - Pass `--report PATH` to write a dependency update report to a file (JSON or Markdown via `--report-type`).
+  - Pass `--report` without a path to print the report as a Rich table directly in the terminal.

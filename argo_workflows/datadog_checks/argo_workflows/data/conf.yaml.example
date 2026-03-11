@@ -46,7 +46,7 @@ init_config:
 instances:
 
     ## @param openmetrics_endpoint - string - required
-    ## Endpoint exposing the Workflow Controller's Prometheus metrics. For more information refer to:
+    ## Endpoint exposing the Argo Workflow Controller's Prometheus metrics. For more information refer to:
     ## https://argo-workflows.readthedocs.io/en/latest/metrics/
     #
   - openmetrics_endpoint: http://localhost:9090/metrics

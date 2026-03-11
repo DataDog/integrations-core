@@ -240,6 +240,26 @@ class MongoApi(object):
     def explain_command(self, db_name, command, verbosity="queryPlanner", session=None):
         return self[db_name].command("explain", command, verbosity=verbosity, session=session, maxTimeMS=self._timeout)
 
+    def query_stats(self, session=None):
+        """
+        Query $queryStats aggregation pipeline (MongoDB 8.0+).
+
+        $queryStats returns query statistics including normalized query shapes and execution metrics.
+        Requires clusterMonitor role or queryStatsRead privilege.
+
+        Returns an iterator over query statistics documents containing:
+        - key: query shape information (cmdNs, command, filter, etc.)
+        - keyHash: hash of the key
+        - queryShapeHash: hash of the query shape
+        - metrics: execution statistics (execCount, totalExecMicros, etc.)
+        - asOf: timestamp of the statistics
+        """
+        pipeline = [
+            {'$queryStats': {}},
+            {'$sort': {'metrics.execCount': -1}},
+        ]
+        return self['admin'].aggregate(pipeline, session=session, maxTimeMS=self._timeout)
+
     @property
     def hostname(self):
         if self.__hostname:

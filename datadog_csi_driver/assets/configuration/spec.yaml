@@ -1,4 +1,5 @@
 name: Datadog CSI Driver
+fleet_configurable: true
 files:
 - name: datadog_csi_driver.yaml
   options:

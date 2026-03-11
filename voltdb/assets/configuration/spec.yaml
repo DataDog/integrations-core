@@ -1,4 +1,5 @@
 name: VoltDB
+fleet_configurable: true
 files:
   - name: voltdb.yaml
     options:
@@ -12,6 +13,8 @@ files:
         options:
           - name: url
             description: URL to a VoltDB client endpoint.
+            fleet_configurable: true
+            formats: ["url"]
             required: true
             display_priority: 3
             value:
@@ -27,6 +30,7 @@ files:
               example: false
 
           - name: statistics_components
+            fleet_configurable: true
             description: |
               List VoltDB components to collect metrics. A subset of components are collected by default.
               See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php

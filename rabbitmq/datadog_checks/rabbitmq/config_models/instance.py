@@ -109,6 +109,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_health_service_check: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     exchanges: Optional[tuple[str, ...]] = None
     exchanges_regexes: Optional[tuple[str, ...]] = None
     exclude_labels: Optional[tuple[str, ...]] = None
