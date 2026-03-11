@@ -1,0 +1,10 @@
+name: HPE Aruba EdgeConnect
+files:
+- name: hpe_aruba_edgeconnect.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/default
