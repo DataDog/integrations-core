@@ -40,15 +40,34 @@ def main() -> None:
             sys.exit(result.returncode)
 
     errors = []
+    no_version = []
+    pre_release = []
+    validated = []
     for package in packages:
         raw = get_version(package)
-        if raw is None or _PRE_RELEASE_RE.search(raw):
+        if raw is None:
+            no_version.append(package)
+            continue
+        if _PRE_RELEASE_RE.search(raw):
+            pre_release.append(f"{package} ({raw})")
             continue
         if has_changelog_fragments(package):
             errors.append(f"{package} ({raw}): changelog.d/ contains unreleased fragments")
+        else:
+            validated.append(f"{package} ({raw})")
+
+    if no_version:
+        print("Skipped (no version found):")
+        for p in no_version:
+            print(f"  - {p}")
+
+    if pre_release:
+        print("Skipped (pre-release):")
+        for p in pre_release:
+            print(f"  - {p}")
 
     if errors:
-        print("Release validation failed:", file=sys.stderr)
+        print("\nRelease validation failed:", file=sys.stderr)
         for err in errors:
             print(f"  {err}", file=sys.stderr)
         print(
@@ -57,7 +76,9 @@ def main() -> None:
         )
         sys.exit(1)
 
-    print(f"All {len(packages)} package(s) passed release validation.")
+    print(f"\nValidated {len(validated)} package(s):")
+    for v in validated:
+        print(f"  - {v}")
 
 
 if __name__ == "__main__":
