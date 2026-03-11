@@ -286,10 +286,24 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `load_balancer.service_name` to `ocsf.dst_endpoint.svc_name`
+              name: Map `haproxy.backend_name` to `ocsf.load_balancer.name`
+              sources:
+                - haproxy.backend_name
+              target: ocsf.load_balancer.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `haproxy.frontend_name` to `ocsf.dst_endpoint.svc_name`
+              sources:
+                - haproxy.frontend_name
+              target: ocsf.dst_endpoint.svc_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `load_balancer.service_name` to `ocsf.load_balancer.dst_endpoint.svc_name`
               sources:
                 - load_balancer.service_name
-              target: ocsf.dst_endpoint.svc_name
+              target: ocsf.load_balancer.dst_endpoint.svc_name
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -326,7 +340,7 @@ pipeline:
             className: Network Activity
             classUid: 4001
             extensions: []
-            profiles: []
+            profiles: [load_balancer]
     - type: pipeline
       name: OCSF sub pipeline for class HTTP Activity [4002]
       enabled: true
@@ -451,6 +465,27 @@ pipeline:
               sources:
                 - network.client.port
               target: ocsf.src_endpoint.port
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `haproxy.backend_name` to `ocsf.load_balancer.name`
+              sources:
+                - haproxy.backend_name
+              target: ocsf.load_balancer.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `haproxy.frontend_name` to `ocsf.dst_endpoint.svc_name`
+              sources:
+                - haproxy.frontend_name
+              target: ocsf.dst_endpoint.svc_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `load_balancer.service_name` to `ocsf.load_balancer.dst_endpoint.svc_name`
+              sources:
+                - load_balancer.service_name
+              target: ocsf.load_balancer.dst_endpoint.svc_name
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -601,4 +636,4 @@ pipeline:
             className: HTTP Activity
             classUid: 4002
             extensions: []
-            profiles: []
+            profiles: [load_balancer]
