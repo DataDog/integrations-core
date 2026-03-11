@@ -19,6 +19,13 @@ def set_outputs(**kwargs: str) -> None:
             f.write(f"{key}={value}\n")
 
 
+def write_summary(content: str) -> None:
+    path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if path:
+        with open(path, "a") as f:
+            f.write(content + "\n")
+
+
 def get_all_packages() -> list[str]:
     return sorted(
         {path.parent.parent.parent.name for path in Path(".").glob("*/datadog_checks/*/__about__.py")}
@@ -37,18 +44,20 @@ def main() -> None:
     all_packages = get_all_packages()
 
     if manual.lower() == "all":
-        print(f"Mode: all ({len(all_packages)} packages in repo)")
+        mode = f"all ({len(all_packages)} packages in repo)"
         packages = all_packages
     elif manual:
-        print(f"Mode: manual ({manual})")
+        mode = f"manual"
         try:
             packages = json.loads(manual)
         except json.JSONDecodeError as e:
             print(f"MANUAL_PACKAGES is not valid JSON: {e}", file=sys.stderr)
             sys.exit(1)
     else:
-        print("Mode: auto-detect from tags at HEAD")
+        mode = "auto-detect from tags at HEAD"
         packages = detect_from_tags()
+
+    print(f"Mode: {mode}")
 
     unknown = set(packages) - set(all_packages)
     if unknown:
@@ -59,8 +68,17 @@ def main() -> None:
         print(f"\nDetected {len(packages)} package(s) to release:")
         for name in packages:
             print(f"  - {name}")
+        rows = "\n".join(f"| `{name}` |" for name in packages)
+        write_summary(
+            f"## Package Detection\n\n"
+            f"**Mode:** {mode}\n\n"
+            f"| Package |\n"
+            f"|---------|\n"
+            f"{rows}\n"
+        )
     else:
         print("No packages detected — nothing to release")
+        write_summary("## Package Detection\n\nNo packages detected — nothing to release\n")
 
     set_outputs(
         packages=json.dumps(packages),

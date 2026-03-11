@@ -14,6 +14,13 @@ DISPATCH_URL = f"https://api.github.com/repos/{TARGET_REPO}/dispatches"
 ACTIONS_URL = f"https://github.com/{TARGET_REPO}/actions"
 
 
+def write_summary(content: str) -> None:
+    path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if path:
+        with open(path, "a") as f:
+            f.write(content + "\n")
+
+
 def dispatch(batch: list[str], source_repo: str, ref: str, target: str, token: str) -> None:
     payload = json.dumps(
         {
@@ -53,12 +60,24 @@ def main() -> None:
     target = os.environ["TARGET"]
     dry_run = os.environ.get("DRY_RUN", "").lower() != "false"
 
-    print(f"Releasing {len(packages)} package(s) from {source_repo}@{ref} →  {target} S3:")
+    commit_url = f"https://github.com/DataDog/{source_repo}/commit/{ref}"
+    print(f"Releasing {len(packages)} package(s) from {source_repo}@{ref} → {target} S3:")
     for name in packages:
         print(f"  - {name}")
 
+    rows = "\n".join(f"| `{name}` |" for name in packages)
+    source_link = f"[`{source_repo}@{ref[:12]}`]({commit_url})"
+
     if dry_run:
         print("\nDRY RUN: no tags pushed, no builds triggered")
+        write_summary(
+            f"## Release Dispatch (Dry Run)\n\n"
+            f"**Source:** {source_link} → {target} S3\n\n"
+            f"| Package |\n"
+            f"|---------|\n"
+            f"{rows}\n\n"
+            f"> Dry run — no tags pushed, no builds triggered\n"
+        )
         return
 
     token = os.environ["GH_TOKEN"]
@@ -68,6 +87,16 @@ def main() -> None:
         for name in batch:
             print(f"  - {name}")
         dispatch(batch, source_repo, ref, target, token)
+
+    actions_link = f"[Track downstream runs →]({ACTIONS_URL}?query=event:repository_dispatch)"
+    write_summary(
+        f"## Release Dispatch\n\n"
+        f"**Source:** {source_link} → {target} S3\n\n"
+        f"| Package | Status |\n"
+        f"|---------|--------|\n"
+        + "\n".join(f"| `{name}` | ✅ Dispatched |" for name in packages)
+        + f"\n\n{actions_link}\n"
+    )
 
 
 if __name__ == "__main__":

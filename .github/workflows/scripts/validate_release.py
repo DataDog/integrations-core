@@ -15,6 +15,13 @@ from pathlib import Path
 _PRE_RELEASE_RE = re.compile(r"\d+\.\d+\.\d+(a|b|rc)\d+")
 
 
+def write_summary(content: str) -> None:
+    path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if path:
+        with open(path, "a") as f:
+            f.write(content + "\n")
+
+
 def get_version(package: str) -> str | None:
     about = next(Path(package).glob("datadog_checks/*/__about__.py"), None)
     if about is None:
@@ -65,6 +72,20 @@ def main() -> None:
         print("Skipped (pre-release):")
         for p in pre_release:
             print(f"  - {p}")
+
+    rows = (
+        [f"| `{p}` | ⚠️ No version found |" for p in no_version]
+        + [f"| `{p}` | ⏭️ Pre-release, skipped |" for p in pre_release]
+        + [f"| `{p}` | ❌ Unreleased changelog fragments |" for p in errors]
+        + [f"| `{v}` | ✅ Ready |" for v in validated]
+    )
+    write_summary(
+        "## Release Validation\n\n"
+        "| Package | Status |\n"
+        "|---------|--------|\n"
+        + "\n".join(rows)
+        + "\n"
+    )
 
     if errors:
         print("\nRelease validation failed:", file=sys.stderr)
