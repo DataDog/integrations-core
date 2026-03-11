@@ -11,3 +11,7 @@ class ToolResult(BaseModel):
     success: bool
     data: str | None = None
     error: str | None = None
+    truncated: bool = False
+    total_size: int | None = None
+    shown_size: int | None = None
+    hint: str | None = None
