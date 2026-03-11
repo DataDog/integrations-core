@@ -1,5 +1,5 @@
 provides:
-  - id: iam-access-analyzer-metrics
-    always_on: true
-    data_type: metrics
+  - id: iam-access-analyzer-logs
+    always_on: false
+    data_type: logs
     direction: inbound
