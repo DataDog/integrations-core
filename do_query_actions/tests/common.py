@@ -4,10 +4,8 @@
 
 POSTGRES_INSTANCE = {
     'db_identifier': {
-        'type': 'postgres',
         'host': 'localhost',
         'dbname': 'test_db',
-        'agent_hostname': 'test-agent',
     },
     'port': 5432,
     'username': 'datadog',
@@ -33,10 +31,8 @@ POSTGRES_INSTANCE = {
 
 MULTI_QUERY_INSTANCE = {
     'db_identifier': {
-        'type': 'postgres',
         'host': 'localhost',
         'dbname': 'test_db',
-        'agent_hostname': 'test-agent',
     },
     'port': 5432,
     'username': 'datadog',

@@ -29,7 +29,7 @@ classifiers = [
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=37.24.0",
+    "datadog-checks-base>=37.27.1",
 ]
 dynamic = [
     "version",
@@ -37,9 +37,9 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "psycopg[c,pool]==3.3.3",
-    "boto3==1.42.54",
     "azure-identity==1.25.2",
+    "boto3==1.42.63",
+    "psycopg[c,pool]==3.3.3",
 ]
 
 [project.urls]

@@ -76,8 +76,7 @@ instances:
     # config_id: <CONFIG_ID>
 
     ## @param db_type - string - required
-    ## The type of database to connect to.
-    ## Currently only 'postgres' is supported.
+    ## The database engine to connect to. Currently only 'postgres' is supported.
     #
     db_type: postgres
 

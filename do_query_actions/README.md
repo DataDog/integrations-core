@@ -10,14 +10,6 @@ The DO Query Actions check executes SQL queries against PostgreSQL and reports s
 
 The DO Query Actions check is included in the Datadog Agent package.
 
-### Dependencies
-
-This check requires the PostgreSQL client library:
-
-```bash
-sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install 'psycopg[c,pool]==3.3.3'
-```
-
 ### Configuration
 
 1. Edit the `do_query_actions.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting metrics. See the sample `do_query_actions.d/conf.yaml.example` for all available configuration options.
@@ -36,12 +28,11 @@ Run the Agent's status subcommand and look for `do_query_actions` under the Chec
 |--------|------|-------------|
 | `do_query_actions.query_execution_time` | gauge | Time taken to execute the query in seconds |
 | `do_query_actions.query_success` | gauge | 1 if query succeeded, 0 if failed |
+| `do_query_actions.query_status` | gauge | 1 if query succeeded, 0 if failed |
 
 ### Service Checks
 
-**do_query_actions.query_status**
-
-Returns `CRITICAL` if the query execution fails. Returns `OK` otherwise.
+No service checks are provided by this integration.
 
 ### Events
 

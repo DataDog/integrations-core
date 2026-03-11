@@ -14,18 +14,12 @@ files:
       value:
         type: object
         required:
-          - type
           - host
           - dbname
-          - agent_hostname
         properties:
-        - name: type
-          type: string
         - name: host
           type: string
         - name: dbname
-          type: string
-        - name: agent_hostname
           type: string
     - name: username
       required: true
@@ -108,8 +102,7 @@ files:
     - name: db_type
       required: true
       description: |
-        The type of database to connect to.
-        Currently only 'postgres' is supported.
+        The database engine to connect to. Currently only 'postgres' is supported.
       value:
         example: "postgres"
         type: string

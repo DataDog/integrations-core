@@ -42,10 +42,8 @@ class DbIdentifier(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    agent_hostname: str
     dbname: str
     host: str
-    type: str
 
 
 class ManagedAuthentication1(BaseModel):

@@ -230,12 +230,7 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
                     success = result['status'] == 'success'
                     self.gauge('query_success', 1 if success else 0, tags=tags)
 
-                    if success:
-                        self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=tags)
-                    else:
-                        self.service_check(
-                            self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=tags, message=result['error']
-                        )
+                    self.gauge(self.SERVICE_CHECK_NAME, 1 if success else 0, tags=tags)
 
                     payload = self._build_event_payload(q, result)
                     raw_event = json.dumps(payload, default=default_json_event_encoding)
@@ -244,14 +239,13 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
 
                     self._last_execution[q.monitor_id] = now
 
-        except Exception as e:
-            error_msg = str(e)
+        except Exception:
             self.log.exception("Check execution failed")
             for q in due_queries:
                 tags = base_tags + [f'monitor_id:{q.monitor_id}']
                 self.gauge('query_execution_time', 0, tags=tags)
                 self.gauge('query_success', 0, tags=tags)
-                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=tags, message=error_msg)
+                self.gauge(self.SERVICE_CHECK_NAME, 0, tags=tags)
 
     def cancel(self) -> None:
         pool = self._pool

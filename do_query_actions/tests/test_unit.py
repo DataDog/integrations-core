@@ -6,10 +6,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from datadog_checks.base import AgentCheck
 from datadog_checks.do_query_actions import DOQueryActionsCheck
 
 from .common import METRICS
+
+pytestmark = pytest.mark.unit
 
 
 def _make_mock_conn(rows=None, description=None):
@@ -52,7 +53,7 @@ def test_missing_db_type(dd_run_check):
             {},
             [
                 {
-                    'db_identifier': {'type': 'postgres', 'host': 'localhost', 'dbname': 'test', 'agent_hostname': 'h'},
+                    'db_identifier': {'host': 'localhost', 'dbname': 'test'},
                     'username': 'test',
                     'queries': [],
                 }
@@ -72,7 +73,7 @@ def test_postgres_single_query_success(dd_run_check, aggregator, postgres_instan
         aggregator.assert_metric(metric)
 
     aggregator.assert_metric('do_query_actions.query_success', value=1)
-    aggregator.assert_service_check('do_query_actions.query_status', AgentCheck.OK)
+    aggregator.assert_metric('do_query_actions.query_status', value=1)
 
 
 def test_postgres_query_failure(dd_run_check, aggregator, postgres_instance):
@@ -94,7 +95,7 @@ def test_postgres_query_failure(dd_run_check, aggregator, postgres_instance):
         dd_run_check(check)
 
     aggregator.assert_metric('do_query_actions.query_success', value=0)
-    aggregator.assert_service_check('do_query_actions.query_status', AgentCheck.CRITICAL)
+    aggregator.assert_metric('do_query_actions.query_status', value=0)
 
 
 def test_unsupported_db_type(dd_run_check, aggregator, postgres_instance):
@@ -104,7 +105,7 @@ def test_unsupported_db_type(dd_run_check, aggregator, postgres_instance):
     dd_run_check(check)
 
     aggregator.assert_metric('do_query_actions.query_success', value=0)
-    aggregator.assert_service_check('do_query_actions.query_status', AgentCheck.CRITICAL)
+    aggregator.assert_metric('do_query_actions.query_status', value=0)
 
 
 def test_connection_failure_marks_all_queries_critical(dd_run_check, aggregator, multi_query_instance):
@@ -115,9 +116,9 @@ def test_connection_failure_marks_all_queries_critical(dd_run_check, aggregator,
         check = DOQueryActionsCheck('do_query_actions', {}, [multi_query_instance])
         dd_run_check(check)
 
-    assert len(aggregator.service_checks('do_query_actions.query_status')) == 2
-    for sc in aggregator.service_checks('do_query_actions.query_status'):
-        assert sc.status == AgentCheck.CRITICAL
+    assert len(aggregator.metrics('do_query_actions.query_status')) == 2
+    for m in aggregator.metrics('do_query_actions.query_status'):
+        assert m.value == 0
 
     success_metrics = aggregator.metrics('do_query_actions.query_success')
     assert len(success_metrics) == 2
@@ -140,8 +141,8 @@ def test_multi_query_execution(dd_run_check, aggregator, multi_query_instance):
     time_metrics = aggregator.metrics('do_query_actions.query_execution_time')
     assert len(time_metrics) == 2
 
-    service_checks = aggregator.service_checks('do_query_actions.query_status')
-    assert len(service_checks) == 2
+    status_metrics = aggregator.metrics('do_query_actions.query_status')
+    assert len(status_metrics) == 2
 
 
 def test_scheduling_interval(dd_run_check, aggregator, postgres_instance):
@@ -278,8 +279,8 @@ def test_query_failure_does_not_block_subsequent_queries(dd_run_check, aggregato
     success_metrics = aggregator.metrics('do_query_actions.query_success')
     assert len(success_metrics) == 2
 
-    service_checks = aggregator.service_checks('do_query_actions.query_status')
-    assert len(service_checks) == 2
+    status_metrics = aggregator.metrics('do_query_actions.query_status')
+    assert len(status_metrics) == 2
 
 
 def test_cancel_closes_pool(postgres_instance):
@@ -313,7 +314,7 @@ def test_no_queries_emits_nothing(dd_run_check, aggregator, postgres_instance):
     dd_run_check(check)
 
     assert len(aggregator.metrics('do_query_actions.query_success')) == 0
-    assert len(aggregator.service_checks('do_query_actions.query_status')) == 0
+    assert len(aggregator.metrics('do_query_actions.query_status')) == 0
 
 
 def test_pool_timeout_marks_queries_critical(dd_run_check, aggregator, postgres_instance):
@@ -328,7 +329,7 @@ def test_pool_timeout_marks_queries_critical(dd_run_check, aggregator, postgres_
         dd_run_check(check)
 
     aggregator.assert_metric('do_query_actions.query_success', value=0)
-    aggregator.assert_service_check('do_query_actions.query_status', AgentCheck.CRITICAL)
+    aggregator.assert_metric('do_query_actions.query_status', value=0)
 
 
 def test_postgres_ssl_params_forwarded(dd_run_check, postgres_instance):
@@ -339,12 +340,11 @@ def test_postgres_ssl_params_forwarded(dd_run_check, postgres_instance):
     postgres_instance['ssl_key'] = '/path/to/key.pem'
 
     check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
-    dd_run_check(check)
 
     with patch('datadog_checks.do_query_actions.check.ConnectionPool') as MockPool:
-        MockPool.return_value = MagicMock()
-        check._pool = None
-        check._create_postgres_pool()
+        mock_pool, _ = _make_mock_pool()
+        MockPool.return_value = mock_pool
+        dd_run_check(check)
 
     pool_kwargs = MockPool.call_args.kwargs['kwargs']
     assert pool_kwargs['sslmode'] == 'verify-full'
@@ -399,12 +399,11 @@ def test_token_provider_sets_pool_kwargs(dd_run_check, postgres_instance):
     }
 
     check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
-    dd_run_check(check)
 
     with patch('datadog_checks.do_query_actions.check.ConnectionPool') as MockPool:
-        MockPool.return_value = MagicMock()
-        check._pool = None
-        check._create_postgres_pool()
+        mock_pool, _ = _make_mock_pool()
+        MockPool.return_value = mock_pool
+        dd_run_check(check)
 
     pool_kwargs = MockPool.call_args.kwargs['kwargs']
     assert 'token_provider' in pool_kwargs
@@ -448,10 +447,10 @@ def test_rollback_exception_swallowed(dd_run_check, aggregator, postgres_instanc
         dd_run_check(check)
 
     aggregator.assert_metric('do_query_actions.query_success', value=0)
-    aggregator.assert_service_check('do_query_actions.query_status', AgentCheck.CRITICAL)
+    aggregator.assert_metric('do_query_actions.query_status', value=0)
 
 
-def test_event_payload_entity_model_dump(dd_run_check, postgres_instance):
+def test_event_payload_entity_model_dump(dd_run_check, aggregator, postgres_instance):
     """Entity from pydantic model is serialized correctly via model_dump."""
     mock_pool, _ = _make_mock_pool()
 
@@ -459,19 +458,10 @@ def test_event_payload_entity_model_dump(dd_run_check, postgres_instance):
         check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
         dd_run_check(check)
 
-    query_spec = check.config.queries[0]
-    result = {
-        'status': 'success',
-        'columns': ['count'],
-        'rows': [[1]],
-        'row_count': 1,
-        'duration_s': 0.1,
-        'error': None,
-    }
-    payload = check._build_event_payload(query_spec, result)
-
-    assert payload['entity']['platform'] == 'aws'
-    assert payload['entity']['table'] == 'orders'
+    events = aggregator.get_event_platform_events('do-query-results')
+    assert len(events) == 1
+    assert events[0]['entity']['platform'] == 'aws'
+    assert events[0]['entity']['table'] == 'orders'
 
 
 def test_query_with_no_description(dd_run_check, aggregator, postgres_instance):
