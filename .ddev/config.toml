@@ -15,11 +15,14 @@ win32_event_log = "Windows Event Log"
 krakend = "KrakenD"
 lustre = "Lustre"
 n8n = "n8n"
+hpe_aruba_edgeconnect = "HPE Aruba EdgeConnect"
+
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
 lustre = "lustre."
 n8n = "n8n."
+hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -211,3 +214,4 @@ __pycache__ = false
 krakend = ["linux", "windows", "mac_os"]
 lustre = ["linux", "windows", "mac_os"]
 n8n = ["linux", "windows", "mac_os"]
+hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
