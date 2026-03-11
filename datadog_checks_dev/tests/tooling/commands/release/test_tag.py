@@ -33,6 +33,7 @@ def test_new_version_appears_in_output():
     assert result.exit_code == 0
     assert 'activemq-99.99.99' in result.output
     assert 'btrfs-99.99.99' in result.output
+    assert 'Tagged 2 release(s)' in result.output
 
 
 def test_existing_tag_silent_by_default():
@@ -49,7 +50,7 @@ def test_existing_tag_silent_by_default():
         subprocess.run(['git', '-C', REPO_ROOT, 'tag', '-d', 'activemq-99.99.99'], check=True, capture_output=True)
 
     assert result.exit_code == 2
-    assert result.output.strip() == ''
+    assert 'Tagged 0 release(s), skipped 1 already-tagged release(s).' in result.output
 
 
 def test_existing_tag_debug_message():
@@ -70,3 +71,4 @@ def test_existing_tag_debug_message():
 
     assert result.exit_code == 2
     assert 'activemq-99.99.99 already exists' in result.output
+    assert 'Tagged 0 release(s), skipped 1 already-tagged release(s).' in result.output

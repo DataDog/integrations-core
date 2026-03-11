@@ -59,7 +59,8 @@ def tag(check, version, push, dry_run, skip_prerelease, fetch):
         checks = [check]
 
     # Check for any new tags
-    tagged = False
+    tagged = 0
+    skipped = 0
     # Fetch all tags from the remote
     if fetch:
         echo_info('Fetching all tags from remote...')
@@ -84,6 +85,7 @@ def tag(check, version, push, dry_run, skip_prerelease, fetch):
 
         if release_tag in existing_tags:
             echo_debug(f'{check}: {release_tag} already exists')
+            skipped += 1
             version = None
             continue
 
@@ -91,7 +93,7 @@ def tag(check, version, push, dry_run, skip_prerelease, fetch):
         echo_waiting(f'Tagging HEAD with {release_tag}... ', indent=True, nl=False)
 
         if dry_run:
-            tagged = True
+            tagged += 1
             echo_success("success! (dry-run)")
             version = None
             continue
@@ -103,11 +105,13 @@ def tag(check, version, push, dry_run, skip_prerelease, fetch):
         elif result.code != 0:
             abort(f'\n{result.stdout}{result.stderr}', code=result.code)
         else:
-            tagged = True
+            tagged += 1
             echo_success('success!')
 
         # Reset version
         version = None
+
+    echo_info(f'Tagged {tagged} release(s), skipped {skipped} already-tagged release(s).')
 
     if not tagged:
         abort(code=2)
