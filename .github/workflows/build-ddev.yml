@@ -154,13 +154,13 @@ jobs:
 
     # Pinning virtualenv because of https://github.com/pypa/hatch/issues/2193
     - name: Install Hatch
-      run: pip install -U hatch "virtualenv<21" 
+      run: pip install -U hatch "virtualenv<21"
 
     - name: Install Hatch environment collector plugin
       run: pip install -e . --no-deps
 
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@772c4490b37ea1c65caf6a53089a38ea1510cf4a # 1.93.0 Latest rust stable version as of 2026-01-27 (https://forge.rust-lang.org/)
+      uses: dtolnay/rust-toolchain@086dfa4efe372cfb6b375460a56e26a62a873d2e # 1.93.1 Latest rust stable version as of 2026-01-27 (https://forge.rust-lang.org/)
       with:
         targets: ${{ matrix.job.target }}
 

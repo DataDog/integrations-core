@@ -57,6 +57,7 @@ EXCLUDED_INTEGRATIONS = [
     "datadog-amazon-kafka",  # excluding this since `amazon-kafka` wasn't an official release
     "datadog-tokumx",  # excluding this since `tokumx` was dropped in py3
     "datadog-ntp",  # excluding this since `ntp` was Agent 5 only
+    "datadog-kaspersky",  # excluding this since `kaspersky` check was removed and wheel no longer exists
 ]
 
 EXCLUDED_LOG_INTEGRATIONS = [

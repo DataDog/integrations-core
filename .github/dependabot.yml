@@ -10,7 +10,6 @@ updates:
       time: "06:00"
     cooldown:
       default-days: 7
-      semver-major-days: 14
     # Group all actions updates together in the same PR
     groups:
       actions:
@@ -21,15 +20,13 @@ updates:
       - qa/skip-qa
 
   - package-ecosystem: "github-actions"
-    directory: "/actions/tag-job"
+    directory: "/.github/actions/tag-job"
     schedule:
       interval: "weekly"
       day: "monday"
       time: "06:00"
     cooldown:
       default-days: 7
-      semver-major-days: 14
-    # Group all actions updates together in the same PR
     groups:
       actions:
         patterns:
