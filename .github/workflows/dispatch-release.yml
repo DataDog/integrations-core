@@ -42,6 +42,7 @@ jobs:
   dispatch:
     name: Tag releases and dispatch wheel builds
     runs-on: ubuntu-latest
+    environment: release
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -92,7 +93,7 @@ jobs:
         uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
         with:
           scope: DataDog/agent-integration-wheels-release
-          policy: integrations-core.dispatch-wheel-builds-test
+          policy: integrations-core.dispatch-wheel-builds
 
       - name: Dispatch release
         if: steps.detect.outputs.has_packages == 'true'

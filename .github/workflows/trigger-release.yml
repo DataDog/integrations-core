@@ -35,13 +35,11 @@ on:
         description: "Print what would be released without pushing tags or starting builds"
         required: false
         type: boolean
-        default: true
+        default: false
       ddev-version:
         description: "ddev version specifier (e.g. ==14.3.2). Defaults to latest."
         required: false
         type: string
-  pull_request:
-      
 
 jobs:
   dispatch:
@@ -52,7 +50,7 @@ jobs:
       packages: ${{ inputs.packages || '' }}
       source-repo-ref: ${{ inputs.source-repo-ref || github.sha }}
       target: ${{ inputs.target || 'dev' }} # TODO: switch default to prod once the new pipeline is validated
-      dry-run: ${{ inputs.dry-run || true }}
+      dry-run: ${{ inputs.dry-run || false }}
       ddev-version: ${{ inputs.ddev-version || '' }}
     permissions:
       id-token: write
