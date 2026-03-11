@@ -9,7 +9,9 @@ import urllib.error
 import urllib.request
 
 BATCH_SIZE = 200
-DISPATCH_URL = "https://api.github.com/repos/DataDog/agent-integration-wheels-release/dispatches"
+TARGET_REPO = "DataDog/agent-integration-wheels-release"
+DISPATCH_URL = f"https://api.github.com/repos/{TARGET_REPO}/dispatches"
+ACTIONS_URL = f"https://github.com/{TARGET_REPO}/actions"
 
 
 def dispatch(batch: list[str], source_repo: str, ref: str, target: str, token: str) -> None:
@@ -38,6 +40,7 @@ def dispatch(batch: list[str], source_repo: str, ref: str, target: str, token: s
     try:
         with urllib.request.urlopen(req) as resp:
             print(f"  Dispatched: HTTP {resp.status}")
+            print(f"  Track runs: {ACTIONS_URL}?query=event:repository_dispatch")
     except urllib.error.HTTPError as e:
         print(e.read().decode(), file=sys.stderr)
         sys.exit(1)
@@ -50,8 +53,7 @@ def main() -> None:
     target = os.environ["TARGET"]
     dry_run = os.environ.get("DRY_RUN", "").lower() != "false"
 
-    bucket = f"https://agent-integration-wheels-{target}.s3.amazonaws.com"
-    print(f"Releasing {len(packages)} package(s) from {source_repo}@{ref} → {bucket}:")
+    print(f"Releasing {len(packages)} package(s) from {source_repo}@{ref} →  {target} S3:")
     for name in packages:
         print(f"  - {name}")
 
@@ -62,7 +64,9 @@ def main() -> None:
     token = os.environ["GH_TOKEN"]
     batches = [packages[i : i + BATCH_SIZE] for i in range(0, len(packages), BATCH_SIZE)]
     for i, batch in enumerate(batches, 1):
-        print(f"Batch {i}/{len(batches)} ({len(batch)} packages)")
+        print(f"\nBatch {i}/{len(batches)}:")
+        for name in batch:
+            print(f"  - {name}")
         dispatch(batch, source_repo, ref, target, token)
 
 
