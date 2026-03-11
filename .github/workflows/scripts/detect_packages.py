@@ -37,20 +37,30 @@ def main() -> None:
     all_packages = get_all_packages()
 
     if manual.lower() == "all":
+        print(f"Mode: all ({len(all_packages)} packages in repo)")
         packages = all_packages
     elif manual:
+        print(f"Mode: manual ({manual})")
         try:
             packages = json.loads(manual)
         except json.JSONDecodeError as e:
             print(f"MANUAL_PACKAGES is not valid JSON: {e}", file=sys.stderr)
             sys.exit(1)
     else:
+        print("Mode: auto-detect from tags at HEAD")
         packages = detect_from_tags()
 
     unknown = set(packages) - set(all_packages)
     if unknown:
         print(f"Unknown packages: {', '.join(unknown)}", file=sys.stderr)
         sys.exit(1)
+
+    if packages:
+        print(f"\nDetected {len(packages)} package(s) to release:")
+        for name in packages:
+            print(f"  - {name}")
+    else:
+        print("No packages detected — nothing to release.")
 
     set_outputs(
         packages=json.dumps(packages),
