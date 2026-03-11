@@ -59,7 +59,7 @@ def main() -> None:
             pre_release.append(f"{package} ({raw})")
             continue
         if has_changelog_fragments(package):
-            errors.append(f"{package} ({raw}): changelog.d/ contains unreleased fragments")
+            errors.append((package, raw))
         else:
             validated.append(f"{package} ({raw})")
 
@@ -76,7 +76,7 @@ def main() -> None:
     rows = (
         [f"| `{p}` | ⚠️ No version found |" for p in no_version]
         + [f"| `{p}` | ⏭️ Pre-release, skipped |" for p in pre_release]
-        + [f"| `{p}` | ❌ Unreleased changelog fragments |" for p in errors]
+        + [f"| `{pkg} ({ver})` | ❌ Unreleased changelog fragments |" for pkg, ver in errors]
         + [f"| `{v}` | ✅ Ready |" for v in validated]
     )
     write_summary(
@@ -89,8 +89,8 @@ def main() -> None:
 
     if errors:
         print("\nRelease validation failed:", file=sys.stderr)
-        for err in errors:
-            print(f"  {err}", file=sys.stderr)
+        for pkg, ver in errors:
+            print(f"  {pkg} ({ver}): changelog.d/ contains unreleased fragments", file=sys.stderr)
         print(
             "\nRun 'ddev release make' to consolidate changelog fragments before releasing.",
             file=sys.stderr,

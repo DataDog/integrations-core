@@ -47,7 +47,7 @@ def main() -> None:
         mode = f"all ({len(all_packages)} packages in repo)"
         packages = all_packages
     elif manual:
-        mode = f"manual"
+        mode = f"manual ({manual})"
         try:
             packages = json.loads(manual)
         except json.JSONDecodeError as e:

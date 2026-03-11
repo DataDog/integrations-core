@@ -47,7 +47,6 @@ def dispatch(batch: list[str], source_repo: str, ref: str, target: str, token: s
     try:
         with urllib.request.urlopen(req) as resp:
             print(f"  Dispatched: HTTP {resp.status}")
-            print(f"  Track runs: {ACTIONS_URL}?query=event:repository_dispatch")
     except urllib.error.HTTPError as e:
         print(e.read().decode(), file=sys.stderr)
         sys.exit(1)
@@ -60,16 +59,14 @@ def main() -> None:
     target = os.environ["TARGET"]
     dry_run = os.environ.get("DRY_RUN", "").lower() != "false"
 
-    commit_url = f"https://github.com/DataDog/{source_repo}/commit/{ref}"
+    source_link = f"[`{source_repo}@{ref[:12]}`](https://github.com/DataDog/{source_repo}/commit/{ref})"
     print(f"Releasing {len(packages)} package(s) from {source_repo}@{ref} → {target} S3:")
     for name in packages:
         print(f"  - {name}")
 
-    rows = "\n".join(f"| `{name}` |" for name in packages)
-    source_link = f"[`{source_repo}@{ref[:12]}`]({commit_url})"
-
     if dry_run:
         print("\nDRY RUN: no tags pushed, no builds triggered")
+        rows = "\n".join(f"| `{name}` |" for name in packages)
         write_summary(
             f"## Release Dispatch (Dry Run)\n\n"
             f"**Source:** {source_link} → {target} S3\n\n"
@@ -88,6 +85,7 @@ def main() -> None:
             print(f"  - {name}")
         dispatch(batch, source_repo, ref, target, token)
 
+    print(f"\nTrack runs: {ACTIONS_URL}?query=event:repository_dispatch")
     actions_link = f"[Track downstream runs →]({ACTIONS_URL}?query=event:repository_dispatch)"
     write_summary(
         f"## Release Dispatch\n\n"
