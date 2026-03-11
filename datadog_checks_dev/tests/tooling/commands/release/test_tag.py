@@ -9,10 +9,9 @@ from click.testing import CliRunner
 
 from datadog_checks.dev.tooling.commands import console
 from datadog_checks.dev.tooling.commands.release.tag import tag
-from datadog_checks.dev.tooling.constants import set_root
+from datadog_checks.dev.tooling.constants import get_root, set_root
 
 REPO_ROOT = str(Path(__file__).parents[5])
-set_root(REPO_ROOT)
 
 
 def test_new_version_appears_in_output():
@@ -23,10 +22,13 @@ def test_new_version_appears_in_output():
     original_btrfs = btrfs_about.read_text()
     activemq_about.write_text(re.sub(r"(?<=__version__ = ')[^']+", '99.99.99', original_activemq))
     btrfs_about.write_text(re.sub(r"(?<=__version__ = ')[^']+", '99.99.99', original_btrfs))
+    original_root = get_root()
+    set_root(REPO_ROOT)
     try:
         runner = CliRunner()
         result = runner.invoke(tag, ['--no-fetch', '--no-push', '--dry-run', 'all'], catch_exceptions=False)
     finally:
+        set_root(original_root)
         activemq_about.write_text(original_activemq)
         btrfs_about.write_text(original_btrfs)
 
@@ -43,9 +45,12 @@ def test_existing_tag_silent_by_default():
     subprocess.run(
         ['git', '-C', REPO_ROOT, '-c', 'tag.gpgsign=false', 'tag', 'activemq-99.99.99'], check=True, capture_output=True
     )
+    original_root = get_root()
+    set_root(REPO_ROOT)
     try:
         result = CliRunner().invoke(tag, ['--no-fetch', '--no-push', '--dry-run', 'activemq'], catch_exceptions=False)
     finally:
+        set_root(original_root)
         activemq_about.write_text(original)
         subprocess.run(['git', '-C', REPO_ROOT, 'tag', '-d', 'activemq-99.99.99'], check=True, capture_output=True)
 
@@ -60,10 +65,13 @@ def test_existing_tag_debug_message():
     subprocess.run(
         ['git', '-C', REPO_ROOT, '-c', 'tag.gpgsign=false', 'tag', 'activemq-99.99.99'], check=True, capture_output=True
     )
+    original_root = get_root()
+    set_root(REPO_ROOT)
     console.set_debug()
     try:
         result = CliRunner().invoke(tag, ['--no-fetch', '--no-push', '--dry-run', 'activemq'], catch_exceptions=False)
     finally:
+        set_root(original_root)
         console.DEBUG_OUTPUT = False
         activemq_about.write_text(original)
         subprocess.run(['git', '-C', REPO_ROOT, 'tag', '-d', 'activemq-99.99.99'], check=True, capture_output=True)
