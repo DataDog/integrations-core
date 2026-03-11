@@ -1,12 +1,13 @@
 """Dispatch build-wheels events to agent-integration-wheels-release in batches.
 
-Environment variables: GH_TOKEN, PACKAGES, SOURCE_REPO, REF, TARGET.
+Environment variables: GH_TOKEN, PACKAGES, SOURCE_REPO, REF, TARGET, DRY_RUN.
 """
 import json
 import os
 import sys
 import urllib.error
 import urllib.request
+from pathlib import Path
 
 BATCH_SIZE = 200
 TARGET_REPO = "DataDog/agent-integration-wheels-release"
@@ -52,6 +53,53 @@ def dispatch(batch: list[str], source_repo: str, ref: str, target: str, token: s
         sys.exit(1)
 
 
+def build_summary(
+    packages: list[str],
+    validation: dict,
+    source_repo: str,
+    ref: str,
+    target: str,
+    dry_run: bool,
+    dispatched: bool,
+) -> str:
+    source_link = f"[`{source_repo}@{ref[:12]}`](https://github.com/DataDog/{source_repo}/commit/{ref})"
+    mode = validation.get("mode", "")
+    by_package = {r["package"]: r for r in validation.get("results", [])}
+
+    rows = []
+    for name in packages:
+        r = by_package.get(name, {})
+        ver = r.get("version") or "—"
+        s = r.get("status", "ready")
+        if s == "no_version":
+            status = "⚠️ No version found"
+        elif s == "pre_release":
+            status = "⏭️ Pre-release, skipped"
+        elif dry_run:
+            status = "🔄 Dry run"
+        else:
+            status = "✅ Dispatched"
+        rows.append(f"| `{name}` | `{ver}` | {status} |")
+
+    if dispatched:
+        footer = f"[Track downstream runs →]({ACTIONS_URL}?query=event:repository_dispatch)"
+    else:
+        footer = "> Dry run — no tags pushed, no builds triggered"
+
+    return (
+        "## Wheel Release\n\n"
+        "| | |\n|---|---|\n"
+        f"| **Mode** | {mode} |\n"
+        f"| **Source** | {source_link} |\n"
+        f"| **Target** | {target} S3 |\n"
+        f"| **Dry run** | {'Yes' if dry_run else 'No'} |\n\n"
+        "| Package | Version | Status |\n"
+        "|---------|---------|--------|\n"
+        + "\n".join(rows)
+        + f"\n\n{footer}\n"
+    )
+
+
 def main() -> None:
     packages = json.loads(os.environ["PACKAGES"])
     source_repo = os.environ["SOURCE_REPO"]
@@ -59,22 +107,19 @@ def main() -> None:
     target = os.environ["TARGET"]
     dry_run = os.environ.get("DRY_RUN", "").lower() != "false"
 
-    source_link = f"[`{source_repo}@{ref[:12]}`](https://github.com/DataDog/{source_repo}/commit/{ref})"
+    results_path = Path(os.environ.get("RUNNER_TEMP", "/tmp")) / "release_validation.json"
+    try:
+        validation = json.loads(results_path.read_text())
+    except FileNotFoundError:
+        validation = {}
+
     print(f"Releasing {len(packages)} package(s) from {source_repo}@{ref} → {target} S3:")
 
     if dry_run:
         for name in packages:
             print(f"  - {name}")
         print("\nDRY RUN: no tags pushed, no builds triggered")
-        rows = "\n".join(f"| `{name}` |" for name in packages)
-        write_summary(
-            f"## Release Dispatch (Dry Run)\n\n"
-            f"**Source:** {source_link} → {target} S3\n\n"
-            f"| Package |\n"
-            f"|---------|\n"
-            f"{rows}\n\n"
-            f"> Dry run — no tags pushed, no builds triggered\n"
-        )
+        write_summary(build_summary(packages, validation, source_repo, ref, target, dry_run, dispatched=False))
         return
 
     token = os.environ["GH_TOKEN"]
@@ -86,15 +131,7 @@ def main() -> None:
         dispatch(batch, source_repo, ref, target, token)
 
     print(f"\nTrack runs: {ACTIONS_URL}?query=event:repository_dispatch")
-    actions_link = f"[Track downstream runs →]({ACTIONS_URL}?query=event:repository_dispatch)"
-    write_summary(
-        f"## Release Dispatch\n\n"
-        f"**Source:** {source_link} → {target} S3\n\n"
-        f"| Package | Status |\n"
-        f"|---------|--------|\n"
-        + "\n".join(f"| `{name}` | ✅ Dispatched |" for name in packages)
-        + f"\n\n{actions_link}\n"
-    )
+    write_summary(build_summary(packages, validation, source_repo, ref, target, dry_run, dispatched=True))
 
 
 if __name__ == "__main__":

@@ -68,21 +68,14 @@ def main() -> None:
         print(f"\nDetected {len(packages)} package(s) to release:")
         for name in packages:
             print(f"  - {name}")
-        rows = "\n".join(f"| `{name}` |" for name in packages)
-        write_summary(
-            f"## Package Detection\n\n"
-            f"**Mode:** {mode}\n\n"
-            f"| Package |\n"
-            f"|---------|\n"
-            f"{rows}\n"
-        )
     else:
         print("No packages detected — nothing to release")
-        write_summary("## Package Detection\n\nNo packages detected — nothing to release\n")
+        write_summary("## Wheel Release\n\nNo packages detected — nothing to release.\n")
 
     set_outputs(
         packages=json.dumps(packages),
         has_packages="true" if packages else "false",
+        mode=mode,
     )
 
 

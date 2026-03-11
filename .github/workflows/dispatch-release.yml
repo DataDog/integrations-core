@@ -80,6 +80,10 @@ jobs:
         env:
           PACKAGES: ${{ steps.detect.outputs.packages }}
           SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
+          REF: ${{ inputs.source-repo-ref || github.sha }}
+          TARGET: ${{ inputs.target }}
+          DRY_RUN: ${{ inputs.dry-run }}
+          MODE: ${{ steps.detect.outputs.mode }}
         run: python .github/workflows/scripts/validate_release.py
 
       - name: Get GitHub token via dd-octo-sts
