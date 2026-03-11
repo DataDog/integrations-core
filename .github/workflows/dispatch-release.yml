@@ -51,6 +51,15 @@ jobs:
       - name: Install ddev
         run: pip install ddev${{ inputs.ddev-version }}
 
+      - name: Configure ddev
+        env:
+          SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
+        run: |
+          REPO_SHORT="${SOURCE_REPO#integrations-}"
+          ddev config set upgrade_check false
+          ddev config set repos.${REPO_SHORT} .
+          ddev config set repo ${REPO_SHORT}
+
       - name: Tag releases
         if: inputs.packages == ''
         id: tag
