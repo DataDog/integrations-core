@@ -52,7 +52,7 @@ jobs:
       packages: ${{ inputs.packages || '' }}
       source-repo-ref: ${{ inputs.source-repo-ref || github.sha }}
       target: ${{ inputs.target || 'dev' }} # TODO: switch default to prod once the new pipeline is validated
-      dry-run: ${{ inputs.dry-run || false }}
+      dry-run: ${{ inputs.dry-run || true }}
       ddev-version: ${{ inputs.ddev-version || '' }}
     permissions:
       id-token: write
