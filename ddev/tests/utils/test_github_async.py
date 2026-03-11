@@ -17,133 +17,77 @@ class TestAsyncGitHubClient:
             assert client._client is not None
 
     @pytest.mark.asyncio
-    async def test_list_workflow_runs(self, respx_mock):
-        """Test listing workflow runs."""
+    async def test_generic_request(self, respx_mock):
+        """Test generic request method."""
         owner, repo = 'DataDog', 'integrations-core'
 
         respx_mock.get(
-            f'https://api.github.com/repos/{owner}/{repo}/actions/runs',
-            params={'status': 'completed', 'per_page': 10},
+            f'https://api.github.com/repos/{owner}/{repo}/issues',
+            params={'state': 'open'},
         ).mock(
             return_value=httpx.Response(
                 200,
-                json={
-                    'total_count': 1,
-                    'workflow_runs': [
-                        {
-                            'id': 123456,
-                            'name': 'Test Workflow',
-                            'status': 'completed',
-                            'conclusion': 'success',
-                        }
-                    ],
-                },
+                json=[
+                    {'id': 1, 'title': 'Issue 1'},
+                    {'id': 2, 'title': 'Issue 2'},
+                ],
+                headers={'x-ratelimit-remaining': '4999'},
             )
         )
 
         async with AsyncGitHubClient(token='test_token') as client:
-            result = await client.list_workflow_runs(owner, repo, status='completed', per_page=10)
+            result = await client.request('GET', f'/repos/{owner}/{repo}/issues', params={'state': 'open'})
 
-            assert result.data['total_count'] == 1
-            assert len(result.data['workflow_runs']) == 1
-            assert result.data['workflow_runs'][0]['id'] == 123456
-
-    @pytest.mark.asyncio
-    async def test_get_workflow_run(self, respx_mock):
-        """Test getting a specific workflow run."""
-        owner, repo, run_id = 'DataDog', 'integrations-core', 123456
-
-        respx_mock.get(f'https://api.github.com/repos/{owner}/{repo}/actions/runs/{run_id}').mock(
-            return_value=httpx.Response(
-                200,
-                json={
-                    'id': run_id,
-                    'name': 'Test Workflow',
-                    'status': 'completed',
-                    'conclusion': 'success',
-                },
-            )
-        )
-
-        async with AsyncGitHubClient(token='test_token') as client:
-            result = await client.get_workflow_run(owner, repo, run_id)
-
-            assert result.data['id'] == run_id
-            assert result.data['status'] == 'completed'
+            assert isinstance(result.data, list)
+            assert len(result.data) == 2
+            assert result.data[0]['id'] == 1
+            assert result.headers['x-ratelimit-remaining'] == '4999'
 
     @pytest.mark.asyncio
-    async def test_cancel_workflow_run(self, respx_mock):
-        """Test canceling a workflow run."""
-        owner, repo, run_id = 'DataDog', 'integrations-core', 123456
+    async def test_list_workflows(self, respx_mock):
+        """Test listing workflows for a repository."""
+        owner, repo = 'DataDog', 'integrations-core'
 
-        respx_mock.post(f'https://api.github.com/repos/{owner}/{repo}/actions/runs/{run_id}/cancel').mock(
-            return_value=httpx.Response(202)
-        )
-
-        async with AsyncGitHubClient(token='test_token') as client:
-            # Should not raise
-            await client.cancel_workflow_run(owner, repo, run_id)
-
-    @pytest.mark.asyncio
-    async def test_list_workflow_run_jobs(self, respx_mock):
-        """Test listing jobs for a workflow run."""
-        owner, repo, run_id = 'DataDog', 'integrations-core', 123456
-
-        respx_mock.get(f'https://api.github.com/repos/{owner}/{repo}/actions/runs/{run_id}/jobs').mock(
+        respx_mock.get(f'https://api.github.com/repos/{owner}/{repo}/actions/workflows').mock(
             return_value=httpx.Response(
                 200,
                 json={
                     'total_count': 2,
-                    'jobs': [
-                        {'id': 1, 'name': 'Job 1', 'status': 'completed'},
-                        {'id': 2, 'name': 'Job 2', 'status': 'in_progress'},
+                    'workflows': [
+                        {'id': 1, 'name': 'CI', 'path': '.github/workflows/ci.yml'},
+                        {'id': 2, 'name': 'Release', 'path': '.github/workflows/release.yml'},
                     ],
                 },
             )
         )
 
         async with AsyncGitHubClient(token='test_token') as client:
-            result = await client.list_workflow_run_jobs(owner, repo, run_id)
+            result = await client.list_workflows(owner, repo)
 
             assert result.data['total_count'] == 2
-            assert len(result.data['jobs']) == 2
+            assert len(result.data['workflows']) == 2
+            assert result.data['workflows'][0]['name'] == 'CI'
 
     @pytest.mark.asyncio
-    async def test_create_workflow_dispatch(self, respx_mock):
-        """Test triggering a workflow dispatch."""
-        owner, repo, workflow_id = 'DataDog', 'integrations-core', 'test.yml'
-
-        respx_mock.post(f'https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches').mock(
-            return_value=httpx.Response(204)
-        )
-
-        async with AsyncGitHubClient(token='test_token') as client:
-            # Should not raise
-            await client.create_workflow_dispatch(owner, repo, workflow_id, ref='main', inputs={'test': 'value'})
-
-    @pytest.mark.asyncio
-    async def test_throttling_handling(self, respx_mock):
-        """Test that throttling (secondary rate limit) is handled properly."""
+    async def test_pagination(self, respx_mock):
+        """Test pagination extraction from Link header."""
         owner, repo = 'DataDog', 'integrations-core'
 
-        # First request hits secondary rate limit (throttling)
-        respx_mock.get(f'https://api.github.com/repos/{owner}/{repo}/actions/runs').mock(
-            side_effect=[
-                httpx.Response(
-                    429,
-                    headers={
-                        'Retry-After': '1',  # Wait 1 second
-                    },
-                ),
-                httpx.Response(
-                    200,
-                    json={'total_count': 0, 'workflow_runs': []},
-                ),
-            ]
+        link_header = (
+            '<https://api.github.com/repos/DataDog/integrations-core/issues?page=2>; rel="next", '
+            '<https://api.github.com/repos/DataDog/integrations-core/issues?page=5>; rel="last"'
+        )
+        respx_mock.get(f'https://api.github.com/repos/{owner}/{repo}/issues').mock(
+            return_value=httpx.Response(
+                200,
+                json=[{'id': 1}],
+                headers={'Link': link_header},
+            )
         )
 
         async with AsyncGitHubClient(token='test_token') as client:
-            result = await client.list_workflow_runs(owner, repo)
-            assert result.data['total_count'] == 0
-            # After successful retry, retry_after should be None
-            assert result.rate_limit.retry_after is None
+            result = await client.request('GET', f'/repos/{owner}/{repo}/issues')
+
+            assert result.pagination.next_url == 'https://api.github.com/repos/DataDog/integrations-core/issues?page=2'
+            assert result.pagination.last_url == 'https://api.github.com/repos/DataDog/integrations-core/issues?page=5'
+
