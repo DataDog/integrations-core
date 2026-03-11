@@ -1,8 +1,8 @@
 """Tag all unreleased packages via ddev and optionally push to origin.
 
 Environment variables:
-  TARGET   'prod' pushes tags; 'dev' (default) creates them locally only.
-  DRY_RUN  When true, tags are created locally but never pushed.
+  TARGET   'prod' pushes tags; 'dev' (default) creates them locally only
+  DRY_RUN  When true, tags are created locally but never pushed
 """
 import os
 import subprocess

@@ -60,7 +60,7 @@ def main() -> None:
         for name in packages:
             print(f"  - {name}")
     else:
-        print("No packages detected — nothing to release.")
+        print("No packages detected — nothing to release")
 
     set_outputs(
         packages=json.dumps(packages),
