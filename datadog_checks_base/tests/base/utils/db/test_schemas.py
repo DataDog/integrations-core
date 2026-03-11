@@ -81,6 +81,36 @@ class TestSchemaCollector(SchemaCollector):
         return "test_databases"
 
 
+class TestSchemaCollectorEmptyLastDb(TestSchemaCollector):
+    """Simulates multiple databases where the last one has no tables."""
+
+    __test__ = False
+
+    def __init__(self, check, config):
+        super().__init__(check, config)
+        self._db_rows = {
+            'db_with_tables': [{'table_name': 'users'}, {'table_name': 'orders'}],
+            'db_empty_last': [],
+        }
+        self._current_rows = []
+
+    def _get_databases(self):
+        return [{'name': 'db_with_tables'}, {'name': 'db_empty_last'}]
+
+    @contextmanager
+    def _get_cursor(self, database: str):
+        self._current_rows = list(self._db_rows.get(database, []))
+        self._row_index = 0
+        yield {}
+
+    def _get_next(self, _cursor):
+        if self._row_index < len(self._current_rows):
+            row = self._current_rows[self._row_index]
+            self._row_index += 1
+            return row
+        return None
+
+
 @pytest.mark.unit
 def test_schema_collector(aggregator):
     check = TestDatabaseCheck()
@@ -100,3 +130,20 @@ def test_schema_collector(aggregator):
     assert event['cloud_metadata'] == check.cloud_metadata
     assert event['metadata'][0]['name'] == 'test_database'
     assert event['metadata'][0]['tables'][0]['table_name'] == 'test_table'
+
+
+@pytest.mark.unit
+def test_schema_collector_empty_last_database(aggregator):
+    """Verify that queued rows are flushed even when the last database returns 0 rows."""
+    check = TestDatabaseCheck()
+    collector = TestSchemaCollectorEmptyLastDb(check, SchemaCollectorConfig())
+    collector.collect_schemas()
+
+    events = aggregator.get_event_platform_events("dbm-metadata")
+    assert len(events) == 1, "Expected 1 payload but got {}".format(len(events))
+    event = events[0]
+    assert len(event['metadata']) == 2
+    assert event['metadata'][0]['name'] == 'db_with_tables'
+    assert event['metadata'][0]['tables'][0]['table_name'] == 'users'
+    assert event['metadata'][1]['name'] == 'db_with_tables'
+    assert event['metadata'][1]['tables'][0]['table_name'] == 'orders'

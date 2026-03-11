@@ -87,6 +87,12 @@ class SchemaCollector(ABC):
                         is_last_payload = database == databases[-1] and next_row is None
                         self.maybe_flush(is_last_payload)
                 self._log.debug("Completed collection of schemas for database %s", database_name)
+            # Flush any remaining queued rows that weren't flushed during iteration.
+            # This handles the case where the last database(s) in the list return 0 rows,
+            # causing the while loop to be skipped and maybe_flush(is_last_payload=True)
+            # to never be called.
+            if self._queued_rows:
+                self.maybe_flush(is_last_payload=True)
         except Exception as e:
             status = "error"
             self._log.error("Error collecting schema: %s", e)
