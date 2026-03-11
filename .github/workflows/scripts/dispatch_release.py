@@ -61,10 +61,10 @@ def main() -> None:
 
     source_link = f"[`{source_repo}@{ref[:12]}`](https://github.com/DataDog/{source_repo}/commit/{ref})"
     print(f"Releasing {len(packages)} package(s) from {source_repo}@{ref} → {target} S3:")
-    for name in packages:
-        print(f"  - {name}")
 
     if dry_run:
+        for name in packages:
+            print(f"  - {name}")
         print("\nDRY RUN: no tags pushed, no builds triggered")
         rows = "\n".join(f"| `{name}` |" for name in packages)
         write_summary(
