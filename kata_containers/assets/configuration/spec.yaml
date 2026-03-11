@@ -19,14 +19,6 @@ files:
         example:
           - /run/vc/sbs
           - /run/kata
-    - name: cri_socket_path
-      description: |
-        Path to the CRI Unix socket used to resolve Kata sandbox IDs to Kubernetes
-        pod UIDs for tag enrichment (pod_name, kube_namespace, kube_deployment, …).
-        Requires grpcio. Leave unset to use the default containerd socket.
-      value:
-        type: string
-        example: /run/containerd/containerd.sock
     - name: rename_labels
       description: |
         Rename Prometheus labels before they are submitted as tags.

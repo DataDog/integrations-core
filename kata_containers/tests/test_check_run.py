@@ -13,7 +13,6 @@ from datadog_checks.base.utils.tagging import tagger
 FIXTURES_PATH = Path(__file__).parent / 'fixtures'
 
 
-POD_UID = 'aabbccdd-1234-5678-abcd-ef0123456789'
 K8S_TAGS = ['pod_name:my-pod', 'kube_namespace:default', 'kube_deployment:my-app']
 
 EXPECTED_METRICS = [
@@ -42,7 +41,6 @@ def run_check_with_sandbox(dd_run_check, mock_http_response, make_check, make_sa
             mock.patch('os.path.exists', side_effect=mock_exists),
             mock.patch('os.listdir', side_effect=mock_listdir),
             mock.patch('os.path.isdir', side_effect=mock_isdir),
-            mock.patch('datadog_checks.kata_containers.check.GRPC_AVAILABLE', False),
         ):
             dd_run_check(check)
 
@@ -76,7 +74,6 @@ def test_check_metrics_carry_instance_level_tags(aggregator, run_check_with_sand
         aggregator.assert_metric_has_tag(metric, 'region:us-east')
 
 
-
 def test_check_running_shim_count_reflects_number_of_discovered_sandboxes(aggregator, run_check_with_sandbox):
     run_check_with_sandbox()
 
@@ -100,7 +97,6 @@ def test_check_scrapes_metrics_from_all_sandboxes(dd_run_check, aggregator, mock
             'os.path.isdir',
             side_effect=lambda p: p in [f'{storage_path}/{sandbox_a}', f'{storage_path}/{sandbox_b}'],
         ),
-        mock.patch('datadog_checks.kata_containers.check.GRPC_AVAILABLE', False),
     ):
         dd_run_check(check)
 
@@ -109,18 +105,14 @@ def test_check_scrapes_metrics_from_all_sandboxes(dd_run_check, aggregator, mock
     aggregator.assert_metric_has_tag('kata.hypervisor_vcpus', f'sandbox_id:{sandbox_b}')
 
 
-def test_check_metrics_carry_k8s_tags_when_cri_resolves_pod(
+def test_check_metrics_carry_k8s_tags_when_tagger_has_container_tags(
     dd_run_check, aggregator, mock_http_response, make_check, make_sandbox_mocks
 ):
-    """When the CRI client resolves a pod UID and the tagger has K8s tags, they propagate to every metric."""
+    """When the agent tagger has K8s tags for the sandbox container ID, they propagate to every metric."""
     sandbox_id = 'k8s-sandbox'
-    tagger.set_tags({'kubernetes_pod_uid://' + POD_UID: K8S_TAGS})
+    tagger.set_tags({'sandbox_id://' + sandbox_id: K8S_TAGS})
 
     check = make_check()
-    mock_cri = mock.Mock(spec=['get_pod_uid', 'close'])
-    mock_cri.get_pod_uid.return_value = POD_UID
-    check._cri_client = mock_cri
-
     mock_exists, mock_listdir, mock_isdir, _ = make_sandbox_mocks(sandbox_id)
     mock_http_response(file_path=FIXTURES_PATH / 'sandbox_metrics.txt')
 
@@ -128,7 +120,6 @@ def test_check_metrics_carry_k8s_tags_when_cri_resolves_pod(
         mock.patch('os.path.exists', side_effect=mock_exists),
         mock.patch('os.listdir', side_effect=mock_listdir),
         mock.patch('os.path.isdir', side_effect=mock_isdir),
-        mock.patch('datadog_checks.kata_containers.check.GRPC_AVAILABLE', False),
     ):
         dd_run_check(check)
 
@@ -152,7 +143,6 @@ def test_check_emits_critical_service_check_when_shim_socket_unreachable(
         mock.patch('os.path.exists', side_effect=mock_exists),
         mock.patch('os.listdir', side_effect=mock_listdir),
         mock.patch('os.path.isdir', side_effect=mock_isdir),
-        mock.patch('datadog_checks.kata_containers.check.GRPC_AVAILABLE', False),
         pytest.raises(Exception, match='There was an error scraping endpoint'),
     ):
         dd_run_check(check)
@@ -173,7 +163,6 @@ def test_check_emits_critical_service_check_on_http_error_response(
         mock.patch('os.path.exists', side_effect=mock_exists),
         mock.patch('os.listdir', side_effect=mock_listdir),
         mock.patch('os.path.isdir', side_effect=mock_isdir),
-        mock.patch('datadog_checks.kata_containers.check.GRPC_AVAILABLE', False),
         pytest.raises(Exception),
     ):
         dd_run_check(check)
@@ -185,10 +174,7 @@ def test_check_succeeds_with_no_service_checks_when_no_sandboxes_found(dd_run_ch
     """When no sandboxes are discovered, the check completes without emitting any health service checks."""
     check = make_check()
 
-    with (
-        mock.patch('os.path.exists', return_value=False),
-        mock.patch('datadog_checks.kata_containers.check.GRPC_AVAILABLE', False),
-    ):
+    with mock.patch('os.path.exists', return_value=False):
         dd_run_check(check)
 
     aggregator.assert_metric('kata.running_shim_count', value=0)

@@ -7,7 +7,6 @@ from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.utils.tagging import tagger
 
 from .config_models import ConfigMixin
-from .cri import GRPC_AVAILABLE, CRIClient
 
 
 class KataContainersCheck(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -22,19 +21,11 @@ class KataContainersCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
-
         self.scraper_configs = []
-        self._cri_client: CRIClient | None = None
-        self._pod_uid_cache: dict[str, str] = {}
-        self.check_initializations.append(self._init_cri_client)
 
     def get_default_config(self) -> dict:
         return {
-            # Strip the kata_ prefix so kata_hypervisor_fds -> kata.hypervisor_fds.
-            # raw_metric_prefix is applied before metrics pattern-matching,
-            # so exclude_metrics is the right place to filter by the original prefix.
             'raw_metric_prefix': 'kata_',
-            # Unix socket paths are noisy as metric tags.
             'tag_by_endpoint': False,
             'metrics': [{'.*': {}}],
         }
@@ -42,11 +33,6 @@ class KataContainersCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     def refresh_scrapers(self) -> None:
         """Rebuild one scraper per live sandbox at the start of every check run."""
         sandboxes = self._discover_sandboxes()
-
-        # Evict pod-UID cache entries whose sandboxes have disappeared.
-        for sandbox_id in list(self._pod_uid_cache):
-            if sandbox_id not in sandboxes:
-                del self._pod_uid_cache[sandbox_id]
 
         instance_tags = list(self.instance.get('tags', []))
         self.gauge('running_shim_count', len(sandboxes), tags=instance_tags)
@@ -90,29 +76,7 @@ class KataContainersCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def _get_sandbox_tags(self, sandbox_id: str) -> list[str]:
         tags = ['sandbox_id:{}'.format(sandbox_id)]
-        pod_uid = self._get_pod_uid(sandbox_id)
-        if pod_uid:
-            tags.extend(tagger.tag('kubernetes_pod_uid://' + pod_uid, tagger.ORCHESTRATOR) or [])
+        k8s_tags = tagger.tag('sandbox_id://' + sandbox_id, tagger.ORCHESTRATOR) or []
+        if k8s_tags:
+            tags.extend(k8s_tags)
         return tags
-
-    def _get_pod_uid(self, sandbox_id: str) -> str | None:
-        if sandbox_id in self._pod_uid_cache:
-            return self._pod_uid_cache[sandbox_id]
-        if self._cri_client is None:
-            return None
-        pod_uid = self._cri_client.get_pod_uid(sandbox_id)
-        if pod_uid:
-            self._pod_uid_cache[sandbox_id] = pod_uid
-            self.log.debug("Resolved sandbox %s → pod UID %s", sandbox_id, pod_uid)
-        return pod_uid
-
-    def _init_cri_client(self) -> None:
-        if not GRPC_AVAILABLE:
-            self.log.debug("grpcio not available; CRI enrichment disabled")
-            return
-        cri_socket = self.instance.get('cri_socket_path') or CRIClient.DEFAULT_SOCKET
-        try:
-            self._cri_client = CRIClient(socket_path=cri_socket)
-            self.log.debug("CRI client initialised at %s", cri_socket)
-        except Exception as e:
-            self.log.debug("CRI client init failed (not on Kubernetes?): %s", e)

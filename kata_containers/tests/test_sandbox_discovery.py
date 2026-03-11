@@ -99,33 +99,3 @@ def test_refresh_scrapers_emits_shim_count_equal_to_discovered_sandboxes(aggrega
     aggregator.assert_metric('kata.running_shim_count', value=1)
     assert len(check.scraper_configs) == 1
 
-
-def test_pod_uid_cache_entry_is_evicted_when_sandbox_disappears(aggregator, make_check, make_sandbox_mocks):
-    """Cache entries for sandboxes that no longer exist are removed on the next refresh."""
-    sandbox_id = 'evicted-sandbox'
-    check = make_check()
-    mock_exists, mock_listdir, mock_isdir, _ = make_sandbox_mocks(sandbox_id)
-
-    mock_cri = mock.Mock(spec=['get_pod_uid', 'close'])
-    mock_cri.get_pod_uid.return_value = 'some-pod-uid'
-    check._cri_client = mock_cri
-
-    # First refresh — sandbox present, cache populated via _build_scraper_config → _get_pod_uid.
-    with (
-        mock.patch('os.path.exists', side_effect=mock_exists),
-        mock.patch('os.listdir', side_effect=mock_listdir),
-        mock.patch('os.path.isdir', side_effect=mock_isdir),
-        mock.patch.object(check, 'configure_scrapers'),
-    ):
-        check.refresh_scrapers()
-
-    assert sandbox_id in check._pod_uid_cache
-
-    # Second refresh — sandbox gone, cache entry evicted.
-    with (
-        mock.patch('os.path.exists', return_value=False),
-        mock.patch.object(check, 'configure_scrapers'),
-    ):
-        check.refresh_scrapers()
-
-    assert sandbox_id not in check._pod_uid_cache

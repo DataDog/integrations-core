@@ -25,7 +25,6 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    cri_socket_path: Optional[str] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     exclude_labels: Optional[tuple[str, ...]] = None
