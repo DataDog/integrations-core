@@ -1,5 +1,5 @@
 provides:
   - id: kubernetes-admission-events
-    always_on: true
+    always_on: false
     data_type: events
     direction: inbound
