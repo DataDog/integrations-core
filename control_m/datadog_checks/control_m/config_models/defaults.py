@@ -28,6 +28,10 @@ def instance_auth_type():
     return 'basic'
 
 
+def instance_control_m_timezone():
+    return 'UTC'
+
+
 def instance_control_m_username():
     return 'workbench'
 

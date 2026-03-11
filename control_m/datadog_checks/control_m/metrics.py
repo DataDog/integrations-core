@@ -9,6 +9,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlencode
+from zoneinfo import ZoneInfo
 
 if TYPE_CHECKING:
     from datadog_checks.base import AgentCheck
@@ -107,10 +108,10 @@ def job_metric_tags(
     return tags
 
 
-def duration_ms(job: dict[str, Any]) -> int | None:
+def duration_ms(job: dict[str, Any], tz: ZoneInfo | None = None) -> int | None:
     # Calculate the job duration in milliseconds from start/end timestamps.
-    start = parse_datetime(job.get("startTime"))
-    end = parse_datetime(job.get("endTime"))
+    start = parse_datetime(job.get("startTime"), tz=tz)
+    end = parse_datetime(job.get("endTime"), tz=tz)
     if start is None or end is None:
         return None
     delta = int((end - start).total_seconds() * 1000)
@@ -119,8 +120,8 @@ def duration_ms(job: dict[str, Any]) -> int | None:
     return delta
 
 
-def overrun_ms(job: dict[str, Any], now: datetime) -> int | None:
-    estimated_end = parse_datetime(job.get("estimatedEndTime"))
+def overrun_ms(job: dict[str, Any], now: datetime, tz: ZoneInfo | None = None) -> int | None:
+    estimated_end = parse_datetime(job.get("estimatedEndTime"), tz=tz)
     if estimated_end is None:
         return None
     delta = int((now - estimated_end).total_seconds() * 1000)
@@ -129,23 +130,28 @@ def overrun_ms(job: dict[str, Any], now: datetime) -> int | None:
     return delta
 
 
-def parse_datetime(value: Any) -> datetime | None:
+def parse_datetime(value: Any, tz: ZoneInfo | None = None) -> datetime | None:
     # Parse datetime values from compact Control-M format or human-readable fallback.
     raw = timestamp_string(value)
     if not raw:
         return None
 
     compact = raw.strip()
+    dt: datetime | None = None
     if compact.isdigit() and len(compact) == 14:
         try:
-            return datetime.strptime(compact, "%Y%m%d%H%M%S")
+            dt = datetime.strptime(compact, "%Y%m%d%H%M%S")
+        except ValueError:
+            return None
+    else:
+        try:
+            dt = datetime.strptime(compact, "%b %d, %Y, %I:%M:%S %p")
         except ValueError:
             return None
 
-    try:
-        return datetime.strptime(compact, "%b %d, %Y, %I:%M:%S %p")
-    except ValueError:
-        return None
+    if dt is not None and tz is not None:
+        dt = dt.replace(tzinfo=tz)
+    return dt
 
 
 def timestamp_string(value: Any) -> str | None:
@@ -171,16 +177,21 @@ def prune_state_map(state_map: dict[str, float], now: float, ttl_seconds: int) -
     return bool(stale)
 
 
-def _format_timestamp(raw: Any) -> str | None:
-    dt = parse_datetime(raw)
+def _format_timestamp(raw: Any, tz: ZoneInfo | None = None) -> str | None:
+    dt = parse_datetime(raw, tz=tz)
     if dt is not None:
-        return dt.strftime("%b %d, %Y, %I:%M:%S %p")
+        formatted = dt.strftime("%b %d, %Y, %I:%M:%S %p")
+        if dt.tzinfo is not None:
+            formatted += f" {dt.strftime('%Z')}"
+        return formatted
     # Unparseable but non-empty — return the raw value so it's still visible.
     s = timestamp_string(raw)
     return s if s else None
 
 
-def _build_event_text(job: dict[str, Any], result: str, ctm_server: str, job_duration: int | None) -> str:
+def _build_event_text(
+    job: dict[str, Any], result: str, ctm_server: str, job_duration: int | None, tz: ZoneInfo | None = None
+) -> str:
     lines = [f"Result: {result}", f"Server: {ctm_server}"]
 
     folder = job.get("folder")
@@ -195,11 +206,11 @@ def _build_event_text(job: dict[str, Any], result: str, ctm_server: str, job_dur
     if number_of_runs is not None:
         lines.append(f"Run #: {number_of_runs}")
 
-    start = _format_timestamp(job.get("startTime"))
+    start = _format_timestamp(job.get("startTime"), tz=tz)
     if start:
         lines.append(f"Start: {start}")
 
-    end = _format_timestamp(job.get("endTime"))
+    end = _format_timestamp(job.get("endTime"), tz=tz)
     if end:
         lines.append(f"End: {end}")
 
@@ -225,6 +236,9 @@ class JobCollector:
         self._emit_success_events = bool(instance.get("emit_success_events", False))
         raw_threshold = instance.get("slow_run_threshold_ms")
         self._slow_run_threshold_ms: int | None = int(raw_threshold) if raw_threshold is not None else None
+
+        tz_name = instance.get("control_m_timezone")
+        self._tz: ZoneInfo | None = ZoneInfo(tz_name) if tz_name else None
 
         query = {"limit": self._job_status_limit, "jobname": self._job_name_filter}
         self._jobs_status_url = f"{client.api_endpoint}/run/jobs/status?{urlencode(query)}"
@@ -253,7 +267,10 @@ class JobCollector:
         self._check.gauge("jobs.returned", len(statuses), tags=self._base_tags)
 
         now = time.time()
-        now_dt = datetime.fromtimestamp(now, tz=timezone.utc).replace(tzinfo=None)
+        if self._tz is not None:
+            now_dt = datetime.fromtimestamp(now, tz=self._tz)
+        else:
+            now_dt = datetime.fromtimestamp(now, tz=timezone.utc).replace(tzinfo=None)
         finalized_changed = prune_state_map(self._finalized_runs, now, self._finalized_ttl)
         active_changed = prune_state_map(self._active_runs, now, self._active_ttl)
 
@@ -295,7 +312,7 @@ class JobCollector:
                 self._active_runs[dedupe_key] = now
 
                 if normalized == "executing":
-                    job_overrun = overrun_ms(job, now_dt)
+                    job_overrun = overrun_ms(job, now_dt, tz=self._tz)
                     if job_overrun is not None:
                         overrun_tags = job_metric_tags(self._base_tags, job, ctm_server=ctm_server, include_job_id=True)
                         self._check.gauge("job.overrun_ms", job_overrun, tags=overrun_tags)
@@ -333,13 +350,13 @@ class JobCollector:
         completion_tags = tags + [f"result:{result}"]
         self._check.count("job.run.count", 1, tags=completion_tags)
 
-        job_duration = duration_ms(job)
+        job_duration = duration_ms(job, tz=self._tz)
         if job_duration is not None:
             self._check.histogram("job.run.duration_ms", job_duration, tags=completion_tags)
 
-        end_dt = parse_datetime(job.get("endTime"))
+        end_dt = parse_datetime(job.get("endTime"), tz=self._tz)
         if end_dt is not None:
-            terminal_overrun = overrun_ms(job, end_dt)
+            terminal_overrun = overrun_ms(job, end_dt, tz=self._tz)
             if terminal_overrun is not None:
                 self._check.histogram("job.run.overrun_ms", terminal_overrun, tags=completion_tags)
 
@@ -366,7 +383,7 @@ class JobCollector:
                     "timestamp": int(time.time()),
                     "event_type": "control_m.job.completion",
                     "msg_title": f"Control-M job {result}: {job_name}",
-                    "msg_text": _build_event_text(job, result, ctm_server, job_duration),
+                    "msg_text": _build_event_text(job, result, ctm_server, job_duration, tz=self._tz),
                     "alert_type": _ALERT_TYPE.get(result, "info"),
                     "source_type_name": _SOURCE_TYPE_NAME,
                     "tags": tags,
@@ -384,7 +401,7 @@ class JobCollector:
                     "timestamp": int(time.time()),
                     "event_type": "control_m.job.slow_run",
                     "msg_title": f"Control-M slow run: {job_name} ({job_duration}ms > {self._slow_run_threshold_ms}ms)",
-                    "msg_text": _build_event_text(job, result, ctm_server, job_duration),
+                    "msg_text": _build_event_text(job, result, ctm_server, job_duration, tz=self._tz),
                     "alert_type": "warning",
                     "source_type_name": _SOURCE_TYPE_NAME,
                     "tags": tags,

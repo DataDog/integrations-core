@@ -99,6 +99,16 @@ files:
       value:
         type: boolean
         example: false
+    - name: control_m_timezone
+      required: false
+      description: |
+        IANA timezone of the Control-M server (e.g., `America/New_York`, `Europe/London`).
+        Control-M timestamps do not include timezone information, so this setting
+        tells the integration how to interpret them. Defaults to `UTC`.
+        Used for overrun calculations and event timestamp display.
+      value:
+        type: string
+        example: UTC
     - name: slow_run_threshold_ms
       required: false
       description: |

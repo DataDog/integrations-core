@@ -497,3 +497,61 @@ def test_overrun_histogram_given_terminal_job(
         aggregator.assert_metric_has_tag("control_m.job.run.overrun_ms", "result:ok")
     else:
         aggregator.assert_metric("control_m.job.run.overrun_ms", count=0)
+
+
+def test_timezone_displayed_in_event_text(
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+) -> None:
+    instance["emit_job_events"] = True
+    instance["emit_success_events"] = True
+    instance["control_m_timezone"] = "America/New_York"
+
+    check = _make_check(instance)
+    _mock_api(
+        check,
+        monkeypatch,
+        jobs=[
+            _load_job(
+                "job_ended_ok.json",
+                jobId="tz1",
+                name="tz_job",
+                startTime="20260115100000",
+                endTime="20260115103000",
+            )
+        ],
+    )
+
+    _run_check(check)
+
+    assert len(aggregator.events) == 1
+    assert "EST" in aggregator.events[0]["msg_text"]
+
+
+def test_timezone_corrects_overrun_for_non_utc_server(
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+) -> None:
+    # Control-M server in US Eastern reports estimatedEndTime as 19:04:10 local.
+    # That's 2026-02-10 19:04:10 EST = 2026-02-11 00:04:10 UTC (epoch 1770768250).
+    # Freeze wall-clock 5 minutes past that UTC instant.
+    frozen_now = 1770768250.0 + 300
+    monkeypatch.setattr(time, "time", lambda: frozen_now)
+
+    instance["control_m_timezone"] = "America/New_York"
+    check = _make_check(instance)
+    _mock_api(
+        check,
+        monkeypatch,
+        jobs=[
+            _load_job(
+                "job_executing.json",
+                jobId="wb:tz_overrun",
+                name="tz_late_job",
+                startTime="20260210185000",
+                estimatedEndTime=["20260210190410"],
+            )
+        ],
+    )
+
+    _run_check(check)
+
+    aggregator.assert_metric("control_m.job.overrun_ms", value=300_000, count=1)

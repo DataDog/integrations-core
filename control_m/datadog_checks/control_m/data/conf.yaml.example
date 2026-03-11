@@ -121,6 +121,14 @@ instances:
     #
     # emit_success_events: false
 
+    ## @param control_m_timezone - string - optional - default: UTC
+    ## IANA timezone of the Control-M server (e.g., `America/New_York`, `Europe/London`).
+    ## Control-M timestamps do not include timezone information, so this setting
+    ## tells the integration how to interpret them. Defaults to `UTC`.
+    ## Used for overrun calculations and event timestamp display.
+    #
+    # control_m_timezone: UTC
+
     ## @param slow_run_threshold_ms - integer - optional
     ## Emit a warning event when a terminal job's duration exceeds this
     ## threshold in milliseconds. Only applies when `emit_job_events` is

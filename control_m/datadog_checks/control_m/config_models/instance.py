@@ -65,6 +65,7 @@ class InstanceConfig(BaseModel):
     connect_timeout: Optional[float] = None
     control_m_api_endpoint: str
     control_m_password: Optional[str] = None
+    control_m_timezone: Optional[str] = None
     control_m_username: Optional[str] = None
     disable_generic_tags: Optional[bool] = None
     emit_job_events: Optional[bool] = None
