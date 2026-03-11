@@ -38,7 +38,7 @@ license = "BSD-3-Clause"
 deps = [
     "aws-msk-iam-sasl-signer-python==1.0.2",
     "boto3==1.42.63",
-    "confluent-kafka==2.13.0",
+    "confluent-kafka==2.13.2",
     "fastavro==1.12.1",
     "protobuf==7.34.0",
 ]

@@ -1,0 +1,9 @@
+provides:
+  - id: silverstripe-cms-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: silverstripe-cms-events
+    always_on: true
+    data_type: events
+    direction: inbound

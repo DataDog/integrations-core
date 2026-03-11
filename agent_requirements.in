@@ -9,7 +9,7 @@ botocore==1.42.63
 cachetools==7.0.4
 clickhouse-connect==0.13.0
 cm-client==45.0.4
-confluent-kafka==2.13.0
+confluent-kafka==2.13.2
 cryptography==46.0.5
 ddtrace==4.5.1
 dnspython==2.8.0
