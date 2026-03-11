@@ -21,7 +21,7 @@ def set_outputs(**kwargs: str) -> None:
 
 def get_all_packages() -> list[str]:
     return sorted(
-        {path.parent.name for path in Path(".").glob("*/datadog_checks/*/__about__.py")}
+        {path.parent.parent.parent.name for path in Path(".").glob("*/datadog_checks/*/__about__.py")}
     )
 
 
