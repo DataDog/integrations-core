@@ -35,11 +35,13 @@ on:
         description: "Print what would be released without pushing tags or starting builds"
         required: false
         type: boolean
-        default: false
+        default: true
       ddev-version:
         description: "ddev version specifier (e.g. ==14.3.2). Defaults to latest."
         required: false
         type: string
+  pull_request:
+      
 
 jobs:
   dispatch:
