@@ -4,10 +4,10 @@
 import re
 import subprocess
 from pathlib import Path
-from unittest.mock import patch
 
 from click.testing import CliRunner
 
+from datadog_checks.dev.tooling.commands import console
 from datadog_checks.dev.tooling.commands.release.tag import tag
 from datadog_checks.dev.tooling.constants import set_root
 
@@ -60,12 +60,11 @@ def test_existing_tag_debug_message():
     subprocess.run(
         ['git', '-C', REPO_ROOT, '-c', 'tag.gpgsign=false', 'tag', 'activemq-99.99.99'], check=True, capture_output=True
     )
+    console.set_debug()
     try:
-        with patch('datadog_checks.dev.tooling.commands.console.DEBUG_OUTPUT', True):
-            result = CliRunner().invoke(
-                tag, ['--no-fetch', '--no-push', '--dry-run', 'activemq'], catch_exceptions=False
-            )
+        result = CliRunner().invoke(tag, ['--no-fetch', '--no-push', '--dry-run', 'activemq'], catch_exceptions=False)
     finally:
+        console.DEBUG_OUTPUT = False
         activemq_about.write_text(original)
         subprocess.run(['git', '-C', REPO_ROOT, 'tag', '-d', 'activemq-99.99.99'], check=True, capture_output=True)
 
