@@ -18,7 +18,7 @@ from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
 from datadog_checks.mongo.collectors import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, get_state_name
-from datadog_checks.mongo.dbm.utils import should_explain_operation
+from datadog_checks.mongo.dbm.utils import get_explain_plan, should_explain_operation
 from datadog_checks.mongo.mongo import HostingType, MongoDb, metrics
 from datadog_checks.mongo.utils import parse_mongo_uri
 
@@ -899,6 +899,13 @@ def load_json_fixture(name):
             True,
             id='ns with no collection',
         ),
+        pytest.param(
+            "test.test",
+            "command",
+            {"listIndexes": "test", "$db": "test"},
+            False,
+            id='no explain listIndexes',
+        ),
     ],
 )
 def test_should_explain_operation(namespace, op, command, should_explain):
@@ -913,3 +920,41 @@ def test_should_explain_operation(namespace, op, command, should_explain):
         )
         == should_explain
     )
+
+
+@pytest.mark.parametrize(
+    "command,expected_cursor",
+    [
+        pytest.param({"find": "coll", "$db": "test"}, False, id="find_no_cursor"),
+        pytest.param({"count": "coll", "$db": "test"}, False, id="count_no_cursor"),
+        pytest.param({"distinct": "coll", "$db": "test"}, False, id="distinct_no_cursor"),
+        pytest.param({"aggregate": "coll", "$db": "test", "pipeline": []}, True, id="aggregate_adds_cursor"),
+        pytest.param(
+            {"aggregate": "coll", "$db": "test", "pipeline": [], "cursor": {"batchSize": 10}},
+            False,
+            id="aggregate_preserves_existing_cursor",
+        ),
+    ],
+)
+def test_get_explain_plan_adds_cursor_for_aggregate(command, expected_cursor):
+    """Verify that get_explain_plan adds cursor: {} only for aggregate commands."""
+    captured_command = {}
+
+    def mock_explain_command(db_name, cmd, verbosity, session=None):
+        captured_command.update(cmd)
+        return {"queryPlanner": {"winningPlan": {}}}
+
+    api_client = mock.MagicMock()
+    api_client.explain_command.side_effect = mock_explain_command
+
+    get_explain_plan(api_client, command.copy(), dbname="test", op_duration=0, cursor_timeout=60)
+
+    if expected_cursor:
+        assert "cursor" in captured_command, f"Expected cursor in command for {command}"
+        assert captured_command["cursor"] == {}
+    else:
+        if "cursor" in command:
+            # Existing cursor should be preserved as-is
+            assert captured_command["cursor"] == command["cursor"]
+        else:
+            assert "cursor" not in captured_command, f"cursor should not be added for {command}"

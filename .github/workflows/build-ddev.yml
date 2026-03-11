@@ -77,7 +77,7 @@ jobs:
       run: python -m build
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: python-artifacts
         path: ddev/dist/*
@@ -152,20 +152,21 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
+    # Pinning virtualenv because of https://github.com/pypa/hatch/issues/2193
     - name: Install Hatch
-      run: pip install -U hatch
+      run: pip install -U hatch "virtualenv<21"
 
     - name: Install Hatch environment collector plugin
       run: pip install -e . --no-deps
 
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@772c4490b37ea1c65caf6a53089a38ea1510cf4a # 1.93.0 Latest rust stable version as of 2026-01-27 (https://forge.rust-lang.org/)
+      uses: dtolnay/rust-toolchain@086dfa4efe372cfb6b375460a56e26a62a873d2e # 1.93.1 Latest rust stable version as of 2026-01-27 (https://forge.rust-lang.org/)
       with:
         targets: ${{ matrix.job.target }}
 
     - name: Set up cross compiling
       if: matrix.job.cross
-      uses: taiki-e/install-action@7e574ed8bb89811282a11aecb3fe1d043bf5bf0e # v2.67.15
+      uses: taiki-e/install-action@d6e286fa45544157a02d45a43742857ebbc25d12 # v2.68.16
       with:
         tool: cross
 
@@ -182,7 +183,7 @@ jobs:
 
     - name: Download Python artifacts
       if: ${{ !startsWith(github.event.ref, 'refs/tags') }}
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         name: python-artifacts
         path: ddev/dist
@@ -254,7 +255,7 @@ jobs:
 
     - name: Upload staged managed archive
       if: runner.os != 'Linux'
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: staged-managed-${{ runner.os }}-${{ matrix.job.target }}
         path: ddev/packaging/*
@@ -275,7 +276,7 @@ jobs:
 
     - name: Upload staged standalone archive
       if: runner.os != 'Linux'
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: staged-standalone-${{ runner.os }}-${{ matrix.job.target }}
         path: ddev/packaging/*
@@ -285,7 +286,7 @@ jobs:
     # can upload directly at this point
     - name: Upload standalone archive
       if: runner.os == 'Linux'
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: standalone-${{ matrix.job.target }}
         path: ddev/packaging/*
@@ -353,7 +354,7 @@ jobs:
         OUTER
 
     - name: Download staged standalone binaries
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         pattern: staged-standalone-${{ runner.os }}-*
         path: ddev/archives
@@ -366,7 +367,7 @@ jobs:
       run: ${{ steps.script-prepare.outputs.script }}
 
     - name: Upload standalone binaries
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: standalone-${{ matrix.job.target }}
         path: ddev/archives/*
@@ -376,7 +377,7 @@ jobs:
       run: rm -rf archives bin targets
 
     - name: Download staged managed binaries
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         pattern: staged-managed-${{ runner.os }}-*
         path: ddev/archives
@@ -400,7 +401,7 @@ jobs:
         mv build/*/release/*/*.{exe,msi} installers
 
     - name: Upload installers
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: installers-${{ runner.os }}
         path: ddev/installers/*
@@ -514,7 +515,7 @@ jobs:
         OUTER
 
     - name: Download staged standalone binaries
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         pattern: staged-standalone-${{ runner.os }}-*
         path: ddev/archives
@@ -542,7 +543,7 @@ jobs:
         done
 
     - name: Upload standalone binaries
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: standalone-${{ runner.os }}
         path: ddev/archives/*
@@ -552,7 +553,7 @@ jobs:
       run: rm -rf archives bin notarize-bin
 
     - name: Download staged managed binaries
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         pattern: staged-managed-${{ runner.os }}-*
         path: ddev/archives
@@ -627,7 +628,7 @@ jobs:
 
     - name: Upload installer
       if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: installers-${{ runner.os }}
         path: ddev/signed/${{ steps.pkg.outputs.path }}
@@ -662,20 +663,20 @@ jobs:
         dd_api_key: ${{ secrets.DD_API_KEY }}
 
     - name: Download Python artifacts
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         name: python-artifacts
         path: dist
 
     - name: Download binaries
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         pattern: standalone*
         path: archives
         merge-multiple: true
 
     - name: Download installers
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
       with:
         pattern: installers-*
         path: installers
