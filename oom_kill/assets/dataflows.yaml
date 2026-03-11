@@ -3,3 +3,7 @@ provides:
     always_on: true
     data_type: metrics
     direction: inbound
+  - id: oom-kill-events
+    always_on: false
+    data_type: events
+    direction: inbound
