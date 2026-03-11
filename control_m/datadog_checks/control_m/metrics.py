@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 import time
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlencode
 
@@ -80,7 +80,9 @@ def build_run_key(job: dict[str, Any]) -> str | None:
     return None
 
 
-def job_metric_tags(base_tags: list[str], job: dict[str, Any], ctm_server: str | None = None) -> list[str]:
+def job_metric_tags(
+    base_tags: list[str], job: dict[str, Any], ctm_server: str | None = None, include_job_id: bool = False
+) -> list[str]:
     if ctm_server is None:
         ctm_server = str(job.get("ctm") or job.get("server") or "unknown")
     tags = base_tags + [f"ctm_server:{ctm_server}"]
@@ -88,6 +90,11 @@ def job_metric_tags(base_tags: list[str], job: dict[str, Any], ctm_server: str |
     job_name = job.get("name")
     if job_name:
         tags.append(f"job_name:{job_name}")
+
+    if include_job_id:
+        job_id = job.get("jobId")
+        if job_id:
+            tags.append(f"job_id:{job_id}")
 
     folder = job.get("folder")
     if folder:
@@ -108,6 +115,16 @@ def duration_ms(job: dict[str, Any]) -> int | None:
         return None
     delta = int((end - start).total_seconds() * 1000)
     if delta < 0:
+        return None
+    return delta
+
+
+def overrun_ms(job: dict[str, Any], now: datetime) -> int | None:
+    estimated_end = parse_datetime(job.get("estimatedEndTime"))
+    if estimated_end is None:
+        return None
+    delta = int((now - estimated_end).total_seconds() * 1000)
+    if delta <= 0:
         return None
     return delta
 
@@ -236,6 +253,7 @@ class JobCollector:
         self._check.gauge("jobs.returned", len(statuses), tags=self._base_tags)
 
         now = time.time()
+        now_dt = datetime.fromtimestamp(now, tz=timezone.utc).replace(tzinfo=None)
         finalized_changed = prune_state_map(self._finalized_runs, now, self._finalized_ttl)
         active_changed = prune_state_map(self._active_runs, now, self._active_ttl)
 
@@ -276,6 +294,12 @@ class JobCollector:
                     active_changed = True
                 self._active_runs[dedupe_key] = now
 
+                if normalized == "executing":
+                    job_overrun = overrun_ms(job, now_dt)
+                    if job_overrun is not None:
+                        overrun_tags = job_metric_tags(self._base_tags, job, ctm_server=ctm_server, include_job_id=True)
+                        self._check.gauge("job.overrun_ms", job_overrun, tags=overrun_tags)
+
         for (ctm_server, normalized), count in status_counts.items():
             tags = self._base_tags + [f"ctm_server:{ctm_server}", f"status:{normalized}"]
             self._check.gauge("jobs.by_status", count, tags=tags)
@@ -312,6 +336,12 @@ class JobCollector:
         job_duration = duration_ms(job)
         if job_duration is not None:
             self._check.histogram("job.run.duration_ms", job_duration, tags=completion_tags)
+
+        end_dt = parse_datetime(job.get("endTime"))
+        if end_dt is not None:
+            terminal_overrun = overrun_ms(job, end_dt)
+            if terminal_overrun is not None:
+                self._check.histogram("job.run.overrun_ms", terminal_overrun, tags=completion_tags)
 
         if self._emit_job_events:
             self._emit_job_event(job, result, ctm_server, completion_tags, job_duration)

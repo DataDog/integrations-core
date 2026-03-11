@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
+import time
 from typing import Any
 from unittest.mock import Mock
 
@@ -22,12 +23,14 @@ def test_config_missing_endpoint() -> None:
 
 def test_config_token_lifetime_below_minimum() -> None:
     with pytest.raises(Exception, match="token_lifetime_seconds.*at least 60"):
-        _make_check({
-            "control_m_api_endpoint": "https://x/api",
-            "control_m_username": "user",
-            "control_m_password": "pass",
-            "token_lifetime_seconds": 0,
-        })
+        _make_check(
+            {
+                "control_m_api_endpoint": "https://x/api",
+                "control_m_username": "user",
+                "control_m_password": "pass",
+                "token_lifetime_seconds": 0,
+            }
+        )
 
 
 def test_config_no_auth() -> None:
@@ -405,3 +408,92 @@ def test_full_cycle_with_fixture_data(
     )
 
     datadog_agent.assert_metadata(check.check_id, {"version.raw": "9.0.21.080"})
+
+
+# estimatedEndTime 2026-02-10 19:04:10 UTC → epoch 1770750250
+_ESTIMATED_END_EPOCH = 1770750250.0
+
+
+@pytest.mark.parametrize(
+    "time_offset, expected_value",
+    [
+        pytest.param(300, 300_000, id="5min_past_estimate"),
+        pytest.param(-60, None, id="1min_before_estimate"),
+    ],
+)
+def test_overrun_gauge_given_executing_job(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+    time_offset: int,
+    expected_value: int | None,
+) -> None:
+    monkeypatch.setattr(time, "time", lambda: _ESTIMATED_END_EPOCH + time_offset)
+
+    check = _make_check(instance)
+    _mock_api(
+        check,
+        monkeypatch,
+        jobs=[
+            _load_job(
+                "job_executing.json",
+                jobId="wb:overrun1",
+                name="late_job",
+                folder="nightly",
+                startTime="20260210185000",
+                estimatedEndTime=["20260210190410"],
+            )
+        ],
+    )
+
+    _run_check(check)
+
+    if expected_value is not None:
+        aggregator.assert_metric(
+            "control_m.job.overrun_ms",
+            value=expected_value,
+            tags=BASE_TAGS + ["ctm_server:srv1", "job_name:late_job", "job_id:wb:overrun1", "folder:nightly"],
+            count=1,
+        )
+    else:
+        aggregator.assert_metric("control_m.job.overrun_ms", count=0)
+
+
+@pytest.mark.parametrize(
+    "end_time, expected_value",
+    [
+        pytest.param("20260210191410", 600_000, id="10min_overrun"),
+        pytest.param("20260210190000", None, id="within_estimate"),
+    ],
+)
+def test_overrun_histogram_given_terminal_job(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+    end_time: str,
+    expected_value: int | None,
+) -> None:
+    check = _make_check(instance)
+    _mock_api(
+        check,
+        monkeypatch,
+        jobs=[
+            _load_job(
+                "job_ended_ok.json",
+                jobId="wb:done1",
+                name="finished_job",
+                startTime="20260210185000",
+                endTime=end_time,
+                estimatedEndTime=["20260210190410"],
+            )
+        ],
+    )
+
+    _run_check(check)
+
+    if expected_value is not None:
+        aggregator.assert_metric("control_m.job.run.overrun_ms", value=expected_value, count=1)
+        aggregator.assert_metric_has_tag("control_m.job.run.overrun_ms", "job_name:finished_job")
+        aggregator.assert_metric_has_tag("control_m.job.run.overrun_ms", "result:ok")
+    else:
+        aggregator.assert_metric("control_m.job.run.overrun_ms", count=0)

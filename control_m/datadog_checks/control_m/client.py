@@ -51,9 +51,7 @@ class ControlMClient:
 
         self._token_lifetime = instance.get("token_lifetime_seconds", 1800)
         if self._token_lifetime < 60:
-            raise ConfigurationError(
-                f"`token_lifetime_seconds` must be at least 60, got {self._token_lifetime}"
-            )
+            raise ConfigurationError(f"`token_lifetime_seconds` must be at least 60, got {self._token_lifetime}")
         self._token_refresh_buffer = instance.get("token_refresh_buffer_seconds", 300)
         if self._token_refresh_buffer >= self._token_lifetime:
             self._token_refresh_buffer = self._token_lifetime // 6
