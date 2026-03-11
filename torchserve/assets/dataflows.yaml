@@ -1,0 +1,13 @@
+provides:
+  - id: torchserve-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: torchserve-logs
+    always_on: false
+    data_type: logs
+    direction: inbound
+  - id: torchserve-events
+    always_on: false
+    data_type: events
+    direction: inbound
