@@ -25,6 +25,10 @@ echo "${SHA256}  ${workdir}/${archive_name}" | sha256sum --check
 tar -C "${workdir}" -xf "${workdir}/${archive_name}"
 pushd "${workdir}/${relative_path}"
 
+for p in ${PATCHES:-}; do
+    patch -p1 -i "${DD_MOUNT_DIR}/patches/${p}"
+done
+
 ${CONFIGURE_SCRIPT:-./configure} "$@"
 make -j $(nproc)
 ${INSTALL_COMMAND:-make install}
