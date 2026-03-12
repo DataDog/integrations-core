@@ -232,13 +232,7 @@ class KafkaActionsClient:
                 timestamp_partitions = [TopicPartition(topic, p, start_timestamp) for p in partition_ids]
                 partitions = consumer.offsets_for_times(timestamp_partitions, timeout=10)
                 for tp in partitions:
-                    if tp.offset == -1:
-                        self.log.debug(
-                            "Partition %d: no messages at or after timestamp %d, will wait at end",
-                            tp.partition,
-                            start_timestamp,
-                        )
-                    else:
+                    if tp.offset != -1:
                         self.log.debug(
                             "Partition %d: timestamp %d resolved to offset %d",
                             tp.partition,
