@@ -191,6 +191,7 @@ class KafkaActionsClient:
         topic: str,
         partition: int = -1,
         start_offset: int = -2,
+        start_timestamp: int | None = None,
         max_messages: int = 1000,
         timeout_ms: int = 30000,
         group_id: str = 'kafka_actions',
@@ -204,6 +205,7 @@ class KafkaActionsClient:
             topic: Topic name
             partition: Partition number (-1 for all partitions)
             start_offset: Starting offset (-1 for latest, -2 for earliest)
+            start_timestamp: Starting timestamp in milliseconds since epoch. When set, start_offset is ignored.
             max_messages: Maximum messages to consume
             timeout_ms: Global timeout in milliseconds for the entire consumption
             group_id: Consumer group ID
@@ -225,7 +227,30 @@ class KafkaActionsClient:
             else:
                 partition_ids = [partition]
 
-            if start_offset == -1:
+            if start_timestamp is not None:
+                # Resolve timestamp to per-partition offsets using offsets_for_times.
+                timestamp_partitions = [TopicPartition(topic, p, start_timestamp) for p in partition_ids]
+                resolved = consumer.offsets_for_times(timestamp_partitions, timeout=10)
+                partitions = []
+                for tp in resolved:
+                    if tp.offset == -1:
+                        self.log.debug(
+                            "Partition %d: no messages at or after timestamp %d, skipping",
+                            tp.partition,
+                            start_timestamp,
+                        )
+                    else:
+                        partitions.append(tp)
+                        self.log.debug(
+                            "Partition %d: timestamp %d resolved to offset %d",
+                            tp.partition,
+                            start_timestamp,
+                            tp.offset,
+                        )
+                if not partitions:
+                    self.log.debug("No partitions have messages at or after timestamp %d", start_timestamp)
+                    return
+            elif start_offset == -1:
                 # For "latest" offset, seek back from the high watermark to read the last N existing messages.
                 # Use AdminClient.list_offsets to fetch all high watermarks in a single batched call.
                 admin = self.get_admin_client()

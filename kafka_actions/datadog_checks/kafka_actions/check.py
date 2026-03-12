@@ -232,6 +232,7 @@ class KafkaActionsCheck(AgentCheck):
         topic = config['topic']
         partition = config.get('partition', -1)
         start_offset = config.get('start_offset', -1)
+        start_timestamp = config.get('start_timestamp')
         n_messages_retrieved = config.get('n_messages_retrieved', 10)
         max_scanned_messages = config.get('max_scanned_messages', 1000)
         timeout_ms = config.get('timeout_ms', 20000)
@@ -267,6 +268,7 @@ class KafkaActionsCheck(AgentCheck):
             topic=topic,
             partition=partition,
             start_offset=start_offset,
+            start_timestamp=start_timestamp,
             max_messages=max_scanned_messages,
             timeout_ms=timeout_ms,
             group_id=consumer_group_id,
