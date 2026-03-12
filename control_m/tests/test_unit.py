@@ -12,61 +12,32 @@ from pytest import MonkeyPatch
 from requests.exceptions import HTTPError
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.dev.utils import get_metadata_metrics
 
-from .helpers import BASE_TAGS, FIXTURE_DIR, _load_job, _make_check, _mock_api, _respond, _run_check
-
-
-def test_config_missing_endpoint() -> None:
-    with pytest.raises(Exception, match="control_m_api_endpoint.*required"):
-        _make_check({"control_m_api_endpoint": ""})
+from .common import BASE_TAGS, FIXTURE_DIR, _load_job, _make_check, _mock_api, _respond, _run_check
 
 
-def test_config_token_lifetime_below_minimum() -> None:
-    with pytest.raises(Exception, match="token_lifetime_seconds.*at least 60"):
-        _make_check(
+@pytest.mark.parametrize(
+    "instance, match",
+    [
+        ({"control_m_api_endpoint": ""}, "control_m_api_endpoint.*required"),
+        ({"control_m_api_endpoint": "https://x/api"}, "No authentication configured"),
+        (
             {
                 "control_m_api_endpoint": "https://x/api",
                 "control_m_username": "user",
                 "control_m_password": "pass",
                 "token_lifetime_seconds": 0,
-            }
-        )
-
-
-def test_config_no_auth() -> None:
-    with pytest.raises(Exception, match="No authentication configured"):
-        _make_check({"control_m_api_endpoint": "https://x/api"})
-
-
-@pytest.mark.parametrize(
-    "partial",
-    [
-        {"control_m_username": "user"},
-        {"control_m_password": "pass"},
+            },
+            "token_lifetime_seconds.*at least 60",
+        ),
+        ({"control_m_api_endpoint": "https://x/api", "control_m_username": "user"}, "must both be set"),
+        ({"control_m_api_endpoint": "https://x/api", "control_m_password": "pass"}, "must both be set"),
     ],
 )
-def test_config_partial_credentials(partial: dict[str, str]) -> None:
-    with pytest.raises(Exception, match="must both be set"):
-        _make_check({"control_m_api_endpoint": "https://x/api", **partial})
-
-
-def test_connect_ok_with_static_token(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
-) -> None:
-    check = _make_check(instance)
-    _mock_api(
-        check,
-        monkeypatch,
-        servers=[{"name": "srv1", "state": "Up"}],
-        jobs=[_load_job("job_executing.json")],
-    )
-
-    _run_check(check)
-
-    aggregator.assert_metric("control_m.can_connect", value=1, count=1)
-    aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:static_token")
-    aggregator.assert_metric("control_m.server.up", value=1, count=1)
-    aggregator.assert_metric("control_m.jobs.returned", value=1, count=1)
+def test_config_invalid(instance: dict[str, Any], match: str) -> None:
+    with pytest.raises(Exception, match=match):
+        _make_check(instance)
 
 
 def test_connect_server_error_emits_critical(
@@ -245,11 +216,29 @@ def test_dedup_new_run_number_counted_as_new_completion(
     aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
 
 
-def test_events_disabled_by_default(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+@pytest.mark.parametrize(
+    "extra_config, fixture, fixture_kwargs",
+    [
+        pytest.param({}, "job_ended_not_ok.json", {"jobId": "e1"}, id="events_disabled_by_default"),
+        pytest.param(
+            {"emit_job_events": True},
+            "job_ended_ok.json",
+            {"jobId": "e4", "name": "ok_job"},
+            id="success_suppressed_by_default",
+        ),
+    ],
+)
+def test_no_events_emitted(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+    extra_config: dict[str, Any],
+    fixture: str,
+    fixture_kwargs: dict[str, str],
 ) -> None:
+    instance.update(extra_config)
     check = _make_check(instance)
-    _mock_api(check, monkeypatch, jobs=[_load_job("job_ended_not_ok.json", jobId="e1")])
+    _mock_api(check, monkeypatch, jobs=[_load_job(fixture, **fixture_kwargs)])
 
     _run_check(check)
 
@@ -274,19 +263,6 @@ def test_event_on_terminal_failure(
         alert_type="error",
         event_type="control_m.job.completion",
     )
-
-
-def test_event_success_suppressed_by_default(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
-) -> None:
-    instance["emit_job_events"] = True
-    check = _make_check(instance)
-    _mock_api(check, monkeypatch, jobs=[_load_job("job_ended_ok.json", jobId="e4", name="ok_job")])
-
-    _run_check(check)
-
-    aggregator.assert_metric("control_m.job.run.count", count=1)
-    assert len(aggregator.events) == 0
 
 
 def test_event_success_when_opted_in(
@@ -338,22 +314,34 @@ def test_event_slow_run_check(instance: dict[str, Any], aggregator: AggregatorSt
     assert "1800000ms" in aggregator.events[0]["msg_title"]
 
 
-def test_metadata_version_from_first_server(
-    instance: dict[str, Any], datadog_agent: Any, monkeypatch: MonkeyPatch
+@pytest.mark.parametrize(
+    "servers, expected_version",
+    [
+        pytest.param(
+            [{"name": "s1", "version": "9.0.21.080"}, {"name": "s2", "version": "9.1.00.000"}],
+            "9.0.21.080",
+            id="first_server_has_version",
+        ),
+        pytest.param(
+            [{"name": "s1", "state": "Up"}, {"name": "s2", "version": "9.1.00.000"}],
+            "9.1.00.000",
+            id="fallback_to_second_server",
+        ),
+    ],
+)
+def test_metadata_version_from_servers(
+    instance: dict[str, Any],
+    datadog_agent: Any,
+    monkeypatch: MonkeyPatch,
+    servers: list[dict[str, str]],
+    expected_version: str,
 ) -> None:
     check = _make_check(instance)
-    _mock_api(
-        check,
-        monkeypatch,
-        servers=[
-            {"name": "s1", "version": "9.0.21.080"},
-            {"name": "s2", "version": "9.1.00.000"},
-        ],
-    )
+    _mock_api(check, monkeypatch, servers=servers)
 
     _run_check(check)
 
-    datadog_agent.assert_metadata(check.check_id, {"version.raw": "9.0.21.080"})
+    datadog_agent.assert_metadata(check.check_id, {"version.raw": expected_version})
 
 
 def test_full_cycle_with_fixture_data(
@@ -378,6 +366,7 @@ def test_full_cycle_with_fixture_data(
 
     wb_tags = BASE_TAGS + ["ctm_server:workbench"]
 
+    aggregator.assert_metric("control_m.can_connect", value=1, tags=BASE_TAGS + ["auth_method:static_token"], count=1)
     aggregator.assert_metric("control_m.server.up", value=1, tags=BASE_TAGS + ["ctm_server:workbench", "state:up"])
     aggregator.assert_metric("control_m.jobs.total", value=3, tags=BASE_TAGS, count=1)
     aggregator.assert_metric("control_m.jobs.returned", value=3, tags=BASE_TAGS, count=1)
@@ -396,9 +385,8 @@ def test_full_cycle_with_fixture_data(
 
     datadog_agent.assert_metadata(check.check_id, {"version.raw": "9.0.21.080"})
 
-
-# estimatedEndTime 2026-02-10 19:04:10 UTC → epoch 1770750250
-_ESTIMATED_END_EPOCH = 1770750250.0
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.parametrize(
@@ -415,7 +403,8 @@ def test_overrun_gauge_given_executing_job(
     time_offset: int,
     expected_value: int | None,
 ) -> None:
-    monkeypatch.setattr(time, "time", lambda: _ESTIMATED_END_EPOCH + time_offset)
+    monkeypatch.setattr(time, "time", lambda: 1770750250.0 + time_offset)
+    # estimatedEndTime 2026-02-10 19:04:10 UTC → epoch 1770750250
 
     check = _make_check(instance)
     _mock_api(
