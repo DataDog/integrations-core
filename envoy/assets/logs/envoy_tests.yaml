@@ -169,4 +169,16 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1615540311592
-
+ -
+  sample: "[2021-03-12 15:31:30.492][1][warning][runtime] [source/common/runtime/runtime_features.cc:31] Unable to use runtime singleton for feature envoy.http.headermap.lazy_map_min_size"
+  result:
+    custom:
+      date: 1615563090492
+      filename: "source/common/runtime/runtime_features.cc"
+      level: "warning"
+      line_number: 31
+    message: "Unable to use runtime singleton for feature envoy.http.headermap.lazy_map_min_size"
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1615563090492
