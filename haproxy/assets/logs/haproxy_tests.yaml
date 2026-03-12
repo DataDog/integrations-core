@@ -51,6 +51,8 @@ tests:
           direction_id: 1
           protocol_name: HTTP
           protocol_ver: '1.1'
+        dst_endpoint:
+          svc_name: http-in
         duration: 1.09E8
         http_request:
           http_method: GET
@@ -61,10 +63,16 @@ tests:
         http_response:
           code: 200
           status: OK
+        load_balancer:
+          dst_endpoint:
+            svc_name: srv1
+          name: static
         metadata:
           product:
             name: HAProxy
             vendor_name: HAProxy
+          profiles:
+          - load_balancer
           version: 1.5.0
         severity: Informational
         severity_id: 1
@@ -118,11 +126,17 @@ tests:
           direction: Inbound
           direction_id: 1
         dst_endpoint:
-          svc_name: srv1
+          svc_name: fnt
+        load_balancer:
+          dst_endpoint:
+            svc_name: srv1
+          name: bck
         metadata:
           product:
             name: HAProxy
             vendor_name: HAProxy
+          profiles:
+          - load_balancer
           version: 1.5.0
         severity: Informational
         severity_id: 1
@@ -164,10 +178,13 @@ tests:
         dst_endpoint:
           ip: 10.0.3.31
           port: 8012
+          svc_name: www
         metadata:
           product:
             name: HAProxy
             vendor_name: HAProxy
+          profiles:
+          - load_balancer
           version: 1.5.0
         severity: Informational
         severity_id: 1
@@ -247,6 +264,8 @@ tests:
           direction_id: 1
           protocol_name: HTTP
           protocol_ver: '1.1'
+        dst_endpoint:
+          svc_name: fr_proxy.lirn.net-HTTP
         duration: 1.22E8
         http_request:
           http_method: GET
@@ -258,10 +277,16 @@ tests:
         http_response:
           code: 200
           status: OK
+        load_balancer:
+          dst_endpoint:
+            svc_name: bk_mp01-UnivOfThePeople-9797
+          name: bk_UnivOfThePeople-9797
         metadata:
           product:
             name: HAProxy
             vendor_name: HAProxy
+          profiles:
+          - load_balancer
           version: 1.5.0
         severity: Informational
         severity_id: 1
@@ -349,6 +374,8 @@ tests:
           direction_id: 1
           protocol_name: HTTP
           protocol_ver: '1.1'
+        dst_endpoint:
+          svc_name: fr_proxy.lirn.net-HTTP
         duration: 1.22E8
         http_request:
           http_method: GET
@@ -360,10 +387,16 @@ tests:
         http_response:
           code: 200
           status: OK
+        load_balancer:
+          dst_endpoint:
+            svc_name: bk_mp01-UnivOfThePeople-9797
+          name: bk_UnivOfThePeople-9797
         metadata:
           product:
             name: HAProxy
             vendor_name: HAProxy
+          profiles:
+          - load_balancer
           version: 1.5.0
         severity: Informational
         severity_id: 1
@@ -435,6 +468,8 @@ tests:
           direction_id: 1
           protocol_name: HTTP
           protocol_ver: '1.1'
+        dst_endpoint:
+          svc_name: stats
         duration: 0.0
         http_request:
           http_method: GET
@@ -445,10 +480,16 @@ tests:
         http_response:
           code: 200
           status: OK
+        load_balancer:
+          dst_endpoint:
+            svc_name: <STATS>
+          name: stats
         metadata:
           product:
             name: HAProxy
             vendor_name: HAProxy
+          profiles:
+          - load_balancer
           version: 1.5.0
         severity: Informational
         severity_id: 1
@@ -523,6 +564,8 @@ tests:
           direction_id: 1
           protocol_name: HTTP
           protocol_ver: '1.1'
+        dst_endpoint:
+          svc_name: http-0_0_0_0-8080
         duration: 2000000.0
         http_request:
           http_method: POST
@@ -534,10 +577,16 @@ tests:
         http_response:
           code: 202
           status: OK
+        load_balancer:
+          dst_endpoint:
+            svc_name: propjoe-71
+          name: propjoe
         metadata:
           product:
             name: HAProxy
             vendor_name: HAProxy
+          profiles:
+          - load_balancer
           version: 1.5.0
         severity: Informational
         severity_id: 1
@@ -595,11 +644,17 @@ tests:
           direction: Inbound
           direction_id: 1
         dst_endpoint:
-          svc_name: nl14s0111
+          svc_name: lb_slicing_77_222_80_79
+        load_balancer:
+          dst_endpoint:
+            svc_name: nl14s0111
+          name: bk_kamino_p
         metadata:
           product:
             name: HAProxy
             vendor_name: HAProxy
+          profiles:
+          - load_balancer
           version: 1.5.0
         severity: Informational
         severity_id: 1
@@ -645,10 +700,13 @@ tests:
         dst_endpoint:
           ip: 77.222.80.71
           port: 80
+          svc_name: lb_http_oa_vip
         metadata:
           product:
             name: HAProxy
             vendor_name: HAProxy
+          profiles:
+          - load_balancer
           version: 1.5.0
         severity: Informational
         severity_id: 1
@@ -702,11 +760,17 @@ tests:
           direction: Inbound
           direction_id: 1
         dst_endpoint:
-          svc_name: nl12s0075
+          svc_name: lb_https_op_vip
+        load_balancer:
+          dst_endpoint:
+            svc_name: nl12s0075
+          name: bk_op_c30a_leliezorg
         metadata:
           product:
             name: HAProxy
             vendor_name: HAProxy
+          profiles:
+          - load_balancer
           version: 1.5.0
         severity: Informational
         severity_id: 1
