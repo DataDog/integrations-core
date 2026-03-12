@@ -35,7 +35,7 @@ async def run_command(cmd: list[str]) -> ToolResult:
         output = output + proc.stderr if output else proc.stderr
 
     if not output.strip():
-        return ToolResult(success=proc.returncode == 0, data="(no output)")
+        return ToolResult(success=True, data="(no output)")
 
     truncated_output, was_truncated, meta = truncate(output)
 

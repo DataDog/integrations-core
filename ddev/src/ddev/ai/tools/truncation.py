@@ -32,8 +32,10 @@ def truncate(content: str, max_chars: int = MAX_CHARS) -> tuple[str, bool, Trunc
         return content, False, None
 
     total = len(content)
-    head_chars = int(max_chars * HEAD_RATIO)
-    tail_chars = max_chars - head_chars
+    gap_marker_approx = 100
+    content_budget = max_chars - gap_marker_approx
+    head_chars = int(content_budget * HEAD_RATIO)
+    tail_chars = content_budget - head_chars
 
     head = content[:head_chars]
     tail = content[-tail_chars:]
@@ -43,8 +45,6 @@ def truncate(content: str, max_chars: int = MAX_CHARS) -> tuple[str, bool, Trunc
 
     if error_lines:
         error_snippet = "\n".join(line for _, line in error_lines)
-        # Fit head + error_snippet + tail within max_chars
-        gap_marker_approx = 100
         available = max_chars - len(error_snippet) - gap_marker_approx
         if available > 0:
             head_share = int(available * HEAD_RATIO)
