@@ -237,7 +237,7 @@ SELECT table_name as `table_name`,
        column_key as `column_key`,
        extra as `extra`
 FROM INFORMATION_SCHEMA.COLUMNS
-%WHERE%
+{where}
 """
 
 SQL_SCHEMAS_INDEXES = """\
@@ -256,7 +256,7 @@ SELECT
         'sub_part', sub_part
     )) as `columns`
 FROM INFORMATION_SCHEMA.STATISTICS
-%WHERE%
+{where}
 GROUP BY index_name, table_name, schema_name, cardinality, index_type, non_unique, expression
 """
 
@@ -276,7 +276,7 @@ SELECT
         'sub_part', sub_part
     )) as `columns`
 FROM INFORMATION_SCHEMA.STATISTICS
-%WHERE%
+{where}
 GROUP BY index_name, table_name, schema_name, cardinality, index_type, non_unique, expression
 
 """
@@ -295,7 +295,7 @@ SELECT
     nullable,
     sub_part
 FROM INFORMATION_SCHEMA.STATISTICS
-%WHERE%
+{where}
 """
 
 SQL_SCHEMAS_INDEXES_NO_JSON_8_0_13 = """\
@@ -312,7 +312,7 @@ SELECT
     nullable,
     sub_part
 FROM INFORMATION_SCHEMA.STATISTICS
-%WHERE%
+{where}
 """
 
 SQL_SCHEMAS_FOREIGN_KEYS = """\
@@ -335,7 +335,7 @@ LEFT JOIN
     AND kcu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
 WHERE
     kcu.referenced_table_name is not null
-    %WHERE%
+    {where}
 GROUP BY
     kcu.constraint_schema,
     kcu.constraint_name,
@@ -367,7 +367,7 @@ SELECT
 FROM INFORMATION_SCHEMA.PARTITIONS
 WHERE
     partition_name IS NOT NULL
-    %WHERE%
+    {where}
 GROUP BY table_name, table_schema, partition_name, partition_ordinal_position,
    partition_method, partition_expression, partition_description
 """
@@ -390,7 +390,7 @@ SELECT
 FROM INFORMATION_SCHEMA.PARTITIONS
 WHERE
     partition_name IS NOT NULL
-    %WHERE%
+    {where}
 """
 
 QUERY_DEADLOCKS = {

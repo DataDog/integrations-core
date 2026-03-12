@@ -182,16 +182,16 @@ class MySqlSchemaCollector(SchemaCollector):
                 ORDER BY tables.table_name
                 LIMIT {limit}
             ) schema_tables
-                LEFT JOIN ({columns_query.replace("%WHERE%", "")}) columns ON
+                LEFT JOIN ({columns_query.format(where="")}) columns ON
                     schema_tables.table_name = columns.table_name AND
                     schema_tables.schema_name = columns.schema_name
-                LEFT JOIN ({indexes_query.replace("%WHERE%", "")}) indexes ON
+                LEFT JOIN ({indexes_query.format(where="")}) indexes ON
                     schema_tables.table_name = indexes.table_name AND
                     schema_tables.schema_name = indexes.schema_name
-                LEFT JOIN ({constraints_query.replace("%WHERE%", "")}) constraints ON
+                LEFT JOIN ({constraints_query.format(where="")}) constraints ON
                     schema_tables.table_name = constraints.table_name AND
                     schema_tables.schema_name = constraints.schema_name
-                LEFT JOIN ({partition_query.replace("%WHERE%", "")}) partitions ON
+                LEFT JOIN ({partition_query.format(where="")}) partitions ON
                 schema_tables.table_name = partitions.table_name AND
                 schema_tables.schema_name = partitions.schema_name
             GROUP BY schema_tables.schema_name,
@@ -221,7 +221,7 @@ class MySqlSchemaCollector(SchemaCollector):
                 table_name = cursor_row.get("table_name")
                 table_schema = cursor_row.get("schema_name")
                 # Get columns
-                columns_query = SQL_SCHEMAS_COLUMNS.replace("%WHERE%", "WHERE table_name = %s AND table_schema = %s")
+                columns_query = SQL_SCHEMAS_COLUMNS.format(where="WHERE table_name = %s AND table_schema = %s")
                 cursor.execute(columns_query, (table_name, table_schema))
                 columns = cursor.fetchall()
                 # Get indexes
@@ -229,7 +229,7 @@ class MySqlSchemaCollector(SchemaCollector):
                     SQL_SCHEMAS_INDEXES_NO_JSON_8_0_13
                     if self._check.version.flavor == 'MySQL' and self._check.version.version_compatible((8, 0, 13))
                     else SQL_SCHEMAS_INDEXES_NO_JSON
-                ).replace("%WHERE%", "WHERE table_name = %s AND table_schema = %s")
+                ).format(where="WHERE table_name = %s AND table_schema = %s")
                 cursor.execute(indexes_query, (table_name, table_schema))
                 indexes_rows = cursor.fetchall()
                 indexes_dict = {}
@@ -253,14 +253,14 @@ class MySqlSchemaCollector(SchemaCollector):
                     )
                 indexes = list(indexes_dict.values())
                 # Get foreign keys
-                foreign_keys_query = SQL_SCHEMAS_FOREIGN_KEYS.replace(
-                    "%WHERE%", "AND kcu.table_name = %s AND kcu.table_schema = %s"
+                foreign_keys_query = SQL_SCHEMAS_FOREIGN_KEYS.format(
+                    where="AND kcu.table_name = %s AND kcu.table_schema = %s"
                 )
                 cursor.execute(foreign_keys_query, (table_name, table_schema))
                 foreign_keys = cursor.fetchall()
                 # Get partitions
-                partition_query = SQL_SCHEMAS_PARTITION_NO_JSON.replace(
-                    "%WHERE%", "AND table_name = %s AND table_schema = %s"
+                partition_query = SQL_SCHEMAS_PARTITION_NO_JSON.format(
+                    where="AND table_name = %s AND table_schema = %s"
                 )
                 cursor.execute(partition_query, (table_name, table_schema))
                 partitions_rows = cursor.fetchall()
