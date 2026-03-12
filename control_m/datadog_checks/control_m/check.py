@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import hashlib
 from typing import Any
 
 from datadog_checks.base import AgentCheck
@@ -20,6 +21,12 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         self._client = ControlMClient(self)
         self._base_tags = [f"control_m_instance:{self._client.api_endpoint}"]
         self._job_collector = JobCollector(self, self._client, self._base_tags)
+
+    def persistent_cache_id(self) -> str:
+        # Stable cache ID based on the endpoint URL so config changes
+        # (e.g., toggling events, adjusting TTLs) don't invalidate the
+        # dedup cache and re-emit all historical job completions.
+        return hashlib.md5(self._client.api_endpoint.encode()).hexdigest()[:16]
 
     def check(self, _: Any) -> None:
         auth_tags = self._auth_tags()

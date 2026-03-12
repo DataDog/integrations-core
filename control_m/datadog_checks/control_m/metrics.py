@@ -31,16 +31,14 @@ STATUS_NORMALIZATION: dict[str, str] = {
     "waiting for host": "wait_host",
     "wait workload": "wait_workload",
     "waiting for workload": "wait_workload",
-    "canceled": "canceled",
-    "cancelled": "canceled",
 }
-TERMINAL_STATUSES = {"ended_ok", "ended_not_ok", "canceled"}
+TERMINAL_STATUSES = {"ended_ok", "ended_not_ok"}
 WAITING_STATUSES = {"wait_condition", "wait_event", "wait_user", "wait_resource", "wait_host", "wait_workload"}
 UP_STATES = {"up", "available", "connected", "active"}
 
 _FINALIZED_RUNS_CACHE_KEY = "finalized_runs_control_m"
 _ACTIVE_RUNS_CACHE_KEY = "active_runs_control_m"
-_ALERT_TYPE = {"ok": "success", "failed": "error", "canceled": "warning", "unknown": "warning"}
+_ALERT_TYPE = {"ok": "success", "failed": "error", "unknown": "warning"}
 _SOURCE_TYPE_NAME = "control-m"  # needs to match app_id
 
 
@@ -56,8 +54,6 @@ def result_from_status(status: str) -> str:
         return "ok"
     if status == "ended_not_ok":
         return "failed"
-    if status == "canceled":
-        return "canceled"
     return "unknown"
 
 

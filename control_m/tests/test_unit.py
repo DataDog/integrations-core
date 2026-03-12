@@ -257,25 +257,12 @@ def test_events_disabled_by_default(
     assert len(aggregator.events) == 0
 
 
-@pytest.mark.parametrize(
-    "fixture, job_id, expected_title, expected_alert_type",
-    [
-        ("job_ended_not_ok.json", "e2", "Control-M job failed: fail_job", "error"),
-        ("job_cancelled.json", "e3", "Control-M job canceled: cancel_job", "warning"),
-    ],
-)
 def test_event_on_terminal_failure(
-    instance: dict[str, Any],
-    aggregator: AggregatorStub,
-    monkeypatch: MonkeyPatch,
-    fixture: str,
-    job_id: str,
-    expected_title: str,
-    expected_alert_type: str,
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
 ) -> None:
     instance["emit_job_events"] = True
     check = _make_check(instance)
-    _mock_api(check, monkeypatch, jobs=[_load_job(fixture, jobId=job_id)])
+    _mock_api(check, monkeypatch, jobs=[_load_job("job_ended_not_ok.json", jobId="e2")])
 
     _run_check(check)
 
@@ -283,8 +270,8 @@ def test_event_on_terminal_failure(
     aggregator.assert_event(
         "",
         exact_match=False,
-        msg_title=expected_title,
-        alert_type=expected_alert_type,
+        msg_title="Control-M job failed: fail_job",
+        alert_type="error",
         event_type="control_m.job.completion",
     )
 

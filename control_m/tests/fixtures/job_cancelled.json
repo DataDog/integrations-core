@@ -1,7 +1,0 @@
-{
-  "jobId": "cancel:001",
-  "numberOfRuns": 1,
-  "ctm": "srv1",
-  "name": "cancel_job",
-  "status": "Cancelled"
-}
