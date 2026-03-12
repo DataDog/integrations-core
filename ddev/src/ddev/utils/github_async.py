@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import httpx
 from pydantic import BaseModel, ConfigDict
@@ -197,7 +197,7 @@ class AsyncGitHubClient:
         last_pagination = PaginationInfo()
 
         while current_url:
-            response = await self.request(method, current_url, params=params, json_body=json_body)
+            response: GitHubResponse[Any] = await self.request(method, current_url, params=params, json_body=json_body)
             last_headers = response.headers
             last_pagination = response.pagination
 
@@ -213,7 +213,7 @@ class AsyncGitHubClient:
                         break
                 else:
                     # If no known list key found, treat the whole dict as a single item
-                    all_data.append(response.data)
+                    all_data.append(cast(T, response.data))
 
             # Move to next page
             current_url = response.pagination.next_url
