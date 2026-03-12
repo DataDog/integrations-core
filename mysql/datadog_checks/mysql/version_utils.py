@@ -49,6 +49,6 @@ class MySQLVersion(namedtuple('MySQLVersion', ['version', 'flavor', 'build'])):
             return False
 
         patchlevel = int(PATCHLEVEL_REGEX.match(mysql_version[2] if len(mysql_version) > 2 else '0').group(1))
-        version = (int(mysql_version[0]), int(mysql_version[1]), patchlevel)
+        version = (int(mysql_version[0]), int(mysql_version[1] if len(mysql_version) > 1 else 0), patchlevel)
 
         return version >= compat_version
