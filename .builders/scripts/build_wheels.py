@@ -251,7 +251,7 @@ def _get_matching_rules(wheel_name: str) -> list[dict]:
 
 
 def _strip_lines_from_dir(unpacked_dir: Path, rules: list[dict]) -> bool:
-    """Strip matching lines from files in an unpacked wheel directory."""
+    """Strip matching lines and their indented blocks from files."""
     modified = False
     for rule in rules:
         file_pattern = rule.get('file_pattern', '*.py')
@@ -267,10 +267,23 @@ def _strip_lines_from_dir(unpacked_dir: Path, rules: list[dict]) -> bool:
                 continue
 
             lines = original_content.splitlines(keepends=True)
-            kept_lines = [
-                line for line in lines
-                if not any(pattern.search(line) for pattern in compiled_patterns)
-            ]
+            kept_lines: list[str] = []
+            skip_indent: int | None = None
+
+            for line in lines:
+                stripped = line.rstrip('\n\r')
+
+                if skip_indent is not None:
+                    line_indent = len(stripped) - len(stripped.lstrip())
+                    if stripped == '' or line_indent > skip_indent:
+                        continue
+                    skip_indent = None
+
+                if any(pattern.search(line) for pattern in compiled_patterns):
+                    skip_indent = len(stripped) - len(stripped.lstrip())
+                    continue
+
+                kept_lines.append(line)
 
             if len(kept_lines) != len(lines):
                 py_file.write_text(''.join(kept_lines), encoding='utf-8')
