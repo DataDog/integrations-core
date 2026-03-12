@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.do_query_actions import DOQueryActionsCheck
 
 from .common import METRICS
@@ -492,3 +493,48 @@ def test_query_with_no_description(dd_run_check, aggregator, postgres_instance):
     assert payload['columns'] == []
     assert payload['rows'] == []
     assert payload['row_count'] == 0
+
+
+def test_custom_sql_select_fields_in_payload(dd_run_check, aggregator, custom_fields_instance):
+    """custom_sql_select_fields from the query spec are forwarded in the event payload."""
+    mock_pool, _ = _make_mock_pool()
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [custom_fields_instance])
+        dd_run_check(check)
+
+    events = aggregator.get_event_platform_events('do-query-results')
+    assert len(events) == 1
+    custom = events[0]['custom_sql_select_fields']
+    assert custom['metric_config_id'] == 42
+    assert custom['entity_id'] == 'ent-abc-123'
+
+
+def test_dd_column_names_in_payload(dd_run_check, aggregator, dd_columns_instance):
+    """dd_{type}_{name} column names from query results are forwarded as-is in the event payload."""
+    dd_cols = [('dd_count_failed_queries',), ('dd_gauge_latency_ms',), ('dd_tag_schema_name',)]
+    mock_pool, _ = _make_mock_pool(rows=[(500, 0.42, 'public')], description=dd_cols)
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [dd_columns_instance])
+        dd_run_check(check)
+
+    events = aggregator.get_event_platform_events('do-query-results')
+    assert len(events) == 1
+    assert events[0]['columns'] == ['dd_count_failed_queries', 'dd_gauge_latency_ms', 'dd_tag_schema_name']
+    assert events[0]['rows'] == [[500, 0.42, 'public']]
+
+
+def test_all_metrics_covered(dd_run_check, aggregator, postgres_instance):
+    """All emitted metrics are declared in metadata.csv."""
+    mock_pool, _ = _make_mock_pool()
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+        dd_run_check(check)
+
+    for metric in METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

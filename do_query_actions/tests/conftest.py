@@ -48,3 +48,13 @@ def postgres_instance():
 @pytest.fixture
 def multi_query_instance():
     return deepcopy(common.MULTI_QUERY_INSTANCE)
+
+
+@pytest.fixture
+def custom_fields_instance():
+    return deepcopy(common.CUSTOM_FIELDS_INSTANCE)
+
+
+@pytest.fixture
+def dd_columns_instance():
+    return deepcopy(common.DD_COLUMNS_INSTANCE)
