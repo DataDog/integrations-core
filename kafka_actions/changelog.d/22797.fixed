@@ -1,0 +1,1 @@
+Fix consumer timeout when reading latest N messages by seeking back from high watermark instead of positioning at OFFSET_END
