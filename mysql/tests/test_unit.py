@@ -156,6 +156,10 @@ def test_parse_version(raw_version, version_comment, expected_version, expected_
         ('8.0.25', (5, 7, 0), True),  # older major
         ('8.0.25', (8, 0, 30), False),  # newer patch
         ('8.0.25', (8, 1, 0), False),  # newer minor
+        ('8.0', (8, 0, 1), False),  # handle missing patch
+        ('8', (8, 0, 1), False),  # handle missing minor
+        ('8.0', (8, 0, 0), True),  # handle missing patch
+        ('8', (8, 0, 0), True),  # handle missing minor
         # MariaDB version compatibility
         ('10.3.34', (10, 3, 30), True),  # older patch
         ('10.3.34', (10, 3, 40), False),  # newer patch
