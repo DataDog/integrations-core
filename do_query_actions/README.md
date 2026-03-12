@@ -27,7 +27,6 @@ Run the Agent's status subcommand and look for `do_query_actions` under the Chec
 | Metric | Type | Description |
 |--------|------|-------------|
 | `do_query_actions.query_execution_time` | gauge | Time taken to execute the query in seconds |
-| `do_query_actions.query_success` | gauge | 1 if query succeeded, 0 if failed |
 | `do_query_actions.query_status` | gauge | 1 if query succeeded, 0 if failed |
 
 ### Service Checks

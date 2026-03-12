@@ -130,5 +130,4 @@ DD_COLUMNS_INSTANCE = {
 METRICS = [
     'do_query_actions.query_execution_time',
     'do_query_actions.query_status',
-    'do_query_actions.query_success',
 ]

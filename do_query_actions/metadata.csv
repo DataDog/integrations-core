@@ -1,4 +1,3 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 do_query_actions.query_execution_time,gauge,,second,,The time taken to execute the query.,0,do_query_actions,,,
 do_query_actions.query_status,gauge,,,,Indicates the query execution status. 1 for success and 0 for failure.,0,do_query_actions,,,
-do_query_actions.query_success,gauge,,,,Indicates whether the query executed successfully. 1 for success and 0 for failure.,0,do_query_actions,,,

@@ -73,7 +73,6 @@ def test_postgres_single_query_success(dd_run_check, aggregator, postgres_instan
     for metric in METRICS:
         aggregator.assert_metric(metric)
 
-    aggregator.assert_metric('do_query_actions.query_success', value=1)
     aggregator.assert_metric('do_query_actions.query_status', value=1)
 
 
@@ -95,7 +94,6 @@ def test_postgres_query_failure(dd_run_check, aggregator, postgres_instance):
         check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
         dd_run_check(check)
 
-    aggregator.assert_metric('do_query_actions.query_success', value=0)
     aggregator.assert_metric('do_query_actions.query_status', value=0)
 
 
@@ -105,7 +103,6 @@ def test_unsupported_db_type(dd_run_check, aggregator, postgres_instance):
     check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
     dd_run_check(check)
 
-    aggregator.assert_metric('do_query_actions.query_success', value=0)
     aggregator.assert_metric('do_query_actions.query_status', value=0)
 
 
@@ -121,11 +118,6 @@ def test_connection_failure_marks_all_queries_critical(dd_run_check, aggregator,
     for m in aggregator.metrics('do_query_actions.query_status'):
         assert m.value == 0
 
-    success_metrics = aggregator.metrics('do_query_actions.query_success')
-    assert len(success_metrics) == 2
-    for m in success_metrics:
-        assert m.value == 0
-
 
 def test_multi_query_execution(dd_run_check, aggregator, multi_query_instance):
     mock_pool, _ = _make_mock_pool()
@@ -134,16 +126,13 @@ def test_multi_query_execution(dd_run_check, aggregator, multi_query_instance):
         check = DOQueryActionsCheck('do_query_actions', {}, [multi_query_instance])
         dd_run_check(check)
 
-    success_metrics = aggregator.metrics('do_query_actions.query_success')
-    assert len(success_metrics) == 2
-    for m in success_metrics:
-        assert m.value == 1
-
     time_metrics = aggregator.metrics('do_query_actions.query_execution_time')
     assert len(time_metrics) == 2
 
     status_metrics = aggregator.metrics('do_query_actions.query_status')
     assert len(status_metrics) == 2
+    for m in status_metrics:
+        assert m.value == 1
 
 
 def test_scheduling_interval(dd_run_check, aggregator, postgres_instance):
@@ -154,16 +143,16 @@ def test_scheduling_interval(dd_run_check, aggregator, postgres_instance):
         check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
 
         dd_run_check(check)
-        assert len(aggregator.metrics('do_query_actions.query_success')) == 1
+        assert len(aggregator.metrics('do_query_actions.query_status')) == 1
 
         aggregator.reset()
         dd_run_check(check)
-        assert len(aggregator.metrics('do_query_actions.query_success')) == 0
+        assert len(aggregator.metrics('do_query_actions.query_status')) == 0
 
         aggregator.reset()
         check._last_execution = {1: 0.0}
         dd_run_check(check)
-        assert len(aggregator.metrics('do_query_actions.query_success')) == 1
+        assert len(aggregator.metrics('do_query_actions.query_status')) == 1
 
 
 def test_per_query_timeout_is_set(dd_run_check, aggregator, postgres_instance):
@@ -277,9 +266,6 @@ def test_query_failure_does_not_block_subsequent_queries(dd_run_check, aggregato
         check = DOQueryActionsCheck('do_query_actions', {}, [multi_query_instance])
         dd_run_check(check)
 
-    success_metrics = aggregator.metrics('do_query_actions.query_success')
-    assert len(success_metrics) == 2
-
     status_metrics = aggregator.metrics('do_query_actions.query_status')
     assert len(status_metrics) == 2
 
@@ -314,7 +300,7 @@ def test_no_queries_emits_nothing(dd_run_check, aggregator, postgres_instance):
     check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
     dd_run_check(check)
 
-    assert len(aggregator.metrics('do_query_actions.query_success')) == 0
+    assert len(aggregator.metrics('do_query_actions.query_status')) == 0
     assert len(aggregator.metrics('do_query_actions.query_status')) == 0
 
 
@@ -329,7 +315,6 @@ def test_pool_timeout_marks_queries_critical(dd_run_check, aggregator, postgres_
         check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
         dd_run_check(check)
 
-    aggregator.assert_metric('do_query_actions.query_success', value=0)
     aggregator.assert_metric('do_query_actions.query_status', value=0)
 
 
@@ -447,7 +432,6 @@ def test_rollback_exception_swallowed(dd_run_check, aggregator, postgres_instanc
         check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
         dd_run_check(check)
 
-    aggregator.assert_metric('do_query_actions.query_success', value=0)
     aggregator.assert_metric('do_query_actions.query_status', value=0)
 
 
@@ -487,7 +471,7 @@ def test_query_with_no_description(dd_run_check, aggregator, postgres_instance):
         check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
         dd_run_check(check)
 
-    aggregator.assert_metric('do_query_actions.query_success', value=1)
+    aggregator.assert_metric('do_query_actions.query_status', value=1)
 
     payload = json.loads(mock_epe.call_args[0][0])
     assert payload['columns'] == []

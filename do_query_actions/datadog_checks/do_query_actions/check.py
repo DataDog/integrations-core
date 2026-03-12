@@ -40,7 +40,7 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
     """Execute SQL queries against databases on individual schedules."""
 
     __NAMESPACE__ = 'do_query_actions'
-    SERVICE_CHECK_NAME = 'query_status'
+    QUERY_STATUS_METRIC = 'query_status'
 
     def __init__(self, name: str, init_config: dict[str, Any], instances: list[dict[str, Any]]) -> None:
         super().__init__(name, init_config, instances)
@@ -125,7 +125,6 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
     @contextlib.contextmanager
     def _acquire_connection(self) -> Iterator[Any]:
         if self.config.db_type != 'postgres':
-            self.log.error("Unsupported db_type: %r. Only 'postgres' is supported.", self.config.db_type)
             raise ValueError(f"Unsupported db_type: {self.config.db_type!r}. Only 'postgres' is supported.")
         with self._get_or_create_postgres_pool().connection() as conn:
             yield conn
@@ -228,9 +227,7 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
 
                     self.gauge('query_execution_time', result['duration_s'], tags=tags)
                     success = result['status'] == 'success'
-                    self.gauge('query_success', 1 if success else 0, tags=tags)
-
-                    self.gauge(self.SERVICE_CHECK_NAME, 1 if success else 0, tags=tags)
+                    self.gauge(self.QUERY_STATUS_METRIC, 1 if success else 0, tags=tags)
 
                     payload = self._build_event_payload(q, result)
                     raw_event = json.dumps(payload, default=default_json_event_encoding)
@@ -244,8 +241,7 @@ class DOQueryActionsCheck(AgentCheck, ConfigMixin):
             for q in due_queries:
                 tags = base_tags + [f'monitor_id:{q.monitor_id}']
                 self.gauge('query_execution_time', 0, tags=tags)
-                self.gauge('query_success', 0, tags=tags)
-                self.gauge(self.SERVICE_CHECK_NAME, 0, tags=tags)
+                self.gauge(self.QUERY_STATUS_METRIC, 0, tags=tags)
 
     def cancel(self) -> None:
         pool = self._pool
