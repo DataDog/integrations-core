@@ -1,6 +1,8 @@
 """Markdown summary builder for the wheel release pipeline."""
 from . import validation as v
-from .dispatch import _ACTIONS_URL
+
+_TARGET_REPO = "DataDog/agent-integration-wheels-release"
+ACTIONS_URL = f"https://github.com/{_TARGET_REPO}/actions"
 
 _STATUS_LABELS: dict[str, str] = {
     v.NO_VERSION: "⚠️ No version found",
@@ -57,7 +59,7 @@ def build_summary(
 
     if not footer:
         if dispatched:
-            footer = f"[Track downstream runs →]({_ACTIONS_URL}?query=event:repository_dispatch)"
+            footer = f"[Track downstream runs →]({ACTIONS_URL}?query=event:repository_dispatch)"
         elif dry_run:
             footer = "> Dry run — no tags pushed, no builds triggered"
 

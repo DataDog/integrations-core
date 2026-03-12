@@ -1,7 +1,7 @@
 """Tests for _release.packages."""
 import pytest
-
-from _release.packages import detect_from_tags, get_all_packages, resolve_packages
+from _release.packages import (detect_from_tags, get_all_packages,
+                               resolve_packages)
 
 
 class TestGetAllPackages:
@@ -35,7 +35,6 @@ class TestDetectFromTags:
         assert detect_from_tags([]) == []
 
     def test_pre_release_version_stripped(self):
-        # e.g. datadog_checks_base-7.0.0rc1
         tags = ["datadog_checks_base-7.0.0rc1"]
         assert detect_from_tags(tags) == ["datadog_checks_base"]
 

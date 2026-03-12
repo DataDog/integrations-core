@@ -1,9 +1,41 @@
 """Tests for _release.dispatch and _release.summary."""
-from unittest.mock import patch
+import io
+import urllib.error
+from unittest.mock import MagicMock, patch
 
-from _release.dispatch import BATCH_SIZE, build_payload, dispatch_in_batches
+import pytest
+
+from _release.dispatch import BATCH_SIZE, build_payload, dispatch_in_batches, send_dispatch
 from _release.summary import build_summary
 from _release import validation as v
+
+
+class TestSendDispatch:
+    _payload = {"event_type": "build-wheels", "client_payload": {}}
+
+    def _http_error(self, code: int) -> urllib.error.HTTPError:
+        return urllib.error.HTTPError(
+            "https://example.com", code, f"HTTP {code}", {}, io.BytesIO(b"error")
+        )
+
+    def test_exits_on_4xx(self):
+        with patch("_release.dispatch.time.sleep"), \
+             patch("urllib.request.urlopen", side_effect=self._http_error(422)), \
+             pytest.raises(SystemExit):
+            send_dispatch(self._payload, "token")
+
+    def test_exits_after_5xx_exhausts_retries(self):
+        with patch("_release.dispatch.time.sleep"), \
+             patch("urllib.request.urlopen", side_effect=self._http_error(500)), \
+             pytest.raises(SystemExit):
+            send_dispatch(self._payload, "token")
+
+    def test_succeeds_after_transient_5xx(self):
+        mock_ctx = MagicMock()
+        mock_ctx.__enter__.return_value.status = 204
+        with patch("_release.dispatch.time.sleep"), \
+             patch("urllib.request.urlopen", side_effect=[self._http_error(503), self._http_error(502), mock_ctx]):
+            send_dispatch(self._payload, "token")  # should not raise
 
 
 class TestBuildPayload:

@@ -1,13 +1,14 @@
 """HTTP dispatch logic for repository_dispatch events."""
 import json
 import sys
+import time
 import urllib.error
 import urllib.request
 
 BATCH_SIZE = 200
 _TARGET_REPO = "DataDog/agent-integration-wheels-release"
 _DISPATCH_URL = f"https://api.github.com/repos/{_TARGET_REPO}/dispatches"
-_ACTIONS_URL = f"https://github.com/{_TARGET_REPO}/actions"
+_MAX_ATTEMPTS = 5
 
 
 def build_payload(batch: list[str], source_repo: str, ref: str, target: str) -> dict:
@@ -26,7 +27,8 @@ def build_payload(batch: list[str], source_repo: str, ref: str, target: str) -> 
 def send_dispatch(payload: dict, token: str) -> None:
     """POST a single ``repository_dispatch`` event to the wheels-release repo.
 
-    Calls ``sys.exit(1)`` on HTTP errors.
+    Retries up to ``_MAX_ATTEMPTS`` times on 5xx errors with exponential backoff.
+    Calls ``sys.exit(1)`` on 4xx errors or after exhausting retries.
     """
     req = urllib.request.Request(
         _DISPATCH_URL,
@@ -38,12 +40,18 @@ def send_dispatch(payload: dict, token: str) -> None:
         },
         method="POST",
     )
-    try:
-        with urllib.request.urlopen(req) as resp:
-            print(f"  Dispatched: HTTP {resp.status}")
-    except urllib.error.HTTPError as e:
-        print(e.read().decode(), file=sys.stderr)
-        sys.exit(1)
+    for attempt in range(1, _MAX_ATTEMPTS + 1):
+        try:
+            with urllib.request.urlopen(req) as resp:
+                print(f"  Dispatched: HTTP {resp.status}")
+                return
+        except urllib.error.HTTPError as e:
+            body = e.read().decode()
+            if e.code < 500 or attempt == _MAX_ATTEMPTS:
+                print(body, file=sys.stderr)
+                sys.exit(1)
+            print(f"  HTTP {e.code} on attempt {attempt}/{_MAX_ATTEMPTS}, retrying...", file=sys.stderr)
+            time.sleep(2**attempt)
 
 
 def dispatch_in_batches(

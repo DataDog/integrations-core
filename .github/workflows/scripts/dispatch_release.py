@@ -9,9 +9,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from _release.dispatch import _ACTIONS_URL, dispatch_in_batches
-from _release.github import write_summary
-from _release.summary import build_summary
+from _release.dispatch import dispatch_in_batches
+from _release.github import parse_bool_env, write_summary
+from _release.summary import ACTIONS_URL, build_summary
 
 
 def _load_validation(runner_temp: str) -> dict:
@@ -35,7 +35,7 @@ def main() -> None:
     validation = _load_validation(os.environ.get("RUNNER_TEMP", "/tmp"))
     results = validation.get("results", [])
     mode = validation.get("mode", "")
-    dry_run = validation.get("dry_run", False)
+    dry_run = validation.get("dry_run", parse_bool_env("DRY_RUN", default=False))
 
     print(f"Releasing {len(packages)} package(s) from {source_repo}@{ref} → {target} S3:")
 
@@ -49,7 +49,7 @@ def main() -> None:
     token = os.environ["GH_TOKEN"]
     dispatch_in_batches(packages, source_repo, ref, target, token)
 
-    print(f"\nTrack runs: {_ACTIONS_URL}?query=event:repository_dispatch")
+    print(f"\nTrack runs: {ACTIONS_URL}?query=event:repository_dispatch")
     write_summary(build_summary(packages, results, mode, source_repo, ref, target, dry_run, dispatched=True))
 
 

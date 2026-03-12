@@ -50,7 +50,8 @@ def main() -> None:
 
     result = subprocess.run(base_cmd)
     if result.returncode == 3:
-        # fetch failed — retry without fetching (tags already up-to-date locally)
+        # ddev release tag exits 3 when the remote fetch fails (e.g. tags already cached locally).
+        # Retry with --no-fetch to use the local tag state.
         result = subprocess.run(base_cmd + ["--no-fetch"])
 
     # exit 2 means nothing new to tag — not an error, tags may already exist on HEAD
