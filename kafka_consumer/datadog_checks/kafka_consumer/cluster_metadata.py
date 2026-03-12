@@ -9,10 +9,21 @@ import json
 import random
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import TypedDict
 
 from confluent_kafka.admin import ConfigResource, ResourceType
 
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, LOW_WATERMARK
+
+
+class SchemaDefinition(TypedDict):
+    schema: str
+    schema_type: str
+
+
+class SubjectVersionInfo(TypedDict):
+    version: int
+    schema_id: int
 
 
 class ClusterMetadataCollector:
@@ -36,6 +47,12 @@ class ClusterMetadataCollector:
 
         self.SCHEMA_VERSION_CHECK_BATCH_SIZE = 200  # Lightweight calls, can do more per run
         self.SCHEMA_FETCH_CONCURRENCY = 10  # Parallel HTTP requests
+
+        # Cache size limits
+        self.BROKER_CONFIG_CACHE_MAX_SIZE = 1_000
+        self.TOPIC_CONFIG_CACHE_MAX_SIZE = 20_000
+        self.SCHEMA_VERSION_CHECK_CACHE_MAX_SIZE = 20_000
+        self.SCHEMA_ID_CACHE_MAX_SIZE = 20_000
 
         self.BROKER_CONFIG_CACHE_KEY = 'kafka_broker_config_cache'
         self.BROKER_CONFIG_FETCH_CACHE_KEY = 'kafka_broker_config_fetch_cache'
@@ -225,6 +242,7 @@ class ClusterMetadataCollector:
         item_keys: list[str],
         ttl_base: float | None = None,
         ttl_jitter: float | None = None,
+        max_cache_size: int | None = None,
     ):
         """
         Mark items as fetched in cache with jittered TTL.
@@ -234,6 +252,7 @@ class ClusterMetadataCollector:
             item_keys: List of item keys that were fetched
             ttl_base: Base TTL in seconds (defaults to CONFIGS_REFRESH_INTERVAL)
             ttl_jitter: Jitter range in seconds (defaults to CONFIGS_REFRESH_JITTER)
+            max_cache_size: Maximum number of entries to keep. Oldest entries are evicted first.
         """
         if ttl_base is None:
             ttl_base = self.CONFIGS_REFRESH_INTERVAL
@@ -252,6 +271,11 @@ class ClusterMetadataCollector:
         for item_key in item_keys:
             ttl = ttl_base + random.uniform(0, ttl_jitter)
             cache_dict[item_key] = current_time + ttl
+
+        if max_cache_size and len(cache_dict) > max_cache_size:
+            sorted_keys = sorted(cache_dict, key=lambda k: cache_dict[k])
+            for key in sorted_keys[: len(cache_dict) - max_cache_size]:
+                del cache_dict[key]
 
         try:
             self.check.write_persistent_cache(cache_key_prefix, json.dumps(cache_dict))
@@ -368,6 +392,7 @@ class ClusterMetadataCollector:
             self.BROKER_CONFIG_FETCH_CACHE_KEY, [str(bid) for bid in brokers.keys()]
         )
         fetched_broker_configs = {}
+        broker_ids_batch = []
 
         if broker_ids_to_fetch:
             broker_ids_batch = broker_ids_to_fetch[: self.BROKER_CONFIG_BATCH_SIZE]
@@ -392,46 +417,53 @@ class ClusterMetadataCollector:
                     resources = [ConfigResource(ResourceType.BROKER, broker_id_str)]
                     futures = self.client.kafka_client.describe_configs(resources)
                     config_entries = futures[resources[0]].result(timeout=self.config._request_timeout)
-
-                    config_data = {}
-                    for config_name, config_entry in config_entries.items():
-                        config_data[config_name] = config_entry.value
-
-                    for config_name in [
-                        'log.retention.bytes',
-                        'log.retention.ms',
-                        'log.segment.bytes',
-                        'num.partitions',
-                        'num.network.threads',
-                        'num.io.threads',
-                        'default.replication.factor',
-                        'min.insync.replicas',
-                    ]:
-                        if config_name in config_data:
-                            try:
-                                value = float(config_data[config_name]) if config_data[config_name] else 0
-                                metric_name = f"broker.config.{config_name.replace('.', '_')}"
-                                self.check.gauge(metric_name, value, tags=tags)
-                            except (ValueError, TypeError):
-                                pass
-
-                    truncated_config = self._truncate_config_for_event(config_data, max_configs=50)
-                    event_text = json.dumps(truncated_config, indent=2, sort_keys=True)
-
-                    fetched_broker_configs[broker_id_str] = {
-                        'event_text': event_text,
-                        'tags': tags,
-                        'broker_host': broker_meta.host,
-                        'broker_port': broker_meta.port,
-                    }
                 except Exception as e:
                     self.log.warning("Failed to describe configs for broker %s: %s", broker_id_str, e)
+                    continue
+
+                config_data = {}
+                for config_name, config_entry in config_entries.items():
+                    config_data[config_name] = config_entry.value
+
+                for config_name in [
+                    'log.retention.bytes',
+                    'log.retention.ms',
+                    'log.segment.bytes',
+                    'num.partitions',
+                    'num.network.threads',
+                    'num.io.threads',
+                    'default.replication.factor',
+                    'min.insync.replicas',
+                ]:
+                    if config_name in config_data:
+                        try:
+                            value = float(config_data[config_name]) if config_data[config_name] else 0
+                            metric_name = f"broker.config.{config_name.replace('.', '_')}"
+                            self.check.gauge(metric_name, value, tags=tags)
+                        except (ValueError, TypeError):
+                            self.log.debug(
+                                "Could not convert broker %s config %s value %r to float",
+                                broker_id_str,
+                                config_name,
+                                config_data[config_name],
+                            )
+
+                truncated_config = self._truncate_config_for_event(config_data, max_configs=50)
+                event_text = json.dumps(truncated_config, indent=2, sort_keys=True)
+
+                fetched_broker_configs[broker_id_str] = {
+                    'event_text': event_text,
+                    'tags': tags,
+                    'broker_host': broker_meta.host,
+                    'broker_port': broker_meta.port,
+                }
 
         self._mark_items_fetched(
             self.BROKER_CONFIG_FETCH_CACHE_KEY,
-            list(fetched_broker_configs.keys()),
+            broker_ids_batch,
             ttl_base=self.CONFIGS_REFRESH_INTERVAL,
             ttl_jitter=self.CONFIGS_REFRESH_JITTER,
+            max_cache_size=self.BROKER_CONFIG_CACHE_MAX_SIZE,
         )
 
         broker_contents = {bid: info['event_text'] for bid, info in fetched_broker_configs.items()}
@@ -606,8 +638,7 @@ class ClusterMetadataCollector:
         topic_names_to_fetch = self._get_items_to_fetch(self.TOPIC_CONFIG_FETCH_CACHE_KEY, all_topic_names)
 
         # Batch: cap the number of topic configs fetched per check run.
-        if len(topic_names_to_fetch) > self.TOPIC_CONFIG_BATCH_SIZE:
-            topic_names_to_fetch = topic_names_to_fetch[: self.TOPIC_CONFIG_BATCH_SIZE]
+        topic_names_to_fetch = topic_names_to_fetch[: self.TOPIC_CONFIG_BATCH_SIZE]
 
         fetched_topic_configs = {}
 
@@ -660,9 +691,10 @@ class ClusterMetadataCollector:
 
         self._mark_items_fetched(
             self.TOPIC_CONFIG_FETCH_CACHE_KEY,
-            list(fetched_topic_configs.keys()),
+            topic_names_to_fetch,
             ttl_base=self.CONFIGS_REFRESH_INTERVAL,
             ttl_jitter=self.CONFIGS_REFRESH_JITTER,
+            max_cache_size=self.TOPIC_CONFIG_CACHE_MAX_SIZE,
         )
 
         topic_contents = {name: info['event_text'] for name, info in fetched_topic_configs.items()}
@@ -765,15 +797,12 @@ class ClusterMetadataCollector:
                     for tp in member.assignment.topic_partitions:
                         topics_for_group.add(tp.topic)
 
-    def _load_schema_id_cache(self) -> dict[str, dict]:
+    def _load_schema_id_cache(self) -> dict[str, SchemaDefinition]:
         """Load the permanent schema ID cache from persistent storage.
 
         Schema IDs in Confluent Schema Registry are immutable: once a schema is
         registered with a given ID, that ID always maps to the same content.
         This cache avoids re-fetching schema content for already-seen IDs.
-
-        Returns:
-            Dict mapping schema_id (str) -> {schema, schema_type}
         """
         try:
             cached_str = self.check.read_persistent_cache(self.SCHEMA_ID_CACHE_KEY)
@@ -782,14 +811,19 @@ class ClusterMetadataCollector:
             self.log.debug("Could not read schema ID cache: %s", e)
             return {}
 
-    def _save_schema_id_cache(self, cache: dict[str, dict]):
-        """Persist the schema ID cache."""
+    def _save_schema_id_cache(self, cache: dict[str, SchemaDefinition]):
+        """Persist the schema ID cache, evicting oldest entries if over the size limit."""
+        if len(cache) > self.SCHEMA_ID_CACHE_MAX_SIZE:
+            # Schema IDs are monotonically increasing, so keep the highest (most recent) ones
+            sorted_keys = sorted(cache, key=int)
+            for key in sorted_keys[: len(cache) - self.SCHEMA_ID_CACHE_MAX_SIZE]:
+                del cache[key]
         try:
             self.check.write_persistent_cache(self.SCHEMA_ID_CACHE_KEY, json.dumps(cache))
         except Exception as e:
             self.log.debug("Could not write schema ID cache: %s", e)
 
-    def _load_latest_version_cache(self) -> dict[str, int]:
+    def _load_latest_version_cache(self) -> dict[str, SubjectVersionInfo]:
         """Load cache mapping subject -> last known max version number."""
         try:
             cached_str = self.check.read_persistent_cache(self.SCHEMA_LATEST_VERSION_CACHE_KEY)
@@ -798,7 +832,7 @@ class ClusterMetadataCollector:
             self.log.debug("Could not read schema latest version cache: %s", e)
             return {}
 
-    def _save_latest_version_cache(self, cache: dict[str, int]):
+    def _save_latest_version_cache(self, cache: dict[str, SubjectVersionInfo]):
         """Persist the latest version cache."""
         try:
             self.check.write_persistent_cache(self.SCHEMA_LATEST_VERSION_CACHE_KEY, json.dumps(cache))
@@ -836,8 +870,7 @@ class ClusterMetadataCollector:
         # We use this to detect if a subject has a new version without fetching schema content.
         subjects_to_check = self._get_items_to_fetch(self.SCHEMA_VERSION_CHECK_CACHE_KEY, subjects)
 
-        if len(subjects_to_check) > self.SCHEMA_VERSION_CHECK_BATCH_SIZE:
-            subjects_to_check = subjects_to_check[: self.SCHEMA_VERSION_CHECK_BATCH_SIZE]
+        subjects_to_check = subjects_to_check[: self.SCHEMA_VERSION_CHECK_BATCH_SIZE]
 
         self.log.debug("Checking versions for %d/%d subjects", len(subjects_to_check), len(subjects))
 
@@ -859,10 +892,11 @@ class ClusterMetadataCollector:
                     except Exception as e:
                         self.log.warning("Error getting version list for %s: %s", subject, e)
 
-        # Mark all checked subjects as fetched (even if they didn't change)
+        # Mark all checked subjects as fetched (even if they errored)
         self._mark_items_fetched(
             self.SCHEMA_VERSION_CHECK_CACHE_KEY,
-            list(version_responses.keys()),
+            subjects_to_check,
+            max_cache_size=self.SCHEMA_VERSION_CHECK_CACHE_MAX_SIZE,
         )
 
         # --- Tier 2: Full fetch only for subjects with new versions ---
@@ -872,8 +906,6 @@ class ClusterMetadataCollector:
         for subject, versions in version_responses.items():
             if not versions:
                 continue
-            subject_tags = self._get_tags(cluster_id) + [f'subject:{subject}']
-            self.check.gauge('schema_registry.versions', len(versions), tags=subject_tags)
             max_version = max(versions)
             cached = latest_version_cache.get(subject)
             cached_version = cached.get('version', 0) if isinstance(cached, dict) else (cached or 0)
@@ -913,6 +945,10 @@ class ClusterMetadataCollector:
             schema_version = latest_schema.get('version')
             schema_type = latest_schema.get('schemaType', 'AVRO')
 
+            if schema_id is None or schema_version is None:
+                self.log.warning("Schema Registry returned incomplete data for %s: %s", subject, latest_schema)
+                continue
+
             # Update the latest version cache with version and schema_id
             latest_version_cache[subject] = {'version': schema_version, 'schema_id': schema_id}
 
@@ -930,18 +966,9 @@ class ClusterMetadataCollector:
                 }
                 schema_id_cache_updated = True
 
-            # Extract topic name and schema type (key/value) from subject
-            # Subjects follow patterns: "topic-key", "topic-value"
-            topic_name = subject
-            schema_for = 'unknown'
+            topic_name, schema_for = self._parse_subject(subject)
 
-            if subject.endswith('-value'):
-                topic_name = subject[:-6]  # Remove '-value'
-                schema_for = 'value'
-            elif subject.endswith('-key'):
-                topic_name = subject[:-4]  # Remove '-key'
-                schema_for = 'key'
-
+            subject_tags = self._get_tags(cluster_id) + [f'subject:{subject}']
             event_tags = subject_tags + [
                 f'schema_id:{schema_id}',
                 f'schema_version:{schema_version}',
@@ -1008,16 +1035,7 @@ class ClusterMetadataCollector:
                 schema_content = id_entry.get('schema', '')
                 schema_type = id_entry.get('schema_type', 'AVRO')
 
-                # Extract topic name and schema type (key/value) from subject
-                # Subjects follow patterns: "topic-key", "topic-value"
-                topic_name = subject
-                schema_for = 'unknown'
-                if subject.endswith('-value'):
-                    topic_name = subject[:-6]  # Remove '-value'
-                    schema_for = 'value'
-                elif subject.endswith('-key'):
-                    topic_name = subject[:-4]  # Remove '-key'
-                    schema_for = 'key'
+                topic_name, schema_for = self._parse_subject(subject)
 
                 subject_tags = self._get_tags(cluster_id) + [f'subject:{subject}']
                 event_tags = subject_tags + [
@@ -1070,6 +1088,15 @@ class ClusterMetadataCollector:
                 ),
                 "data-streams-message",
             )
+
+    @staticmethod
+    def _parse_subject(subject: str) -> tuple[str, str]:
+        """Extract topic name and schema type (key/value) from a Schema Registry subject name."""
+        if subject.endswith('-value'):
+            return subject.removesuffix('-value'), 'value'
+        if subject.endswith('-key'):
+            return subject.removesuffix('-key'), 'key'
+        return subject, 'unknown'
 
     def _truncate_config_for_event(self, config_data, max_configs=50):
         """

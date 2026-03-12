@@ -329,7 +329,7 @@ files:
           and schema registry version checks from Kafka. A longer interval reduces load on
           the Kafka cluster and Schema Registry. On clusters with many topics or schemas,
           the check fetches in batches and gracefully degrades by re-fetching less often if
-          it cannot keep up within this interval. Minimum value is 60 seconds.
+          it cannot keep up within this interval.
         fleet_configurable: true
         value:
           type: integer

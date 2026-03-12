@@ -834,10 +834,19 @@ def test_schema_registry_batching(check, dd_run_check, aggregator):
         return_value={'id': 1, 'version': 1, 'schema': avro_schema, 'schemaType': 'AVRO'}
     )
 
-    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=None)
-    kafka_consumer_check.write_persistent_cache = mock.Mock()
+    cache_storage = {}
+
+    def mock_read(key):
+        return cache_storage.get(key)
+
+    def mock_write(key, value):
+        cache_storage[key] = value
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
+    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
     kafka_consumer_check.event_platform_event = mock.Mock()
 
+    # Run 1: first batch of 2 subjects
     dd_run_check(kafka_consumer_check)
 
     # Only SCHEMA_VERSION_CHECK_BATCH_SIZE subjects should have version lists fetched
@@ -848,6 +857,39 @@ def test_schema_registry_batching(check, dd_run_check, aggregator):
 
     # Total subjects metric should still report all 5
     aggregator.assert_metric('kafka.schema_registry.subjects', value=5)
+
+    # Record which subjects were checked in run 1
+    run1_subjects = {call.args[0] for call in collector._get_schema_registry_versions.call_args_list}
+
+    # Run 2: the next batch should pick different subjects (the ones not yet fetched)
+    dd_run_check(kafka_consumer_check)
+
+    assert collector._get_schema_registry_versions.call_count == 4  # 2 more calls
+
+    run2_subjects = {
+        call.args[0] for call in collector._get_schema_registry_versions.call_args_list[2:]
+    }
+    assert run1_subjects.isdisjoint(run2_subjects), (
+        f"Run 2 should check different subjects than run 1, but got overlap: "
+        f"run1={run1_subjects}, run2={run2_subjects}"
+    )
+
+    # Run 3: picks the remaining 1 subject not yet checked
+    dd_run_check(kafka_consumer_check)
+
+    assert collector._get_schema_registry_versions.call_count == 5  # 1 more call
+
+    run3_subjects = {
+        call.args[0] for call in collector._get_schema_registry_versions.call_args_list[4:]
+    }
+    assert run3_subjects.isdisjoint(run1_subjects | run2_subjects), (
+        f"Run 3 should check the remaining subject, but got overlap: "
+        f"run3={run3_subjects}, previous={run1_subjects | run2_subjects}"
+    )
+
+    # All 5 subjects should have been checked across the 3 runs
+    all_checked = run1_subjects | run2_subjects | run3_subjects
+    assert all_checked == set(all_subjects)
 
 
 def test_schema_registry_schema_id_cache(check, dd_run_check, aggregator):
@@ -901,6 +943,11 @@ def test_schema_registry_schema_id_cache(check, dd_run_check, aggregator):
     assert '42' in schema_id_cache
     assert schema_id_cache['42']['schema'] == avro_schema
     assert schema_id_cache['42']['schema_type'] == 'AVRO'
+
+    # Verify that a second run with the same schema ID skips the full fetch
+    assert collector._get_schema_registry_latest_version.call_count == 1
+    dd_run_check(kafka_consumer_check)
+    assert collector._get_schema_registry_latest_version.call_count == 1
 
 
 def test_schema_registry_two_tier_ttl(check):
@@ -1052,33 +1099,28 @@ def test_schema_registry_two_tier_fetch_on_new_version(check, dd_run_check, aggr
     assert updated_cache['unchanged-topic-value'] == {'version': 2, 'schema_id': 50}  # unchanged
 
 
-def test_kafka_configs_refresh_interval_default(check):
-    """Test that kafka_configs_refresh_interval defaults to 180s and drives broker/topic TTLs."""
+@pytest.mark.parametrize(
+    "interval,expected_interval,expected_jitter",
+    [
+        (None, 180, 18),  # default: 10% of 180
+        (600, 600, 60),  # custom: 10% of 600
+        (60, 60, 15),  # jitter floor: 60 // 10 = 6 < 15, so clamped to 15
+    ],
+)
+def test_kafka_configs_refresh_interval(check, interval, expected_interval, expected_jitter):
+    """Test that kafka_configs_refresh_interval drives broker/topic TTLs and jitter."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
         'enable_cluster_monitoring': True,
     }
+    if interval is not None:
+        instance['kafka_configs_refresh_interval'] = interval
 
     kafka_consumer_check = check(instance)
     collector = kafka_consumer_check.metadata_collector
 
-    assert collector.CONFIGS_REFRESH_INTERVAL == 180
-    assert collector.CONFIGS_REFRESH_JITTER == 18  # 10% of 180
-
-
-def test_kafka_configs_refresh_interval_custom(check):
-    """Test that kafka_configs_refresh_interval can be overridden."""
-    instance = {
-        'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
-        'kafka_configs_refresh_interval': 600,
-    }
-
-    kafka_consumer_check = check(instance)
-    collector = kafka_consumer_check.metadata_collector
-
-    assert collector.CONFIGS_REFRESH_INTERVAL == 600
-    assert collector.CONFIGS_REFRESH_JITTER == 60  # 10% of 600
+    assert collector.CONFIGS_REFRESH_INTERVAL == expected_interval
+    assert collector.CONFIGS_REFRESH_JITTER == expected_jitter
 
 
 def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
