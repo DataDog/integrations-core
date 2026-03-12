@@ -136,7 +136,7 @@ jobs:
     - name: Upload coverage to Datadog
       if: always()
       continue-on-error: true
-      uses: DataDog/coverage-upload-github-action@v1
+      uses: DataDog/coverage-upload-github-action@9bbbf86d16f7db1b14c5b885e61cf0d96053686a # v1
       with:
         api_key: ${{ secrets.DD_API_KEY }}
         files: coverage-reports
