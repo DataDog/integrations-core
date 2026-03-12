@@ -1618,6 +1618,7 @@ tests:
   result:
     custom:
       event_id: 354317
+      fam: "inet"
       laddr: "1.2.3.4"
       lport: 4444
       msg_raw: ""
@@ -1665,7 +1666,7 @@ tests:
       SYSCALL: "chmod"
       UID: "lima"
       a0: "7fbd1"
-      a1: 420
+      a1: "1a4"
       a2: 0
       a3: 0
       arch: "c000003e"
