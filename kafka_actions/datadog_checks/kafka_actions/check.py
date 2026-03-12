@@ -505,7 +505,7 @@ class KafkaActionsCheck(AgentCheck):
             cluster: Kafka cluster identifier
         """
         event_data = {
-            'message_timestamp': int(time.time() * 1000),
+            'message_timestamp': deserialized_msg.timestamp,
             'remote_config_id': self.remote_config_id,
             'kafka_cluster_id': cluster,
             'topic': deserialized_msg.topic,
