@@ -118,3 +118,33 @@ tests:
      - "source:LOGS_SOURCE"
      - "db:postgres"
     timestamp: 1758047205429
+ -
+  sample: "2025-11-19 18:27:10.640 UTC:10.198.137.95(54414):service_catalog_rw@service_catalog:[194370]:4:00000:2025-11-19 18:21:43 UTC:15/174689:276953619:691e0ab7.2f742:PostgreSQL JDBC Driver:LOG:  duration: 1626.107 ms  plan: {}"
+  result:
+    custom:
+      msg: 'plan: {}'
+      duration: 1626.107
+      sql_state: "00000"
+      db:
+        date: 1763576830640
+        severity: LOG
+        instance: service_catalog
+        backend_start: 1763576503000
+        user: service_catalog_rw
+      postgres:
+        xid: "276953619"
+        appname: PostgreSQL JDBC Driver
+        proc_id: "194370"
+        session_id: 691e0ab7.2f742
+        vxid: 15/174689
+      session_lineno: 4
+      network:
+        client:
+          port: 54414
+          ip: 10.198.137.95
+    message: "plan: {}"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "db:postgres"
+    timestamp: 1763576830640
