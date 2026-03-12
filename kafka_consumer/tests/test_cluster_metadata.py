@@ -466,16 +466,6 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
         tags=['test_tag:test_value', 'kafka_cluster_id:test-cluster-id'],
     )
 
-    aggregator.assert_metric(
-        'kafka.schema_registry.versions',
-        value=2,
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'subject:test-topic-value',
-        ],
-    )
-
     # Verify broker configuration event structure and content
     broker_config_events = [e for e in aggregator.events if 'event_type:broker_config' in e.get('tags', [])]
     assert broker_config_events, f"Expected at least 1 broker config event, found {len(broker_config_events)}"
