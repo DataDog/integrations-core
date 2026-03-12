@@ -133,6 +133,15 @@ jobs:
         directory: coverage-reports
         fail_ci_if_error: false
 
+    - name: Upload coverage to Datadog
+      if: always()
+      continue-on-error: true
+      uses: DataDog/coverage-upload-github-action@v1
+      with:
+        api_key: ${{ secrets.DD_API_KEY }}
+        files: coverage-reports
+        format: cobertura
+
   check:
     needs:
     - test
