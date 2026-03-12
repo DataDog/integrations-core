@@ -41,15 +41,21 @@ def _mock_api(
     jobs_status: int = 200,
     login_token: str = "test-session-token",
     login_status: int = 200,
+    reject_first_server_call: bool = False,
 ) -> dict[str, Any]:
     state: dict[str, Any] = {
         "servers": servers if servers is not None else [],
         "jobs": jobs if jobs is not None else [],
         "jobs_total": jobs_total,
     }
+    server_call_count = 0
 
     def handle_get(_self: Any, url: str, **kw: Any) -> Mock:
+        nonlocal server_call_count
         if "/config/servers" in url:
+            server_call_count += 1
+            if reject_first_server_call and server_call_count == 1:
+                return _respond(None, 401)
             return _respond(state["servers"], server_status)
         if "/run/jobs/status" in url:
             payload: dict[str, Any] = {"statuses": state["jobs"]}
