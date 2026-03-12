@@ -1405,3 +1405,427 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1740139921923
+ -
+  sample: "type=EXECVE msg=audit(1740378302.456:2249): argc=3 a0=\"/bin/bash\" a1=\"-c\" a2=\"id\""
+  result:
+    custom:
+      a0: "/bin/bash"
+      a1: "-c"
+      a2: "id"
+      argc: 3
+      event_id: 2249
+      msg_raw: ""
+      ocsf:
+        activity_id: 1
+        activity_name: "Launch"
+        category_name: "System Activity"
+        category_uid: 1
+        class_name: "Process Activity"
+        class_uid: 1007
+        device:
+          type: "Unknown"
+          type_id: 0
+        metadata:
+          event_code: "EXECVE"
+          original_time: "1.740378302456E9"
+          product:
+            name: "Auditd"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        process:
+          cmd_line: "/bin/bash -c id       "
+          name: "bash"
+          path: "/bin/bash"
+        severity: "Informational"
+        severity_id: 1
+        time: 1740378302456
+      post_msg_kv: ""
+      pre_msg_kv: ""
+      timestamp: 1.740378302456E12
+      type: "EXECVE"
+    message: "type=EXECVE msg=audit(1740378302.456:2249): argc=3 a0=\"/bin/bash\" a1=\"-c\" a2=\"id\""
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740378302456
+ -
+  sample: "type=SYSCALL msg=audit(1740378303.123:2250): arch=c000003e syscall=59 success=yes exit=0 a0=7fbd5 a1=7fbd6 a2=7fbd7 a3=0 items=2 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"susp_activity\"\x1dARCH=x86_64 SYSCALL=execve AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+  result:
+    custom:
+      AUID: "lima"
+      ARCH: "x86_64"
+      EUID: "lima"
+      EGID: "lima"
+      FSGID: "lima"
+      FSUID: "lima"
+      GID: "lima"
+      SGID: "lima"
+      SUID: "lima"
+      SYSCALL: "execve"
+      UID: "lima"
+      a0: "7fbd5"
+      a1: "7fbd6"
+      a2: "7fbd7"
+      a3: 0
+      arch: "c000003e"
+      auid: 502
+      comm: "bash"
+      egid: 1000
+      euid: 502
+      event_id: 2250
+      exe: "/usr/bin/bash"
+      exit: 0
+      fsgid: 1000
+      fsuid: 502
+      gid: 1000
+      items: 2
+      key: "susp_activity"
+      msg_raw: ""
+      ocsf:
+        activity_id: 1
+        activity_name: "Launch"
+        actor:
+          process:
+            path: "/usr/bin/bash"
+            pid: 226245
+            user:
+              name: "lima"
+              uid: "502"
+          session:
+            terminal: "pts0"
+            uid: "4"
+          user:
+            name: "lima"
+            uid: "502"
+        category_name: "System Activity"
+        category_uid: 1
+        class_name: "Process Activity"
+        class_uid: 1007
+        device:
+          type: "Unknown"
+          type_id: 0
+        metadata:
+          event_code: "SYSCALL"
+          original_time: "1.740378303123E9"
+          product:
+            name: "Auditd"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        process:
+          name: "bash"
+          path: "/usr/bin/bash"
+          pid: 226245
+        severity: "Informational"
+        severity_id: 1
+        status: "Success"
+        status_id: 1
+        time: 1740378303123
+      pid: 226245
+      post_msg_kv: ""
+      ppid: 1407
+      pre_msg_kv: ""
+      ses: 4
+      sgid: 1000
+      subj: "unconfined"
+      success: "yes"
+      suid: 502
+      syscall: 59
+      timestamp: 1.740378303123E12
+      tty: "pts0"
+      type: "SYSCALL"
+      uid: 502
+      usr:
+        id: 502
+        name: "lima"
+    message: "type=SYSCALL msg=audit(1740378303.123:2250): arch=c000003e syscall=59 success=yes exit=0 a0=7fbd5 a1=7fbd6 a2=7fbd7 a3=0 items=2 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"susp_activity\"\x1dARCH=x86_64 SYSCALL=execve AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740378303123
+ -
+  sample: "type=SYSCALL msg=audit(1770316388.442:354317): arch=c00000b7 syscall=203 success=yes exit=0 a0=3 a1=aaaae39b4130 a2=10 a3=ffffa1cc7020 items=0 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"remote_shell\"\x1dARCH=aarch64 SYSCALL=connect AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+  result:
+    custom:
+      AUID: "lima"
+      ARCH: "aarch64"
+      EUID: "lima"
+      EGID: "lima"
+      FSGID: "lima"
+      FSUID: "lima"
+      GID: "lima"
+      SGID: "lima"
+      SUID: "lima"
+      SYSCALL: "connect"
+      UID: "lima"
+      a0: 3
+      a1: "aaaae39b4130"
+      a2: 10
+      a3: "ffffa1cc7020"
+      arch: "c00000b7"
+      auid: 502
+      comm: "bash"
+      egid: 1000
+      euid: 502
+      event_id: 354317
+      exe: "/usr/bin/bash"
+      exit: 0
+      fsgid: 1000
+      fsuid: 502
+      gid: 1000
+      items: 0
+      key: "remote_shell"
+      msg_raw: ""
+      ocsf:
+        activity_id: 1
+        activity_name: "Open"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "Network Activity"
+        class_uid: 4001
+        metadata:
+          event_code: "SYSCALL"
+          original_time: "1.770316388442E9"
+          product:
+            name: "Auditd"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        status: "Success"
+        status_id: 1
+        time: 1770316388442
+      pid: 226245
+      post_msg_kv: ""
+      ppid: 1407
+      pre_msg_kv: ""
+      ses: 4
+      sgid: 1000
+      subj: "unconfined"
+      success: "yes"
+      suid: 502
+      syscall: 203
+      timestamp: 1.770316388442E12
+      tty: "pts0"
+      type: "SYSCALL"
+      uid: 502
+      usr:
+        id: 502
+        name: "lima"
+    message: "type=SYSCALL msg=audit(1770316388.442:354317): arch=c00000b7 syscall=203 success=yes exit=0 a0=3 a1=aaaae39b4130 a2=10 a3=ffffa1cc7020 items=0 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"remote_shell\"\x1dARCH=aarch64 SYSCALL=connect AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1770316388442
+ -
+  sample: "type=SOCKADDR msg=audit(1770316388.442:354317): saddr={ fam=inet laddr=1.2.3.4 lport=4444 }"
+  result:
+    custom:
+      event_id: 354317
+      laddr: "1.2.3.4"
+      lport: 4444
+      msg_raw: ""
+      ocsf:
+        activity_id: 99
+        activity_name: "Other"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "Network Activity"
+        class_uid: 4001
+        dst_endpoint:
+          ip: "1.2.3.4"
+          port: 4444
+        metadata:
+          event_code: "SOCKADDR"
+          original_time: "1.770316388442E9"
+          product:
+            name: "Auditd"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1770316388442
+      post_msg_kv: ""
+      pre_msg_kv: ""
+      timestamp: 1.770316388442E12
+      type: "SOCKADDR"
+    message: "type=SOCKADDR msg=audit(1770316388.442:354317): saddr={ fam=inet laddr=1.2.3.4 lport=4444 }"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1770316388442
+ -
+  sample: "type=SYSCALL msg=audit(1740378303.456:2252): arch=c000003e syscall=90 success=yes exit=0 a0=7fbd1 a1=1a4 a2=0 a3=0 items=1 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"perm_mod\"\x1dARCH=x86_64 SYSCALL=chmod AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+  result:
+    custom:
+      AUID: "lima"
+      ARCH: "x86_64"
+      EUID: "lima"
+      EGID: "lima"
+      FSGID: "lima"
+      FSUID: "lima"
+      GID: "lima"
+      SGID: "lima"
+      SUID: "lima"
+      SYSCALL: "chmod"
+      UID: "lima"
+      a0: "7fbd1"
+      a1: 420
+      a2: 0
+      a3: 0
+      arch: "c000003e"
+      auid: 502
+      comm: "bash"
+      egid: 1000
+      euid: 502
+      event_id: 2252
+      exe: "/usr/bin/bash"
+      exit: 0
+      fsgid: 1000
+      fsuid: 502
+      gid: 1000
+      items: 1
+      key: "perm_mod"
+      msg_raw: ""
+      ocsf:
+        activity_id: 6
+        activity_name: "Set Attributes"
+        actor:
+          process:
+            name: "bash"
+            path: "/usr/bin/bash"
+            pid: 226245
+            user:
+              name: "lima"
+              uid: "502"
+          session:
+            terminal: "pts0"
+            uid: "4"
+          user:
+            name: "lima"
+            uid: "502"
+        category_name: "System Activity"
+        category_uid: 1
+        class_name: "File System Activity"
+        class_uid: 1001
+        device:
+          type: "Unknown"
+          type_id: 0
+        metadata:
+          event_code: "SYSCALL"
+          original_time: "1.740378303456E9"
+          product:
+            name: "Auditd"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        status: "Success"
+        status_id: 1
+        time: 1740378303456
+      pid: 226245
+      post_msg_kv: ""
+      ppid: 1407
+      pre_msg_kv: ""
+      ses: 4
+      sgid: 1000
+      subj: "unconfined"
+      success: "yes"
+      suid: 502
+      syscall: 90
+      timestamp: 1.740378303456E12
+      tty: "pts0"
+      type: "SYSCALL"
+      uid: 502
+      usr:
+        id: 502
+        name: "lima"
+    message: "type=SYSCALL msg=audit(1740378303.456:2252): arch=c000003e syscall=90 success=yes exit=0 a0=7fbd1 a1=1a4 a2=0 a3=0 items=1 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"perm_mod\"\x1dARCH=x86_64 SYSCALL=chmod AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740378303456
+ -
+  sample: "type=SYSCALL msg=audit(1740378303.789:2253): arch=c000003e syscall=87 success=yes exit=0 a0=7fcd1 a1=0 a2=0 a3=0 items=2 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"delete\"\x1dARCH=x86_64 SYSCALL=unlink AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+  result:
+    custom:
+      AUID: "lima"
+      ARCH: "x86_64"
+      EUID: "lima"
+      EGID: "lima"
+      FSGID: "lima"
+      FSUID: "lima"
+      GID: "lima"
+      SGID: "lima"
+      SUID: "lima"
+      SYSCALL: "unlink"
+      UID: "lima"
+      a0: "7fcd1"
+      a1: 0
+      a2: 0
+      a3: 0
+      arch: "c000003e"
+      auid: 502
+      comm: "bash"
+      egid: 1000
+      euid: 502
+      event_id: 2253
+      exe: "/usr/bin/bash"
+      exit: 0
+      fsgid: 1000
+      fsuid: 502
+      gid: 1000
+      items: 2
+      key: "delete"
+      msg_raw: ""
+      ocsf:
+        activity_id: 4
+        activity_name: "Delete"
+        actor:
+          process:
+            name: "bash"
+            path: "/usr/bin/bash"
+            pid: 226245
+            user:
+              name: "lima"
+              uid: "502"
+          session:
+            terminal: "pts0"
+            uid: "4"
+          user:
+            name: "lima"
+            uid: "502"
+        category_name: "System Activity"
+        category_uid: 1
+        class_name: "File System Activity"
+        class_uid: 1001
+        device:
+          type: "Unknown"
+          type_id: 0
+        metadata:
+          event_code: "SYSCALL"
+          original_time: "1.740378303789E9"
+          product:
+            name: "Auditd"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        status: "Success"
+        status_id: 1
+        time: 1740378303789
+      pid: 226245
+      post_msg_kv: ""
+      ppid: 1407
+      pre_msg_kv: ""
+      ses: 4
+      sgid: 1000
+      subj: "unconfined"
+      success: "yes"
+      suid: 502
+      syscall: 87
+      timestamp: 1.740378303789E12
+      tty: "pts0"
+      type: "SYSCALL"
+      uid: 502
+      usr:
+        id: 502
+        name: "lima"
+    message: "type=SYSCALL msg=audit(1740378303.789:2253): arch=c000003e syscall=87 success=yes exit=0 a0=7fcd1 a1=0 a2=0 a3=0 items=2 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"delete\"\x1dARCH=x86_64 SYSCALL=unlink AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740378303789
