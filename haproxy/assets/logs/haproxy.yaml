@@ -365,6 +365,12 @@ pipeline:
           template: "HTTP"
           target: ocsf.connection_info.protocol_name
           replaceMissing: false
+        - type: string-builder-processor
+          name: Add ocsf.http_request.http_method
+          enabled: true
+          template: "CONNECT"
+          target: ocsf.http_request.http_method
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 4002
           enabled: true
@@ -592,7 +598,7 @@ pipeline:
                 - duration
               target: ocsf.duration
               preserveSource: true
-              targetFormat: double
+              targetFormat: integer
               overrideOnConflict: true
             - type: schema-remapper
               name: Map `http.status_code` to `ocsf.status_code`
