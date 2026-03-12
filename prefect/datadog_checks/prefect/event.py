@@ -3,7 +3,7 @@ from functools import cached_property
 from .utils import _parse_time
 
 
-class EventManager:
+class Event:
     def __init__(self, event: dict):
         self.event = event
 

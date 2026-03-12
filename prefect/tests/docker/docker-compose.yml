@@ -72,8 +72,7 @@ services:
       PREFECT_API_URL: http://prefect-server:4200/api
     working_dir: /app
     volumes:
-      - ./sample_flow.py:/app/sample_flow.py
-      - ./failing_flow.py:/app/failing_flow.py
+      - ./scripts:/app/scripts
       - ${DD_LOG_1:-/tmp/dd_log_1}:/var/log/prefect/dd_log_1
     command: >
       sh -c "prefect worker start --pool local-pool --with-healthcheck 2>&1 | tee -a /var/log/prefect/dd_log_1"
@@ -95,9 +94,8 @@ services:
       PREFECT_API_URL: http://prefect-server:4200/api
     working_dir: /app
     volumes:
-      - ./sample_flow.py:/app/sample_flow.py
+      - ./scripts:/app/scripts
       - ./prefect.yaml:/app/prefect.yaml
-      - ./failing_flow.py:/app/failing_flow.py
     command: >
       bash -c "
       prefect work-queue set-concurrency-limit default 10 &&

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from datadog_checks.base.utils.common import pattern_filter
 
-from .event_manager import EventManager
+from .event import Event
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
@@ -142,7 +142,7 @@ class PrefectFilterMetrics:
             },
         )
 
-    def is_event_included(self, event: EventManager) -> bool:
+    def is_event_included(self, event: Event) -> bool:
         fields: dict[str, str] = {}
         caches: dict[str, tuple[dict[str, bool], bool, Fallback | None]] = {}
         fields["event_type"] = event.event_type

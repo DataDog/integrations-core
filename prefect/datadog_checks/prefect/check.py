@@ -14,7 +14,7 @@ from datadog_checks.base import AgentCheck
 
 from .config_models import ConfigMixin
 from .constants import METRICS_SPEC
-from .event_manager import EventManager
+from .event import Event
 from .filter_metrics import PrefectFilterMetrics
 from .utils import _parse_time
 
@@ -423,16 +423,16 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self._aggregate_concurrency_in_use_metric(
                 state_type, fr.get('work_pool_name', ''), fr.get('work_queue_name', '')
             )
-            self._aggregate_metric("flow_runs.scheduled.count", 1.0 if state_type == 'SCHEDULED' else 0.0, fr_tags)
-            self._aggregate_metric("flow_runs.pending.count", 1.0 if state_type == 'PENDING' else 0.0, fr_tags)
+            self._aggregate_metric("flow_runs.scheduled", 1.0 if state_type == 'SCHEDULED' else 0.0, fr_tags)
+            self._aggregate_metric("flow_runs.pending", 1.0 if state_type == 'PENDING' else 0.0, fr_tags)
             self._aggregate_metric("flow_runs.failed.count", 1.0 if state_type == 'FAILED' else 0.0, fr_tags)
             self._aggregate_metric(
                 "flow_runs.cancelled.count", 1.0 if state_type in ['CANCELLING', 'CANCELLED'] else 0.0, fr_tags
             )
             self._aggregate_metric("flow_runs.crashed.count", 1.0 if state_type == 'CRASHED' else 0.0, fr_tags)
-            self._aggregate_metric("flow_runs.paused.count", 1.0 if state_type == 'PAUSED' else 0.0, fr_tags)
+            self._aggregate_metric("flow_runs.paused", 1.0 if state_type == 'PAUSED' else 0.0, fr_tags)
             self._aggregate_metric("flow_runs.completed.count", 1.0 if state_type == 'COMPLETED' else 0.0, fr_tags)
-            self._aggregate_metric("flow_runs.running.count", 1.0 if state_type == 'RUNNING' else 0.0, fr_tags)
+            self._aggregate_metric("flow_runs.running", 1.0 if state_type == 'RUNNING' else 0.0, fr_tags)
 
             if start_time and end_time:
                 self._emit_metric("flow_runs.execution_duration", (end_time - start_time).total_seconds(), fr_tags)
@@ -487,12 +487,12 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             )
             task_tags.add(tuple(tr_tags_list))
 
-            self._aggregate_metric("task_runs.pending.count", 1.0 if state_type == 'PENDING' else 0.0, tr_tags_list)
-            self._aggregate_metric("task_runs.paused.count", 1.0 if state_type == 'PAUSED' else 0.0, tr_tags_list)
+            self._aggregate_metric("task_runs.pending", 1.0 if state_type == 'PENDING' else 0.0, tr_tags_list)
+            self._aggregate_metric("task_runs.paused", 1.0 if state_type == 'PAUSED' else 0.0, tr_tags_list)
             self._aggregate_metric(
                 "task_runs.cancelled.count", 1.0 if state_type == 'CANCELLING' else 0.0, tr_tags_list
             )
-            self._aggregate_metric("task_runs.running.count", 1.0 if state_type == 'RUNNING' else 0.0, tr_tags_list)
+            self._aggregate_metric("task_runs.running", 1.0 if state_type == 'RUNNING' else 0.0, tr_tags_list)
 
             self._aggregate_metric(
                 "task_runs.late_start.count",
@@ -523,76 +523,73 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 }
             },
         )
-        for e in events:
-            event_manager = EventManager(e)
-            if not self.filter_metrics.is_event_included(event_manager):
+        for raw_event in events:
+            event = Event(raw_event)
+            if not self.filter_metrics.is_event_included(event):
                 continue
 
-            if event_manager.occurred is None:
+            if event.occurred is None:
                 self.log.error(
                     "Could not parse occurred timestamp %s for event %s",
-                    event_manager.event.get('occurred', ''),
-                    event_manager.id,
+                    event.event.get('occurred', ''),
+                    event.id,
                 )
                 continue
 
-            self._check_retry_gaps(event_manager)
-            self._check_dependency_wait(event_manager)
-            self._collect_task_run_metrics_from_events(event_manager)
+            self._check_retry_gaps(event)
+            self._check_dependency_wait(event)
+            self._collect_task_run_metrics_from_events(event)
             if self.collect_events:
-                self._emit_event_metrics(event_manager)
+                self._emit_event_metrics(event)
 
-    def _emit_event_metrics(self, event_manager: EventManager):
-        if event_manager.occurred is None:
+    def _emit_event_metrics(self, event: Event):
+        if event.occurred is None:
             return
 
         self.event(
             {
-                "timestamp": event_manager.occurred.timestamp(),
-                "event_type": event_manager.event_type,
-                "msg_title": event_manager.msg_title,
-                "msg_text": event_manager.message,
-                "tags": event_manager.tags + self.base_tags,
-                "source_type_name": event_manager.resource_type,
-                "alert_type": event_manager.alert_type,
+                "timestamp": event.occurred.timestamp(),
+                "event_type": event.event_type,
+                "msg_title": event.msg_title,
+                "msg_text": event.message,
+                "tags": event.tags + self.base_tags,
+                "source_type_name": event.resource_type,
+                "alert_type": event.alert_type,
             }
         )
 
-    def _check_retry_gaps(self, event_manager: EventManager) -> None:
-        if event_manager.occurred is None:
+    def _check_retry_gaps(self, event: Event) -> None:
+        if event.occurred is None:
             return
-        if event_manager.event_type == 'prefect.flow-run.AwaitingRetry':
-            self.flows_awaiting_retry[event_manager.id] = event_manager.occurred.isoformat()
+        if event.event_type == 'prefect.flow-run.AwaitingRetry':
+            self.flows_awaiting_retry[event.id] = event.occurred.isoformat()
 
-        elif (
-            event_manager.event_type == 'prefect.flow-run.Running'
-            and event_manager.initial_state_name == "AwaitingRetry"
-        ):
-            await_retry_timestamp = _parse_time(self.flows_awaiting_retry.pop(event_manager.follows, None), self.log)
+        elif event.event_type == 'prefect.flow-run.Running' and event.initial_state_name == "AwaitingRetry":
+            await_retry_timestamp = _parse_time(self.flows_awaiting_retry.pop(event.follows, None), self.log)
 
             if not await_retry_timestamp:
                 self.log.error(
                     "Could not find awaitingRetry timestamp for flow run %s in the cache, "
                     "skipping retry gap metric for retried flow run %s",
-                    event_manager.follows,
-                    event_manager.resource_id,
+                    event.follows,
+                    event.resource_id,
                 )
                 return
-            retry_gap = (event_manager.occurred - await_retry_timestamp).total_seconds()
+            retry_gap = (event.occurred - await_retry_timestamp).total_seconds()
 
-            flow_run_tags = event_manager.flow_tags
+            flow_run_tags = event.flow_tags
             self._emit_metric("flow_runs.retry_gaps_duration", retry_gap, flow_run_tags + self.base_tags)
 
-    def _collect_task_run_metrics_from_events(self, event_manager: EventManager) -> None:
+    def _collect_task_run_metrics_from_events(self, event: Event) -> None:
         """
         Collects task run metrics from Prefect events instead of API.
         This includes cancelled, completed, failed, crashed counts and execution duration.
         """
-        if not event_manager.event_type.startswith('prefect.task-run'):
+        if not event.event_type.startswith('prefect.task-run'):
             return
 
-        state_type = event_manager.state_type
-        task_tags = sorted(event_manager.task_tags)
+        state_type = event.state_type
+        task_tags = sorted(event.task_tags)
 
         # Emit count metrics for terminal states
         self._aggregate_metric("task_runs.cancelled.count", 1.0 if state_type == 'CANCELLED' else 0.0, task_tags)
@@ -601,37 +598,37 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         self._aggregate_metric("task_runs.crashed.count", 1.0 if state_type == 'CRASHED' else 0.0, task_tags)
 
         # Emit execution duration metric when task run has completed
-        task_run_data = event_manager.payload.get('task_run', {})
+        task_run_data = event.payload.get('task_run', {})
         duration = task_run_data.get('total_run_time', None)
 
         if duration:
             self._emit_metric("task_runs.execution_duration", duration, task_tags)
 
-    def _check_dependency_wait(self, event_manager: EventManager) -> None:
-        if event_manager.event_type == 'prefect.flow-run.Completed':
-            flow_run_id = event_manager.resource_id
+    def _check_dependency_wait(self, event: Event) -> None:
+        if event.event_type == 'prefect.flow-run.Completed':
+            flow_run_id = event.resource_id
             self.dependency_wait.pop(flow_run_id, None)
 
         # When a task run is completed, add its finished time to the dependency wait for the flow run
-        elif event_manager.event_type in [
+        elif event.event_type in [
             'prefect.task-run.Completed',
             'prefect.task-run.Cancelled',
             'prefect.task-run.Crashed',
             'prefect.task-run.Failed',
         ]:
-            task_run_id = event_manager.resource_id
-            flow_run_id = event_manager.event_related.get("flow-run", {}).get("id")
-            if flow_run_id and task_run_id and event_manager.occurred:
-                self.dependency_wait.setdefault(flow_run_id, {})[task_run_id] = event_manager.occurred.isoformat()
+            task_run_id = event.resource_id
+            flow_run_id = event.event_related.get("flow-run", {}).get("id")
+            if flow_run_id and task_run_id and event.occurred:
+                self.dependency_wait.setdefault(flow_run_id, {})[task_run_id] = event.occurred.isoformat()
 
         # When a task run is running, emit the dependency wait metric
-        elif event_manager.event_type == 'prefect.task-run.Running':
-            flow_run_id = event_manager.event_related.get("flow-run", {}).get("id")
+        elif event.event_type == 'prefect.task-run.Running':
+            flow_run_id = event.event_related.get("flow-run", {}).get("id")
             flow_tasks = self.dependency_wait.get(flow_run_id, {})
-            task_run_id = event_manager.resource_id
-            dependencies = event_manager.task_run_dependencies
+            task_run_id = event.resource_id
+            dependencies = event.task_run_dependencies
             if not flow_run_id or not task_run_id:
-                self.log.error("Could not find flow run id or task run id for event %s", event_manager.id)
+                self.log.error("Could not find flow run id or task run id for event %s", event.id)
                 return
             elif dependencies:
                 parsed_times = [
@@ -640,16 +637,16 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
                 last_dep_finished = max(parsed_times) if parsed_times else None
 
-                task_tags = event_manager.task_tags
-                if last_dep_finished and event_manager.occurred:
+                task_tags = event.task_tags
+                if last_dep_finished and event.occurred:
                     self._emit_metric(
                         "task_runs.dependency_wait_duration",
-                        (event_manager.occurred - last_dep_finished).total_seconds(),
+                        (event.occurred - last_dep_finished).total_seconds(),
                         task_tags + self.base_tags,
                     )
                 else:
                     self.log.error(
-                        "Could not find last dependency finished time or occurred time for event %s", event_manager.id
+                        "Could not find last dependency finished time or occurred time for event %s", event.id
                     )
 
     def _emit_aggregated_metrics(self):

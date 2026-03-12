@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.prefect import PrefectCheck
-from datadog_checks.prefect.event_manager import EventManager
+from datadog_checks.prefect.event import Event
 from datadog_checks.prefect.filter_metrics import PrefectFilterMetrics
 from tests.helpers import MockDatetime
 
@@ -545,6 +545,6 @@ def test_filter_events(filter_metrics, event_data, expected_included, descriptio
             for r in event_data["related"]
         ]
 
-    event = EventManager(payload)
+    event = Event(payload)
 
     assert filter_metrics.is_event_included(event) is expected_included
