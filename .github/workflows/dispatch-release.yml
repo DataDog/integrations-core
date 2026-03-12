@@ -62,15 +62,15 @@ jobs:
           ddev config set repo ${REPO_SHORT}
 
       - name: Tag releases
-        if: inputs.packages == ''
         id: tag
         env:
           TARGET: ${{ inputs.target }}
           DRY_RUN: ${{ inputs.dry-run }}
+          MANUAL_PACKAGES: ${{ inputs.packages }}
         run: python .github/workflows/scripts/tag_releases.py
 
       - name: Detect package list
-        if: inputs.packages != '' || steps.tag.outcome == 'success'
+        if: steps.tag.outcome == 'success'
         id: detect
         env:
           MANUAL_PACKAGES: ${{ inputs.packages }}

@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from _release.dispatch import _ACTIONS_URL, dispatch_in_batches
-from _release.github import parse_bool_env, write_summary
+from _release.github import write_summary
 from _release.summary import build_summary
 
 
@@ -31,11 +31,11 @@ def main() -> None:
     source_repo = os.environ["SOURCE_REPO"]
     ref = os.environ["REF"]
     target = os.environ["TARGET"]
-    dry_run = parse_bool_env("DRY_RUN", default=False)
 
     validation = _load_validation(os.environ.get("RUNNER_TEMP", "/tmp"))
     results = validation.get("results", [])
     mode = validation.get("mode", "")
+    dry_run = validation.get("dry_run", False)
 
     print(f"Releasing {len(packages)} package(s) from {source_repo}@{ref} → {target} S3:")
 

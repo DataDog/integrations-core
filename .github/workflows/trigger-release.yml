@@ -10,7 +10,7 @@ on:
       - "[0-9]+.[0-9]+.x"
     paths:
       - "*/CHANGELOG.md"
-      - "*/src/datadog_checks/*/__about__.py"
+      - "*/datadog_checks/*/__about__.py"
   workflow_dispatch:
     inputs:
       packages:
