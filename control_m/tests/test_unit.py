@@ -5,6 +5,7 @@
 import json
 import time
 from typing import Any
+
 import pytest
 from pytest import MonkeyPatch
 from requests.exceptions import HTTPError
