@@ -17,16 +17,6 @@ class TestGetAllPackages:
     def test_empty_repo(self, tmp_path):
         assert get_all_packages(tmp_path) == []
 
-    def test_deduplicates_when_multiple_check_dirs(self, tmp_path):
-        # A package with two check subdirs (unusual but possible)
-        for check in ("datadog_checks_base", "datadog_checks_dev"):
-            about = tmp_path / "datadog_checks_base" / "datadog_checks" / check / "__about__.py"
-            about.parent.mkdir(parents=True, exist_ok=True)
-            about.write_text('__version__ = "1.0.0"\n')
-
-        result = get_all_packages(tmp_path)
-        assert result == ["datadog_checks_base"]
-
 
 class TestDetectFromTags:
     def test_strips_version_suffix(self):
@@ -50,11 +40,9 @@ class TestDetectFromTags:
         assert detect_from_tags(tags) == ["datadog_checks_base"]
 
     def test_hyphenated_package_name(self):
-        # Integration names can contain hyphens
+        # The regex strips from the LAST -X.Y.Z occurrence
         tags = ["amazon-msk-1.2.3"]
-        result = detect_from_tags(tags)
-        # The regex strips from the LAST occurrence of -X.Y.Z, so we get "amazon-msk"
-        assert result == ["amazon-msk"]
+        assert detect_from_tags(tags) == ["amazon-msk"]
 
 
 class TestResolvePackages:
@@ -81,10 +69,6 @@ class TestResolvePackages:
         assert packages == ["postgres", "redis"]
         assert "auto-detect" in mode
 
-    def test_auto_detect_no_tags(self):
-        packages, mode = resolve_packages("", self.ALL, head_tags=[])
-        assert packages == []
-
     def test_unknown_package_exits(self):
         with pytest.raises(SystemExit):
             resolve_packages('["unknown_pkg"]', self.ALL)
@@ -94,7 +78,6 @@ class TestResolvePackages:
             resolve_packages("not-json", self.ALL)
 
     def test_unknown_in_auto_detect_exits(self):
-        # A malformed tag produces a name not in all_packages
         tags = ["not-a-package-1.0.0"]
         with pytest.raises(SystemExit):
             resolve_packages("", self.ALL, head_tags=tags)

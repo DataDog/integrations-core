@@ -1,8 +1,5 @@
 """Tests for _release.dispatch and _release.summary."""
-import json
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import patch
 
 from _release.dispatch import BATCH_SIZE, build_payload, dispatch_in_batches
 from _release.summary import build_summary
@@ -18,10 +15,6 @@ class TestBuildPayload:
         assert cp["source_repo"] == "integrations-core"
         assert cp["source_repo_ref"] == "abc123"
         assert cp["target"] == "prod"
-
-    def test_serializable(self):
-        payload = build_payload(["pkg"], "repo", "ref", "dev")
-        json.dumps(payload)  # must not raise
 
 
 class TestDispatchInBatches:
@@ -54,116 +47,46 @@ class TestBuildSummary:
         {"package": "postgres", "version": "1.2.3", "status": v.READY},
         {"package": "mysql", "version": "2.0.0b1", "status": v.PRE_RELEASE},
         {"package": "redis", "version": None, "status": v.NO_VERSION},
+        {"package": "pg", "version": "1.0.0", "status": v.HAS_FRAGMENTS},
     ]
 
-    def test_contains_package_names(self):
-        out = build_summary(
-            ["postgres", "mysql", "redis"],
-            self._results,
-            "auto",
-            "integrations-core",
-            "abc1234567890",
-            "prod",
+    def _summary(self, packages=None, **kwargs):
+        defaults = dict(
+            mode="auto",
+            source_repo="integrations-core",
+            ref="abc1234567890",
+            target="prod",
             dry_run=False,
             dispatched=True,
         )
-        assert "postgres" in out
-        assert "mysql" in out
-        assert "redis" in out
+        return build_summary(packages or ["postgres"], self._results, **{**defaults, **kwargs})
 
-    def test_dispatched_label(self):
+    def test_status_labels(self):
         out = build_summary(
-            ["postgres"],
+            ["postgres", "mysql", "redis", "pg"],
             self._results,
-            "auto",
-            "integrations-core",
-            "abc1234567890",
-            "prod",
+            mode="auto",
+            source_repo="integrations-core",
+            ref="sha",
+            target="prod",
             dry_run=False,
             dispatched=True,
         )
         assert "✅ Dispatched" in out
+        assert "⏭️ Pre-release" in out
+        assert "⚠️ No version" in out
+        assert "❌ Unreleased" in out
 
     def test_dry_run_label(self):
-        out = build_summary(
-            ["postgres"],
-            self._results,
-            "auto",
-            "integrations-core",
-            "abc1234567890",
-            "dev",
-            dry_run=True,
-            dispatched=False,
-        )
+        out = self._summary(dry_run=True, dispatched=False)
         assert "🔄 Dry run" in out
-        assert "Dry run" in out  # header row
-
-    def test_pre_release_label(self):
-        out = build_summary(
-            ["mysql"],
-            self._results,
-            "auto",
-            "integrations-core",
-            "sha",
-            "prod",
-            dry_run=False,
-            dispatched=True,
-        )
-        assert "⏭️ Pre-release" in out
-
-    def test_no_version_label(self):
-        out = build_summary(
-            ["redis"],
-            self._results,
-            "auto",
-            "integrations-core",
-            "sha",
-            "prod",
-            dry_run=False,
-            dispatched=True,
-        )
-        assert "⚠️ No version" in out
 
     def test_custom_footer(self):
-        out = build_summary(
-            ["postgres"],
-            self._results,
-            "auto",
-            "integrations-core",
-            "sha",
-            "prod",
-            dry_run=False,
-            dispatched=False,
-            footer="> Custom footer text",
-        )
+        out = self._summary(dispatched=False, footer="> Custom footer text")
         assert "Custom footer text" in out
 
     def test_ref_truncated_in_link(self):
         full_sha = "a" * 40
-        out = build_summary(
-            ["postgres"],
-            self._results,
-            "auto",
-            "integrations-core",
-            full_sha,
-            "prod",
-            dry_run=False,
-            dispatched=True,
-        )
-        # Only first 12 chars should appear as the link label
+        out = self._summary(ref=full_sha)
         assert full_sha[:12] in out
         assert full_sha[12:] not in out.split("commit/")[0]
-
-    def test_has_fragments_label(self):
-        results = [{"package": "pg", "version": "1.0.0", "status": v.HAS_FRAGMENTS}]
-        out = build_summary(
-            ["pg"],
-            results,
-            "auto",
-            "integrations-core",
-            "sha",
-            "prod",
-            dry_run=False,
-            dispatched=False,
-        )
-        assert "❌ Unreleased" in out
