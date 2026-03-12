@@ -151,21 +151,19 @@ tests:
   sample: "2025-12-03 19:59:40.415 UTC::@:[1670514]:1:00000:2025-12-03 19:59:26 UTC:20/120887:0:6930969e.197d72:LOG:  automatic vacuum of table \"dm_v0.stream_router.kv_shadow_entei\": index scans: 1"
   result:
     custom:
-      msg: 'automatic vacuum of table "dm_v0.stream_router.kv_shadow_entei": index scans: 1'
-      sql_state: "00000"
       db:
-        date: 1764791980415
-        severity: LOG
         backend_start: 1764791966000
+        date: 1764791980415
+        severity: "LOG"
       postgres:
-        xid: "0"
         proc_id: "1670514"
-        session_id: 6930969e.197d72
-        vxid: 20/120887
+        session_id: "6930969e.197d72"
+        vxid: "20/120887"
+        xid: "0"
       session_lineno: 1
-    message: 'automatic vacuum of table "dm_v0.stream_router.kv_shadow_entei": index scans: 1'
+      sql_state: "00000"
+    message: "automatic vacuum of table \"dm_v0.stream_router.kv_shadow_entei\": index scans: 1"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
-     - "db:postgres"
     timestamp: 1764791980415
