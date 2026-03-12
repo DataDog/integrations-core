@@ -866,12 +866,9 @@ def test_schema_registry_batching(check, dd_run_check, aggregator):
 
     assert collector._get_schema_registry_versions.call_count == 4  # 2 more calls
 
-    run2_subjects = {
-        call.args[0] for call in collector._get_schema_registry_versions.call_args_list[2:]
-    }
+    run2_subjects = {call.args[0] for call in collector._get_schema_registry_versions.call_args_list[2:]}
     assert run1_subjects.isdisjoint(run2_subjects), (
-        f"Run 2 should check different subjects than run 1, but got overlap: "
-        f"run1={run1_subjects}, run2={run2_subjects}"
+        f"Run 2 should check different subjects than run 1, but got overlap: run1={run1_subjects}, run2={run2_subjects}"
     )
 
     # Run 3: picks the remaining 1 subject not yet checked
@@ -879,9 +876,7 @@ def test_schema_registry_batching(check, dd_run_check, aggregator):
 
     assert collector._get_schema_registry_versions.call_count == 5  # 1 more call
 
-    run3_subjects = {
-        call.args[0] for call in collector._get_schema_registry_versions.call_args_list[4:]
-    }
+    run3_subjects = {call.args[0] for call in collector._get_schema_registry_versions.call_args_list[4:]}
     assert run3_subjects.isdisjoint(run1_subjects | run2_subjects), (
         f"Run 3 should check the remaining subject, but got overlap: "
         f"run3={run3_subjects}, previous={run1_subjects | run2_subjects}"
