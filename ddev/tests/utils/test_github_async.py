@@ -90,4 +90,3 @@ class TestAsyncGitHubClient:
 
             assert result.pagination.next_url == 'https://api.github.com/repos/DataDog/integrations-core/issues?page=2'
             assert result.pagination.last_url == 'https://api.github.com/repos/DataDog/integrations-core/issues?page=5'
-
