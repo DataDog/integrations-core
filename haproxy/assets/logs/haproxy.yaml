@@ -121,7 +121,7 @@ pipeline:
     query: source:haproxy
   processors:
     - type: grok-parser
-      name: ''
+      name: ""
       enabled: true
       source: message
       samples:
@@ -170,13 +170,13 @@ pipeline:
           haproxy.default (%{_syslog_prefix}\s+)?Connect from %{_client_ip}:%{_client_port} to %{_destination_ip}:%{_destination_port} \(%{_frontend_name}\/%{_ha_mode}\)
 
     - type: url-parser
-      name: ''
+      name: ""
       enabled: true
       sources:
         - http.url
       target: http.url_details
     - type: user-agent-parser
-      name: ''
+      name: ""
       enabled: true
       sources:
         - http.useragent
@@ -192,16 +192,16 @@ pipeline:
       enabled: true
       categories:
         - filter:
-            query: '@http.status_code:[200 TO 299]'
+            query: "@http.status_code:[200 TO 299]"
           name: OK
         - filter:
-            query: '@http.status_code:[300 TO 399]'
+            query: "@http.status_code:[300 TO 399]"
           name: notice
         - filter:
-            query: '@http.status_code:[400 TO 499]'
+            query: "@http.status_code:[400 TO 499]"
           name: warning
         - filter:
-            query: '@http.status_code:[500 TO 599]'
+            query: "@http.status_code:[500 TO 599]"
           name: error
       target: http.status_category
     - type: status-remapper
@@ -236,6 +236,13 @@ pipeline:
         isOcsf: true
       filter:
         query: "-@http.method:* (@load_balancer.service_name:* OR @haproxy.mode:TCP)"
+      schema:
+        schemaType: ocsf
+        version: 1.5.0
+        className: Network Activity
+        classUid: 4001
+        extensions: []
+        profiles: [load_balancer]
       processors:
         - type: schema-processor
           name: Apply OCSF schema for 4001
@@ -334,20 +341,20 @@ pipeline:
               target: ocsf.metadata.product.vendor_name
               preserveSource: true
               overrideOnConflict: true
-          schema:
-            schemaType: ocsf
-            version: 1.5.0
-            className: Network Activity
-            classUid: 4001
-            extensions: []
-            profiles: [load_balancer]
-    - type: pipeline
+≈    - type: pipeline
       name: OCSF sub pipeline for class HTTP Activity [4002]
       enabled: true
       ocsf:
         isOcsf: true
       filter:
         query: "@http.method:* OR @haproxy.mode:HTTP"
+      schema:
+        schemaType: ocsf
+        version: 1.5.0
+        className: HTTP Activity
+        classUid: 4002
+        extensions: []
+        profiles: [load_balancer]
       processors:
         - type: grok-parser
           name: Parse `ocsf.http_request.url.query_string` from `http.url`
@@ -636,10 +643,3 @@ pipeline:
               target: ocsf.metadata.product.vendor_name
               preserveSource: true
               overrideOnConflict: true
-          schema:
-            schemaType: ocsf
-            version: 1.5.0
-            className: HTTP Activity
-            classUid: 4002
-            extensions: []
-            profiles: [load_balancer]
