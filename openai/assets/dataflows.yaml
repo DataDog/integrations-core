@@ -1,9 +1,15 @@
 provides:
   - id: openai-usage-metrics
     always_on: true
+    data_type: metrics
+    direction: inbound
   - id: openai-cloud-cost-data
     always_on: false
+    data_type: metrics
+    direction: inbound
     granular: true
   - id: openai-llm-completions
     always_on: false
     granular: true
+    data_type: logs
+    direction: inbound
