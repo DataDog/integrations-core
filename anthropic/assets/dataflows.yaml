@@ -2,5 +2,3 @@ provides:
   - id: anthropic-llm-completions
     always_on: false
     granular: true
-    data_type: logs
-    direction: inbound
