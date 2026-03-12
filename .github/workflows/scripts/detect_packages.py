@@ -7,62 +7,21 @@ Resolution order for MANUAL_PACKAGES:
 """
 import json
 import os
-import re
-import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent))
 
-def set_outputs(**kwargs: str) -> None:
-    with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-        for key, value in kwargs.items():
-            f.write(f"{key}={value}\n")
-
-
-def write_summary(content: str) -> None:
-    path = os.environ.get("GITHUB_STEP_SUMMARY")
-    if path:
-        with open(path, "a") as f:
-            f.write(content + "\n")
-
-
-def get_all_packages() -> list[str]:
-    return sorted(
-        {path.parent.parent.parent.name for path in Path(".").glob("*/datadog_checks/*/__about__.py")}
-    )
-
-
-def detect_from_tags() -> list[str]:
-    tags = subprocess.check_output(["git", "tag", "--points-at", "HEAD"], text=True)
-    return sorted(
-        {re.sub(r"-\d+\.\d+\.\d+.*", "", tag) for tag in tags.splitlines() if tag.strip()}
-    )
+from _release.github import set_outputs, write_summary
+from _release.packages import get_all_packages, resolve_packages
 
 
 def main() -> None:
     manual = os.environ.get("MANUAL_PACKAGES", "").strip()
     all_packages = get_all_packages()
-
-    if manual.lower() == "all":
-        mode = f"all ({len(all_packages)} packages in repo)"
-        packages = all_packages
-    elif manual:
-        mode = f"manual ({manual})"
-        try:
-            packages = json.loads(manual)
-        except json.JSONDecodeError as e:
-            print(f"MANUAL_PACKAGES is not valid JSON: {e}", file=sys.stderr)
-            sys.exit(1)
-    else:
-        mode = "auto-detect from tags at HEAD"
-        packages = detect_from_tags()
+    packages, mode = resolve_packages(manual, all_packages)
 
     print(f"Mode: {mode}")
-
-    unknown = set(packages) - set(all_packages)
-    if unknown:
-        print(f"Unknown packages: {', '.join(unknown)}", file=sys.stderr)
-        sys.exit(1)
 
     if packages:
         print(f"\nDetected {len(packages)} package(s) to release:")

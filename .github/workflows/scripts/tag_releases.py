@@ -7,11 +7,16 @@ Environment variables:
 import os
 import subprocess
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent))
+
+from _release.github import parse_bool_env
 
 
 def main() -> None:
     target = os.environ.get("TARGET", "dev")
-    dry_run = os.environ.get("DRY_RUN", "").lower() != "false"
+    dry_run = parse_bool_env("DRY_RUN", default=False)
 
     if dry_run:
         print("DRY RUN: tags will be created locally but not pushed to origin")

@@ -7,74 +7,15 @@ Environment variables: PACKAGES, SOURCE_REPO, REF, TARGET, DRY_RUN, MODE.
 """
 import json
 import os
-import re
 import subprocess
 import sys
 from pathlib import Path
 
-_PRE_RELEASE_RE = re.compile(r"\d+\.\d+\.\d+(a|b|rc)\d+")
-_STATUS_LABELS = {
-    "no_version": "⚠️ No version found",
-    "pre_release": "⏭️ Pre-release, skipped",
-    "error": "❌ Unreleased changelog fragments",
-    "ready": "✅ Ready",
-}
+sys.path.insert(0, str(Path(__file__).parent))
 
-
-def write_summary(content: str) -> None:
-    path = os.environ.get("GITHUB_STEP_SUMMARY")
-    if path:
-        with open(path, "a") as f:
-            f.write(content + "\n")
-
-
-def get_version(package: str) -> str | None:
-    about = next(Path(package).glob("datadog_checks/*/__about__.py"), None)
-    if about is None:
-        return None
-    match = re.search(r'__version__\s*=\s*["\']([^"\']+)["\']', about.read_text())
-    return match.group(1) if match else None
-
-
-def has_changelog_fragments(package: str) -> bool:
-    changelog_dir = Path(package) / "changelog.d"
-    if not changelog_dir.is_dir():
-        return False
-    return any(changelog_dir.iterdir())
-
-
-def build_summary(
-    results: list[dict],
-    mode: str,
-    source_repo: str,
-    ref: str,
-    target: str,
-    dry_run: bool,
-    footer: str = "",
-) -> str:
-    source_link = (
-        f"[`{source_repo}@{ref[:12]}`](https://github.com/DataDog/{source_repo}/commit/{ref})"
-        if ref
-        else source_repo
-    )
-    rows = [
-        f"| `{r['package']}` | `{r.get('version') or '—'}` | {_STATUS_LABELS.get(r['status'], '✅ Ready')} |"
-        for r in results
-    ]
-
-    return (
-        "## Wheel Release\n\n"
-        "| | |\n|---|---|\n"
-        f"| **Mode** | {mode} |\n"
-        f"| **Source** | {source_link} |\n"
-        f"| **Target** | {target} S3 |\n"
-        f"| **Dry run** | {'Yes' if dry_run else 'No'} |\n\n"
-        "| Package | Version | Status |\n"
-        "|---------|---------|--------|\n"
-        + "\n".join(rows)
-        + ("\n\n" + footer if footer else "")
-        + "\n"
-    )
+from _release.github import parse_bool_env, write_summary
+from _release.summary import build_summary
+from _release.validation import HAS_FRAGMENTS, validate_packages
 
 
 def main() -> None:
@@ -82,7 +23,7 @@ def main() -> None:
     source_repo = os.environ["SOURCE_REPO"]
     ref = os.environ.get("REF", "")
     target = os.environ.get("TARGET", "")
-    dry_run = os.environ.get("DRY_RUN", "").lower() != "false"
+    dry_run = parse_bool_env("DRY_RUN", default=False)
     mode = os.environ.get("MODE", "")
 
     if source_repo == "integrations-core":
@@ -90,21 +31,9 @@ def main() -> None:
         if result.returncode != 0:
             sys.exit(result.returncode)
 
-    results = []
-    for package in packages:
-        raw = get_version(package)
-        if raw is None:
-            results.append({"package": package, "version": None, "status": "no_version"})
-            continue
-        if _PRE_RELEASE_RE.search(raw):
-            results.append({"package": package, "version": raw, "status": "pre_release"})
-            continue
-        if has_changelog_fragments(package):
-            results.append({"package": package, "version": raw, "status": "error"})
-        else:
-            results.append({"package": package, "version": raw, "status": "ready"})
+    results = validate_packages(packages)
 
-    # Save results for the dispatch step to build the comprehensive summary.
+    # Persist results for the dispatch step.
     runner_temp = os.environ.get("RUNNER_TEMP", "/tmp")
     Path(runner_temp, "release_validation.json").write_text(
         json.dumps({"results": results, "mode": mode, "ref": ref, "target": target, "dry_run": dry_run})
@@ -113,9 +42,10 @@ def main() -> None:
     by_status: dict[str, list] = {}
     for r in results:
         by_status.setdefault(r["status"], []).append(r)
+
     no_version = by_status.get("no_version", [])
     pre_release = by_status.get("pre_release", [])
-    errors = by_status.get("error", [])
+    errors = by_status.get(HAS_FRAGMENTS, [])
     validated = by_status.get("ready", [])
 
     if no_version:
@@ -131,20 +61,25 @@ def main() -> None:
     if errors:
         print("\nRelease validation failed:", file=sys.stderr)
         for r in errors:
-            print(f"  {r['package']} ({r['version']}): changelog.d/ contains unreleased fragments", file=sys.stderr)
+            print(
+                f"  {r['package']} ({r['version']}): changelog.d/ contains unreleased fragments",
+                file=sys.stderr,
+            )
         print(
             "\nRun 'ddev release make' to consolidate changelog fragments before releasing.",
             file=sys.stderr,
         )
-        # Dispatch won't run — write the comprehensive summary here so the failure is visible.
+        # Dispatch won't run — write the comprehensive summary here.
         write_summary(
             build_summary(
+                packages,
                 results,
                 mode,
                 source_repo,
                 ref,
                 target,
                 dry_run,
+                dispatched=False,
                 footer="> ⚠️ Validation failed — run `ddev release make` to consolidate changelog fragments before releasing.",
             )
         )
