@@ -9,7 +9,7 @@ _FRAGMENT_RE = re.compile(r"^\d+\.[a-z]+$")
 
 NO_VERSION = "no_version"
 PRE_RELEASE = "pre_release"
-HAS_FRAGMENTS = "error"
+HAS_FRAGMENTS = "has_fragments"
 READY = "ready"
 
 

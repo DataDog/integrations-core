@@ -1,5 +1,6 @@
 """Markdown summary builder for the wheel release pipeline."""
 from . import validation as v
+from .dispatch import _ACTIONS_URL
 
 _STATUS_LABELS: dict[str, str] = {
     v.NO_VERSION: "⚠️ No version found",
@@ -7,8 +8,6 @@ _STATUS_LABELS: dict[str, str] = {
     v.HAS_FRAGMENTS: "❌ Unreleased changelog fragments",
     v.READY: "✅ Ready",
 }
-
-_ACTIONS_URL = "https://github.com/DataDog/agent-integration-wheels-release/actions"
 
 
 def _source_link(source_repo: str, ref: str) -> str:

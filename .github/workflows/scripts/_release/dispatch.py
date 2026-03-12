@@ -7,6 +7,7 @@ import urllib.request
 BATCH_SIZE = 200
 _TARGET_REPO = "DataDog/agent-integration-wheels-release"
 _DISPATCH_URL = f"https://api.github.com/repos/{_TARGET_REPO}/dispatches"
+_ACTIONS_URL = f"https://github.com/{_TARGET_REPO}/actions"
 
 
 def build_payload(batch: list[str], source_repo: str, ref: str, target: str) -> dict:

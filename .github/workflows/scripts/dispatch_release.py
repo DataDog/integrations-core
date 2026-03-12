@@ -16,13 +16,14 @@ from _release.summary import build_summary
 
 def _load_validation(runner_temp: str) -> dict:
     path = Path(runner_temp) / "release_validation.json"
-    if not path.exists():
+    try:
+        return json.loads(path.read_text())
+    except FileNotFoundError:
         print(
             f"Warning: validation results not found at {path}. Summary may be incomplete.",
             file=sys.stderr,
         )
         return {}
-    return json.loads(path.read_text())
 
 
 def main() -> None:

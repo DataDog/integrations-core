@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from _release.github import parse_bool_env, write_summary
 from _release.summary import build_summary
-from _release.validation import HAS_FRAGMENTS, validate_packages
+from _release.validation import HAS_FRAGMENTS, NO_VERSION, PRE_RELEASE, READY, validate_packages
 
 
 def main() -> None:
@@ -43,10 +43,10 @@ def main() -> None:
     for r in results:
         by_status.setdefault(r["status"], []).append(r)
 
-    no_version = by_status.get("no_version", [])
-    pre_release = by_status.get("pre_release", [])
+    no_version = by_status.get(NO_VERSION, [])
+    pre_release = by_status.get(PRE_RELEASE, [])
     errors = by_status.get(HAS_FRAGMENTS, [])
-    validated = by_status.get("ready", [])
+    validated = by_status.get(READY, [])
 
     if no_version:
         print("Skipped (no version found):")
