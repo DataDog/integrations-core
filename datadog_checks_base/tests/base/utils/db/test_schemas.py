@@ -147,3 +147,20 @@ def test_schema_collector_empty_last_database(aggregator):
     assert event['metadata'][0]['tables'][0]['table_name'] == 'users'
     assert event['metadata'][1]['name'] == 'db_with_tables'
     assert event['metadata'][1]['tables'][0]['table_name'] == 'orders'
+    assert event['collection_payloads_count'] == 1
+
+
+@pytest.mark.unit
+def test_schema_collector_chunk_size_flush(aggregator):
+    """Verify that collection_payloads_count is set even when all rows are flushed by chunk size."""
+    check = TestDatabaseCheck()
+    config = SchemaCollectorConfig()
+    config.payload_chunk_size = 1
+    collector = TestSchemaCollector(check, config)
+    collector.collect_schemas()
+
+    events = aggregator.get_event_platform_events("dbm-metadata")
+    # chunk_size=1 flushes the single row mid-loop, then a final payload marks the snapshot
+    assert len(events) == 2
+    assert 'collection_payloads_count' not in events[0]
+    assert events[-1]['collection_payloads_count'] == len(events)
