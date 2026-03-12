@@ -5,15 +5,13 @@
 import json
 import time
 from typing import Any
-from unittest.mock import Mock
-
 import pytest
 from pytest import MonkeyPatch
 from requests.exceptions import HTTPError
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 
-from .common import BASE_TAGS, FIXTURE_DIR, _load_job, _make_check, _mock_api, _respond, _run_check
+from .common import BASE_TAGS, FIXTURE_DIR, _load_job, _make_check, _mock_api, _run_check
 
 
 @pytest.mark.parametrize(
@@ -84,28 +82,12 @@ def test_connect_static_token_401_falls_back_to_session(
     instance["control_m_username"] = "user"
     instance["control_m_password"] = "pass"
     check = _make_check(instance)
-
-    servers = [{"name": "srv1", "state": "Up"}]
-    server_call_count = 0
-
-    def handle_get(_self: Any, url: str, **kw: Any) -> Mock:
-        nonlocal server_call_count
-        if "/config/servers" in url:
-            server_call_count += 1
-            if server_call_count == 1:
-                return _respond(None, 401)
-            return _respond(servers)
-        if "/run/jobs/status" in url:
-            return _respond({"statuses": []})
-        return _respond(None, 404)
-
-    def handle_post(_self: Any, url: str, **kw: Any) -> Mock:
-        if "/session/login" in url:
-            return _respond({"token": "test-session-token"})
-        return _respond(None, 404)
-
-    monkeypatch.setattr(type(check.http), "get", handle_get)
-    monkeypatch.setattr(type(check.http), "post", handle_post)
+    _mock_api(
+        check,
+        monkeypatch,
+        servers=[{"name": "srv1", "state": "Up"}],
+        reject_first_server_call=True,
+    )
 
     _run_check(check)
 
