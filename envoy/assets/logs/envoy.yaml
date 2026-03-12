@@ -80,7 +80,7 @@ pipeline:
         - '[2019-03-06T09:31:27.360Z] "GET /status/418 HTTP/1.1" 418 - "-" 0 135 5 2 "-" "curl/7.60.0" "d209e46f-9ed5-9b61-bbdd-43e22662702a" "httpbin:8000" "127.0.0.1:80" inbound|8000|http|httpbin.default.svc.cluster.local - 172.30.146.73:80 172.30.146.82:38618 outbound_.8000_._.httpbin.default.svc.cluster.local'
         - '[2021-03-12T09:11:51.592Z] "GET /server_info HTTP/1.1" 200 - 0 27805 1 - "64.145.79.247" "Datadog Agent/7.26.0" "d0000a1f-0000-4b42-0000-0000e13d78ca" "64.145.79.247:8001" "-"'
         - '[2021-03-12 15:31:30.492][1][warning][runtime] [source/common/runtime/runtime_features.cc:31] Unable to use runtime singleton for feature envoy.http.headermap.lazy_map_min_size'
-        - '{"start_time":"2021-03-12T09:11:51.592Z","method":"GET","path":"/server_info","protocol":"HTTP/1.1","response_code":200,"response_flags":"-","bytes_received":0,"bytes_sent":27805,"duration":1,"upstream_host":"-","level":"info"}'
+        - '{"response_flags":"-","duration":1,"start_time":"2021-03-12T09:11:51.592Z","path":"/server_info","protocol":"HTTP/1.1","response_code":200,"method":"GET","level":"info","bytes_received":0,"upstream_host":"-","bytes_sent":27805}'
     - type: user-agent-parser
       name: ''
       enabled: true

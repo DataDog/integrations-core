@@ -178,14 +178,28 @@ tests:
       level: "warning"
       line_number: 31
       logger_name: "runtime"
+      message: "Unable to use runtime singleton for feature envoy.http.headermap.lazy_map_min_size"
       thread_id: 1
-    message: "Unable to use runtime singleton for feature envoy.http.headermap.lazy_map_min_size"
+    message: "[2021-03-12 15:31:30.492][1][warning][runtime] [source/common/runtime/runtime_features.cc:31] Unable to use runtime singleton for feature envoy.http.headermap.lazy_map_min_size"
     status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1615563090492
  -
-  sample: "{\"start_time\":\"2021-03-12T09:11:51.592Z\",\"method\":\"GET\",\"path\":\"/server_info\",\"protocol\":\"HTTP/1.1\",\"response_code\":200,\"response_flags\":\"-\",\"bytes_received\":0,\"bytes_sent\":27805,\"duration\":1,\"upstream_host\":\"-\",\"level\":\"info\"}"
+  sample: |-
+    {
+      "response_flags" : "-",
+      "duration" : 1,
+      "start_time" : "2021-03-12T09:11:51.592Z",
+      "path" : "/server_info",
+      "protocol" : "HTTP/1.1",
+      "response_code" : 200,
+      "method" : "GET",
+      "level" : "info",
+      "bytes_received" : 0,
+      "upstream_host" : "-",
+      "bytes_sent" : 27805
+    }
   result:
     custom:
       bytes_received: 0
@@ -199,8 +213,21 @@ tests:
       response_flags: "-"
       start_time: "2021-03-12T09:11:51.592Z"
       upstream_host: "-"
-    message: "{\"start_time\":\"2021-03-12T09:11:51.592Z\",\"method\":\"GET\",\"path\":\"/server_info\",\"protocol\":\"HTTP/1.1\",\"response_code\":200,\"response_flags\":\"-\",\"bytes_received\":0,\"bytes_sent\":27805,\"duration\":1,\"upstream_host\":\"-\",\"level\":\"info\"}"
+    message: |-
+      {
+        "response_flags" : "-",
+        "duration" : 1,
+        "start_time" : "2021-03-12T09:11:51.592Z",
+        "path" : "/server_info",
+        "protocol" : "HTTP/1.1",
+        "response_code" : 200,
+        "method" : "GET",
+        "level" : "info",
+        "bytes_received" : 0,
+        "upstream_host" : "-",
+        "bytes_sent" : 27805
+      }
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 0
+    timestamp: 1
