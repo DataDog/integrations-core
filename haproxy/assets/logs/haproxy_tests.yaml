@@ -179,6 +179,8 @@ tests:
           ip: 10.0.3.31
           port: 8012
           svc_name: www
+        http_request:
+          http_method: CONNECT
         metadata:
           product:
             name: HAProxy
@@ -701,6 +703,8 @@ tests:
           ip: 77.222.80.71
           port: 80
           svc_name: lb_http_oa_vip
+        http_request:
+          http_method: CONNECT
         metadata:
           product:
             name: HAProxy
