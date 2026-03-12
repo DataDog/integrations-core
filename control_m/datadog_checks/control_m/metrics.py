@@ -43,6 +43,7 @@ _SOURCE_TYPE_NAME = "control-m"  # needs to match app_id
 
 
 def normalize_status(status: Any) -> str:
+    # Normalize a raw Control-M status string to a canonical lowercase key.
     if not status:
         return "unknown"
     return STATUS_NORMALIZATION.get(str(status).strip().lower(), "unknown")
@@ -58,6 +59,7 @@ def result_from_status(status: str) -> str:
 
 
 def build_run_key(job: dict[str, Any]) -> str | None:
+    # Build a unique dedupe key from jobId + numberOfRuns (or timestamps as fallback).
     job_id = job.get("jobId")
     if not job_id:
         return None
@@ -80,6 +82,7 @@ def build_run_key(job: dict[str, Any]) -> str | None:
 def job_metric_tags(
     base_tags: list[str], job: dict[str, Any], ctm_server: str | None = None, include_job_id: bool = False
 ) -> list[str]:
+    # Build the tag list for a job metric from base tags and job fields.
     if ctm_server is None:
         ctm_server = str(job.get("ctm") or job.get("server") or "unknown")
     tags = base_tags + [f"ctm_server:{ctm_server}"]
@@ -117,6 +120,7 @@ def duration_ms(job: dict[str, Any], tz: ZoneInfo | None = None) -> int | None:
 
 
 def overrun_ms(job: dict[str, Any], now: datetime, tz: ZoneInfo | None = None) -> int | None:
+    # Calculate how far past its estimated end time a job is running (in ms).
     estimated_end = parse_datetime(job.get("estimatedEndTime"), tz=tz)
     if estimated_end is None:
         return None
@@ -167,6 +171,7 @@ def timestamp_string(value: Any) -> str | None:
 
 
 def prune_state_map(state_map: dict[str, float], now: float, ttl_seconds: int) -> bool:
+    # Remove entries older than ttl_seconds from the state map. Returns True if any were removed.
     stale = [key for key, seen_at in state_map.items() if now - seen_at > ttl_seconds]
     for key in stale:
         state_map.pop(key)
@@ -174,6 +179,7 @@ def prune_state_map(state_map: dict[str, float], now: float, ttl_seconds: int) -
 
 
 def _format_timestamp(raw: Any, tz: ZoneInfo | None = None) -> str | None:
+    # Format a raw timestamp into a human-readable string for event text.
     dt = parse_datetime(raw, tz=tz)
     if dt is not None:
         formatted = dt.strftime("%b %d, %Y, %I:%M:%S %p")
@@ -188,6 +194,7 @@ def _format_timestamp(raw: Any, tz: ZoneInfo | None = None) -> str | None:
 def _build_event_text(
     job: dict[str, Any], result: str, ctm_server: str, job_duration: int | None, tz: ZoneInfo | None = None
 ) -> str:
+    # Build the multi-line event body from job fields.
     lines = [f"Result: {result}", f"Server: {ctm_server}"]
 
     folder = job.get("folder")
@@ -245,6 +252,7 @@ class JobCollector:
         self._load_runs_cache(_ACTIVE_RUNS_CACHE_KEY, self._active_ttl, self._active_runs)
 
     def collect(self) -> None:
+        # Fetch job statuses and emit rollup, per-job, and event metrics.
         try:
             response = self._client.request("get", self._jobs_status_url)
             response.raise_for_status()
@@ -335,6 +343,7 @@ class JobCollector:
     def _handle_terminal_job(
         self, job: dict[str, Any], normalized: str, dedupe_key: str | None, now: float, ctm_server: str
     ) -> bool:
+        # Process a terminal job: emit run count, duration, overrun, and optional events.
         if dedupe_key is None:
             self._check.log.debug("Skipping completion metrics for job without dedupe key: %s", job.get("name"))
             return False
@@ -370,6 +379,7 @@ class JobCollector:
         tags: list[str],
         job_duration: int | None,
     ) -> None:
+        # Emit completion and/or slow-run events for a terminal job.
         job_name = job.get("name", "unknown")
         agg_key = f"{ctm_server}:{job_name}"
 
@@ -406,6 +416,7 @@ class JobCollector:
             )
 
     def _load_runs_cache(self, cache_key: str, ttl: int, target: dict[str, float]) -> None:
+        # Load dedupe state from the Agent's persistent cache, discarding stale entries.
         raw = self._check.read_persistent_cache(cache_key)
         if not raw:
             return
@@ -432,6 +443,7 @@ class JobCollector:
         self._check.log.debug("Loaded %d entries from persistent cache %s", len(target), cache_key)
 
     def _persist_cache(self, cache_key: str, state_map: dict[str, float]) -> None:
+        # Write the current dedupe state to the Agent's persistent cache.
         try:
             self._check.write_persistent_cache(cache_key, json.dumps(state_map))
         except Exception as e:

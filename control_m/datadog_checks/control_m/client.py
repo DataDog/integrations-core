@@ -80,6 +80,7 @@ class ControlMClient:
         return "auth_method:static_token"
 
     def login(self) -> None:
+        # Authenticate via /session/login and store the token.
         url = f"{self._api_endpoint}/session/login"
         payload = {"username": self._username, "password": self._password}
 
@@ -116,6 +117,7 @@ class ControlMClient:
         self.login()
 
     def request(self, method: str, url: str, **kwargs: Any) -> Response:
+        # Route the request through static token or session login, with 401 fallback.
         request_fn = getattr(self._http, method)
 
         if self._use_session_login:

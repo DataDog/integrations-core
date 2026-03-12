@@ -29,6 +29,7 @@ class ControlMCheck(AgentCheck, ConfigMixin):
         return hashlib.md5(self._client.api_endpoint.encode()).hexdigest()[:16]
 
     def check(self, _: Any) -> None:
+        # Main entry point: authenticate, collect server health, metadata, and job metrics.
         auth_tags = self._auth_tags()
 
         if self._client.use_session_login:
