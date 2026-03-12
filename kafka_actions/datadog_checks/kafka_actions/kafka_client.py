@@ -230,26 +230,21 @@ class KafkaActionsClient:
             if start_timestamp is not None:
                 # Resolve timestamp to per-partition offsets using offsets_for_times.
                 timestamp_partitions = [TopicPartition(topic, p, start_timestamp) for p in partition_ids]
-                resolved = consumer.offsets_for_times(timestamp_partitions, timeout=10)
-                partitions = []
-                for tp in resolved:
+                partitions = consumer.offsets_for_times(timestamp_partitions, timeout=10)
+                for tp in partitions:
                     if tp.offset == -1:
                         self.log.debug(
-                            "Partition %d: no messages at or after timestamp %d, skipping",
+                            "Partition %d: no messages at or after timestamp %d, will wait at end",
                             tp.partition,
                             start_timestamp,
                         )
                     else:
-                        partitions.append(tp)
                         self.log.debug(
                             "Partition %d: timestamp %d resolved to offset %d",
                             tp.partition,
                             start_timestamp,
                             tp.offset,
                         )
-                if not partitions:
-                    self.log.debug("No partitions have messages at or after timestamp %d", start_timestamp)
-                    return
             elif start_offset == -1:
                 # For "latest" offset, seek back from the high watermark to read the last N existing messages.
                 # Use AdminClient.list_offsets to fetch all high watermarks in a single batched call.

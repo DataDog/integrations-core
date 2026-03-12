@@ -459,7 +459,7 @@ class TestConsumeMessagesStartTimestamp:
         assigned = consumer.assign.call_args[0][0]
         assert len(assigned) == 2
 
-    def test_start_timestamp_skips_partitions_with_no_messages(self):
+    def test_start_timestamp_includes_partitions_at_end(self):
         from unittest.mock import MagicMock
 
         consumer = MagicMock()
@@ -469,7 +469,7 @@ class TestConsumeMessagesStartTimestamp:
         metadata.topics = {'t': MagicMock(partitions={0: MagicMock(), 1: MagicMock()})}
         consumer.list_topics.return_value = metadata
 
-        # Partition 0 has no messages at the timestamp (offset=-1), partition 1 does
+        # Partition 0 has no messages at the timestamp (offset=-1 = OFFSET_END), partition 1 does
         resolved_tp0 = MagicMock(partition=0, offset=-1)
         resolved_tp1 = MagicMock(partition=1, offset=120)
         consumer.offsets_for_times.return_value = [resolved_tp0, resolved_tp1]
@@ -483,36 +483,9 @@ class TestConsumeMessagesStartTimestamp:
         with patch.object(client, 'get_consumer', return_value=consumer):
             list(client.consume_messages(topic='t', start_timestamp=1700000000000, max_messages=10, timeout_ms=500))
 
-        # Only partition 1 should be assigned
+        # Both partitions should be assigned; partition 0 waits at end for new messages
         assigned = consumer.assign.call_args[0][0]
-        assert len(assigned) == 1
-
-    def test_start_timestamp_no_partitions_with_messages(self):
-        from unittest.mock import MagicMock
-
-        consumer = MagicMock()
-
-        metadata = MagicMock()
-        metadata.topics = {'t': MagicMock(partitions={0: MagicMock()})}
-        consumer.list_topics.return_value = metadata
-
-        resolved_tp0 = MagicMock(partition=0, offset=-1)
-        consumer.offsets_for_times.return_value = [resolved_tp0]
-
-        import logging
-
-        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
-
-        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
-
-        with patch.object(client, 'get_consumer', return_value=consumer):
-            result = list(
-                client.consume_messages(topic='t', start_timestamp=1700000000000, max_messages=10, timeout_ms=500)
-            )
-
-        # No messages should be consumed, and assign should not be called
-        assert result == []
-        consumer.assign.assert_not_called()
+        assert len(assigned) == 2
 
     def test_start_timestamp_overrides_start_offset(self, dd_run_check, aggregator):
         """Test that start_timestamp is passed through from check config."""
