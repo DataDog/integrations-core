@@ -6,7 +6,7 @@ IFS=$'\n\t'
 echo "Obtaining GitHub token via dd-octo-sts"
 set +x
 GITHUB_TOKEN=$(dd-octo-sts token --scope DataDog/integrations-core --policy self.gitlab.release.branches)
-trap 'dd-octo-sts revoke -t "$GITHUB_TOKEN" 2>/dev/null || true' EXIT
+trap 'set +x; dd-octo-sts revoke -t "$GITHUB_TOKEN" 2>/dev/null || true' EXIT
 git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/DataDog/integrations-core.git"
 set -x
 
