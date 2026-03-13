@@ -88,6 +88,26 @@ If you are collecting metrics through annotations, refer to the following exampl
 
 Remember that metric names can be specified as regular expressions, making it possible to specify the type for a set of metrics without listing all of them individually.
 
+### Limitations with Prometheus Federate Endpoints
+
+The Datadog OpenMetrics / Prometheus integrations expect metrics to follow the standard Prometheus/OpenMetrics exposition format, including:
+
+- `# HELP <metric_name> ...`
+- `# TYPE <metric_name> <type>` (for example, `histogram`, `counter`, `gauge`, `summary`)
+
+**Prometheus federate endpoints** deliberately strip this metadata and expose metrics as untyped. As a result:
+
+- The Agent cannot reliably detect which metric families are histograms.
+- Histogram buckets (e.g. `*_bucket` with `le="..."`) cannot be safely converted into Datadog distribution metrics using options such as:
+  - `histogram_buckets_as_distributions` (OpenMetrics v2)
+- Attempting to treat federated metrics as histograms can lead to transformer errors during bucket processing (e.g. `KeyError: 'upper_bound'`)
+
+**Important:** At this time, we do **not support** Prometheus federate endpoints for histogram → distribution conversion. If you need distributions from Prometheus histograms, use one of the following approaches instead:
+
+- Scrape metrics directly from the **original targets** (non‑federated endpoints) that expose proper `# TYPE` metadata.
+- Introduce a small intermediary exporter/service that re‑emits metrics in full Prometheus/OpenMetrics format (with `# TYPE` and standard
+- Utilize a custom check for proper histogram to distribution conversion
+
 ### Errors parsing the OpenMetrics payload with Agent 7.46
 
 The version of this integration shipped with version 7.46 of the Agent gives preference by default to the OpenMetrics format when requesting metrics from the metrics endpoint. It does so by setting the `Accept` header to `application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,text/plain;version=0.0.4;q=0.5,*/*;q=0.1`. This was done in combination with dynamically determining which scraper to use based on the `Content-Type` it receives from the server, to reduce the need for manual setup.
