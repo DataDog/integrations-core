@@ -12,9 +12,6 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.http import DEFAULT_EXPIRATION, RequestsWrapper
 from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.base.utils.time import get_timestamp
-
-# Note: MockHTTPResponse is a drop-in replacement for dev.http.MockResponse
-# with protocol compliance and httpx compatibility
 from datadog_checks.dev import TempDir
 from datadog_checks.dev.fs import read_file, write_file
 
