@@ -104,7 +104,7 @@ The Datadog OpenMetrics / Prometheus integrations expect metrics to follow the s
 **Important:** At this time, we do **not support** Prometheus federate endpoints for histogram to distribution conversion. If you need distributions from Prometheus histograms, use one of the following approaches instead:
 
 - Scrape metrics directly from the **original targets** (non‑federated endpoints) that expose proper `# TYPE` metadata.
-- Introduce a small intermediary exporter/service that re‑emits metrics in full Prometheus/OpenMetrics format (with `# TYPE` and standard
+- Introduce a small intermediary exporter/service that re‑emits metrics in full Prometheus/OpenMetrics format (with `# TYPE` and standard).
 - Utilize a custom check for proper histogram to distribution conversion
 
 ### Errors parsing the OpenMetrics payload with Agent 7.46
