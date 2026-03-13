@@ -128,9 +128,15 @@ class VSphereAPI(object):
         try:
             # Object returned by SmartConnect is a ServerInstance
             # https://www.vmware.com/support/developer/vc-sdk/visdk2xpubs/ReferenceGuide/vim.ServiceInstance.html
-            conn = connect.SmartConnect(
-                host=self.config.hostname, user=self.config.username, pwd=self.config.password, sslContext=context
-            )
+            connect_kwargs = {
+                "host": self.config.hostname,
+                "user": self.config.username,
+                "pwd": self.config.password,
+                "sslContext": context,
+            }
+            if self.config.http_connection_timeout is not None:
+                connect_kwargs["httpConnectionTimeout"] = self.config.http_connection_timeout
+            conn = connect.SmartConnect(**connect_kwargs)
             # Next line tries a simple API call to check the health of the connection.
             version_info = VersionInfo(conn.content.about)
         except Exception as e:

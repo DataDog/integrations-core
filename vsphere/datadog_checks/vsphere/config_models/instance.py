@@ -160,6 +160,7 @@ class InstanceConfig(BaseModel):
     excluded_host_tags: Optional[tuple[str, ...]] = None
     host: str
     hostname_transform: Optional[str] = None
+    http_connection_timeout: Optional[int] = None
     include_datastore_cluster_folder_tag: Optional[bool] = None
     include_events: Optional[tuple[IncludeEvent, ...]] = None
     infrastructure_mode: Optional[str] = None

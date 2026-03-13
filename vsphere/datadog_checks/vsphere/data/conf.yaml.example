@@ -167,6 +167,11 @@ instances:
     #   - TLS_CHACHA20_POLY1305_SHA256
     #   - TLS_AES_128_GCM_SHA256
 
+    ## @param http_connection_timeout - integer - optional - default: 60
+    ## Timeout in seconds for HTTP requests when connecting to vCenter via the SOAP API.
+    #
+    # http_connection_timeout: 60
+
     ## @param resource_filters - list of mappings - optional
     ## Each filter in the list is composed of three parameters.
     ## 'resource' is one of vm/host/datastore/datacenter/cluster on which to apply the filter

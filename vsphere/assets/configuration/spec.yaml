@@ -164,6 +164,13 @@ files:
             - 'TLS_AES_256_GCM_SHA384'
             - 'TLS_CHACHA20_POLY1305_SHA256'
             - 'TLS_AES_128_GCM_SHA256'
+      - name: http_connection_timeout
+        description: |
+          Timeout in seconds for HTTP requests when connecting to vCenter via the SOAP API.
+        fleet_configurable: true
+        value:
+          type: integer
+          example: 60
       - name: resource_filters
         description: |
           Each filter in the list is composed of three parameters.
