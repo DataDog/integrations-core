@@ -4,11 +4,12 @@
 
 import re
 from dataclasses import dataclass
+from typing import Final
 
-MAX_CHARS = 50_000
-HEAD_RATIO = 0.6
+MAX_CHARS: Final = 50_000
+HEAD_RATIO: Final = 0.6
 
-ERROR_PATTERN = re.compile(r"ERROR|FAILED|Exception|Traceback|error:|fatal|panic", re.IGNORECASE)
+ERROR_PATTERN = re.compile(r"ERROR|FAILED|Exception|Traceback|fatal|panic", re.IGNORECASE)
 
 
 @dataclass

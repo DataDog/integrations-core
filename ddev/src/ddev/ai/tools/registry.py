@@ -2,12 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from typing import Final
+
 from anthropic.types import ToolParam
 
 from .protocol import ToolProtocol
 from .types import ToolResult
 
-ALLOWED_TOOL_CALLERS = ["code_execution_20260120"]
+ALLOWED_TOOL_CALLERS: Final = ["code_execution_20260120"]
 
 
 class ToolRegistry:

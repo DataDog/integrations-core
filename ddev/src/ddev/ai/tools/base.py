@@ -4,6 +4,7 @@
 
 import dataclasses
 import inspect
+import types as _types
 import typing
 from abc import ABC, abstractmethod
 from typing import Annotated, Any, get_args, get_type_hints, overload
@@ -39,8 +40,6 @@ def safe_int(value: object, default: int | None = 0) -> int | None:
 
 
 def _resolve_json_type(hint: Any) -> str | None:
-    import types as _types
-
     origin = typing.get_origin(hint)
     if origin is typing.Union or isinstance(hint, _types.UnionType):
         args = [a for a in typing.get_args(hint) if a is not type(None)]
