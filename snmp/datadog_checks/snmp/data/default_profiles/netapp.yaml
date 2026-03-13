@@ -50,6 +50,8 @@ metadata:
           match_pattern: 'NetApp Release\s+(\d+(?:\.\d+)*)'  # First part of the version composed of digits and `.`
                                                              # Example: 9.7P14 => 9.7
           match_value: '$1'
+      type:
+        value: "storage"
 
 
 metrics:
