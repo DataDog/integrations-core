@@ -60,16 +60,12 @@ instances:
 
 ### Cluster Monitoring (Preview)
 
-In addition to consumer lag metrics, this integration can collect comprehensive cluster metadata when `enable_cluster_monitoring` is enabled:
+When `enable_cluster_monitoring` is enabled, the integration collects cluster-wide metrics for [Data Streams Monitoring][18] in addition to consumer lag:
 
-- **Broker information**: Configuration and health metrics
-- **Topic and partition details**: Sizes, offsets, replication status
-- **Consumer group metadata**: Member details and group state
-- **Schema registry**: Schema information (if `schema_registry_url` is provided)
-
-All cluster monitoring metrics are tagged with `kafka_cluster_id` for easy filtering.
-
-**Note**: This feature is in Preview and may increase Agent resource consumption on large clusters. The integration caches configuration and schema events to reduce volume.
+- **Brokers**: Configuration and health metrics
+- **Topics and partitions**: Sizes, offsets, and replication status
+- **Consumer groups**: Member details and group state
+- **Schema registry**: Schema metadata (requires `schema_registry_url`)
 
 #### Batched collection
 
