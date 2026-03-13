@@ -11,7 +11,7 @@ from pytest import MonkeyPatch
 from requests.exceptions import HTTPError
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.dev.metadata import get_metadata_metrics
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import BASE_TAGS, FIXTURE_DIR, _load_job, _make_check, _mock_api, _run_check
 
