@@ -36,6 +36,10 @@ Once you've made this change, click "Apply" to save the configuration and restar
 
 ### Configuration
 
+#### Prepare IBM WAS
+
+As a best practice, Datadog recommends using a read-only user to monitor your IBM WAS instance. This limits the access granted to the Datadog Agent.
+
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
