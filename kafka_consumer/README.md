@@ -79,6 +79,21 @@ instances:
     schema_registry_url: http://localhost:8081  # optional
 ```
 
+### Kafka ACL Permissions
+
+**Cluster** (`kafka-cluster`)
+- DESCRIBE
+- DESCRIBE_CONFIGS (cluster monitoring only)
+
+**Topic** (`*`)
+- DESCRIBE
+- DESCRIBE_CONFIGS (cluster monitoring only)
+- READ, WRITE ([Kafka messages][21] only)
+
+**Consumer group** (`*`)
+- DESCRIBE
+- READ
+
 ### Validation
 
 1. [Run the Agent's status subcommand][8] and look for `kafka_consumer` under the Checks section.

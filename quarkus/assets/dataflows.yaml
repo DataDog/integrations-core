@@ -1,0 +1,9 @@
+provides:
+  - id: quarkus-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: quarkus-logs
+    always_on: false
+    data_type: logs
+    direction: inbound
