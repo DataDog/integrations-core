@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
-from typing import TypedDict
+from dataclasses import dataclass
 
 MAX_CHARS = 50_000
 HEAD_RATIO = 0.6
@@ -11,11 +11,19 @@ HEAD_RATIO = 0.6
 ERROR_PATTERN = re.compile(r"ERROR|FAILED|Exception|Traceback|error:|fatal|panic", re.IGNORECASE)
 
 
-class TruncationMeta(TypedDict):
+@dataclass
+class TruncationMeta:
     total_size: int
     shown_size: int
     truncated_size: int
     hint: str
+
+
+@dataclass
+class TruncateResult:
+    output: str
+    truncated: bool
+    meta: TruncationMeta | None
 
 
 def extract_error_lines(lines: list[str]) -> list[tuple[int, str]]:
@@ -23,18 +31,19 @@ def extract_error_lines(lines: list[str]) -> list[tuple[int, str]]:
     return [(i, line) for i, line in enumerate(lines) if ERROR_PATTERN.search(line)]
 
 
-def truncate(content: str, max_chars: int = MAX_CHARS) -> tuple[str, bool, TruncationMeta | None]:
-    """Truncate content using error-aware head+tail strategy.
-
-    Returns (output, truncated, meta).
-    """
+def truncate(
+    content: str,
+    max_chars: int = MAX_CHARS,
+    head_ratio: float = HEAD_RATIO,
+) -> TruncateResult:
+    """Truncate content using error-aware head+tail strategy."""
     if len(content) <= max_chars:
-        return content, False, None
+        return TruncateResult(output=content, truncated=False, meta=None)
 
     total = len(content)
     gap_marker_approx = 100
     content_budget = max_chars - gap_marker_approx
-    head_chars = int(content_budget * HEAD_RATIO)
+    head_chars = int(content_budget * head_ratio)
     tail_chars = content_budget - head_chars
 
     head = content[:head_chars]
@@ -43,11 +52,12 @@ def truncate(content: str, max_chars: int = MAX_CHARS) -> tuple[str, bool, Trunc
 
     error_lines = extract_error_lines(middle.splitlines())
 
+    errors_dropped = False
     if error_lines:
         error_snippet = "\n".join(line for _, line in error_lines)
         available = max_chars - len(error_snippet) - gap_marker_approx
         if available > 0:
-            head_share = int(available * HEAD_RATIO)
+            head_share = int(available * head_ratio)
             tail_share = available - head_share
             head = content[:head_share]
             tail = content[-tail_share:] if tail_share > 0 else ""
@@ -55,7 +65,7 @@ def truncate(content: str, max_chars: int = MAX_CHARS) -> tuple[str, bool, Trunc
             gap = f"\n\n[... {removed} characters removed (errors preserved above) ...]\n\n"
             result = head + gap + error_snippet + "\n" + tail
         else:
-            # error snippet alone is too large; fall back to plain split
+            errors_dropped = True
             removed = total - head_chars - tail_chars
             gap = f"\n\n[... {removed} characters removed ...]\n\n"
             result = head + gap + tail
@@ -65,10 +75,18 @@ def truncate(content: str, max_chars: int = MAX_CHARS) -> tuple[str, bool, Trunc
         result = head + gap + tail
 
     shown = len(result)
-    meta: TruncationMeta = {
-        "total_size": total,
-        "shown_size": shown,
-        "truncated_size": total - shown,
-        "hint": f"Output truncated: showing {shown} of {total} characters.",
-    }
-    return result, True, meta
+    if errors_dropped:
+        hint = (
+            f"Output truncated: showing {shown} of {total} characters. "
+            f"Error lines were detected in the truncated region but could not be preserved "
+            f"(error snippet exceeded the remaining budget)."
+        )
+    else:
+        hint = f"Output truncated: showing {shown} of {total} characters."
+    meta = TruncationMeta(
+        total_size=total,
+        shown_size=shown,
+        truncated_size=total - shown,
+        hint=hint,
+    )
+    return TruncateResult(output=result, truncated=True, meta=meta)

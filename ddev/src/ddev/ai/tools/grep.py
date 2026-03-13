@@ -19,13 +19,15 @@ class GrepTool(CmdTool[GrepInput]):
     numbers. Use to find specific config values, ports, hostnames across files. Supports extended
     regex syntax. Output might be truncated for large results."""
 
+    timeout = 30
+
     @property
     def name(self) -> str:
         return "grep"
 
     def cmd(self, tool_input: GrepInput) -> list[str]:
-        cmd = ["grep", "-n", "-E", tool_input.pattern]
+        cmd = ["grep", "-n", "-E"]
         if tool_input.recursive:
             cmd.append("-r")
-        cmd.append(tool_input.path)
+        cmd += [tool_input.pattern, tool_input.path]
         return cmd

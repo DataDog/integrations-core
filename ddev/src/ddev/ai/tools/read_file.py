@@ -11,7 +11,7 @@ from .cmd import CmdTool
 @dataclass
 class ReadFileInput:
     path: Annotated[str, "Absolute or relative path to the file to read"]
-    offset: Annotated[int | None, "Line number to start reading from (0-indexed, default: 0)"] = None
+    offset: Annotated[int | None, "Line number to start reading from (0-indexed, default: 0)"] = 0
     limit: Annotated[int | None, "Number of lines to read (default: all remaining lines)"] = None
 
 

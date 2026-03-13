@@ -5,12 +5,14 @@ import asyncio
 from abc import abstractmethod
 
 from .base import BaseTool
-from .truncation import truncate
+from .truncation import TruncateResult, truncate
 from .types import ToolResult
 
 
 class CmdTool[TInput](BaseTool[TInput]):
     """Base for tools that execute shell commands."""
+
+    timeout: int = 10
 
     @abstractmethod
     def cmd(self, tool_input: TInput) -> list[str]:
@@ -18,7 +20,7 @@ class CmdTool[TInput](BaseTool[TInput]):
         ...
 
     async def __call__(self, tool_input: TInput) -> ToolResult:
-        return await run_command(self.cmd(tool_input))
+        return await run_command(self.cmd(tool_input), timeout=self.timeout)
 
 
 async def run_command(cmd: list[str], timeout: int = 10) -> ToolResult:
@@ -40,21 +42,21 @@ async def run_command(cmd: list[str], timeout: int = 10) -> ToolResult:
 
     output = stdout
     if proc.returncode != 0 and stderr:
-        output = output + stderr if output else stderr
+        output = (output + "\n" + stderr) if output else stderr
 
     if not output.strip():
-        return ToolResult(success=True, data="(no output)")
+        return ToolResult(success=proc.returncode == 0, data="(no output)")
 
-    truncated_output, was_truncated, meta = truncate(output)
+    result: TruncateResult = truncate(output)
 
-    if was_truncated and meta is not None:
+    if result.truncated and result.meta is not None:
         return ToolResult(
             success=proc.returncode == 0,
-            data=truncated_output,
+            data=result.output,
             truncated=True,
-            total_size=meta["total_size"],
-            shown_size=meta["shown_size"],
-            hint=meta["hint"],
+            total_size=result.meta.total_size,
+            shown_size=result.meta.shown_size,
+            hint=result.meta.hint,
         )
 
-    return ToolResult(success=proc.returncode == 0, data=output)
+    return ToolResult(success=proc.returncode == 0, data=result.output)

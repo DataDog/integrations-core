@@ -16,6 +16,8 @@ class MkdirTool(CmdTool[MkdirInput]):
     """Creates a directory at the given path, including any missing parent directories.
     Use to create directories for config files, logs, source code."""
 
+    timeout = 5
+
     @property
     def name(self) -> str:
         return "mkdir"

@@ -17,6 +17,8 @@ class ListFilesTool(CmdTool[ListFilesInput]):
     """Lists files and directories at the given path. Use to explore directory structure and find
     config files. Non-recursive by default - set recursive=true for a deep listing."""
 
+    timeout = 30
+
     @property
     def name(self) -> str:
         return "list_files"
