@@ -2,13 +2,24 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import shlex
+import sys
 
 import pytest
 
-from ddev.config.model import ConfigurationError, RootConfig, get_github_token, get_github_user
+from ddev.config.model import ConfigurationError, RootConfig, get_github_user
+from ddev.config.secret_command import reset_secret_command_cache
 
 
-def test_default():
+@pytest.fixture(autouse=True)
+def reset_secret_command_cache_between_tests():
+    reset_secret_command_cache()
+    yield
+    reset_secret_command_cache()
+
+
+def test_default(monkeypatch):
+    monkeypatch.setenv('DD_GITHUB_TOKEN', 'default-token')
     config = RootConfig({})
     config.parse_fields()
 
@@ -40,10 +51,8 @@ def test_default():
             'user': '',
             'auth': '',
         },
-        'trello': {
-            'key': '',
-            'token': '',
-        },
+        'trello': {},
+        'dynamicd': {},
         'terminal': {
             'styles': {
                 'info': 'bold',
@@ -705,14 +714,54 @@ class TestOrgs:
 
 
 class TestGitHub:
-    def test_default(self):
+    def test_default(self, monkeypatch):
+        monkeypatch.setenv('DD_GITHUB_TOKEN', 'default-token')
         config = RootConfig({})
 
         assert config.github.user == config.github.user == get_github_user()
-        assert config.github.token == config.github.token == get_github_token()
+        assert config.github.token == config.github.token == 'default-token'
         assert config.raw_data == {
             'github': {},
         }
+
+    def test_token_command_precedence_over_literal_and_env(self, tmp_path, monkeypatch):
+        monkeypatch.setenv('DD_GITHUB_TOKEN', 'env-token')
+        script_path = tmp_path / 'github_token_precedence.py'
+        script_path.write_text("print('token_from_command')")
+
+        config = RootConfig(
+            {
+                'github': {
+                    'token': 'literal-token',
+                    'token_command': f"{shlex.quote(sys.executable)} {shlex.quote(str(script_path))}",
+                }
+            }
+        )
+
+        assert config.github.token == 'token_from_command'
+
+    def test_blank_literal_falls_back_to_environment(self, monkeypatch):
+        monkeypatch.setenv('DD_GITHUB_TOKEN', 'env-token')
+        config = RootConfig({'github': {'token': '   '}})
+
+        assert config.github.token == 'env-token'
+
+    def test_missing_token_is_deterministic_required_secret_error(self, helpers, monkeypatch):
+        monkeypatch.delenv('DD_GITHUB_TOKEN', raising=False)
+        monkeypatch.delenv('GH_TOKEN', raising=False)
+        monkeypatch.delenv('GITHUB_TOKEN', raising=False)
+        config = RootConfig({})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                github -> token
+                  \\[missing-required-secret\\] could not resolve required secret for github.token;"""
+            ),
+        ):
+            _ = config.github.token
 
     def test_not_table(self, helpers):
         config = RootConfig({'github': 9000})
@@ -818,6 +867,114 @@ class TestGitHub:
             ),
         ):
             _ = config.github.token
+
+    def test_token_command(self):
+        config = RootConfig({'github': {'token_command': 'python token.py'}})
+
+        assert config.github.token_command == 'python token.py'
+        assert config.raw_data == {'github': {'token_command': 'python token.py'}}
+
+    def test_token_command_not_string(self, helpers):
+        config = RootConfig({'github': {'token_command': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                github -> token_command
+                  must be a string"""
+            ),
+        ):
+            _ = config.github.token_command
+
+    def test_token_command_set_lazy_error(self, helpers):
+        config = RootConfig({})
+
+        config.github.token_command = 9000
+        assert config.raw_data == {'github': {'token_command': 9000}}
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                github -> token_command
+                  must be a string"""
+            ),
+        ):
+            _ = config.github.token_command
+
+    def test_token_command_uses_executor(self, tmp_path):
+        script_path = tmp_path / 'github_token.py'
+        script_path.write_text("print('token_from_command')")
+
+        config = RootConfig(
+            {'github': {'token_command': f"{shlex.quote(sys.executable)} {shlex.quote(str(script_path))}"}}
+        )
+
+        assert config.github.token == 'token_from_command'
+
+    def test_token_command_output_normalized(self, tmp_path):
+        script_path = tmp_path / 'github_token_ws.py'
+        script_path.write_text("print('  token_with_spaces  ')")
+        config = RootConfig(
+            {'github': {'token_command': f"{shlex.quote(sys.executable)} {shlex.quote(str(script_path))}"}}
+        )
+
+        assert config.github.token == 'token_with_spaces'
+
+    def test_token_command_failure_exit_code(self, helpers):
+        config = RootConfig(
+            {'github': {'token_command': f"{shlex.quote(sys.executable)} -c \"import sys; sys.exit(7)\""}}
+        )
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                github -> token
+                  \\[secret-command-non-zero-exit\\] could not resolve required secret for github.token;"""
+            ),
+        ):
+            _ = config.github.token
+
+    def test_token_command_timeout(self, helpers, monkeypatch):
+        monkeypatch.setattr('ddev.config.secret_command.DEFAULT_SECRET_COMMAND_TIMEOUT', 0.01)
+        config = RootConfig(
+            {'github': {'token_command': f"{shlex.quote(sys.executable)} -c \"import time; time.sleep(0.2)\""}}
+        )
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                github -> token
+                  \\[secret-command-timeout\\] could not resolve required secret for github.token;"""
+            ),
+        ):
+            _ = config.github.token
+
+    def test_token_command_missing_executable(self, helpers):
+        config = RootConfig({'github': {'token_command': 'missing-executable-12345'}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                github -> token
+                  \\[secret-command-executable-not-found\\] could not resolve required secret for github.token;"""
+            ),
+        ):
+            _ = config.github.token
+
+    def test_token_command_lazy_when_other_fields_are_used(self):
+        config = RootConfig({'github': {'user': 'github-user', 'token_command': 'missing-executable-12345'}})
+
+        assert config.github.user == 'github-user'
 
 
 class TestPyPI:
@@ -940,17 +1097,80 @@ class TestPyPI:
 
 
 class TestTrello:
-    def test_default(self):
+    def test_default_uses_environment(self, monkeypatch):
+        monkeypatch.setenv('DD_TRELLO_KEY', 'env-key')
+        monkeypatch.setenv('DD_TRELLO_TOKEN', 'env-token')
         config = RootConfig({})
 
-        assert config.trello.key == config.trello.key == ''
-        assert config.trello.token == config.trello.token == ''
+        assert config.trello.key == config.trello.key == 'env-key'
+        assert config.trello.token == config.trello.token == 'env-token'
         assert config.raw_data == {
-            'trello': {
-                'key': '',
-                'token': '',
-            },
+            'trello': {},
         }
+
+    def test_key_command_precedence_over_literal_and_env(self, tmp_path, monkeypatch):
+        monkeypatch.setenv('DD_TRELLO_KEY', 'env-key')
+        script_path = tmp_path / 'trello_key.py'
+        script_path.write_text("print('key_from_command')")
+
+        config = RootConfig(
+            {
+                'trello': {
+                    'key': 'literal-key',
+                    'key_command': f"{shlex.quote(sys.executable)} {shlex.quote(str(script_path))}",
+                }
+            }
+        )
+
+        assert config.trello.key == 'key_from_command'
+
+    def test_token_command_precedence_over_literal_and_env(self, tmp_path, monkeypatch):
+        monkeypatch.setenv('DD_TRELLO_TOKEN', 'env-token')
+        script_path = tmp_path / 'trello_token.py'
+        script_path.write_text("print('token_from_command')")
+
+        config = RootConfig(
+            {
+                'trello': {
+                    'token': 'literal-token',
+                    'token_command': f"{shlex.quote(sys.executable)} {shlex.quote(str(script_path))}",
+                }
+            }
+        )
+
+        assert config.trello.token == 'token_from_command'
+
+    def test_missing_key_is_deterministic_required_secret_error(self, helpers, monkeypatch):
+        monkeypatch.delenv('DD_TRELLO_KEY', raising=False)
+        monkeypatch.delenv('TRELLO_KEY', raising=False)
+        config = RootConfig({'trello': {'token': 'literal-token'}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                trello -> key
+                  \\[missing-required-secret\\] could not resolve required secret for trello.key;"""
+            ),
+        ):
+            _ = config.trello.key
+
+    def test_missing_token_is_deterministic_required_secret_error(self, helpers, monkeypatch):
+        monkeypatch.delenv('DD_TRELLO_TOKEN', raising=False)
+        monkeypatch.delenv('TRELLO_TOKEN', raising=False)
+        config = RootConfig({'trello': {'key': 'literal-key'}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                trello -> token
+                  \\[missing-required-secret\\] could not resolve required secret for trello.token;"""
+            ),
+        ):
+            _ = config.trello.token
 
     def test_not_table(self, helpers):
         config = RootConfig({'trello': 9000})
@@ -1020,6 +1240,43 @@ class TestTrello:
         ):
             _ = config.trello.key
 
+    def test_key_command(self):
+        config = RootConfig({'trello': {'key_command': 'python key.py'}})
+
+        assert config.trello.key_command == 'python key.py'
+        assert config.raw_data == {'trello': {'key_command': 'python key.py'}}
+
+    def test_key_command_not_string(self, helpers):
+        config = RootConfig({'trello': {'key_command': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                trello -> key_command
+                  must be a string"""
+            ),
+        ):
+            _ = config.trello.key_command
+
+    def test_key_command_set_lazy_error(self, helpers):
+        config = RootConfig({})
+
+        config.trello.key_command = 9000
+        assert config.raw_data == {'trello': {'key_command': 9000}}
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                trello -> key_command
+                  must be a string"""
+            ),
+        ):
+            _ = config.trello.key_command
+
     def test_token(self):
         config = RootConfig({'trello': {'token': 'foo'}})
 
@@ -1056,6 +1313,225 @@ class TestTrello:
             ),
         ):
             _ = config.trello.token
+
+    def test_token_command(self):
+        config = RootConfig({'trello': {'token_command': 'python token.py'}})
+
+        assert config.trello.token_command == 'python token.py'
+        assert config.raw_data == {'trello': {'token_command': 'python token.py'}}
+
+    def test_token_command_not_string(self, helpers):
+        config = RootConfig({'trello': {'token_command': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                trello -> token_command
+                  must be a string"""
+            ),
+        ):
+            _ = config.trello.token_command
+
+    def test_token_command_set_lazy_error(self, helpers):
+        config = RootConfig({})
+
+        config.trello.token_command = 9000
+        assert config.raw_data == {'trello': {'token_command': 9000}}
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                trello -> token_command
+                  must be a string"""
+            ),
+        ):
+            _ = config.trello.token_command
+
+
+class TestDynamicD:
+    def test_default_uses_environment(self, monkeypatch):
+        monkeypatch.setenv('ANTHROPIC_API_KEY', 'anthropic-from-env')
+        config = RootConfig({})
+
+        assert config.dynamicd.llm_api_key == 'anthropic-from-env'
+        assert config.raw_data == {'dynamicd': {}}
+
+    def test_dd_dynamicd_env_alias_takes_precedence(self, monkeypatch):
+        monkeypatch.setenv('DD_DYNAMICD_LLM_API_KEY', 'preferred')
+        monkeypatch.setenv('ANTHROPIC_API_KEY', 'fallback')
+        config = RootConfig({})
+
+        assert config.dynamicd.llm_api_key == 'preferred'
+
+    def test_llm_api_key_command_precedence_over_literal_and_env(self, tmp_path, monkeypatch):
+        monkeypatch.setenv('ANTHROPIC_API_KEY', 'env-key')
+        script_path = tmp_path / 'dynamicd_key.py'
+        script_path.write_text("print('key_from_command')")
+
+        config = RootConfig(
+            {
+                'dynamicd': {
+                    'llm_api_key': 'literal-key',
+                    'llm_api_key_command': f"{shlex.quote(sys.executable)} {shlex.quote(str(script_path))}",
+                }
+            }
+        )
+
+        assert config.dynamicd.llm_api_key == 'key_from_command'
+
+    def test_missing_llm_api_key_is_deterministic_required_secret_error(self, helpers, monkeypatch):
+        monkeypatch.delenv('DD_DYNAMICD_LLM_API_KEY', raising=False)
+        monkeypatch.delenv('ANTHROPIC_API_KEY', raising=False)
+        config = RootConfig({})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                dynamicd -> llm_api_key
+                  \\[missing-required-secret\\] could not resolve required secret for dynamicd.llm_api_key;"""
+            ),
+        ):
+            _ = config.dynamicd.llm_api_key
+
+    def test_not_table(self, helpers):
+        config = RootConfig({'dynamicd': 9000})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                dynamicd
+                  must be a table"""
+            ),
+        ):
+            _ = config.dynamicd
+
+    def test_set_lazy_error(self, helpers):
+        config = RootConfig({})
+
+        config.dynamicd = 9000
+        assert config.raw_data == {'dynamicd': 9000}
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                dynamicd
+                  must be a table"""
+            ),
+        ):
+            _ = config.dynamicd
+
+    def test_llm_api_key_not_string(self, helpers):
+        config = RootConfig({'dynamicd': {'llm_api_key': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                dynamicd -> llm_api_key
+                  must be a string"""
+            ),
+        ):
+            _ = config.dynamicd.llm_api_key
+
+    def test_llm_api_key_set_lazy_error(self, helpers):
+        config = RootConfig({})
+
+        config.dynamicd.llm_api_key = 9000
+        assert config.raw_data == {'dynamicd': {'llm_api_key': 9000}}
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                dynamicd -> llm_api_key
+                  must be a string"""
+            ),
+        ):
+            _ = config.dynamicd.llm_api_key
+
+    def test_llm_api_key_command(self):
+        config = RootConfig({'dynamicd': {'llm_api_key_command': 'python llm_key.py'}})
+
+        assert config.dynamicd.llm_api_key_command == 'python llm_key.py'
+        assert config.raw_data == {'dynamicd': {'llm_api_key_command': 'python llm_key.py'}}
+
+    def test_llm_api_key_command_not_string(self, helpers):
+        config = RootConfig({'dynamicd': {'llm_api_key_command': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                dynamicd -> llm_api_key_command
+                  must be a string"""
+            ),
+        ):
+            _ = config.dynamicd.llm_api_key_command
+
+    def test_llm_api_key_command_set_lazy_error(self, helpers):
+        config = RootConfig({})
+
+        config.dynamicd.llm_api_key_command = 9000
+        assert config.raw_data == {'dynamicd': {'llm_api_key_command': 9000}}
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                dynamicd -> llm_api_key_command
+                  must be a string"""
+            ),
+        ):
+            _ = config.dynamicd.llm_api_key_command
+
+    def test_llm_api_key_command_is_lazy_until_access(self, monkeypatch):
+        calls = []
+
+        def fake_run(*args, **kwargs):
+            calls.append((args, kwargs))
+            return type('P', (), {'returncode': 0, 'stdout': 'secret-from-command'})()
+
+        monkeypatch.setattr('ddev.config.secret_command.subprocess.run', fake_run)
+
+        config = RootConfig({'dynamicd': {'llm_api_key_command': 'python key.py'}})
+        config.parse_fields()
+
+        assert calls == []
+
+        assert config.dynamicd.llm_api_key == 'secret-from-command'
+        assert len(calls) == 1
+
+
+class TestSecretCommandCache:
+    def test_same_command_executes_once_across_model_instances(self, monkeypatch):
+        calls = []
+
+        def fake_run(*args, **kwargs):
+            calls.append((args, kwargs))
+            return type('P', (), {'returncode': 0, 'stdout': 'cached-token'})()
+
+        monkeypatch.setattr('ddev.config.secret_command.subprocess.run', fake_run)
+
+        first = RootConfig({'github': {'token_command': 'python token.py'}})
+        second = RootConfig({'github': {'token_command': 'python token.py'}})
+
+        assert first.github.token == 'cached-token'
+        assert second.github.token == 'cached-token'
+        assert len(calls) == 1
 
 
 class TestTerminal:
@@ -1406,7 +1882,8 @@ class TestTerminal:
 
 
 class TestGitHubConfig:
-    def test_default_github_config_empty_raw_data(self):
+    def test_default_github_config_empty_raw_data(self, monkeypatch):
+        monkeypatch.setenv('DD_GITHUB_TOKEN', 'env_token')
         config = RootConfig({})
         config.parse_fields()
 
@@ -1415,7 +1892,7 @@ class TestGitHubConfig:
 
         # But properties should still work via environment variables
         assert config.github.user == get_github_user()
-        assert config.github.token == get_github_token()
+        assert config.github.token == 'env_token'
 
         # After accessing properties, raw_data should still be empty
         assert config.raw_data['github'] == {}
@@ -1431,7 +1908,8 @@ class TestGitHubConfig:
         assert config.github.user == 'explicit_user'
         assert config.github.token == 'explicit_token'
 
-    def test_partial_github_config_explicit_user_only(self):
+    def test_partial_github_config_explicit_user_only(self, monkeypatch):
+        monkeypatch.setenv('DD_GITHUB_TOKEN', 'env_token')
         config = RootConfig({'github': {'user': 'explicit_user'}})
 
         # Only explicitly set field should be in raw_data
@@ -1440,7 +1918,7 @@ class TestGitHubConfig:
 
         # Properties should work - explicit user, env var token
         assert config.github.user == 'explicit_user'
-        assert config.github.token == get_github_token()
+        assert config.github.token == 'env_token'
 
         # raw_data should still only have explicit field
         assert config.raw_data['github']['user'] == 'explicit_user'
@@ -1474,3 +1952,27 @@ class TestGitHubConfig:
 
         # raw_data should still be empty
         assert config.raw_data['github'] == {}
+
+    def test_github_token_uses_gh_token_alias_when_primary_env_absent(self, monkeypatch):
+        monkeypatch.delenv('DD_GITHUB_TOKEN', raising=False)
+        monkeypatch.setenv('GH_TOKEN', 'gh-token')
+        monkeypatch.delenv('GITHUB_TOKEN', raising=False)
+
+        config = RootConfig({})
+
+        assert config.github.token == 'gh-token'
+
+    def test_missing_required_secret_error_reports_first_missing_field(self, monkeypatch):
+        monkeypatch.delenv('DD_GITHUB_TOKEN', raising=False)
+        monkeypatch.delenv('GH_TOKEN', raising=False)
+        monkeypatch.delenv('GITHUB_TOKEN', raising=False)
+
+        config = RootConfig({})
+
+        with pytest.raises(ConfigurationError) as error:
+            _ = config.github.token
+
+        message = str(error.value)
+        assert 'github -> token' in message
+        assert 'missing-required-secret' in message
+        assert 'orgs' not in message

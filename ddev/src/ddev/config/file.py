@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import cast
 
 from ddev.config.model import RootConfig
+from ddev.config.trust import is_local_config_trusted, sanitize_command_fields
 from ddev.config.utils import scrub_config
 from ddev.utils.fs import Path
 from ddev.utils.toml import dumps_toml_data, load_toml_data
@@ -68,6 +69,28 @@ def build_line_index_with_multiple_entries(content: str) -> dict[str, list[int]]
         stripped_line = line.strip()
         index.setdefault(stripped_line, []).append(line_number)
     return index
+
+
+def find_command_field_paths(value, path: tuple[str, ...] = ()) -> set[str]:
+    if isinstance(value, dict):
+        command_paths: set[str] = set()
+        for key, item in value.items():
+            if isinstance(key, str):
+                next_path = (*path, key)
+                if key.endswith('_command'):
+                    command_paths.add('.'.join(next_path))
+                command_paths.update(find_command_field_paths(item, next_path))
+            else:
+                command_paths.update(find_command_field_paths(item, path))
+        return command_paths
+
+    if isinstance(value, list):
+        list_command_paths: set[str] = set()
+        for item in value:
+            list_command_paths.update(find_command_field_paths(item, path))
+        return list_command_paths
+
+    return set()
 
 
 @dataclass
@@ -157,13 +180,20 @@ class ConfigFileWithOverrides:
             return
 
         self.overrides_content = overrides_content
-        self.overrides_model = RootConfig(load_toml_data(self.overrides_content))
+        overrides_data = load_toml_data(self.overrides_content)
+        trust_blocked_command_fields: set[str] = set()
+        if not is_local_config_trusted(self.overrides_path):
+            trust_blocked_command_fields = find_command_field_paths(overrides_data)
+            overrides_data = sanitize_command_fields(overrides_data)
+        non_secret_metadata = {'trust_blocked_command_fields': trust_blocked_command_fields}
+        self.overrides_model = RootConfig(overrides_data, non_secret_metadata=non_secret_metadata)
 
         self.combined_model = RootConfig(
             deep_merge_with_list_handling(
                 cast(RootConfig, self.global_model).raw_data,
                 self.overrides_model.raw_data,
-            )
+            ),
+            non_secret_metadata=non_secret_metadata,
         )
         self.combined_content = dumps_toml_data(self.combined_model.raw_data)
 

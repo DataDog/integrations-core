@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+from ddev.config.secret_resolution import SecretResolutionError, resolve_required_secret
+
 FIELD_TO_PARSE = object()
 
 
@@ -17,6 +19,18 @@ def get_github_user():
 
 def get_github_token():
     return os.environ.get('DD_GITHUB_TOKEN', '') or os.environ.get('GH_TOKEN', '') or os.environ.get('GITHUB_TOKEN', '')
+
+
+def get_trello_key():
+    return os.environ.get('DD_TRELLO_KEY', '') or os.environ.get('TRELLO_KEY', '')
+
+
+def get_trello_token():
+    return os.environ.get('DD_TRELLO_TOKEN', '') or os.environ.get('TRELLO_TOKEN', '')
+
+
+def get_dynamicd_llm_api_key():
+    return os.environ.get('DD_DYNAMICD_LLM_API_KEY', '') or os.environ.get('ANTHROPIC_API_KEY', '')
 
 
 class ConfigurationError(Exception):
@@ -58,8 +72,9 @@ class LazilyParsedConfig:
 
 
 class RootConfig(LazilyParsedConfig):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, non_secret_metadata=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.non_secret_metadata = non_secret_metadata or {}
 
         self._field_repo = FIELD_TO_PARSE
         self._field_agent = FIELD_TO_PARSE
@@ -71,6 +86,7 @@ class RootConfig(LazilyParsedConfig):
         self._field_pypi = FIELD_TO_PARSE
         self._field_trello = FIELD_TO_PARSE
         self._field_terminal = FIELD_TO_PARSE
+        self._field_dynamicd = FIELD_TO_PARSE
         self._field_upgrade_check = FIELD_TO_PARSE
 
     @property
@@ -255,11 +271,19 @@ class RootConfig(LazilyParsedConfig):
                 if not isinstance(github, dict):
                     self.raise_error('must be a table')
 
-                self._field_github = GitHubConfig(github, ('github',))
+                self._field_github = GitHubConfig(
+                    github,
+                    ('github',),
+                    trust_blocked_command_fields=self._trust_blocked_command_fields,
+                )
             else:
                 github = {}
                 self.raw_data['github'] = github
-                self._field_github = GitHubConfig(github, ('github',))
+                self._field_github = GitHubConfig(
+                    github,
+                    ('github',),
+                    trust_blocked_command_fields=self._trust_blocked_command_fields,
+                )
 
         return self._field_github
 
@@ -297,11 +321,19 @@ class RootConfig(LazilyParsedConfig):
                 if not isinstance(trello, dict):
                     self.raise_error('must be a table')
 
-                self._field_trello = TrelloConfig(trello, ('trello',))
+                self._field_trello = TrelloConfig(
+                    trello,
+                    ('trello',),
+                    trust_blocked_command_fields=self._trust_blocked_command_fields,
+                )
             else:
                 trello = {}
                 self.raw_data['trello'] = trello
-                self._field_trello = TrelloConfig(trello, ('trello',))
+                self._field_trello = TrelloConfig(
+                    trello,
+                    ('trello',),
+                    trust_blocked_command_fields=self._trust_blocked_command_fields,
+                )
 
         return self._field_trello
 
@@ -330,6 +362,42 @@ class RootConfig(LazilyParsedConfig):
     def terminal(self, value):
         self.raw_data['terminal'] = value
         self._field_terminal = FIELD_TO_PARSE
+
+    @property
+    def dynamicd(self):
+        if self._field_dynamicd is FIELD_TO_PARSE:
+            if 'dynamicd' in self.raw_data:
+                dynamicd = self.raw_data['dynamicd']
+                if not isinstance(dynamicd, dict):
+                    self.raise_error('must be a table')
+
+                self._field_dynamicd = DynamicDConfig(
+                    dynamicd,
+                    ('dynamicd',),
+                    trust_blocked_command_fields=self._trust_blocked_command_fields,
+                )
+            else:
+                dynamicd = {}
+                self.raw_data['dynamicd'] = dynamicd
+                self._field_dynamicd = DynamicDConfig(
+                    dynamicd,
+                    ('dynamicd',),
+                    trust_blocked_command_fields=self._trust_blocked_command_fields,
+                )
+
+        return self._field_dynamicd
+
+    @dynamicd.setter
+    def dynamicd(self, value):
+        self.raw_data['dynamicd'] = value
+        self._field_dynamicd = FIELD_TO_PARSE
+
+    @property
+    def _trust_blocked_command_fields(self):
+        value = self.non_secret_metadata.get('trust_blocked_command_fields', set())
+        if not isinstance(value, set):
+            return set()
+        return value
 
 
 class RepoConfig(LazilyParsedConfig):
@@ -471,11 +539,19 @@ class OrgConfig(LazilyParsedConfig):
 
 
 class GitHubConfig(LazilyParsedConfig):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, trust_blocked_command_fields=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self._trust_blocked_command_fields = trust_blocked_command_fields or set()
 
         self._field_user = FIELD_TO_PARSE
         self._field_token = FIELD_TO_PARSE
+        self._field_token_command = FIELD_TO_PARSE
+
+    def parse_fields(self):
+        # Keep command-backed token resolution lazy. Parsing all fields (used by config reset and
+        # non-auth paths) should validate structure without forcing required-secret evaluation.
+        parse_config(self.user)
+        parse_config(self.token_command)
 
     @property
     def user(self):
@@ -499,14 +575,26 @@ class GitHubConfig(LazilyParsedConfig):
     @property
     def token(self):
         if self._field_token is FIELD_TO_PARSE:
+            literal_token = None
             if 'token' in self.raw_data:
-                token = self.raw_data['token']
-                if not isinstance(token, str):
+                literal_token = self.raw_data['token']
+                if not isinstance(literal_token, str):
                     self.raise_error('must be a string')
 
-                self._field_token = token
-            else:
-                self._field_token = get_github_token()
+            command = self.token_command
+
+            try:
+                self._field_token = resolve_required_secret(
+                    field_path='github.token',
+                    command=command,
+                    literal=literal_token,
+                    env_var='DD_GITHUB_TOKEN',
+                    env_value=get_github_token(),
+                    env_label='DD_GITHUB_TOKEN|GH_TOKEN|GITHUB_TOKEN',
+                    command_blocked_by_trust='github.token_command' in self._trust_blocked_command_fields,
+                )
+            except SecretResolutionError as e:
+                self.raise_error(str(e))
 
         return self._field_token
 
@@ -514,6 +602,25 @@ class GitHubConfig(LazilyParsedConfig):
     def token(self, value):
         self.raw_data['token'] = value
         self._field_token = FIELD_TO_PARSE
+
+    @property
+    def token_command(self):
+        if self._field_token_command is FIELD_TO_PARSE:
+            if 'token_command' not in self.raw_data:
+                self._field_token_command = None
+            else:
+                token_command = self.raw_data['token_command']
+                if not isinstance(token_command, str):
+                    self.raise_error('must be a string')
+
+                self._field_token_command = token_command
+
+        return self._field_token_command
+
+    @token_command.setter
+    def token_command(self, value):
+        self.raw_data['token_command'] = value
+        self._field_token_command = FIELD_TO_PARSE
 
 
 class PyPIConfig(LazilyParsedConfig):
@@ -563,23 +670,43 @@ class PyPIConfig(LazilyParsedConfig):
 
 
 class TrelloConfig(LazilyParsedConfig):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, trust_blocked_command_fields=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self._trust_blocked_command_fields = trust_blocked_command_fields or set()
 
         self._field_key = FIELD_TO_PARSE
+        self._field_key_command = FIELD_TO_PARSE
         self._field_token = FIELD_TO_PARSE
+        self._field_token_command = FIELD_TO_PARSE
+
+    def parse_fields(self):
+        # Keep required secret resolution lazy for trello credentials.
+        parse_config(self.key_command)
+        parse_config(self.token_command)
 
     @property
     def key(self):
         if self._field_key is FIELD_TO_PARSE:
+            literal_key = None
             if 'key' in self.raw_data:
-                key = self.raw_data['key']
-                if not isinstance(key, str):
+                literal_key = self.raw_data['key']
+                if not isinstance(literal_key, str):
                     self.raise_error('must be a string')
 
-                self._field_key = key
-            else:
-                self._field_key = self.raw_data['key'] = ''
+            command = self.key_command
+
+            try:
+                self._field_key = resolve_required_secret(
+                    field_path='trello.key',
+                    command=command,
+                    literal=literal_key,
+                    env_var='DD_TRELLO_KEY',
+                    env_value=get_trello_key(),
+                    env_label='DD_TRELLO_KEY|TRELLO_KEY',
+                    command_blocked_by_trust='trello.key_command' in self._trust_blocked_command_fields,
+                )
+            except SecretResolutionError as e:
+                self.raise_error(str(e))
 
         return self._field_key
 
@@ -591,14 +718,26 @@ class TrelloConfig(LazilyParsedConfig):
     @property
     def token(self):
         if self._field_token is FIELD_TO_PARSE:
+            literal_token = None
             if 'token' in self.raw_data:
-                token = self.raw_data['token']
-                if not isinstance(token, str):
+                literal_token = self.raw_data['token']
+                if not isinstance(literal_token, str):
                     self.raise_error('must be a string')
 
-                self._field_token = token
-            else:
-                self._field_token = self.raw_data['token'] = ''
+            command = self.token_command
+
+            try:
+                self._field_token = resolve_required_secret(
+                    field_path='trello.token',
+                    command=command,
+                    literal=literal_token,
+                    env_var='DD_TRELLO_TOKEN',
+                    env_value=get_trello_token(),
+                    env_label='DD_TRELLO_TOKEN|TRELLO_TOKEN',
+                    command_blocked_by_trust='trello.token_command' in self._trust_blocked_command_fields,
+                )
+            except SecretResolutionError as e:
+                self.raise_error(str(e))
 
         return self._field_token
 
@@ -606,6 +745,107 @@ class TrelloConfig(LazilyParsedConfig):
     def token(self, value):
         self.raw_data['token'] = value
         self._field_token = FIELD_TO_PARSE
+
+    @property
+    def key_command(self):
+        if self._field_key_command is FIELD_TO_PARSE:
+            if 'key_command' not in self.raw_data:
+                self._field_key_command = None
+            else:
+                key_command = self.raw_data['key_command']
+                if not isinstance(key_command, str):
+                    self.raise_error('must be a string')
+
+                self._field_key_command = key_command
+
+        return self._field_key_command
+
+    @key_command.setter
+    def key_command(self, value):
+        self.raw_data['key_command'] = value
+        self._field_key_command = FIELD_TO_PARSE
+
+    @property
+    def token_command(self):
+        if self._field_token_command is FIELD_TO_PARSE:
+            if 'token_command' not in self.raw_data:
+                self._field_token_command = None
+            else:
+                token_command = self.raw_data['token_command']
+                if not isinstance(token_command, str):
+                    self.raise_error('must be a string')
+
+                self._field_token_command = token_command
+
+        return self._field_token_command
+
+    @token_command.setter
+    def token_command(self, value):
+        self.raw_data['token_command'] = value
+        self._field_token_command = FIELD_TO_PARSE
+
+
+class DynamicDConfig(LazilyParsedConfig):
+    def __init__(self, *args, trust_blocked_command_fields=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._trust_blocked_command_fields = trust_blocked_command_fields or set()
+
+        self._field_llm_api_key = FIELD_TO_PARSE
+        self._field_llm_api_key_command = FIELD_TO_PARSE
+
+    def parse_fields(self):
+        # Keep command-backed llm key resolution lazy.
+        parse_config(self.llm_api_key_command)
+
+    @property
+    def llm_api_key(self):
+        if self._field_llm_api_key is FIELD_TO_PARSE:
+            literal_key = None
+            if 'llm_api_key' in self.raw_data:
+                literal_key = self.raw_data['llm_api_key']
+                if not isinstance(literal_key, str):
+                    self.raise_error('must be a string')
+
+            command = self.llm_api_key_command
+
+            try:
+                self._field_llm_api_key = resolve_required_secret(
+                    field_path='dynamicd.llm_api_key',
+                    command=command,
+                    literal=literal_key,
+                    env_var='ANTHROPIC_API_KEY',
+                    env_value=get_dynamicd_llm_api_key(),
+                    env_label='DD_DYNAMICD_LLM_API_KEY|ANTHROPIC_API_KEY',
+                    command_blocked_by_trust='dynamicd.llm_api_key_command' in self._trust_blocked_command_fields,
+                )
+            except SecretResolutionError as e:
+                self.raise_error(str(e))
+
+        return self._field_llm_api_key
+
+    @llm_api_key.setter
+    def llm_api_key(self, value):
+        self.raw_data['llm_api_key'] = value
+        self._field_llm_api_key = FIELD_TO_PARSE
+
+    @property
+    def llm_api_key_command(self):
+        if self._field_llm_api_key_command is FIELD_TO_PARSE:
+            if 'llm_api_key_command' not in self.raw_data:
+                self._field_llm_api_key_command = None
+            else:
+                llm_api_key_command = self.raw_data['llm_api_key_command']
+                if not isinstance(llm_api_key_command, str):
+                    self.raise_error('must be a string')
+
+                self._field_llm_api_key_command = llm_api_key_command
+
+        return self._field_llm_api_key_command
+
+    @llm_api_key_command.setter
+    def llm_api_key_command(self, value):
+        self.raw_data['llm_api_key_command'] = value
+        self._field_llm_api_key_command = FIELD_TO_PARSE
 
 
 class TerminalConfig(LazilyParsedConfig):

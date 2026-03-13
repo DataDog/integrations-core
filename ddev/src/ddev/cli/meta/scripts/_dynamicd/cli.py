@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-import os
 from typing import TYPE_CHECKING
 
 import click
@@ -78,10 +77,22 @@ def _get_api_keys(app: Application) -> tuple[str, str]:
 
     Returns (llm_api_key, dd_api_key) or aborts if not configured.
     """
-    # Get LLM API key from config or environment variable
-    llm_api_key = app.config.raw_data.get("dynamicd", {}).get("llm_api_key")
-    if not llm_api_key:
-        llm_api_key = os.environ.get("ANTHROPIC_API_KEY")
+    from ddev.config.model import ConfigurationError
+
+    try:
+        llm_api_key = app.config.dynamicd.llm_api_key
+    except ConfigurationError as e:
+        if 'missing-required-secret' not in str(e):
+            app.display_error(str(e))
+            app.abort()
+
+        app.display_error(
+            "LLM API key not configured. Either:\n"
+            "  1. Set env var: export ANTHROPIC_API_KEY=<your-key>\n"
+            "  2. Or run: ddev config set dynamicd.llm_api_key <your-key>"
+        )
+        app.abort()
+
     if not llm_api_key:
         app.display_error(
             "LLM API key not configured. Either:\n"

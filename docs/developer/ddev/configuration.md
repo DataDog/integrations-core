@@ -91,3 +91,46 @@ If not:
 1. Create a [personal access token][github-personal-access-token] with `public_repo` and `read:org` permissions
 1. Run `ddev config set github.token` then paste the token
 1. [Enable single sign-on][github-saml-single-sign-on] for the token
+
+If you prefer command-based secret sourcing, set `github.token_command` instead of `github.token`.
+
+## Command-based secret fields
+
+Use `<field>_command` when you want `ddev` to execute a command at runtime and read the secret from the command output,
+instead of storing the secret directly in config.
+
+Supported command-backed fields are:
+
+- `github.token_command`
+- `trello.key_command`
+- `trello.token_command`
+- `dynamicd.llm_api_key_command`
+
+Example global config:
+
+```toml
+[github]
+user = "<YOUR_GITHUB_USERNAME>"
+token_command = "<COMMAND_THAT_PRINTS_GITHUB_TOKEN>"
+
+[trello]
+key_command = "<COMMAND_THAT_PRINTS_TRELLO_KEY>"
+token_command = "<COMMAND_THAT_PRINTS_TRELLO_TOKEN>"
+
+[dynamicd]
+llm_api_key_command = "<COMMAND_THAT_PRINTS_DYNAMICD_LLM_API_KEY>"
+```
+
+For each supported secret, `ddev` resolves values in this order:
+
+1. matching `<field>_command`
+1. matching literal field in config
+1. matching environment variable
+
+This lets you migrate gradually: keep literal values or env vars as fallback while you adopt command-based sourcing.
+
+## Troubleshooting command-based setup
+
+- Ensure command fields are strings and print only the secret value.
+- If you define command fields in a repo-local `.ddev.toml`, trust may be required before those commands are used. See [Multi-repo/Worktrees](multirepo.md).
+- If a command fails, update the command itself or temporarily use a literal or environment fallback while fixing it.

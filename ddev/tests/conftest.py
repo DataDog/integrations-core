@@ -112,6 +112,7 @@ def config_file(tmp_path, monkeypatch, local_repo, mocker) -> ConfigFileWithOver
 
     # Provide a real default for times when tests have no need to modify the repo
     config.global_model.repos['core'] = str(local_repo)
+    config.global_model.github.token = 'fake-test-token'
     config.save()
 
     return config

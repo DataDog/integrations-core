@@ -7,8 +7,12 @@ These tests verify that dashboard parsing correctly extracts metrics, tags,
 and tag values from real integration dashboards.
 """
 
+import shlex
+import sys
+
 import pytest
 
+from ddev.config.model import RootConfig
 from ddev.repo.core import Repository
 
 
@@ -168,3 +172,52 @@ class TestReadServiceChecks:
 
         assert len(checks) > 0, "Redis should have service checks"
         assert all('name' in c for c in checks), "Each check should have a name"
+
+
+class _StubApp:
+    def __init__(self, config: RootConfig):
+        self.config = config
+        self.errors = []
+
+    def display_error(self, message: str):
+        self.errors.append(message)
+
+    def abort(self, message: str | None = None):
+        raise RuntimeError(message or 'aborted')
+
+
+class TestGetApiKeys:
+    def test_uses_dynamicd_model_resolution_with_command_precedence(self, tmp_path):
+        from ddev.cli.meta.scripts._dynamicd.cli import _get_api_keys
+
+        script_path = tmp_path / 'dynamicd_key.py'
+        script_path.write_text("print('from-command')")
+        config = RootConfig(
+            {
+                'dynamicd': {
+                    'llm_api_key': 'literal',
+                    'llm_api_key_command': f"{shlex.quote(sys.executable)} {shlex.quote(str(script_path))}",
+                },
+                'orgs': {'default': {'api_key': 'dd-api-key'}},
+            }
+        )
+        app = _StubApp(config)
+
+        llm_api_key, dd_api_key = _get_api_keys(app)
+
+        assert llm_api_key == 'from-command'
+        assert dd_api_key == 'dd-api-key'
+
+    def test_missing_dynamicd_key_shows_actionable_message(self, monkeypatch):
+        from ddev.cli.meta.scripts._dynamicd.cli import _get_api_keys
+
+        monkeypatch.delenv('DD_DYNAMICD_LLM_API_KEY', raising=False)
+        monkeypatch.delenv('ANTHROPIC_API_KEY', raising=False)
+
+        config = RootConfig({'orgs': {'default': {'api_key': 'dd-api-key'}}})
+        app = _StubApp(config)
+
+        with pytest.raises(RuntimeError):
+            _get_api_keys(app)
+
+        assert any('LLM API key not configured' in error for error in app.errors)
