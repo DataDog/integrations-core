@@ -74,6 +74,15 @@ class TestDispatchInBatches:
             dispatch_in_batches(["pkg"], "repo", "ref", "dev", "my-token")
         assert mock_send.call_args[0][1] == "my-token"
 
+    def test_empty_packages_does_not_dispatch(self):
+        with patch("_release.dispatch.send_dispatch") as mock_send:
+            dispatch_in_batches([], "repo", "ref", "dev", "tok")
+        mock_send.assert_not_called()
+
+    def test_invalid_batch_size_raises(self):
+        with pytest.raises(ValueError):
+            dispatch_in_batches(["pkg"], "repo", "ref", "dev", "tok", batch_size=0)
+
 
 class TestBuildSummary:
     _results = [

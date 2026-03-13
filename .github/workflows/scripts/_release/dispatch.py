@@ -66,20 +66,20 @@ def dispatch_in_batches(
     ref: str,
     target: str,
     token: str,
-    *,
     batch_size: int = BATCH_SIZE,
-    dispatch_url: str = DISPATCH_URL,
-    max_attempts: int = MAX_ATTEMPTS,
 ) -> None:
     """Dispatch all packages to the wheels-release repo, batching if needed."""
-    batches = [packages[i : i + batch_size] for i in range(0, len(packages), batch_size)]
-    for i, batch in enumerate(batches, 1):
-        print(f"\nBatch {i}/{len(batches)}:")
-        for name in batch:
-            print(f"  - {name}")
-        send_dispatch(
-            build_payload(batch, source_repo, ref, target),
-            token,
-            dispatch_url=dispatch_url,
-            max_attempts=max_attempts,
-        )
+    if batch_size <= 0:
+        raise ValueError("batch_size must be > 0")
+    nbr_packages = len(packages)
+    if nbr_packages == 0:
+        return
+    total_batches = (nbr_packages + batch_size - 1) // batch_size
+    batch_num = 1
+    for start in range(0, nbr_packages, batch_size):
+        end = min(start + batch_size, nbr_packages)
+        current_batch = packages[start:end]
+        print(f"\nBatch {batch_num}/{total_batches}:")
+        print("\n".join(f"  - {name}" for name in current_batch))
+        send_dispatch(build_payload(current_batch, source_repo, ref, target), token)
+        batch_num += 1

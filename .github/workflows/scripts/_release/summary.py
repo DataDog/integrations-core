@@ -27,7 +27,6 @@ def build_summary(
     target: str,
     dry_run: bool,
     dispatched: bool,
-    *,
     footer: str = "",
 ) -> str:
     """Return the full Markdown summary for GITHUB_STEP_SUMMARY.
