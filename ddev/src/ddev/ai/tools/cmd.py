@@ -3,22 +3,21 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
 from abc import abstractmethod
-from typing import Any
 
 from .base import BaseTool
 from .truncation import truncate
 from .types import ToolResult
 
 
-class CmdTool(BaseTool):
+class CmdTool[TInput](BaseTool[TInput]):
     """Base for tools that execute shell commands."""
 
     @abstractmethod
-    def cmd(self, tool_input: Any) -> list[str]:
+    def cmd(self, tool_input: TInput) -> list[str]:
         """Builds the shell command from validated tool input."""
         ...
 
-    async def __call__(self, tool_input: Any) -> ToolResult:
+    async def __call__(self, tool_input: TInput) -> ToolResult:
         return await run_command(self.cmd(tool_input))
 
 

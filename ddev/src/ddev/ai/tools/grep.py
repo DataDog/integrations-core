@@ -14,12 +14,10 @@ class GrepInput:
     recursive: Annotated[bool, "Search recursively in directories (default: true)"] = True
 
 
-class GrepTool(CmdTool):
+class GrepTool(CmdTool[GrepInput]):
     """Searches for a regex pattern in files. Returns matching lines with file path and line
     numbers. Use to find specific config values, ports, hostnames across files. Supports extended
     regex syntax. Output might be truncated for large results."""
-
-    Input = GrepInput
 
     @property
     def name(self) -> str:

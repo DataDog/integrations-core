@@ -13,11 +13,9 @@ class ListFilesInput:
     recursive: Annotated[bool, "Whether to list recursively (default: false)"] = False
 
 
-class ListFilesTool(CmdTool):
+class ListFilesTool(CmdTool[ListFilesInput]):
     """Lists files and directories at the given path. Use to explore directory structure and find
     config files. Non-recursive by default - set recursive=true for a deep listing."""
-
-    Input = ListFilesInput
 
     @property
     def name(self) -> str:

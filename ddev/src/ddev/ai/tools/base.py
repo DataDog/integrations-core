@@ -6,13 +6,11 @@ import dataclasses
 import inspect
 import typing
 from abc import ABC, abstractmethod
-from typing import Annotated, Any, ClassVar, get_args, get_type_hints, overload
+from typing import Annotated, Any, get_args, get_type_hints, overload
 
 from anthropic.types import ToolParam
 
 from .types import ToolResult
-
-ALLOWED_TOOL_CALLERS = ["code_execution_20260120"]
 
 _JSON_TYPE_MAP: dict[type, str] = {
     str: "string",
@@ -88,6 +86,14 @@ def build_schema(cls: type) -> dict[str, object]:
     return schema
 
 
+def _get_input_type(cls: type) -> type:
+    for base in getattr(cls, "__orig_bases__", ()):
+        args = typing.get_args(base)
+        if args:
+            return args[0]
+    raise TypeError(f"{cls.__name__} must be parameterized with an input type: class MyTool(BaseTool[MyInput])")
+
+
 class ToolProtocol(typing.Protocol):
     @property
     def name(self) -> str: ...
@@ -99,9 +105,7 @@ class ToolProtocol(typing.Protocol):
     async def __call__(self, tool_input: Any) -> ToolResult: ...
 
 
-class BaseTool(ABC, ToolProtocol):
-    Input: ClassVar[type]
-
+class BaseTool[TInput](ABC, ToolProtocol):
     @property
     @abstractmethod
     def name(self) -> str:
@@ -114,7 +118,7 @@ class BaseTool(ABC, ToolProtocol):
 
     @property
     def input_schema(self) -> dict[str, object]:
-        return build_schema(self.Input)
+        return build_schema(_get_input_type(type(self)))
 
     @property
     def definition(self) -> ToolParam:
@@ -123,13 +127,12 @@ class BaseTool(ABC, ToolProtocol):
             "name": self.name,
             "description": self.description,
             "input_schema": self.input_schema,
-            "allowed_callers": ALLOWED_TOOL_CALLERS,
         }
 
     async def run(self, raw: dict[str, object]) -> ToolResult:
         """Coerce raw dict to the typed Input class and delegate to __call__."""
         try:
-            validated = self.Input(**raw)
+            validated = _get_input_type(type(self))(**raw)
         except (TypeError, ValueError) as e:
             return ToolResult(success=False, error=str(e))
         try:
@@ -138,6 +141,6 @@ class BaseTool(ABC, ToolProtocol):
             return ToolResult(success=False, error=f"{type(e).__name__}: {str(e)}")
 
     @abstractmethod
-    async def __call__(self, tool_input: Any) -> ToolResult:
+    async def __call__(self, tool_input: TInput) -> ToolResult:
         """Call the tool with a typed input instance."""
         ...

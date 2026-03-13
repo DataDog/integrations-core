@@ -15,12 +15,10 @@ class ReadFileInput:
     limit: Annotated[int | None, "Number of lines to read (default: all remaining lines)"] = None
 
 
-class ReadFileTool(CmdTool):
+class ReadFileTool(CmdTool[ReadFileInput]):
     """Reads contents of a text file from the host filesystem.
     Use to inspect config files, logs, source code. Do not use for binary files.
     Supports offset/limit for paging through large files."""
-
-    Input = ReadFileInput
 
     @property
     def name(self) -> str:

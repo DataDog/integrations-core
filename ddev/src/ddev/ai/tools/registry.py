@@ -7,6 +7,8 @@ from anthropic.types import ToolParam
 from .base import ToolProtocol
 from .types import ToolResult
 
+ALLOWED_TOOL_CALLERS = ["code_execution_20260120"]
+
 
 class ToolRegistry:
     """Registry holding all available tools."""
@@ -17,7 +19,10 @@ class ToolRegistry:
     @property
     def definitions(self) -> list[ToolParam]:
         """Return Anthropic SDK tool definitions for all registered tools."""
-        return [tool.definition for tool in self._tools.values()]
+        defs = [tool.definition for tool in self._tools.values()]
+        for d in defs:
+            d["allowed_callers"] = ALLOWED_TOOL_CALLERS
+        return defs
 
     async def run(self, name: str, raw: dict[str, object]) -> ToolResult:
         """Execute a tool by name, returning an error result if not found."""

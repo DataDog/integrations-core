@@ -12,11 +12,9 @@ class MkdirInput:
     path: Annotated[str, "Path of the directory to create"]
 
 
-class MkdirTool(CmdTool):
+class MkdirTool(CmdTool[MkdirInput]):
     """Creates a directory at the given path, including any missing parent directories.
     Use to create directories for config files, logs, source code."""
-
-    Input = MkdirInput
 
     @property
     def name(self) -> str:
