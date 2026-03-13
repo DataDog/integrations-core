@@ -1,0 +1,3 @@
+Fix `ddev -x` (`--here`) stripping Datadog license headers from generated
+`config_models/*.py` files when run from a directory whose name does not match
+`integrations-{core,extras,...}` (for example, a git worktree with an arbitrary name).
