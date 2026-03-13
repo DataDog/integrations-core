@@ -413,7 +413,8 @@ pipeline:
           OR USER_AUTH OR ROLE_ASSIGN OR ROLE_REMOVE OR PATH OR USER_ROLE_CHANGE
           OR USER_SELINUX_ERR OR DAEMON_CONFIG OR DAEMON_ABORT OR
           USER_MAC_CONFIG_CHANGE OR MAC_CONFIG_CHANGE OR MAC_STATUS OR
-          MAC_POLICY_LOAD OR AVC OR CONFIG_CHANGE OR EXECVE OR SYSCALL OR SOCKADDR)"
+          MAC_POLICY_LOAD OR AVC OR CONFIG_CHANGE OR EXECVE OR SYSCALL) OR
+          (@type:SOCKADDR AND @laddr:*)"
       processors:
         - type: string-builder-processor
           name: Add product name
@@ -2573,7 +2574,7 @@ pipeline:
       name: OCSF pre-processing for SOCKADDR logs
       enabled: true
       filter:
-        query: "@type:SOCKADDR"
+        query: "@type:SOCKADDR AND @laddr:*"
       processors:
         - type: grok-parser
           name: Extract laddr and lport from SOCKADDR saddr field
