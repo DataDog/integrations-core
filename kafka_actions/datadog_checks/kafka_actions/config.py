@@ -189,6 +189,11 @@ class KafkaActionsConfig:
                 f"Invalid key_format: {key_format}. Supported formats: json, bson, string, protobuf, avro"
             )
 
+        start_timestamp = config.get('start_timestamp')
+        if start_timestamp is not None:
+            if not isinstance(start_timestamp, int) or start_timestamp < 0:
+                raise ConfigurationError("start_timestamp must be a non-negative integer (milliseconds since epoch)")
+
         schema_registry_url = self.instance.get('schema_registry_url')
 
         if value_format in ['protobuf', 'avro']:

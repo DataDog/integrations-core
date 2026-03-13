@@ -127,7 +127,14 @@ class ReadMessages(BaseModel):
         -1, description='Specific partition to read from (-1 for all partitions)', examples=[-1]
     )
     start_offset: Optional[int] = Field(
-        -1, description='Starting offset (-1 for latest, -2 for earliest, or specific offset)', examples=[-1]
+        -1,
+        description='Starting offset (-1 for latest, -2 for earliest, or specific offset).\nIgnored when start_timestamp is set.\n',
+        examples=[-1],
+    )
+    start_timestamp: Optional[int] = Field(
+        None,
+        description='Starting timestamp in milliseconds since epoch.\nWhen set, the consumer seeks to the first message at or after this timestamp\nin each partition. The start_offset parameter is ignored when this is set.\n',
+        examples=[1700000000000],
     )
     topic: str = Field(..., description='Topic to read messages from', examples=['orders'])
     value_format: Optional[str] = Field(
