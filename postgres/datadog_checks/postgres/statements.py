@@ -274,7 +274,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if not rows:
                 return
             for event in self._rows_to_fqt_events(rows):
-                self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+                self._check.database_monitoring_query_sample(event)
 
             payload_wrapper = {
                 'host': self._check.reported_hostname,

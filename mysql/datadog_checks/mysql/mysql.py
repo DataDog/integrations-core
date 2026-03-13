@@ -20,13 +20,11 @@ from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
     TagManager,
-    default_json_event_encoding,
     tracked_query,
 )
 from datadog_checks.base.utils.db.utils import (
     resolve_db_host as agent_host_resolver,
 )
-from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import aws
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
 from datadog_checks.mysql.health import MySqlHealth
@@ -1417,7 +1415,7 @@ class MySql(DatabaseCheck):
                 },
             }
             self._database_instance_emitted[self.database_identifier] = event
-            self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            self.database_monitoring_metadata(event)
 
     def set_cluster_tags(self, db):
         if not self._config.replication_enabled:
