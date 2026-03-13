@@ -1326,3 +1326,172 @@ cilium_k8s_client_rate_limiter_duration_seconds_count{method="DELETE",path="/api
 # TYPE cilium_policy_change_total counter
 cilium_policy_change_total{outcome="fail"} 106
 cilium_policy_change_total{outcome="success"} 24128
+# HELP cilium_clustermesh_remote_cluster_services Total services in remote cluster
+# TYPE cilium_clustermesh_remote_cluster_services gauge
+cilium_clustermesh_remote_cluster_services{target_cluster="remote-cluster"} 12
+# HELP cilium_clustermesh_remote_cluster_nodes Total nodes in remote cluster
+# TYPE cilium_clustermesh_remote_cluster_nodes gauge
+cilium_clustermesh_remote_cluster_nodes{target_cluster="remote-cluster"} 3
+# HELP cilium_clustermesh_remote_clusters Total number of remote clusters meshed
+# TYPE cilium_clustermesh_remote_clusters gauge
+cilium_clustermesh_remote_clusters 1
+# HELP cilium_clustermesh_remote_cluster_failures Total failures related to remote cluster
+# TYPE cilium_clustermesh_remote_cluster_failures gauge
+cilium_clustermesh_remote_cluster_failures{target_cluster="remote-cluster"} 0
+# HELP cilium_clustermesh_remote_cluster_last_failure_ts Timestamp of last failure in remote cluster
+# TYPE cilium_clustermesh_remote_cluster_last_failure_ts gauge
+cilium_clustermesh_remote_cluster_last_failure_ts{target_cluster="remote-cluster"} 0
+# HELP cilium_clustermesh_remote_cluster_readiness_status Readiness status of remote cluster
+# TYPE cilium_clustermesh_remote_cluster_readiness_status gauge
+cilium_clustermesh_remote_cluster_readiness_status{target_cluster="remote-cluster"} 1
+# HELP cilium_clustermesh_remote_cluster_cache_revocations Total cache revocations in remote cluster
+# TYPE cilium_clustermesh_remote_cluster_cache_revocations gauge
+cilium_clustermesh_remote_cluster_cache_revocations{target_cluster="remote-cluster"} 0
+# HELP cilium_clustermesh_remote_cluster_endpoints Total endpoints in remote cluster
+# TYPE cilium_clustermesh_remote_cluster_endpoints gauge
+cilium_clustermesh_remote_cluster_endpoints{target_cluster="remote-cluster"} 5
+# HELP cilium_ipsec_xfrm_error Total XFRM errors
+# TYPE cilium_ipsec_xfrm_error gauge
+cilium_ipsec_xfrm_error{error="inStateProtoError",type="decrypt"} 0
+# HELP cilium_ipsec_keys Number of keys in use
+# TYPE cilium_ipsec_keys gauge
+cilium_ipsec_keys 2
+# HELP cilium_ipsec_xfrm_states Number of XFRM states
+# TYPE cilium_ipsec_xfrm_states gauge
+cilium_ipsec_xfrm_states{direction="in"} 4
+# HELP cilium_ipsec_xfrm_policies Number of XFRM policies
+# TYPE cilium_ipsec_xfrm_policies gauge
+cilium_ipsec_xfrm_policies{direction="in"} 4
+# HELP cilium_bpf_syscall_duration_seconds Duration of BPF system calls
+# TYPE cilium_bpf_syscall_duration_seconds histogram
+cilium_bpf_syscall_duration_seconds_bucket{error="0",operation="lookup",le="0.005"} 100
+cilium_bpf_syscall_duration_seconds_bucket{error="0",operation="lookup",le="0.025"} 100
+cilium_bpf_syscall_duration_seconds_bucket{error="0",operation="lookup",le="+Inf"} 100
+cilium_bpf_syscall_duration_seconds_sum{error="0",operation="lookup"} 0.123
+cilium_bpf_syscall_duration_seconds_count{error="0",operation="lookup"} 100
+# HELP cilium_bpf_ratelimit_dropped_total Total drops from BPF ratelimiter
+# TYPE cilium_bpf_ratelimit_dropped_total counter
+cilium_bpf_ratelimit_dropped_total{usage="ct_bpf"} 0
+# HELP cilium_mtu_error_message_total Total ICMP fragmentation-needed messages sent
+# TYPE cilium_mtu_error_message_total counter
+cilium_mtu_error_message_total{direction="egress"} 0
+# HELP cilium_fragmented_count_total Total number of fragmented packets
+# TYPE cilium_fragmented_count_total counter
+cilium_fragmented_count_total{direction="ingress"} 0
+# HELP cilium_service_implementation_delay Time between service change and datapath deployment
+# TYPE cilium_service_implementation_delay histogram
+cilium_service_implementation_delay_bucket{action="upsert",le="0.005"} 10
+cilium_service_implementation_delay_bucket{action="upsert",le="0.025"} 10
+cilium_service_implementation_delay_bucket{action="upsert",le="+Inf"} 10
+cilium_service_implementation_delay_sum{action="upsert"} 0.05
+cilium_service_implementation_delay_count{action="upsert"} 10
+# HELP cilium_api_limiter_wait_history_duration_seconds Wait duration histogram for API rate limiter
+# TYPE cilium_api_limiter_wait_history_duration_seconds histogram
+cilium_api_limiter_wait_history_duration_seconds_bucket{api_call="endpoint-create",le="0.005"} 5
+cilium_api_limiter_wait_history_duration_seconds_bucket{api_call="endpoint-create",le="0.025"} 5
+cilium_api_limiter_wait_history_duration_seconds_bucket{api_call="endpoint-create",le="+Inf"} 5
+cilium_api_limiter_wait_history_duration_seconds_sum{api_call="endpoint-create"} 0.01
+cilium_api_limiter_wait_history_duration_seconds_count{api_call="endpoint-create"} 5
+# HELP cilium_policy_incremental_update_duration Time for identities added to policy system
+# TYPE cilium_policy_incremental_update_duration histogram
+cilium_policy_incremental_update_duration_bucket{scope="incremental",le="0.005"} 3
+cilium_policy_incremental_update_duration_bucket{scope="incremental",le="0.025"} 3
+cilium_policy_incremental_update_duration_bucket{scope="incremental",le="+Inf"} 3
+cilium_policy_incremental_update_duration_sum{scope="incremental"} 0.003
+cilium_policy_incremental_update_duration_count{scope="incremental"} 3
+# HELP cilium_identity_gc_entries Identities alive and deleted at GC end
+# TYPE cilium_identity_gc_entries gauge
+cilium_identity_gc_entries{identity_type="global",outcome="alive"} 42
+# HELP cilium_identity_gc_runs Times identity GC process was run
+# TYPE cilium_identity_gc_runs gauge
+cilium_identity_gc_runs{identity_type="global",outcome="success"} 10
+# HELP cilium_identity_gc_latency Duration of last successful identity GC
+# TYPE cilium_identity_gc_latency gauge
+cilium_identity_gc_latency{identity_type="global",outcome="success"} 0.001
+# HELP cilium_ipcache_events_total Events interacting with ipcache
+# TYPE cilium_ipcache_events_total counter
+cilium_ipcache_events_total{type="upsert"} 100
+# HELP cilium_controllers_group_runs_total Controller runs grouped by name
+# TYPE cilium_controllers_group_runs_total counter
+cilium_controllers_group_runs_total{group_name="resolve-identity-references",status="success"} 50
+# HELP cilium_k8s_cnp_status_completion_seconds Time to complete CNP status update
+# TYPE cilium_k8s_cnp_status_completion_seconds histogram
+cilium_k8s_cnp_status_completion_seconds_bucket{attempts="1",outcome="succeeded",le="0.005"} 5
+cilium_k8s_cnp_status_completion_seconds_bucket{attempts="1",outcome="succeeded",le="0.025"} 5
+cilium_k8s_cnp_status_completion_seconds_bucket{attempts="1",outcome="succeeded",le="+Inf"} 5
+cilium_k8s_cnp_status_completion_seconds_sum{attempts="1",outcome="succeeded"} 0.02
+cilium_k8s_cnp_status_completion_seconds_count{attempts="1",outcome="succeeded"} 5
+# HELP cilium_endpoint_restoration_endpoints Number of restored endpoints by phase and outcome
+# TYPE cilium_endpoint_restoration_endpoints gauge
+cilium_endpoint_restoration_endpoints{outcome="success",phase="initial"} 2
+# HELP cilium_endpoint_restoration_duration_seconds Duration of endpoint restoration phases
+# TYPE cilium_endpoint_restoration_duration_seconds histogram
+cilium_endpoint_restoration_duration_seconds_bucket{phase="initial",le="0.005"} 1
+cilium_endpoint_restoration_duration_seconds_bucket{phase="initial",le="0.025"} 1
+cilium_endpoint_restoration_duration_seconds_bucket{phase="initial",le="+Inf"} 1
+cilium_endpoint_restoration_duration_seconds_sum{phase="initial"} 0.001
+cilium_endpoint_restoration_duration_seconds_count{phase="initial"} 1
+# HELP cilium_nat_endpoint_max_connection NAT connection saturation percent by family
+# TYPE cilium_nat_endpoint_max_connection gauge
+cilium_nat_endpoint_max_connection{family="ipv4"} 0.01
+# HELP cilium_hive_jobs_runs_total Total job runs
+# TYPE cilium_hive_jobs_runs_total counter
+cilium_hive_jobs_runs_total{job_name="update-bandwidth-map",module="bandwidth-manager"} 10
+# HELP cilium_hive_jobs_runs_failed Failed job runs
+# TYPE cilium_hive_jobs_runs_failed gauge
+cilium_hive_jobs_runs_failed{job_name="update-bandwidth-map",module="bandwidth-manager"} 0
+# HELP cilium_hive_jobs_oneshot_last_run_duration_seconds One-shot job last run duration
+# TYPE cilium_hive_jobs_oneshot_last_run_duration_seconds gauge
+cilium_hive_jobs_oneshot_last_run_duration_seconds{job_name="populate-initial-ipam-state",module="ipam"} 0.002
+# HELP cilium_hive_jobs_observer_last_run_duration_seconds Observer job last run duration
+# TYPE cilium_hive_jobs_observer_last_run_duration_seconds gauge
+cilium_hive_jobs_observer_last_run_duration_seconds{job_name="policy-distributor",module="policy"} 0.001
+# HELP cilium_hive_jobs_observer_run_duration_seconds Observer job run duration histogram
+# TYPE cilium_hive_jobs_observer_run_duration_seconds histogram
+cilium_hive_jobs_observer_run_duration_seconds_bucket{job_name="policy-distributor",module="policy",le="0.005"} 20
+cilium_hive_jobs_observer_run_duration_seconds_bucket{job_name="policy-distributor",module="policy",le="0.025"} 20
+cilium_hive_jobs_observer_run_duration_seconds_bucket{job_name="policy-distributor",module="policy",le="+Inf"} 20
+cilium_hive_jobs_observer_run_duration_seconds_sum{job_name="policy-distributor",module="policy"} 0.02
+cilium_hive_jobs_observer_run_duration_seconds_count{job_name="policy-distributor",module="policy"} 20
+# HELP cilium_hive_jobs_timer_last_run_duration_seconds Timer job last run duration
+# TYPE cilium_hive_jobs_timer_last_run_duration_seconds gauge
+cilium_hive_jobs_timer_last_run_duration_seconds{job_name="gc-nodes",module="node-manager"} 0.005
+# HELP cilium_hive_jobs_timer_run_duration_seconds Timer job run duration histogram
+# TYPE cilium_hive_jobs_timer_run_duration_seconds histogram
+cilium_hive_jobs_timer_run_duration_seconds_bucket{job_name="gc-nodes",module="node-manager",le="0.005"} 5
+cilium_hive_jobs_timer_run_duration_seconds_bucket{job_name="gc-nodes",module="node-manager",le="0.025"} 5
+cilium_hive_jobs_timer_run_duration_seconds_bucket{job_name="gc-nodes",module="node-manager",le="+Inf"} 5
+cilium_hive_jobs_timer_run_duration_seconds_sum{job_name="gc-nodes",module="node-manager"} 0.025
+cilium_hive_jobs_timer_run_duration_seconds_count{job_name="gc-nodes",module="node-manager"} 5
+# HELP cilium_node_health_connectivity_status Connectivity between Cilium agents and nodes
+# TYPE cilium_node_health_connectivity_status gauge
+cilium_node_health_connectivity_status{status="reachable",type="direct"} 3
+# HELP cilium_node_health_connectivity_latency_seconds Histogram of latency between current agent and other nodes
+# TYPE cilium_node_health_connectivity_latency_seconds histogram
+cilium_node_health_connectivity_latency_seconds_bucket{address_type="ipv4",protocol="icmp",type="direct",le="0.005"} 3
+cilium_node_health_connectivity_latency_seconds_bucket{address_type="ipv4",protocol="icmp",type="direct",le="0.025"} 3
+cilium_node_health_connectivity_latency_seconds_bucket{address_type="ipv4",protocol="icmp",type="direct",le="+Inf"} 3
+cilium_node_health_connectivity_latency_seconds_sum{address_type="ipv4",protocol="icmp",type="direct"} 0.003
+cilium_node_health_connectivity_latency_seconds_count{address_type="ipv4",protocol="icmp",type="direct"} 3
+# HELP cilium_policy_selector_match_count_max Maximum identities selected by policy selector
+# TYPE cilium_policy_selector_match_count_max gauge
+cilium_policy_selector_match_count_max{class="policy-namespace"} 5
+# HELP cilium_identity_cache_timer_duration Seconds for periodic policy processes
+# TYPE cilium_identity_cache_timer_duration gauge
+cilium_identity_cache_timer_duration{name="policy-trigger"} 0.001
+# HELP cilium_identity_cache_timer_trigger_latency Wait time before starting next round
+# TYPE cilium_identity_cache_timer_trigger_latency gauge
+cilium_identity_cache_timer_trigger_latency{name="policy-trigger"} 0.0005
+# HELP cilium_identity_cache_timer_trigger_folds Coalesced timer triggers in one execution
+# TYPE cilium_identity_cache_timer_trigger_folds gauge
+cilium_identity_cache_timer_trigger_folds{name="policy-trigger"} 1
+# HELP cilium_k8s_workqueue_work_duration_seconds How long in seconds processing an item from the workqueue takes
+# TYPE cilium_k8s_workqueue_work_duration_seconds histogram
+cilium_k8s_workqueue_work_duration_seconds_bucket{name="cilium-node",le="0.005"} 10
+cilium_k8s_workqueue_work_duration_seconds_bucket{name="cilium-node",le="0.025"} 10
+cilium_k8s_workqueue_work_duration_seconds_bucket{name="cilium-node",le="+Inf"} 10
+cilium_k8s_workqueue_work_duration_seconds_sum{name="cilium-node"} 0.05
+cilium_k8s_workqueue_work_duration_seconds_count{name="cilium-node"} 10
+# HELP cilium_kvstore_sync_errors_total Failed synchronizations to kvstore
+# TYPE cilium_kvstore_sync_errors_total counter
+cilium_kvstore_sync_errors_total{scope="state",source_cluster="local"} 0

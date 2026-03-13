@@ -1415,3 +1415,103 @@ cilium_operator_ipam_used_ips{target_node="ip-10-131-49-46.ec2.internal"} 3
 cilium_operator_ipam_used_ips{target_node="ip-10-131-49-69.ec2.internal"} 4
 cilium_operator_ipam_used_ips{target_node="ip-10-131-49-73.ec2.internal"} 7
 cilium_operator_ipam_used_ips{target_node="ip-10-131-49-76.ec2.internal"} 23
+# HELP cilium_operator_controllers_group_runs_total Controller runs by group name
+# TYPE cilium_operator_controllers_group_runs_total counter
+cilium_operator_controllers_group_runs_total{group_name="sync-ces-with-ciliumendpoint",status="success"} 25
+# HELP cilium_operator_number_of_cep_changes_per_ces Changed CEPs per CES update
+# TYPE cilium_operator_number_of_cep_changes_per_ces histogram
+cilium_operator_number_of_cep_changes_per_ces_bucket{failure_type="",opcode="upsert",le="1"} 5
+cilium_operator_number_of_cep_changes_per_ces_bucket{failure_type="",opcode="upsert",le="10"} 5
+cilium_operator_number_of_cep_changes_per_ces_bucket{failure_type="",opcode="upsert",le="+Inf"} 5
+cilium_operator_number_of_cep_changes_per_ces_sum{failure_type="",opcode="upsert"} 5
+cilium_operator_number_of_cep_changes_per_ces_count{failure_type="",opcode="upsert"} 5
+# HELP cilium_operator_clustermesh_remote_clusters Total remote clusters meshed
+# TYPE cilium_operator_clustermesh_remote_clusters gauge
+cilium_operator_clustermesh_remote_clusters 1
+# HELP cilium_operator_clustermesh_remote_cluster_failures Failures per remote cluster
+# TYPE cilium_operator_clustermesh_remote_cluster_failures gauge
+cilium_operator_clustermesh_remote_cluster_failures{target_cluster="remote-cluster"} 0
+# HELP cilium_operator_clustermesh_remote_cluster_last_failure_ts Last failure timestamp per remote cluster
+# TYPE cilium_operator_clustermesh_remote_cluster_last_failure_ts gauge
+cilium_operator_clustermesh_remote_cluster_last_failure_ts{target_cluster="remote-cluster"} 0
+# HELP cilium_operator_clustermesh_remote_cluster_readiness_status Remote cluster readiness status
+# TYPE cilium_operator_clustermesh_remote_cluster_readiness_status gauge
+cilium_operator_clustermesh_remote_cluster_readiness_status{target_cluster="remote-cluster"} 1
+# HELP cilium_operator_clustermesh_remote_cluster_cache_revocations Cache revocations per remote cluster
+# TYPE cilium_operator_clustermesh_remote_cluster_cache_revocations gauge
+cilium_operator_clustermesh_remote_cluster_cache_revocations{target_cluster="remote-cluster"} 0
+# HELP cilium_operator_clustermesh_remote_cluster_services Services per remote cluster
+# TYPE cilium_operator_clustermesh_remote_cluster_services gauge
+cilium_operator_clustermesh_remote_cluster_services{target_cluster="remote-cluster"} 5
+# HELP cilium_operator_clustermesh_remote_cluster_service_exports Service exports per remote cluster
+# TYPE cilium_operator_clustermesh_remote_cluster_service_exports gauge
+cilium_operator_clustermesh_remote_cluster_service_exports{target_cluster="remote-cluster"} 2
+# HELP cilium_operator_mcsapi_serviceexport_info ServiceExport information
+# TYPE cilium_operator_mcsapi_serviceexport_info gauge
+cilium_operator_mcsapi_serviceexport_info{namespace="default",serviceexport="my-service"} 1
+# HELP cilium_operator_mcsapi_serviceexport_status_condition ServiceExport status conditions
+# TYPE cilium_operator_mcsapi_serviceexport_status_condition gauge
+cilium_operator_mcsapi_serviceexport_status_condition{condition="Ready",namespace="default",reason="Accepted",serviceexport="my-service",status="True"} 1
+# HELP cilium_operator_mcsapi_serviceimport_info ServiceImport information
+# TYPE cilium_operator_mcsapi_serviceimport_info gauge
+cilium_operator_mcsapi_serviceimport_info{namespace="default",serviceimport="my-service"} 1
+# HELP cilium_operator_mcsapi_serviceimport_status_condition ServiceImport status conditions
+# TYPE cilium_operator_mcsapi_serviceimport_status_condition gauge
+cilium_operator_mcsapi_serviceimport_status_condition{condition="Ready",namespace="default",reason="Accepted",serviceimport="my-service",status="True"} 1
+# HELP cilium_operator_mcsapi_serviceimport_status_clusters Clusters backing ServiceImport
+# TYPE cilium_operator_mcsapi_serviceimport_status_clusters gauge
+cilium_operator_mcsapi_serviceimport_status_clusters{namespace="default",serviceimport="my-service"} 1
+# HELP cilium_operator_cid_controller_work_queue_event_count Processed events by CID controller
+# TYPE cilium_operator_cid_controller_work_queue_event_count gauge
+cilium_operator_cid_controller_work_queue_event_count{outcome="success",resource="ciliumidentity"} 10
+# HELP cilium_operator_cid_controller_work_queue_latency CID controller queue latencies
+# TYPE cilium_operator_cid_controller_work_queue_latency histogram
+cilium_operator_cid_controller_work_queue_latency_bucket{phase="processing",resource="ciliumidentity",le="0.005"} 10
+cilium_operator_cid_controller_work_queue_latency_bucket{phase="processing",resource="ciliumidentity",le="0.025"} 10
+cilium_operator_cid_controller_work_queue_latency_bucket{phase="processing",resource="ciliumidentity",le="+Inf"} 10
+cilium_operator_cid_controller_work_queue_latency_sum{phase="processing",resource="ciliumidentity"} 0.05
+cilium_operator_cid_controller_work_queue_latency_count{phase="processing",resource="ciliumidentity"} 10
+# HELP cilium_operator_unmanaged_pods Total unmanaged pods observed
+# TYPE cilium_operator_unmanaged_pods gauge
+cilium_operator_unmanaged_pods 0
+# HELP cilium_operator_doublewrite_crd_identities Total CRD identities
+# TYPE cilium_operator_doublewrite_crd_identities gauge
+cilium_operator_doublewrite_crd_identities 42
+# HELP cilium_operator_doublewrite_kvstore_identities Total KVStore identities
+# TYPE cilium_operator_doublewrite_kvstore_identities gauge
+cilium_operator_doublewrite_kvstore_identities 42
+# HELP cilium_operator_doublewrite_crd_only_identities CRD identities not present in KVStore
+# TYPE cilium_operator_doublewrite_crd_only_identities gauge
+cilium_operator_doublewrite_crd_only_identities 0
+# HELP cilium_operator_doublewrite_kvstore_only_identities KVStore identities not present as CRD
+# TYPE cilium_operator_doublewrite_kvstore_only_identities gauge
+cilium_operator_doublewrite_kvstore_only_identities 0
+# HELP cilium_operator_k8s_workqueue_depth Current workqueue depth
+# TYPE cilium_operator_k8s_workqueue_depth gauge
+cilium_operator_k8s_workqueue_depth{name="ciliumendpointslice"} 0
+# HELP cilium_operator_k8s_workqueue_adds_total Total adds to workqueue
+# TYPE cilium_operator_k8s_workqueue_adds_total counter
+cilium_operator_k8s_workqueue_adds_total{name="ciliumendpointslice"} 100
+# HELP cilium_operator_k8s_workqueue_queue_duration_seconds Item duration in workqueue
+# TYPE cilium_operator_k8s_workqueue_queue_duration_seconds histogram
+cilium_operator_k8s_workqueue_queue_duration_seconds_bucket{name="ciliumendpointslice",le="0.005"} 50
+cilium_operator_k8s_workqueue_queue_duration_seconds_bucket{name="ciliumendpointslice",le="0.025"} 50
+cilium_operator_k8s_workqueue_queue_duration_seconds_bucket{name="ciliumendpointslice",le="+Inf"} 50
+cilium_operator_k8s_workqueue_queue_duration_seconds_sum{name="ciliumendpointslice"} 0.1
+cilium_operator_k8s_workqueue_queue_duration_seconds_count{name="ciliumendpointslice"} 50
+# HELP cilium_operator_k8s_workqueue_work_duration_seconds Item processing duration from workqueue
+# TYPE cilium_operator_k8s_workqueue_work_duration_seconds histogram
+cilium_operator_k8s_workqueue_work_duration_seconds_bucket{name="ciliumendpointslice",le="0.005"} 50
+cilium_operator_k8s_workqueue_work_duration_seconds_bucket{name="ciliumendpointslice",le="0.025"} 50
+cilium_operator_k8s_workqueue_work_duration_seconds_bucket{name="ciliumendpointslice",le="+Inf"} 50
+cilium_operator_k8s_workqueue_work_duration_seconds_sum{name="ciliumendpointslice"} 0.05
+cilium_operator_k8s_workqueue_work_duration_seconds_count{name="ciliumendpointslice"} 50
+# HELP cilium_operator_k8s_workqueue_unfinished_work_seconds Work in progress not yet observed
+# TYPE cilium_operator_k8s_workqueue_unfinished_work_seconds gauge
+cilium_operator_k8s_workqueue_unfinished_work_seconds{name="ciliumendpointslice"} 0
+# HELP cilium_operator_k8s_workqueue_longest_running_processor_seconds Longest running workqueue processor
+# TYPE cilium_operator_k8s_workqueue_longest_running_processor_seconds gauge
+cilium_operator_k8s_workqueue_longest_running_processor_seconds{name="ciliumendpointslice"} 0
+# HELP cilium_operator_k8s_workqueue_retries_total Total workqueue retries
+# TYPE cilium_operator_k8s_workqueue_retries_total counter
+cilium_operator_k8s_workqueue_retries_total{name="ciliumendpointslice"} 5

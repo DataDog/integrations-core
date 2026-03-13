@@ -9,12 +9,9 @@ from .common import (
     ADDL_GC_OPERATOR_METRICS,
     ADDL_OPERATOR_METRICS,
     AGENT_V1_METRICS,
-    AGENT_V1_METRICS_1_14,
     AGENT_V1_METRICS_EXCLUDE_METADATA_CHECK,
     AGENT_V2_METRICS,
-    AGENT_V2_METRICS_1_14,
     OPERATOR_V2_METRICS,
-    OPERATOR_V2_METRICS_1_14,
     requires_new_environment,
 )
 
@@ -25,7 +22,7 @@ pytestmark = [requires_new_environment, pytest.mark.unit]
 def test_agent_check(aggregator, agent_instance_use_openmetrics, mock_agent_data, dd_run_check, check, use_openmetrics):
     c = check(agent_instance_use_openmetrics(use_openmetrics))
     dd_run_check(c)
-    for m in AGENT_V2_METRICS + AGENT_V2_METRICS_1_14 if use_openmetrics else AGENT_V1_METRICS + AGENT_V1_METRICS_1_14:
+    for m in AGENT_V2_METRICS if use_openmetrics else AGENT_V1_METRICS:
         aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -37,7 +34,7 @@ def test_operator_check(aggregator, operator_instance_use_openmetrics, mock_oper
     c = check(operator_instance_use_openmetrics(True))
 
     dd_run_check(c)
-    for m in OPERATOR_V2_METRICS + ADDL_OPERATOR_METRICS + ADDL_GC_OPERATOR_METRICS + OPERATOR_V2_METRICS_1_14:
+    for m in OPERATOR_V2_METRICS + ADDL_OPERATOR_METRICS + ADDL_GC_OPERATOR_METRICS:
         aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

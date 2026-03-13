@@ -51,9 +51,6 @@ AGENT_METRICS = {
     "cilium_process_virtual_memory_max_bytes": "process.virtual_memory.max.bytes",
     "cilium_services_events_total": "services.events.total",
     "cilium_subprocess_start_total": "subprocess.start.total",
-    "cilium_triggers_policy_update_call_duration_seconds": "triggers_policy.update_call_duration.seconds",
-    "cilium_triggers_policy_update_folds": "triggers_policy.update_folds",
-    "cilium_triggers_policy_update_total": "triggers_policy.update.total",
     "cilium_unreachable_health_endpoints": "unreachable.health_endpoints",
     "cilium_unreachable_nodes": "unreachable.nodes",
     "cilium_event_ts": "event_timestamp",
@@ -92,6 +89,7 @@ AGENT_METRICS = {
     "cilium_bpf_progs_virtual_memory_max_bytes": "bpf.progs.virtual_memory.max.bytes",
     "cilium_datapath_conntrack_dump_resets_total": "datapath.conntrack_dump.resets.total",
     "cilium_ipcache_errors_total": "ipcache.errors.total",
+    "cilium_ipcache_events_total": "ipcache.events.total",
     "cilium_k8s_event_lag_seconds": "k8s_event.lag.seconds",
     "cilium_k8s_terminating_endpoints_events_total": "k8s_terminating.endpoints_events.total",
     "cilium_proxy_datapath_update_timeout_total": "proxy.datapath.update_timeout.total",
@@ -101,10 +99,10 @@ AGENT_METRICS = {
     "cilium_fqdn_alive_zombie_connections": "fqdn.alive_zombie_connections",
     # Cilium 1.14+
     "cilium_endpoint": "endpoint.count",
-    "cilium_endpoint_max_ifindex": "endpoint.max_ifindex",
     "cilium_cidrgroup_policies": "cidrgroup.policies",
     "cilium_kvstore_sync_queue_size": "kvstore.sync_queue_size",
     "cilium_kvstore_initial_sync_completed": "kvstore.initial_sync_completed",
+    "cilium_kvstore_sync_errors_total": "kvstore.sync_errors.total",
     "cilium_k8s_client_rate_limiter_duration_seconds": "k8s_client.rate_limiter_duration.seconds",
     "cilium_policy_change_total": "policy.change.total",
     # Cilium 1.15+
@@ -112,17 +110,81 @@ AGENT_METRICS = {
     "cilium_hive_status": "hive.status",
     "cilium_ipam_capacity": "ipam.capacity",
     "cilium_cidrgroups_referenced": "cidrgroups.referenced",
-    "cilium_cidrgroup_translation_time_stats_seconds": "cidrgroup.translation.time.stats.seconds",
     "cilium_k8s_workqueue_adds_total": "k8s.workqueue.adds.total",
     "cilium_k8s_workqueue_depth": "k8s.workqueue.depth",
     "cilium_k8s_workqueue_longest_running_processor_seconds": "k8s.workqueue.longest.running.processor.seconds",
     "cilium_k8s_workqueue_queue_duration_seconds": "k8s.workqueue.queue.duration.seconds",
     "cilium_k8s_workqueue_retries_total": "k8s.workqueue.retries.total",
     "cilium_k8s_workqueue_unfinished_work_seconds": "k8s.workqueue.unfinished.work.seconds",
-    "cilium_version": "version",
+    "cilium_k8s_workqueue_work_duration_seconds": "k8s.workqueue.work_duration.seconds",
+    # cilium_version is intentionally excluded from the metrics mapper so that
+    # the metadata transformer fires and sets version.major/minor/patch via set_metadata.
     # Cilium 1.16+
     "cilium_fqdn_selectors": "fqdn.selectors",
     "cilium_identity_label_sources": "identity.label_sources",
+    # Cilium 1.14-1.18, removed in 1.19
+    "cilium_endpoint_max_ifindex": "endpoint.max_ifindex",
+    # Cilium 1.15-1.16, removed in 1.17
+    "cilium_cidrgroup_translation_time_stats_seconds": "cidrgroup.translation.time.stats.seconds",
+    # Cilium <= 1.16, removed in 1.17
+    "cilium_triggers_policy_update_call_duration_seconds": "triggers_policy.update_call_duration.seconds",
+    "cilium_triggers_policy_update_folds": "triggers_policy.update_folds",
+    "cilium_triggers_policy_update_total": "triggers_policy.update.total",
+    # ClusterMesh agent metrics
+    "cilium_clustermesh_remote_cluster_services": "clustermesh.remote_cluster_services",
+    "cilium_clustermesh_remote_cluster_nodes": "clustermesh.remote_cluster_nodes",
+    "cilium_clustermesh_remote_clusters": "clustermesh.remote_clusters",
+    "cilium_clustermesh_remote_cluster_failures": "clustermesh.remote_cluster_failures",
+    "cilium_clustermesh_remote_cluster_last_failure_ts": "clustermesh.remote_cluster_last_failure_ts",
+    "cilium_clustermesh_remote_cluster_readiness_status": "clustermesh.remote_cluster_readiness_status",
+    "cilium_clustermesh_remote_cluster_cache_revocations": "clustermesh.remote_cluster_cache_revocations",
+    # IPsec
+    "cilium_ipsec_xfrm_error": "ipsec.xfrm_error",
+    "cilium_ipsec_keys": "ipsec.keys",
+    "cilium_ipsec_xfrm_states": "ipsec.xfrm_states",
+    "cilium_ipsec_xfrm_policies": "ipsec.xfrm_policies",
+    # eBPF additions
+    "cilium_bpf_syscall_duration_seconds": "bpf.syscall_duration.seconds",
+    "cilium_bpf_ratelimit_dropped_total": "bpf.ratelimit_dropped.total",
+    # Drop/Forward additions
+    "cilium_mtu_error_message_total": "mtu_error_message.total",
+    "cilium_fragmented_count_total": "fragmented_count.total",
+    # Services
+    "cilium_service_implementation_delay": "service.implementation_delay",
+    # API limiter
+    "cilium_api_limiter_wait_history_duration_seconds": "api_limiter.wait_history_duration.seconds",
+    # Policy
+    "cilium_policy_incremental_update_duration": "policy.incremental_update_duration",
+    # Identity
+    "cilium_identity_gc_entries": "identity.gc_entries",
+    "cilium_identity_gc_runs": "identity.gc_runs",
+    "cilium_identity_gc_latency": "identity.gc_latency",
+    # Kubernetes
+    "cilium_k8s_cnp_status_completion_seconds": "k8s.cnp_status_completion.seconds",
+    # Controllers
+    "cilium_controllers_group_runs_total": "controllers.group_runs.total",
+    # Endpoint
+    "cilium_endpoint_restoration_endpoints": "endpoint.restoration_endpoints",
+    "cilium_endpoint_restoration_duration_seconds": "endpoint.restoration_duration.seconds",
+    # NAT
+    "cilium_nat_endpoint_max_connection": "nat.endpoint_max_connection",
+    # Hive Jobs (Cilium 1.17+)
+    "cilium_hive_jobs_runs_total": "hive.jobs_runs.total",
+    "cilium_hive_jobs_runs_failed": "hive.jobs_runs_failed",
+    "cilium_hive_jobs_oneshot_last_run_duration_seconds": "hive.jobs.oneshot.last_run_duration.seconds",
+    "cilium_hive_jobs_observer_last_run_duration_seconds": "hive.jobs.observer.last_run_duration.seconds",
+    "cilium_hive_jobs_observer_run_duration_seconds": "hive.jobs.observer.run_duration.seconds",
+    "cilium_hive_jobs_timer_last_run_duration_seconds": "hive.jobs.timer.last_run_duration.seconds",
+    "cilium_hive_jobs_timer_run_duration_seconds": "hive.jobs.timer.run_duration.seconds",
+    # Cilium 1.17+
+    "cilium_node_health_connectivity_status": "node_health.connectivity.status",
+    "cilium_node_health_connectivity_latency_seconds": "node_health.connectivity.latency.seconds",
+    "cilium_policy_selector_match_count_max": "policy.selector_match_count_max",
+    "cilium_identity_cache_timer_duration": "identity.cache_timer.duration",
+    "cilium_identity_cache_timer_trigger_latency": "identity.cache_timer_trigger.latency",
+    "cilium_identity_cache_timer_trigger_folds": "identity.cache_timer_trigger.folds",
+    # Cilium 1.19+
+    "cilium_clustermesh_remote_cluster_endpoints": "clustermesh.remote_cluster_endpoints",
 }
 
 OPERATOR_V2_OVERRIDES = {
@@ -208,6 +270,8 @@ OPERATOR_METRICS = {
     "cilium_operator_ipam_release_duration_seconds": "operator.ipam.release.duration.seconds",
     "cilium_operator_ipam_used_ips": "operator.ipam.used_ips",
     # Cilium 1.15+
+    # Note: lbipam metrics had _total suffix in 1.15-1.16; the _total is stripped by construct_metrics_config
+    # so the same entries match both old (counter) and new (gauge, renamed without _total in 1.17+) metric names.
     "cilium_hive_status": "operator.hive.status",
     "cilium_operator_errors_warnings_total": "operator.errors.warnings.total",
     "cilium_operator_lbipam_ips_available_total": "operator.lbipam.ips.available.total",
@@ -215,6 +279,40 @@ OPERATOR_METRICS = {
     "cilium_operator_lbipam_conflicting_pools_total": "operator.lbipam.conflicting.pools.total",
     "cilium_operator_lbipam_services_matching_total": "operator.lbipam.services.matching.total",
     "cilium_operator_lbipam_services_unsatisfied_total": "operator.lbipam.services.unsatisfied.total",
+    # Missing from earlier integrations
+    "cilium_operator_controllers_group_runs_total": "operator.controllers.group_runs.total",
+    "cilium_operator_number_of_cep_changes_per_ces": "operator.num_cep_changes_per_ces",
+    # ClusterMesh operator
+    "cilium_operator_clustermesh_remote_clusters": "operator.clustermesh.remote_clusters",
+    "cilium_operator_clustermesh_remote_cluster_failures": "operator.clustermesh.remote_cluster_failures",
+    "cilium_operator_clustermesh_remote_cluster_last_failure_ts": "operator.clustermesh.remote_cluster_last_failure_ts",
+    "cilium_operator_clustermesh_remote_cluster_readiness_status": "operator.clustermesh.remote_cluster_readiness_status",  # noqa: E501
+    "cilium_operator_clustermesh_remote_cluster_cache_revocations": "operator.clustermesh.remote_cluster_cache_revocations",  # noqa: E501
+    "cilium_operator_clustermesh_remote_cluster_services": "operator.clustermesh.remote_cluster_services",
+    "cilium_operator_clustermesh_remote_cluster_service_exports": "operator.clustermesh.remote_cluster_service_exports",
+    # MCS-API
+    "cilium_operator_mcsapi_serviceexport_info": "operator.mcsapi.serviceexport_info",
+    "cilium_operator_mcsapi_serviceexport_status_condition": "operator.mcsapi.serviceexport_status_condition",
+    "cilium_operator_mcsapi_serviceimport_info": "operator.mcsapi.serviceimport_info",
+    "cilium_operator_mcsapi_serviceimport_status_condition": "operator.mcsapi.serviceimport_status_condition",
+    "cilium_operator_mcsapi_serviceimport_status_clusters": "operator.mcsapi.serviceimport_status_clusters",
+    # CID controller
+    "cilium_operator_cid_controller_work_queue_event_count": "operator.cid_controller.work_queue_event_count",
+    "cilium_operator_cid_controller_work_queue_latency": "operator.cid_controller.work_queue_latency",
+    # Cilium 1.17+
+    "cilium_operator_unmanaged_pods": "operator.unmanaged_pods",
+    "cilium_operator_doublewrite_crd_identities": "operator.doublewrite.crd_identities",
+    "cilium_operator_doublewrite_kvstore_identities": "operator.doublewrite.kvstore_identities",
+    "cilium_operator_doublewrite_crd_only_identities": "operator.doublewrite.crd_only_identities",
+    "cilium_operator_doublewrite_kvstore_only_identities": "operator.doublewrite.kvstore_only_identities",
+    # Cilium 1.19+ (operator workqueue metrics with cilium_operator_ prefix, replacing bare workqueue_* names)
+    "cilium_operator_k8s_workqueue_depth": "operator.k8s.workqueue.depth",
+    "cilium_operator_k8s_workqueue_adds_total": "operator.k8s.workqueue.adds.total",
+    "cilium_operator_k8s_workqueue_queue_duration_seconds": "operator.k8s.workqueue.queue_duration.seconds",
+    "cilium_operator_k8s_workqueue_work_duration_seconds": "operator.k8s.workqueue.work_duration.seconds",
+    "cilium_operator_k8s_workqueue_unfinished_work_seconds": "operator.k8s.workqueue.unfinished_work.seconds",
+    "cilium_operator_k8s_workqueue_longest_running_processor_seconds": "operator.k8s.workqueue.longest_running_processor.seconds",  # noqa: E501
+    "cilium_operator_k8s_workqueue_retries_total": "operator.k8s.workqueue.retries.total",
 }
 
 AGENT_V2_METRICS = deepcopy(AGENT_METRICS)
