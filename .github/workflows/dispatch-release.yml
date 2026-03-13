@@ -30,7 +30,7 @@ on:
         type: boolean
         default: false
       ddev-version:
-        description: "ddev version specifier (e.g. ==14.3.2). Defaults to latest."
+        description: "ddev version, defaults to latest."
         required: false
         type: string
 
@@ -50,7 +50,7 @@ jobs:
           fetch-depth: 0 # ddev needs full tag history
 
       - name: Install ddev
-        run: pip install ddev${{ inputs.ddev-version }}
+        run: pip install "ddev${{ inputs.ddev-version && format('=={0}', inputs.ddev-version) || '' }}"
 
       - name: Configure ddev
         env:

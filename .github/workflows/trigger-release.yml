@@ -37,7 +37,7 @@ on:
         type: boolean
         default: false
       ddev-version:
-        description: "ddev version specifier (e.g. ==14.3.2). Defaults to latest."
+        description: "ddev version, defaults to latest."
         required: false
         type: string
 
