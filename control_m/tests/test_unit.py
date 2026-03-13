@@ -11,6 +11,7 @@ from pytest import MonkeyPatch
 from requests.exceptions import HTTPError
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.dev.metadata import get_metadata_metrics
 
 from .common import BASE_TAGS, FIXTURE_DIR, _load_job, _make_check, _mock_api, _run_check
 
@@ -368,6 +369,13 @@ def test_full_cycle_with_fixture_data(
     datadog_agent.assert_metadata(check.check_id, {"version.raw": "9.0.21.080"})
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        exclude=[
+            "control_m.job.run.duration_ms",
+            "control_m.job.run.overrun_ms",
+        ],
+    )
 
 
 @pytest.mark.parametrize(
