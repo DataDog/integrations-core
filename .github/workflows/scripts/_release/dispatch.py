@@ -7,8 +7,8 @@ import urllib.request
 
 BATCH_SIZE = 200
 _TARGET_REPO = "DataDog/agent-integration-wheels-release"
-_DISPATCH_URL = f"https://api.github.com/repos/{_TARGET_REPO}/dispatches"
-_MAX_ATTEMPTS = 5
+DISPATCH_URL = f"https://api.github.com/repos/{_TARGET_REPO}/dispatches"
+MAX_ATTEMPTS = 5
 
 
 def build_payload(batch: list[str], source_repo: str, ref: str, target: str) -> dict:
@@ -24,14 +24,20 @@ def build_payload(batch: list[str], source_repo: str, ref: str, target: str) -> 
     }
 
 
-def send_dispatch(payload: dict, token: str) -> None:
+def send_dispatch(
+    payload: dict,
+    token: str,
+    *,
+    dispatch_url: str = DISPATCH_URL,
+    max_attempts: int = MAX_ATTEMPTS,
+) -> None:
     """POST a single ``repository_dispatch`` event to the wheels-release repo.
 
-    Retries up to ``_MAX_ATTEMPTS`` times on 5xx errors with exponential backoff.
+    Retries up to ``max_attempts`` times on 5xx errors with exponential backoff.
     Calls ``sys.exit(1)`` on 4xx errors or after exhausting retries.
     """
     req = urllib.request.Request(
-        _DISPATCH_URL,
+        dispatch_url,
         data=json.dumps(payload).encode(),
         headers={
             "Authorization": f"Bearer {token}",
@@ -40,17 +46,17 @@ def send_dispatch(payload: dict, token: str) -> None:
         },
         method="POST",
     )
-    for attempt in range(1, _MAX_ATTEMPTS + 1):
+    for attempt in range(1, max_attempts + 1):
         try:
             with urllib.request.urlopen(req) as resp:
                 print(f"  Dispatched: HTTP {resp.status}")
                 return
         except urllib.error.HTTPError as e:
             body = e.read().decode()
-            if e.code < 500 or attempt == _MAX_ATTEMPTS:
+            if e.code < 500 or attempt == max_attempts:
                 print(body, file=sys.stderr)
                 sys.exit(1)
-            print(f"  HTTP {e.code} on attempt {attempt}/{_MAX_ATTEMPTS}, retrying...", file=sys.stderr)
+            print(f"  HTTP {e.code} on attempt {attempt}/{max_attempts}, retrying...", file=sys.stderr)
             time.sleep(2**attempt)
 
 
@@ -60,11 +66,20 @@ def dispatch_in_batches(
     ref: str,
     target: str,
     token: str,
+    *,
+    batch_size: int = BATCH_SIZE,
+    dispatch_url: str = DISPATCH_URL,
+    max_attempts: int = MAX_ATTEMPTS,
 ) -> None:
     """Dispatch all packages to the wheels-release repo, batching if needed."""
-    batches = [packages[i : i + BATCH_SIZE] for i in range(0, len(packages), BATCH_SIZE)]
+    batches = [packages[i : i + batch_size] for i in range(0, len(packages), batch_size)]
     for i, batch in enumerate(batches, 1):
         print(f"\nBatch {i}/{len(batches)}:")
         for name in batch:
             print(f"  - {name}")
-        send_dispatch(build_payload(batch, source_repo, ref, target), token)
+        send_dispatch(
+            build_payload(batch, source_repo, ref, target),
+            token,
+            dispatch_url=dispatch_url,
+            max_attempts=max_attempts,
+        )

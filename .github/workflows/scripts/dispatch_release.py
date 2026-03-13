@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from _release.dispatch import dispatch_in_batches
 from _release.github import parse_bool_env, write_summary
-from _release.summary import ACTIONS_URL, build_summary
+from _release.summary import build_summary
 
 
 def _load_validation(runner_temp: str) -> dict:
@@ -49,7 +49,6 @@ def main() -> None:
     token = os.environ["GH_TOKEN"]
     dispatch_in_batches(packages, source_repo, ref, target, token)
 
-    print(f"\nTrack runs: {ACTIONS_URL}?query=event:repository_dispatch")
     write_summary(build_summary(packages, results, mode, source_repo, ref, target, dry_run, dispatched=True))
 
 
