@@ -4,6 +4,6 @@ provides:
     data_type: metrics
     direction: inbound
   - id: oom-kill-events
-    always_on: false
+    always_on: true
     data_type: events
     direction: inbound
