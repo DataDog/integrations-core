@@ -7,6 +7,7 @@ build-backend = "hatchling.build"
 [project]
 name = "datadog-prefect"
 description = "The Prefect check"
+readme = "README.md"
 license = "BSD-3-Clause"
 requires-python = ">=3.13"
 keywords = [
