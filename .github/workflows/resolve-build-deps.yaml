@@ -249,7 +249,7 @@ jobs:
     - name: Run the build
       env:
         # This sets the minimum macOS version compatible for all built artifacts
-        MACOSX_DEPLOYMENT_TARGET: "11.0" # https://docs.datadoghq.com/agent/supported_platforms/?tab=macos
+        MACOSX_DEPLOYMENT_TARGET: "12.0" # https://docs.datadoghq.com/agent/supported_platforms/?tab=macos
         CACHE_HIT: ${{ steps.cache-builder-root.outputs.cache-hit }}
       run: |
         # If we hit the cache, we can skip the builder setup

@@ -38,8 +38,8 @@ license = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "azure-identity==1.25.2",
-    "boto3==1.42.63",
-    "cachetools==7.0.4",
+    "boto3==1.42.54",
+    "cachetools==7.0.1",
     "psycopg[c,pool]==3.3.3",
     "semver==3.0.4",
 ]
