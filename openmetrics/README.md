@@ -101,7 +101,7 @@ The Datadog OpenMetrics / Prometheus integrations expect metrics to follow the s
 - Histogram buckets (e.g. `*_bucket` with `le="..."`) cannot be safely converted into Datadog distribution metrics using options such as `histogram_buckets_as_distributions` (OpenMetrics v2)
 - Attempting to treat federated metrics as histograms can lead to transformer errors during bucket processing (e.g. `KeyError: 'upper_bound'`)
 
-**Important:** At this time, we do **not support** Prometheus federate endpoints for histogram → distribution conversion. If you need distributions from Prometheus histograms, use one of the following approaches instead:
+**Important:** At this time, we do **not support** Prometheus federate endpoints for histogram to distribution conversion. If you need distributions from Prometheus histograms, use one of the following approaches instead:
 
 - Scrape metrics directly from the **original targets** (non‑federated endpoints) that expose proper `# TYPE` metadata.
 - Introduce a small intermediary exporter/service that re‑emits metrics in full Prometheus/OpenMetrics format (with `# TYPE` and standard
