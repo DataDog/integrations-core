@@ -431,9 +431,11 @@ class AsyncGitHubClient:
             GitHubResponse with dict containing 'artifacts' list and total_count (all pages if auto_paginate=True)
         """
         if auto_paginate:
-            return await self.request_all_pages(
+            result = await self.request_all_pages[dict[str, Any]](
                 'GET', f'/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts', params=kwargs, auto_paginate=True
             )
+            # The artifacts endpoint always returns dict format
+            return result
         return await self.request('GET', f'/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts', params=kwargs)
 
     async def create_issue_comment(
