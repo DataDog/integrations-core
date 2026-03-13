@@ -161,6 +161,20 @@ release:
     )
 
 
+def test_labeler_sync_ignores_gitignored_directories(fake_repo, ddev):
+    (fake_repo.path / "dist").mkdir()
+    (fake_repo.path / "dist" / "manifest.json").write_text("{}")
+    (fake_repo.path / ".gitignore").write_text("dist/\n")
+
+    labeler_path = fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml'
+    labeler_path.write_text(labeler_test_config(["dummy", "dummy2"]))
+
+    result = ddev('validate', 'labeler', '--sync')
+
+    assert result.exit_code == 0, result.output
+    assert labeler_path.read_text() == labeler_test_config(["dummy", "dummy2"])
+
+
 def labeler_test_config(integrations):
     config = """\
 changelog/no-changelog:
