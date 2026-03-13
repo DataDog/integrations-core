@@ -94,18 +94,7 @@ def _get_input_type(cls: type) -> type:
     raise TypeError(f"{cls.__name__} must be parameterized with an input type: class MyTool(BaseTool[MyInput])")
 
 
-class ToolProtocol(typing.Protocol):
-    @property
-    def name(self) -> str: ...
-    @property
-    def description(self) -> str: ...
-    @property
-    def definition(self) -> ToolParam: ...
-    async def run(self, raw: dict[str, object]) -> ToolResult: ...
-    async def __call__(self, tool_input: Any) -> ToolResult: ...
-
-
-class BaseTool[TInput](ABC, ToolProtocol):
+class BaseTool[TInput](ABC):
     @property
     @abstractmethod
     def name(self) -> str:

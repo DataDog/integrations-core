@@ -4,7 +4,7 @@
 
 from anthropic.types import ToolParam
 
-from .base import ToolProtocol
+from .protocol import ToolProtocol
 from .types import ToolResult
 
 ALLOWED_TOOL_CALLERS = ["code_execution_20260120"]
