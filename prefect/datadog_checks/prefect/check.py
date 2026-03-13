@@ -5,18 +5,20 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timedelta, timezone
+from functools import cached_property
 from json import JSONDecodeError
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.common import pattern_filter
 
 from .config_models import ConfigMixin
 from .constants import METRICS_SPEC
-from .event import Event
-from .filter_metrics import PrefectFilterMetrics
-from .utils import _parse_time
+
+if TYPE_CHECKING:
+    from datadog_checks.base.log import CheckLoggingAdapter
 
 
 class PrefectCheck(AgentCheck, ConfigMixin):
@@ -710,3 +712,356 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             return
         if state_type == 'RUNNING':
             queue['concurrency_in_use'] = queue.get('concurrency_in_use', 0) + 1
+
+
+class Fallback:
+    def __init__(
+        self, key: str, value: str, custom_key: str, log: CheckLoggingAdapter, resolver: Fallback | None = None
+    ):
+        '''
+        e.g Flow runs don't contain deployment_name, only id. So we use the deployment_id to lookup the deployment_name.
+        - key is the name of the key used to lookup the value in the original obj. e.g deployment_id in deployments
+          is "id"
+        - value is the name of the key that contains the value in the original obj. e.g deployment_name in deployments
+          is "name"
+        - custom_key is the name of the key in the object that needs remapping. e.g deployment_id in flow runs
+
+        e.g Task runs don't contain deployment_name, only information on the flow run. So we use the flow_run info to
+        lookup the deployment_name.
+        - key is the name of the key in the intermediate object. e.g flow_run_id in flow_runs is "id"
+        - value is the name of the key that contains the value in the intermediate object. e.g deployment_id in flow
+          runs is "deployment_id"
+        - custom_key is the name of the key in the object that needs remapping. e.g flow_run_id in task runs
+        - resolver is the fallback to resolve the value through. e.g self.deployment_fallback to parse deployment_id
+          to deployment_name
+        '''
+        self.key = key  # which field to use as the mapping key e.g. "id"
+        self.custom_key = custom_key  # which field to use for lookup e.g. "flow_run_id"
+        self.value = value  # which field to use as the mapping value e.g. "name"
+        self.resolver = resolver  # optional fallback to resolve the value through
+        self.mappings: dict[str, str] = {}
+        self.log = log
+
+    def add_mapping(self, element: dict[str, str]):
+        raw_value = element[self.value]
+        if raw_value is None:
+            self.log.debug("Value is None for key %s and value %s", self.key, self.value)
+            return
+        if self.resolver:
+            raw_value = self.resolver.mappings.get(raw_value, raw_value)
+        mapping_key = element[self.key]
+        if mapping_key is None:
+            self.log.debug("Mapping key is None for key %s and value %s", self.key, self.value)
+            return
+        self.mappings[mapping_key] = raw_value
+
+    def get(self, element: dict[str, str]) -> str | None:
+        return self.mappings.get(element.get(self.custom_key, ''))
+
+
+class PrefectFilterMetrics:
+    def __init__(
+        self,
+        log: CheckLoggingAdapter,
+        work_pool_names: dict[str, list[str]] | None = None,
+        work_queue_names: dict[str, list[str]] | None = None,
+        deployment_names: dict[str, list[str]] | None = None,
+        event_names: dict[str, list[str]] | None = None,
+    ):
+        self.log = log
+
+        self.work_pool_names = work_pool_names or {}
+        self.work_queue_names = work_queue_names or {}
+        self.deployment_names = deployment_names or {}
+        self.event_names = event_names or {}
+
+        self.work_pool_cache: dict[str, bool] = {}
+        self.work_queue_cache: dict[str, bool] = {}
+        self.deployment_cache: dict[str, bool] = {}
+        self.flow_run_cache: dict[str, bool] = {}
+        self.task_run_cache: dict[str, bool] = {}
+        self.event_cache: dict[str, bool] = {}
+
+        self.deployment_fallback = Fallback("id", "name", "deployment_id", log)
+        self.flow_run_fallback = Fallback("id", "flow_name", "flow_run_id", log)
+        self.flow_run_to_work_pool_fallback = Fallback("id", "work_pool_name", "flow_run_id", log)
+        self.flow_run_to_queue_fallback = Fallback("id", "work_queue_name", "flow_run_id", log)
+        self.flow_run_to_deployment_fallback = Fallback(
+            "id", "deployment_id", "flow_run_id", log, resolver=self.deployment_fallback
+        )
+
+    def filter_work_pools(self, work_pools: list[dict[str, str]]) -> list[dict[str, str]]:
+        return self._filter_metric(
+            self.work_pool_names,
+            work_pools,
+            {"name": (self.work_pool_cache, True, None)},
+        )
+
+    def filter_work_queues(self, work_queues: list[dict[str, str]]) -> list[dict[str, str]]:
+        return self._filter_metric(
+            self.work_queue_names,
+            work_queues,
+            {
+                "work_pool_name": (self.work_pool_cache, False, None),
+                "name": (self.work_queue_cache, True, None),
+            },
+        )
+
+    def filter_deployments(self, deployments: list[dict[str, str]]) -> list[dict[str, str]]:
+        return self._filter_metric(
+            self.deployment_names,
+            deployments,
+            {
+                "work_pool_name": (self.work_pool_cache, False, None),
+                "work_queue_name": (self.work_queue_cache, False, None),
+                "name": (self.deployment_cache, True, None),
+            },
+            [self.deployment_fallback],
+        )
+
+    def filter_flow_runs(self, flow_runs: list[dict[str, str]]) -> list[dict[str, str]]:
+        return self._filter_metric(
+            None,
+            flow_runs,
+            {
+                "work_pool_name": (self.work_pool_cache, False, None),
+                "work_queue_name": (self.work_queue_cache, False, None),
+                "deployment_name": (self.deployment_cache, False, self.deployment_fallback),
+            },
+            [
+                self.flow_run_to_deployment_fallback,
+                self.flow_run_to_work_pool_fallback,
+                self.flow_run_to_queue_fallback,
+            ],
+        )
+
+    def filter_task_runs(self, task_runs: list[dict[str, str]]) -> list[dict[str, str]]:
+        return self._filter_metric(
+            None,
+            task_runs,
+            {
+                "work_pool_name": (self.work_pool_cache, False, self.flow_run_to_work_pool_fallback),
+                "work_queue_name": (self.work_queue_cache, False, self.flow_run_to_queue_fallback),
+                "deployment_name": (self.deployment_cache, False, self.flow_run_to_deployment_fallback),
+            },
+        )
+
+    def is_event_included(self, event: Event) -> bool:
+        fields: dict[str, str] = {}
+        caches: dict[str, tuple[dict[str, bool], bool, Fallback | None]] = {}
+        fields["event_type"] = event.event_type
+        caches["event_type"] = (self.event_cache, True, None)
+        work_pool_name = event.event_related.get("work-pool", {}).get("name")
+        if work_pool_name:
+            fields["work_pool_name"] = work_pool_name
+            caches["work_pool_name"] = (self.work_pool_cache, False, None)
+        work_queue_name = event.event_related.get("work-queue", {}).get("name")
+        if work_queue_name:
+            fields["work_queue_name"] = work_queue_name
+            caches["work_queue_name"] = (self.work_queue_cache, False, None)
+        deployment_name = event.event_related.get("deployment", {}).get("name")
+        if deployment_name:
+            fields["deployment_name"] = deployment_name
+            caches["deployment_name"] = (self.deployment_cache, False, None)
+
+        return bool(
+            self._filter_metric(
+                self.event_names,
+                [fields],
+                caches,
+            )
+        )
+
+    def _filter_metric(
+        self,
+        list_of_patterns: dict[str, list[str]] | None,
+        list_to_filter_metric: list[dict[str, str]],
+        caches: dict[str, tuple[dict[str, bool], bool, Fallback | None]],
+        fallback_to_write: list[Fallback] | None = None,
+    ) -> list[dict[str, str]]:
+        result = []
+
+        for e in list_to_filter_metric:
+            for fallback in fallback_to_write or []:
+                fallback.add_mapping(e)
+
+            for field, (cache, check_pattern, fallback_to_use) in caches.items():
+                value = None
+                if field in e:
+                    value = e.get(field)
+                elif fallback_to_use:
+                    value = fallback_to_use.get(e)
+                else:
+                    self.log.debug("Including event because no fallback or field found for %s", field)
+
+                if value is not None and value not in cache and check_pattern:
+                    if list_of_patterns:
+                        cache[value] = bool(
+                            pattern_filter(
+                                [value],
+                                whitelist=list_of_patterns.get("include", []),
+                                blacklist=list_of_patterns.get("exclude", []),
+                                key=lambda x: x,
+                            )
+                        )
+                    else:
+                        cache[value] = True
+
+                if value is not None and value in cache and not cache[value]:
+                    break
+            else:
+                result.append(e)
+        return result
+
+
+class Event:
+    def __init__(self, event: dict):
+        self.event = event
+
+        self.id = event.get('id', '')
+        self.follows = event.get('follows', '')  # the id of the event that this event follows
+        self.occurred = _parse_time(self.event.get('occurred', ''), None)  # the timestamp of the event
+        self.event_type = self.event.get('event', '')  # e.g. "prefect.task-run.Completed"
+        self.event_state_type = self.event_type.split('.')[-1]  # e.g. "Completed"
+
+        self.resource = event.get('resource') or {}
+        self.resource_id_parts = self.resource.get('prefect.resource.id', '').split(
+            '.'
+        )  # e.g. "prefect.task-run.019bc69e-7438-7f35-a011-26ce615b1e7d"
+        self.resource_type = (
+            '.'.join(self.resource_id_parts[1:-1]) if self.resource_id_parts else ''
+        )  # e.g. "task-run", "docker.container"
+        self.resource_id = (
+            self.resource_id_parts[-1] if self.resource_id_parts else ''
+        )  # e.g. "019bc69e-7438-7f35-a011-26ce615b1e7d"
+        self.state_name = self.resource.get('prefect.state-name', '')  # e.g. "AwaitingRetry"
+        self.state_type = self.resource.get('prefect.state-type', '')  # e.g. "SCHEDULED"
+        self.resource_name = self.resource.get('prefect.resource.name', '')  # e.g. "task-run-1234"
+        self.resource_message = self.resource.get('prefect.state-message', '')  # e.g. "Error 123"
+
+        self.payload = event.get('payload') or {}
+        self.intended_state_type = (self.payload.get('intended') or {}).get('to', '')  # e.g. "RUNNING"
+        self.initial_state = self.payload.get('initial_state') or {}
+        self.initial_state_message = self.initial_state.get('message', '')  # e.g. "Error 123"
+        self.initial_state_name = self.initial_state.get('name', '')  # e.g. "AwaitingRetry"
+        self.initial_state_type = self.initial_state.get('type', '')  # e.g. "SCHEDULED"
+
+    @cached_property
+    def event_related(self) -> dict[str, dict[str, str]]:
+        related_raw = self.event.get('related', [])
+        related: dict[str, dict[str, str]] = {}
+        for r in related_raw:
+            role = r.get('prefect.resource.role')
+            if role:
+                related[role] = {
+                    'id': r.get('prefect.resource.id', '').split('.')[-1],
+                    'name': r.get('prefect.resource.name', ''),
+                }
+        return related
+
+    @cached_property
+    def tags(self) -> list[str]:
+        tags = [
+            f"resource_name:{self.resource_name}",
+            f"resource_id:{self.resource_id}",
+            f"state_type:{self.state_type}",
+            f"initial_state_type:{self.initial_state_type}",
+            f"intended_state_type:{self.intended_state_type}",
+        ]
+        for role, val in self.event_related.items():
+            tags.append(f"{role}_id:{val.get('id', '')}")
+            tags.append(f"{role}_name:{val.get('name', '')}")
+        return tags
+
+    @cached_property
+    def flow_tags(self) -> list[str]:
+        if self.event_type.startswith('prefect.flow-run') or self.event_type.startswith('prefect.task-run'):
+            return [
+                f"work_pool_id:{self.event_related.get('work-pool', {}).get('id', '')}",
+                f"work_pool_name:{self.event_related.get('work-pool', {}).get('name', '')}",
+                f"work_queue_id:{self.event_related.get('work-queue', {}).get('id', '')}",
+                f"work_queue_name:{self.event_related.get('work-queue', {}).get('name', '')}",
+                f"deployment_id:{self.event_related.get('deployment', {}).get('id', '')}",
+                f"deployment_name:{self.event_related.get('deployment', {}).get('name', '')}",
+                f"flow_id:{self.event_related.get('flow', {}).get('id', '')}",
+            ]
+        else:
+            return []
+
+    @cached_property
+    def task_tags(self) -> list[str]:
+        if self.event_type.startswith('prefect.task-run'):
+            return self.flow_tags + [
+                f"task_key:{self.payload.get('task_run', {}).get('task_key', '')}",
+            ]
+        else:
+            return []
+
+    @cached_property
+    def task_run_dependencies(self) -> list[str]:
+        if not self.event_type.startswith("prefect.task-run"):
+            return []
+        task_inputs = self.payload.get("task_run", {}).get("task_inputs", {})
+        dependencies: list[str] = []
+        for arguments in task_inputs.values():
+            if isinstance(arguments, list):
+                dependencies.extend(
+                    arg.get("id") for arg in arguments if arg.get("id") and arg.get("input_type") == "task_run"
+                )
+            elif isinstance(arguments, dict) and "data" in arguments:
+                dependencies.extend(
+                    arg.get("id")
+                    for arg in arguments.get("data", [])
+                    if arg.get("id") and arg.get("input_type") == "task_run"
+                )
+        return dependencies
+
+    @cached_property
+    def message(self) -> str:
+        if self.event_type.startswith('prefect.flow-run') or self.event_type.startswith('prefect.task-run'):
+            run_count = self.resource.get('prefect.run-count') or self.payload.get('task_run', {}).get('run_count')
+            message = (
+                f"{self.resource_type} went from {self.initial_state_name} to {self.state_name}\n"
+                f"Resource ID: {self.resource_id}\n"
+                f"Resource Name: {self.resource_name}\n"
+            )
+
+            if run_count:
+                message += f"Run count: {run_count}\n"
+
+            if self.initial_state_message:
+                message += f"Initial message: {self.initial_state_message}\n"
+
+            if self.resource_message:
+                message += f"Message: {self.resource_message}\n"
+
+        else:
+            message = f"{self.resource_type} {self.resource_name} with id {self.resource_id} {self.event_state_type}\n"
+        return message
+
+    @cached_property
+    def msg_title(self) -> str:
+        return f"[PREFECT] [{self.resource_type}] {self.resource_name} -> {self.event_state_type}"
+
+    @cached_property
+    def alert_type(self) -> str:
+        if (
+            "Failed" in self.event_state_type
+            or "Crashed" in self.event_state_type
+            or "not-ready" in self.event_state_type
+            or "AwaitingRetry" in self.event_state_type
+        ):
+            return "error"
+        else:
+            return "info"
+
+
+def _parse_time(ts: str | None, log: CheckLoggingAdapter | None = None) -> datetime | None:
+    if not ts or ts == "null":
+        return None
+    try:
+        return datetime.fromisoformat(ts)
+    except ValueError:
+        if log:
+            log.error("Could not parse timestamp: %s", ts)
+        return None
