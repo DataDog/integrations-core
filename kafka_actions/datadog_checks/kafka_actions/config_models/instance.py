@@ -139,6 +139,19 @@ class ReadMessages(BaseModel):
     value_uses_schema_registry: Optional[bool] = Field(False, description='Whether value uses Schema Registry format')
 
 
+class SchemaRegistryOauthTokenProvider(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    client_id: Optional[str] = None
+    client_secret: Optional[str] = None
+    custom_headers: Optional[MappingProxyType[str, str]] = None
+    scope: Optional[str] = None
+    tls_ca_cert: Optional[str] = None
+    url: Optional[str] = None
+
+
 class Offset(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -207,6 +220,14 @@ class InstanceConfig(BaseModel):
     sasl_mechanism: Optional[str] = None
     sasl_plain_password: Optional[str] = None
     sasl_plain_username: Optional[str] = None
+    schema_registry_oauth_token_provider: Optional[SchemaRegistryOauthTokenProvider] = None
+    schema_registry_password: Optional[str] = None
+    schema_registry_tls_ca_cert: Optional[str] = None
+    schema_registry_tls_cert: Optional[str] = None
+    schema_registry_tls_key: Optional[str] = None
+    schema_registry_tls_verify: Optional[bool] = None
+    schema_registry_url: Optional[str] = None
+    schema_registry_username: Optional[str] = None
     security_protocol: Optional[str] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None

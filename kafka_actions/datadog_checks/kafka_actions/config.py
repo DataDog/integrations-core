@@ -118,15 +118,29 @@ class KafkaActionsConfig:
                 f"Invalid key_format: {key_format}. Supported formats: json, bson, string, protobuf, avro"
             )
 
+        schema_registry_url = self.instance.get('schema_registry_url')
+
         if value_format in ['protobuf', 'avro']:
-            if not config.get('value_uses_schema_registry') and not config.get('value_schema'):
+            if config.get('value_uses_schema_registry'):
+                if not schema_registry_url:
+                    raise ConfigurationError(
+                        f"value_format='{value_format}' with 'value_uses_schema_registry=true' "
+                        f"requires 'schema_registry_url' to be configured"
+                    )
+            elif not config.get('value_schema'):
                 raise ConfigurationError(
                     f"value_format='{value_format}' requires either 'value_uses_schema_registry=true' "
                     f"or 'value_schema' to be specified"
                 )
 
         if key_format in ['protobuf', 'avro']:
-            if not config.get('key_uses_schema_registry') and not config.get('key_schema'):
+            if config.get('key_uses_schema_registry'):
+                if not schema_registry_url:
+                    raise ConfigurationError(
+                        f"key_format='{key_format}' with 'key_uses_schema_registry=true' "
+                        f"requires 'schema_registry_url' to be configured"
+                    )
+            elif not config.get('key_schema'):
                 raise ConfigurationError(
                     f"key_format='{key_format}' requires either 'key_uses_schema_registry=true' "
                     f"or 'key_schema' to be specified"
