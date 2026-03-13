@@ -111,6 +111,7 @@ class TestReadMessagesAction:
         event1 = message_events[0]
         assert event1['topic'] == 'test-topic'
         assert event1['offset'] == 100
+        assert event1['message_timestamp'] == 1732128000000
         assert event1['value']['id'] == 1
         assert event1['value']['status'] == 'active'
         assert event1['remote_config_id'] == 'test-read-messages-001'
