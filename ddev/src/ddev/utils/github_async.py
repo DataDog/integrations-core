@@ -10,7 +10,7 @@ from collections.abc import AsyncIterator
 from typing import Any
 
 import httpx
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from ddev.config.file import ConfigFileWithOverrides
 
@@ -48,13 +48,91 @@ class PaginationInfo(BaseModel):
 
 
 class GitHubResponse[T](BaseModel):
-    """Response wrapper containing data, headers, and pagination information."""
+    """Generic response model for GitHub API responses."""
 
-    model_config = ConfigDict(extra="ignore", arbitrary_types_allowed=True)
+    model_config = ConfigDict(extra="allow", arbitrary_types_allowed=True)
 
-    data: T
-    headers: dict[str, str]
-    pagination: PaginationInfo
+    pagination: PaginationInfo = Field(default_factory=PaginationInfo)
+
+    # Store raw response data for backward compatibility
+    _raw_data: T | None = None
+    _headers: dict[str, str] = {}
+
+    @property
+    def data(self) -> T | None:
+        """Access raw response data for backward compatibility."""
+        return self._raw_data
+
+    @property
+    def headers(self) -> dict[str, str]:
+        """Access response headers for backward compatibility."""
+        return self._headers
+
+    @classmethod
+    def from_response(cls, data: T | None, headers: dict[str, str], pagination: PaginationInfo):
+        """Create response from raw data."""
+        instance = cls(pagination=pagination)
+        instance._raw_data = data
+        instance._headers = headers
+        return instance
+
+
+class WorkflowRun(BaseModel):
+    """GitHub workflow run response model."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    id: int
+    name: str | None = None
+    status: str
+    conclusion: str | None = None
+    html_url: str | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
+
+
+class Workflow(BaseModel):
+    """GitHub workflow response model."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    id: int
+    name: str
+    path: str
+    state: str | None = None
+
+
+class Artifact(BaseModel):
+    """GitHub artifact response model."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    id: int
+    name: str
+    size_in_bytes: int | None = None
+    url: str | None = None
+    archive_download_url: str | None = None
+    expired: bool = False
+
+
+class ArtifactsResponse(GitHubResponse[dict[str, Any]]):
+    """Response for list artifacts endpoint."""
+
+    total_count: int = 0
+    artifacts: list[Artifact] = Field(default_factory=list)
+
+
+class IssueComment(BaseModel):
+    """GitHub issue comment response model."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    id: int
+    body: str
+    user: dict[str, Any] | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
+    html_url: str | None = None
 
 
 class AsyncGitHubClient:
@@ -157,14 +235,14 @@ class AsyncGitHubClient:
             json_body: JSON request body
 
         Returns:
-            GitHubResponse with typed data, headers dict, and pagination info
+            GitHubResponse[T] with data accessible via .data property, headers via .headers property
         """
         response = await self._request(method, url, params=params, json=json_body)
 
         # Handle JSON responses and empty responses
         data = response.json() if response.content else None
 
-        return GitHubResponse(
+        return GitHubResponse[T].from_response(
             data=data,
             headers=dict(response.headers),
             pagination=self._extract_pagination(response.headers),
@@ -187,7 +265,7 @@ class AsyncGitHubClient:
             json_body: JSON request body
 
         Yields:
-            GitHubResponse for each page
+            GitHubResponse[T] for each page
         """
         current_url: str | None = url
         current_params = params
@@ -232,9 +310,9 @@ class AsyncGitHubClient:
             # Single page request
             return await self.request(method, url, params=params, json_body=json_body)
 
-        all_data: list[T] = []
+        all_data: list[Any] = []
         wrapper_key: str | None = None
-        last_response: GitHubResponse[Any] | None = None
+        last_response: GitHubResponse[T] | None = None
         total_count: int | None = None
 
         async for response in self.iter_pages(method, url, params=params, json_body=json_body):
@@ -261,13 +339,13 @@ class AsyncGitHubClient:
             result_data: dict[str, Any] = {wrapper_key: all_data}
             if total_count is not None:
                 result_data['total_count'] = total_count
-            return GitHubResponse(
+            return GitHubResponse[dict[str, Any]].from_response(
                 data=result_data,
                 headers=last_response.headers,
                 pagination=last_response.pagination,
             )
 
-        return GitHubResponse(
+        return GitHubResponse[list[T]].from_response(
             data=all_data,
             headers=last_response.headers if last_response else {},
             pagination=last_response.pagination if last_response else PaginationInfo(),
@@ -308,7 +386,7 @@ class AsyncGitHubClient:
             inputs: Input parameters defined in the workflow file
 
         Returns:
-            GitHubResponse with None data (204 No Content on success)
+            GitHubResponse[None] with None data (204 No Content on success)
         """
         body: dict[str, Any] = {'ref': ref}
         if inputs:
