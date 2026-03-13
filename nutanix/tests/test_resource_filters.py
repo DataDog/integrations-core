@@ -21,7 +21,7 @@ BASE_TAGS = ["nutanix", "prism_central:10.0.0.197"]
 def test_default_collects_only_on_vms_and_user_category_tags(dd_run_check, aggregator, mock_instance, mock_http_get):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
-    expected_tags = BASE_TAGS + ['ntnx_cluster_name:' + CLUSTER_NAME]
+    expected_tags = BASE_TAGS + ['Team:agent-integrations', 'ntnx_cluster_name:' + CLUSTER_NAME]
     aggregator.assert_metric("nutanix.cluster.count", value=1, tags=expected_tags)
     aggregator.assert_metric("nutanix.host.count", at_least=1)
 
@@ -49,7 +49,7 @@ def test_include_cluster_by_id(dd_run_check, aggregator, mock_instance, mock_htt
     ]
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
-    expected_tags = BASE_TAGS + ['ntnx_cluster_name:' + CLUSTER_NAME]
+    expected_tags = BASE_TAGS + ['Team:agent-integrations', 'ntnx_cluster_name:' + CLUSTER_NAME]
     aggregator.assert_metric("nutanix.cluster.count", value=1, tags=expected_tags)
 
 
@@ -102,7 +102,7 @@ def test_multiple_include_patterns(dd_run_check, aggregator, mock_instance, mock
     ]
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
-    expected_tags = BASE_TAGS + ['ntnx_cluster_name:' + CLUSTER_NAME]
+    expected_tags = BASE_TAGS + ['Team:agent-integrations', 'ntnx_cluster_name:' + CLUSTER_NAME]
     aggregator.assert_metric("nutanix.cluster.count", value=1, tags=expected_tags)
 
 

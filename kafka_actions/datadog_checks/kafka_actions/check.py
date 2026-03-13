@@ -10,6 +10,7 @@ from datadog_checks.base import AgentCheck
 from .config import KafkaActionsConfig
 from .kafka_client import KafkaActionsClient
 from .message_deserializer import DeserializedMessage, MessageDeserializer
+from .schema_registry import SchemaRegistryClient
 
 
 class KafkaActionsCheck(AgentCheck):
@@ -33,7 +34,13 @@ class KafkaActionsCheck(AgentCheck):
         self.cluster = 'unknown'  # Will be set by action handlers
 
         self.kafka_client = KafkaActionsClient(self.instance, self.log)
-        self.deserializer = MessageDeserializer(self.log)
+
+        schema_registry = None
+        schema_registry_url = self.instance.get('schema_registry_url')
+        if schema_registry_url:
+            schema_registry = SchemaRegistryClient(self.http, schema_registry_url, self.log, self.instance)
+
+        self.deserializer = MessageDeserializer(self.log, schema_registry=schema_registry)
 
         self.action_handlers = {
             'read_messages': self._action_read_messages,
@@ -235,7 +242,7 @@ class KafkaActionsCheck(AgentCheck):
             'value_format': config.get('value_format', 'json'),
             'value_schema': config.get('value_schema'),
             'value_uses_schema_registry': config.get('value_uses_schema_registry', False),
-            'key_format': config.get('key_format', 'json'),
+            'key_format': config.get('key_format', 'string'),
             'key_schema': config.get('key_schema'),
             'key_uses_schema_registry': config.get('key_uses_schema_registry', False),
         }
@@ -505,7 +512,7 @@ class KafkaActionsCheck(AgentCheck):
             cluster: Kafka cluster identifier
         """
         event_data = {
-            'message_timestamp': int(time.time() * 1000),
+            'message_timestamp': deserialized_msg.timestamp,
             'remote_config_id': self.remote_config_id,
             'kafka_cluster_id': cluster,
             'topic': deserialized_msg.topic,
