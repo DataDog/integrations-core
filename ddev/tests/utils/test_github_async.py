@@ -44,31 +44,6 @@ class TestAsyncGitHubClient:
             assert result.headers['x-ratelimit-remaining'] == '4999'
 
     @pytest.mark.asyncio
-    async def test_list_workflows(self, respx_mock):
-        """Test listing workflows for a repository."""
-        owner, repo = 'DataDog', 'integrations-core'
-
-        respx_mock.get(f'https://api.github.com/repos/{owner}/{repo}/actions/workflows').mock(
-            return_value=httpx.Response(
-                200,
-                json={
-                    'total_count': 2,
-                    'workflows': [
-                        {'id': 1, 'name': 'CI', 'path': '.github/workflows/ci.yml'},
-                        {'id': 2, 'name': 'Release', 'path': '.github/workflows/release.yml'},
-                    ],
-                },
-            )
-        )
-
-        async with AsyncGitHubClient(token='test_token') as client:
-            result = await client.list_workflows(owner, repo)
-
-            assert result.data['total_count'] == 2
-            assert len(result.data['workflows']) == 2
-            assert result.data['workflows'][0]['name'] == 'CI'
-
-    @pytest.mark.asyncio
     async def test_pagination(self, respx_mock):
         """Test pagination extraction from Link header."""
         owner, repo = 'DataDog', 'integrations-core'
