@@ -20,13 +20,11 @@ class EditFileInput:
     new_string: Annotated[str, "Text to replace old_string with"]
 
 
-class EditFileTool(BaseTool):
+class EditFileTool(BaseTool[EditFileInput]):
     """Edits a file by replacing an exact string with a new one.
     Only files registered in the FileRegistry can be edited.
     old_string must appear exactly once in the file — if it appears multiple times, the call fails.
     Read the file first with read_file to get the exact content to use as old_string."""
-
-    Input = EditFileInput
 
     def __init__(self, file_registry: FileRegistry) -> None:
         self._file_registry = file_registry

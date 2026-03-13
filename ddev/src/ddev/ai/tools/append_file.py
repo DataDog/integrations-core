@@ -16,11 +16,9 @@ class AppendFileInput:
     content: Annotated[str, "Content to append to the file"]
 
 
-class AppendFileTool(BaseTool):
+class AppendFileTool(BaseTool[AppendFileInput]):
     """Appends content to the end of an existing file.
     Only files registered in the FileRegistry can be appended to."""
-
-    Input = AppendFileInput
 
     def __init__(self, file_registry: FileRegistry):
         self._file_registry = file_registry

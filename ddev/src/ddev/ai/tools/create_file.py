@@ -16,13 +16,11 @@ class CreateFileInput:
     content: Annotated[str, "Content of the file to create"] = ""
 
 
-class CreateFileTool(BaseTool):
+class CreateFileTool(BaseTool[CreateFileInput]):
     """Creates a new file and writes content into it (default: empty content).
     Parent directories are created automatically if they do not exist (no need to call mkdir first).
     Fails if the file already exists.
     Use edit_file to modify existing files."""
-
-    Input = CreateFileInput
 
     def __init__(self, file_registry: FileRegistry):
         self._file_registry = file_registry

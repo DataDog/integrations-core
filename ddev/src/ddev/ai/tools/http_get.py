@@ -7,7 +7,7 @@ from typing import Annotated
 import httpx
 
 from .base import BaseTool
-from .truncation import truncate
+from .truncation import TruncateResult, truncate
 from .types import ToolResult
 
 
@@ -17,12 +17,10 @@ class HttpGetInput:
     timeout: Annotated[float, "Request timeout in seconds (default: 10)"] = 10.0
 
 
-class HttpGetTool(BaseTool):
+class HttpGetTool(BaseTool[HttpGetInput]):
     """Performs an HTTP GET request to check if an endpoint is reachable.
     Use to validate that a metrics endpoint is accessible and inspect its response.
     Returns the HTTP status code and response body (truncated if large)."""
-
-    Input = HttpGetInput
 
     @property
     def name(self) -> str:
@@ -44,19 +42,19 @@ class HttpGetTool(BaseTool):
             return ToolResult(success=False, error=f"Request failed: {e}")
 
         body = response.text
-        truncated_body, was_truncated, meta = truncate(body)
+        result: TruncateResult = truncate(body)
 
         status_line = f"Status: {response.status_code}"
-        output = f"{status_line}\n\n{truncated_body}"
+        output = f"{status_line}\n\n{result.output}"
 
-        if was_truncated and meta is not None:
+        if result.truncated and result.meta is not None:
             return ToolResult(
                 success=response.is_success,
                 data=output,
                 truncated=True,
-                total_size=meta["total_size"],
-                shown_size=meta["shown_size"],
-                hint=meta["hint"],
+                total_size=result.meta.total_size,
+                shown_size=result.meta.shown_size,
+                hint=result.meta.hint,
             )
 
         return ToolResult(success=response.is_success, data=output)
