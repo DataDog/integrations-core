@@ -2219,7 +2219,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              trim_rule %{regex("\\S+(?:\\s+\\S+)*"):ocsf.process.cmd_line}
+              trim_rule %{regex("[^\\s].*[^\\s]|[^\\s]"):ocsf.process.cmd_line}
     - type: pipeline
       name: OCSF sub pipeline for class Process Activity [1007]
       enabled: true
