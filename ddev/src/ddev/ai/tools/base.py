@@ -130,9 +130,12 @@ class BaseTool(ABC, ToolProtocol):
         """Coerce raw dict to the typed Input class and delegate to __call__."""
         try:
             validated = self.Input(**raw)
-        except TypeError as e:
+        except (TypeError, ValueError) as e:
             return ToolResult(success=False, error=str(e))
-        return await self(validated)
+        try:
+            return await self(validated)
+        except Exception as e:
+            return ToolResult(success=False, error=f"{type(e).__name__}: {str(e)}")
 
     @abstractmethod
     async def __call__(self, tool_input: Any) -> ToolResult:

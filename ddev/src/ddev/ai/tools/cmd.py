@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import subprocess
+import asyncio
 from abc import abstractmethod
 from typing import Any
 
@@ -22,17 +22,26 @@ class CmdTool(BaseTool):
         return await run_command(self.cmd(tool_input))
 
 
-async def run_command(cmd: list[str]) -> ToolResult:
+async def run_command(cmd: list[str], timeout: int = 10) -> ToolResult:
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+        proc = await asyncio.create_subprocess_exec(
+            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
+        stdout_bytes, stderr_bytes = await asyncio.wait_for(proc.communicate(), timeout=timeout)
     except FileNotFoundError:
         return ToolResult(success=False, error=f"Command not found: {cmd[0]!r}")
-    except subprocess.TimeoutExpired:
-        return ToolResult(success=False, error=f"Command timed out after 10 seconds: {cmd}")
+    except asyncio.TimeoutError:
+        proc.kill()
+        return ToolResult(success=False, error=f"Command timed out after {timeout}s: {cmd}")
+    except Exception as e:
+        return ToolResult(success=False, error=f"{type(e).__name__}: {e}")
 
-    output = proc.stdout
-    if proc.returncode != 0 and proc.stderr:
-        output = output + proc.stderr if output else proc.stderr
+    stdout = stdout_bytes.decode()
+    stderr = stderr_bytes.decode()
+
+    output = stdout
+    if proc.returncode != 0 and stderr:
+        output = output + stderr if output else stderr
 
     if not output.strip():
         return ToolResult(success=True, data="(no output)")
