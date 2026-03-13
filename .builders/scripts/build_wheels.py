@@ -274,13 +274,15 @@ def _strip_lines_from_dir(unpacked_dir: Path, rules: list[dict]) -> bool:
                 stripped = line.rstrip('\n\r')
 
                 if skip_indent is not None:
-                    line_indent = len(stripped) - len(stripped.lstrip())
+                    expanded = stripped.expandtabs()
+                    line_indent = len(expanded) - len(expanded.lstrip())
                     if stripped == '' or line_indent > skip_indent:
                         continue
                     skip_indent = None
 
                 if any(pattern.search(line) for pattern in compiled_patterns):
-                    skip_indent = len(stripped) - len(stripped.lstrip())
+                    expanded = stripped.expandtabs()
+                    skip_indent = len(expanded) - len(expanded.lstrip())
                     continue
 
                 kept_lines.append(line)
