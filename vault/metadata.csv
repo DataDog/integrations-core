@@ -63,6 +63,7 @@ vault.go.memstats.stack.inuse.bytes,gauge,,,,Number of bytes in use by the stack
 vault.go.memstats.stack.sys.bytes,gauge,,,,Number of bytes obtained from system for stack allocator.,0,vault,,,
 vault.go.memstats.sys.bytes,gauge,,,,Number of bytes obtained from system.,0,vault,,,
 vault.go.threads,gauge,,,,Number of OS threads created.,0,vault,,,
+vault.has_leader,gauge,,,,1 if vault has a leader 0 otherwise.,0,vault,Vault cluster has a leader,,
 vault.identity.upsert_entity_txn.count,count,,,,PLACEHOLDER,0,vault,,,
 vault.identity.upsert_entity_txn.sum,count,,,,PLACEHOLDER,0,vault,,,
 vault.is_leader,gauge,,,,1 if leader 0 otherwise.,0,vault,Cluster leader,,
