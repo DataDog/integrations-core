@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import AsyncIterator
-from typing import Any
+from typing import Any, cast
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
@@ -431,11 +431,12 @@ class AsyncGitHubClient:
             GitHubResponse with dict containing 'artifacts' list and total_count (all pages if auto_paginate=True)
         """
         if auto_paginate:
-            result = await self.request_all_pages[dict[str, Any]](
+            # The artifacts endpoint always returns dict format with 'artifacts' key
+            result = await self.request_all_pages(
                 'GET', f'/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts', params=kwargs, auto_paginate=True
             )
-            # The artifacts endpoint always returns dict format
-            return result
+            # Cast to the correct type since we know this endpoint returns dict format
+            return cast(GitHubResponse[dict[str, Any]], result)
         return await self.request('GET', f'/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts', params=kwargs)
 
     async def create_issue_comment(
