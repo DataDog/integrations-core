@@ -3,43 +3,119 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Kafka client wrapper for kafka_actions check."""
 
+from __future__ import annotations
+
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from confluent_kafka import Consumer, KafkaException, Producer, TopicPartition
 from confluent_kafka.admin import AdminClient, ConfigResource, NewTopic, OffsetSpec, ResourceType
+
+try:
+    import boto3
+    from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
+
+    AWS_MSK_IAM_AVAILABLE = True
+except ImportError:
+    AWS_MSK_IAM_AVAILABLE = False
+
+if TYPE_CHECKING:
+    from datadog_checks.kafka_actions.config import KafkaActionsConfig
 
 
 class KafkaActionsClient:
     """Kafka client for performing actions on Kafka clusters."""
 
-    def __init__(self, config: dict[str, Any], log):
-        """Initialize Kafka client with configuration.
-
-        Args:
-            config: Kafka configuration dictionary
-            log: Logger instance
-        """
+    def __init__(self, config: KafkaActionsConfig, log):
         self.config = config
         self.log = log
         self.consumer = None
         self.producer = None
         self.admin_client = None
 
-    def _get_kafka_config(self) -> dict[str, str]:
-        """Build Kafka configuration from check config."""
-        kafka_config = {
-            'bootstrap.servers': self.config.get('kafka_connect_str', 'localhost:9092'),
-            'security.protocol': self.config.get('security_protocol', 'PLAINTEXT'),
+    def _get_authentication_config(self) -> dict[str, Any]:
+        """Build authentication configuration for librdkafka."""
+        config = {
+            "security.protocol": self.config._security_protocol.lower(),
         }
 
-        if self.config.get('sasl_mechanism'):
-            kafka_config['sasl.mechanism'] = self.config['sasl_mechanism']
-        if self.config.get('sasl_plain_username'):
-            kafka_config['sasl.username'] = self.config['sasl_plain_username']
-        if self.config.get('sasl_plain_password'):
-            kafka_config['sasl.password'] = self.config['sasl_plain_password']
+        extras_parameters = {
+            "ssl.ca.location": self.config._tls_ca_cert,
+            "ssl.certificate.location": self.config._tls_cert,
+            "ssl.key.location": self.config._tls_private_key,
+            "ssl.key.password": self.config._tls_private_key_password,
+            "ssl.endpoint.identification.algorithm": "https" if self.config._tls_validate_hostname else "none",
+            "ssl.crl.location": self.config._crlfile,
+            "enable.ssl.certificate.verification": self.config._tls_verify,
+            "sasl.mechanism": self.config._sasl_mechanism,
+            "sasl.username": self.config._sasl_plain_username,
+            "sasl.password": self.config._sasl_plain_password,
+            "sasl.kerberos.keytab": self.config._sasl_kerberos_keytab,
+            "sasl.kerberos.principal": self.config._sasl_kerberos_principal,
+            "sasl.kerberos.service.name": self.config._sasl_kerberos_service_name,
+        }
 
+        if self.config._sasl_mechanism == "OAUTHBEARER":
+            method = self.config._sasl_oauth_token_provider.get("method", "oidc")
+
+            if method == "aws_msk_iam":
+                if not AWS_MSK_IAM_AVAILABLE:
+                    raise Exception(
+                        "AWS MSK IAM authentication requires 'aws-msk-iam-sasl-signer-python' library. "
+                        "Install it with: pip install aws-msk-iam-sasl-signer-python"
+                    )
+
+                def _aws_msk_iam_oauth_cb(oauth_config):
+                    try:
+                        region = self.config._sasl_oauth_token_provider.get("aws_region")
+                        if not region:
+                            region = boto3.session.Session().region_name
+
+                        if not region:
+                            raise Exception(
+                                "AWS region could not be determined. Please specify 'aws_region' in "
+                                "sasl_oauth_token_provider configuration."
+                            )
+
+                        auth_token, expiry_ms = MSKAuthTokenProvider.generate_auth_token(region)
+                        self.log.debug("Generated AWS MSK IAM token for region %s, expires in %s ms", region, expiry_ms)
+                        return auth_token, expiry_ms / 1000
+                    except Exception as e:
+                        self.log.error("Failed to generate AWS MSK IAM token: %s", e)
+                        raise
+
+                extras_parameters['oauth_cb'] = _aws_msk_iam_oauth_cb
+
+            elif method == "oidc":
+                extras_parameters['sasl.oauthbearer.method'] = "oidc"
+                extras_parameters["sasl.oauthbearer.client.id"] = self.config._sasl_oauth_token_provider.get(
+                    "client_id"
+                )
+                extras_parameters["sasl.oauthbearer.token.endpoint.url"] = self.config._sasl_oauth_token_provider.get(
+                    "url"
+                )
+                extras_parameters["sasl.oauthbearer.client.secret"] = self.config._sasl_oauth_token_provider.get(
+                    "client_secret"
+                )
+                extras_parameters["sasl.oauthbearer.scope"] = self.config._sasl_oauth_token_provider.get("scope")
+                extras_parameters["sasl.oauthbearer.extensions"] = self.config._sasl_oauth_token_provider.get(
+                    "extensions"
+                )
+                if self.config._sasl_oauth_tls_ca_cert:
+                    extras_parameters["https.ca.location"] = self.config._sasl_oauth_tls_ca_cert
+
+        for key, value in extras_parameters.items():
+            if value:
+                config[key] = value
+
+        return config
+
+    def _get_kafka_config(self) -> dict[str, Any]:
+        """Build full Kafka configuration."""
+        kafka_config = {
+            'bootstrap.servers': self.config.kafka_connect_str,
+        }
+        kafka_config.update(self._get_authentication_config())
         return kafka_config
 
     def get_consumer(self, group_id: str = 'kafka_actions') -> Consumer:

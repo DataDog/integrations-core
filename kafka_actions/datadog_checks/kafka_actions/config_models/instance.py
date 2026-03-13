@@ -139,6 +139,21 @@ class ReadMessages(BaseModel):
     value_uses_schema_registry: Optional[bool] = Field(False, description='Whether value uses Schema Registry format')
 
 
+class SaslOauthTokenProvider(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    aws_region: Optional[str] = None
+    client_id: Optional[str] = None
+    client_secret: Optional[str] = None
+    extensions: Optional[str] = None
+    method: Optional[str] = None
+    scope: Optional[str] = None
+    tls_ca_cert: Optional[str] = None
+    url: Optional[str] = None
+
+
 class SchemaRegistryOauthTokenProvider(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -217,7 +232,12 @@ class InstanceConfig(BaseModel):
     produce_message: Optional[ProduceMessage] = None
     read_messages: Optional[ReadMessages] = None
     remote_config_id: str
+    sasl_kerberos_domain_name: Optional[str] = None
+    sasl_kerberos_keytab: Optional[str] = None
+    sasl_kerberos_principal: Optional[str] = None
+    sasl_kerberos_service_name: Optional[str] = None
     sasl_mechanism: Optional[str] = None
+    sasl_oauth_token_provider: Optional[SaslOauthTokenProvider] = None
     sasl_plain_password: Optional[str] = None
     sasl_plain_username: Optional[str] = None
     schema_registry_oauth_token_provider: Optional[SchemaRegistryOauthTokenProvider] = None
@@ -231,6 +251,14 @@ class InstanceConfig(BaseModel):
     security_protocol: Optional[str] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+    tls_ca_cert: Optional[str] = None
+    tls_cert: Optional[str] = None
+    tls_ciphers: Optional[tuple[str, ...]] = None
+    tls_crlfile: Optional[str] = None
+    tls_private_key: Optional[str] = None
+    tls_private_key_password: Optional[str] = None
+    tls_validate_hostname: Optional[bool] = None
+    tls_verify: Optional[bool] = None
     update_consumer_group_offsets: Optional[UpdateConsumerGroupOffsets] = None
     update_topic_config: Optional[UpdateTopicConfig] = None
 
