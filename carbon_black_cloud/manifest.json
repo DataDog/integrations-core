@@ -47,6 +47,7 @@
       "Category::AWS",
       "Category::Log Collection",
       "Category::Security",
+      "Category::Cloud",
       "Offering::Integration",
       "Submitted Data Type::Logs"
     ]
