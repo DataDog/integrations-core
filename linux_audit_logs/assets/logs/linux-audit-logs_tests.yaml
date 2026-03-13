@@ -1433,7 +1433,7 @@ tests:
             vendor_name: "Linux"
           version: "1.5.0"
         process:
-          cmd_line: "/bin/bash -c id       "
+          cmd_line: "/bin/bash -c id"
           name: "bash"
           path: "/bin/bash"
         severity: "Informational"
