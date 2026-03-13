@@ -9,9 +9,9 @@ botocore==1.42.54
 cachetools==7.0.1
 clickhouse-connect==0.11.0
 cm-client==45.0.4
-confluent-kafka==2.13.0
+confluent-kafka==2.13.2
 cryptography==46.0.5
-ddtrace==4.4.0
+ddtrace==3.19.5
 dnspython==2.8.0
 fastavro==1.12.1
 foundationdb==6.3.25
@@ -62,7 +62,7 @@ securesystemslib[crypto,pynacl]==0.28.0
 semver==3.0.4
 service-identity[idna]==24.2.0
 simplejson==3.20.2
-snowflake-connector-python==4.3.0
+snowflake-connector-python==4.0.0
 supervisor==4.3.0
 tuf==4.0.0
 urllib3==2.6.3

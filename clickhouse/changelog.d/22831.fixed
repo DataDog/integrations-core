@@ -1,0 +1,1 @@
+Fix query_signature mismatch between DBM query metrics and query samples by using raw query text instead of ClickHouse's normalizeQuery() for obfuscation

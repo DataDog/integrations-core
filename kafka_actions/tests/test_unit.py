@@ -383,5 +383,43 @@ class TestReadMessagesAdvancedFiltering:
         assert message_events[0]['remote_config_id'] == 'test-nested-filter-001'
 
 
+class TestConsumeMessagesLatestOffset:
+    """Test that start_offset=-1 seeks back from high watermark instead of waiting at end."""
+
+    def test_latest_offset_seeks_back_from_high_watermark(self):
+        from unittest.mock import MagicMock
+
+        consumer = MagicMock()
+        consumer.poll.return_value = None
+
+        metadata = MagicMock()
+        metadata.topics = {'t': MagicMock(partitions={0: MagicMock(), 1: MagicMock()})}
+        consumer.list_topics.return_value = metadata
+
+        mock_admin = MagicMock()
+        tp0, tp1 = MagicMock(partition=0), MagicMock(partition=1)
+        f0, f1 = MagicMock(), MagicMock()
+        f0.result.return_value = MagicMock(offset=100)
+        f1.result.return_value = MagicMock(offset=200)
+        mock_admin.list_offsets.return_value = {tp0: f0, tp1: f1}
+
+        import logging
+
+        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
+
+        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
+
+        with (
+            patch.object(client, 'get_consumer', return_value=consumer),
+            patch.object(client, 'get_admin_client', return_value=mock_admin),
+        ):
+            list(client.consume_messages(topic='t', start_offset=-1, max_messages=10, timeout_ms=500))
+
+        mock_admin.list_offsets.assert_called_once()
+        assigned = {tp.partition: tp.offset for tp in consumer.assign.call_args[0][0]}
+        assert assigned[0] == 90  # max(0, 100 - 10)
+        assert assigned[1] == 190  # max(0, 200 - 10)
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-vv'])

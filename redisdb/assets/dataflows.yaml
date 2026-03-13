@@ -1,0 +1,9 @@
+provides:
+  - id: redis-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: redis-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

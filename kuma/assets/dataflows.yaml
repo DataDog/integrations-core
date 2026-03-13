@@ -1,0 +1,9 @@
+provides:
+  - id: kuma-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: kuma-logs
+    always_on: false
+    data_type: logs
+    direction: inbound
