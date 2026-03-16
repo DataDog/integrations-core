@@ -42,13 +42,13 @@ def truncate(
         return TruncateResult(output=content, truncated=False, meta=None)
 
     total = len(content)
-    gap_marker_approx = 100
-    content_budget = max_chars - gap_marker_approx
+    gap_marker_approx = 50
+    content_budget = max(0, max_chars - gap_marker_approx)
     head_chars = int(content_budget * head_ratio)
     tail_chars = content_budget - head_chars
 
     head = content[:head_chars]
-    tail = content[-tail_chars:]
+    tail = content[-tail_chars:] if tail_chars > 0 else ""
     middle = content[head_chars : total - tail_chars]
 
     error_lines = extract_error_lines(middle.splitlines())
