@@ -50,12 +50,13 @@ See [metadata.csv][9] for a list of metrics provided by this integration.
 logs_enabled: true
 ```
 2. Uncomment and edit the logs configuration block in your `prefect.d/conf.yaml` file. For example:
-```
-logs:
-  - type: docker
-    source: prefect
-    service: <SERVICE>
-```
+
+    ```
+    logs:
+      - type: docker
+        source: prefect
+        service: <SERVICE>
+    ```
 
 ### Events
 
