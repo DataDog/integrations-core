@@ -33,7 +33,7 @@ prefect.server.task_runs.crashed.count,count,,run,,Number of task runs that cras
 prefect.server.task_runs.dependency_wait_duration.95percentile,gauge,,second,,95th percentile time a task run waited after its latest upstream dependency completed.,0,prefect,task dep wait p95,,
 prefect.server.task_runs.dependency_wait_duration.avg,gauge,,second,,Average time a task run waited after its latest upstream dependency completed.,0,prefect,task dep wait avg,,
 prefect.server.task_runs.dependency_wait_duration.count,gauge,,occurrence,second,Count of task run dependency wait duration samples.,0,prefect,task dep wait count,,
-prefect.server.task_runs.dependency_wait_duration.max,gauge,,second,,Maximum time a task run waited after latest upstream task dependency end.,0,prefect,task dep wait max,,
+prefect.server.task_runs.dependency_wait_duration.max,gauge,,second,,Maximum time a task run waited after its latest upstream dependency completed.,0,prefect,task dep wait max,,
 prefect.server.task_runs.dependency_wait_duration.median,gauge,,second,,Median time a task run waited after latest upstream task dependency end.,0,prefect,task dep wait median,,
 prefect.server.task_runs.execution_duration.95percentile,gauge,,second,,95th percentile execution time of individual task runs.,0,prefect,task exec dur p95,,
 prefect.server.task_runs.execution_duration.avg,gauge,,second,,Average execution time of individual task runs.,0,prefect,task exec dur avg,,
