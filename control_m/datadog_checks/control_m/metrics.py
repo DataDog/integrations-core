@@ -311,9 +311,8 @@ class JobCollector:
                     self._active_runs.pop(dedupe_key)
                     active_changed = True
             elif dedupe_key is not None:
-                if dedupe_key not in self._active_runs:
-                    active_changed = True
                 self._active_runs[dedupe_key] = now
+                active_changed = True
 
                 if normalized == "executing":
                     job_overrun = overrun_ms(job, now_dt, tz=self._tz)
