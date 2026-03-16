@@ -375,7 +375,7 @@ pipeline:
         - type: string-builder-processor
           name: Add ocsf.actor.process.uid
           enabled: true
-          template: "jvm-gc-process"
+          template: "unknown"
           target: ocsf.actor.process.uid
           replaceMissing: false
         - type: string-builder-processor
@@ -387,7 +387,7 @@ pipeline:
         - type: string-builder-processor
           name: Add ocsf.process.uid
           enabled: true
-          template: "jvm-gc-process"
+          template: "unknown"
           target: ocsf.process.uid
           replaceMissing: false
         - type: string-builder-processor
@@ -512,7 +512,6 @@ pipeline:
             classUid: 1004
             extensions: []
             profiles: []
-
     - type: pipeline
       name: OCSF sub pipeline for class HTTP Activity [4002]
       enabled: true
