@@ -107,6 +107,7 @@ SELECT
 FROM {query_log_table}
 WHERE
     {checkpoint_filter}
+    AND event_time_microseconds <= now64(6)
     AND event_date >= toDate(fromUnixTimestamp64Micro({min_checkpoint_microseconds}))
     AND type != 'QueryStart'
     AND is_initial_query = 1
@@ -427,9 +428,15 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
             merged = dict(base)
 
             sum_fields = [
-                'count', 'total_time', 'read_rows', 'read_bytes',
-                'written_rows', 'written_bytes', 'result_rows',
-                'result_bytes', 'memory_usage',
+                'count',
+                'total_time',
+                'read_rows',
+                'read_bytes',
+                'written_rows',
+                'written_bytes',
+                'result_rows',
+                'result_bytes',
+                'memory_usage',
             ]
             for field in sum_fields:
                 merged[field] = sum(r.get(field, 0) for r in rows)
@@ -439,9 +446,7 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
             total_count = merged['count']
             if total_count > 0:
                 for field in ['p50_time', 'p90_time', 'p95_time', 'p99_time']:
-                    merged[field] = (
-                        sum(r.get(field, 0) * r.get('count', 0) for r in rows) / total_count
-                    )
+                    merged[field] = sum(r.get(field, 0) * r.get('count', 0) for r in rows) / total_count
                 merged['mean_time'] = merged['total_time'] / total_count
             else:
                 merged['mean_time'] = 0.0

@@ -34,6 +34,12 @@ from datadog_checks.base.utils.serialization import json
 # Used for first run or when no rows are returned (to advance checkpoint during idle periods)
 GET_CURRENT_TIME_QUERY = "SELECT toUnixTimestamp64Micro(now64(6))"
 
+# If a node's checkpoint is more than this far behind the most advanced node,
+# it is considered decommissioned/quiet and evicted from the per-node map so
+# that its stale timestamp does not drag min_checkpoint (and therefore the
+# event_date partition filter) into the distant past.
+_NODE_CHECKPOINT_STALENESS_THRESHOLD_US = 60 * 60 * 1_000_000  # 1 hour
+
 # List of internal Cloud users to exclude from query metrics/samples
 # These are Datadog Cloud internal service accounts
 INTERNAL_CLOUD_USERS = frozenset(
@@ -369,9 +375,28 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
             if self._last_checkpoint_microseconds is None:
                 self._last_checkpoint_microseconds = self._get_last_checkpoint()
             return (
-                "event_time_microseconds > fromUnixTimestamp64Micro({})".format(
-                    self._last_checkpoint_microseconds
-                ),
+                "event_time_microseconds > fromUnixTimestamp64Micro({})".format(self._last_checkpoint_microseconds),
+                self._last_checkpoint_microseconds,
+            )
+
+        max_checkpoint = max(self._node_checkpoints.values())
+        stale_cutoff = max_checkpoint - _NODE_CHECKPOINT_STALENESS_THRESHOLD_US
+        stale_nodes = [node for node, cp in self._node_checkpoints.items() if cp < stale_cutoff]
+        for node in stale_nodes:
+            self._log.info(
+                "Evicting stale node checkpoint: node=%s, checkpoint=%d (max=%d, threshold=%ds)",
+                node,
+                self._node_checkpoints[node],
+                max_checkpoint,
+                _NODE_CHECKPOINT_STALENESS_THRESHOLD_US // 1_000_000,
+            )
+            del self._node_checkpoints[node]
+
+        if not self._node_checkpoints:
+            if self._last_checkpoint_microseconds is None:
+                self._last_checkpoint_microseconds = self._get_last_checkpoint()
+            return (
+                "event_time_microseconds > fromUnixTimestamp64Micro({})".format(self._last_checkpoint_microseconds),
                 self._last_checkpoint_microseconds,
             )
 
@@ -382,9 +407,7 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         for node, cp in self._node_checkpoints.items():
             safe_node = node.replace("'", "")
             conditions.append(
-                "(hostName() = '{}' AND event_time_microseconds > fromUnixTimestamp64Micro({}))".format(
-                    safe_node, cp
-                )
+                "(hostName() = '{}' AND event_time_microseconds > fromUnixTimestamp64Micro({}))".format(safe_node, cp)
             )
             known_nodes.append("'{}'".format(safe_node))
 
@@ -404,17 +427,23 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         if max_event_time_us > current:
             self._pending_node_checkpoints[node_name] = max_event_time_us
 
-    # ------------------------------------------------------------------
-
     def _advance_checkpoint(self):
         """
         Save the current checkpoint and update the last checkpoint reference.
         Also persists per-node checkpoints for multi-node clusters.
+
+        Per-node checkpoints are only saved when the global checkpoint is also
+        being advanced (i.e. _set_checkpoint_from_event_time completed).  This
+        prevents partial node checkpoints from being persisted when a collection
+        fails mid-way through row processing, which would cause the next run to
+        skip rows that were never actually submitted.
         """
         if self._current_checkpoint_microseconds:
             self._save_checkpoint(self._current_checkpoint_microseconds)
             self._last_checkpoint_microseconds = self._current_checkpoint_microseconds
-        self._save_node_checkpoints()
+            self._save_node_checkpoints()
+        else:
+            self._pending_node_checkpoints = {}
 
     def _set_checkpoint_from_event_time(self, max_event_time: int):
         """
