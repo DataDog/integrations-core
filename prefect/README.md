@@ -62,7 +62,7 @@ See [metadata.csv][9] for a list of metrics provided by this integration.
 
 The Prefect integration includes event support. Events are disabled by default; to enable them, set `collect_events` to `true` in the configuration.
 
-Once enabled, the integration submits flow-run, task-run, and ready/not-ready events. The set of submitted events can be customized by adding or removing entries in the configuration.
+After you enable it, the integration submits flow-run, task-run, and ready or not-ready events. The set of submitted events can be customized by adding or removing entries in the configuration.
 
 ### Service Checks
 
