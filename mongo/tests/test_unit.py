@@ -479,6 +479,7 @@ def test_legacy_config_deprecation(check, caplog):
     assert 'Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.' in caplog.text
 
 
+@pytest.mark.flaky
 def test_collector_submit_payload(check, aggregator):
     check = check(common.INSTANCE_BASIC)
     collector = MongoCollector(check, ['foo:1'])

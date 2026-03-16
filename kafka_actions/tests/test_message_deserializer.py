@@ -416,5 +416,169 @@ class TestMessageDeserializer:
         assert deserialized_msg_sr.value_schema_id == 350
 
 
+class TestSchemaRegistryIntegration:
+    """Test MessageDeserializer with schema registry client."""
+
+    AVRO_SCHEMA_JSON = (
+        '{"type": "record", "name": "Book", "namespace": "com.book", '
+        '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
+        '{"name": "author", "type": "string"}]}'
+    )
+
+    # Base64-encoded FileDescriptorProto (what Schema Registry ?format=serialized returns)
+    PROTOBUF_SCHEMA_B64 = (
+        'CgxzY2hlbWEucHJvdG8SCGNvbS5ib29rIkgKBEJvb2sSEgoEaXNibhgBIAEoA1IEaXNibhIU'
+        'CgV0aXRsZRgCIAEoCVIFdGl0bGUSFgoGYXV0aG9yGAMgASgJUgZhdXRob3JiBnByb3RvMw=='
+    )
+
+    # Avro-encoded Book: isbn=9780134190440, title="The Go Programming Language", author="Alan Donovan"
+    AVRO_PAYLOAD = b'\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan'
+
+    # Protobuf-encoded Book (same fields)
+    PROTOBUF_PAYLOAD = (
+        b'\x08\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1b\x54\x68\x65\x20\x47\x6f\x20\x50\x72\x6f\x67\x72\x61\x6d'
+        b'\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65'
+        b'\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e'
+    )
+
+    @staticmethod
+    def _make_sr_message(schema_id: int, payload: bytes, protobuf_indices: bytes | None = None) -> bytes:
+        """Build a Schema Registry wire-format message."""
+        header = b'\x00' + schema_id.to_bytes(4, 'big')
+        if protobuf_indices is not None:
+            return header + protobuf_indices + payload
+        return header + payload
+
+    @staticmethod
+    def _mock_registry(schema_str: str, schema_type: str = 'AVRO', dep_schemas: list[str] | None = None) -> MagicMock:
+        registry = MagicMock()
+        registry.get_schema.return_value = (schema_str, schema_type, dep_schemas or [])
+        return registry
+
+    def test_avro_with_schema_registry_fetch(self):
+        """Avro message with schema fetched from registry."""
+        log = MagicMock()
+        registry = self._mock_registry(self.AVRO_SCHEMA_JSON, 'AVRO')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        raw = self._make_sr_message(42, self.AVRO_PAYLOAD)
+
+        result_str, schema_id = deserializer.deserialize_message(raw, 'avro', None, True)
+        assert schema_id == 42
+        registry.get_schema.assert_called_once_with(42)
+
+        result = json.loads(result_str)
+        assert result['isbn'] == 9780134190440
+        assert result['title'] == 'The Go Programming Language'
+        assert result['author'] == 'Alan Donovan'
+
+    def test_protobuf_with_schema_registry_fetch(self):
+        """Protobuf message with schema fetched from registry."""
+        log = MagicMock()
+        registry = self._mock_registry(self.PROTOBUF_SCHEMA_B64, 'PROTOBUF')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        # Confluent protobuf wire format: indices [0] encoded as varint array
+        raw = self._make_sr_message(99, self.PROTOBUF_PAYLOAD, protobuf_indices=b'\x01\x00')
+
+        result_str, schema_id = deserializer.deserialize_message(raw, 'protobuf', None, True)
+        assert schema_id == 99
+        registry.get_schema.assert_called_once_with(99)
+
+        result = json.loads(result_str)
+        assert result['title'] == 'The Go Programming Language'
+
+    def test_json_with_schema_registry_fetch(self):
+        """JSON message with schema registry format fetches type from registry."""
+        log = MagicMock()
+        json_schema = '{"type": "object"}'
+        registry = self._mock_registry(json_schema, 'JSON')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        payload = json.dumps({"hello": "world"}).encode()
+        raw = self._make_sr_message(7, payload)
+
+        result_str, schema_id = deserializer.deserialize_message(raw, 'json', None, True)
+        assert schema_id == 7
+        registry.get_schema.assert_called_once_with(7)
+
+        result = json.loads(result_str)
+        assert result['hello'] == 'world'
+
+    def test_schema_caching_across_messages(self):
+        """Schema is fetched once from registry and reused for subsequent messages."""
+        log = MagicMock()
+        registry = self._mock_registry(self.AVRO_SCHEMA_JSON, 'AVRO')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        raw = self._make_sr_message(42, self.AVRO_PAYLOAD)
+
+        deserializer.deserialize_message(raw, 'avro', None, True)
+        deserializer.deserialize_message(raw, 'avro', None, True)
+        deserializer.deserialize_message(raw, 'avro', None, True)
+
+        # Registry is called once; the schema object is cached by _get_or_build_schema
+        registry.get_schema.assert_called_once_with(42)
+
+    def test_registry_error_surfaces(self):
+        """Registry HTTP error surfaces as deserialization error."""
+        log = MagicMock()
+        registry = MagicMock()
+        registry.get_schema.side_effect = Exception("HTTP 404: Schema not found")
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        raw = self._make_sr_message(999, self.AVRO_PAYLOAD)
+
+        result_str, schema_id = deserializer.deserialize_message(raw, 'avro', None, True)
+        assert result_str.startswith("<deserialization error:")
+        assert schema_id is None
+
+    def test_registry_always_used_when_uses_schema_registry(self):
+        """When uses_schema_registry=True, registry is always used even if inline schema is provided."""
+        log = MagicMock()
+        registry = self._mock_registry(self.AVRO_SCHEMA_JSON, 'AVRO')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        raw = self._make_sr_message(42, self.AVRO_PAYLOAD)
+
+        result_str, schema_id = deserializer.deserialize_message(raw, 'avro', self.AVRO_SCHEMA_JSON, True)
+        assert schema_id == 42
+        registry.get_schema.assert_called_once_with(42)
+
+        result = json.loads(result_str)
+        assert result['title'] == 'The Go Programming Language'
+
+    def test_no_registry_and_no_schema_raises(self):
+        """Without registry or inline schema, avro deserialization fails."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log, schema_registry=None)
+
+        raw = self._make_sr_message(42, self.AVRO_PAYLOAD)
+
+        result_str, schema_id = deserializer.deserialize_message(raw, 'avro', None, True)
+        assert result_str.startswith("<deserialization error:")
+
+    def test_deserialized_message_with_registry(self):
+        """DeserializedMessage wrapper works with schema registry."""
+        log = MagicMock()
+        registry = self._mock_registry(self.AVRO_SCHEMA_JSON, 'AVRO')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        raw_value = self._make_sr_message(42, self.AVRO_PAYLOAD)
+        kafka_msg = MockKafkaMessage(key=b'test-key', value=raw_value)
+
+        config = {
+            'key_format': 'string',
+            'key_uses_schema_registry': False,
+            'value_format': 'avro',
+            'value_schema': None,
+            'value_uses_schema_registry': True,
+        }
+
+        msg = DeserializedMessage(kafka_msg, deserializer, config)
+        assert msg.value['title'] == 'The Go Programming Language'
+        assert msg.value_schema_id == 42
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
