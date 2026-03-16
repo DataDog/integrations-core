@@ -123,7 +123,6 @@ def test_operation_tracking_disabled(aggregator, integration_check, pg_instance)
     aggregator.assert_metric('dd.postgres.operation.time', count=0)
 
 
-
 def _increase_txid(cur):
     # Force increases of txid
     if float(POSTGRES_VERSION) >= 13.0:
