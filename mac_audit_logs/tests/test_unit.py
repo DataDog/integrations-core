@@ -327,6 +327,124 @@ def test_fetch_audit_logs_single_file(mock_popen, instance):
     assert error == ""
 
 
+@pytest.mark.unit
+@patch("os.path.exists", return_value=True)
+@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
+def test_collect_data_from_files_batches_all_existing_files(mock_utc, mock_exists, instance):
+    """All existing files are batched into a single auditreduce call."""
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+    check.fetch_audit_logs = MagicMock(return_value=(b"<record/>", b""))
+    check.process_and_ingest_log_entries = MagicMock()
+
+    relevant_files = [
+        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401010000"),
+        (utils.time_string_to_datetime_utc("20230401010000"), "20230401010000.20230401020000"),
+        (utils.time_string_to_datetime_utc("20230401020000"), "20230401020000.20230401030000"),
+    ]
+    last_record_time = "20230401000000"
+
+    check.collect_data_from_files(relevant_files, None, last_record_time, None, None, "+0000")
+
+    expected_paths = [os.path.join(check.audit_logs_dir_path, f) for _, f in relevant_files]
+    check.fetch_audit_logs.assert_called_once_with(expected_paths, last_record_time)
+    check.process_and_ingest_log_entries.assert_called_once()
+
+
+@pytest.mark.unit
+@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
+def test_collect_data_from_files_excludes_missing_files(mock_utc, instance):
+    """Files that no longer exist on disk are excluded from the auditreduce batch."""
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+    check.fetch_audit_logs = MagicMock(return_value=(b"<record/>", b""))
+    check.process_and_ingest_log_entries = MagicMock()
+
+    relevant_files = [
+        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401010000"),
+        (utils.time_string_to_datetime_utc("20230401010000"), "20230401010000.20230401020000"),
+        (utils.time_string_to_datetime_utc("20230401020000"), "20230401020000.20230401030000"),
+    ]
+    missing_file = os.path.join(check.audit_logs_dir_path, relevant_files[1][1])
+
+    with patch("os.path.exists", side_effect=lambda p: p != missing_file):
+        check.collect_data_from_files(relevant_files, None, "20230401000000", None, None, "+0000")
+
+    expected_paths = [
+        os.path.join(check.audit_logs_dir_path, relevant_files[0][1]),
+        os.path.join(check.audit_logs_dir_path, relevant_files[2][1]),
+    ]
+    check.fetch_audit_logs.assert_called_once_with(expected_paths, "20230401000000")
+
+
+@pytest.mark.unit
+@patch("os.path.exists", return_value=True)
+@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
+def test_collect_data_from_files_skips_already_processed_files(mock_utc, mock_exists, instance):
+    """Files fully processed in a previous iteration are excluded from the batch."""
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+    check.fetch_audit_logs = MagicMock(return_value=(b"<record/>", b""))
+    check.process_and_ingest_log_entries = MagicMock()
+
+    relevant_files = [
+        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401010000"),
+        (utils.time_string_to_datetime_utc("20230401010000"), "20230401010000.20230401020000"),
+        (utils.time_string_to_datetime_utc("20230401020000"), "20230401020000.20230401030000"),
+    ]
+    previous_cursor = {"is_file_collection_completed": True}
+    last_collected_file_name = relevant_files[0][1]
+    last_record_time = "20230401010000"
+
+    check.collect_data_from_files(
+        relevant_files, previous_cursor, last_record_time, last_collected_file_name, None, "+0000"
+    )
+
+    expected_paths = [
+        os.path.join(check.audit_logs_dir_path, relevant_files[1][1]),
+        os.path.join(check.audit_logs_dir_path, relevant_files[2][1]),
+    ]
+    check.fetch_audit_logs.assert_called_once_with(expected_paths, last_record_time)
+
+
+@pytest.mark.unit
+@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
+def test_collect_data_from_files_no_valid_files(mock_utc, instance):
+    """No subprocess call when all files are filtered out."""
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+    check.fetch_audit_logs = MagicMock()
+
+    relevant_files = [
+        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401010000"),
+        (utils.time_string_to_datetime_utc("20230401010000"), "20230401010000.20230401020000"),
+    ]
+
+    with patch("os.path.exists", return_value=False):
+        check.collect_data_from_files(relevant_files, None, "20230401000000", None, None, "+0000")
+
+    check.fetch_audit_logs.assert_not_called()
+
+
+@pytest.mark.unit
+@patch("os.path.exists", return_value=True)
+@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
+def test_collect_data_from_files_always_uses_last_record_time(mock_utc, mock_exists, instance):
+    """The time filter is always last_record_time (regression test for file_index bug)."""
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+    check.fetch_audit_logs = MagicMock(return_value=(b"<record/>", b""))
+    check.process_and_ingest_log_entries = MagicMock()
+
+    relevant_files = [
+        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401010000"),
+        (utils.time_string_to_datetime_utc("20230401010000"), "20230401010000.20230401020000"),
+        (utils.time_string_to_datetime_utc("20230401020000"), "20230401020000.20230401030000"),
+    ]
+    last_record_time = "20230401000030"
+
+    check.collect_data_from_files(relevant_files, None, last_record_time, None, None, "+0000")
+
+    _, call_kwargs = check.fetch_audit_logs.call_args
+    call_args = check.fetch_audit_logs.call_args[0]
+    assert call_args[1] == last_record_time
+
+
 @patch.object(MacAuditLogsCheck, 'send_log')
 def test_process_and_ingest_log_entries_skipping_logs_milli_seconds(mock_send_log, instance):
     logs = (

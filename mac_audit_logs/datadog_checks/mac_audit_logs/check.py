@@ -203,6 +203,45 @@ class MacAuditLogsCheck(AgentCheck):
                 self.log.exception(constants.LOG_TEMPLATE.format(message=err_message))
                 raise
 
+    def _should_skip_file(self, file, previous_cursor, last_collected_file_name, last_record_time) -> bool:
+        start_time_str, end_time_str = file.split(".")
+
+        if end_time_str not in ["not_terminated", "crash_recovery"] and utils.time_string_to_datetime_utc(
+            end_time_str
+        ) < utils.time_string_to_datetime_utc(utils.get_utc_timestamp_minus_hours(constants.HOURS_OFFSET)):
+            self.log.info(
+                constants.LOG_TEMPLATE.format(
+                    message=f"Skipping the log collection of {file} file as logs are not within the "
+                    f"last {constants.HOURS_OFFSET} hours timeframe."
+                )
+            )
+            return True
+
+        if not previous_cursor:
+            return False
+
+        cursor_file_start_time_str, cursor_file_end_time_str = last_collected_file_name.split(".")
+
+        if (
+            cursor_file_end_time_str == "not_terminated"
+            and previous_cursor["is_file_collection_completed"]
+            and cursor_file_start_time_str == start_time_str
+            and last_record_time == end_time_str
+        ):
+            self.log.debug(f"Skipping the collection of {file} file")  # noqa: G004
+            return True
+
+        if (last_collected_file_name == file and previous_cursor["is_file_collection_completed"]) or (
+            end_time_str not in ["not_terminated", "crash_recovery"]
+            and utils.time_string_to_datetime_utc(start_time_str) <= utils.time_string_to_datetime_utc(last_record_time)
+            and utils.time_string_to_datetime_utc(end_time_str) == utils.time_string_to_datetime_utc(last_record_time)
+            and last_collected_file_name != file
+        ):
+            self.log.debug(f"Skipping the collection of {file} file")  # noqa: G004
+            return True
+
+        return False
+
     def collect_data_from_files(
         self,
         relevant_files,
@@ -212,74 +251,45 @@ class MacAuditLogsCheck(AgentCheck):
         last_record_milli_sec,
         timezone_offset,
     ) -> None:
-        for file_index, (_, file) in enumerate(relevant_files):
+        valid_file_paths = []
+        for _, file in relevant_files:
             file_path = os.path.join(self.audit_logs_dir_path, file)
 
             if not os.path.exists(file_path):
-                message = f"{file_path} is not available. Skipping collection for this file."
-                self.log.info(constants.LOG_TEMPLATE.format(message=message))
-                continue
-
-            start_time_str, end_time_str = file.split(".")
-
-            # Skip execution of the file if it is not falls within the time range
-            if end_time_str not in ["not_terminated", "crash_recovery"] and utils.time_string_to_datetime_utc(
-                end_time_str
-            ) < utils.time_string_to_datetime_utc(utils.get_utc_timestamp_minus_hours(constants.HOURS_OFFSET)):
-                err_message = (
-                    f"Skipping the log collection of {file} file as logs are not within the "
-                    f"last {constants.HOURS_OFFSET} hours timeframe."
-                )
-                self.log.info(constants.LOG_TEMPLATE.format(message=err_message))
-                continue
-
-            if previous_cursor:
-                cursor_file_start_time_str, cursor_file_end_time_str = last_collected_file_name.split(".")
-                # If last proccessed file is `not_terminated`, Skip the already processed files
-                if (
-                    cursor_file_end_time_str == "not_terminated"
-                    and previous_cursor["is_file_collection_completed"]
-                    and cursor_file_start_time_str == start_time_str
-                    and last_record_time == end_time_str
-                ):
-                    self.log.debug(f"Skipping the collection of {file} file")  # noqa: G004
-                    continue
-
-                # Skip the file if it has been already processed
-                if (last_collected_file_name == file and previous_cursor["is_file_collection_completed"]) or (
-                    end_time_str not in ["not_terminated", "crash_recovery"]
-                    and utils.time_string_to_datetime_utc(start_time_str)
-                    <= utils.time_string_to_datetime_utc(last_record_time)
-                    and utils.time_string_to_datetime_utc(end_time_str)
-                    == utils.time_string_to_datetime_utc(last_record_time)
-                    and last_collected_file_name != file
-                ):
-                    self.log.debug(f"Skipping the collection of {file} file")  # noqa: G004
-                    continue
-
-            # Prepare time filter argument for auditreduce command. Set `last_record_time` as a value if
-            # the first file to be processed otherwise set this to start-time of file
-            time_filter_arg = last_record_time if file_index == 0 else start_time_str
-
-            try:
-                output, error = self.fetch_audit_logs([file_path], time_filter_arg)
-
-                output_str = output.decode("utf-8", errors="replace")
-
-                if not output_str.strip():
-                    err_message = (
-                        f"praudit command produced no output. Error: {error.decode('utf-8', errors='replace')}"
+                self.log.info(
+                    constants.LOG_TEMPLATE.format(
+                        message=f"{file_path} is not available. Skipping collection for this file."
                     )
-                    self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
-                    continue
+                )
+                continue
 
-                log_entries = output_str.strip().split("\n")
+            if self._should_skip_file(file, previous_cursor, last_collected_file_name, last_record_time):
+                continue
 
-                self.process_and_ingest_log_entries(log_entries, file, timezone_offset, last_record_milli_sec)
+            valid_file_paths.append(file_path)
 
-            except Exception as e:
-                err_message = f"Error processing file {file}: {e}"
-                self.log.exception(constants.LOG_TEMPLATE.format(message=err_message))
+        if not valid_file_paths:
+            return
+
+        last_file = os.path.basename(valid_file_paths[-1])
+
+        try:
+            output, error = self.fetch_audit_logs(valid_file_paths, last_record_time)
+
+            output_str = output.decode("utf-8", errors="replace")
+
+            if not output_str.strip():
+                err_message = f"praudit command produced no output. Error: {error.decode('utf-8', errors='replace')}"
+                self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
+                return
+
+            log_entries = output_str.strip().split("\n")
+
+            self.process_and_ingest_log_entries(log_entries, last_file, timezone_offset, last_record_milli_sec)
+
+        except Exception as e:
+            err_message = f"Error processing files {valid_file_paths}: {e}"
+            self.log.exception(constants.LOG_TEMPLATE.format(message=err_message))
 
     def check(self, _):
         try:
