@@ -24,6 +24,11 @@ def build_payload(batch: list[str], source_repo: str, ref: str, target: str) -> 
     }
 
 
+def _urlopen(req: urllib.request.Request):
+    """Thin urllib wrapper — exists so tests can patch it without touching stdlib."""
+    return urllib.request.urlopen(req)
+
+
 def send_dispatch(
     payload: dict,
     token: str,
@@ -48,7 +53,7 @@ def send_dispatch(
     )
     for attempt in range(1, max_attempts + 1):
         try:
-            with urllib.request.urlopen(req) as resp:
+            with _urlopen(req) as resp:
                 print(f"  Dispatched: HTTP {resp.status}")
                 return
         except urllib.error.HTTPError as e:
