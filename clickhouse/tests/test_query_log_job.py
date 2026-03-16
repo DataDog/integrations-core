@@ -74,30 +74,37 @@ class TestBuildPerNodeCheckpointFilter:
         job._node_checkpoints = {}
         job._last_checkpoint_microseconds = 1000
 
-        filter_sql, min_cp = job._build_per_node_checkpoint_filter()
+        filter_sql, min_cp, params = job._build_per_node_checkpoint_filter()
 
-        assert 'fromUnixTimestamp64Micro(1000)' in filter_sql
+        assert '{cp_fallback:UInt64}' in filter_sql
         assert min_cp == 1000
+        assert params['cp_fallback'] == 1000
         assert 'hostName()' not in filter_sql
 
     def test_generates_per_node_conditions(self, job):
-        """Each known node should get its own condition."""
+        """Each known node should get its own bound-parameter condition."""
         job._node_checkpoints = {
             'node-A': 1000,
             'node-B': 2000,
             'node-C': 1500,
         }
 
-        filter_sql, min_cp = job._build_per_node_checkpoint_filter()
+        filter_sql, min_cp, params = job._build_per_node_checkpoint_filter()
 
         assert min_cp == 1000
-        assert "hostName() = 'node-A'" in filter_sql
-        assert "hostName() = 'node-B'" in filter_sql
-        assert "hostName() = 'node-C'" in filter_sql
-        assert 'fromUnixTimestamp64Micro(1000)' in filter_sql
-        assert 'fromUnixTimestamp64Micro(2000)' in filter_sql
-        assert 'fromUnixTimestamp64Micro(1500)' in filter_sql
+        # SQL should use parameter placeholders, not literal values
+        assert 'hostName() =' in filter_sql
+        assert ':String}' in filter_sql
+        assert ':UInt64}' in filter_sql
         assert 'hostName() NOT IN' in filter_sql
+        # All node names and checkpoints should be in the params dict
+        param_values = set(params.values())
+        assert 'node-A' in param_values
+        assert 'node-B' in param_values
+        assert 'node-C' in param_values
+        assert 1000 in param_values
+        assert 2000 in param_values
+        assert 1500 in param_values
 
     def test_fallback_uses_min_checkpoint(self, job):
         """The NOT IN fallback for unknown nodes should use min checkpoint."""
@@ -106,12 +113,11 @@ class TestBuildPerNodeCheckpointFilter:
             'node-B': 3000,
         }
 
-        filter_sql, min_cp = job._build_per_node_checkpoint_filter()
+        filter_sql, min_cp, params = job._build_per_node_checkpoint_filter()
 
         assert min_cp == 3000
-        # The NOT IN clause should reference the min checkpoint
         assert 'NOT IN' in filter_sql
-        assert 'fromUnixTimestamp64Micro(3000)' in filter_sql
+        assert params['cp_fallback'] == 3000
 
     def test_evicts_stale_nodes(self, job):
         """Nodes whose checkpoint is more than the threshold behind max should be evicted."""
@@ -124,11 +130,12 @@ class TestBuildPerNodeCheckpointFilter:
             'stale-node': stale_time,
         }
 
-        filter_sql, min_cp = job._build_per_node_checkpoint_filter()
+        filter_sql, min_cp, params = job._build_per_node_checkpoint_filter()
 
-        assert 'stale-node' not in filter_sql
-        assert "hostName() = 'node-A'" in filter_sql
-        assert "hostName() = 'node-B'" in filter_sql
+        # Stale node should not appear in params or SQL
+        assert 'stale-node' not in params.values()
+        assert 'node-A' in params.values()
+        assert 'node-B' in params.values()
         assert 'stale-node' not in job._node_checkpoints
 
     def test_eviction_removes_from_stored_checkpoints(self, job):
@@ -165,12 +172,12 @@ class TestBuildPerNodeCheckpointFilter:
         }
         job._last_checkpoint_microseconds = 500
 
-        filter_sql, min_cp = job._build_per_node_checkpoint_filter()
+        filter_sql, min_cp, params = job._build_per_node_checkpoint_filter()
 
         # stale-1 and stale-2 should be evicted, leaving only node-A
-        assert 'stale-1' not in filter_sql
-        assert 'stale-2' not in filter_sql
-        assert "hostName() = 'node-A'" in filter_sql
+        assert 'stale-1' not in params.values()
+        assert 'stale-2' not in params.values()
+        assert 'node-A' in params.values()
 
     def test_node_at_exact_threshold_is_not_evicted(self, job):
         """A node exactly at the threshold boundary should NOT be evicted."""
@@ -182,23 +189,23 @@ class TestBuildPerNodeCheckpointFilter:
             'node-B': boundary,
         }
 
-        filter_sql, _ = job._build_per_node_checkpoint_filter()
+        filter_sql, _, params = job._build_per_node_checkpoint_filter()
 
-        assert "hostName() = 'node-B'" in filter_sql
+        assert 'node-B' in params.values()
         assert 'node-B' in job._node_checkpoints
 
-    def test_sanitizes_node_names(self, job):
-        """Node names with quotes should be sanitized."""
+    def test_node_names_are_bound_parameters(self, job):
+        """Node names should be passed as bound parameters, not interpolated into SQL."""
         job._node_checkpoints = {
             "node'injection": 1000,
         }
 
-        filter_sql, _ = job._build_per_node_checkpoint_filter()
+        filter_sql, _, params = job._build_per_node_checkpoint_filter()
 
-        assert (
-            "'" not in filter_sql.replace("hostName()", "").replace("fromUnixTimestamp64Micro", "")
-            or "nodeinjection" in filter_sql
-        )
+        # The raw node name should NOT appear in the SQL text
+        assert "node'injection" not in filter_sql
+        # It should be in the params dict (ClickHouse handles escaping)
+        assert "node'injection" in params.values()
 
     def test_loads_from_cache_when_none(self, job):
         """When _node_checkpoints is None, it should load from persistent cache."""
@@ -206,10 +213,11 @@ class TestBuildPerNodeCheckpointFilter:
         job._last_checkpoint_microseconds = 5000
 
         with mock.patch.object(job, '_load_node_checkpoints', return_value={}) as mock_load:
-            filter_sql, min_cp = job._build_per_node_checkpoint_filter()
+            filter_sql, min_cp, params = job._build_per_node_checkpoint_filter()
 
         mock_load.assert_called_once()
         assert min_cp == 5000
+        assert params['cp_fallback'] == 5000
 
 
 class TestAdvanceCheckpoint:
@@ -243,8 +251,8 @@ class TestAdvanceCheckpoint:
         mock_save_nodes.assert_not_called()
         assert job._pending_node_checkpoints == {}
 
-    def test_zero_checkpoint_treated_as_unset(self, job):
-        """A checkpoint of 0 (falsy) should not trigger saves."""
+    def test_zero_checkpoint_is_valid(self, job):
+        """A checkpoint of 0 is a valid value and should trigger saves."""
         job._current_checkpoint_microseconds = 0
         job._pending_node_checkpoints = {'node-A': 100}
 
@@ -254,9 +262,9 @@ class TestAdvanceCheckpoint:
         ):
             job._advance_checkpoint()
 
-        mock_save.assert_not_called()
-        mock_save_nodes.assert_not_called()
-        assert job._pending_node_checkpoints == {}
+        mock_save.assert_called_once_with(0)
+        mock_save_nodes.assert_called_once()
+        assert job._last_checkpoint_microseconds == 0
 
 
 class TestNodeCheckpointPersistence:

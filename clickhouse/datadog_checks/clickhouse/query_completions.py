@@ -19,52 +19,26 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.clickhouse.query_log_job import ClickhouseQueryLogJob, agent_check_getter
 
-# Query to fetch individual completed queries from system.query_log
-# Unlike statements.py which aggregates, this query returns individual query executions
+# Query to fetch individual completed queries from system.query_log.
+# Unlike statements.py which aggregates, this returns individual query executions.
 #
-# Uses {query_log_table} placeholder for ClickHouse Cloud clusterAllReplicas() support:
-# - For ClickHouse Cloud: clusterAllReplicas('default', system.query_log)
-# - For self-hosted: system.query_log
+# Always includes hostName() as server_node for per-node checkpoint tracking.
+# For single-node deployments this is a single constant value; for multi-node
+# Cloud clusters it enables each node's checkpoint to advance independently.
+#
+# Data values use ClickHouse server-side parameter binding ({param:Type}) for
+# injection safety.
+#
+# Structural placeholders (inserted via str.replace()):
+#   {query_log_table}     - table reference (trusted, internal)
+#   {checkpoint_filter}   - per-node WHERE fragment from _build_per_node_checkpoint_filter()
+#   {internal_user_filter} - hardcoded filter fragment
+#
+# Bound parameters (ClickHouse server-side, via `parameters` dict):
+#   min_checkpoint_us     - earliest checkpoint for event_date partition pruning
+#   max_samples           - LIMIT value
+#   cp_*                  - per-node checkpoint values (from _build_per_node_checkpoint_filter)
 COMPLETED_QUERIES_QUERY = """
-SELECT
-    normalized_query_hash,
-    query,
-    user,
-    type as query_type,
-    databases,
-    tables,
-    query_duration_ms,
-    read_rows,
-    read_bytes,
-    written_rows,
-    written_bytes,
-    result_rows,
-    result_bytes,
-    memory_usage,
-    query_start_time_microseconds,
-    event_time_microseconds,
-    query_id,
-    initial_query_id,
-    query_kind,
-    is_initial_query
-FROM {query_log_table}
-WHERE
-  event_time_microseconds > fromUnixTimestamp64Micro({last_checkpoint_microseconds})
-  AND event_time_microseconds <= now64(6)
-  AND event_date >= toDate(fromUnixTimestamp64Micro({last_checkpoint_microseconds}))
-  AND type = 'QueryFinish'
-  AND is_initial_query = 1
-  AND query != ''
-  AND normalized_query_hash != 0
-  {internal_user_filter}
-ORDER BY event_time_microseconds ASC
-LIMIT {max_samples}
-"""
-
-# Cloud variant: adds hostName() so per-node checkpoints can be tracked,
-# preventing the cross-node query_log flush race on multi-node ClickHouse
-# Cloud clusters.
-COMPLETED_QUERIES_QUERY_CLOUD = """
 SELECT
     normalized_query_hash,
     hostName() as server_node,
@@ -91,14 +65,14 @@ FROM {query_log_table}
 WHERE
   {checkpoint_filter}
   AND event_time_microseconds <= now64(6)
-  AND event_date >= toDate(fromUnixTimestamp64Micro({min_checkpoint_microseconds}))
+  AND event_date >= toDate(fromUnixTimestamp64Micro({min_checkpoint_us:UInt64}))
   AND type = 'QueryFinish'
   AND is_initial_query = 1
   AND query != ''
   AND normalized_query_hash != 0
   {internal_user_filter}
 ORDER BY event_time_microseconds ASC
-LIMIT {max_samples}
+LIMIT {max_samples:UInt64}
 """
 
 
@@ -161,7 +135,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             )
             self._check.database_monitoring_query_activity(payload_data)
 
-            if self._current_checkpoint_microseconds:
+            if self._current_checkpoint_microseconds is not None:
                 self._log.info(
                     "Successfully submitted. Checkpoint: %d microseconds", self._current_checkpoint_microseconds
                 )
@@ -179,109 +153,68 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         Load completed query samples using checkpoint-based collection.
 
         Flow:
-            1. Load or initialize last checkpoint (only fetches from DB on first run)
+            1. Build per-node checkpoint filter (falls back to global on first run)
             2. Execute query with now64(6) as upper bound
             3. Derive checkpoint from max(event_time_microseconds) in results
             4. Return results (checkpoint saved later on success)
 
         Optimization: Uses now64(6) directly in the query and derives the checkpoint from
         the results, reducing DB roundtrips from 2 to 1 for normal operation.
-
-        For ClickHouse Cloud: Uses clusterAllReplicas('default', system.query_log) to query
-        all nodes in the cluster.
-        For self-hosted: Queries only the local node's query_log.
         """
         try:
-            is_cloud = self._check.is_single_endpoint_mode
             query_log_table = self._check.get_system_table('query_log')
+            checkpoint_filter, min_checkpoint, params = self._build_per_node_checkpoint_filter()
 
-            if is_cloud:
-                checkpoint_filter, min_checkpoint = self._build_per_node_checkpoint_filter()
-                query = COMPLETED_QUERIES_QUERY_CLOUD.format(
-                    query_log_table=query_log_table,
-                    checkpoint_filter=checkpoint_filter,
-                    min_checkpoint_microseconds=min_checkpoint,
-                    internal_user_filter=self._get_internal_user_filter(),
-                    max_samples=self._max_samples_per_collection,
-                )
-            else:
-                if self._last_checkpoint_microseconds is None:
-                    self._last_checkpoint_microseconds = self._get_last_checkpoint()
-                query = COMPLETED_QUERIES_QUERY.format(
-                    query_log_table=query_log_table,
-                    last_checkpoint_microseconds=self._last_checkpoint_microseconds,
-                    internal_user_filter=self._get_internal_user_filter(),
-                    max_samples=self._max_samples_per_collection,
-                )
+            query = (
+                COMPLETED_QUERIES_QUERY.replace("{query_log_table}", query_log_table)
+                .replace("{checkpoint_filter}", checkpoint_filter)
+                .replace("{internal_user_filter}", self._get_internal_user_filter())
+            )
+            params["min_checkpoint_us"] = min_checkpoint
+            params["max_samples"] = self._max_samples_per_collection
 
-            rows = self._execute_query(query)
+            rows = self._execute_query(query, parameters=params)
 
             self._log.info(
-                "Loaded %d completed queries from %s [%s] (is_cloud=%s)",
+                "Loaded %d completed queries from %s [%s]",
                 len(rows),
                 query_log_table,
                 self.deployment_mode,
-                is_cloud,
             )
 
             max_event_time = 0
 
             result_rows = []
             for row in rows:
-                if is_cloud:
-                    (
-                        normalized_query_hash,
-                        server_node,
-                        query_text,
-                        user,
-                        query_type,
-                        databases,
-                        tables,
-                        query_duration_ms,
-                        read_rows,
-                        read_bytes,
-                        written_rows,
-                        written_bytes,
-                        result_rows_count,
-                        result_bytes,
-                        memory_usage,
-                        query_start_time_microseconds,
-                        event_time_microseconds,
-                        query_id,
-                        initial_query_id,
-                        query_kind,
-                        is_initial_query,
-                    ) = row
-                else:
-                    (
-                        normalized_query_hash,
-                        query_text,
-                        user,
-                        query_type,
-                        databases,
-                        tables,
-                        query_duration_ms,
-                        read_rows,
-                        read_bytes,
-                        written_rows,
-                        written_bytes,
-                        result_rows_count,
-                        result_bytes,
-                        memory_usage,
-                        query_start_time_microseconds,
-                        event_time_microseconds,
-                        query_id,
-                        initial_query_id,
-                        query_kind,
-                        is_initial_query,
-                    ) = row
-                    server_node = None
+                (
+                    normalized_query_hash,
+                    server_node,
+                    query_text,
+                    user,
+                    query_type,
+                    databases,
+                    tables,
+                    query_duration_ms,
+                    read_rows,
+                    read_bytes,
+                    written_rows,
+                    written_bytes,
+                    result_rows_count,
+                    result_bytes,
+                    memory_usage,
+                    query_start_time_microseconds,
+                    event_time_microseconds,
+                    query_id,
+                    initial_query_id,
+                    query_kind,
+                    is_initial_query,
+                ) = row
 
                 event_time_int = self.to_microseconds(event_time_microseconds)
                 if event_time_int > max_event_time:
                     max_event_time = event_time_int
 
-                if is_cloud and server_node:
+                if server_node:
                     self._track_node_checkpoint(str(server_node), event_time_int)
 
                 row_dict = {

@@ -116,10 +116,6 @@ def test_normalize_queries(check_with_dbm):
             'count': 10,
             'total_time': 1000.0,
             'mean_time': 100.0,
-            'p50_time': 90.0,
-            'p90_time': 150.0,
-            'p95_time': 180.0,
-            'p99_time': 200.0,
             'result_rows': 100,
             'read_rows': 1000,
             'read_bytes': 50000,
@@ -185,10 +181,6 @@ def test_query_signature_matches_samples_pipeline(check_with_dbm):
                 'count': 1,
                 'total_time': 10.0,
                 'mean_time': 10.0,
-                'p50_time': 10.0,
-                'p90_time': 10.0,
-                'p95_time': 10.0,
-                'p99_time': 10.0,
                 'result_rows': 0,
                 'read_rows': 0,
                 'read_bytes': 0,
@@ -452,10 +444,6 @@ def test_normalize_queries_handles_obfuscation_failure(check_with_dbm):
             'count': 1,
             'total_time': 10.0,
             'mean_time': 10.0,
-            'p50_time': 10.0,
-            'p90_time': 10.0,
-            'p95_time': 10.0,
-            'p99_time': 10.0,
             'result_rows': 0,
             'read_rows': 0,
             'read_bytes': 0,
@@ -476,10 +464,6 @@ def test_normalize_queries_handles_obfuscation_failure(check_with_dbm):
             'count': 1,
             'total_time': 5.0,
             'mean_time': 5.0,
-            'p50_time': 5.0,
-            'p90_time': 5.0,
-            'p95_time': 5.0,
-            'p99_time': 5.0,
             'result_rows': 1,
             'read_rows': 0,
             'read_bytes': 0,
@@ -498,26 +482,23 @@ def test_normalize_queries_handles_obfuscation_failure(check_with_dbm):
     assert any(row['query'] is not None for row in normalized_rows)
 
 
-def test_cloud_query_format():
-    """Test that the cloud statements query has the expected structure"""
-    from datadog_checks.clickhouse.statements import STATEMENTS_QUERY_CLOUD
+def test_statements_query_format():
+    """The query template uses server-side parameter binding for data values."""
+    from datadog_checks.clickhouse.statements import STATEMENTS_QUERY
 
-    assert '{checkpoint_filter}' in STATEMENTS_QUERY_CLOUD
-    assert '{min_checkpoint_microseconds}' in STATEMENTS_QUERY_CLOUD
-    assert 'hostName() as server_node' in STATEMENTS_QUERY_CLOUD
-    assert 'GROUP BY normalized_query_hash, server_node' in STATEMENTS_QUERY_CLOUD
-    assert 'now64(6)' in STATEMENTS_QUERY_CLOUD
-    assert '{query_log_table}' in STATEMENTS_QUERY_CLOUD
+    # Structural placeholders (Python .format())
+    assert '{checkpoint_filter}' in STATEMENTS_QUERY
+    assert '{query_log_table}' in STATEMENTS_QUERY
 
-    # Should NOT use global checkpoint placeholder
-    assert '{last_checkpoint_microseconds}' not in STATEMENTS_QUERY_CLOUD
+    # Bound parameters (ClickHouse server-side, double-braced to survive .format())
+    assert '{min_checkpoint_us:UInt64}' in STATEMENTS_QUERY
 
+    # hostName() is always included for per-node checkpoint tracking
+    assert 'hostName() as server_node' in STATEMENTS_QUERY
+    assert 'GROUP BY normalized_query_hash, server_node' in STATEMENTS_QUERY
 
-def test_cloud_query_has_upper_bound():
-    """The cloud query must cap event_time with now64(6) to prevent clock-skew issues"""
-    from datadog_checks.clickhouse.statements import STATEMENTS_QUERY_CLOUD
-
-    assert 'event_time_microseconds <= now64(6)' in STATEMENTS_QUERY_CLOUD
+    # Filters
+    assert 'event_time_microseconds <= now64(6)' in STATEMENTS_QUERY
 
 
 def test_merge_rows_across_nodes_single_node():
@@ -531,10 +512,6 @@ def test_merge_rows_across_nodes_single_node():
             'count': 10,
             'total_time': 100.0,
             'mean_time': 10.0,
-            'p50_time': 8.0,
-            'p90_time': 15.0,
-            'p95_time': 18.0,
-            'p99_time': 20.0,
             'read_rows': 100,
             'read_bytes': 1000,
             'written_rows': 0,
@@ -563,10 +540,6 @@ def test_merge_rows_across_nodes_sums_counts():
             'count': 100,
             'total_time': 500.0,
             'mean_time': 5.0,
-            'p50_time': 4.0,
-            'p90_time': 8.0,
-            'p95_time': 9.0,
-            'p99_time': 10.0,
             'read_rows': 1000,
             'read_bytes': 10000,
             'written_rows': 0,
@@ -582,10 +555,6 @@ def test_merge_rows_across_nodes_sums_counts():
             'count': 50,
             'total_time': 300.0,
             'mean_time': 6.0,
-            'p50_time': 5.0,
-            'p90_time': 10.0,
-            'p95_time': 12.0,
-            'p99_time': 14.0,
             'read_rows': 500,
             'read_bytes': 5000,
             'written_rows': 10,
@@ -614,61 +583,6 @@ def test_merge_rows_across_nodes_sums_counts():
     assert merged['mean_time'] == 800.0 / 150
 
 
-def test_merge_rows_across_nodes_weighted_quantiles():
-    """Quantiles should be count-weighted averaged."""
-    from datadog_checks.clickhouse.statements import ClickhouseStatementMetrics
-
-    rows = [
-        {
-            'normalized_query_hash': 'hash1',
-            'query': 'SELECT 1',
-            'count': 100,
-            'total_time': 1000.0,
-            'mean_time': 10.0,
-            'p50_time': 10.0,
-            'p90_time': 20.0,
-            'p95_time': 25.0,
-            'p99_time': 30.0,
-            'read_rows': 0,
-            'read_bytes': 0,
-            'written_rows': 0,
-            'written_bytes': 0,
-            'result_rows': 0,
-            'result_bytes': 0,
-            'memory_usage': 0,
-            'peak_memory_usage': 0,
-        },
-        {
-            'normalized_query_hash': 'hash1',
-            'query': 'SELECT 1',
-            'count': 100,
-            'total_time': 2000.0,
-            'mean_time': 20.0,
-            'p50_time': 20.0,
-            'p90_time': 30.0,
-            'p95_time': 35.0,
-            'p99_time': 40.0,
-            'read_rows': 0,
-            'read_bytes': 0,
-            'written_rows': 0,
-            'written_bytes': 0,
-            'result_rows': 0,
-            'result_bytes': 0,
-            'memory_usage': 0,
-            'peak_memory_usage': 0,
-        },
-    ]
-
-    result = ClickhouseStatementMetrics._merge_rows_across_nodes(rows)
-    merged = result[0]
-
-    # Equal counts (100 each) so weighted average = simple average
-    assert merged['p50_time'] == 15.0
-    assert merged['p90_time'] == 25.0
-    assert merged['p95_time'] == 30.0
-    assert merged['p99_time'] == 35.0
-
-
 def test_merge_rows_across_nodes_different_queries():
     """Rows with different query hashes should not be merged."""
     from datadog_checks.clickhouse.statements import ClickhouseStatementMetrics
@@ -678,10 +592,6 @@ def test_merge_rows_across_nodes_different_queries():
         'count': 10,
         'total_time': 100.0,
         'mean_time': 10.0,
-        'p50_time': 8.0,
-        'p90_time': 15.0,
-        'p95_time': 18.0,
-        'p99_time': 20.0,
         'read_rows': 0,
         'read_bytes': 0,
         'written_rows': 0,
@@ -718,10 +628,6 @@ def test_metrics_row_with_empty_values(check_with_dbm):
             'count': 0,  # Zero count
             'total_time': 0.0,
             'mean_time': 0.0,
-            'p50_time': 0.0,
-            'p90_time': 0.0,
-            'p95_time': 0.0,
-            'p99_time': 0.0,
             'result_rows': 0,
             'read_rows': 0,
             'read_bytes': 0,

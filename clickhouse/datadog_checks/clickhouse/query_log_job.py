@@ -140,12 +140,15 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
                 self._log.debug("Error closing DBM client: %s", e)
             self._db_client = None
 
-    def _execute_query(self, query: str):
+    def _execute_query(self, query: str, parameters: dict | None = None):
         """
         Execute a query using the dedicated client (with shared connection pool).
 
         Args:
             query: SQL query to execute
+            parameters: Optional dict of ClickHouse server-side bound parameters.
+                        Use ``{name:Type}`` placeholders in the query
+                        (e.g. ``{val:UInt64}``, ``{name:String}``).
 
         Returns:
             List of result rows
@@ -158,7 +161,7 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         try:
             if self._db_client is None:
                 self._db_client = self._check.create_dbm_client()
-            result = self._db_client.query(query)
+            result = self._db_client.query(query, parameters=parameters)
             return result.result_rows
         except OperationalError as e:
             # Connection-related error - reset client to force reconnect
@@ -357,19 +360,23 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         Unknown nodes (e.g. newly added to the cluster) fall back to the
         minimum checkpoint across all known nodes.
 
+        Uses ClickHouse server-side parameter binding (``{name:Type}`` syntax)
+        for all data values to prevent SQL injection.
+
         Returns:
-            (filter_sql, min_checkpoint_microseconds) tuple
+            (filter_sql, min_checkpoint_microseconds, parameters) tuple
+            where *parameters* is a dict for ClickHouse server-side binding.
         """
         if self._node_checkpoints is None:
             self._node_checkpoints = self._load_node_checkpoints()
 
         if not self._node_checkpoints:
-            # First run or cache miss — fall back to global checkpoint
             if self._last_checkpoint_microseconds is None:
                 self._last_checkpoint_microseconds = self._get_last_checkpoint()
             return (
-                "event_time_microseconds > fromUnixTimestamp64Micro({})".format(self._last_checkpoint_microseconds),
+                "event_time_microseconds > fromUnixTimestamp64Micro({cp_fallback:UInt64})",
                 self._last_checkpoint_microseconds,
+                {"cp_fallback": self._last_checkpoint_microseconds},
             )
 
         max_checkpoint = max(self._node_checkpoints.values())
@@ -389,30 +396,36 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
             if self._last_checkpoint_microseconds is None:
                 self._last_checkpoint_microseconds = self._get_last_checkpoint()
             return (
-                "event_time_microseconds > fromUnixTimestamp64Micro({})".format(self._last_checkpoint_microseconds),
+                "event_time_microseconds > fromUnixTimestamp64Micro({cp_fallback:UInt64})",
                 self._last_checkpoint_microseconds,
+                {"cp_fallback": self._last_checkpoint_microseconds},
             )
 
         min_checkpoint = min(self._node_checkpoints.values())
 
+        params = {}
         conditions = []
-        known_nodes = []
-        for node, cp in self._node_checkpoints.items():
-            safe_node = node.replace("'", "")
+        node_param_names = []
+        for i, (node, cp) in enumerate(self._node_checkpoints.items()):
+            node_key = "cp_node_" + str(i)
+            cp_key = "cp_us_" + str(i)
             conditions.append(
-                "(hostName() = '{}' AND event_time_microseconds > fromUnixTimestamp64Micro({}))".format(safe_node, cp)
+                "(hostName() = {" + node_key + ":String}"
+                " AND event_time_microseconds > fromUnixTimestamp64Micro({" + cp_key + ":UInt64}))"
             )
-            known_nodes.append("'{}'".format(safe_node))
+            params[node_key] = node
+            params[cp_key] = cp
+            node_param_names.append(node_key)
 
         # Fallback for nodes not yet tracked (cluster scale-out)
-        nodes_csv = ", ".join(known_nodes)
+        node_refs = ", ".join("{" + name + ":String}" for name in node_param_names)
         conditions.append(
-            "(hostName() NOT IN ({}) AND event_time_microseconds > fromUnixTimestamp64Micro({}))".format(
-                nodes_csv, min_checkpoint
-            )
+            "(hostName() NOT IN (" + node_refs + ")"
+            " AND event_time_microseconds > fromUnixTimestamp64Micro({cp_fallback:UInt64}))"
         )
+        params["cp_fallback"] = min_checkpoint
 
-        return "(" + " OR ".join(conditions) + ")", min_checkpoint
+        return "(" + " OR ".join(conditions) + ")", min_checkpoint, params
 
     def _track_node_checkpoint(self, node_name: str, max_event_time_us: int):
         """Accumulate the highest event_time seen so far for *node_name*."""
@@ -431,7 +444,7 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         fails mid-way through row processing, which would cause the next run to
         skip rows that were never actually submitted.
         """
-        if self._current_checkpoint_microseconds:
+        if self._current_checkpoint_microseconds is not None:
             self._save_checkpoint(self._current_checkpoint_microseconds)
             self._last_checkpoint_microseconds = self._current_checkpoint_microseconds
             self._save_node_checkpoints()
