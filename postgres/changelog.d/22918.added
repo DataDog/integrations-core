@@ -1,0 +1,1 @@
+Add `enable_operation_tracking` option to gate `dd.postgres.operation.time` metrics.
