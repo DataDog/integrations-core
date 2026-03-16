@@ -441,7 +441,7 @@ class AgentCheck(object):
                 ignore_untrusted_file_params=bool(datadog_agent.get_config('integration_ignore_untrusted_file_params')),
                 file_paths_allowlist=datadog_agent.get_config('integration_file_paths_allowlist') or [],
                 trusted_providers=datadog_agent.get_config('integration_trusted_providers')
-                or DEFAULT_TRUSTED_PROVIDERS,
+                or list(DEFAULT_TRUSTED_PROVIDERS),
                 excluded_checks=datadog_agent.get_config('integration_security_excluded_checks') or [],
             )
 

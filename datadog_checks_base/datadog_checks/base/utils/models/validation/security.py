@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 
 DEFAULT_TRUSTED_PROVIDERS = ['file', 'remote-config']
@@ -28,8 +29,11 @@ class SecurityConfig:
         return provider in self.trusted_providers
 
     def is_file_path_allowed(self, path: str) -> bool:
-        """Return whether the given path matches any allowed prefix."""
-        return any(path.startswith(allowed) for allowed in self.file_paths_allowlist)
+        """Return whether the resolved path falls under any allowed prefix directory."""
+        resolved = os.path.realpath(path)
+        return any(
+            resolved == allowed or resolved.startswith(allowed + os.sep) for allowed in self.file_paths_allowlist
+        )
 
     def is_check_excluded(self, check_name: str) -> bool:
         """Return whether the given check is excluded from security restrictions."""
