@@ -1,6 +1,6 @@
 id: tomcat
 tests:
-- sample: 2000-09-07 14:07:41,508 [main] INFO  MyApp - Entering application.
+- sample: 2005-09-07 14:07:41,508 [main] INFO  MyApp - Entering application.
   result:
     custom:
       logger:
@@ -90,7 +90,7 @@ tests:
     tags:
     - source:LOGS_SOURCE
     timestamp: 1
-- sample: 2000-09-07 14:07:44 INFO org.foo.bar:32 - Entering application.
+- sample: 2005-09-07 14:07:44 INFO org.foo.bar:32 - Entering application.
   result:
     custom:
       line: 32
