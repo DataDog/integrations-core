@@ -251,6 +251,34 @@ def test_completed_queries_query_format():
     assert 'query_start_time_microseconds' in COMPLETED_QUERIES_QUERY
 
 
+def test_cloud_completed_queries_query_format():
+    """Test that the cloud variant query has per-node checkpoint support"""
+    from datadog_checks.clickhouse.query_completions import COMPLETED_QUERIES_QUERY_CLOUD
+
+    assert '{checkpoint_filter}' in COMPLETED_QUERIES_QUERY_CLOUD
+    assert '{min_checkpoint_microseconds}' in COMPLETED_QUERIES_QUERY_CLOUD
+    assert 'hostName() as server_node' in COMPLETED_QUERIES_QUERY_CLOUD
+    assert '{query_log_table}' in COMPLETED_QUERIES_QUERY_CLOUD
+    assert "type = 'QueryFinish'" in COMPLETED_QUERIES_QUERY_CLOUD
+
+    # Should NOT use global checkpoint placeholder
+    assert '{last_checkpoint_microseconds}' not in COMPLETED_QUERIES_QUERY_CLOUD
+
+
+def test_cloud_completed_queries_has_upper_bound():
+    """The cloud query must cap event_time with now64(6) to prevent clock-skew issues"""
+    from datadog_checks.clickhouse.query_completions import COMPLETED_QUERIES_QUERY_CLOUD
+
+    assert 'event_time_microseconds <= now64(6)' in COMPLETED_QUERIES_QUERY_CLOUD
+
+
+def test_cloud_completed_queries_has_limit():
+    """The cloud query must respect the max_samples limit"""
+    from datadog_checks.clickhouse.query_completions import COMPLETED_QUERIES_QUERY_CLOUD
+
+    assert '{max_samples}' in COMPLETED_QUERIES_QUERY_CLOUD
+
+
 def test_normalize_query_with_obfuscation(check_with_dbm):
     """Test that query normalization properly obfuscates and extracts metadata"""
     query_completions = check_with_dbm.query_completions
