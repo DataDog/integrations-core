@@ -21,7 +21,7 @@ on:
         description: "Target environment (dev = no tag push, dev S3; prod = push tags, prod S3)"
         required: false
         type: string
-        default: dev # TODO: switch default to prod once the new pipeline is validated
+        default: prod
       dry-run:
         description: >-
           When true, print what would be released and where without pushing tags
