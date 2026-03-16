@@ -13,7 +13,7 @@ prefect.server.flow_runs.late_start.count,count,,run,,Number of flow runs that s
 prefect.server.flow_runs.paused,gauge,,run,,Number of flow runs currently paused.,0,prefect,flow runs paused,,
 prefect.server.flow_runs.pending,gauge,,run,,Number of flow runs currently in the pending state.,0,prefect,flow runs pending,,
 prefect.server.flow_runs.queue_wait_duration.95percentile,gauge,,second,,95th percentile time spent waiting in the queue before the flow run actually started.,0,prefect,flow queue wait p95,,
-prefect.server.flow_runs.queue_wait_duration.avg,gauge,,second,,Average time spent waiting in the queue before the flow run actually started.,0,prefect,flow queue wait avg,,
+prefect.server.flow_runs.queue_wait_duration.avg,gauge,,second,,Average time a flow run spent waiting in the queue before starting.,0,prefect,flow queue wait avg,,
 prefect.server.flow_runs.queue_wait_duration.count,gauge,,run,second,Count of flow run queue wait duration samples.,0,prefect,flow queue wait count,,
 prefect.server.flow_runs.queue_wait_duration.max,gauge,,second,,Maximum time spent waiting in the queue before the flow run actually started.,0,prefect,flow queue wait max,,
 prefect.server.flow_runs.queue_wait_duration.median,gauge,,second,,Median time a flow run spent waiting in the queue before starting.,0,prefect,flow queue wait median,,
