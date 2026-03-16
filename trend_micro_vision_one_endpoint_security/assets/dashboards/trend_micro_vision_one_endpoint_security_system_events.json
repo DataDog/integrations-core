@@ -1,5 +1,5 @@
 {
-    "title": "Trend Micro Vision One Endpoint Security - System Events",
+    "title": "Trend Micro Vision One Endpoint Security - System Events ",
     "description": "This dashboard provides a detailed analysis of system events captured by Trend Micro Vision One Endpoint Security, offering deep insights into the security status of your environment. It is designed to help you monitor system behaviors, detect potential threats, and ensure that security policies are effectively enforced across all endpoints.",
     "widgets": [
         {
