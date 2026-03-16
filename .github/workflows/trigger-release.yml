@@ -8,6 +8,9 @@ on:
     branches:
       - master
       - "[0-9]+.[0-9]+.x"
+      - "alpha/*"
+      - "beta/*"
+      - "rc/*"
     paths:
       - "*/CHANGELOG.md"
       - "*/datadog_checks/*/__about__.py"
@@ -42,8 +45,23 @@ on:
         type: string
 
 jobs:
+  context:
+    name: Detect release context
+    runs-on: ubuntu-latest
+    outputs:
+      is-stable-release: ${{ steps.detect.outputs.is-stable-release }}
+    steps:
+      - id: detect
+        run: |
+          if [[ "$GITHUB_REF" =~ ^refs/heads/(master|[0-9]+\.[0-9]+\.x)$ ]]; then
+            echo "is-stable-release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is-stable-release=false" >> "$GITHUB_OUTPUT"
+          fi
+
   dispatch:
     name: Release
+    needs: context
     uses: ./.github/workflows/dispatch-release.yml
     with:
       source-repo: integrations-core
@@ -52,6 +70,7 @@ jobs:
       target: ${{ inputs.target || 'dev' }} # TODO: switch default to prod once the new pipeline is validated
       dry-run: ${{ inputs.dry-run || false }}
       ddev-version: ${{ inputs.ddev-version || '' }}
+      is-stable-release: ${{ needs.context.outputs.is-stable-release }}
     permissions:
       id-token: write
       contents: write
