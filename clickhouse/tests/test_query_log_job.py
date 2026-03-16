@@ -39,6 +39,7 @@ def job(check_with_dbm):
     """Return the statement_metrics job (a concrete subclass of ClickhouseQueryLogJob)."""
     return check_with_dbm.statement_metrics
 
+
 class TestTrackNodeCheckpoint:
     def test_tracks_new_node(self, job):
         job._pending_node_checkpoints = {}
@@ -65,6 +66,7 @@ class TestTrackNodeCheckpoint:
             'node-B': 200,
             'node-C': 150,
         }
+
 
 class TestBuildPerNodeCheckpointFilter:
     def test_first_run_falls_back_to_global_checkpoint(self, job):
@@ -209,6 +211,7 @@ class TestBuildPerNodeCheckpointFilter:
         mock_load.assert_called_once()
         assert min_cp == 5000
 
+
 class TestAdvanceCheckpoint:
     def test_persists_node_checkpoints_on_success(self, job):
         """When global checkpoint is set, node checkpoints should also be saved."""
@@ -254,6 +257,7 @@ class TestAdvanceCheckpoint:
         mock_save.assert_not_called()
         mock_save_nodes.assert_not_called()
         assert job._pending_node_checkpoints == {}
+
 
 class TestNodeCheckpointPersistence:
     def test_save_merges_pending_into_stored(self, job):

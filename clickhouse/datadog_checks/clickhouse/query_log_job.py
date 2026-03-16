@@ -314,7 +314,6 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         """
         return "cluster-wide (single endpoint)" if self._check.is_single_endpoint_mode else "local (direct)"
 
-
     def _load_node_checkpoints(self) -> dict:
         """Load per-node checkpoints from persistent cache."""
         cache_key = self.CHECKPOINT_CACHE_KEY + "_node_checkpoints"
