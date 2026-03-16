@@ -38,15 +38,6 @@ from datadog_checks.clickhouse.query_log_job import ClickhouseQueryLogJob, agent
 #
 # Data values use ClickHouse server-side parameter binding ({param:Type}) for
 # injection safety.
-#
-# Structural placeholders (inserted via str.replace()):
-#   {query_log_table}     - table reference (trusted, internal)
-#   {checkpoint_filter}   - per-node WHERE fragment from _build_per_node_checkpoint_filter()
-#   {internal_user_filter} - hardcoded filter fragment
-#
-# Bound parameters (ClickHouse server-side, via `parameters` dict):
-#   min_checkpoint_us     - earliest checkpoint for event_date partition pruning
-#   cp_*                  - per-node checkpoint values (from _build_per_node_checkpoint_filter)
 STATEMENTS_QUERY = """
 SELECT
     normalized_query_hash,
