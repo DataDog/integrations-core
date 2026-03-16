@@ -19,7 +19,6 @@ from . import constants, utils
 
 
 class MacAuditLogsCheck(AgentCheck):
-    # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = "mac_audit_logs"
 
     def __init__(self, name, init_config, instances):
@@ -59,7 +58,6 @@ class MacAuditLogsCheck(AgentCheck):
             if file_name == "current":
                 continue
 
-            # Skip directories
             file_path = os.path.join(self.audit_logs_dir_path, file_name)
             if not os.path.isfile(file_path):
                 self.log.debug(constants.LOG_TEMPLATE.format(message=f"Skipping non-file entry: {file_name}"))
@@ -84,11 +82,9 @@ class MacAuditLogsCheck(AgentCheck):
 
                 end_time = utils.time_string_to_datetime_utc(end_time_str)
 
-                # Include all the files which are withing the time interval
                 if start_time <= last_record_datetime <= end_time or last_record_datetime < start_time:
                     relevant_files.append((start_time, file_name))
             else:
-                # Skip files that don't match the expected audit log format
                 self.log.debug(
                     constants.LOG_TEMPLATE.format(message=f"Skipping file with unexpected format: {file_name}")
                 )
@@ -159,13 +155,9 @@ class MacAuditLogsCheck(AgentCheck):
                 time_value = data_xml.get("time")
                 milli_sec_value = data_xml.get("msec")
 
-                # This condition is used to reduce the duplicacy of the records.
-                # Skip records until not find the last ingested record milli second time value
                 if last_record_milli_sec and last_record_milli_sec != milli_sec_value:
                     continue
 
-                # Set the `last_record_milli_sec` None when reach the last ingested record's milli second time value
-                # Once set to None skipping logic will be not initiated
                 if last_record_milli_sec == milli_sec_value:
                     last_record_milli_sec = None
 
@@ -176,15 +168,9 @@ class MacAuditLogsCheck(AgentCheck):
                 cursor["file_name"] = file
 
                 if log_index + 1 == total_entries:
-                    # Set `record_milli_sec` to None and `is_file_collection_completed` to True
-                    # when reach the last entry of the file. This indicates the successful
-                    # execution of the particular file
                     cursor["record_milli_sec"] = None
                     cursor["is_file_collection_completed"] = True
                 else:
-                    # Set `record_milli_sec` to millisecond  time value of record and
-                    # `is_file_collection_completed` to False for remaining entries
-                    # This indicates the ongoing execution of the file
                     cursor["record_milli_sec"] = milli_sec_value
                     cursor["is_file_collection_completed"] = False
 
@@ -311,7 +297,6 @@ class MacAuditLogsCheck(AgentCheck):
 
             timezone_offset = subprocess.run(["date", "+%z"], capture_output=True, text=True).stdout.strip()
 
-            # Collect all the files from `audit_logs_dir_path` path which falls under the time range
             relevant_files = self.collect_relevant_files(last_record_time)
 
             if (
