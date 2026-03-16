@@ -2,7 +2,11 @@
 id: "linux-audit-logs"
 tests:
  -
-  sample: "type=USER_MAC_CONFIG_CHANGE msg=audit(1736329118.112:6532): pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='resrc=port op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"root\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=USER_MAC_CONFIG_CHANGE msg=audit(1736329118.112:6532): pid=381980 uid=0 auid=0 ses=138 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='resrc=port op=add lport=3307 proto=6 tcontext=system_u:object_r:mysqld_port_t:s0 comm=\"semanage\" exe=\"/usr/libexec/platform-python3.6\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"root\""
+    }
   result:
     custom:
       AUID: "root"
@@ -79,7 +83,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1736329118112
  -
-  sample: "type=USER_AUTH msg=audit(1740139921.923:1778): pid=155615 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_usertype,pam_localuser,pam_unix acct=\"devuser\" exe=\"/usr/sbin/sshd\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"unset\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=USER_AUTH msg=audit(1740139921.923:1778): pid=155615 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_usertype,pam_localuser,pam_unix acct=\"devuser\" exe=\"/usr/sbin/sshd\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"unset\""
+    }
   result:
     custom:
       AUID: "unset"
@@ -163,7 +171,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740139921923
  -
-  sample: "type=MAC_STATUS msg=audit(1740386730.535:1674): enforcing=0 old_enforcing=1 auid=1001 ses=36 enabled=1 old-enabled=1 lsm=selinux res=1AUID=\"devuser\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=MAC_STATUS msg=audit(1740386730.535:1674): enforcing=0 old_enforcing=1 auid=1001 ses=36 enabled=1 old-enabled=1 lsm=selinux res=1AUID=\"devuser\""
+    }
   result:
     custom:
       AUID: "devuser"
@@ -211,7 +223,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740386730535
  -
-  sample: "type=AVC msg=audit(1669185724.533:182): avc:  denied  { getattr } for  pid=16660 comm=\"groupadd\" name=\"/\" dev=\"proc\" ino=1 scontext=unconfined_u:unconfined_r:groupadd_t:s0-s0:c0.c1023 tcontext=system_u:object_r:proc_t:s0 tclass=filesystem permissive=0"
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=AVC msg=audit(1669185724.533:182): avc:  denied  { getattr } for  pid=16660 comm=\"groupadd\" name=\"/\" dev=\"proc\" ino=1 scontext=unconfined_u:unconfined_r:groupadd_t:s0-s0:c0.c1023 tcontext=system_u:object_r:proc_t:s0 tclass=filesystem permissive=0"
+    }
   result:
     custom:
       comm: "groupadd"
@@ -252,7 +268,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1669185724533
  -
-  sample: "type=USER_SELINUX_ERR msg=audit(1669714331.555:198): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='Regex version mismatch, expected: 10.37 2021-05-26 actual: 10.40 2022-04-14  exe=\"/usr/lib/systemd/systemd\" sauid=0 hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh'UID=\"root\" AUID=\"unset\" SAUID=\"root\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=USER_SELINUX_ERR msg=audit(1669714331.555:198): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='Regex version mismatch, expected: 10.37 2021-05-26 actual: 10.40 2022-04-14  exe=\"/usr/lib/systemd/systemd\" sauid=0 hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh'UID=\"root\" AUID=\"unset\" SAUID=\"root\""
+    }
   result:
     custom:
       AUID: "unset"
@@ -304,7 +324,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1669714331555
  -
-  sample: "type=USER_ROLE_CHANGE msg=audit(1741000050.325:2606): pid=60958 uid=0 auid=1001 ses=64 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023 msg='pam: default-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 selected-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 exe=\"/usr/sbin/sshd\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"devuser\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=USER_ROLE_CHANGE msg=audit(1741000050.325:2606): pid=60958 uid=0 auid=1001 ses=64 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023 msg='pam: default-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 selected-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 exe=\"/usr/sbin/sshd\" hostname=10.10.10.10 addr=10.10.10.10 terminal=ssh res=success'UID=\"root\" AUID=\"devuser\""
+    }
   result:
     custom:
       AUID: "devuser"
@@ -360,7 +384,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1741000050325
  -
-  sample: "type=MAC_CONFIG_CHANGE msg=audit(1678360880.644:121): bool=virt_use_nfs val=1 old_val=0 auid=1000 ses=1\x1dAUID=\"serviceuser\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=MAC_CONFIG_CHANGE msg=audit(1678360880.644:121): bool=virt_use_nfs val=1 old_val=0 auid=1000 ses=1\u001dAUID=\"serviceuser\""
+    }
   result:
     custom:
       AUID: "serviceuser"
@@ -400,7 +428,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1678360880644
  -
-  sample: "type=ADD_GROUP msg=audit(1740980591.704:5766): pid=12258 uid=0 auid=1001 ses=535 subj=unconfined msg='op=adding group to /etc/group id=1004 exe=\"/usr/sbin/groupadd\" hostname=ub10-10-10-10 addr=10.10.10.10 terminal=pts/3 res=success'UID=\"root\" AUID=\"serviceuser\" ID=\"demo\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=ADD_GROUP msg=audit(1740980591.704:5766): pid=12258 uid=0 auid=1001 ses=535 subj=unconfined msg='op=adding group to /etc/group id=1004 exe=\"/usr/sbin/groupadd\" hostname=ub10-10-10-10 addr=10.10.10.10 terminal=pts/3 res=success'UID=\"root\" AUID=\"serviceuser\" ID=\"demo\""
+    }
   result:
     custom:
       AUID: "serviceuser"
@@ -478,7 +510,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740980591704
  -
-  sample: "type=DEL_GROUP msg=audit(1765794074.279:2333): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-group grp=\"testuser\" acct=\"testuser\" exe=\"/usr/sbin/userdel\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"serviceuser\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=DEL_GROUP msg=audit(1765794074.279:2333): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-group grp=\"testuser\" acct=\"testuser\" exe=\"/usr/sbin/userdel\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\u001dUID=\"root\" AUID=\"serviceuser\""
+    }
   result:
     custom:
       AUID: "serviceuser"
@@ -556,7 +592,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1765794074279
  -
-  sample: "type=ADD_USER msg=audit(1635509157.089:345): pid=73290 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=add-user acct=\"serviceuser\" exe=\"/usr/sbin/useradd\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"root\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=ADD_USER msg=audit(1635509157.089:345): pid=73290 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=add-user acct=\"serviceuser\" exe=\"/usr/sbin/useradd\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\u001dUID=\"root\" AUID=\"root\""
+    }
   result:
     custom:
       AUID: "root"
@@ -633,7 +673,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1635509157089
  -
-  sample: "type=DEL_USER msg=audit(1740379094.277:2332): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-user id=1003 exe=\"/usr/sbin/userdel\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"testuser\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=DEL_USER msg=audit(1740379094.277:2332): pid=161731 uid=0 auid=1001 ses=27 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=delete-user id=1003 exe=\"/usr/sbin/userdel\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\u001dUID=\"root\" AUID=\"serviceuser\" ID=\"testuser\""
+    }
   result:
     custom:
       AUID: "serviceuser"
@@ -712,7 +756,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740379094277
  -
-  sample: "type=USER_CHAUTHTOK msg=audit(1635509189.860:347): pid=73297 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:passwd_t:s0-s0:c0.c1023 msg='op=PAM:chauthtok grantors=pam_pwquality,pam_unix acct=\"serviceuser\" exe=\"/usr/bin/passwd\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\x1dUID=\"root\" AUID=\"root\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=USER_CHAUTHTOK msg=audit(1635509189.860:347): pid=73297 uid=0 auid=0 ses=3 subj=unconfined_u:unconfined_r:passwd_t:s0-s0:c0.c1023 msg='op=PAM:chauthtok grantors=pam_pwquality,pam_unix acct=\"serviceuser\" exe=\"/usr/bin/passwd\" hostname=localhost addr=10.10.10.10 terminal=pts/1 res=success'\u001dUID=\"root\" AUID=\"root\""
+    }
   result:
     custom:
       AUID: "root"
@@ -792,7 +840,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1635509189860
  -
-  sample: "type=ROLE_ASSIGN msg=audit(1740720945.670:879): pid=11107 uid=0 auid=1001 ses=21 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser-role,range id=0 old-seuser=user_u old-role=user_r old-range=s0 new-seuser=user_u new-role=staff_r new-range=s0 exe=/sbin/semanage hostname=localhost addr=10.10.10.10 terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"serviceuser\" ID=\"root\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=ROLE_ASSIGN msg=audit(1740720945.670:879): pid=11107 uid=0 auid=1001 ses=21 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser-role,range id=0 old-seuser=user_u old-role=user_r old-range=s0 new-seuser=user_u new-role=staff_r new-range=s0 exe=/sbin/semanage hostname=localhost addr=10.10.10.10 terminal=pts/0 res=success'\u001dUID=\"root\" AUID=\"serviceuser\" ID=\"root\""
+    }
   result:
     custom:
       AUID: "serviceuser"
@@ -880,7 +932,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740720945670
  -
-  sample: "type=ROLE_REMOVE msg=audit(1740130059.788:1002): pid=49119 uid=0 auid=1001 ses=17 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser id=0 old-seuser=test1 old-role=user_r old-range=s0 new-seuser=user_u new-role=user_r new-range=s0 exe=/sbin/semanage hostname=localhost addr=10.10.10.10 terminal=pts/0 res=success'\x1dUID=\"root\" AUID=\"devuser\" ID=\"root\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=ROLE_REMOVE msg=audit(1740130059.788:1002): pid=49119 uid=0 auid=1001 ses=17 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=seuser id=0 old-seuser=test1 old-role=user_r old-range=s0 new-seuser=user_u new-role=user_r new-range=s0 exe=/sbin/semanage hostname=localhost addr=10.10.10.10 terminal=pts/0 res=success'\u001dUID=\"root\" AUID=\"devuser\" ID=\"root\""
+    }
   result:
     custom:
       AUID: "devuser"
@@ -967,7 +1023,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740130059788
  -
-  sample: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/etc/shadow\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=NORMAL cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/etc/shadow\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=NORMAL cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\u001dOUID=\"root\" OGID=\"root\""
+    }
   result:
     custom:
       OGID: "root"
@@ -997,6 +1057,7 @@ tests:
         class_name: "File System Activity"
         class_uid: 1001
         device:
+          hostname: "audit-server"
           type: "Unknown"
           type_id: 0
           uid: "fd:03"
@@ -1030,7 +1091,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740378301873
  -
-  sample: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/x86_64-linux-gnu/libcrypt.so.1\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=DELETE cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/x86_64-linux-gnu/libcrypt.so.1\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=DELETE cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\u001dOUID=\"root\" OGID=\"root\""
+    }
   result:
     custom:
       OGID: "root"
@@ -1060,6 +1125,7 @@ tests:
         class_name: "File System Activity"
         class_uid: 1001
         device:
+          hostname: "audit-server"
           type: "Unknown"
           type_id: 0
           uid: "fd:03"
@@ -1094,7 +1160,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740378301873
  -
-  sample: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/\" inode=50314523 dev=fd:03 mode=0040755 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=PARENT cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/\" inode=50314523 dev=fd:03 mode=0040755 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=PARENT cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\u001dOUID=\"root\" OGID=\"root\""
+    }
   result:
     custom:
       OGID: "root"
@@ -1124,6 +1194,7 @@ tests:
         class_name: "File System Activity"
         class_uid: 1001
         device:
+          hostname: "audit-server"
           type: "Unknown"
           type_id: 0
           uid: "fd:03"
@@ -1157,7 +1228,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740378301873
  -
-  sample: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/run/nginx.pid\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=CREATE cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/run/nginx.pid\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=CREATE cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\u001dOUID=\"root\" OGID=\"root\""
+    }
   result:
     custom:
       OGID: "root"
@@ -1187,6 +1262,7 @@ tests:
         class_name: "File System Activity"
         class_uid: 1001
         device:
+          hostname: "audit-server"
           type: "Unknown"
           type_id: 0
           uid: "fd:03"
@@ -1221,7 +1297,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740378301873
  -
-  sample: "type=DAEMON_CONFIG msg=audit(1740139921.923:946): op=reconfigure state=changed auid=1001 pid=12258 subj=unconfined_u:unconfined_r:rpm_script_t:s0-s0:c0.c1023 res=success AUID=\"serviceuser\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=DAEMON_CONFIG msg=audit(1740139921.923:946): op=reconfigure state=changed auid=1001 pid=12258 subj=unconfined_u:unconfined_r:rpm_script_t:s0-s0:c0.c1023 res=success AUID=\"serviceuser\""
+    }
   result:
     custom:
       AUID: "serviceuser"
@@ -1267,7 +1347,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740139921923
  -
-  sample: "type=DAEMON_ABORT msg=audit(1740139921.923:1849): op=set-pid auid=1001 pid=12258 uid=0 ses=535 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 res=failed AUID=\"serviceuser\" UID=\"root\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=DAEMON_ABORT msg=audit(1740139921.923:1849): op=set-pid auid=1001 pid=12258 uid=0 ses=535 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 res=failed AUID=\"serviceuser\" UID=\"root\""
+    }
   result:
     custom:
       AUID: "serviceuser"
@@ -1315,7 +1399,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740139921923
  -
-  sample: "type=MAC_POLICY_LOAD msg=audit(1740139921.923:235): auid=1001 ses=535 lsm=selinux res=1 AUID=\"serviceuser\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=MAC_POLICY_LOAD msg=audit(1740139921.923:235): auid=1001 ses=535 lsm=selinux res=1 AUID=\"serviceuser\""
+    }
   result:
     custom:
       AUID: "serviceuser"
@@ -1359,7 +1447,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740139921923
  -
-  sample: "type=CONFIG_CHANGE msg=audit(1740139921.923:2361): auid=1001 ses=535 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 op=add_rule key=\"account_mgmt\" list=4 res=1 AUID=\"serviceuser\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=CONFIG_CHANGE msg=audit(1740139921.923:2361): auid=1001 ses=535 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 op=add_rule key=\"account_mgmt\" list=4 res=1 AUID=\"serviceuser\""
+    }
   result:
     custom:
       AUID: "serviceuser"
@@ -1406,7 +1498,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740139921923
  -
-  sample: "type=EXECVE msg=audit(1740378302.456:2249): argc=3 a0=\"/bin/bash\" a1=\"-c\" a2=\"id\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=EXECVE msg=audit(1740378302.456:2249): argc=3 a0=\"/bin/bash\" a1=\"-c\" a2=\"id\""
+    }
   result:
     custom:
       a0: "/bin/bash"
@@ -1423,6 +1519,7 @@ tests:
         class_name: "Process Activity"
         class_uid: 1007
         device:
+          hostname: "audit-server"
           type: "Unknown"
           type_id: 0
         metadata:
@@ -1448,7 +1545,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740378302456
  -
-  sample: "type=SYSCALL msg=audit(1740378303.123:2250): arch=c000003e syscall=59 success=yes exit=0 a0=7fbd5 a1=7fbd6 a2=7fbd7 a3=0 items=2 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"susp_activity\"\x1dARCH=x86_64 SYSCALL=execve AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=SYSCALL msg=audit(1740378303.123:2250): arch=c000003e syscall=59 success=yes exit=0 a0=7fbd5 a1=7fbd6 a2=7fbd7 a3=0 items=2 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"susp_activity\"\u001dARCH=x86_64 SYSCALL=execve AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+    }
   result:
     custom:
       AUID: "lima"
@@ -1501,6 +1602,7 @@ tests:
         class_name: "Process Activity"
         class_uid: 1007
         device:
+          hostname: "audit-server"
           type: "Unknown"
           type_id: 0
         metadata:
@@ -1541,7 +1643,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740378303123
  -
-  sample: "type=SYSCALL msg=audit(1770316388.442:354317): arch=c00000b7 syscall=203 success=yes exit=0 a0=3 a1=aaaae39b4130 a2=10 a3=ffffa1cc7020 items=0 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"remote_shell\"\x1dARCH=aarch64 SYSCALL=connect AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=SYSCALL msg=audit(1770316388.442:354317): arch=c00000b7 syscall=203 success=yes exit=0 a0=3 a1=aaaae39b4130 a2=10 a3=ffffa1cc7020 items=0 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"remote_shell\"\u001dARCH=aarch64 SYSCALL=connect AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+    }
   result:
     custom:
       AUID: "lima"
@@ -1614,7 +1720,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1770316388442
  -
-  sample: "type=SOCKADDR msg=audit(1770316388.442:354317): saddr={ fam=inet laddr=1.2.3.4 lport=4444 }"
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=SOCKADDR msg=audit(1770316388.442:354317): saddr={ fam=inet laddr=1.2.3.4 lport=4444 }"
+    }
   result:
     custom:
       event_id: 354317
@@ -1651,7 +1761,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1770316388442
  -
-  sample: "type=SYSCALL msg=audit(1740378303.456:2252): arch=c000003e syscall=90 success=yes exit=0 a0=7fbd1 a1=1a4 a2=0 a3=0 items=1 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"perm_mod\"\x1dARCH=x86_64 SYSCALL=chmod AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=SYSCALL msg=audit(1740378303.456:2252): arch=c000003e syscall=90 success=yes exit=0 a0=7fbd1 a1=1a4 a2=0 a3=0 items=1 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"perm_mod\"\u001dARCH=x86_64 SYSCALL=chmod AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+    }
   result:
     custom:
       AUID: "lima"
@@ -1705,6 +1819,7 @@ tests:
         class_name: "File System Activity"
         class_uid: 1001
         device:
+          hostname: "audit-server"
           type: "Unknown"
           type_id: 0
         metadata:
@@ -1741,7 +1856,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740378303456
  -
-  sample: "type=SYSCALL msg=audit(1740378303.789:2253): arch=c000003e syscall=87 success=yes exit=0 a0=7fcd1 a1=0 a2=0 a3=0 items=2 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"delete\"\x1dARCH=x86_64 SYSCALL=unlink AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=SYSCALL msg=audit(1740378303.789:2253): arch=c000003e syscall=87 success=yes exit=0 a0=7fcd1 a1=0 a2=0 a3=0 items=2 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"delete\"\u001dARCH=x86_64 SYSCALL=unlink AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+    }
   result:
     custom:
       AUID: "lima"
@@ -1795,6 +1914,7 @@ tests:
         class_name: "File System Activity"
         class_uid: 1001
         device:
+          hostname: "audit-server"
           type: "Unknown"
           type_id: 0
         metadata:
