@@ -33,6 +33,10 @@ on:
         description: "ddev version, defaults to latest."
         required: false
         type: string
+      is-stable-release:
+        description: "'true' for master/X.X.x (blocks pre-releases), 'false' for alpha/beta/rc (blocks stable), unset for workflow_dispatch (no restriction)."
+        required: false
+        type: string
 
 permissions:
   id-token: write
@@ -85,6 +89,7 @@ jobs:
           TARGET: ${{ inputs.target }}
           DRY_RUN: ${{ inputs.dry-run }}
           MODE: ${{ steps.detect.outputs.mode }}
+          IS_STABLE_RELEASE: ${{ inputs.is-stable-release }}
         run: python .github/workflows/scripts/validate_release.py
 
       - name: Get GitHub token via dd-octo-sts

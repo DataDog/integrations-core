@@ -7,7 +7,8 @@ from _release.validation import (
     HAS_FRAGMENTS,
     NO_VERSION,
     PRE_RELEASE,
-    READY,
+    STABLE,
+    UNRELEASED,
     get_version,
     has_changelog_fragments,
     is_pre_release,
@@ -22,6 +23,7 @@ def _make_package(root: Path, name: str, version: str) -> Path:
     about.parent.mkdir(parents=True)
     about.write_text(f'__version__ = "{version}"\n')
     return root / name
+
 
 
 class TestGetVersion:
@@ -82,21 +84,35 @@ class TestHasChangelogFragments:
 
 
 class TestValidatePackage:
-    def test_ready(self, tmp_path):
+    def test_stable(self, tmp_path):
         _make_package(tmp_path, "pkg", "1.0.0")
         result = validate_package("pkg", tmp_path)
-        assert result == {"package": "pkg", "version": "1.0.0", "status": READY}
+        assert result == {"package": "pkg", "version": "1.0.0", "type": STABLE, "dispatch": True}
 
     def test_no_version(self, tmp_path):
         (tmp_path / "pkg").mkdir()
         result = validate_package("pkg", tmp_path)
-        assert result["status"] == NO_VERSION
+        assert result["type"] == NO_VERSION
+        assert result["dispatch"] is False
         assert result["version"] is None
 
-    def test_pre_release(self, tmp_path):
-        _make_package(tmp_path, "pkg", "2.0.0b1")
+    def test_unreleased(self, tmp_path):
+        _make_package(tmp_path, "pkg", "0.0.1")
         result = validate_package("pkg", tmp_path)
-        assert result["status"] == PRE_RELEASE
+        assert result["type"] == UNRELEASED
+        assert result["dispatch"] is False
+
+    def test_pre_release_on_pre_release_branch(self, tmp_path):
+        _make_package(tmp_path, "pkg", "2.0.0b1")
+        result = validate_package("pkg", tmp_path, is_stable_release=False)
+        assert result["type"] == PRE_RELEASE
+        assert result["dispatch"] is True
+
+    def test_pre_release_on_stable_branch(self, tmp_path):
+        _make_package(tmp_path, "pkg", "2.0.0b1")
+        result = validate_package("pkg", tmp_path, is_stable_release=True)
+        assert result["type"] == PRE_RELEASE
+        assert result["dispatch"] is False
 
     def test_has_fragments(self, tmp_path):
         _make_package(tmp_path, "pkg", "1.0.0")
@@ -104,24 +120,28 @@ class TestValidatePackage:
         changelog_d.mkdir()
         (changelog_d / "7.fixed").write_text("Fix.")
         result = validate_package("pkg", tmp_path)
-        assert result["status"] == HAS_FRAGMENTS
+        assert result["type"] == HAS_FRAGMENTS
+        assert result["dispatch"] is False
 
-    def test_pre_release_takes_priority_over_fragments(self, tmp_path):
-        """Pre-release packages are skipped even if they have fragments."""
+    def test_pre_release_dispatches_despite_fragments(self, tmp_path):
+        """Pre-release packages are dispatched even if they have fragments."""
         _make_package(tmp_path, "pkg", "1.0.0a1")
         changelog_d = tmp_path / "pkg" / "changelog.d"
         changelog_d.mkdir()
         (changelog_d / "1.fixed").write_text("Fix.")
-        result = validate_package("pkg", tmp_path)
-        assert result["status"] == PRE_RELEASE
+        result = validate_package("pkg", tmp_path, is_stable_release=False)
+        assert result["type"] == PRE_RELEASE
+        assert result["dispatch"] is True
 
 
 class TestValidatePackages:
     def test_multiple_packages(self, tmp_path):
         _make_package(tmp_path, "a", "1.0.0")
         _make_package(tmp_path, "b", "2.0.0b1")
-        results = validate_packages(["a", "b"], tmp_path)
+        results = validate_packages(["a", "b"], tmp_path, is_stable_release=False)
         assert len(results) == 2
-        statuses = {r["package"]: r["status"] for r in results}
-        assert statuses["a"] == READY
-        assert statuses["b"] == PRE_RELEASE
+        by_pkg = {r["package"]: r for r in results}
+        assert by_pkg["a"]["type"] == STABLE
+        assert by_pkg["a"]["dispatch"] is False  # stable package not dispatched on pre-release branch
+        assert by_pkg["b"]["type"] == PRE_RELEASE
+        assert by_pkg["b"]["dispatch"] is True  # pre-release branch context

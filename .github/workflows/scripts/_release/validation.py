@@ -8,9 +8,10 @@ _PRE_RELEASE_RE = re.compile(r"\d+\.\d+\.\d+(a|b|rc)\d+")
 _FRAGMENT_RE = re.compile(r"^\d+\.[a-z]+$")
 
 NO_VERSION = "no_version"
+UNRELEASED = "unreleased"
 PRE_RELEASE = "pre_release"
 HAS_FRAGMENTS = "has_fragments"
-READY = "ready"
+STABLE = "stable"
 
 
 def get_version(package: str, root: Path = Path(".")) -> str | None:
@@ -39,18 +40,27 @@ def has_changelog_fragments(package: str, root: Path = Path(".")) -> bool:
     return any(_FRAGMENT_RE.match(f.name) for f in changelog_dir.iterdir())
 
 
-def validate_package(package: str, root: Path = Path(".")) -> dict:
-    """Validate a single package and return a status dict."""
+
+def validate_package(package: str, root: Path = Path("."), is_stable_release: bool = True) -> dict:
+    """Validate a single package and return a result dict with ``type`` and ``dispatch`` keys.
+
+    ``is_stable_release`` encodes the git ref context:
+    - ``True``  (master/X.X.x/...): pre-release versions are not dispatched.
+    - ``False`` (alpha/beta/rc):    stable versions are not dispatched.
+    """
     version = get_version(package, root)
     if version is None:
-        return {"package": package, "version": None, "status": NO_VERSION}
+        return {"package": package, "version": None, "type": NO_VERSION, "dispatch": False}
+    if version == "0.0.1":
+        return {"package": package, "version": version, "type": UNRELEASED, "dispatch": False}
     if is_pre_release(version):
-        return {"package": package, "version": version, "status": PRE_RELEASE}
+        # PEP 440 pre-release (alpha/beta/rc) — skip fragment check, dispatch unless on a stable branch
+        return {"package": package, "version": version, "type": PRE_RELEASE, "dispatch": not is_stable_release}
     if has_changelog_fragments(package, root):
-        return {"package": package, "version": version, "status": HAS_FRAGMENTS}
-    return {"package": package, "version": version, "status": READY}
+        return {"package": package, "version": version, "type": HAS_FRAGMENTS, "dispatch": False}
+    return {"package": package, "version": version, "type": STABLE, "dispatch": is_stable_release}
 
 
-def validate_packages(packages: list[str], root: Path = Path(".")) -> list[dict]:
-    """Validate all packages and return a list of status dicts."""
-    return [validate_package(p, root) for p in packages]
+def validate_packages(packages: list[str], root: Path = Path("."), is_stable_release: bool = True) -> list[dict]:
+    """Validate all packages and return a list of result dicts."""
+    return [validate_package(p, root, is_stable_release) for p in packages]

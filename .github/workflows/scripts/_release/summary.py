@@ -4,11 +4,12 @@ from . import validation as v
 _TARGET_REPO = "DataDog/agent-integration-wheels-release"
 ACTIONS_URL = f"https://github.com/{_TARGET_REPO}/actions"
 
-_STATUS_LABELS: dict[str, str] = {
+_TYPE_LABELS: dict[str, str] = {
     v.NO_VERSION: "⚠️ No version found",
-    v.PRE_RELEASE: "⏭️ Pre-release, skipped",
+    v.UNRELEASED: "⏭️ Unreleased (0.0.1)",
+    v.PRE_RELEASE: "🧪 Pre-release",
     v.HAS_FRAGMENTS: "❌ Unreleased changelog fragments",
-    v.READY: "✅ Ready",
+    v.STABLE: "✅ Ready",
 }
 
 
@@ -33,7 +34,7 @@ def build_summary(
 
     Args:
         packages:   Ordered list of package names to include in the table.
-        results:    Validation result dicts (``{"package", "version", "status"}``).
+        results:    Validation result dicts (``{"package", "version", "type", "dispatch"}``).
         mode:       Human-readable detection mode string.
         source_repo: Repository name (e.g. ``integrations-core``).
         ref:        Commit SHA or ref used as the build source.
@@ -48,13 +49,14 @@ def build_summary(
     for name in packages:
         r = by_package.get(name, {})
         ver = r.get("version") or "—"
-        status = r.get("status", v.READY)
-        if dry_run and status == v.READY:
+        typ = r.get("type", v.STABLE)
+        will_dispatch = r.get("dispatch", True)
+        if dry_run and will_dispatch:
             label = "🔄 Dry run"
-        elif dispatched and status == v.READY:
+        elif dispatched and will_dispatch:
             label = "✅ Dispatched"
         else:
-            label = _STATUS_LABELS.get(status, "✅ Ready")
+            label = _TYPE_LABELS.get(typ, "✅ Ready")
         rows.append(f"| `{name}` | `{ver}` | {label} |")
 
     if not footer:

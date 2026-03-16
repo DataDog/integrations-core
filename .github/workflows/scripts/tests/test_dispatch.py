@@ -86,10 +86,11 @@ class TestDispatchInBatches:
 
 class TestBuildSummary:
     _results = [
-        {"package": "postgres", "version": "1.2.3", "status": v.READY},
-        {"package": "mysql", "version": "2.0.0b1", "status": v.PRE_RELEASE},
-        {"package": "redis", "version": None, "status": v.NO_VERSION},
-        {"package": "pg", "version": "1.0.0", "status": v.HAS_FRAGMENTS},
+        {"package": "postgres", "version": "1.2.3", "type": v.STABLE, "dispatch": True},
+        {"package": "mysql", "version": "2.0.0b1", "type": v.PRE_RELEASE, "dispatch": True},
+        {"package": "redis", "version": None, "type": v.NO_VERSION, "dispatch": False},
+        {"package": "pg", "version": "1.0.0", "type": v.HAS_FRAGMENTS, "dispatch": False},
+        {"package": "new_pkg", "version": "0.0.1", "type": v.UNRELEASED, "dispatch": False},
     ]
 
     def _summary(self, packages=None, **kwargs):
@@ -103,9 +104,9 @@ class TestBuildSummary:
         )
         return build_summary(packages or ["postgres"], self._results, **{**defaults, **kwargs})
 
-    def test_status_labels(self):
+    def test_labels_when_dispatched(self):
         out = build_summary(
-            ["postgres", "mysql", "redis", "pg"],
+            ["postgres", "mysql", "redis", "pg", "new_pkg"],
             self._results,
             mode="auto",
             source_repo="integrations-core",
@@ -114,10 +115,14 @@ class TestBuildSummary:
             dry_run=False,
             dispatched=True,
         )
-        assert "✅ Dispatched" in out
-        assert "⏭️ Pre-release" in out
+        assert "✅ Dispatched" in out       # stable and pre-release
+        assert "⏭️ Unreleased" in out       # 0.0.1 placeholder
         assert "⚠️ No version" in out
-        assert "❌ Unreleased" in out
+        assert "❌ Unreleased" in out       # has_fragments
+
+    def test_pre_release_dry_run_label(self):
+        out = self._summary(packages=["mysql"], dry_run=True, dispatched=False)
+        assert "🔄 Dry run" in out
 
     def test_dry_run_label(self):
         out = self._summary(dry_run=True, dispatched=False)
