@@ -4,7 +4,6 @@
 import os
 import subprocess
 from datetime import datetime
-from typing import List, Tuple
 from xml.etree.ElementTree import ParseError
 
 from lxml import etree
@@ -47,7 +46,7 @@ class MacAuditLogsCheck(AgentCheck):
             self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
             raise ConfigurationError(err_message)
 
-    def collect_relevant_files(self, last_record_time: str) -> List[Tuple[datetime, str]]:
+    def collect_relevant_files(self, last_record_time: str) -> list[tuple[datetime, str]]:
         if not os.path.isdir(self.audit_logs_dir_path):
             err_message = (
                 f"`{self.audit_logs_dir_path}` directory does not exist. Please ensure BSM auditing is enabled."
@@ -97,7 +96,7 @@ class MacAuditLogsCheck(AgentCheck):
         relevant_files.sort(key=lambda x: (x[1].endswith('.not_terminated'), x[0]))
         return relevant_files
 
-    def get_previous_iteration_log_cursor(self, previous_cursor) -> Tuple[str, str, str]:
+    def get_previous_iteration_log_cursor(self, previous_cursor) -> tuple[str, str | None, str | None]:
         last_record_time = utils.get_utc_timestamp_minus_hours(constants.HOURS_OFFSET)
         last_record_milli_sec = None
         last_collected_file_name = None
