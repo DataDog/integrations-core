@@ -319,8 +319,22 @@ def mock_http(mocker):
         'verify': True,
         'allow_redirects': True,
     }
-    client.get_header.side_effect = lambda name, default=None: client.options['headers'].get(name, default)
-    client.set_header.side_effect = lambda name, value: client.options['headers'].__setitem__(name, value)
+
+    def _get_header(name, default=None):
+        for key, value in client.options['headers'].items():
+            if key.lower() == name.lower():
+                return value
+        return default
+
+    def _set_header(name, value):
+        for key in list(client.options['headers']):
+            if key.lower() == name.lower():
+                client.options['headers'][key] = value
+                return
+        client.options['headers'][name] = value
+
+    client.get_header.side_effect = _get_header
+    client.set_header.side_effect = _set_header
     client.options_method.side_effect = NotImplementedError('HTTP OPTIONS not yet supported in mock_http')
     mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
     return client

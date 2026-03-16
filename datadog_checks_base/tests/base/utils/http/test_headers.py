@@ -105,10 +105,11 @@ def test_get_header_default_for_missing():
     assert http.get_header('X-Missing', 'fallback') == 'fallback'
 
 
-def test_get_header_case_sensitive():
+def test_get_header_case_insensitive():
     http = RequestsWrapper({}, {})
-    assert http.get_header('accept') is None
+    assert http.get_header('accept') == '*/*'
     assert http.get_header('Accept') == '*/*'
+    assert http.get_header('ACCEPT') == '*/*'
 
 
 def test_set_header():
@@ -117,3 +118,13 @@ def test_set_header():
     assert http.get_header('X-Token') == 'abc123'
     http.set_header('Accept', 'application/json')
     assert http.get_header('Accept') == 'application/json'
+
+
+def test_set_header_case_insensitive():
+    http = RequestsWrapper({}, {})
+    http.set_header('accept', 'application/json')
+    # Overwrites the existing 'Accept' key (preserving original casing)
+    assert http.get_header('Accept') == 'application/json'
+    assert http.options['headers']['Accept'] == 'application/json'
+    # No duplicate key created
+    assert sum(1 for k in http.options['headers'] if k.lower() == 'accept') == 1
