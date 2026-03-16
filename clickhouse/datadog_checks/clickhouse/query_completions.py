@@ -61,6 +61,47 @@ ORDER BY event_time_microseconds ASC
 LIMIT {max_samples}
 """
 
+# Cloud variant: adds hostName() so per-node checkpoints can be tracked,
+# preventing the cross-node query_log flush race on multi-node ClickHouse
+# Cloud clusters.  Unlike the statements cloud query, there is no merge
+# step because completions are individual rows, not aggregated.
+COMPLETED_QUERIES_QUERY_CLOUD = """
+SELECT
+    normalized_query_hash,
+    hostName() as server_node,
+    query,
+    user,
+    type as query_type,
+    databases,
+    tables,
+    query_duration_ms,
+    read_rows,
+    read_bytes,
+    written_rows,
+    written_bytes,
+    result_rows,
+    result_bytes,
+    memory_usage,
+    query_start_time_microseconds,
+    event_time_microseconds,
+    query_id,
+    initial_query_id,
+    query_kind,
+    is_initial_query
+FROM {query_log_table}
+WHERE
+  {checkpoint_filter}
+  AND event_time_microseconds <= now64(6)
+  AND event_date >= toDate(fromUnixTimestamp64Micro({min_checkpoint_microseconds}))
+  AND type = 'QueryFinish'
+  AND is_initial_query = 1
+  AND query != ''
+  AND normalized_query_hash != 0
+  {internal_user_filter}
+ORDER BY event_time_microseconds ASC
+LIMIT {max_samples}
+"""
+
 
 class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
     """Collects individual completed query samples from system.query_log"""
@@ -92,6 +133,10 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         Checkpoint is always advanced after collection to prefer dropped data over duplicates.
         """
         try:
+            # Reset pending checkpoints at the start of each collection
+            self._current_checkpoint_microseconds = None
+            self._pending_node_checkpoints = {}
+
             # Step 1: Collect rows (loads checkpoint internally)
             rows = self._collect_completed_queries()
 
@@ -148,64 +193,97 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         For self-hosted: Queries only the local node's query_log.
         """
         try:
-            # Step 1: Get last checkpoint (only fetches from DB on first run)
-            if self._last_checkpoint_microseconds is None:
-                self._last_checkpoint_microseconds = self._get_last_checkpoint()
-
-            # Get the appropriate table reference based on deployment type
+            is_cloud = self._check.is_single_endpoint_mode
             query_log_table = self._check.get_system_table('query_log')
 
-            # Step 2: Build and execute query (uses now64(6) directly for upper bound)
-            query = COMPLETED_QUERIES_QUERY.format(
-                query_log_table=query_log_table,
-                last_checkpoint_microseconds=self._last_checkpoint_microseconds,
-                internal_user_filter=self._get_internal_user_filter(),
-                max_samples=self._max_samples_per_collection,
-            )
+            if is_cloud:
+                checkpoint_filter, min_checkpoint = self._build_per_node_checkpoint_filter()
+                query = COMPLETED_QUERIES_QUERY_CLOUD.format(
+                    query_log_table=query_log_table,
+                    checkpoint_filter=checkpoint_filter,
+                    min_checkpoint_microseconds=min_checkpoint,
+                    internal_user_filter=self._get_internal_user_filter(),
+                    max_samples=self._max_samples_per_collection,
+                )
+            else:
+                if self._last_checkpoint_microseconds is None:
+                    self._last_checkpoint_microseconds = self._get_last_checkpoint()
+                query = COMPLETED_QUERIES_QUERY.format(
+                    query_log_table=query_log_table,
+                    last_checkpoint_microseconds=self._last_checkpoint_microseconds,
+                    internal_user_filter=self._get_internal_user_filter(),
+                    max_samples=self._max_samples_per_collection,
+                )
+
             rows = self._execute_query(query)
 
             self._log.info(
-                "Loaded %d completed queries from %s [%s] (last_checkpoint=%d)",
+                "Loaded %d completed queries from %s [%s] (is_cloud=%s)",
                 len(rows),
                 query_log_table,
                 self.deployment_mode,
-                self._last_checkpoint_microseconds,
+                is_cloud,
             )
 
-            # Track the max event time across all rows for checkpoint
-            # Since results are ordered ASC by event_time, the last row has the max
             max_event_time = 0
 
-            # Step 3: Convert to list of dicts and obfuscate
             result_rows = []
             for row in rows:
-                (
-                    normalized_query_hash,
-                    query_text,
-                    user,
-                    query_type,
-                    databases,
-                    tables,
-                    query_duration_ms,
-                    read_rows,
-                    read_bytes,
-                    written_rows,
-                    written_bytes,
-                    result_rows_count,
-                    result_bytes,
-                    memory_usage,
-                    query_start_time_microseconds,
-                    event_time_microseconds,
-                    query_id,
-                    initial_query_id,
-                    query_kind,
-                    is_initial_query,
-                ) = row
+                if is_cloud:
+                    (
+                        normalized_query_hash,
+                        server_node,
+                        query_text,
+                        user,
+                        query_type,
+                        databases,
+                        tables,
+                        query_duration_ms,
+                        read_rows,
+                        read_bytes,
+                        written_rows,
+                        written_bytes,
+                        result_rows_count,
+                        result_bytes,
+                        memory_usage,
+                        query_start_time_microseconds,
+                        event_time_microseconds,
+                        query_id,
+                        initial_query_id,
+                        query_kind,
+                        is_initial_query,
+                    ) = row
+                else:
+                    (
+                        normalized_query_hash,
+                        query_text,
+                        user,
+                        query_type,
+                        databases,
+                        tables,
+                        query_duration_ms,
+                        read_rows,
+                        read_bytes,
+                        written_rows,
+                        written_bytes,
+                        result_rows_count,
+                        result_bytes,
+                        memory_usage,
+                        query_start_time_microseconds,
+                        event_time_microseconds,
+                        query_id,
+                        initial_query_id,
+                        query_kind,
+                        is_initial_query,
+                    ) = row
+                    server_node = None
 
-                # Track max event time for checkpoint
                 event_time_int = self.to_microseconds(event_time_microseconds)
                 if event_time_int > max_event_time:
                     max_event_time = event_time_int
+
+                if is_cloud and server_node:
+                    self._track_node_checkpoint(str(server_node), event_time_int)
 
                 row_dict = {
                     'normalized_query_hash': str(normalized_query_hash),
