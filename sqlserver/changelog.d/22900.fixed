@@ -1,0 +1,1 @@
+Fix the documented config option `database_autodiscovery_interval` which was never read by the check. The option has been renamed to `autodiscovery_interval` to match the key the check actually reads.
