@@ -16,7 +16,7 @@ prefect.server.flow_runs.queue_wait_duration.95percentile,gauge,,second,,95th pe
 prefect.server.flow_runs.queue_wait_duration.avg,gauge,,second,,Average time spent waiting in the queue before the flow run actually started.,0,prefect,flow queue wait avg,,
 prefect.server.flow_runs.queue_wait_duration.count,gauge,,run,second,Count of flow run queue wait duration samples.,0,prefect,flow queue wait count,,
 prefect.server.flow_runs.queue_wait_duration.max,gauge,,second,,Maximum time spent waiting in the queue before the flow run actually started.,0,prefect,flow queue wait max,,
-prefect.server.flow_runs.queue_wait_duration.median,gauge,,second,,Median time spent waiting in the queue before the flow run actually started.,0,prefect,flow queue wait median,,
+prefect.server.flow_runs.queue_wait_duration.median,gauge,,second,,Median time a flow run spent waiting in the queue before starting.,0,prefect,flow queue wait median,,
 prefect.server.flow_runs.retry_gaps_duration.95percentile,gauge,,second,,95th percentile time gap between consecutive retries of the same flow run.,0,prefect,flow retry gap p95,,
 prefect.server.flow_runs.retry_gaps_duration.avg,gauge,,second,,Average time gap between consecutive retries of the same flow run.,0,prefect,flow retry gap avg,,
 prefect.server.flow_runs.retry_gaps_duration.count,gauge,,occurrence,second,Count of flow run retry gap samples.,0,prefect,flow retry gap count,,
