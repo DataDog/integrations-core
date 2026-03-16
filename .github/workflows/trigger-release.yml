@@ -2,6 +2,7 @@ name: Trigger Wheel Builds
 
 # Thin wrapper — all tagging and dispatch logic lives in dispatch-release.yml.
 # The pipeline can build wheels for any Python package in the repo.
+# Equivalent trigger workflows exist in integrations-extras and marketplace.
 
 on:
   push:

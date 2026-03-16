@@ -1,5 +1,8 @@
 name: Dispatch Release
 
+# Reusable workflow — intended to be called by a trigger-release workflow in an
+# integration repository (integrations-core, integrations-extras, marketplace).
+
 on:
   workflow_call:
     inputs:
