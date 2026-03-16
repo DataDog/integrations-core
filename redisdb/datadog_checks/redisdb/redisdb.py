@@ -384,7 +384,10 @@ class Redis(AgentCheck):
         for key, metric in CLUSTER_INFO_GAUGE_KEYS.items():
             value = cluster_info.get(key)
             if value is not None:
-                self.gauge(metric, int(value), tags=tags)
+                try:
+                    self.gauge(metric, int(value), tags=tags)
+                except ValueError:
+                    self.log.debug('Unable to parse cluster metric %s value: %s', key, value)
 
     def _check_slowlog(self):
         """Retrieve length and entries from Redis' SLOWLOG

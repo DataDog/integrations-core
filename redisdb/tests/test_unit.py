@@ -190,6 +190,7 @@ def test__check_cluster_info(check, aggregator, redis_instance, cluster_state, e
     }
     redis_check._check_cluster_info(conn, ['foo:bar'])
 
+    conn.cluster.assert_called_once_with('info')
     aggregator.assert_metric('redis.cluster.state', value=expected_state_value, count=1, tags=['foo:bar'])
     aggregator.assert_metric('redis.cluster.slots_assigned', value=16384, count=1, tags=['foo:bar'])
     aggregator.assert_metric('redis.cluster.slots_ok', value=16384, count=1, tags=['foo:bar'])
@@ -198,6 +199,7 @@ def test__check_cluster_info(check, aggregator, redis_instance, cluster_state, e
     aggregator.assert_metric('redis.cluster.known_nodes', value=6, count=1, tags=['foo:bar'])
     aggregator.assert_metric('redis.cluster.size', value=3, count=1, tags=['foo:bar'])
     aggregator.assert_metric('redis.cluster.current_epoch', value=6, count=1, tags=['foo:bar'])
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test__check_cluster_info_disabled(check, aggregator, redis_instance):
@@ -206,7 +208,29 @@ def test__check_cluster_info_disabled(check, aggregator, redis_instance):
     conn = mock.MagicMock()
     conn.cluster.side_effect = redis.ResponseError('ERR This instance has cluster support disabled')
     redis_check._check_cluster_info(conn, ['foo:bar'])
+    conn.cluster.assert_called_once_with('info')
     aggregator.assert_metric('redis.cluster.state', count=0)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test__check_cluster_info_invalid_value(check, aggregator, redis_instance):
+    redis_check = check(redis_instance)
+    conn = mock.MagicMock()
+    conn.cluster.return_value = {
+        'cluster_state': 'ok',
+        'cluster_slots_assigned': 'not_a_number',
+        'cluster_slots_ok': '16384',
+        'cluster_slots_pfail': '0',
+        'cluster_slots_fail': '0',
+        'cluster_known_nodes': '6',
+        'cluster_size': '3',
+        'cluster_current_epoch': '6',
+    }
+    redis_check._check_cluster_info(conn, ['foo:bar'])
+    conn.cluster.assert_called_once_with('info')
+    aggregator.assert_metric('redis.cluster.slots_assigned', count=0)
+    aggregator.assert_metric('redis.cluster.slots_ok', value=16384, count=1, tags=['foo:bar'])
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_info_command_fallback(check, redis_instance, caplog):
