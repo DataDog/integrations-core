@@ -40,7 +40,7 @@ def _missing_metrics_msg(expected, submitted):
     )
 
 
-def _build_payload(draw, metric_type, values, sample_suffix="", footer=""):
+def _build_payload_and_names(draw, metric_type, values, sample_suffix="", footer=""):
     names = draw(st.lists(metric_names, min_size=1, max_size=20, unique=True))
     lines = []
     for name in names:
@@ -55,7 +55,7 @@ def _build_payload(draw, metric_type, values, sample_suffix="", footer=""):
 
 
 @st.composite
-def gauge_payload(draw):
+def gauge_payload_and_names(draw):
     """Generate a gauge payload with unique metric names.
 
     Gauge syntax is identical in Prometheus text format and OpenMetrics format,
@@ -63,30 +63,30 @@ def gauge_payload(draw):
     formats use the gauge_format_params parametrize mark to inject the
     appropriate Content-Type header and EOF trailer.
     """
-    return _build_payload(draw, "gauge", metric_values)
+    return _build_payload_and_names(draw, "gauge", metric_values)
 
 
 @st.composite
-def prometheus_counter_payload(draw):
+def prometheus_counter_payload_and_names(draw):
     """Generate a Prometheus text format counter payload with unique metric names."""
-    return _build_payload(draw, "counter", counter_values)
+    return _build_payload_and_names(draw, "counter", counter_values)
 
 
 @st.composite
-def openmetrics_counter_payload(draw):
+def openmetrics_counter_payload_and_names(draw):
     """Generate an OpenMetrics-format counter payload with unique metric names.
 
     OpenMetrics counters use {name}_total as the sample line and require # EOF.
     The content-type header must be application/openmetrics-text to trigger the
     OpenMetrics parser instead of the Prometheus text parser.
     """
-    return _build_payload(draw, "counter", counter_values, sample_suffix="_total", footer="# EOF")
+    return _build_payload_and_names(draw, "counter", counter_values, sample_suffix="_total", footer="# EOF")
 
 
 @st.composite
 def gauge_payload_and_mapping(draw):
     """Generate a gauge payload with unique metric names and a subset mapping."""
-    payload, names = draw(gauge_payload())
+    payload, names = draw(gauge_payload_and_names())
     mapped = draw(st.lists(st.sampled_from(names), min_size=1, unique=True))
     return payload, names, mapped
 
@@ -94,15 +94,15 @@ def gauge_payload_and_mapping(draw):
 @st.composite
 def prometheus_counter_payload_and_mapping(draw):
     """Generate a Prometheus text format counter payload and a subset mapping."""
-    payload, names = draw(prometheus_counter_payload())
+    payload, names = draw(prometheus_counter_payload_and_names())
     mapped = draw(st.lists(st.sampled_from(names), min_size=1, unique=True))
     return payload, names, mapped
 
 
 @st.composite
-def openmetrics_counter_payload_and_mapping(draw):
+def openmetrics_counter_payload_and_names_and_mapping(draw):
     """Generate an OpenMetrics-format counter payload and a subset mapping."""
-    payload, names = draw(openmetrics_counter_payload())
+    payload, names = draw(openmetrics_counter_payload_and_names())
     mapped = draw(st.lists(st.sampled_from(names), min_size=1, unique=True))
     return payload, names, mapped
 
@@ -111,13 +111,13 @@ counter_format_params = pytest.mark.parametrize(
     "response_headers,counter_and_mapping",
     [
         pytest.param(PROMETHEUS_HEADERS, prometheus_counter_payload_and_mapping, id="prometheus"),
-        pytest.param(OPENMETRICS_HEADERS, openmetrics_counter_payload_and_mapping, id="openmetrics"),
+        pytest.param(OPENMETRICS_HEADERS, openmetrics_counter_payload_and_names_and_mapping, id="openmetrics"),
     ],
 )
 
 
 @format_params
-@given(data=gauge_payload())
+@given(data=gauge_payload_and_names())
 def test_wildcard_captures_all_gauges(aggregator, dd_run_check, mock_http_response, response_headers, eof, data):
     """A wildcard mapping submits every gauge present in the payload.
 
@@ -160,7 +160,7 @@ def test_gauge_submission_count_lower_bound(aggregator, dd_run_check, mock_http_
 
 
 @format_params
-@given(data=gauge_payload())
+@given(data=gauge_payload_and_names())
 def test_empty_mapping_submits_no_metrics(aggregator, dd_run_check, mock_http_response, response_headers, eof, data):
     """An empty metrics mapping results in no metric submissions.
 
@@ -179,7 +179,7 @@ def test_empty_mapping_submits_no_metrics(aggregator, dd_run_check, mock_http_re
     assert submitted == set(), f"Expected no metrics with empty mapping, got: {sorted(submitted)}"
 
 
-@given(data=prometheus_counter_payload())
+@given(data=prometheus_counter_payload_and_names())
 def test_prometheus_counter_submissions_are_suffixed_with_count(aggregator, dd_run_check, mock_http_response, data):
     """Each Prometheus text format counter is submitted with a '.count' suffix.
 
@@ -200,7 +200,7 @@ def test_prometheus_counter_submissions_are_suffixed_with_count(aggregator, dd_r
     assert expected <= submitted, _missing_metrics_msg(expected, submitted)
 
 
-@given(data=openmetrics_counter_payload())
+@given(data=openmetrics_counter_payload_and_names())
 def test_openmetrics_counter_submissions_are_suffixed_with_count(aggregator, dd_run_check, mock_http_response, data):
     """Each OpenMetrics-format counter is submitted with a '.count' suffix.
 
