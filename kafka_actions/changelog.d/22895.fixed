@@ -1,0 +1,1 @@
+Use the actual Kafka message timestamp instead of current time for message_timestamp in read_messages events.
