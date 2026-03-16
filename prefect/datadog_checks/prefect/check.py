@@ -15,10 +15,11 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import pattern_filter
 
 from .config_models import ConfigMixin
-from .constants import METRICS_SPEC
+from .metrics import METRICS_SPEC
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
+    from datadog_checks.base.utils.http import RequestsWrapper
 
 
 class PrefectCheck(AgentCheck, ConfigMixin):
@@ -46,9 +47,11 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         self.completed_flow_runs: set[str] = set()
 
     def _parse_config(self):
-        self.url = self.config.prefect_url.rstrip('/')
+        url = self.config.prefect_url.rstrip('/')
 
         self.http.options['headers'].update(self.config.custom_headers or {})
+
+        self.client = PrefectClient(url, self.http, self.log)
 
         self.base_tags = list(self.config.tags or [])
 
@@ -81,7 +84,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self.last_check_time = parsed_last_check
         else:
             self.log.warning("Last check time not found, setting to now - min_collection_interval")
-            self.last_check_time = datetime.now(timezone.utc) - timedelta(seconds=self.config.min_collection_interval)
+            self.last_check_time = _utcnow() - timedelta(seconds=self.config.min_collection_interval)
             self.last_check_time_iso = self.last_check_time.isoformat()
 
     def _set_up_filters(self):
@@ -98,71 +101,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             event_names=_to_dict(self.config.event_names),
         )
 
-    def api_get(self, endpoint: str, pagination: bool = False) -> Any:
-        url = f"{self.url}{endpoint}" if not pagination else endpoint
-        try:
-            response = self.http.get(url)
-            response.raise_for_status()
-            return response.json()
-        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
-            self.log.error("Error fetching from %s: %s", url, e)
-            raise
-
-    def api_post(self, endpoint: str, payload: dict | None = None) -> Any:
-        url = f"{self.url}{endpoint}"
-        try:
-            response = self.http.post(url, json=payload or {})
-            response.raise_for_status()
-            return response.json()
-        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError):
-            raise
-
-    def paginate_filter(self, endpoint: str, payload: dict | None = None) -> list[dict]:
-        """
-        Implements pagination for /filter endpoints using limit/offset loop.
-        """
-        payload = dict(payload) if payload else {}
-
-        limit = 200
-        offset = 0
-        all_results: list[dict] = []
-        try:
-            while True:
-                payload['limit'] = limit
-                payload['offset'] = offset
-                results = self.api_post(endpoint, payload)
-
-                all_results.extend(results if isinstance(results, list) else [results])
-                if len(results) < limit:
-                    break
-                offset += limit
-            return all_results
-
-        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
-            self.log.error("Could not collect %s: %s", endpoint, e)
-            return []
-
-    def paginate_events(self, endpoint: str, payload: dict | None = None) -> list[dict]:
-        if payload is None:
-            payload = {}
-
-        events = []
-        try:
-            response = self.api_post(endpoint, payload)
-
-            while True:
-                events.extend(response.get("events", []))
-                if not response.get("next_page"):
-                    break
-
-                response = self.api_get(response.get("next_page"), pagination=True)
-            return events
-
-        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
-            self.log.error("Could not collect events: %s", e)
-            return []
-
-    def _emit_metric(self, name: str, value: float, tags: list[str]):
+    def _clean_and_emit_metric(self, name: str, value: float, tags: list[str]):
         """
         Internal helper to collect metrics.
         """
@@ -196,7 +135,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         self.collected_metrics[key] = self.collected_metrics.get(key, 0) + value
 
     def check(self, _):
-        now = datetime.now(timezone.utc)
+        now = _utcnow()
         now_iso = now.isoformat()
 
         self.collected_metrics = {}
@@ -205,49 +144,44 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         self.deployments_by_id = {}
 
         try:
-            self.set_metadata('version', self.api_get("/version"))
-        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
+            self.set_metadata('version', self.client.get("/version"))
+        except self.client.http_exceptions as e:
             self.log.error("Failed to retrieve Prefect version: %s", e)
 
         # Flows that complete in this run of the check so that they are removed from the
         # flow_runs_tags cache after task runs are collected
         self.completed_flow_runs = set()
+        try:
+            self._collect_api_status_metrics()
 
-        # 1. API Status
-        self._collect_api_status_metrics()
+            self._collect_work_pool_metrics(now)
 
-        # 2. Work Pools
-        self._collect_work_pool_metrics(now)
+            self._collect_work_queue_metrics(now)
 
-        # 3. Work Queues
-        self._collect_work_queue_metrics(now)
+            self._collect_deployment_metrics()
 
-        # 5. Deployments
-        self._collect_deployment_metrics()
+            self._collect_flow_run_metrics(now_iso, now)
 
-        # 6. Flow Runs (depends on work queues and deployments)
-        self._collect_flow_run_metrics(now_iso, now)
+            self._collect_queue_aggregated_metrics(now)
 
-        # 7. Queue Backlog (depends on work queues and flow runs)
-        self._collect_queue_aggregated_metrics(now)
+            self._collect_task_run_metrics(now_iso)
 
-        # 8. Task Runs (depends on flow runs)
-        self._collect_task_run_metrics(now_iso)
+            self._collect_event_metrics(now_iso)
 
-        # 9. Events
-        self._collect_event_metrics(now_iso)
+            self._emit_aggregated_metrics()
+        finally:
+            self._clean_cache()
 
-        self._emit_aggregated_metrics()
+            self.last_check_time_iso = now_iso
+            self.last_check_time = now
 
-        self._clean_cache()
-
-        self.last_check_time_iso = now_iso
-        self.last_check_time = now
-
-        self.write_persistent_cache(self.LAST_CHECK_TIME_CACHE_KEY, now_iso)
-        self.write_persistent_cache(self.DEPENDENCY_WAIT_KEY, json.dumps(self.dependency_wait))
-        self.write_persistent_cache(self.FLOWS_AWAITING_RETRY_KEY, json.dumps(self.flows_awaiting_retry))
-        self.write_persistent_cache(self.FLOW_RUNS_TAGS_KEY, json.dumps(self.flow_runs_tags))
+            for key, value in (
+                (self.LAST_CHECK_TIME_CACHE_KEY, now_iso),
+                (self.DEPENDENCY_WAIT_KEY, json.dumps(self.dependency_wait)),
+                (self.FLOWS_AWAITING_RETRY_KEY, json.dumps(self.flows_awaiting_retry)),
+                (self.FLOW_RUNS_TAGS_KEY, json.dumps(self.flow_runs_tags)),
+            ):
+                self.write_persistent_cache(key, value)
 
     def _clean_cache(self):
         self.flow_runs_tags = {k: v for k, v in self.flow_runs_tags.items() if k not in self.completed_flow_runs}
@@ -257,25 +191,25 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         Collects api.info, ready, and health metrics.
         """
         try:
-            health = self.api_get("/health")
-            self._emit_metric("health", 1.0 if health is True else 0.0, [])
-        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
+            health = self.client.get("/health")
+            self._clean_and_emit_metric("health", 1.0 if health is True else 0.0, [])
+        except self.client.http_exceptions as e:
             self.log.error("Failed to retrieve Prefect health status: %s", e)
-            self._emit_metric("health", 0.0, [])
+            self._clean_and_emit_metric("health", 0.0, [])
 
         try:
-            self.api_get("/ready")
-            self._emit_metric("ready", 1.0, [])
-        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError) as e:
+            self.client.get("/ready")
+            self._clean_and_emit_metric("ready", 1.0, [])
+        except self.client.http_exceptions as e:
             self.log.error("Failed to retrieve Prefect ready status: %s", e)
-            self._emit_metric("ready", 0.0, [])
+            self._clean_and_emit_metric("ready", 0.0, [])
 
     def _collect_work_pool_metrics(self, now: datetime):
         """
         Collects work_pool.is_ready, is_not_ready, and is_paused metrics.
         """
 
-        pools = self.paginate_filter("/work_pools/filter")
+        pools = self.client.paginate_filter("/work_pools/filter")
         pools = self.filter_metrics.filter_work_pools(pools)
 
         for p in pools:
@@ -288,14 +222,14 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             ]
             status = p.get('status', '')
             self.pools_by_name[pname] = {'id': pid}
-            self._emit_metric("work_pool.is_ready", 1.0 if status == 'READY' else 0.0, ptags)
-            self._emit_metric("work_pool.is_not_ready", 1.0 if status == 'NOT_READY' else 0.0, ptags)
-            self._emit_metric("work_pool.is_paused", 1.0 if status == 'PAUSED' else 0.0, ptags)
+            self._clean_and_emit_metric("work_pool.is_ready", 1.0 if status == 'READY' else 0.0, ptags)
+            self._clean_and_emit_metric("work_pool.is_not_ready", 1.0 if status == 'NOT_READY' else 0.0, ptags)
+            self._clean_and_emit_metric("work_pool.is_paused", 1.0 if status == 'PAUSED' else 0.0, ptags)
 
             self._collect_worker_metrics(now, p)
 
     def _collect_work_queue_metrics(self, now: datetime):
-        queues = self.paginate_filter("/work_queues/filter")
+        queues = self.client.paginate_filter("/work_queues/filter")
         queues = self.filter_metrics.filter_work_queues(queues)
 
         for q in queues:
@@ -314,9 +248,9 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             status = q.get('status', None)
             qtags_status = qtags + [f"work_queue_status:{status}"]
 
-            self._emit_metric("work_queue.is_ready", 1.0 if status == 'READY' else 0.0, qtags)
-            self._emit_metric("work_queue.is_not_ready", 1.0 if status == 'NOT_READY' else 0.0, qtags)
-            self._emit_metric("work_queue.is_paused", 1.0 if status == 'PAUSED' else 0.0, qtags)
+            self._clean_and_emit_metric("work_queue.is_ready", 1.0 if status == 'READY' else 0.0, qtags)
+            self._clean_and_emit_metric("work_queue.is_not_ready", 1.0 if status == 'NOT_READY' else 0.0, qtags)
+            self._clean_and_emit_metric("work_queue.is_paused", 1.0 if status == 'PAUSED' else 0.0, qtags)
 
             self._add_queue_last_polled_age_seconds(q, now, qtags_status)
 
@@ -330,7 +264,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
     def _collect_worker_metrics(self, now: datetime, pool: dict):
         pname = pool['name']
 
-        workers = self.paginate_filter(f"/work_pools/{pname}/workers/filter")
+        workers = self.client.paginate_filter(f"/work_pools/{pname}/workers/filter")
         for w in workers:
             wtags = [
                 f"work_pool_id:{pool.get('id', '')}",
@@ -339,11 +273,13 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 f"worker_name:{w.get('name', '')}",
             ]
 
-            self._emit_metric("work_pool.worker.is_online", 1.0 if w.get('status') == 'ONLINE' else 0.0, wtags)
+            self._clean_and_emit_metric(
+                "work_pool.worker.is_online", 1.0 if w.get('status') == 'ONLINE' else 0.0, wtags
+            )
             self._add_worker_heartbeat_age_seconds(w, now, wtags)
 
     def _collect_deployment_metrics(self):
-        deployments = self.paginate_filter("/deployments/filter")
+        deployments = self.client.paginate_filter("/deployments/filter")
         deployments = self.filter_metrics.filter_deployments(deployments)
 
         for d in deployments:
@@ -362,7 +298,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 f"is_paused:{d.get('paused', '')}",
             ]
 
-            self._emit_metric("deployment.is_ready", 1.0 if d['status'] == 'READY' else 0.0, dtags)
+            self._clean_and_emit_metric("deployment.is_ready", 1.0 if d['status'] == 'READY' else 0.0, dtags)
             self.deployments_by_id[d.get('id', '')] = d.get('name', '')
 
     def _get_runs(self, type: Literal["flow_runs", "task_runs"], now_iso: str) -> list[dict]:
@@ -377,11 +313,11 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         # task runs don't have an end_time filter
         if type == "flow_runs":
             payload[type]["end_time"] = {"after_": self.last_check_time_iso, "before_": now_iso}
-        runs = self.paginate_filter(f"/{type}/filter", payload)
+        runs = self.client.paginate_filter(f"/{type}/filter", payload)
         runs = (
-            self.filter_metrics.filter_flow_runs(runs)
+            self.filter_metrics.filter_flow_runs(runs, self.deployments_by_id)
             if type == "flow_runs"
-            else self.filter_metrics.filter_task_runs(runs)
+            else self.filter_metrics.filter_task_runs(runs, self.flow_runs_tags)
         )
 
         return runs
@@ -437,7 +373,9 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self._aggregate_metric("flow_runs.running", 1.0 if state_type == 'RUNNING' else 0.0, fr_tags)
 
             if start_time and end_time:
-                self._emit_metric("flow_runs.execution_duration", (end_time - start_time).total_seconds(), fr_tags)
+                self._clean_and_emit_metric(
+                    "flow_runs.execution_duration", (end_time - start_time).total_seconds(), fr_tags
+                )
 
             self._aggregate_metric(
                 "flow_runs.late_start.count",
@@ -451,7 +389,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             )
 
             if start_time and expected_start_time and start_time >= self.last_check_time:
-                self._emit_metric(
+                self._clean_and_emit_metric(
                     "flow_runs.queue_wait_duration", max(0, (start_time - expected_start_time).total_seconds()), fr_tags
                 )
                 self._aggregate_metric("flow_runs.throughput", 1.0, fr_tags)
@@ -465,11 +403,11 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             backlog_oldest = q.get('backlog_oldest')
             age = (now - backlog_oldest).total_seconds() if backlog_oldest is not None else 0.0
 
-            self._emit_metric("work_queue.backlog.age", max(0, age), qtags)
-            self._emit_metric("work_queue.backlog.size", q.get('backlog_count', 0.0), qtags)
+            self._clean_and_emit_metric("work_queue.backlog.age", max(0, age), qtags)
+            self._clean_and_emit_metric("work_queue.backlog.size", q.get('backlog_count', 0.0), qtags)
             concurrency_limit = q.get('concurrency_limit', 0.0)
             if concurrency_limit > 0:
-                self._emit_metric(
+                self._clean_and_emit_metric(
                     "work_queue.concurrency.in_use", q.get('concurrency_in_use', 0.0) / concurrency_limit, qtags
                 )
 
@@ -513,7 +451,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             )
 
     def _collect_event_metrics(self, now_iso: str):
-        events = self.paginate_events(
+        events = self.client.paginate_events(
             "/events/filter",
             payload={
                 "filter": {
@@ -580,7 +518,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             retry_gap = (event.occurred - await_retry_timestamp).total_seconds()
 
             flow_run_tags = event.flow_tags
-            self._emit_metric("flow_runs.retry_gaps_duration", retry_gap, flow_run_tags + self.base_tags)
+            self._clean_and_emit_metric("flow_runs.retry_gaps_duration", retry_gap, flow_run_tags + self.base_tags)
 
     def _collect_task_run_metrics_from_events(self, event: Event) -> None:
         """
@@ -604,7 +542,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         duration = task_run_data.get('total_run_time', None)
 
         if duration:
-            self._emit_metric("task_runs.execution_duration", duration, task_tags)
+            self._clean_and_emit_metric("task_runs.execution_duration", duration, task_tags)
 
     def _check_dependency_wait(self, event: Event) -> None:
         if event.event_type == 'prefect.flow-run.Completed':
@@ -641,7 +579,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
                 task_tags = event.task_tags
                 if last_dep_finished and event.occurred:
-                    self._emit_metric(
+                    self._clean_and_emit_metric(
                         "task_runs.dependency_wait_duration",
                         (event.occurred - last_dep_finished).total_seconds(),
                         task_tags + self.base_tags,
@@ -656,13 +594,13 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         Emits metrics that needed to be aggregated.
         """
         for (name, tags), val in self.collected_metrics.items():
-            self._emit_metric(name, val, list(tags))
+            self._clean_and_emit_metric(name, val, list(tags))
 
     def _add_queue_last_polled_age_seconds(self, queue: dict, now: datetime, tags: list[str]):
         last_polled = _parse_time(queue.get('last_polled'), self.log)
         if last_polled:
             age = (now - last_polled).total_seconds()
-            self._emit_metric("work_queue.last_polled_age_seconds", max(0, age), tags)
+            self._clean_and_emit_metric("work_queue.last_polled_age_seconds", max(0, age), tags)
         else:
             self.log.error(
                 "Could not parse last polled time %s for queue %s, skipping queue last polled age metric",
@@ -674,7 +612,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         last_heartbeat = _parse_time(worker.get('last_heartbeat_time'), self.log)
         if last_heartbeat:
             age = (now - last_heartbeat).total_seconds()
-            self._emit_metric("work_pool.worker.heartbeat_age_seconds", max(0, age), tags)
+            self._clean_and_emit_metric("work_pool.worker.heartbeat_age_seconds", max(0, age), tags)
         else:
             self.log.error(
                 "Could not parse last heartbeat time %s for worker %s, skipping worker heartbeat age metric",
@@ -714,49 +652,78 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             queue['concurrency_in_use'] = queue.get('concurrency_in_use', 0) + 1
 
 
-class Fallback:
-    def __init__(
-        self, key: str, value: str, custom_key: str, log: CheckLoggingAdapter, resolver: Fallback | None = None
-    ):
-        '''
-        e.g Flow runs don't contain deployment_name, only id. So we use the deployment_id to lookup the deployment_name.
-        - key is the name of the key used to lookup the value in the original obj. e.g deployment_id in deployments
-          is "id"
-        - value is the name of the key that contains the value in the original obj. e.g deployment_name in deployments
-          is "name"
-        - custom_key is the name of the key in the object that needs remapping. e.g deployment_id in flow runs
+class PrefectClient:
+    """HTTP client wrapping GET/POST requests and pagination for the Prefect API."""
 
-        e.g Task runs don't contain deployment_name, only information on the flow run. So we use the flow_run info to
-        lookup the deployment_name.
-        - key is the name of the key in the intermediate object. e.g flow_run_id in flow_runs is "id"
-        - value is the name of the key that contains the value in the intermediate object. e.g deployment_id in flow
-          runs is "deployment_id"
-        - custom_key is the name of the key in the object that needs remapping. e.g flow_run_id in task runs
-        - resolver is the fallback to resolve the value through. e.g self.deployment_fallback to parse deployment_id
-          to deployment_name
-        '''
-        self.key = key  # which field to use as the mapping key e.g. "id"
-        self.custom_key = custom_key  # which field to use for lookup e.g. "flow_run_id"
-        self.value = value  # which field to use as the mapping value e.g. "name"
-        self.resolver = resolver  # optional fallback to resolve the value through
-        self.mappings: dict[str, str] = {}
+    def __init__(self, url: str, http: RequestsWrapper, log: CheckLoggingAdapter):
+        self.http_exceptions = (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError)
+        self.url = url
+        self.http = http
         self.log = log
 
-    def add_mapping(self, element: dict[str, str]):
-        raw_value = element[self.value]
-        if raw_value is None:
-            self.log.debug("Value is None for key %s and value %s", self.key, self.value)
-            return
-        if self.resolver:
-            raw_value = self.resolver.mappings.get(raw_value, raw_value)
-        mapping_key = element[self.key]
-        if mapping_key is None:
-            self.log.debug("Mapping key is None for key %s and value %s", self.key, self.value)
-            return
-        self.mappings[mapping_key] = raw_value
+    def get(self, endpoint: str, pagination: bool = False) -> Any:
+        url = f"{self.url}{endpoint}" if not pagination else endpoint
+        try:
+            response = self.http.get(url)
+            response.raise_for_status()
+            return response.json()
+        except self.http_exceptions as e:
+            self.log.error("Error fetching from %s: %s", url, e)
+            raise
 
-    def get(self, element: dict[str, str]) -> str | None:
-        return self.mappings.get(element.get(self.custom_key, ''))
+    def post(self, endpoint: str, payload: dict | None = None) -> Any:
+        url = f"{self.url}{endpoint}"
+        try:
+            response = self.http.post(url, json=payload or {})
+            response.raise_for_status()
+            return response.json()
+        except self.http_exceptions:
+            raise
+
+    def paginate_filter(self, endpoint: str, payload: dict | None = None) -> list[dict]:
+        """Implements pagination for /filter endpoints using limit/offset loop."""
+        payload = dict(payload) if payload else {}
+
+        limit = 200
+        offset = 0
+        all_results: list[dict] = []
+        while True:
+            payload['limit'] = limit
+            payload['offset'] = offset
+            try:
+                results = self.post(endpoint, payload)
+            except self.http_exceptions as e:
+                self.log.error("Could not collect %s: %s", endpoint, e)
+                return all_results
+
+            all_results.extend(results if isinstance(results, list) else [results])
+            if len(results) < limit:
+                break
+            offset += limit
+        return all_results
+
+    def paginate_events(self, endpoint: str, payload: dict | None = None) -> list[dict]:
+        if payload is None:
+            payload = {}
+
+        events: list[dict] = []
+        try:
+            response = self.post(endpoint, payload)
+        except self.http_exceptions as e:
+            self.log.error("Could not collect events: %s", e)
+            return events
+
+        while True:
+            events.extend(response.get("events", []))
+            if not response.get("next_page"):
+                break
+
+            try:
+                response = self.get(response.get("next_page"), pagination=True)
+            except self.http_exceptions as e:
+                self.log.error("Could not collect next page of events: %s", e)
+                return events
+        return events
 
 
 class PrefectFilterMetrics:
@@ -781,14 +748,6 @@ class PrefectFilterMetrics:
         self.flow_run_cache: dict[str, bool] = {}
         self.task_run_cache: dict[str, bool] = {}
         self.event_cache: dict[str, bool] = {}
-
-        self.deployment_fallback = Fallback("id", "name", "deployment_id", log)
-        self.flow_run_fallback = Fallback("id", "flow_name", "flow_run_id", log)
-        self.flow_run_to_work_pool_fallback = Fallback("id", "work_pool_name", "flow_run_id", log)
-        self.flow_run_to_queue_fallback = Fallback("id", "work_queue_name", "flow_run_id", log)
-        self.flow_run_to_deployment_fallback = Fallback(
-            "id", "deployment_id", "flow_run_id", log, resolver=self.deployment_fallback
-        )
 
     def filter_work_pools(self, work_pools: list[dict[str, str]]) -> list[dict[str, str]]:
         return self._filter_metric(
@@ -816,39 +775,45 @@ class PrefectFilterMetrics:
                 "work_queue_name": (self.work_queue_cache, False, None),
                 "name": (self.deployment_cache, True, None),
             },
-            [self.deployment_fallback],
         )
 
-    def filter_flow_runs(self, flow_runs: list[dict[str, str]]) -> list[dict[str, str]]:
+    def filter_flow_runs(
+        self, flow_runs: list[dict[str, str]], deployments_by_id: dict[str, str]
+    ) -> list[dict[str, str]]:
         return self._filter_metric(
             None,
             flow_runs,
             {
                 "work_pool_name": (self.work_pool_cache, False, None),
                 "work_queue_name": (self.work_queue_cache, False, None),
-                "deployment_name": (self.deployment_cache, False, self.deployment_fallback),
+                "deployment_name": (
+                    self.deployment_cache,
+                    False,
+                    lambda e: deployments_by_id.get(e.get('deployment_id', '')),
+                ),
             },
-            [
-                self.flow_run_to_deployment_fallback,
-                self.flow_run_to_work_pool_fallback,
-                self.flow_run_to_queue_fallback,
-            ],
         )
 
-    def filter_task_runs(self, task_runs: list[dict[str, str]]) -> list[dict[str, str]]:
+    def filter_task_runs(self, task_runs: list[dict[str, str]], flow_runs_tags: dict[str, Any]) -> list[dict[str, str]]:
+        def _resolve_from_tags(element: dict[str, str], prefix: str) -> str | None:
+            for tag in flow_runs_tags.get(element.get('flow_run_id', ''), ()):
+                if tag.startswith(f"{prefix}:"):
+                    return tag[len(prefix) + 1 :]
+            return None
+
         return self._filter_metric(
             None,
             task_runs,
             {
-                "work_pool_name": (self.work_pool_cache, False, self.flow_run_to_work_pool_fallback),
-                "work_queue_name": (self.work_queue_cache, False, self.flow_run_to_queue_fallback),
-                "deployment_name": (self.deployment_cache, False, self.flow_run_to_deployment_fallback),
+                "work_pool_name": (self.work_pool_cache, False, lambda e: _resolve_from_tags(e, "work_pool_name")),
+                "work_queue_name": (self.work_queue_cache, False, lambda e: _resolve_from_tags(e, "work_queue_name")),
+                "deployment_name": (self.deployment_cache, False, lambda e: _resolve_from_tags(e, "deployment_name")),
             },
         )
 
     def is_event_included(self, event: Event) -> bool:
         fields: dict[str, str] = {}
-        caches: dict[str, tuple[dict[str, bool], bool, Fallback | None]] = {}
+        caches: dict[str, tuple] = {}
         fields["event_type"] = event.event_type
         caches["event_type"] = (self.event_cache, True, None)
         work_pool_name = event.event_related.get("work-pool", {}).get("name")
@@ -876,23 +841,19 @@ class PrefectFilterMetrics:
         self,
         list_of_patterns: dict[str, list[str]] | None,
         list_to_filter_metric: list[dict[str, str]],
-        caches: dict[str, tuple[dict[str, bool], bool, Fallback | None]],
-        fallback_to_write: list[Fallback] | None = None,
+        caches: dict[str, tuple],
     ) -> list[dict[str, str]]:
         result = []
 
         for e in list_to_filter_metric:
-            for fallback in fallback_to_write or []:
-                fallback.add_mapping(e)
-
-            for field, (cache, check_pattern, fallback_to_use) in caches.items():
+            for field, (cache, check_pattern, resolver) in caches.items():
                 value = None
                 if field in e:
                     value = e.get(field)
-                elif fallback_to_use:
-                    value = fallback_to_use.get(e)
+                elif resolver:
+                    value = resolver(e)
                 else:
-                    self.log.debug("Including event because no fallback or field found for %s", field)
+                    self.log.debug("Including event because no resolver or field found for %s", field)
 
                 if value is not None and value not in cache and check_pattern:
                     if list_of_patterns:
@@ -1054,6 +1015,10 @@ class Event:
             return "error"
         else:
             return "info"
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 def _parse_time(ts: str | None, log: CheckLoggingAdapter | None = None) -> datetime | None:

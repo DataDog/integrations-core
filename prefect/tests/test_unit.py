@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Callable
+from typing import Callable, NamedTuple
 
 import pytest
 
@@ -7,7 +7,6 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.prefect import PrefectCheck
 from datadog_checks.prefect.check import Event, PrefectFilterMetrics
-from tests.helpers import MockDatetime
 
 WP1_TAGS = ["work_pool_id:wp-1", "work_pool_name:default-pool", "work_pool_type:process"]
 WP2_TAGS = ["work_pool_id:wp-2", "work_pool_name:paused-pool", "work_pool_type:docker"]
@@ -185,12 +184,22 @@ ALL_METRIC_CASES = [
 ]
 
 
+class EventCase(NamedTuple):
+    msg_text: str
+    exact_match: bool
+    msg_title: str
+    event_type: str
+    alert_type: str
+
+
 pytestmark = [pytest.mark.usefixtures("mock_http_responses"), pytest.mark.unit]
 
 
 @pytest.fixture()
 def ready_check(check: PrefectCheck, dd_run_check: Callable, aggregator, mocker) -> PrefectCheck:
-    mocker.patch("datadog_checks.prefect.check.datetime", MockDatetime)
+    mocker.patch(
+        "datadog_checks.prefect.check._utcnow", return_value=datetime(2026, 1, 20, 15, 2, 0, tzinfo=timezone.utc)
+    )
     mocker.patch.object(check, '_get_last_check_time')
 
     check.last_check_time_iso = "2026-01-20T15:00:00Z"
@@ -230,76 +239,79 @@ def test_assert_metrics(ready_check: PrefectCheck, aggregator: AggregatorStub):
 
 
 @pytest.mark.parametrize(
-    "msg_text, exact_match, msg_title, event_type, alert_type",
+    "case",
     [
         pytest.param(
-            "flow-run went from Late to Pending\n"
-            "Resource ID: fr-completed\nResource Name: fr-completed\nRun count: 1\n",
-            True,
-            "[PREFECT] [flow-run] fr-completed -> Pending",
-            "prefect.flow-run.Pending",
-            "info",
+            EventCase(
+                msg_text="flow-run went from Late to Pending\n"
+                "Resource ID: fr-completed\nResource Name: fr-completed\nRun count: 1\n",
+                exact_match=True,
+                msg_title="[PREFECT] [flow-run] fr-completed -> Pending",
+                event_type="prefect.flow-run.Pending",
+                alert_type="info",
+            ),
             id="flow-run-pending",
         ),
         pytest.param(
-            "task-run went from Running to Completed\nResource ID: tr-1\nResource Name: task-1\nRun count: 1\n",
-            True,
-            "[PREFECT] [task-run] task-1 -> Completed",
-            "prefect.task-run.Completed",
-            "info",
+            EventCase(
+                msg_text="task-run went from Running to Completed\n"
+                "Resource ID: tr-1\nResource Name: task-1\nRun count: 1\n",
+                exact_match=True,
+                msg_title="[PREFECT] [task-run] task-1 -> Completed",
+                event_type="prefect.task-run.Completed",
+                alert_type="info",
+            ),
             id="task-run-completed",
         ),
         pytest.param(
-            "worker.process ProcessWorker worker-1 with id worker-1 executed-flow-run\n",
-            False,
-            "[PREFECT] [worker.process] ProcessWorker worker-1 -> executed-flow-run",
-            "prefect.worker.executed-flow-run",
-            "info",
+            EventCase(
+                msg_text="worker.process ProcessWorker worker-1 with id worker-1 executed-flow-run\n",
+                exact_match=False,
+                msg_title="[PREFECT] [worker.process] ProcessWorker worker-1 -> executed-flow-run",
+                event_type="prefect.worker.executed-flow-run",
+                alert_type="info",
+            ),
             id="worker-executed-flow-run",
         ),
         pytest.param(
-            "flow-run went from Running to AwaitingRetry\n"
-            "Resource ID: fr-retry\n"
-            "Resource Name: fr-retry\n"
-            "Run count: 1\n"
-            "Message: Retry scheduled\n",
-            True,
-            "[PREFECT] [flow-run] fr-retry -> AwaitingRetry",
-            "prefect.flow-run.AwaitingRetry",
-            "error",
+            EventCase(
+                msg_text="flow-run went from Running to AwaitingRetry\n"
+                "Resource ID: fr-retry\n"
+                "Resource Name: fr-retry\n"
+                "Run count: 1\n"
+                "Message: Retry scheduled\n",
+                exact_match=True,
+                msg_title="[PREFECT] [flow-run] fr-retry -> AwaitingRetry",
+                event_type="prefect.flow-run.AwaitingRetry",
+                alert_type="error",
+            ),
             id="flow-run-awaiting-retry",
         ),
         pytest.param(
-            "work-pool not-ready-pool with id wp-3 not-ready\n",
-            False,
-            "[PREFECT] [work-pool] not-ready-pool -> not-ready",
-            "prefect.work-pool.not-ready",
-            "error",
+            EventCase(
+                msg_text="work-pool not-ready-pool with id wp-3 not-ready\n",
+                exact_match=False,
+                msg_title="[PREFECT] [work-pool] not-ready-pool -> not-ready",
+                event_type="prefect.work-pool.not-ready",
+                alert_type="error",
+            ),
             id="work-pool-not-ready-error",
         ),
     ],
 )
-def test_events(
-    ready_check: PrefectCheck,
-    aggregator: AggregatorStub,
-    msg_text: str,
-    exact_match: bool,
-    msg_title: str,
-    event_type: str,
-    alert_type: str,
-):
+def test_events(ready_check: PrefectCheck, aggregator: AggregatorStub, case: EventCase):
     aggregator.assert_event(
-        msg_text,
-        exact_match=exact_match,
+        case.msg_text,
+        exact_match=case.exact_match,
         count=1,
-        msg_title=msg_title,
-        event_type=event_type,
-        alert_type=alert_type,
+        msg_title=case.msg_title,
+        event_type=case.event_type,
+        alert_type=case.alert_type,
     )
 
 
 def test_filter_work_pools(filter_metrics):
-    """Test work pool filtering with whitelist/blacklist."""
+    """Include/exclude patterns on pool names select only matching pools and cache."""
     work_pools = [
         {"id": "pool1", "name": "production-pool"},
         {"id": "pool2", "name": "production-pool-2"},
@@ -307,8 +319,10 @@ def test_filter_work_pools(filter_metrics):
         {"id": "pool4", "name": "dev-pool"},
     ]
     filtered_pools = filter_metrics.filter_work_pools(work_pools)
-    assert len(filtered_pools) == 2
-    assert all(pool["name"] in ["production-pool", "production-pool-2"] for pool in filtered_pools)
+    assert filtered_pools == [
+        {"id": "pool1", "name": "production-pool"},
+        {"id": "pool2", "name": "production-pool-2"},
+    ]
 
     # Verify cache was populated
     assert filter_metrics.work_pool_cache["production-pool"] is True
@@ -318,15 +332,16 @@ def test_filter_work_pools(filter_metrics):
 
 
 def test_filter_work_queues(filter_metrics):
-    """Test work queue filtering (depends on work pool cache)."""
+    """Queues must match the name pattern AND belong to an included work pool."""
     work_queues = [
         {"id": "queue1", "name": "high-priority", "work_pool_name": "production-pool"},
         {"id": "queue2", "name": "low-priority", "work_pool_name": "production-pool"},
         {"id": "queue3", "name": "high-priority-2", "work_pool_name": "staging-pool"},
     ]
     filtered_queues = filter_metrics.filter_work_queues(work_queues)
-    assert len(filtered_queues) == 1
-    assert filtered_queues[0]["name"] == "high-priority"
+    assert filtered_queues == [
+        {"id": "queue1", "name": "high-priority", "work_pool_name": "production-pool"},
+    ]
 
     # Verify cache was populated
     assert filter_metrics.work_queue_cache["high-priority"] is True
@@ -334,7 +349,7 @@ def test_filter_work_queues(filter_metrics):
 
 
 def test_filter_deployments(filter_metrics):
-    """Test deployment filtering (depends on work pool and work queue caches)."""
+    """Deployments must match the name pattern AND belong to an included pool and queue."""
     deployments = [
         {
             "id": "dep1",
@@ -356,115 +371,27 @@ def test_filter_deployments(filter_metrics):
         },
     ]
     filtered_deployments = filter_metrics.filter_deployments(deployments)
-    assert len(filtered_deployments) == 1
-    assert filtered_deployments[0]["name"] == "api-deployment"
+    assert filtered_deployments == [
+        {
+            "id": "dep1",
+            "name": "api-deployment",
+            "work_pool_name": "production-pool",
+            "work_queue_name": "high-priority",
+        },
+    ]
 
     # Verify cache was populated
     assert filter_metrics.deployment_cache["api-deployment"] is True
     assert filter_metrics.deployment_cache["worker-deployment"] is False  # Not whitelisted
 
-    # Verify fallback mapping was created
-    assert filter_metrics.deployment_fallback.mappings["dep1"] == "api-deployment"
-    assert filter_metrics.deployment_fallback.mappings["dep2"] == "worker-deployment"
-    assert filter_metrics.deployment_fallback.mappings["dep3"] == "api-deployment-2"
-
 
 def test_filter_flow_runs(filter_metrics):
-    """Test flow run filtering (uses deployment_id fallback to check deployment_name)."""
-    # First, populate deployment fallback mappings
-    filter_metrics.filter_deployments(
-        [
-            {
-                "id": "dep1",
-                "name": "api-deployment",
-                "work_pool_name": "production-pool",
-                "work_queue_name": "high-priority",
-            },
-            {
-                "id": "dep2",
-                "name": "worker-deployment",
-                "work_pool_name": "production-pool",
-                "work_queue_name": "high-priority",
-            },
-            {
-                "id": "dep3",
-                "name": "api-deployment-2",
-                "work_pool_name": "staging-pool",
-                "work_queue_name": "high-priority-2",
-            },
-        ]
-    )
-
-    flow_runs = [
-        {
-            "id": "fr1",
-            "name": "scheduled-flow",
-            "work_pool_name": "production-pool",
-            "work_queue_name": "high-priority",
-            "deployment_id": "dep1",  # Maps to "api-deployment" via fallback
-        },
-        {
-            "id": "fr2",
-            "name": "manual-flow",
-            "work_pool_name": "staging-pool",
-            "work_queue_name": "high-priority-2",
-            "deployment_id": "dep1",  # Maps to "api-deployment" via fallback
-        },
-        {
-            "id": "fr3",
-            "name": "scheduled-flow-2",
-            "work_pool_name": "production-pool",
-            "work_queue_name": "low-priority",
-            "deployment_id": "dep2",  # Maps to "worker-deployment" via fallback (filtered out)
-        },
-        {
-            "id": "fr4",
-            "name": "scheduled-flow-3",
-            "work_pool_name": "staging-pool",
-            "work_queue_name": "high-priority-2",
-            "deployment_id": "dep3",  # Maps to "api-deployment-2" via fallback (filtered out)
-        },
-    ]
-    filtered_flow_runs = filter_metrics.filter_flow_runs(flow_runs)
-    assert len(filtered_flow_runs) == 1
-    assert filtered_flow_runs[0]["name"] == "scheduled-flow"
-
-    # Verify that the flow run to fallback mappings were created properly
-    assert filter_metrics.flow_run_to_deployment_fallback.mappings["fr1"] == "api-deployment"
-    assert filter_metrics.flow_run_to_deployment_fallback.mappings["fr2"] == "api-deployment"
-    assert filter_metrics.flow_run_to_deployment_fallback.mappings["fr3"] == "worker-deployment"
-
-    # Verify work pool and work queue fallback mappings
-    assert filter_metrics.flow_run_to_work_pool_fallback.mappings["fr1"] == "production-pool"
-    assert filter_metrics.flow_run_to_work_pool_fallback.mappings["fr2"] == "staging-pool"
-    assert filter_metrics.flow_run_to_work_pool_fallback.mappings["fr3"] == "production-pool"
-    assert filter_metrics.flow_run_to_work_pool_fallback.mappings["fr4"] == "staging-pool"
-
-    assert filter_metrics.flow_run_to_queue_fallback.mappings["fr1"] == "high-priority"
-    assert filter_metrics.flow_run_to_queue_fallback.mappings["fr2"] == "high-priority-2"
-    assert filter_metrics.flow_run_to_queue_fallback.mappings["fr3"] == "low-priority"
-    assert filter_metrics.flow_run_to_queue_fallback.mappings["fr4"] == "high-priority-2"
-
-
-def test_filter_task_runs(filter_metrics):
-    """Test task run filtering (uses flow_run_id fallback to check flow_run_cache)."""
-    # First, populate flow run cache and fallback mappings
-    filter_metrics.filter_deployments(
-        [
-            {
-                "id": "dep1",
-                "name": "api-deployment",
-                "work_pool_name": "production-pool",
-                "work_queue_name": "high-priority",
-            },
-            {
-                "id": "dep2",
-                "name": "worker-deployment",
-                "work_pool_name": "production-pool",
-                "work_queue_name": "high-priority",
-            },
-        ]
-    )
+    """Flow runs are resolved via deployments_by_id to check against the deployment cache."""
+    deployments_by_id = {
+        "dep1": "api-deployment",
+        "dep2": "worker-deployment",
+        "dep3": "api-deployment-2",
+    }
 
     flow_runs = [
         {
@@ -496,7 +423,58 @@ def test_filter_task_runs(filter_metrics):
             "deployment_id": "dep3",
         },
     ]
-    filter_metrics.filter_flow_runs(flow_runs)
+    filtered_flow_runs = filter_metrics.filter_flow_runs(flow_runs, deployments_by_id)
+    assert filtered_flow_runs == [
+        {
+            "id": "fr1",
+            "name": "scheduled-flow",
+            "work_pool_name": "production-pool",
+            "work_queue_name": "high-priority",
+            "deployment_id": "dep1",
+        },
+    ]
+
+
+def test_filter_task_runs(filter_metrics):
+    """Task runs are resolved via flow_runs_tags to check against the cached filter caches."""
+    flow_runs_tags = {
+        "fr1": (
+            "deployment_id:dep1",
+            "deployment_name:api-deployment",
+            "flow_id:f1",
+            "work_pool_id:wp1",
+            "work_pool_name:production-pool",
+            "work_queue_id:wq1",
+            "work_queue_name:high-priority",
+        ),
+        "fr2": (
+            "deployment_id:dep1",
+            "deployment_name:api-deployment",
+            "flow_id:f2",
+            "work_pool_id:wp2",
+            "work_pool_name:staging-pool",
+            "work_queue_id:wq2",
+            "work_queue_name:high-priority-2",
+        ),
+        "fr3": (
+            "deployment_id:dep2",
+            "deployment_name:worker-deployment",
+            "flow_id:f3",
+            "work_pool_id:wp1",
+            "work_pool_name:production-pool",
+            "work_queue_id:wq3",
+            "work_queue_name:low-priority",
+        ),
+        "fr4": (
+            "deployment_id:dep3",
+            "deployment_name:api-deployment-2",
+            "flow_id:f4",
+            "work_pool_id:wp2",
+            "work_pool_name:staging-pool",
+            "work_queue_id:wq4",
+            "work_queue_name:high-priority-2",
+        ),
+    }
 
     task_runs = [
         {"id": "tr1", "flow_run_id": "fr1"},
@@ -504,13 +482,12 @@ def test_filter_task_runs(filter_metrics):
         {"id": "tr3", "flow_run_id": "fr3"},
         {"id": "tr4", "flow_run_id": "fr4"},
     ]
-    filtered_task_runs = filter_metrics.filter_task_runs(task_runs)
-    assert len(filtered_task_runs) == 1
-    assert filtered_task_runs[0]["id"] == "tr1"
+    filtered_task_runs = filter_metrics.filter_task_runs(task_runs, flow_runs_tags)
+    assert filtered_task_runs == [{"id": "tr1", "flow_run_id": "fr1"}]
 
 
 def test_filter_metrics_no_rules_configured(check):
-    """Test that when no filter rules are configured, everything is included."""
+    """Without any filter rules, all resources pass through unfiltered."""
     filter_metrics = PrefectFilterMetrics(log=check.log)
 
     # Test work pools - all should be included
@@ -520,7 +497,7 @@ def test_filter_metrics_no_rules_configured(check):
         {"id": "pool3", "name": "dev-pool"},
     ]
     filtered_pools = filter_metrics.filter_work_pools(work_pools)
-    assert len(filtered_pools) == 3
+    assert filtered_pools == work_pools
 
     # Test work queues - all should be included
     work_queues = [
@@ -528,7 +505,7 @@ def test_filter_metrics_no_rules_configured(check):
         {"id": "queue2", "name": "low-priority", "work_pool_name": "production-pool"},
     ]
     filtered_queues = filter_metrics.filter_work_queues(work_queues)
-    assert len(filtered_queues) == 2
+    assert filtered_queues == work_queues
 
     # Test deployments - all should be included
     deployments = [
@@ -546,10 +523,10 @@ def test_filter_metrics_no_rules_configured(check):
         },
     ]
     filtered_deployments = filter_metrics.filter_deployments(deployments)
-    assert len(filtered_deployments) == 2
+    assert filtered_deployments == deployments
 
     # Test flow runs - all should be included
-    filter_metrics.filter_deployments(deployments)  # Populate deployment fallback
+    deployments_by_id = {"dep1": "api-deployment", "dep2": "worker-deployment"}
     flow_runs = [
         {
             "id": "fr1",
@@ -566,17 +543,28 @@ def test_filter_metrics_no_rules_configured(check):
             "deployment_id": "dep2",
         },
     ]
-    filtered_flow_runs = filter_metrics.filter_flow_runs(flow_runs)
-    assert len(filtered_flow_runs) == 2
+    filtered_flow_runs = filter_metrics.filter_flow_runs(flow_runs, deployments_by_id)
+    assert filtered_flow_runs == flow_runs
 
     # Test task runs - all should be included
-    filter_metrics.filter_flow_runs(flow_runs)  # Populate flow run cache
+    flow_runs_tags = {
+        "fr1": (
+            "deployment_name:api-deployment",
+            "work_pool_name:production-pool",
+            "work_queue_name:high-priority",
+        ),
+        "fr2": (
+            "deployment_name:worker-deployment",
+            "work_pool_name:staging-pool",
+            "work_queue_name:low-priority",
+        ),
+    }
     task_runs = [
         {"id": "tr1", "flow_run_id": "fr1"},
         {"id": "tr2", "flow_run_id": "fr2"},
     ]
-    filtered_task_runs = filter_metrics.filter_task_runs(task_runs)
-    assert len(filtered_task_runs) == 2
+    filtered_task_runs = filter_metrics.filter_task_runs(task_runs, flow_runs_tags)
+    assert filtered_task_runs == task_runs
 
 
 @pytest.fixture
