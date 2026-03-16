@@ -3,13 +3,13 @@
 set -euxo pipefail
 IFS=$'\n\t'
 
-echo "Grabbing GitHub deploy key and starting ssh-agent"
+echo "Obtaining GitHub token via dd-octo-sts"
 set +x
-eval "$(ssh-agent -s)"
-aws ssm get-parameter --region us-east-1 --name ci.integrations-core.github_deploy_key --with-decryption --query "Parameter.Value" --out text | ssh-add -
+GITHUB_TOKEN=$(dd-octo-sts token --scope DataDog/integrations-core --policy self.gitlab.release.branches)
+trap 'set +x; dd-octo-sts revoke -t "$GITHUB_TOKEN" 2>/dev/null || true' EXIT
+git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/DataDog/integrations-core.git"
 set -x
 
-git remote set-url origin git@github.com:DataDog/integrations-core.git
 git config --global user.email "$TAGGER_EMAIL"
 git config --global user.name "$TAGGER_NAME"
 
