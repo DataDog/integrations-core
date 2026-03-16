@@ -7,6 +7,7 @@ import inspect
 import types as _types
 import typing
 from abc import ABC, abstractmethod
+from types import get_original_bases
 from typing import Annotated, Any, get_args, get_type_hints, overload
 
 from anthropic.types import ToolParam
@@ -70,8 +71,13 @@ def build_schema(cls: type) -> dict[str, object]:
             raw_type = hint
 
         json_type = _resolve_json_type(raw_type)
-        if json_type:
-            prop["type"] = json_type
+        if json_type is None:
+            supported = ", ".join(t.__name__ for t in _JSON_TYPE_MAP)
+            raise TypeError(
+                f"{cls.__name__}.{field_name}: type {raw_type!r} cannot be mapped to a JSON Schema type. "
+                f"Supported types are: {supported}, and Optional variants."
+            )
+        prop["type"] = json_type
 
         properties[field_name] = prop
 
@@ -86,11 +92,32 @@ def build_schema(cls: type) -> dict[str, object]:
 
 
 def _get_input_type(cls: type) -> type:
-    for base in getattr(cls, "__orig_bases__", ()):
+    """Extract the TInput type from a BaseTool subclass, resolving through intermediate generics."""
+    try:
+        return _resolve_base_tool_arg(cls, {})
+    except TypeError:
+        raise TypeError(f"{cls.__name__} must be parameterized with an input type: class MyTool(BaseTool[MyInput])")
+
+
+def _resolve_base_tool_arg(cls: type, type_map: dict) -> type:
+    for base in get_original_bases(cls):
+        origin = typing.get_origin(base) or base
         args = typing.get_args(base)
-        if args:
-            return args[0]
-    raise TypeError(f"{cls.__name__} must be parameterized with an input type: class MyTool(BaseTool[MyInput])")
+
+        if origin is BaseTool and args:
+            resolved = type_map.get(args[0], args[0])
+            if isinstance(resolved, type):
+                return resolved
+
+        if isinstance(origin, type) and issubclass(origin, BaseTool) and origin is not BaseTool:
+            type_params = origin.__type_params__
+            new_map = {param: type_map.get(arg, arg) for param, arg in zip(type_params, args, strict=False)}
+            try:
+                return _resolve_base_tool_arg(origin, new_map)
+            except TypeError:
+                continue
+
+    raise TypeError
 
 
 class BaseTool[TInput](ABC):
@@ -102,7 +129,7 @@ class BaseTool[TInput](ABC):
 
     @property
     def description(self) -> str:
-        return inspect.getdoc(self.__class__) or ""
+        return inspect.cleandoc(self.__class__.__doc__) if self.__class__.__doc__ else ""
 
     @property
     def input_schema(self) -> dict[str, object]:
