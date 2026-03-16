@@ -15,11 +15,13 @@ win32_event_log = "Windows Event Log"
 krakend = "KrakenD"
 lustre = "Lustre"
 n8n = "n8n"
+control_m = "Control-M"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
 lustre = "lustre."
 n8n = "n8n."
+control_m = "control_m."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -179,6 +181,9 @@ exclude = [
     'pyvmomi',      # 9+ has breaking changes
     'pymongo',      # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
     'foundationdb', # 7+ has a breaking changes
+    'snowflake-connector-python', # 4.3.0 causes a size bump of 35Mb
+    'ddtrace' # 4.5.1 does not support MacOS 11, which is used by the Agent
+
 ]
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
@@ -211,3 +216,4 @@ __pycache__ = false
 krakend = ["linux", "windows", "mac_os"]
 lustre = ["linux", "windows", "mac_os"]
 n8n = ["linux", "windows", "mac_os"]
+control_m = ["linux", "windows", "mac_os"]

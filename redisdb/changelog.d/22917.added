@@ -1,0 +1,1 @@
+Add CLUSTER INFO metrics: cluster state, slot coverage, node count, cluster size, and current epoch.
