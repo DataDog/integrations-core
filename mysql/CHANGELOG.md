@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 15.13.0 / 2026-02-19
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Support collecting both group replication and traditional primary/replica replication metrics simultaneously. This enables monitoring of hybrid MySQL topologies where a server participates in group replication while also having traditional replicas connected. ([#22485](https://github.com/DataDog/integrations-core/pull/22485))
+
+## 15.12.0 / 2026-02-11
+
+***Security***:
+
+* Bump `cryptography` to 46.0.5 ([#22607](https://github.com/DataDog/integrations-core/pull/22607))
+
 ## 15.11.2 / 2026-01-21
 
 ***Fixed***:

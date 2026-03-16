@@ -1,4 +1,5 @@
 name: Microsoft DNS
+fleet_configurable: true
 files:
 - name: microsoft_dns.yaml
   options:

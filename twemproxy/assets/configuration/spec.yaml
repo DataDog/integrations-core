@@ -1,4 +1,5 @@
 name: Twemproxy
+fleet_configurable: true
 files:
 - name: twemproxy.yaml
   options:
@@ -9,12 +10,14 @@ files:
     options:
     - name: host
       description: Twemproxy host to connect to.
+      fleet_configurable: true
       required: True
       value:
         example: localhost
         type: string
     - name: port
       description: Twemproxy port to connect to.
+      fleet_configurable: true
       required: True
       value:
         example: 2222

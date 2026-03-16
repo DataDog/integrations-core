@@ -1,0 +1,24 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+services:
+  nutanix-prism-central:
+    image: python:3.11-slim
+    container_name: nutanix-prism-central
+    ports:
+      - "9440:9440"
+    volumes:
+      - ../fixtures:/fixtures:ro
+      - ./mock_server.py:/app/mock_server.py:ro
+    working_dir: /app
+    command: >
+      sh -c "pip install --quiet flask && python mock_server.py"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9440/console')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    environment:
+      - PYTHONUNBUFFERED=1

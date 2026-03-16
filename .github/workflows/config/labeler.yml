@@ -118,6 +118,10 @@ integration/arangodb:
 - changed-files:
   - any-glob-to-any-file:
     - arangodb/**/*
+integration/arctic_wolf_aurora_endpoint_security:
+- changed-files:
+  - any-glob-to-any-file:
+    - arctic_wolf_aurora_endpoint_security/**/*
 integration/argo_rollouts:
 - changed-files:
   - any-glob-to-any-file:
@@ -182,6 +186,10 @@ integration/beyondtrust_password_safe:
 - changed-files:
   - any-glob-to-any-file:
     - beyondtrust_password_safe/**/*
+integration/beyondtrust_privileged_remote_access:
+- changed-files:
+  - any-glob-to-any-file:
+    - beyondtrust_privileged_remote_access/**/*
 integration/bitdefender:
 - changed-files:
   - any-glob-to-any-file:
@@ -194,6 +202,10 @@ integration/blazemeter:
 - changed-files:
   - any-glob-to-any-file:
     - blazemeter/**/*
+integration/bluecat_edge:
+- changed-files:
+  - any-glob-to-any-file:
+    - bluecat_edge/**/*
 integration/boundary:
 - changed-files:
   - any-glob-to-any-file:
@@ -278,6 +290,10 @@ integration/cisco_sdwan:
 - changed-files:
   - any-glob-to-any-file:
     - cisco_sdwan/**/*
+integration/cisco_secure_client:
+- changed-files:
+  - any-glob-to-any-file:
+    - cisco_secure_client/**/*
 integration/cisco_secure_email_threat_defense:
 - changed-files:
   - any-glob-to-any-file:
@@ -374,6 +390,10 @@ integration/crio:
 - changed-files:
   - any-glob-to-any-file:
     - crio/**/*
+integration/cyberark_endpoint_privilege_manager:
+- changed-files:
+  - any-glob-to-any-file:
+    - cyberark_endpoint_privilege_manager/**/*
 integration/crowdstrike_fdr:
 - changed-files:
   - any-glob-to-any-file:
@@ -670,6 +690,10 @@ integration/iboss:
 - changed-files:
   - any-glob-to-any-file:
     - iboss/**/*
+integration/ide_shepherd:
+- changed-files:
+  - any-glob-to-any-file:
+    - ide_shepherd/**/*
 integration/ignite:
 - changed-files:
   - any-glob-to-any-file:
@@ -954,6 +978,10 @@ integration/mysql:
 - changed-files:
   - any-glob-to-any-file:
     - mysql/**/*
+integration/n8n:
+- changed-files:
+  - any-glob-to-any-file:
+    - n8n/**/*
 integration/nagios:
 - changed-files:
   - any-glob-to-any-file:
@@ -982,6 +1010,10 @@ integration/ntp:
 - changed-files:
   - any-glob-to-any-file:
     - ntp/**/*
+integration/nutanix:
+- changed-files:
+  - any-glob-to-any-file:
+    - nutanix/**/*
 integration/nvidia_jetson:
 - changed-files:
   - any-glob-to-any-file:
@@ -1330,6 +1362,10 @@ integration/statsd:
 - changed-files:
   - any-glob-to-any-file:
     - statsd/**/*
+integration/storage_management:
+- changed-files:
+  - any-glob-to-any-file:
+    - storage_management/**/*
 integration/streamnative:
 - changed-files:
   - any-glob-to-any-file:

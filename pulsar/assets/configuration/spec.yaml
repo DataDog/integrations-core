@@ -1,4 +1,5 @@
 name: pulsar
+fleet_configurable: true
 files:
 - name: pulsar.yaml
   options:

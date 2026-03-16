@@ -1,0 +1,26 @@
+{
+    "name": "IBM Spectrum LSF System Error Logs",
+    "type": "logs",
+    "page": "stream",
+    "query": "source:ibm_spectrum_lsf status:error log_type:system",
+    "timerange": {
+      "interval_ms": 3600000
+    },
+    "visible_facets": [
+      "source",
+      "host",
+      "service",
+      "@pid"
+    ],
+    "options": {
+      "columns": [
+        "host",
+        "service",
+        "@pid"
+      ],
+      "show_date_column": true,
+      "show_message_column": true,
+      "message_display": "inline",
+      "show_timeline": true
+    }
+}

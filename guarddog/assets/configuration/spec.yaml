@@ -1,4 +1,5 @@
 name: GuardDog
+fleet_configurable: true
 files:
 - name: guarddog.yaml
   options:
@@ -10,6 +11,7 @@ files:
   - template: init_config
     options:
     - name: guarddog_path
+      fleet_configurable: true
       required: true
       description: "Absolute path to the GuardDog file."
       value:
@@ -19,6 +21,7 @@ files:
   - template: instances
     options:
     - name: package_ecosystem
+      fleet_configurable: true
       required: true
       description: "The type of package ecosystem. Supported values: pypi, npm, go and github_action"
       value:
@@ -30,6 +33,7 @@ files:
           - github_action
         example: <PACKAGE_ECOSYSTEM>
     - name: dependency_file_path
+      fleet_configurable: true
       required: true
       description: "Absolute path to the dependency file you want to monitor."
       value:

@@ -1,0 +1,66 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "ccd5850d-3e2d-49ab-8f9c-b8f796a20760",
+  "app_id": "bluecat-edge",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into BlueCat Edge DNS query logs.",
+    "title": "BlueCat Edge",
+    "media": [
+      {
+        "caption": "BlueCat Edge DNS Query Insights",
+        "image_url": "images/bluecat_edge_dns_query_insights_light_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "BlueCat Edge DNS Query Insights",
+        "image_url": "images/bluecat_edge_dns_query_insights_dark_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "BlueCat Edge DNS Query Insights",
+        "image_url": "images/bluecat_edge_dns_query_insights_light_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "BlueCat Edge DNS Query Insights",
+        "image_url": "images/bluecat_edge_dns_query_insights_dark_2.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Network",
+      "Category::Security",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 69583406,
+      "source_type_name": "BlueCat Edge",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "BlueCat Edge DNS Query Insights": "assets/dashboards/bluecat_edge_dns_query_insights.json"
+    },
+    "logs": {
+      "source": "bluecat-edge"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

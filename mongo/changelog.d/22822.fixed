@@ -1,0 +1,1 @@
+Fix ``FailedToParse`` errors in DBM explain plans for aggregate queries by adding the required ``cursor`` option to the explain command.
