@@ -1003,8 +1003,8 @@ tests:
         file:
           name: "shadow"
           path: "/etc/shadow"
-          type: "Folder"
-          type_id: 2
+          type: "Regular File"
+          type_id: 1
           uid: "50314523"
         metadata:
           event_code: "PATH"
@@ -1094,7 +1094,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740378301873
  -
-  sample: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=PARENT cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
+  sample: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/\" inode=50314523 dev=fd:03 mode=0040755 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=PARENT cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
   result:
     custom:
       OGID: "root"
@@ -1107,7 +1107,7 @@ tests:
       event_id: 2247
       inode: 50314523
       item: 0
-      mode: 100000
+      mode: 40755
       msg_raw: ""
       name: "/lib/"
       nametype: "PARENT"
@@ -1152,7 +1152,7 @@ tests:
       usr:
         id: 0
         name: "root"
-    message: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/\" inode=50314523 dev=fd:03 mode=0100000 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=PARENT cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
+    message: "type=PATH msg=audit(1740378301.873:2247): item=0 name=\"/lib/\" inode=50314523 dev=fd:03 mode=0040755 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:shadow_t:s0 nametype=PARENT cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0\x1dOUID=\"root\" OGID=\"root\""
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1740378301873

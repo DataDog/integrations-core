@@ -625,13 +625,17 @@ pipeline:
             - name: ocsf.file.type_id
               categories:
                 - filter:
-                    query: "@ocsf.file.name:*\\.*"
+                    query: "@mode:[100000 TO 107777]"
                   name: Regular File
                   id: 1
                 - filter:
-                    query: -@ocsf.file.name:*\.*
+                    query: "@mode:[40000 TO 47777]"
                   name: Folder
                   id: 2
+                - filter:
+                    query: "@mode:[120000 TO 127777]"
+                  name: Symbolic Link
+                  id: 3
               targets:
                 name: ocsf.file.type
                 id: ocsf.file.type_id
