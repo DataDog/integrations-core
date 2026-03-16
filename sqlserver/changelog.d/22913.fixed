@@ -1,0 +1,1 @@
+Fix stale database metrics cache when autodiscovered databases change. Previously, database-level metric query executors (e.g. ``sys.database_files``) were never rebuilt after autodiscovery detected database changes, causing persistent errors for deleted databases and missing metrics for newly added databases until agent restart.

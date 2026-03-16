@@ -301,9 +301,9 @@ def test_azure_autodiscovery_exclude_override(instance_autodiscovery):
     assert check.databases == {Database("tempdb", "tempdb")}
 
 
-def test_autodiscovery_resets_database_metrics_on_change(instance_autodiscovery):
-    """When autodiscovery detects a database change, _database_metrics must be
-    reset so that query executors are rebuilt with the updated database list."""
+def test_autodiscovery_resets_database_metrics_on_db_removal(instance_autodiscovery):
+    """When autodiscovery detects databases were removed, _database_metrics must be
+    reset so that query executors are rebuilt without the deleted databases."""
     fetchall_results, mock_cursor = _mock_database_list()
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
 
@@ -324,6 +324,34 @@ def test_autodiscovery_resets_database_metrics_on_change(instance_autodiscovery)
     changed = check.autodiscover_databases(mock_cursor)
     assert changed is True
     assert check.databases == {Database('master'), Database('tempdb'), Database('msdb')}
+    assert check._database_metrics is None
+
+
+def test_autodiscovery_resets_database_metrics_on_db_addition(instance_autodiscovery):
+    """When autodiscovery detects new databases were added, _database_metrics must be
+    reset so that query executors are rebuilt to include the new databases."""
+    Row = namedtuple('Row', 'name')
+    initial_results = [Row('master'), Row('tempdb')]
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = iter(initial_results)
+
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+
+    # First autodiscovery run
+    check.autodiscover_databases(mock_cursor)
+    assert check.databases == {Database('master'), Database('tempdb')}
+
+    # Simulate _database_metrics being built
+    check._database_metrics = [mock.MagicMock()]
+
+    # Second autodiscovery run with a database added
+    expanded_results = [Row('master'), Row('tempdb'), Row('newdb')]
+    mock_cursor.fetchall.return_value = iter(expanded_results)
+    check._ad_last_check = 0
+
+    changed = check.autodiscover_databases(mock_cursor)
+    assert changed is True
+    assert check.databases == {Database('master'), Database('tempdb'), Database('newdb')}
     assert check._database_metrics is None
 
 
