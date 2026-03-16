@@ -1623,8 +1623,8 @@ tests:
       lport: 4444
       msg_raw: ""
       ocsf:
-        activity_id: 99
-        activity_name: "Other"
+        activity_id: 1
+        activity_name: "Open"
         category_name: "Network Activity"
         category_uid: 4
         class_name: "Network Activity"

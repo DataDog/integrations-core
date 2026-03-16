@@ -2608,8 +2608,8 @@ pipeline:
               categories:
                 - filter:
                     query: "*"
-                  name: Other
-                  id: 99
+                  name: Open
+                  id: 1
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
