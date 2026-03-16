@@ -6,9 +6,9 @@ from typing import Annotated
 
 import httpx
 
-from .base import BaseTool
-from .truncation import TruncateResult, truncate
-from .types import ToolResult
+from ddev.ai.tools.core.base import BaseTool
+from ddev.ai.tools.core.truncation import TruncateResult, truncate
+from ddev.ai.tools.core.types import ToolResult
 
 
 @dataclass

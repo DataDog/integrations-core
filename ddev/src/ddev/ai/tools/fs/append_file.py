@@ -5,9 +5,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated
 
-from .base import BaseTool
+from ddev.ai.tools.core.base import BaseTool
+from ddev.ai.tools.core.types import ToolResult
+
 from .file_registry import FileRegistry
-from .types import ToolResult
 
 
 @dataclass
