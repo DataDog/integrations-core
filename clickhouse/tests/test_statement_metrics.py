@@ -116,10 +116,6 @@ def test_normalize_queries(check_with_dbm):
             'count': 10,
             'total_time': 1000.0,
             'mean_time': 100.0,
-            'p50_time': 90.0,
-            'p90_time': 150.0,
-            'p95_time': 180.0,
-            'p99_time': 200.0,
             'result_rows': 100,
             'read_rows': 1000,
             'read_bytes': 50000,
@@ -185,10 +181,6 @@ def test_query_signature_matches_samples_pipeline(check_with_dbm):
                 'count': 1,
                 'total_time': 10.0,
                 'mean_time': 10.0,
-                'p50_time': 10.0,
-                'p90_time': 10.0,
-                'p95_time': 10.0,
-                'p99_time': 10.0,
                 'result_rows': 0,
                 'read_rows': 0,
                 'read_bytes': 0,
@@ -452,10 +444,6 @@ def test_normalize_queries_handles_obfuscation_failure(check_with_dbm):
             'count': 1,
             'total_time': 10.0,
             'mean_time': 10.0,
-            'p50_time': 10.0,
-            'p90_time': 10.0,
-            'p95_time': 10.0,
-            'p99_time': 10.0,
             'result_rows': 0,
             'read_rows': 0,
             'read_bytes': 0,
@@ -476,10 +464,6 @@ def test_normalize_queries_handles_obfuscation_failure(check_with_dbm):
             'count': 1,
             'total_time': 5.0,
             'mean_time': 5.0,
-            'p50_time': 5.0,
-            'p90_time': 5.0,
-            'p95_time': 5.0,
-            'p99_time': 5.0,
             'result_rows': 1,
             'read_rows': 0,
             'read_bytes': 0,
@@ -498,6 +482,136 @@ def test_normalize_queries_handles_obfuscation_failure(check_with_dbm):
     assert any(row['query'] is not None for row in normalized_rows)
 
 
+def test_statements_query_format():
+    """The query template uses server-side parameter binding for data values."""
+    from datadog_checks.clickhouse.statements import STATEMENTS_QUERY
+
+    # Structural placeholders (Python .format())
+    assert '{checkpoint_filter}' in STATEMENTS_QUERY
+    assert '{query_log_table}' in STATEMENTS_QUERY
+
+    # Bound parameters (ClickHouse server-side, double-braced to survive .format())
+    assert '{min_checkpoint_us:UInt64}' in STATEMENTS_QUERY
+
+    # hostName() is always included for per-node checkpoint tracking
+    assert 'hostName() as server_node' in STATEMENTS_QUERY
+    assert 'GROUP BY normalized_query_hash, server_node' in STATEMENTS_QUERY
+
+    # Filters
+    assert 'event_time_microseconds <= now64(6)' in STATEMENTS_QUERY
+
+
+def test_merge_rows_across_nodes_single_node():
+    """When a query only appears on one node, it should pass through unchanged."""
+    from datadog_checks.clickhouse.statements import ClickhouseStatementMetrics
+
+    rows = [
+        {
+            'normalized_query_hash': 'hash1',
+            'query': 'SELECT 1',
+            'count': 10,
+            'total_time': 100.0,
+            'mean_time': 10.0,
+            'read_rows': 100,
+            'read_bytes': 1000,
+            'written_rows': 0,
+            'written_bytes': 0,
+            'result_rows': 10,
+            'result_bytes': 500,
+            'memory_usage': 5000,
+            'peak_memory_usage': 8000,
+        }
+    ]
+
+    result = ClickhouseStatementMetrics._merge_rows_across_nodes(rows)
+    assert len(result) == 1
+    assert result[0]['count'] == 10
+    assert result[0]['total_time'] == 100.0
+
+
+def test_merge_rows_across_nodes_sums_counts():
+    """Summable metrics should be added across nodes."""
+    from datadog_checks.clickhouse.statements import ClickhouseStatementMetrics
+
+    rows = [
+        {
+            'normalized_query_hash': 'hash1',
+            'query': 'SELECT 1',
+            'count': 100,
+            'total_time': 500.0,
+            'mean_time': 5.0,
+            'read_rows': 1000,
+            'read_bytes': 10000,
+            'written_rows': 0,
+            'written_bytes': 0,
+            'result_rows': 100,
+            'result_bytes': 5000,
+            'memory_usage': 50000,
+            'peak_memory_usage': 80000,
+        },
+        {
+            'normalized_query_hash': 'hash1',
+            'query': 'SELECT 1',
+            'count': 50,
+            'total_time': 300.0,
+            'mean_time': 6.0,
+            'read_rows': 500,
+            'read_bytes': 5000,
+            'written_rows': 10,
+            'written_bytes': 100,
+            'result_rows': 50,
+            'result_bytes': 2500,
+            'memory_usage': 30000,
+            'peak_memory_usage': 90000,
+        },
+    ]
+
+    result = ClickhouseStatementMetrics._merge_rows_across_nodes(rows)
+    assert len(result) == 1
+
+    merged = result[0]
+    assert merged['count'] == 150
+    assert merged['total_time'] == 800.0
+    assert merged['read_rows'] == 1500
+    assert merged['read_bytes'] == 15000
+    assert merged['written_rows'] == 10
+    assert merged['written_bytes'] == 100
+    assert merged['result_rows'] == 150
+    assert merged['result_bytes'] == 7500
+    assert merged['memory_usage'] == 80000
+    assert merged['peak_memory_usage'] == 90000
+    assert merged['mean_time'] == 800.0 / 150
+
+
+def test_merge_rows_across_nodes_different_queries():
+    """Rows with different query hashes should not be merged."""
+    from datadog_checks.clickhouse.statements import ClickhouseStatementMetrics
+
+    base = {
+        'query': 'q',
+        'count': 10,
+        'total_time': 100.0,
+        'mean_time': 10.0,
+        'read_rows': 0,
+        'read_bytes': 0,
+        'written_rows': 0,
+        'written_bytes': 0,
+        'result_rows': 0,
+        'result_bytes': 0,
+        'memory_usage': 0,
+        'peak_memory_usage': 0,
+    }
+
+    rows = [
+        {**base, 'normalized_query_hash': 'hash1'},
+        {**base, 'normalized_query_hash': 'hash2'},
+        {**base, 'normalized_query_hash': 'hash3'},
+    ]
+
+    result = ClickhouseStatementMetrics._merge_rows_across_nodes(rows)
+    assert len(result) == 3
+
+
 def test_metrics_row_with_empty_values(check_with_dbm):
     """Test handling of rows with empty/null values"""
     metrics = check_with_dbm.statement_metrics
@@ -514,10 +628,6 @@ def test_metrics_row_with_empty_values(check_with_dbm):
             'count': 0,  # Zero count
             'total_time': 0.0,
             'mean_time': 0.0,
-            'p50_time': 0.0,
-            'p90_time': 0.0,
-            'p95_time': 0.0,
-            'p99_time': 0.0,
             'result_rows': 0,
             'read_rows': 0,
             'read_bytes': 0,
