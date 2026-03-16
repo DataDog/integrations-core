@@ -6,7 +6,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 
-DEFAULT_TRUSTED_PROVIDERS = ['file', 'remote-config']
+DEFAULT_TRUSTED_PROVIDERS: tuple[str, ...] = ('file', 'remote-config')
 
 
 @dataclass
@@ -17,7 +17,7 @@ class SecurityConfig:
     provider: str = ''
     ignore_untrusted_file_params: bool = False
     file_paths_allowlist: list[str] = field(default_factory=list)
-    trusted_providers: list[str] = field(default_factory=lambda: DEFAULT_TRUSTED_PROVIDERS.copy())
+    trusted_providers: list[str] = field(default_factory=lambda: list(DEFAULT_TRUSTED_PROVIDERS))
     excluded_checks: list[str] = field(default_factory=list)
 
     def is_enabled(self) -> bool:
