@@ -160,7 +160,6 @@ class AerospikeCheck(AgentCheck):
             for idx in sindex_namespaces.get(ns, []):
                 sindex_tags = ['sindex:{}'.format(idx)]
                 sindex_tags.extend(namespace_tags)
-                # self.collect_info('sindex/{}/{}'.format(ns, idx), SINDEX_METRIC_TYPE, tags=sindex_tags)
                 # sindex-stat introduced in 3.3x so will safely work in 4x and above server versions
                 self.collect_info(
                     'sindex-stat:ns={};indexname={}'.format(ns, idx), SINDEX_METRIC_TYPE, tags=sindex_tags
