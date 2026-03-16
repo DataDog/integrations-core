@@ -88,6 +88,18 @@ class TestReadMessagesValidation:
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
 
+    def test_invalid_start_timestamp(self):
+        """Test that invalid start_timestamp raises error."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'read_messages': {'cluster': 'test', 'topic': 'test', 'start_timestamp': -5},
+        }
+
+        with pytest.raises(ConfigurationError, match="start_timestamp must be a non-negative integer"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
+
     def test_protobuf_without_schema(self):
         """Test that protobuf format without schema raises error."""
         instance = {
