@@ -41,7 +41,7 @@ on:
         type: boolean
         default: false
       ddev-version:
-        description: "ddev version, defaults to latest."
+        description: "ddev version, pinned by default."
         required: false
         type: string
 
