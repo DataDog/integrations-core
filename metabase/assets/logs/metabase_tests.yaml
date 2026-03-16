@@ -23,6 +23,7 @@ tests:
       "entity_id" : 11,
       "timestamp" : "2024-09-30T11:47:26.247269+05:30"
     }
+  service: "activity-events"
   result:
     custom:
       details:
@@ -66,6 +67,7 @@ tests:
         "entity_id" : 11,
         "timestamp" : "2024-09-30T11:47:26.247269+05:30"
       }
+    service: "activity-events"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1727677046247
@@ -86,6 +88,7 @@ tests:
       "id" : "188",
       "timestamp" : "2024-09-30T12:37:04.133904+05:30"
     }
+  service: "activity-events"
   result:
     custom:
       details:
@@ -117,6 +120,7 @@ tests:
         "id" : "188",
         "timestamp" : "2024-09-30T12:37:04.133904+05:30"
       }
+    service: "activity-events"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1727680024133
@@ -141,6 +145,7 @@ tests:
       "id" : "12",
       "timestamp" : "2024-09-05T11:59:10.181879Z"
     }
+  service: "view-logs"
   result:
     custom:
       database_description: "Some example data for you to play around with."
@@ -180,6 +185,7 @@ tests:
         "id" : "12",
         "timestamp" : "2024-09-05T11:59:10.181879Z"
       }
+    service: "view-logs"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1725537550181
@@ -223,6 +229,7 @@ tests:
       "action_qualified_id" : "action_7",
       "dashboard_id" : 5
     }
+  service: "query-logs"
   result:
     custom:
       action_id: 7
@@ -298,6 +305,7 @@ tests:
         "action_qualified_id" : "action_7",
         "dashboard_id" : 5
       }
+    service: "query-logs"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1725964655965

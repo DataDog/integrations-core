@@ -30,6 +30,11 @@ pipeline:
   filter:
     query: "source:metabase"
   processors:
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
     - type: pipeline
       name: Processing for Activity Events
       enabled: true
