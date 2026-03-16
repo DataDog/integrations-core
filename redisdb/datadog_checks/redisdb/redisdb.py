@@ -14,6 +14,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, 
 from datadog_checks.base.utils.common import round_value
 
 from .constants import (
+    CLUSTER_INFO_GAUGE_KEYS,
     CONFIG_GAUGE_KEYS,
     DEFAULT_CLIENT_NAME,
     DEFAULT_MAX_SLOW_ENTRIES,
@@ -203,6 +204,8 @@ class Redis(AgentCheck):
 
         # Check replication
         self._check_replication(info, tags)
+        if info.get('cluster_enabled') == 1:
+            self._check_cluster_info(conn, tags)
         if self.instance.get("command_stats", False):
             self._check_command_stats(conn, tags)
 
@@ -365,6 +368,23 @@ class Redis(AgentCheck):
 
             self.service_check('redis.replication.master_link_status', status, tags=tags)
             self.gauge('redis.replication.master_link_down_since_seconds', down_seconds, tags=tags)
+
+    def _check_cluster_info(self, conn, tags):
+        """Collect metrics from CLUSTER INFO for cluster-mode enabled nodes."""
+        try:
+            cluster_info = conn.cluster('info')
+        except redis.ResponseError as e:
+            self.log.debug('Unable to collect cluster info: %s', e)
+            return
+
+        cluster_state = cluster_info.get('cluster_state')
+        if cluster_state is not None:
+            self.gauge('redis.cluster.state', int(cluster_state == 'ok'), tags=tags)
+
+        for key, metric in CLUSTER_INFO_GAUGE_KEYS.items():
+            value = cluster_info.get(key)
+            if value is not None:
+                self.gauge(metric, int(value), tags=tags)
 
     def _check_slowlog(self):
         """Retrieve length and entries from Redis' SLOWLOG

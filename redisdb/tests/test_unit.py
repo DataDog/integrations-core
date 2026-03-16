@@ -168,6 +168,47 @@ def test_slowlog_loud_failure(check, redis_instance):
             redis_check._check_slowlog()
 
 
+@pytest.mark.parametrize(
+    'cluster_state, expected_state_value',
+    [
+        pytest.param('ok', 1, id='cluster_state_ok'),
+        pytest.param('fail', 0, id='cluster_state_fail'),
+    ],
+)
+def test__check_cluster_info(check, aggregator, redis_instance, cluster_state, expected_state_value):
+    redis_check = check(redis_instance)
+    conn = mock.MagicMock()
+    conn.cluster.return_value = {
+        'cluster_state': cluster_state,
+        'cluster_slots_assigned': '16384',
+        'cluster_slots_ok': '16384',
+        'cluster_slots_pfail': '0',
+        'cluster_slots_fail': '0',
+        'cluster_known_nodes': '6',
+        'cluster_size': '3',
+        'cluster_current_epoch': '6',
+    }
+    redis_check._check_cluster_info(conn, ['foo:bar'])
+
+    aggregator.assert_metric('redis.cluster.state', value=expected_state_value, count=1, tags=['foo:bar'])
+    aggregator.assert_metric('redis.cluster.slots_assigned', value=16384, count=1, tags=['foo:bar'])
+    aggregator.assert_metric('redis.cluster.slots_ok', value=16384, count=1, tags=['foo:bar'])
+    aggregator.assert_metric('redis.cluster.slots_pfail', value=0, count=1, tags=['foo:bar'])
+    aggregator.assert_metric('redis.cluster.slots_fail', value=0, count=1, tags=['foo:bar'])
+    aggregator.assert_metric('redis.cluster.known_nodes', value=6, count=1, tags=['foo:bar'])
+    aggregator.assert_metric('redis.cluster.size', value=3, count=1, tags=['foo:bar'])
+    aggregator.assert_metric('redis.cluster.current_epoch', value=6, count=1, tags=['foo:bar'])
+
+
+def test__check_cluster_info_disabled(check, aggregator, redis_instance):
+    """_check_cluster_info should swallow ResponseError (e.g. cluster support disabled)."""
+    redis_check = check(redis_instance)
+    conn = mock.MagicMock()
+    conn.cluster.side_effect = redis.ResponseError('ERR This instance has cluster support disabled')
+    redis_check._check_cluster_info(conn, ['foo:bar'])
+    aggregator.assert_metric('redis.cluster.state', count=0)
+
+
 def test_info_command_fallback(check, redis_instance, caplog):
     """
     The check should default to `INFO all` and fall back to `INFO`
