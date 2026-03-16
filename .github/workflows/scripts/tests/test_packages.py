@@ -58,13 +58,13 @@ class TestResolvePackages:
     def test_json_array(self):
         packages, mode = resolve_packages('["postgres","mysql"]', all_packages=self.all_packages)
         assert packages == ["postgres", "mysql"]
-        assert "manual" in mode
+        assert mode == 'manual (["postgres","mysql"])'
 
     def test_auto_detect(self):
         tags = ["postgres-1.0.0", "redis-2.0.0"]
         packages, mode = resolve_packages("", all_packages=self.all_packages, head_tags=tags)
         assert packages == ["postgres", "redis"]
-        assert "auto-detect" in mode
+        assert mode == "auto-detect from tags at HEAD"
 
     def test_unknown_package_exits(self):
         with pytest.raises(SystemExit):
