@@ -120,7 +120,6 @@ def test_set_header():
     assert http.get_header('Accept') == 'application/json'
 
 
-
 def test_set_header_case_insensitive():
     http = RequestsWrapper({}, {})
     http.set_header('accept', 'application/json')
