@@ -18,43 +18,71 @@
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16723"
+                                "table_id": "16723",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16723"
+                                "table_id": "16723",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16723"
+                                "table_id": "16723",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16723"
+                                "table_id": "16723",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16723"
+                                "table_id": "16723",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16723"
+                        "toast_table": "pg_toast_16723",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "608",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -94,21 +122,40 @@
                         "columns": [
                             {
                                 "name": "id",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16775"
+                                "table_id": "16775",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "name",
+                                "column_number": 2,
                                 "data_type": "text",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16775"
+                                "table_id": "16775",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "0",
+                        "min_mxid": "0",
+                        "has_indexes": false,
+                        "relation_kind": "f",
+                        "num_columns": 2,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -133,43 +180,71 @@
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16729"
+                                "table_id": "16729",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16729"
+                                "table_id": "16729",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16729"
+                                "table_id": "16729",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16729"
+                                "table_id": "16729",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16729"
+                                "table_id": "16729",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16729"
+                        "toast_table": "pg_toast_16729",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "609",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -194,43 +269,71 @@
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16681"
+                                "table_id": "16681",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16681"
+                                "table_id": "16681",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16681"
+                                "table_id": "16681",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16681"
+                                "table_id": "16681",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16681"
+                                "table_id": "16681",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16681"
+                        "toast_table": "pg_toast_16681",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "601",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -255,43 +358,71 @@
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16711"
+                                "table_id": "16711",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16711"
+                                "table_id": "16711",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16711"
+                                "table_id": "16711",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16711"
+                                "table_id": "16711",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16711"
+                                "table_id": "16711",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16711"
+                        "toast_table": "pg_toast_16711",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "606",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -316,43 +447,71 @@
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16675"
+                                "table_id": "16675",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16675"
+                                "table_id": "16675",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16675"
+                                "table_id": "16675",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16675"
+                                "table_id": "16675",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16675"
+                                "table_id": "16675",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16675"
+                        "toast_table": "pg_toast_16675",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "600",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -377,38 +536,53 @@
                         "columns": [
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16735"
+                                "table_id": "16735",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16735"
+                                "table_id": "16735",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16735"
+                                "table_id": "16735",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16735"
+                                "table_id": "16735",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": false,
                                 "default": null,
-                                "table_id": "16735"
+                                "table_id": "16735",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             }
                         ],
                         "indexes": [
@@ -429,7 +603,20 @@
                             }
                         ],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16735"
+                        "toast_table": "pg_toast_16735",
+                        "row_count_estimate": 2.0,
+                        "page_count": 1,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "610",
+                        "min_mxid": "1",
+                        "has_indexes": true,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -454,43 +641,71 @@
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16699"
+                                "table_id": "16699",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16699"
+                                "table_id": "16699",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16699"
+                                "table_id": "16699",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16699"
+                                "table_id": "16699",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16699"
+                                "table_id": "16699",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16699"
+                        "toast_table": "pg_toast_16699",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "604",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -530,43 +745,71 @@
                         "columns": [
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16745"
+                                "table_id": "16745",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16745"
+                                "table_id": "16745",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16745"
+                                "table_id": "16745",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16745"
+                                "table_id": "16745",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": false,
                                 "default": "nextval('pgtable_personid_seq'::regclass)",
-                                "table_id": "16745"
+                                "table_id": "16745",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             }
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16745"
+                        "toast_table": "pg_toast_16745",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "612",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -591,17 +834,23 @@
                         "columns": [
                             {
                                 "name": "city",
+                                "column_number": 1,
                                 "data_type": "character varying(255)",
                                 "nullable": false,
                                 "default": null,
-                                "table_id": "16634"
+                                "table_id": "16634",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "country",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16634"
+                                "table_id": "16634",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [
@@ -622,7 +871,20 @@
                             }
                         ],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16634"
+                        "toast_table": "pg_toast_16634",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "593",
+                        "min_mxid": "1",
+                        "has_indexes": true,
+                        "relation_kind": "r",
+                        "num_columns": 2,
+                        "num_check_constraints": 0,
+                        "has_triggers": true,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -647,43 +909,71 @@
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16717"
+                                "table_id": "16717",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16717"
+                                "table_id": "16717",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16717"
+                                "table_id": "16717",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16717"
+                                "table_id": "16717",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16717"
+                                "table_id": "16717",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16717"
+                        "toast_table": "pg_toast_16717",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "607",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -708,43 +998,71 @@
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16657"
+                                "table_id": "16657",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16657"
+                                "table_id": "16657",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16657"
+                                "table_id": "16657",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16657"
+                                "table_id": "16657",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16657"
+                                "table_id": "16657",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16657"
+                        "toast_table": "pg_toast_16657",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "597",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -769,38 +1087,53 @@
                         "columns": [
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16644"
+                                "table_id": "16644",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16644"
+                                "table_id": "16644",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16644"
+                                "table_id": "16644",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": false,
                                 "default": "nextval('persons_personid_seq'::regclass)",
-                                "table_id": "16644"
+                                "table_id": "16644",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": "'New York'::character varying",
-                                "table_id": "16644"
+                                "table_id": "16644",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
@@ -811,7 +1144,20 @@
                                 "table_id": "16644"
                             }
                         ],
-                        "toast_table": "pg_toast_16644"
+                        "toast_table": "pg_toast_16644",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "595",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": true,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -836,43 +1182,71 @@
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16687"
+                                "table_id": "16687",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16687"
+                                "table_id": "16687",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16687"
+                                "table_id": "16687",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16687"
+                                "table_id": "16687",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16687"
+                                "table_id": "16687",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16687"
+                        "toast_table": "pg_toast_16687",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "602",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -897,43 +1271,71 @@
                         "columns": [
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16754"
+                                "table_id": "16754",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16754"
+                                "table_id": "16754",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16754"
+                                "table_id": "16754",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16754"
+                                "table_id": "16754",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": false,
                                 "default": "nextval('pg_newtable_personid_seq'::regclass)",
-                                "table_id": "16754"
+                                "table_id": "16754",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             }
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16754"
+                        "toast_table": "pg_toast_16754",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "614",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -958,43 +1360,71 @@
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16705"
+                                "table_id": "16705",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16705"
+                                "table_id": "16705",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16705"
+                                "table_id": "16705",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16705"
+                                "table_id": "16705",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16705"
+                                "table_id": "16705",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16705"
+                        "toast_table": "pg_toast_16705",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "605",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -1019,43 +1449,71 @@
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16693"
+                                "table_id": "16693",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16693"
+                                "table_id": "16693",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16693"
+                                "table_id": "16693",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16693"
+                                "table_id": "16693",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16693"
+                                "table_id": "16693",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16693"
+                        "toast_table": "pg_toast_16693",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "603",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -1080,43 +1538,71 @@
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16663"
+                                "table_id": "16663",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16663"
+                                "table_id": "16663",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16663"
+                                "table_id": "16663",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16663"
+                                "table_id": "16663",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16663"
+                                "table_id": "16663",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16663"
+                        "toast_table": "pg_toast_16663",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "598",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -1141,17 +1627,23 @@
                         "columns": [
                             {
                                 "name": "city",
+                                "column_number": 1,
                                 "data_type": "character varying(255)",
                                 "nullable": false,
                                 "default": null,
-                                "table_id": "16762"
+                                "table_id": "16762",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "country",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16762"
+                                "table_id": "16762",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [
@@ -1172,7 +1664,20 @@
                             }
                         ],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16762"
+                        "toast_table": "pg_toast_16762",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "617",
+                        "min_mxid": "1",
+                        "has_indexes": true,
+                        "relation_kind": "r",
+                        "num_columns": 2,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
@@ -1197,43 +1702,71 @@
                         "columns": [
                             {
                                 "name": "personid",
+                                "column_number": 1,
                                 "data_type": "integer",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16669"
+                                "table_id": "16669",
+                                "is_dropped": false,
+                                "storage_type": "p"
                             },
                             {
                                 "name": "lastname",
+                                "column_number": 2,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16669"
+                                "table_id": "16669",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "firstname",
+                                "column_number": 3,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16669"
+                                "table_id": "16669",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "address",
+                                "column_number": 4,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16669"
+                                "table_id": "16669",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             },
                             {
                                 "name": "city",
+                                "column_number": 5,
                                 "data_type": "character varying(255)",
                                 "nullable": true,
                                 "default": null,
-                                "table_id": "16669"
+                                "table_id": "16669",
+                                "is_dropped": false,
+                                "storage_type": "x"
                             }
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16669"
+                        "toast_table": "pg_toast_16669",
+                        "row_count_estimate": 0.0,
+                        "page_count": 0,
+                        "all_visible_pages": 0,
+                        "frozen_xid": "599",
+                        "min_mxid": "1",
+                        "has_indexes": false,
+                        "relation_kind": "r",
+                        "num_columns": 5,
+                        "num_check_constraints": 0,
+                        "has_triggers": false,
+                        "row_security_enabled": false,
+                        "is_populated": true,
+                        "is_partition": false
                     }
                 ]
             }
