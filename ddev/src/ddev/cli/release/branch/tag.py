@@ -77,7 +77,7 @@ def _build_agent_yaml_points_to_main() -> bool:
     from ddev.utils.fs import Path
 
     path = Path('.gitlab/build_agent.yaml')
-    return path.exists() and bool(re.search(r'\s+branch:\s+main', path.read_text()))
+    return path.exists() and bool(re.search(r'\s+branch:\s+main$', path.read_text(), re.MULTILINE))
 
 
 def _extract_patch_and_rc(version_tags):
