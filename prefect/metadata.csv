@@ -41,7 +41,7 @@ prefect.server.task_runs.execution_duration.count,gauge,,run,second,Count of tas
 prefect.server.task_runs.execution_duration.max,gauge,,second,,Maximum execution time of individual task runs.,0,prefect,task exec dur max,,
 prefect.server.task_runs.execution_duration.median,gauge,,second,,Median execution time of individual task runs.,0,prefect,task exec dur median,,
 prefect.server.task_runs.failed.count,count,,run,,Number of task runs that failed in the collection interval.,0,prefect,task runs failed,,
-prefect.server.task_runs.late_start.count,count,,run,,Number of task runs that started later than scheduled.,0,prefect,task runs late start,,
+prefect.server.task_runs.late_start.count,count,,run,,Number of task runs that started later than their scheduled time.,0,prefect,task runs late start,,
 prefect.server.task_runs.paused,gauge,,run,,Number of task runs currently paused.,0,prefect,task runs paused,,
 prefect.server.task_runs.pending,gauge,,run,,Number of task runs currently in the pending state.,0,prefect,task runs pending,,
 prefect.server.task_runs.running,gauge,,run,,Number of task runs currently in the running state.,0,prefect,task runs running,,
