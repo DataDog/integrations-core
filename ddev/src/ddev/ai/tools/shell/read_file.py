@@ -4,8 +4,9 @@
 from dataclasses import dataclass
 from typing import Annotated
 
-from .base import safe_int
-from .cmd import CmdTool
+from ddev.ai.tools.core.base import safe_int
+
+from .base import CmdTool
 
 
 @dataclass

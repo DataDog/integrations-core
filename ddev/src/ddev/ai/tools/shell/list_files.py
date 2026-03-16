@@ -4,7 +4,7 @@
 from dataclasses import dataclass
 from typing import Annotated
 
-from .cmd import CmdTool
+from .base import CmdTool
 
 
 @dataclass

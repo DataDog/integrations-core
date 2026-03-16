@@ -7,8 +7,8 @@ from typing import Annotated
 
 import pytest
 
-from ddev.ai.tools.base import BaseTool, _get_input_type, _resolve_json_type, build_schema, safe_int
-from ddev.ai.tools.types import ToolResult
+from ddev.ai.tools.core.base import BaseTool, _get_input_type, _resolve_json_type, build_schema, safe_int
+from ddev.ai.tools.core.types import ToolResult
 
 # ---------------------------------------------------------------------------
 # Minimal concrete tools used across tests
