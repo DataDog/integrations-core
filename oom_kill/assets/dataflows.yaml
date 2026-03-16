@@ -1,0 +1,9 @@
+provides:
+  - id: oom-kill-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: oom-kill-events
+    always_on: true
+    data_type: events
+    direction: inbound

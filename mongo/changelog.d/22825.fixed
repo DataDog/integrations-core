@@ -1,0 +1,1 @@
+Fix ``IllegalOperation`` errors in DBM explain plans caused by attempting to explain ``listIndexes`` commands.

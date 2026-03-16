@@ -23,8 +23,8 @@ def test_default():
             'agent': os.path.join('~', 'dd', 'datadog-agent'),
         },
         'agents': {
-            'dev': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
-            '7': {'docker': 'datadog/agent:7', 'local': '7'},
+            'dev': {'docker': 'registry.datadoghq.com/agent-dev:master-py3', 'local': 'latest'},
+            '7': {'docker': 'registry.datadoghq.com/agent:7', 'local': '7'},
         },
         'orgs': {
             'default': {
@@ -191,7 +191,7 @@ class TestAgent:
     def test_default(self):
         config = RootConfig({})
 
-        agent_config = {'docker': 'datadog/agent-dev:master', 'local': 'latest'}
+        agent_config = {'docker': 'registry.datadoghq.com/agent-dev:master-py3', 'local': 'latest'}
         assert config.agent.name == config.agent.name == 'dev'
         assert config.agent.config == config.agent.config == agent_config
         assert config.agent.raw_data == {'name': 'dev', 'config': agent_config}
@@ -213,7 +213,7 @@ class TestAgent:
     def test_defined(self):
         config = RootConfig({'agent': '7'})
 
-        agent_config = {'docker': 'datadog/agent:7', 'local': '7'}
+        agent_config = {'docker': 'registry.datadoghq.com/agent:7', 'local': '7'}
         assert config.agent.name == config.agent.name == '7'
         assert config.agent.config == config.agent.config == agent_config
         assert config.agent.raw_data == {'name': '7', 'config': agent_config}
@@ -271,7 +271,7 @@ class TestAgent:
         config.agent.name = 9000
         assert config.agent.raw_data == {
             'name': 9000,
-            'config': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
+            'config': {'docker': 'registry.datadoghq.com/agent-dev:master-py3', 'local': 'latest'},
         }
 
         with pytest.raises(
@@ -548,8 +548,8 @@ class TestAgents:
         config = RootConfig({})
 
         agents = {
-            'dev': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
-            '7': {'docker': 'datadog/agent:7', 'local': '7'},
+            'dev': {'docker': 'registry.datadoghq.com/agent-dev:master-py3', 'local': 'latest'},
+            '7': {'docker': 'registry.datadoghq.com/agent:7', 'local': '7'},
         }
         assert config.agents == agents
         assert config.raw_data == {'agents': agents}

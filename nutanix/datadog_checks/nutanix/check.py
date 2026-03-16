@@ -108,16 +108,33 @@ class NutanixCheck(AgentCheck):
         categories = entity.get("categories")
         if categories:
             for c in categories:
-                category_id = c.get("extId")
-                if category_id and category_id in self.categories:
-                    category = self.categories[category_id]
-                    key = category.get("key")
-                    value = category.get("value")
-                    if key and value:
-                        if self.prefix_category_tags:
-                            tags.append(f"ntnx_{key}:{value}")
-                        else:
-                            tags.append(f"{key}:{value}")
+                if isinstance(c, dict):
+                    category_id = c.get("extId")
+                elif isinstance(c, str):
+                    category_id = c
+                else:
+                    self.log.debug(
+                        "Skipping unexpected category entry type=%s value=%r",
+                        type(c),
+                        c,
+                    )
+                    continue
+
+                if not category_id:
+                    continue
+
+                category = self.categories.get(category_id)
+                if not isinstance(category, dict):
+                    continue
+
+                key = category.get("key")
+                value = category.get("value")
+
+                if key and value:
+                    if self.prefix_category_tags:
+                        tags.append(f"ntnx_{key}:{value}")
+                    else:
+                        tags.append(f"{key}:{value}")
         return tags
 
     def check(self, _):
@@ -178,8 +195,8 @@ class NutanixCheck(AgentCheck):
             return True
         except (HTTPError, InvalidURL, ConnectionError, Timeout) as e:
             self.log.error("[PC:%s:%s] Failed to connect: %s", self.pc_ip, self.pc_port, str(e))
-        except Exception as e:
-            self.log.error("[PC:%s:%s] Unexpected connection error: %s", self.pc_ip, self.pc_port, e)
+        except Exception:
+            self.log.exception("[PC:%s:%s] Unexpected connection error", self.pc_ip, self.pc_port)
 
         self.gauge("health.up", 0, tags=self.base_tags)
         return False
@@ -273,11 +290,17 @@ class NutanixCheck(AgentCheck):
             if not data:
                 break
 
-            all_items.extend(data)
+            if isinstance(data, dict):
+                all_items.append(data)
+            else:
+                all_items.extend(data)
 
             # check next page
             links = payload.get("metadata", {}).get("links", [])
-            next_link = next((link.get("href") for link in links if link.get("rel") == "next"), None)
+            next_link = next(
+                (link.get("href") for link in links if isinstance(link, dict) and link.get("rel") == "next"),
+                None,
+            )
 
             if not next_link:
                 break

@@ -124,6 +124,7 @@
             "currentClusterFaultTolerance": "CFT_1N_OR_1D",
             "desiredClusterFaultTolerance": "CFT_1N_OR_1D"
           },
+          "operationMode": "NORMAL",
           "pulseStatus": {
             "$reserved": {
               "$fv": "v4.r1"
@@ -207,7 +208,10 @@
             "isSegmentationEnabled": false
           }
         },
-        "upgradeStatus": "SUCCEEDED"
+        "upgradeStatus": "SUCCEEDED",
+        "categories": [
+          "66ae6983-5a95-3f0b-9e5d-b5b603b5f2c0"
+        ]
       },
       {
         "$reserved": {

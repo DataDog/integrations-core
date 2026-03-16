@@ -1,0 +1,5 @@
+provides:
+  - id: kube-dns-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
