@@ -38,45 +38,43 @@ class TestDetectFromTags:
         tags = ["datadog_checks_base-7.0.0rc1"]
         assert detect_from_tags(tags) == ["datadog_checks_base"]
 
-    def test_hyphenated_package_name(self):
-        # The regex strips from the LAST -X.Y.Z occurrence
+    def test_strips_only_version_suffix(self):
         tags = ["amazon-msk-1.2.3"]
         assert detect_from_tags(tags) == ["amazon-msk"]
 
 
 class TestResolvePackages:
-    ALL = ["mysql", "postgres", "redis"]
+    all_packages = ["mysql", "postgres", "redis"]
 
     def test_all_keyword(self):
-        packages, mode = resolve_packages("all", self.ALL)
-        assert packages == self.ALL
-        assert "all" in mode
-        assert str(len(self.ALL)) in mode
+        packages, mode = resolve_packages("all", all_packages=self.all_packages)
+        assert packages == self.all_packages
+        assert mode == f"all ({len(self.all_packages)} packages in repo)"
 
     def test_all_keyword_case_insensitive(self):
-        packages, _ = resolve_packages("ALL", self.ALL)
-        assert packages == self.ALL
+        packages, _ = resolve_packages("ALL", all_packages=self.all_packages)
+        assert packages == self.all_packages
 
     def test_json_array(self):
-        packages, mode = resolve_packages('["postgres","mysql"]', self.ALL)
+        packages, mode = resolve_packages('["postgres","mysql"]', all_packages=self.all_packages)
         assert packages == ["postgres", "mysql"]
         assert "manual" in mode
 
     def test_auto_detect(self):
         tags = ["postgres-1.0.0", "redis-2.0.0"]
-        packages, mode = resolve_packages("", self.ALL, head_tags=tags)
+        packages, mode = resolve_packages("", all_packages=self.all_packages, head_tags=tags)
         assert packages == ["postgres", "redis"]
         assert "auto-detect" in mode
 
     def test_unknown_package_exits(self):
         with pytest.raises(SystemExit):
-            resolve_packages('["unknown_pkg"]', self.ALL)
+            resolve_packages('["unknown_pkg"]', all_packages=self.all_packages)
 
     def test_invalid_json_exits(self):
         with pytest.raises(SystemExit):
-            resolve_packages("not-json", self.ALL)
+            resolve_packages("not-json", all_packages=self.all_packages)
 
     def test_unknown_in_auto_detect_exits(self):
         tags = ["not-a-package-1.0.0"]
         with pytest.raises(SystemExit):
-            resolve_packages("", self.ALL, head_tags=tags)
+            resolve_packages("", all_packages=self.all_packages, head_tags=tags)

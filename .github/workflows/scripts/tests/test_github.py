@@ -1,17 +1,18 @@
 """Tests for _release.github."""
+import pytest
 from _release.github import parse_bool_env, set_outputs, write_summary
 
 
 class TestParseBoolEnv:
-    def test_true_values(self, monkeypatch):
-        for val in ("true", "True", "TRUE", "1", "yes", "YES"):
-            monkeypatch.setenv("MY_FLAG", val)
-            assert parse_bool_env("MY_FLAG") is True, f"Expected True for {val!r}"
+    @pytest.mark.parametrize("val", ["true", "True", "TRUE", "1", "yes", "YES"])
+    def test_true_values(self, monkeypatch, val):
+        monkeypatch.setenv("MY_FLAG", val)
+        assert parse_bool_env("MY_FLAG") is True
 
-    def test_false_values(self, monkeypatch):
-        for val in ("false", "False", "FALSE", "0", "no", "NO"):
-            monkeypatch.setenv("MY_FLAG", val)
-            assert parse_bool_env("MY_FLAG") is False, f"Expected False for {val!r}"
+    @pytest.mark.parametrize("val", ["false", "False", "FALSE", "0", "no", "NO"])
+    def test_false_values(self, monkeypatch, val):
+        monkeypatch.setenv("MY_FLAG", val)
+        assert parse_bool_env("MY_FLAG") is False
 
     def test_missing_or_empty_uses_default(self, monkeypatch):
         monkeypatch.delenv("MY_FLAG", raising=False)
