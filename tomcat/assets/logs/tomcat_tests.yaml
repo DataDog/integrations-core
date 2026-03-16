@@ -346,7 +346,7 @@ tests:
         actor:
           process:
             name: java
-            uid: jvm-gc-process
+            uid: unknown
         category_name: System Activity
         category_uid: 1
         class_name: Memory Activity
@@ -364,7 +364,7 @@ tests:
           version: 1.5.0
         process:
           name: java
-          uid: jvm-gc-process
+          uid: unknown
         severity: Informational
         severity_id: 1
         time: 1553092590111
@@ -428,7 +428,7 @@ tests:
         actor:
           process:
             name: java
-            uid: jvm-gc-process
+            uid: unknown
         category_name: System Activity
         category_uid: 1
         class_name: Memory Activity
@@ -446,7 +446,7 @@ tests:
           version: 1.5.0
         process:
           name: java
-          uid: jvm-gc-process
+          uid: unknown
         severity: Informational
         severity_id: 1
         time: 1553092590111
@@ -467,7 +467,7 @@ tests:
         actor:
           process:
             name: java
-            uid: jvm-gc-process
+            uid: unknown
         category_name: System Activity
         category_uid: 1
         class_name: Memory Activity
@@ -485,7 +485,7 @@ tests:
           version: 1.5.0
         process:
           name: java
-          uid: jvm-gc-process
+          uid: unknown
         severity: Informational
         severity_id: 1
         time: 1553092590111
@@ -505,7 +505,7 @@ tests:
         actor:
           process:
             name: java
-            uid: jvm-gc-process
+            uid: unknown
         category_name: System Activity
         category_uid: 1
         class_name: Memory Activity
@@ -522,7 +522,7 @@ tests:
           version: 1.5.0
         process:
           name: java
-          uid: jvm-gc-process
+          uid: unknown
         severity: Informational
         severity_id: 1
         time: 1553092590111
