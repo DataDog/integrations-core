@@ -8,6 +8,7 @@ on:
     branches: [ master ]
     paths:
       - '**/*.py'
+      - '.github/workflows/codeql-analysis.yml'
 
 jobs:
   analyze:
