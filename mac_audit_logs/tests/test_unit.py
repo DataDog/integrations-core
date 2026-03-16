@@ -260,28 +260,28 @@ def test_get_previous_iteration_log_cursor_when_cusror_is_not_none(utc_timestamp
 
 @patch('datadog_checks.mac_audit_logs.check.subprocess.Popen')
 def test_fetch_audit_logs(mock_popen, instance):
+    """Multiple file paths are joined into a single auditreduce command."""
     logs = (
         "<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 244 msec\" > /></record>\n<record time=\"Thu Jun  5 "
         "13:51:39 2025\" msec=\" + 154 msec\" > /></record>"
     )
     log_file_entries = logs.split("\n")
     check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
-    # Create a mock for the stdout and stderr data
     mock_auditreduce_stdout = MagicMock()
     mock_auditreduce_process = MagicMock(stdout=mock_auditreduce_stdout)
     mock_praudit_process = MagicMock(communicate=MagicMock(return_value=(logs, "")))
 
-    # Set up the mock Popen objects
     mock_popen.side_effect = [mock_auditreduce_process, mock_praudit_process]
 
-    # Call the method
-    file_path = "/var/audit/20250605082138.20250605082142"
+    file_paths = [
+        "/var/audit/20250605082138.20250605082142",
+        "/var/audit/20250605082142.20250605082150",
+    ]
     time_filter_arg = "20250605132138"
-    output, error = check.fetch_audit_logs(file_path, time_filter_arg)
+    output, error = check.fetch_audit_logs(file_paths, time_filter_arg)
 
-    # Check that Popen was called with the correct arguments
     mock_popen.assert_any_call(
-        f"sudo auditreduce -a {time_filter_arg} {file_path}",
+        f"sudo auditreduce -a {time_filter_arg} {file_paths[0]} {file_paths[1]}",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -291,18 +291,40 @@ def test_fetch_audit_logs(mock_popen, instance):
         'sudo praudit -xsl', shell=True, stdin=mock_auditreduce_stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
 
-    # Check the communicate method was called
     mock_praudit_process.communicate.assert_called_once()
 
-    # Define expected results
-    expected_output = logs
     log_entries = output.split("\n")
-    expected_error = ""
-
-    # Check if the result matches the expected output
-    assert output == expected_output
-    assert error == expected_error
+    assert output == logs
+    assert error == ""
     assert len(log_entries) == len(log_file_entries)
+
+
+@patch('datadog_checks.mac_audit_logs.check.subprocess.Popen')
+def test_fetch_audit_logs_single_file(mock_popen, instance):
+    """A single-element list produces the correct auditreduce command."""
+    logs = "<record time=\"Thu Jun  5 13:51:38 2025\" msec=\" + 244 msec\" > /></record>"
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+    mock_auditreduce_stdout = MagicMock()
+    mock_auditreduce_process = MagicMock(stdout=mock_auditreduce_stdout)
+    mock_praudit_process = MagicMock(communicate=MagicMock(return_value=(logs, "")))
+
+    mock_popen.side_effect = [mock_auditreduce_process, mock_praudit_process]
+
+    file_path = "/var/audit/20250605082138.20250605082142"
+    time_filter_arg = "20250605132138"
+    output, error = check.fetch_audit_logs([file_path], time_filter_arg)
+
+    mock_popen.assert_any_call(
+        f"sudo auditreduce -a {time_filter_arg} {file_path}",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env={**os.environ, "TZ": "UTC"},
+    )
+    assert mock_popen.call_count == 2
+    mock_praudit_process.communicate.assert_called_once()
+    assert output == logs
+    assert error == ""
 
 
 @patch.object(MacAuditLogsCheck, 'send_log')

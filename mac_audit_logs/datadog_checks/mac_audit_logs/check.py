@@ -110,14 +110,13 @@ class MacAuditLogsCheck(AgentCheck):
 
         return last_record_time, last_record_milli_sec, last_collected_file_name
 
-    def fetch_audit_logs(self, file_path, time_filter_arg) -> Tuple[str, str]:
+    def fetch_audit_logs(self, file_paths: list[str], time_filter_arg) -> tuple[str, str]:
         output = error = ""
 
-        auditreduce_command = f"sudo auditreduce -a {time_filter_arg} {file_path}"
+        auditreduce_command = f"sudo auditreduce -a {time_filter_arg} {' '.join(file_paths)}"
         praudit_command = "sudo praudit -xsl"
 
         try:
-            # use TZ=UTC because auditreduce does not translate daylight savings to UTC and always uses standard time
             auditreduce_process = subprocess.Popen(
                 auditreduce_command,
                 shell=True,
@@ -140,7 +139,7 @@ class MacAuditLogsCheck(AgentCheck):
             return output, error
 
         except Exception as e:
-            err_message = f"Error processing file {file_path}: {e}"
+            err_message = f"Error processing files {file_paths}: {e}"
             self.log.exception(constants.LOG_TEMPLATE.format(message=err_message))
         finally:
             message = "Processes auditreduce and praudit have been closed."
@@ -263,7 +262,7 @@ class MacAuditLogsCheck(AgentCheck):
             time_filter_arg = last_record_time if file_index == 0 else start_time_str
 
             try:
-                output, error = self.fetch_audit_logs(file_path, time_filter_arg)
+                output, error = self.fetch_audit_logs([file_path], time_filter_arg)
 
                 output_str = output.decode("utf-8", errors="replace")
 
