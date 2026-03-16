@@ -1,6 +1,6 @@
 {
     "title": "Zero Networks - Audit",
-    "description": "This Dashboard provides insights into audit logs generated on Zero Networks Platform.",
+    "description": "This Dashboard provides insights into audit logs generated on Zero Networks Platform. ",
     "widgets": [
         {
             "id": 1863500026524962,
