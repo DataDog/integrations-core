@@ -285,7 +285,7 @@ class PostgreSql(DatabaseCheck):
             queries=queries,
             tags=self.tags_without_db,
             hostname=self.reported_hostname,
-            track_operation_time=True,
+            track_operation_time=self._config.enable_operation_tracking,
         )
 
     def execute_query_raw(self, query, db):
@@ -655,7 +655,15 @@ class PostgreSql(DatabaseCheck):
             with self.db() if dbname is None else self.db_pool.get_connection(dbname) as conn:
                 with conn.cursor() as cursor:
                     query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
-                    with tracked_query(check=self, operation='custom_metrics' if is_custom_metrics else scope['name']):
+                    execution_context = (
+                        tracked_query(
+                            check=self,
+                            operation='custom_metrics' if is_custom_metrics else scope['name'],
+                        )
+                        if self._config.enable_operation_tracking
+                        else contextlib.nullcontext()
+                    )
+                    with execution_context:
                         # if this is a relation-specific query, we need to list all relations last
                         if is_relations:
                             schema_field = get_schema_field(descriptors)

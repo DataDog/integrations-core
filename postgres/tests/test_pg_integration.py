@@ -116,6 +116,14 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_metrics_metadata(aggregator)
 
 
+def test_operation_tracking_disabled(aggregator, integration_check, pg_instance):
+    pg_instance['enable_operation_tracking'] = False
+    check = integration_check(pg_instance)
+    check.run()
+    aggregator.assert_metric('dd.postgres.operation.time', count=0)
+
+
+
 def _increase_txid(cur):
     # Force increases of txid
     if float(POSTGRES_VERSION) >= 13.0:

@@ -219,6 +219,14 @@ files:
       value:
         type: integer
         example: 60000
+    - name: enable_operation_tracking
+      description: |
+        When enabled, the check submits `dd.postgres.operation.time` histogram metrics
+        tracking the execution time of each metric collection query operation.
+      hidden: true
+      value:
+        type: boolean
+        example: true
     - name: max_connections
       hidden: true
       description: |
