@@ -1,0 +1,1 @@
+Fix stale database metrics cache when autodiscovered databases are removed. Previously, database-level metric query executors (e.g. ``sys.database_files``) were never rebuilt after autodiscovery detected database changes, causing persistent ``Database 'X' does not exist`` errors until agent restart.

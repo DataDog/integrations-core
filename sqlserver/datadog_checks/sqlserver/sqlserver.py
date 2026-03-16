@@ -594,6 +594,7 @@ class SQLServer(DatabaseCheck):
             if filtered_dbs != self.databases:
                 self.log.debug("Databases updated from previous autodiscovery check.")
                 self.databases = filtered_dbs
+                self._database_metrics = None
                 return True
         return False
 

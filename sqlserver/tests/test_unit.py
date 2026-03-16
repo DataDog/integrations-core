@@ -301,6 +301,32 @@ def test_azure_autodiscovery_exclude_override(instance_autodiscovery):
     assert check.databases == {Database("tempdb", "tempdb")}
 
 
+def test_autodiscovery_resets_database_metrics_on_change(instance_autodiscovery):
+    """When autodiscovery detects a database change, _database_metrics must be
+    reset so that query executors are rebuilt with the updated database list."""
+    fetchall_results, mock_cursor = _mock_database_list()
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+
+    # First autodiscovery run — discovers all databases
+    check.autodiscover_databases(mock_cursor)
+    assert check.databases == {Database(r.name) for r in fetchall_results}
+
+    # Simulate _database_metrics being built (as happens during collect_metrics)
+    check._database_metrics = [mock.MagicMock()]
+    assert check._database_metrics is not None
+
+    # Second autodiscovery run with a database removed — simulate by returning fewer rows
+    Row = namedtuple('Row', 'name')
+    reduced_results = [Row('master'), Row('tempdb'), Row('msdb')]
+    mock_cursor.fetchall.return_value = iter(reduced_results)
+    check._ad_last_check = 0  # force autodiscovery to run again
+
+    changed = check.autodiscover_databases(mock_cursor)
+    assert changed is True
+    assert check.databases == {Database('master'), Database('tempdb'), Database('msdb')}
+    assert check._database_metrics is None
+
+
 @pytest.mark.parametrize(
     'base_name',
     [
