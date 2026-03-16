@@ -46,9 +46,9 @@ See [metadata.csv][9] for a list of metrics provided by this integration.
 ### Logs 
 1. Enable log collection in your `datadog.yaml` file:
 
-```
-logs_enabled: true
-```
+    ```
+    logs_enabled: true
+    ```
 2. Uncomment and edit the logs configuration block in your `prefect.d/conf.yaml` file. For example:
 
     ```
