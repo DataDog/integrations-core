@@ -63,8 +63,7 @@ LIMIT {max_samples}
 
 # Cloud variant: adds hostName() so per-node checkpoints can be tracked,
 # preventing the cross-node query_log flush race on multi-node ClickHouse
-# Cloud clusters.  Unlike the statements cloud query, there is no merge
-# step because completions are individual rows, not aggregated.
+# Cloud clusters.
 COMPLETED_QUERIES_QUERY_CLOUD = """
 SELECT
     normalized_query_hash,

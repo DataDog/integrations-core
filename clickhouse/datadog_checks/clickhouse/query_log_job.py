@@ -35,9 +35,7 @@ from datadog_checks.base.utils.serialization import json
 GET_CURRENT_TIME_QUERY = "SELECT toUnixTimestamp64Micro(now64(6))"
 
 # If a node's checkpoint is more than this far behind the most advanced node,
-# it is considered decommissioned/quiet and evicted from the per-node map so
-# that its stale timestamp does not drag min_checkpoint (and therefore the
-# event_date partition filter) into the distant past.
+# it is considered decommissioned
 _NODE_CHECKPOINT_STALENESS_THRESHOLD_US = 60 * 60 * 1_000_000  # 1 hour
 
 # List of internal Cloud users to exclude from query metrics/samples
@@ -115,8 +113,7 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         self._current_checkpoint_microseconds = None
 
         # Per-node checkpoint state for multi-node clusters (ClickHouse Cloud).
-        # Tracks the last seen event_time per server node to prevent
-        # cross-node query_log flush races from causing data loss.
+        # Tracks the last seen event_time per server node
         self._node_checkpoints = None  # {node_name: checkpoint_microseconds}
         self._pending_node_checkpoints = {}  # accumulated during current collection
 
@@ -317,9 +314,6 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         """
         return "cluster-wide (single endpoint)" if self._check.is_single_endpoint_mode else "local (direct)"
 
-    # ------------------------------------------------------------------
-    # Per-node checkpoint methods (for multi-node ClickHouse Cloud)
-    # ------------------------------------------------------------------
 
     def _load_node_checkpoints(self) -> dict:
         """Load per-node checkpoints from persistent cache."""

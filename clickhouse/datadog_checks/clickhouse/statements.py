@@ -79,9 +79,7 @@ ORDER BY total_duration_ms DESC  -- Prioritize queries with highest system impac
 """
 
 # Cloud variant: adds hostName() to GROUP BY so each (query, node) pair
-# gets its own aggregation row.  Per-node rows are merged in Python after
-# per-node checkpoints are recorded, preventing the cross-node flush race
-# that causes undercounting on multi-node ClickHouse Cloud clusters.
+# gets its own aggregation row.
 STATEMENTS_QUERY_CLOUD = """
 SELECT
     normalized_query_hash,
