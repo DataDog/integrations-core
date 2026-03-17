@@ -38,6 +38,15 @@ class TestSendDispatch:
              patch("_release.dispatch._urlopen", side_effect=[self._http_error(503), self._http_error(502), mock_ctx]):
             send_dispatch(self._payload, "token", dispatch_url=self._url, max_attempts=3)
 
+    def test_authorization_header_sent(self):
+        mock_ctx = create_autospec(http.client.HTTPResponse, instance=True)
+        mock_ctx.__enter__.return_value = mock_ctx
+        mock_ctx.status = 204
+        with patch("_release.dispatch._urlopen", return_value=mock_ctx) as mock_urlopen:
+            send_dispatch(self._payload, "my-token", dispatch_url=self._url)
+        req = mock_urlopen.call_args.args[0]
+        assert req.get_header("Authorization") == "Bearer my-token"
+
 
 class TestBuildPayload:
     def test_structure(self):

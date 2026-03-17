@@ -133,6 +133,12 @@ class TestValidatePackage:
         assert result["type"] == PRE_RELEASE
         assert result["dispatch"] is True
 
+    def test_stable_on_pre_release_branch(self, tmp_path):
+        _make_package(tmp_path, "pkg", "1.0.0")
+        result = validate_package("pkg", tmp_path, is_stable_release=False)
+        assert result["type"] == STABLE
+        assert result["dispatch"] is False
+
 
 class TestValidatePackages:
     def test_multiple_packages(self, tmp_path):
