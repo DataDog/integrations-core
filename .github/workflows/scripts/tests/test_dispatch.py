@@ -44,7 +44,7 @@ class TestSendDispatch:
         mock_ctx.status = 204
         with patch("_release.dispatch._urlopen", return_value=mock_ctx) as mock_urlopen:
             send_dispatch(self._payload, "my-token", dispatch_url=self._url)
-        req = mock_urlopen.call_args.args[0]
+        req = mock_urlopen.mock_calls[0].args[0]
         assert req.get_header("Authorization") == "Bearer my-token"
 
 
@@ -64,9 +64,9 @@ class TestDispatchInBatches:
         packages = ["a", "b", "c"]
         with patch("_release.dispatch.send_dispatch") as mock_send:
             dispatch_in_batches(packages, "integrations-core", "sha1", "dev", "tok")
-        mock_send.assert_called_once()
-        payload = mock_send.call_args.args[0]
-        assert payload["client_payload"]["packages"] == packages
+        assert mock_send.mock_calls == [
+            call(build_payload(packages, "integrations-core", "sha1", "dev"), "tok"),
+        ]
 
     def test_splits_into_batches(self):
         packages = [f"pkg{i}" for i in range(8)]
@@ -81,7 +81,9 @@ class TestDispatchInBatches:
     def test_passes_token(self):
         with patch("_release.dispatch.send_dispatch") as mock_send:
             dispatch_in_batches(["pkg"], "repo", "ref", "dev", "my-token")
-        assert mock_send.call_args[0][1] == "my-token"
+        assert mock_send.mock_calls == [
+            call(build_payload(["pkg"], "repo", "ref", "dev"), "my-token"),
+        ]
 
     def test_empty_packages_does_not_dispatch(self):
         with patch("_release.dispatch.send_dispatch") as mock_send:
