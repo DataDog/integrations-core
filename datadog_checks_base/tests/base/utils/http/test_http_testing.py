@@ -70,3 +70,16 @@ def test_mock_response_normalize_leading_newline():
     response = MockHTTPResponse(content=content)
 
     assert response.text == 'Actual content'
+
+
+def test_mock_response_ok_property():
+    assert MockHTTPResponse(status_code=200).ok is True
+    assert MockHTTPResponse(status_code=399).ok is True
+    assert MockHTTPResponse(status_code=400).ok is False
+    assert MockHTTPResponse(status_code=500).ok is False
+
+
+def test_mock_response_reason_property():
+    assert MockHTTPResponse(status_code=200).reason == 'OK'
+    assert MockHTTPResponse(status_code=404).reason == 'Not Found'
+    assert MockHTTPResponse(status_code=999).reason == ''
