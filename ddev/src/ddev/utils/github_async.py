@@ -16,7 +16,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from ddev.config.file import ConfigFileWithOverrides
 
-# Common GitHub API pagination keys
 PAGINATION_KEYS = frozenset(
     [
         'items',
@@ -118,12 +117,23 @@ class IssueComment(BaseModel):
 
 
 class AsyncGitHubClient:
-    """Async GitHub API client with direct endpoint mapping."""
+    """Async GitHub API client with direct endpoint mapping.
+
+    Resource Management:
+        - Uses httpx.AsyncClient for HTTP connections
+        - Supports context manager protocol for automatic cleanup
+        - Client is lazily initialized on first request
+        - Properly closes connections via close() or context manager exit
+
+    Usage:
+        async with AsyncGitHubClient(token="...") as client:
+            response = await client.get_workflow_run("owner", "repo", 123)
+    """
 
     API_VERSION = '2022-11-28'
     BASE_URL = 'https://api.github.com'
 
-    def __init__(self, token: str | None = None, timeout: float = 30.0):
+    def __init__(self, token: str | None = None, timeout: float = 30.0) -> None:
         """
         Initialize the async GitHub client.
 
@@ -154,8 +164,12 @@ class AsyncGitHubClient:
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         await self.close()
 
-    async def _ensure_client(self):
-        """Ensure the async client is initialized."""
+    async def _ensure_client(self) -> None:
+        """Ensure the async client is initialized.
+
+        Creates an httpx.AsyncClient if not already initialized.
+        Called automatically before making requests.
+        """
         if self._client is None:
             self._client = httpx.AsyncClient(
                 base_url=self.BASE_URL,
@@ -166,8 +180,12 @@ class AsyncGitHubClient:
                 timeout=self._timeout,
             )
 
-    async def close(self):
-        """Close the async client."""
+    async def close(self) -> None:
+        """Close the async client and release resources.
+
+        Safe to call multiple times.
+        Automatically called when using context manager.
+        """
         if self._client is not None:
             await self._client.aclose()
             self._client = None
@@ -202,7 +220,6 @@ class AsyncGitHubClient:
 
         response = await self._client.request(method, url, params=params, json=json)
 
-        # Check for rate limiting
         if response.status_code == 403:
             remaining = response.headers.get('X-RateLimit-Remaining')
             if remaining == '0':
@@ -213,7 +230,6 @@ class AsyncGitHubClient:
                     wait_time = reset_timestamp - current_time
 
                     if wait_time > 0:
-                        # Rate limited - raise informative error
                         msg = (
                             f"GitHub API rate limit exceeded. "
                             f"Reset at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(reset_timestamp))} "
@@ -245,7 +261,6 @@ class AsyncGitHubClient:
         """
         response = await self._request(method, url, params=params, json=json_body)
 
-        # Handle JSON responses and empty responses
         data = response.json() if response.content else None
 
         return GitHubResponse[T](
@@ -286,12 +301,10 @@ class AsyncGitHubClient:
             if not response.pagination.next_url:
                 break
 
-            # Validate pagination URL before following
             if not self._validate_github_url(response.pagination.next_url):
                 msg = f"Invalid pagination URL: {response.pagination.next_url} - must point to api.github.com"
                 raise ValueError(msg)
 
-            # Use full URL from Link header for subsequent requests
             current_url = response.pagination.next_url
             current_params = None
             current_body = None
@@ -318,7 +331,6 @@ class AsyncGitHubClient:
             GitHubResponse with all pages merged into a single list or dict with paginated items
         """
         if not auto_paginate:
-            # Single page request
             return await self.request(method, url, params=params, json_body=json_body)
 
         all_data: list[Any] = []
@@ -329,23 +341,18 @@ class AsyncGitHubClient:
         async for response in self.iter_pages(method, url, params=params, json_body=json_body):
             last_response = response
 
-            # Extract list data from response
             if isinstance(response.data, list):
                 all_data.extend(response.data)
             elif isinstance(response.data, dict):
-                # Look for list data in dict
                 list_key = self._find_list_key(response.data)
                 if list_key:
                     all_data.extend(response.data[list_key])
                     wrapper_key = list_key
-                    # Preserve total_count if present
                     if 'total_count' in response.data:
                         total_count = response.data['total_count']
                 else:
-                    # No list found, treat as single item
                     all_data.append(response.data)
 
-        # Reconstruct wrapped response if needed
         if wrapper_key and last_response:
             result_data: dict[str, Any] = {wrapper_key: all_data}
             if total_count is not None:
@@ -364,12 +371,10 @@ class AsyncGitHubClient:
 
     def _find_list_key(self, data: dict[str, Any]) -> str | None:
         """Find the key containing list data in a dict."""
-        # Check known pagination keys first for efficiency
         for key in PAGINATION_KEYS:
             if key in data and isinstance(data[key], list):
                 return key
 
-        # Fall back to checking any list value
         for key, value in data.items():
             if isinstance(value, list) and value:
                 return key
@@ -442,11 +447,9 @@ class AsyncGitHubClient:
             GitHubResponse with dict containing 'artifacts' list and total_count (all pages if auto_paginate=True)
         """
         if auto_paginate:
-            # The artifacts endpoint always returns dict format with 'artifacts' key
             result = await self.request_all_pages(
                 'GET', f'/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts', params=kwargs, auto_paginate=True
             )
-            # Cast to the correct type since we know this endpoint returns dict format
             return cast(GitHubResponse[dict[str, Any]], result)
         return await self.request('GET', f'/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts', params=kwargs)
 
