@@ -49,15 +49,6 @@ class FailingTool(BaseTool[SimpleInput]):
         raise RuntimeError("something went wrong")
 
 
-class NoDocstringTool(BaseTool[SimpleInput]):
-    @property
-    def name(self) -> str:
-        return "nodoc"
-
-    async def __call__(self, tool_input: SimpleInput) -> ToolResult:
-        return ToolResult(success=True)
-
-
 class FullInputTool(BaseTool[FullInput]):
     """Tool using FullInput."""
 
@@ -74,30 +65,26 @@ class FullInputTool(BaseTool[FullInput]):
 # ---------------------------------------------------------------------------
 
 
-class TestSafeInt:
-    @pytest.mark.parametrize(
-        "value,expected",
-        [
-            (5, 5),
-            (3.7, 3),
-            ("42", 42),
-            ("0", 0),
-            ("-7", -7),
-        ],
-    )
-    def test_valid_conversions(self, value, expected):
-        assert safe_int(value, default=0) == expected
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        (5, 5),
+        (3.7, 3),
+        ("42", 42),
+        ("0", 0),
+        ("-7", -7),
+    ],
+)
+def test_safe_int_valid_conversions(value, expected):
+    assert safe_int(value, default=0) == expected
 
-    @pytest.mark.parametrize("value", ["abc", "3.5", "", None, [], {}])
-    def test_invalid_returns_default(self, value):
-        assert safe_int(value, default=-1) == -1
 
-    def test_default_none_returns_none_on_failure(self):
-        assert safe_int("bad", default=None) is None
-
-    def test_default_is_zero_when_omitted(self):
-        assert safe_int("bad") == 0
-        assert safe_int([1]) == 0
+@pytest.mark.parametrize("value", ["abc", "3.5", "", None, [], {}])
+def test_safe_int_default(value):
+    assert safe_int(value, default=-1) == -1
+    assert safe_int("bad", default=None) is None
+    assert safe_int("bad") == 0
+    assert safe_int([1]) == 0
 
 
 # ---------------------------------------------------------------------------
@@ -105,30 +92,28 @@ class TestSafeInt:
 # ---------------------------------------------------------------------------
 
 
-class TestResolveJsonType:
-    @pytest.mark.parametrize(
-        "hint,expected",
-        [
-            (str, "string"),
-            (int, "integer"),
-            (float, "number"),
-            (bool, "boolean"),
-        ],
-    )
-    def test_primitives(self, hint, expected):
-        assert _resolve_json_type(hint) == expected
+@pytest.mark.parametrize(
+    "hint,expected",
+    [
+        (str, "string"),
+        (int, "integer"),
+        (float, "number"),
+        (bool, "boolean"),
+    ],
+)
+def test_resolve_json_type_primitives(hint, expected):
+    assert _resolve_json_type(hint) == expected
 
-    def test_unknown_type_returns_none(self):
-        assert _resolve_json_type(list) is None
-        assert _resolve_json_type(dict) is None
 
-    def test_optional_type_returns_type_of_non_none_member(self):
-        assert _resolve_json_type(str | None) == "string"
-        assert _resolve_json_type(int | None) == "integer"
+def test_resolve_json_type_unknown_type():
+    assert _resolve_json_type(list) is None
+    assert _resolve_json_type(dict) is None
+    assert _resolve_json_type(str | int) is None
 
-    def test_multi_union_returns_none(self):
-        # str | int has no single JSON type mapping
-        assert _resolve_json_type(str | int) is None
+
+def test_resolve_json_type_optional_type():
+    assert _resolve_json_type(str | None) == "string"
+    assert _resolve_json_type(int | None) == "integer"
 
 
 # ---------------------------------------------------------------------------
@@ -136,56 +121,41 @@ class TestResolveJsonType:
 # ---------------------------------------------------------------------------
 
 
-class TestBuildSchema:
-    def test_top_level_type_is_object(self):
-        schema = build_schema(SimpleInput)
-        assert schema["type"] == "object"
+def test_build_schema_simple_input():
+    schema = build_schema(SimpleInput)
 
-    def test_required_field_in_required_list(self):
-        schema = build_schema(SimpleInput)
-        assert schema["required"] == ["message"]
+    assert schema["type"] == "object"
+    assert schema["required"] == ["message"]
+    assert schema["properties"]["message"]["description"] == "A message to echo"
+    assert schema["properties"]["message"]["type"] == "string"
 
-    def test_property_description_from_annotation(self):
-        schema = build_schema(SimpleInput)
-        assert schema["properties"]["message"]["description"] == "A message to echo"
 
-    def test_property_type_from_annotation(self):
-        schema = build_schema(SimpleInput)
-        assert schema["properties"]["message"]["type"] == "string"
+def test_build_schema_full_input():
+    schema = build_schema(FullInput)
 
-    def test_field_with_default_not_in_required(self):
-        schema = build_schema(FullInput)
-        assert "optional_int" not in schema.get("required", [])
-        assert "flag" not in schema.get("required", [])
+    assert "optional_int" not in schema.get("required", [])
+    assert "flag" not in schema.get("required", [])
+    assert "required_str" in schema["required"]
+    assert schema["properties"]["flag"]["type"] == "boolean"
 
-    def test_required_field_still_present_alongside_optionals(self):
-        schema = build_schema(FullInput)
-        assert "required_str" in schema["required"]
 
-    def test_bool_field_resolves_to_boolean_type(self):
-        schema = build_schema(FullInput)
-        assert schema["properties"]["flag"]["type"] == "boolean"
+def test_build_schema_all_optional():
+    @dataclass
+    class AllOptional:
+        x: Annotated[str, "x"] = "default"
+        y: Annotated[int, "y"] = 0
 
-    def test_no_required_key_when_all_fields_have_defaults(self):
-        @dataclass
-        class AllOptional:
-            x: Annotated[str, "x"] = "default"
-            y: Annotated[int, "y"] = 0
+    schema = build_schema(AllOptional)
+    assert "required" not in schema
 
-        schema = build_schema(AllOptional)
-        assert "required" not in schema
 
-    def test_properties_key_always_present(self):
-        schema = build_schema(SimpleInput)
-        assert "properties" in schema
+def test_build_schema_bad_input():
+    @dataclass
+    class BadInput:
+        field: Annotated[str | int, "ambiguous"]
 
-    def test_unsupported_type_raises_type_error(self):
-        @dataclass
-        class BadInput:
-            field: Annotated[str | int, "ambiguous"]
-
-        with pytest.raises(TypeError, match="BadInput.field"):
-            build_schema(BadInput)
+    with pytest.raises(TypeError, match="BadInput.field"):
+        build_schema(BadInput)
 
 
 # ---------------------------------------------------------------------------
@@ -193,44 +163,43 @@ class TestBuildSchema:
 # ---------------------------------------------------------------------------
 
 
-class TestGetInputType:
-    def test_returns_correct_input_type(self):
-        assert _get_input_type(EchoTool) is SimpleInput
-        assert _get_input_type(FullInputTool) is FullInput
+def test_get_input_type_returns_correct_input_type():
+    class ChildTool(EchoTool):
+        pass
 
-    def test_unparameterized_subclass_raises_type_error(self):
-        # A class that extends BaseTool without a type argument cannot be resolved
-        class BareSubclass(BaseTool):  # type: ignore[type-arg]
-            @property
-            def name(self) -> str:
-                return "bare"
+    assert _get_input_type(EchoTool) is SimpleInput
+    assert _get_input_type(FullInputTool) is FullInput
+    assert _get_input_type(ChildTool) is SimpleInput
 
-            async def __call__(self, tool_input) -> ToolResult:  # type: ignore[override]
-                return ToolResult(success=True)
 
-        with pytest.raises(TypeError, match="BareSubclass"):
-            _get_input_type(BareSubclass)
+def test_get_input_type_unparameterized_subclass():
+    # A class that extends BaseTool without a type argument cannot be resolved
+    class BareSubclass(BaseTool):  # type: ignore[type-arg]
+        @property
+        def name(self) -> str:
+            return "bare"
 
-    def test_resolves_through_concrete_parent(self):
-        class ChildTool(EchoTool):
-            pass
+        async def __call__(self, tool_input) -> ToolResult:  # type: ignore[override]
+            return ToolResult(success=True)
 
-        assert _get_input_type(ChildTool) is SimpleInput
+    with pytest.raises(TypeError, match="BareSubclass"):
+        _get_input_type(BareSubclass)
 
-    def test_resolves_through_intermediate_generic(self):
-        # Simulates the CmdTool[TInput] -> BaseTool[TInput] pattern
-        class IntermediateTool[T](BaseTool[T]):
-            @property
-            def name(self) -> str:
-                return "intermediate"
 
-            async def __call__(self, tool_input: T) -> ToolResult:  # type: ignore[override]
-                return ToolResult(success=True)
+def test_resolves_through_intermediate_generic():
+    # Simulates the CmdTool[TInput] -> BaseTool[TInput] pattern
+    class IntermediateTool[T](BaseTool[T]):
+        @property
+        def name(self) -> str:
+            return "intermediate"
 
-        class ConcreteTool(IntermediateTool[SimpleInput]):
-            pass
+        async def __call__(self, tool_input: T) -> ToolResult:  # type: ignore[override]
+            return ToolResult(success=True)
 
-        assert _get_input_type(ConcreteTool) is SimpleInput
+    class ConcreteTool(IntermediateTool[SimpleInput]):
+        pass
+
+    assert _get_input_type(ConcreteTool) is SimpleInput
 
 
 # ---------------------------------------------------------------------------
@@ -238,59 +207,73 @@ class TestGetInputType:
 # ---------------------------------------------------------------------------
 
 
-class TestBaseTool:
-    def test_name_property(self):
-        assert EchoTool().name == "echo"
+@pytest.fixture
+def echo_tool() -> EchoTool:
+    return EchoTool()
 
-    def test_description_comes_from_class_docstring(self):
-        assert EchoTool().description == "Echo the message back."
 
-    def test_description_is_empty_string_when_no_docstring(self):
-        assert NoDocstringTool().description == ""
+@pytest.fixture
+def failing_tool() -> FailingTool:
+    return FailingTool()
 
-    def test_input_schema_matches_build_schema_for_input_type(self):
-        assert EchoTool().input_schema == build_schema(SimpleInput)
 
-    def test_definition_has_correct_name(self):
-        assert EchoTool().definition["name"] == "echo"
+def test_build_tool(echo_tool: EchoTool):
+    assert echo_tool.name == "echo"
+    assert echo_tool.description == "Echo the message back."
+    assert echo_tool.input_schema == build_schema(SimpleInput)
+    assert echo_tool.definition == {
+        "name": "echo",
+        "description": "Echo the message back.",
+        "input_schema": build_schema(SimpleInput),
+    }
 
-    def test_definition_has_correct_description(self):
-        assert EchoTool().definition["description"] == "Echo the message back."
 
-    def test_definition_has_correct_input_schema(self):
-        assert EchoTool().definition["input_schema"] == build_schema(SimpleInput)
+def test_build_tool_no_docstring():
+    class NoDocstringTool(BaseTool[SimpleInput]):
+        @property
+        def name(self) -> str:
+            return "nodoc"
 
-    def test_cannot_instantiate_abstract_base_directly(self):
-        with pytest.raises(TypeError):
-            BaseTool()  # type: ignore[abstract]
+        async def __call__(self, tool_input: SimpleInput) -> ToolResult:
+            return ToolResult(success=True)
 
-    # --- run(): happy path ---
+    assert NoDocstringTool().description == ""
 
-    def test_run_valid_input_returns_success(self):
-        result = asyncio.run(EchoTool().run({"message": "hello"}))
-        assert result.success is True
-        assert result.data == "hello"
 
-    # --- run(): input validation failures ---
+def test_cannot_instantiate_abstract_base_directly():
+    with pytest.raises(TypeError):
+        BaseTool()  # type: ignore[abstract]
 
-    def test_run_missing_required_field_returns_failure(self):
-        result = asyncio.run(EchoTool().run({}))
-        assert result.success is False
-        assert result.error is not None
 
-    def test_run_unexpected_extra_field_returns_failure(self):
-        result = asyncio.run(EchoTool().run({"message": "hi", "extra": "oops"}))
-        assert result.success is False
+# --- run(): happy path ---
 
-    # --- run(): __call__ exception handling ---
 
-    def test_run_captures_exception_from_call(self):
-        result = asyncio.run(FailingTool().run({"message": "boom"}))
-        assert result.success is False
-        assert "RuntimeError" in result.error
-        assert "something went wrong" in result.error
+def test_run_valid_input_returns_success(echo_tool: EchoTool):
+    result = asyncio.run(echo_tool.run({"message": "hello"}))
+    assert result.success is True
+    assert result.data == "hello"
 
-    def test_run_never_propagates_exception_from_call(self):
-        # run() must always return a ToolResult, never raise
-        result = asyncio.run(FailingTool().run({"message": "boom"}))
-        assert isinstance(result, ToolResult)
+
+# --- run(): input validation failures ---
+
+
+def test_run_missing_required_field_returns_failure(echo_tool: EchoTool):
+    result = asyncio.run(echo_tool.run({}))
+    assert result.success is False
+    assert result.error is not None
+
+
+def test_run_unexpected_extra_field_returns_failure(echo_tool: EchoTool):
+    result = asyncio.run(echo_tool.run({"message": "hi", "extra": "oops"}))
+    assert result.success is False
+
+
+# --- run(): __call__ exception handling ---
+
+
+def test_run_captures_exception_from_call(failing_tool: FailingTool):
+    result = asyncio.run(failing_tool.run({"message": "boom"}))
+    assert isinstance(result, ToolResult)
+    assert result.success is False
+    assert "RuntimeError" in result.error
+    assert "something went wrong" in result.error
