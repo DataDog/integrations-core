@@ -76,7 +76,6 @@ release:
     result = ddev('validate', 'labeler')
 
     assert result.exit_code == 1, result.output
-    print(result.output)
     assert "Integration PR label `integration/dummy2` is not properly configured:" in result.output
 
 
