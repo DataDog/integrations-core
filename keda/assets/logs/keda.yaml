@@ -1,3 +1,4 @@
+# bypass-global-no-service-remapper-checks
 id: keda
 metric_id: keda
 backend_only: false

@@ -1,3 +1,4 @@
+# bypass-global-no-service-remapper-checks
 id: cisco-umbrella-dns
 metric_id: cisco-umbrella-dns
 backend_only: false

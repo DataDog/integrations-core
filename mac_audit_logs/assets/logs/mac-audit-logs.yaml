@@ -1,3 +1,4 @@
+# bypass-global-no-service-remapper-checks
 id: mac-audit-logs
 metric_id: mac-audit-logs
 backend_only: false

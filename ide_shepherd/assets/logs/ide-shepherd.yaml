@@ -1,3 +1,4 @@
+# bypass-global-no-service-remapper-checks
 id: ide-shepherd
 metric_id: ide-shepherd
 backend_only: false

@@ -1,3 +1,4 @@
+# bypass-global-no-service-remapper-checks
 id: adyen
 metric_id: adyen
 backend_only: false

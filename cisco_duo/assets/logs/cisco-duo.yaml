@@ -1,3 +1,4 @@
+# bypass-global-no-service-remapper-checks
 id: cisco-duo
 metric_id: cisco-duo
 backend_only: false
