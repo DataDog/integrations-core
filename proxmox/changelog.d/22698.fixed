@@ -1,0 +1,1 @@
+Handle non-200 HTTP response from /cluster/metrics/export when Proxmox Metric Server is not configured to prevent AttributeError.

@@ -1,0 +1,5 @@
+provides:
+  - id: ide-shepherd-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

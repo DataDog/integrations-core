@@ -50,6 +50,8 @@ files:
             type: string
         - name: user
           hidden: true
+          secret: true
+          fleet_configurable: true
           description: |
            Password authentication is the only auth method supported
            User expects username, password, and user domain id
@@ -69,12 +71,14 @@ files:
             For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
             integration by setting this field to "true".
           fleet_configurable: true
+          legacy: true
           enabled: true
           value:
               type: boolean
               example: false
         - name: whitelist_project_names
           fleet_configurable: true
+          legacy: true
           hidden: true
           description: |
            IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
@@ -90,6 +94,7 @@ files:
               type: string
         - name: blacklist_project_names
           fleet_configurable: true
+          legacy: true
           hidden: true
           description: |
            IDs of projects to blacklist for monitoring (by default the agent collects limit metrics from all projects)
@@ -105,6 +110,7 @@ files:
               type: string
         - name: exclude_server_ids
           fleet_configurable: true
+          legacy: true
           hidden: true
           description: |
            IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)
@@ -119,6 +125,7 @@ files:
               type: string
         - name: exclude_network_ids
           fleet_configurable: true
+          legacy: true
           hidden: true
           description: |
            IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the
@@ -166,10 +173,11 @@ files:
             example: <CLOUD_NAME>
             type: string
         - name: keystone_server_url
+          fleet_configurable: true
+          formats: ["url"]
           description: |
            URL of your identity server. NOTE: The server must support Identity API v3.
            This parameter is required if openstack_config_file_path or openstack_cloud_name are not specified.
-          fleet_configurable: true
           value:
             example: https://<KEYSTONE_ENDPOINT>:<PORT>/
             type: string
@@ -216,6 +224,7 @@ files:
             display_default: null
         - name: collect_hypervisor_load
           fleet_configurable: true
+          legacy: true
           hidden: true
           description: |
            Collects hypervisor_load.1/5/15 for each hypervisor
@@ -228,6 +237,7 @@ files:
             type: boolean
         - name: collect_hypervisor_metrics
           fleet_configurable: true
+          legacy: true
           hidden: true
           description: |
            Collects hypervisor metrics (including hypervisor_load).
@@ -246,6 +256,8 @@ files:
             display_default: true
             type: boolean
         - name: collect_network_metrics
+          legacy: true
+          fleet_configurable: true
           hidden: true
           description: |
            Collects network metrics.
@@ -262,6 +274,8 @@ files:
             display_default: true
             type: boolean
         - name: collect_server_diagnostic_metrics
+          legacy: true
+          fleet_configurable: true
           hidden: true
           description: |
            Collect server diagnostic metrics. Enabling this may result in performance decrease.
@@ -280,6 +294,7 @@ files:
             display_default: false
             type: boolean
         - name: endpoint_interface
+          fleet_configurable: true
           description: |
            Indicates the visibility scope of the component's endpoints to use. The possible values are:
              public: This endpoint is accessible from outside the cloud and typically denotes a public-facing URL or 
@@ -295,6 +310,7 @@ files:
             display_default: "public"
             type: string
         - name: endpoint_region_id
+          fleet_configurable: true
           description: |
            The region_id that will be used to filter the endpoints to use for each component.
           value:
@@ -302,11 +318,13 @@ files:
         - name: all_projects
           description: |
            List compute servers across all projects (admin only).
+          fleet_configurable: true
           value:
             example: false
             display_default: false
             type: boolean
         - name: components
+          fleet_configurable: true
           description: |
             General configuration that we want to apply to each of the components and their different metric blocks.
           value:
@@ -700,6 +718,7 @@ files:
             example:
               compute: false
         - name: projects
+          fleet_configurable: true
           description: |
             Optional configuration to indicate the projects that we want to be processed. If not configured,
             all projects will be processed.

@@ -150,6 +150,10 @@ coverage:
         target: 75
         flags:
         - consul
+      Control-M:
+        target: 75
+        flags:
+        - control_m
       CoreDNS:
         target: 75
         flags:
@@ -166,6 +170,10 @@ coverage:
         target: 75
         flags:
         - dns_check
+      DO_Query_Actions:
+        target: 75
+        flags:
+        - do_query_actions
       Datadog_Checks_Base:
         target: 75
         flags:
@@ -502,6 +510,10 @@ coverage:
         target: 75
         flags:
         - network
+      Nutanix:
+        target: 75
+        flags:
+        - nutanix
       Nvidia_Triton:
         target: 75
         flags:
@@ -806,6 +818,10 @@ coverage:
         target: 75
         flags:
         - kyverno
+      n8n:
+        target: 75
+        flags:
+        - n8n
       nvidia_nim:
         target: 75
         flags:
@@ -998,6 +1014,11 @@ flags:
     paths:
     - consul/datadog_checks/consul
     - consul/tests
+  control_m:
+    carryforward: true
+    paths:
+    - control_m/datadog_checks/control_m
+    - control_m/tests
   coredns:
     carryforward: true
     paths:
@@ -1068,6 +1089,11 @@ flags:
     paths:
     - dns_check/datadog_checks/dns_check
     - dns_check/tests
+  do_query_actions:
+    carryforward: true
+    paths:
+    - do_query_actions/datadog_checks/do_query_actions
+    - do_query_actions/tests
   dotnetclr:
     carryforward: true
     paths:
@@ -1458,6 +1484,11 @@ flags:
     paths:
     - mysql/datadog_checks/mysql
     - mysql/tests
+  n8n:
+    carryforward: true
+    paths:
+    - n8n/datadog_checks/n8n
+    - n8n/tests
   nagios:
     carryforward: true
     paths:
@@ -1483,6 +1514,11 @@ flags:
     paths:
     - nginx_ingress_controller/datadog_checks/nginx_ingress_controller
     - nginx_ingress_controller/tests
+  nutanix:
+    carryforward: true
+    paths:
+    - nutanix/datadog_checks/nutanix
+    - nutanix/tests
   nvidia_nim:
     carryforward: true
     paths:

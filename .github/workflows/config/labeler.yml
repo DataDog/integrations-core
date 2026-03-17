@@ -186,6 +186,10 @@ integration/beyondtrust_password_safe:
 - changed-files:
   - any-glob-to-any-file:
     - beyondtrust_password_safe/**/*
+integration/beyondtrust_privileged_remote_access:
+- changed-files:
+  - any-glob-to-any-file:
+    - beyondtrust_privileged_remote_access/**/*
 integration/bitdefender:
 - changed-files:
   - any-glob-to-any-file:
@@ -362,6 +366,10 @@ integration/contentful:
 - changed-files:
   - any-glob-to-any-file:
     - contentful/**/*
+integration/control_m:
+- changed-files:
+  - any-glob-to-any-file:
+    - control_m/**/*
 integration/coredns:
 - changed-files:
   - any-glob-to-any-file:
@@ -386,6 +394,10 @@ integration/crio:
 - changed-files:
   - any-glob-to-any-file:
     - crio/**/*
+integration/cyberark_endpoint_privilege_manager:
+- changed-files:
+  - any-glob-to-any-file:
+    - cyberark_endpoint_privilege_manager/**/*
 integration/crowdstrike_fdr:
 - changed-files:
   - any-glob-to-any-file:
@@ -442,6 +454,10 @@ integration/dnsfilter:
 - changed-files:
   - any-glob-to-any-file:
     - dnsfilter/**/*
+integration/do_query_actions:
+- changed-files:
+  - any-glob-to-any-file:
+    - do_query_actions/**/*
 integration/docker_daemon:
 - changed-files:
   - any-glob-to-any-file:
@@ -686,6 +702,10 @@ integration/iboss:
 - changed-files:
   - any-glob-to-any-file:
     - iboss/**/*
+integration/ide_shepherd:
+- changed-files:
+  - any-glob-to-any-file:
+    - ide_shepherd/**/*
 integration/ignite:
 - changed-files:
   - any-glob-to-any-file:
@@ -970,6 +990,10 @@ integration/mysql:
 - changed-files:
   - any-glob-to-any-file:
     - mysql/**/*
+integration/n8n:
+- changed-files:
+  - any-glob-to-any-file:
+    - n8n/**/*
 integration/nagios:
 - changed-files:
   - any-glob-to-any-file:
@@ -998,6 +1022,10 @@ integration/ntp:
 - changed-files:
   - any-glob-to-any-file:
     - ntp/**/*
+integration/nutanix:
+- changed-files:
+  - any-glob-to-any-file:
+    - nutanix/**/*
 integration/nvidia_jetson:
 - changed-files:
   - any-glob-to-any-file:
@@ -1346,6 +1374,10 @@ integration/statsd:
 - changed-files:
   - any-glob-to-any-file:
     - statsd/**/*
+integration/storage_management:
+- changed-files:
+  - any-glob-to-any-file:
+    - storage_management/**/*
 integration/streamnative:
 - changed-files:
   - any-glob-to-any-file:

@@ -261,6 +261,56 @@ PILOT_METRICS = {
 }
 
 
+ZTUNNEL_METRICS = {
+    # Ztunnel-specific metrics for Istio Ambient Mode
+    # Available in Istio >= 1.24 (ambient mode GA release)
+    # Ztunnel is a Rust-based L4 proxy that provides zero-trust tunneling for ambient mesh
+    # Core TCP metrics (stable) - overlap with MESH_METRICS
+    'istio_tcp_connections_opened_total': 'tcp.connections_opened.total',
+    'istio_tcp_connections_closed_total': 'tcp.connections_closed.total',
+    'istio_tcp_sent_bytes_total': 'tcp.send_bytes.total',
+    'istio_tcp_received_bytes_total': 'tcp.received_bytes.total',
+    # DNS metrics (unstable)
+    'istio_dns_requests_total': 'dns.requests.total',
+    'istio_dns_upstream_requests_total': 'dns.upstream_requests.total',
+    'istio_dns_upstream_failures_total': 'dns.upstream_failures.total',
+    'istio_dns_upstream_request_duration_seconds': 'dns.upstream_request_duration_seconds',
+    'istio_on_demand_dns_total': 'on_demand_dns.total',
+    # In-pod proxy management metrics (unstable)
+    'istio_active_proxy_count_total': 'active_proxy_count.total',
+    'istio_pending_proxy_count_total': 'pending_proxy_count.total',
+    'istio_proxies_started_total': 'proxies_started.total',
+    'istio_proxies_stopped_total': 'proxies_stopped.total',
+    # XDS metrics (unstable)
+    'istio_xds_connection_terminations_total': 'xds.connection_terminations.total',
+    # Connection metrics (unstable)
+    'istio_connection_opens_total': 'connection.opens.total',
+    'istio_connection_closes_total': 'connection.closes.total',
+    'istio_connection_termination_total': 'connection.termination.total',
+}
+
+
+WAYPOINT_METRICS = {
+    # Waypoint proxy metrics for Istio Ambient Mode
+    # Available in Istio >= 1.24 (ambient mode GA release)
+    # Waypoint proxies are Envoy-based L7 proxies for advanced traffic management
+    # They expose the full set of Istio metrics, similar to sidecar proxies
+    # HTTP/gRPC metrics
+    'istio_requests_total': 'request.count',
+    'istio_request_duration_milliseconds': 'request.duration.milliseconds',
+    'istio_request_duration_seconds': 'request.duration',
+    'istio_request_bytes': 'request.size',
+    'istio_response_bytes': 'response.size',
+    'istio_request_messages_total': 'request.messages.total',
+    'istio_response_messages_total': 'response.messages.total',
+    # TCP metrics (for TCP traffic through waypoint)
+    'istio_tcp_connections_opened_total': 'tcp.connections_opened.total',
+    'istio_tcp_connections_closed_total': 'tcp.connections_closed.total',
+    'istio_tcp_sent_bytes_total': 'tcp.send_bytes.total',
+    'istio_tcp_received_bytes_total': 'tcp.received_bytes.total',
+}
+
+
 ISTIOD_METRICS = {
     # Maintain namespace compatibility from legacy components
     # Generic metrics
