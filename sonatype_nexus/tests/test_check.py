@@ -3,20 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sonatype_nexus import constants
 from datadog_checks.sonatype_nexus.check import SonatypeNexusCheck
 from datadog_checks.sonatype_nexus.errors import EmptyResponseError
 
 from .conftest import instance
-
-
-@pytest.fixture
-def mock_http_response(mocker):
-    yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop("method", "requests.Session.get"), return_value=MockResponse(*args, **kwargs)
-    )
 
 
 def test_successful_metrics_collection(dd_run_check, mock_http_response, aggregator):
