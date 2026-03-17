@@ -26,7 +26,7 @@ This integration forwards logs to Datadog using the Log Forwarder. Configure Ent
 
 5. Select the **Archive to a storage account** check box.
 
-6. Select one of the storage account starting with ddlogstorage* that you created earlier to route the logs to.
+6. Select one of the storage account starting with `ddlogstorage*` that you created earlier to route the logs to.
 
 7. Do one or both of the following. Datadog recommends selecting both.
 
