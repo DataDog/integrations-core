@@ -492,7 +492,7 @@ class SQLServer(DatabaseCheck):
         tags = tags if tags else []
         return {
             "tags": self.debug_tags() + tags,
-            "hostname": self.resolved_hostname,
+            "hostname": self.reported_hostname,
             "raw": True,
         }
 
