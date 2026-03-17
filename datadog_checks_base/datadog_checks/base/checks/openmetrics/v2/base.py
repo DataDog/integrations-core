@@ -72,6 +72,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             with self.adopt_namespace(scraper.namespace):
                 try:
                     scraper.scrape()
+                # Pairs requests-native + library-agnostic exceptions; simplify to HTTPError after migration.
                 except (ConnectionError, RequestException, HTTPRequestError, HTTPStatusError) as e:
                     self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
                     raise type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)) from None
