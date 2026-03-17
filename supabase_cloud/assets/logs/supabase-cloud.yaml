@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: supabase-cloud
 metric_id: supabase-cloud
 backend_only: false

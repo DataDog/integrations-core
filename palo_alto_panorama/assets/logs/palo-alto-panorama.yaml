@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: palo-alto-panorama
 metric_id: palo-alto-panorama
 backend_only: false

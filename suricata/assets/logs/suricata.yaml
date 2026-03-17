@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: suricata
 metric_id: suricata
 backend_only: false

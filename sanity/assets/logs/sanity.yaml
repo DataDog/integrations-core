@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: sanity
 metric_id: sanity
 backend_only: false

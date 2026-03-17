@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: have-i-been-pwned
 metric_id: have-i-been-pwned
 backend_only: false

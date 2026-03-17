@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: cisco-secure-endpoint
 metric_id: cisco-secure-endpoint
 backend_only: false

@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: zscaler-private-access
 metric_id: zscaler-private-access
 backend_only: false

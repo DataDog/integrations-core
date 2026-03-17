@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: microsoft-dns
 metric_id: microsoft-dns
 backend_only: false

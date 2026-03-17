@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: arctic-wolf-aurora-endpoint-security
 metric_id: arctic-wolf-aurora-endpoint-security
 backend_only: false

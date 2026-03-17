@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: push-security
 metric_id: push-security
 backend_only: false

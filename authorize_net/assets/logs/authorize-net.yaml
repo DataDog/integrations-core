@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: authorize-net
 metric_id: authorize-net
 backend_only: false

@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: ossec-security
 metric_id: ossec-security
 backend_only: false

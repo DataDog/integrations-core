@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: slurm
 metric_id: slurm
 backend_only: false

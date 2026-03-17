@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: microsoft-sysmon
 metric_id: microsoft-sysmon
 backend_only: false

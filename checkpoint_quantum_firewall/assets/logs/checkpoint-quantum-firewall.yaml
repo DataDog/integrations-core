@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: checkpoint-quantum-firewall
 metric_id: checkpoint-quantum-firewall
 backend_only: false

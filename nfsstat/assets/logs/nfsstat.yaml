@@ -1,4 +1,3 @@
-# bypass-global-no-service-remapper-checks
 id: nfsstat
 backend_only: true # This integration has no ID and is defined as an exception in the declarative integration pipeline (no tile). For this reason, it should be a backend_only integration. https://github.com/DataDog/declarative-integration-pipeline/blob/4c0b97d57261c4af32525a7db0c2356ac8c09741/declarative_integrations/create_agent_integration/constants.py#L90-L136
 pipeline:
