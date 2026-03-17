@@ -6,7 +6,7 @@ on:
     pull_request:
       paths:
       - .devcontainer/**
-
+      - '.github/workflows/test-build-devcontainer.yml'
 jobs:
   docker:
     runs-on: ubuntu-latest
