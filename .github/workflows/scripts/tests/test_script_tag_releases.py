@@ -7,15 +7,15 @@ import tag_releases
 
 
 class TestPackageArgs:
-    @pytest.mark.parametrize("manual, expected", [
+    @pytest.mark.parametrize("selected, expected", [
         ("", ["all"]),
         ("all", ["all"]),
         ("ALL", ["all"]),
         ('["postgres","mysql"]', ["postgres", "mysql"]),
         ("[]", ["all"]),
     ])
-    def test_returns_expected(self, manual, expected):
-        assert tag_releases._package_args(manual) == expected
+    def test_returns_expected(self, selected, expected):
+        assert tag_releases._package_args(selected) == expected
 
     def test_invalid_json_exits(self):
         with pytest.raises(SystemExit):
@@ -33,7 +33,7 @@ class TestMain:
         for key, val in env.items():
             monkeypatch.setenv(key, val)
         # Remove any keys not in env that might bleed in from the real environment.
-        for key in ("TARGET", "DRY_RUN", "MANUAL_PACKAGES"):
+        for key in ("TARGET", "DRY_RUN", "SELECTED_PACKAGES"):
             if key not in env:
                 monkeypatch.delenv(key, raising=False)
         with patch("tag_releases.subprocess.run", side_effect=side_effects) as mock_run:

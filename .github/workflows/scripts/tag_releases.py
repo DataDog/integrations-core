@@ -3,7 +3,7 @@
 Environment variables:
   TARGET          'prod' pushes tags; 'dev' (default) creates them locally only
   DRY_RUN         When true, tags are created locally but never pushed
-  MANUAL_PACKAGES JSON array of packages to tag, 'all', or empty to tag all
+  SELECTED_PACKAGES JSON array of packages to tag, 'all', or empty to tag all
 """
 import json
 import os
@@ -16,15 +16,15 @@ sys.path.insert(0, str(Path(__file__).parent))
 from _release.github import parse_bool_env
 
 
-def _package_args(manual: str) -> list[str]:
+def _package_args(selected: str) -> list[str]:
     """Return the package arguments for ``ddev release tag``."""
-    manual = manual.strip()
-    if not manual or manual.lower() == "all":
+    selected = selected.strip()
+    if not selected or selected.lower() == "all":
         return ["all"]
     try:
-        packages = json.loads(manual)
+        packages = json.loads(selected)
     except json.JSONDecodeError as e:
-        print(f"MANUAL_PACKAGES is not valid JSON: {e}", file=sys.stderr)
+        print(f"SELECTED_PACKAGES is not valid JSON: {e}", file=sys.stderr)
         sys.exit(1)
     return packages if packages else ["all"]
 
@@ -32,7 +32,7 @@ def _package_args(manual: str) -> list[str]:
 def main() -> None:
     target = os.environ.get("TARGET", "dev")
     dry_run = parse_bool_env("DRY_RUN", default=False)
-    manual = os.environ.get("MANUAL_PACKAGES", "")
+    selected = os.environ.get("SELECTED_PACKAGES", "")
 
     if dry_run:
         print("DRY RUN: tags will be created locally but not pushed to origin")
@@ -46,7 +46,7 @@ def main() -> None:
     )
 
     push_flag = "--push" if (target == "prod" and not dry_run) else "--no-push"
-    base_cmd = ["ddev", "release", "tag"] + _package_args(manual) + ["--skip-prerelease", push_flag]
+    base_cmd = ["ddev", "release", "tag"] + _package_args(selected) + ["--skip-prerelease", push_flag]
 
     result = subprocess.run(base_cmd)
     if result.returncode == 3:

@@ -73,7 +73,7 @@ jobs:
         env:
           TARGET: ${{ inputs.target }}
           DRY_RUN: ${{ inputs.dry-run }}
-          MANUAL_PACKAGES: ${{ inputs.packages }}
+          SELECTED_PACKAGES: ${{ inputs.packages }}
         run: python .github/workflows/scripts/tag_releases.py
 
       - name: Detect package list

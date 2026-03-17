@@ -1,6 +1,6 @@
 """Determine which packages to release and emit the list to GITHUB_OUTPUT.
 
-Resolution order for MANUAL_PACKAGES:
+Resolution order for SELECTED_PACKAGES:
   'all' / 'ALL'  → every Python package found in the repo (glob for __about__.py)
   JSON array     → use the provided list as-is
   (empty)        → detect from git tags created at HEAD in this run
@@ -17,9 +17,9 @@ from _release.packages import get_all_packages, resolve_packages
 
 
 def main() -> None:
-    manual = os.environ.get("MANUAL_PACKAGES", "").strip()
+    selected = os.environ.get("SELECTED_PACKAGES", "").strip()
     all_packages = get_all_packages()
-    packages, mode = resolve_packages(manual, all_packages)
+    packages, mode = resolve_packages(selected, all_packages)
 
     print(f"Mode: {mode}")
 

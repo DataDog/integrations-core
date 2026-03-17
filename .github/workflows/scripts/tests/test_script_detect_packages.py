@@ -8,14 +8,14 @@ import detect_packages
 
 
 class TestMain:
-    def _setup_env(self, monkeypatch, tmp_path, manual_packages: str = ""):
+    def _setup_env(self, monkeypatch, tmp_path, selected_packages: str = ""):
         github_output = tmp_path / "github_output"
         github_output.write_text("")
         github_summary = tmp_path / "github_summary"
         github_summary.write_text("")
         monkeypatch.setenv("GITHUB_OUTPUT", str(github_output))
         monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(github_summary))
-        monkeypatch.setenv("MANUAL_PACKAGES", manual_packages)
+        monkeypatch.setenv("SELECTED_PACKAGES", selected_packages)
         return github_output, github_summary
 
     def _read_outputs(self, github_output: Path) -> dict:
@@ -52,20 +52,20 @@ class TestMain:
         assert json.loads(outputs["packages"]) == packages
         assert outputs["mode"] == "auto-detect from tags at HEAD"
 
-    def test_manual_packages_all_forwards_all(self, monkeypatch, tmp_path):
+    def test_selected_packages_all_forwards_all(self, monkeypatch, tmp_path):
         all_packages = ["a", "b", "c"]
-        github_output, _ = self._setup_env(monkeypatch, tmp_path, manual_packages="all")
+        github_output, _ = self._setup_env(monkeypatch, tmp_path, selected_packages="all")
         with patch("detect_packages.get_all_packages", return_value=all_packages), \
              patch("detect_packages.resolve_packages", return_value=(all_packages, f"all ({len(all_packages)} packages in repo)")):
             detect_packages.main()
         outputs = self._read_outputs(github_output)
         assert json.loads(outputs["packages"]) == all_packages
 
-    def test_manual_packages_json_forwards_exact_list(self, monkeypatch, tmp_path):
-        github_output, _ = self._setup_env(monkeypatch, tmp_path, manual_packages='["postgres"]')
+    def test_selected_packages_json_forwards_exact_list(self, monkeypatch, tmp_path):
+        github_output, _ = self._setup_env(monkeypatch, tmp_path, selected_packages='["postgres"]')
         all_packages = ["postgres", "mysql"]
         with patch("detect_packages.get_all_packages", return_value=all_packages), \
-             patch("detect_packages.resolve_packages", return_value=(["postgres"], 'manual (["postgres"])')):
+             patch("detect_packages.resolve_packages", return_value=(["postgres"], 'selected (["postgres"])')):
             detect_packages.main()
         outputs = self._read_outputs(github_output)
         assert json.loads(outputs["packages"]) == ["postgres"]

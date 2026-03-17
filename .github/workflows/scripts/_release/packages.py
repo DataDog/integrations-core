@@ -30,7 +30,7 @@ def detect_from_tags(tags: list[str]) -> list[str]:
 
 
 def resolve_packages(
-    manual: str,
+    selected: str,
     all_packages: list[str],
     head_tags: list[str] | None = None,
 ) -> tuple[list[str], str]:
@@ -44,18 +44,18 @@ def resolve_packages(
     Returns ``(packages, mode_description)``.
     Calls ``sys.exit(1)`` on invalid input or unknown package names.
     """
-    manual = manual.strip()
+    selected = selected.strip()
 
-    if manual.lower() == "all":
+    if selected.lower() == "all":
         return all_packages, f"all ({len(all_packages)} packages in repo)"
 
-    if manual:
+    if selected:
         try:
-            packages = json.loads(manual)
+            packages = json.loads(selected)
         except json.JSONDecodeError as e:
-            print(f"MANUAL_PACKAGES is not valid JSON: {e}", file=sys.stderr)
+            print(f"selected_PACKAGES is not valid JSON: {e}", file=sys.stderr)
             sys.exit(1)
-        mode = f"manual ({manual})"
+        mode = f"selected ({selected})"
     else:
         tags = head_tags if head_tags is not None else get_tags_at_head()
         packages = detect_from_tags(tags)
