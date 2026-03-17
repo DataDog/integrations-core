@@ -3,7 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 from datetime import timedelta
+from http.client import responses as http_responses
 from io import BytesIO
+from textwrap import dedent
 from typing import Any, Iterator
 from unittest.mock import MagicMock
 
@@ -41,7 +43,7 @@ class MockHTTPResponse:
             (isinstance(content, str) and content.startswith('\n'))
             or (isinstance(content, bytes) and content.startswith(b'\n'))
         ):
-            content = content[1:]
+            content = dedent(content[1:]) if isinstance(content, str) else content[1:]
 
         self._content = content.encode('utf-8') if isinstance(content, str) else content
         self.status_code = status_code
@@ -61,6 +63,14 @@ class MockHTTPResponse:
     @property
     def text(self) -> str:
         return self._content.decode('utf-8')
+
+    @property
+    def ok(self) -> bool:
+        return self.status_code < 400
+
+    @property
+    def reason(self) -> str:
+        return http_responses.get(self.status_code, '')
 
     def json(self, **kwargs: Any) -> Any:
         return json.loads(self.text, **kwargs)
