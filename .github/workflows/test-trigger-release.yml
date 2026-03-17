@@ -1,0 +1,45 @@
+name: Test Trigger Wheel Builds (dry run)
+
+# Smoke-tests the release pipeline on PRs that touch the release scripts or workflows.
+# Always runs as a dry run — no tags are pushed and no builds are triggered.
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/scripts/**"
+      - ".github/workflows/dispatch-release.yml"
+      - ".github/workflows/trigger-release.yml"
+      - ".github/workflows/test-trigger-release.yml"
+
+jobs:
+  context:
+    name: Detect release context
+    runs-on: ubuntu-latest
+    outputs:
+      is-stable-release: ${{ steps.detect.outputs.is-stable-release }}
+    steps:
+      - id: detect
+        run: |
+          if [[ "$GITHUB_BASE_REF" =~ ^(master|[0-9]+\.[0-9]+\.x)$ ]]; then
+            echo "is-stable-release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is-stable-release=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  dispatch:
+    name: Release (dry run)
+    needs: context
+    uses: ./.github/workflows/dispatch-release.yml
+    with:
+      source-repo: integrations-core
+      packages: ''
+      source-repo-ref: ${{ github.sha }}
+      target: dev
+      dry-run: true
+      ddev-version: ''
+      is-stable-release: ${{ needs.context.outputs.is-stable-release }}
+    permissions:
+      id-token: write
+      contents: write

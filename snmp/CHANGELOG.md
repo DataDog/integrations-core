@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 12.3.1 / 2026-03-17
+
+***Fixed***:
+
+* Test release pipeline dry run. ([#22656](https://github.com/DataDog/integrations-core/pull/22656))
+
 ## 12.3.0 / 2026-02-19
 
 ***Added***:
