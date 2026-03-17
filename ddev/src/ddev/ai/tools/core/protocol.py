@@ -9,7 +9,7 @@ from anthropic.types import ToolParam
 from .types import ToolResult
 
 
-class ToolProtocol[TInput](Protocol):
+class ToolProtocol(Protocol):
     @property
     def name(self) -> str: ...
     @property

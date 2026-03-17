@@ -82,6 +82,9 @@ def test_safe_int_valid_conversions(value, expected):
 @pytest.mark.parametrize("value", ["abc", "3.5", "", None, [], {}])
 def test_safe_int_default(value):
     assert safe_int(value, default=-1) == -1
+
+
+def test_safe_int_none_default():
     assert safe_int("bad", default=None) is None
     assert safe_int("bad") == 0
     assert safe_int([1]) == 0

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
 from abc import abstractmethod
+from typing import ClassVar
 
 from ddev.ai.tools.core.base import BaseTool
 from ddev.ai.tools.core.truncation import TruncateResult, truncate
@@ -12,7 +13,7 @@ from ddev.ai.tools.core.types import ToolResult
 class CmdTool[TInput](BaseTool[TInput]):
     """Base for tools that execute shell commands."""
 
-    timeout: int = 10
+    timeout: ClassVar[int] = 10
 
     @abstractmethod
     def cmd(self, tool_input: TInput) -> list[str]:
@@ -33,12 +34,14 @@ async def run_command(cmd: list[str], timeout: int = 10) -> ToolResult:
         return ToolResult(success=False, error=f"Command not found: {cmd[0]!r}")
     except asyncio.TimeoutError:
         proc.kill()
+        await proc.communicate()
         return ToolResult(success=False, error=f"Command timed out after {timeout}s: {cmd}")
     except Exception as e:
         return ToolResult(success=False, error=f"{type(e).__name__}: {e}")
 
-    stdout = stdout_bytes.decode()
-    stderr = stderr_bytes.decode()
+    # errors="replace" to keep output readable in case of non-UTF-8 characters
+    stdout = stdout_bytes.decode("utf-8", errors="replace")
+    stderr = stderr_bytes.decode("utf-8", errors="replace")
 
     output = stdout
     if proc.returncode != 0 and stderr:

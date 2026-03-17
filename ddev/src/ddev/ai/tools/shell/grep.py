@@ -29,5 +29,5 @@ class GrepTool(CmdTool[GrepInput]):
         cmd = ["grep", "-n", "-E"]
         if tool_input.recursive:
             cmd.append("-r")
-        cmd += [tool_input.pattern, tool_input.path]
+        cmd += ["--", tool_input.pattern, tool_input.path]
         return cmd

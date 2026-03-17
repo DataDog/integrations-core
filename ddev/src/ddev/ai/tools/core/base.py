@@ -98,7 +98,7 @@ def _get_input_type(cls: type) -> type:
     raise TypeError(f"{cls.__name__} must be parameterized with an input type: class MyTool(BaseTool[MyInput])")
 
 
-def _resolve_base_tool_arg(cls: type, type_map: dict) -> type | None:
+def _resolve_base_tool_arg(cls: type, type_map: dict[Any, Any]) -> type | None:
     """Resolve the TInput type from a BaseTool subclass, resolving through intermediate generics."""
     for base in get_original_bases(cls):
         origin = typing.get_origin(base) or base
@@ -122,7 +122,6 @@ def _resolve_base_tool_arg(cls: type, type_map: dict) -> type | None:
             new_map = {param: type_map.get(arg, arg) for param, arg in zip(type_params, args, strict=False)}
             if resolved := _resolve_base_tool_arg(origin, new_map):
                 return resolved
-            continue
 
     return None
 

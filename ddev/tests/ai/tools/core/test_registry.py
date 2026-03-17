@@ -59,6 +59,7 @@ def test_multiple_tools_all_registered():
 
 
 def test_duplicate_name_last_one_wins():
+    # This design is intentional to allow for tool overrides.
     first = FakeTool("dup")
     second = FakeTool("dup")
     registry = ToolRegistry([first, second])
@@ -79,7 +80,6 @@ def test_tool_registry_definitions_returns_all_tool_definitions():
     assert len(registry.definitions) == 2
     for defn in registry.definitions:
         assert defn["allowed_callers"] == ALLOWED_TOOL_CALLERS
-    assert registry.definitions[0]["allowed_callers"] == ["code_execution_20260120"]
 
 
 def test_definition_contains_tool_name():

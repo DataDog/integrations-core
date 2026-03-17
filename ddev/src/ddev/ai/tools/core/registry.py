@@ -20,11 +20,9 @@ class ToolRegistry:
 
     @property
     def definitions(self) -> list[ToolParam]:
-        """Return Anthropic SDK tool definitions for all registered tools."""
-        defs = [tool.definition for tool in self._tools.values()]
-        for d in defs:
-            d["allowed_callers"] = ALLOWED_TOOL_CALLERS
-        return defs
+        """Return Anthropic SDK tool definitions for all registered tools.
+        Each tool definition dict is not mutated, but a new dict is returned with the allowed_callers key added."""
+        return [{**tool.definition, "allowed_callers": ALLOWED_TOOL_CALLERS} for tool in self._tools.values()]
 
     async def run(self, name: str, raw: dict[str, object]) -> ToolResult:
         """Execute a tool by name, returning an error result if not found."""
