@@ -93,13 +93,12 @@ def build_schema(cls: type) -> dict[str, object]:
 
 def _get_input_type(cls: type) -> type:
     """Extract the TInput type from a BaseTool subclass, resolving through intermediate generics."""
-    try:
-        return _resolve_base_tool_arg(cls, {})
-    except TypeError:
-        raise TypeError(f"{cls.__name__} must be parameterized with an input type: class MyTool(BaseTool[MyInput])")
+    if resolved := _resolve_base_tool_arg(cls, {}):
+        return resolved
+    raise TypeError(f"{cls.__name__} must be parameterized with an input type: class MyTool(BaseTool[MyInput])")
 
 
-def _resolve_base_tool_arg(cls: type, type_map: dict) -> type:
+def _resolve_base_tool_arg(cls: type, type_map: dict) -> type | None:
     for base in get_original_bases(cls):
         origin = typing.get_origin(base) or base
         args = typing.get_args(base)
@@ -110,6 +109,15 @@ def _resolve_base_tool_arg(cls: type, type_map: dict) -> type:
                 return resolved
 
         if isinstance(origin, type) and issubclass(origin, BaseTool) and origin is not BaseTool:
+            # Call recursively until we find the generic type of the first BaseTool ancestor.
+            # Example:
+            # class EchoTool(BaseTool[EchoInput]):
+            #     pass
+            # class ChildTool[T](EchoTool):
+            #     pass
+            # class ConcreteChildTool(ChildTool[int]):
+            #     pass
+            # _get_input_type(ConcreteChildTool) will resolve to EchoInput.
             type_params = origin.__type_params__
             new_map = {param: type_map.get(arg, arg) for param, arg in zip(type_params, args, strict=False)}
             try:
