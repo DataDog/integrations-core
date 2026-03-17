@@ -56,16 +56,19 @@ def labeler(app: Application, sync: bool):
 
     # Build mapping from directory (in glob patterns) to label key
     directory_to_label: dict[str, str] = {}
+    label_to_directory: dict[str, str] = {}
     for label, config in pr_labels_config.items():
         if not label.startswith('integration'):
             continue
         directory = _extract_directory_from_config(config)
         if directory and directory in valid_integrations:
             directory_to_label[directory] = label
+            label_to_directory[label] = directory
         else:
             check_from_label = label.removeprefix('integration/')
             if check_from_label in valid_integrations:
                 directory_to_label[check_from_label] = label
+                label_to_directory[label] = check_from_label
             elif sync:
                 new_pr_labels_config.pop(label)
                 app.display_info(f'Removing `{label}` only found in labeler config')
@@ -95,15 +98,30 @@ def labeler(app: Application, sync: bool):
                         integration_tag = integration_tag.removeprefix('integration/')
                     integration_label = f"integration/{integration_tag}"
                     if len(integration_label) > 50:
-                        app.display_error(
+                        message = (
                             f"Label `{integration_label}` is still too long ({len(integration_label)} chars), skipping"
                         )
+                        tracker.error((str(pr_labels_config_path),), message=message)
                         continue
+                if integration_label in label_to_directory:
+                    existing_dir = label_to_directory[integration_label]
+                    app.display_warning(
+                        f"Cannot auto-add label `{integration_label}` for `{check_name}` "
+                        f"because it is already used for directory `{existing_dir}`"
+                    )
+                    continue
                 new_pr_labels_config[integration_label] = expected_config
                 app.display_info(f'Adding config for `{check_name}`')
                 continue
 
-            message = f'Check `{check_name}` does not have an integration PR label'
+            if integration_label in label_to_directory:
+                existing_dir = label_to_directory[integration_label]
+                message = (
+                    f'Check `{check_name}` does not have an integration PR label; '
+                    f'label `{integration_label}` is already used for directory `{existing_dir}`'
+                )
+            else:
+                message = f'Check `{check_name}` does not have an integration PR label'
             tracker.error((str(pr_labels_config_path),), message=message)
             continue
 
