@@ -1,0 +1,1381 @@
+{
+  "title": "Nutanix Activity Monitoring",
+  "description": "Monitor Nutanix activity streams including events, tasks, audits, and alerts from Prism Central. Track alert severity, task status, audit actions, and event classifications across your Nutanix clusters.",
+  "widgets": [
+    {
+      "id": 0,
+      "definition": {
+        "title": "Overview",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1,
+            "definition": {
+              "type": "image",
+              "url": "https://static.datadoghq.com/static/images/logos/nutanix_large.svg",
+              "url_dark_theme": "https://static.datadoghq.com/static/images/logos/nutanix_reversed_large.svg",
+              "sizing": "cover",
+              "has_background": false,
+              "has_border": false,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 2,
+            "definition": {
+              "type": "note",
+              "content": "This dashboard provides visibility into Nutanix activity streams collected from Prism Central: **alerts**, **tasks**, **audits**, and **events**. Use the template variables to filter by cluster or Prism Central instance.",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 5,
+              "height": 2
+            }
+          },
+          {
+            "id": 3,
+            "definition": {
+              "title": "Total Alerts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:alert $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1)"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 4,
+            "definition": {
+              "title": "Total Tasks",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:task $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1)"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 10,
+              "y": 0,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 5,
+            "definition": {
+              "title": "Total Audits",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:audit $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1)"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 6,
+            "definition": {
+              "title": "Total Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:event $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1)"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 10,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 7,
+            "definition": {
+              "title": "All Activity Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query_alerts",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:alert $ntnx_cluster_name $prism_central"
+                      }
+                    },
+                    {
+                      "data_source": "events",
+                      "name": "query_tasks",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:task $ntnx_cluster_name $prism_central"
+                      }
+                    },
+                    {
+                      "data_source": "events",
+                      "name": "query_audits",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:audit $ntnx_cluster_name $prism_central"
+                      }
+                    },
+                    {
+                      "data_source": "events",
+                      "name": "query_events",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:event $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Alerts",
+                      "formula": "default_zero(query_alerts)"
+                    },
+                    {
+                      "alias": "Tasks",
+                      "formula": "default_zero(query_tasks)"
+                    },
+                    {
+                      "alias": "Audits",
+                      "formula": "default_zero(query_audits)"
+                    },
+                    {
+                      "alias": "Events",
+                      "formula": "default_zero(query_events)"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 12,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 6
+      }
+    },
+    {
+      "id": 100,
+      "definition": {
+        "title": "Alerts",
+        "background_color": "vivid_red",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 101,
+            "definition": {
+              "title": "Critical Alerts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:alert ntnx_alert_severity:CRITICAL $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1)"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": "=",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 102,
+            "definition": {
+              "title": "Warning Alerts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:alert ntnx_alert_severity:WARNING $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1)"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "=",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 103,
+            "definition": {
+              "title": "Info Alerts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:alert ntnx_alert_severity:INFO $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1)"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 104,
+            "definition": {
+              "title": "Alerts by Severity",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query_critical",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:alert ntnx_alert_severity:CRITICAL $ntnx_cluster_name $prism_central"
+                      }
+                    },
+                    {
+                      "data_source": "events",
+                      "name": "query_warning",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:alert ntnx_alert_severity:WARNING $ntnx_cluster_name $prism_central"
+                      }
+                    },
+                    {
+                      "data_source": "events",
+                      "name": "query_info",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:alert ntnx_alert_severity:INFO $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Critical",
+                      "formula": "default_zero(query_critical)"
+                    },
+                    {
+                      "alias": "Warning",
+                      "formula": "default_zero(query_warning)"
+                    },
+                    {
+                      "alias": "Info",
+                      "formula": "default_zero(query_info)"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 105,
+            "definition": {
+              "title": "Alerts Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:alert $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Alerts",
+                      "formula": "default_zero(query1)"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 106,
+            "definition": {
+              "title": "Alert Stream",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "event_stream",
+                    "query_string": "source:nutanix ntnx_type:alert $ntnx_cluster_name $prism_central",
+                    "event_size": "s"
+                  },
+                  "columns": []
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 12,
+        "height": 10
+      }
+    },
+    {
+      "id": 200,
+      "definition": {
+        "title": "Tasks",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 201,
+            "definition": {
+              "title": "Succeeded Tasks",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:task ntnx_task_status:SUCCEEDED $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1)"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 202,
+            "definition": {
+              "title": "Failed Tasks",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:task ntnx_task_status:FAILED $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1)"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": "=",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 203,
+            "definition": {
+              "title": "Running Tasks",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:task ntnx_task_status:RUNNING $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1)"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 204,
+            "definition": {
+              "title": "Tasks by Status",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query_succeeded",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:task ntnx_task_status:SUCCEEDED $ntnx_cluster_name $prism_central"
+                      }
+                    },
+                    {
+                      "data_source": "events",
+                      "name": "query_failed",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:task ntnx_task_status:FAILED $ntnx_cluster_name $prism_central"
+                      }
+                    },
+                    {
+                      "data_source": "events",
+                      "name": "query_running",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:task ntnx_task_status:RUNNING $ntnx_cluster_name $prism_central"
+                      }
+                    },
+                    {
+                      "data_source": "events",
+                      "name": "query_queued",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:task ntnx_task_status:QUEUED $ntnx_cluster_name $prism_central"
+                      }
+                    },
+                    {
+                      "data_source": "events",
+                      "name": "query_canceled",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:task ntnx_task_status:CANCELED $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Succeeded",
+                      "formula": "default_zero(query_succeeded)"
+                    },
+                    {
+                      "alias": "Failed",
+                      "formula": "default_zero(query_failed)"
+                    },
+                    {
+                      "alias": "Running",
+                      "formula": "default_zero(query_running)"
+                    },
+                    {
+                      "alias": "Queued",
+                      "formula": "default_zero(query_queued)"
+                    },
+                    {
+                      "alias": "Canceled",
+                      "formula": "default_zero(query_canceled)"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 205,
+            "definition": {
+              "title": "Tasks Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:task $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Tasks",
+                      "formula": "default_zero(query1)"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 206,
+            "definition": {
+              "title": "Task Stream",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "event_stream",
+                    "query_string": "source:nutanix ntnx_type:task $ntnx_cluster_name $prism_central",
+                    "event_size": "l"
+                  },
+                  "columns": []
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 16,
+        "width": 12,
+        "height": 10
+      }
+    },
+    {
+      "id": 300,
+      "definition": {
+        "title": "Audits",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 301,
+            "definition": {
+              "title": "Total Audits",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:audit $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1)"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 2
+            }
+          },
+          {
+            "id": 302,
+            "definition": {
+              "title": "Audits Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:audit $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Audits",
+                      "formula": "default_zero(query1)"
+                    }
+                  ],
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 303,
+            "definition": {
+              "title": "Audit Stream",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "event_stream",
+                    "query_string": "source:nutanix ntnx_type:audit $ntnx_cluster_name $prism_central",
+                    "event_size": "l"
+                  },
+                  "columns": []
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 52,
+        "width": 12,
+        "height": 10,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 400,
+      "definition": {
+        "title": "Events",
+        "background_color": "vivid_orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 401,
+            "definition": {
+              "title": "Total Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:event $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1)"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 2
+            }
+          },
+          {
+            "id": 402,
+            "definition": {
+              "title": "Events Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "events",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:nutanix ntnx_type:event $ntnx_cluster_name $prism_central"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Events",
+                      "formula": "default_zero(query1)"
+                    }
+                  ],
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 403,
+            "definition": {
+              "title": "Event Stream",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "event_stream",
+                    "query_string": "source:nutanix ntnx_type:event $ntnx_cluster_name $prism_central",
+                    "event_size": "l"
+                  },
+                  "columns": []
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 62,
+        "width": 12,
+        "height": 10
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "ntnx_cluster_name",
+      "prefix": "ntnx_cluster_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "prism_central",
+      "prefix": "prism_central",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
