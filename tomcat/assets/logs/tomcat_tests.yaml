@@ -23,14 +23,14 @@ tests:
         severity: Informational
         severity_id: 1
         status: INFO
-        time: 968335661508
+        time: 1126102061508
       status: INFO
-      timestamp: 968335661508
+      timestamp: 1126102061508
     message: Entering application.
     status: info
     tags:
     - source:LOGS_SOURCE
-    timestamp: 968335661508
+    timestamp: 1126102061508
 - sample: 2021-01-29 13:42:58,152 [Workflow Event Thread 1] ERROR MyApp - Starting Workflow
   result:
     custom:
@@ -113,14 +113,14 @@ tests:
         severity: Informational
         severity_id: 1
         status: INFO
-        time: 968335664000
+        time: 1126102064000
       status: INFO
-      timestamp: 968335664000
+      timestamp: 1126102064000
     message: Entering application.
     status: info
     tags:
     - source:LOGS_SOURCE
-    timestamp: 968335664000
+    timestamp: 1126102064000
 - sample: 172.17.0.1 - - [06/Jan/2017:16:16:37 +0000] "GET /datadoghq/company?test=var1%20Pl HTTP/1.1" 200 612 "http://www.perdu.com/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36" "-" those are random characters
   result:
     custom:
