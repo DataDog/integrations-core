@@ -10,6 +10,7 @@ import random
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import TypedDict
+from urllib.parse import quote
 
 from confluent_kafka.admin import ConfigResource, ResourceType
 
@@ -163,13 +164,15 @@ class ClusterMetadataCollector:
     def _get_schema_registry_versions(self, subject: str) -> list[int]:
         """Fetch the list of version numbers for a subject (lightweight call)."""
         base_url = self.config._collect_schema_registry
-        response = self.http.get(f"{base_url}/subjects/{subject}/versions")
+        encoded_subject = quote(subject, safe='')
+        response = self.http.get(f"{base_url}/subjects/{encoded_subject}/versions")
         response.raise_for_status()
         return response.json()
 
     def _get_schema_registry_latest_version(self, subject):
         base_url = self.config._collect_schema_registry
-        response = self.http.get(f"{base_url}/subjects/{subject}/versions/latest")
+        encoded_subject = quote(subject, safe='')
+        response = self.http.get(f"{base_url}/subjects/{encoded_subject}/versions/latest")
         response.raise_for_status()
         return response.json()
 
