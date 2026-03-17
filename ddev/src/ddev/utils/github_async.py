@@ -6,8 +6,10 @@
 from __future__ import annotations
 
 import re
+import time
 from collections.abc import AsyncIterator
-from typing import Any, cast
+from typing import Any, Self, cast
+from urllib.parse import urlparse
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
@@ -52,29 +54,9 @@ class GitHubResponse[T](BaseModel):
 
     model_config = ConfigDict(extra="allow", arbitrary_types_allowed=True)
 
+    data: T | None = None
+    headers: dict[str, Any] = Field(default_factory=dict)
     pagination: PaginationInfo = Field(default_factory=PaginationInfo)
-
-    # Store raw response data for backward compatibility
-    _raw_data: T | None = None
-    _headers: dict[str, str] = {}
-
-    @property
-    def data(self) -> T | None:
-        """Access raw response data for backward compatibility."""
-        return self._raw_data
-
-    @property
-    def headers(self) -> dict[str, str]:
-        """Access response headers for backward compatibility."""
-        return self._headers
-
-    @classmethod
-    def from_response(cls, data: T | None, headers: dict[str, str], pagination: PaginationInfo):
-        """Create response from raw data."""
-        instance = cls(pagination=pagination)
-        instance._raw_data = data
-        instance._headers = headers
-        return instance
 
 
 class WorkflowRun(BaseModel):
@@ -165,11 +147,11 @@ class AsyncGitHubClient:
         self._timeout = timeout
         self._client: httpx.AsyncClient | None = None
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Self:
         await self._ensure_client()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         await self.close()
 
     async def _ensure_client(self):
@@ -190,7 +172,11 @@ class AsyncGitHubClient:
             await self._client.aclose()
             self._client = None
 
-    # Compile regex pattern once for efficiency
+    def _validate_github_url(self, url: str) -> bool:
+        """Validate that a URL points to GitHub API."""
+        parsed = urlparse(url)
+        return parsed.hostname == 'api.github.com' and parsed.scheme == 'https'
+
     _link_pattern = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
 
     def _extract_pagination(self, headers: httpx.Headers) -> PaginationInfo:
@@ -199,7 +185,6 @@ class AsyncGitHubClient:
         if not link_header:
             return PaginationInfo()
 
-        # Use regex to efficiently parse Link header
         links = {f'{rel}_url': url for url, rel in self._link_pattern.findall(link_header)}
         return PaginationInfo(**links)
 
@@ -210,11 +195,32 @@ class AsyncGitHubClient:
         params: dict[str, Any] | None = None,
         json: dict[str, Any] | None = None,
     ) -> httpx.Response:
-        """Make an async HTTP request."""
+        """Make an async HTTP request with rate limit handling."""
         await self._ensure_client()
-        assert self._client is not None  # Set by _ensure_client()
+        if self._client is None:
+            raise RuntimeError("HTTP client not initialized")
 
         response = await self._client.request(method, url, params=params, json=json)
+
+        # Check for rate limiting
+        if response.status_code == 403:
+            remaining = response.headers.get('X-RateLimit-Remaining')
+            if remaining == '0':
+                reset_time = response.headers.get('X-RateLimit-Reset')
+                if reset_time:
+                    reset_timestamp = int(reset_time)
+                    current_time = int(time.time())
+                    wait_time = reset_timestamp - current_time
+
+                    if wait_time > 0:
+                        # Rate limited - raise informative error
+                        msg = (
+                            f"GitHub API rate limit exceeded. "
+                            f"Reset at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(reset_timestamp))} "
+                            f"(in {wait_time} seconds)"
+                        )
+                        raise httpx.HTTPStatusError(msg, request=response.request, response=response)
+
         response.raise_for_status()
         return response
 
@@ -242,7 +248,7 @@ class AsyncGitHubClient:
         # Handle JSON responses and empty responses
         data = response.json() if response.content else None
 
-        return GitHubResponse[T].from_response(
+        return GitHubResponse[T](
             data=data,
             headers=dict(response.headers),
             pagination=self._extract_pagination(response.headers),
@@ -279,6 +285,11 @@ class AsyncGitHubClient:
 
             if not response.pagination.next_url:
                 break
+
+            # Validate pagination URL before following
+            if not self._validate_github_url(response.pagination.next_url):
+                msg = f"Invalid pagination URL: {response.pagination.next_url} - must point to api.github.com"
+                raise ValueError(msg)
 
             # Use full URL from Link header for subsequent requests
             current_url = response.pagination.next_url
@@ -339,13 +350,13 @@ class AsyncGitHubClient:
             result_data: dict[str, Any] = {wrapper_key: all_data}
             if total_count is not None:
                 result_data['total_count'] = total_count
-            return GitHubResponse[dict[str, Any]].from_response(
+            return GitHubResponse[dict[str, Any]](
                 data=result_data,
                 headers=last_response.headers,
                 pagination=last_response.pagination,
             )
 
-        return GitHubResponse[list[T]].from_response(
+        return GitHubResponse[list[T]](
             data=all_data,
             headers=last_response.headers if last_response else {},
             pagination=last_response.pagination if last_response else PaginationInfo(),

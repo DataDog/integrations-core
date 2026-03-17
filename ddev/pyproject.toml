@@ -33,7 +33,6 @@ dependencies = [
     "datadog-checks-dev[cli]~=35.6",
     "hatch>=1.8.1",
     "httpx",
-    "respx",
     "jsonpointer",
     "pluggy",
     "rich>=12.5.1",
