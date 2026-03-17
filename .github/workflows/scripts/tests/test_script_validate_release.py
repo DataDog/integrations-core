@@ -91,11 +91,8 @@ class TestMain:
         runner_temp, _ = self._base_env(monkeypatch, tmp_path)
         with patch("validate_release.validate_packages", return_value=self._stable_result()):
             validate_release.main()
-        validation_file = runner_temp / "release_validation.json"
-        assert validation_file.exists()
-        data = json.loads(validation_file.read_text())
-        assert "results" in data
-        assert "mode" in data
-        assert "ref" in data
-        assert "target" in data
-        assert "dry_run" in data
+        data = json.loads((runner_temp / "release_validation.json").read_text())
+        assert data["mode"] == "auto"
+        assert data["ref"] == "abc123"
+        assert data["target"] == "prod"
+        assert data["dry_run"] is False

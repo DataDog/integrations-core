@@ -7,7 +7,7 @@ from unittest.mock import create_autospec, patch
 import pytest
 
 from _release.dispatch import build_payload, dispatch_in_batches, send_dispatch
-from _release.summary import build_summary
+from _release.summary import build_summary, _row_label
 from _release import validation as v
 
 
@@ -186,3 +186,7 @@ class TestBuildSummary:
             was_dispatched=False,
         )
         assert "✅ Validated" in out
+
+    def test_unknown_type_raises(self):
+        with pytest.raises(ValueError, match="unexpected validation type"):
+            _row_label("bogus_type", eligible=False, dry_run=False, was_dispatched=False)
