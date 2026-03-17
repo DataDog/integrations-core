@@ -345,6 +345,13 @@ instances:
     #
     # data_streams_enabled: false
 
+    ## @param kafka_cluster_id_override - string - optional
+    ## Override the auto-detected kafka_cluster_id. When set, this value is used as
+    ## the kafka_cluster_id tag on all metrics and events. The original auto-detected
+    ## cluster ID is preserved as an original_kafka_cluster_id tag.
+    #
+    # kafka_cluster_id_override: <KAFKA_CLUSTER_ID_OVERRIDE>
+
     ## @param enable_cluster_monitoring - boolean - optional - default: false
     ## (PREVIEW) Enable cluster monitoring to collect broker, topic, partition, consumer group,
     ## and schema registry metadata. Events are cached and tagged with kafka_cluster_id.
