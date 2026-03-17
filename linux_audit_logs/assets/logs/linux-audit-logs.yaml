@@ -413,7 +413,15 @@ pipeline:
           OR USER_AUTH OR ROLE_ASSIGN OR ROLE_REMOVE OR PATH OR USER_ROLE_CHANGE
           OR USER_SELINUX_ERR OR DAEMON_CONFIG OR DAEMON_ABORT OR
           USER_MAC_CONFIG_CHANGE OR MAC_CONFIG_CHANGE OR MAC_STATUS OR
-          MAC_POLICY_LOAD OR AVC OR CONFIG_CHANGE OR EXECVE OR SYSCALL) OR
+          MAC_POLICY_LOAD OR AVC OR CONFIG_CHANGE OR EXECVE) OR
+          (@type:SYSCALL AND @SYSCALL:(execve OR chmod OR fchmod OR fchmodat OR
+          chown OR fchown OR fchownat OR lchown OR setxattr OR fsetxattr OR
+          lsetxattr OR removexattr OR fremovexattr OR lremovexattr OR rmdir OR
+          unlink OR unlinkat OR rename OR renameat OR creat OR open OR openat OR
+          open_by_handle_at OR truncate OR ftruncate OR mkdir OR link OR symlink
+          OR mknod OR mknodat OR linkat OR symlinkat OR mount OR umount2 OR
+          memfd_create OR connect OR bind OR listen OR accept OR accept4 OR
+          sendto OR recvfrom)) OR
           (@type:SOCKADDR AND @laddr:*)"
       processors:
         - type: string-builder-processor
