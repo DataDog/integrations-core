@@ -1,0 +1,1 @@
+Broker configurations, topic configurations, and schema registry version checks are now collected in batches across multiple agent runs instead of all at once. This reduces load on large clusters but means that not all metrics are emitted in every check run. The batch sizes and refresh interval are controlled by the `kafka_configs_refresh_interval` configuration option.

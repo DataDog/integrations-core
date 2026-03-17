@@ -109,6 +109,8 @@ class KafkaConfig:
         else:
             self._data_streams_enabled = is_affirmative(instance.get('data_streams_enabled', False))
 
+        self._kafka_configs_refresh_interval = int(instance.get('kafka_configs_refresh_interval', 180))
+
         self._collect_schema_registry = instance.get('schema_registry_url')
 
         # Schema Registry authentication
