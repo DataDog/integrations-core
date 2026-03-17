@@ -1324,3 +1324,30 @@ def test_cluster_metadata_with_cluster_id_override(check, dd_run_check, aggregat
         if 'kafka_cluster_id' in payload:
             assert payload['kafka_cluster_id'] == 'my-override-id'
             assert payload['original_kafka_cluster_id'] == 'auto-detected-id'
+
+
+def test_schema_registry_url_encodes_subject_names(check):
+    """Subjects with slashes (e.g. Protobuf references) must be URL-encoded in API calls."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'schema_registry_url': 'http://localhost:8081',
+    }
+    kafka_check = check(instance)
+    collector = kafka_check.metadata_collector
+
+    mock_response = mock.MagicMock()
+    mock_response.json.return_value = [1]
+    mock_response.raise_for_status.return_value = None
+    collector.http = mock.MagicMock()
+    collector.http.get.return_value = mock_response
+
+    subject = 'google/protobuf/timestamp.proto'
+
+    collector._get_schema_registry_versions(subject)
+    collector.http.get.assert_called_with('http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions')
+
+    collector.http.get.reset_mock()
+    collector._get_schema_registry_latest_version(subject)
+    collector.http.get.assert_called_with(
+        'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions/latest'
+    )

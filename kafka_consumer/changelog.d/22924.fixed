@@ -1,0 +1,1 @@
+URL-encode subject names in Schema Registry API calls to fix 404 errors for Protobuf reference subjects containing slashes.
