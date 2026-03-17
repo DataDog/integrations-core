@@ -1406,7 +1406,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740139921923
  -
-  sample: "type=EXECVE msg=audit(1740378302.456:2249): argc=3 a0=\"/bin/bash\" a1=\"-c\" a2=\"id\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=EXECVE msg=audit(1740378302.456:2249): argc=3 a0=\"/bin/bash\" a1=\"-c\" a2=\"id\""
+    }
   result:
     custom:
       a0: "/bin/bash"
@@ -1423,6 +1427,7 @@ tests:
         class_name: "Process Activity"
         class_uid: 1007
         device:
+          hostname: "audit-server"
           type: "Unknown"
           type_id: 0
         metadata:
@@ -1448,7 +1453,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740378302456
  -
-  sample: "type=SYSCALL msg=audit(1740378303.123:2250): arch=c000003e syscall=59 success=yes exit=0 a0=7fbd5 a1=7fbd6 a2=7fbd7 a3=0 items=2 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"susp_activity\"\x1dARCH=x86_64 SYSCALL=execve AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=SYSCALL msg=audit(1740378303.123:2250): arch=c000003e syscall=59 success=yes exit=0 a0=7fbd5 a1=7fbd6 a2=7fbd7 a3=0 items=2 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"susp_activity\"\u001dARCH=x86_64 SYSCALL=execve AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+    }
   result:
     custom:
       AUID: "lima"
@@ -1501,6 +1510,7 @@ tests:
         class_name: "Process Activity"
         class_uid: 1007
         device:
+          hostname: "audit-server"
           type: "Unknown"
           type_id: 0
         metadata:
@@ -1651,7 +1661,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1770316388442
  -
-  sample: "type=SYSCALL msg=audit(1740378303.456:2252): arch=c000003e syscall=90 success=yes exit=0 a0=7fbd1 a1=1a4 a2=0 a3=0 items=1 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"perm_mod\"\x1dARCH=x86_64 SYSCALL=chmod AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=SYSCALL msg=audit(1740378303.456:2252): arch=c000003e syscall=90 success=yes exit=0 a0=7fbd1 a1=1a4 a2=0 a3=0 items=1 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"perm_mod\"\u001dARCH=x86_64 SYSCALL=chmod AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+    }
   result:
     custom:
       AUID: "lima"
@@ -1705,6 +1719,7 @@ tests:
         class_name: "File System Activity"
         class_uid: 1001
         device:
+          hostname: "audit-server"
           type: "Unknown"
           type_id: 0
         metadata:
@@ -1741,7 +1756,11 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1740378303456
  -
-  sample: "type=SYSCALL msg=audit(1740378303.789:2253): arch=c000003e syscall=87 success=yes exit=0 a0=7fcd1 a1=0 a2=0 a3=0 items=2 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"delete\"\x1dARCH=x86_64 SYSCALL=unlink AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=SYSCALL msg=audit(1740378303.789:2253): arch=c000003e syscall=87 success=yes exit=0 a0=7fcd1 a1=0 a2=0 a3=0 items=2 ppid=1407 pid=226245 auid=502 uid=502 gid=1000 euid=502 suid=502 fsuid=502 egid=1000 sgid=1000 fsgid=1000 tty=pts0 ses=4 comm=\"bash\" exe=\"/usr/bin/bash\" subj=unconfined key=\"delete\"\u001dARCH=x86_64 SYSCALL=unlink AUID=\"lima\" UID=\"lima\" GID=\"lima\" EUID=\"lima\" SUID=\"lima\" FSUID=\"lima\" EGID=\"lima\" SGID=\"lima\" FSGID=\"lima\""
+    }
   result:
     custom:
       AUID: "lima"
@@ -1795,6 +1814,7 @@ tests:
         class_name: "File System Activity"
         class_uid: 1001
         device:
+          hostname: "audit-server"
           type: "Unknown"
           type_id: 0
         metadata:
@@ -1830,3 +1850,91 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1740378303789
+ -
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=EXECVE msg=audit(1740378302.456:2249): argc=3 a0=\"/bin/bash\" a1=\"-c\" a2=\"id\""
+    }
+  result:
+    custom:
+      a0: "/bin/bash"
+      a1: "-c"
+      a2: "id"
+      argc: 3
+      event_id: 2249
+      msg_raw: ""
+      ocsf:
+        activity_id: 1
+        activity_name: "Launch"
+        category_name: "System Activity"
+        category_uid: 1
+        class_name: "Process Activity"
+        class_uid: 1007
+        device:
+          hostname: "audit-server"
+          type: "Unknown"
+          type_id: 0
+        metadata:
+          event_code: "EXECVE"
+          original_time: "1.740378302456E9"
+          product:
+            name: "Auditd"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        process:
+          cmd_line: "/bin/bash -c id"
+          name: "bash"
+          path: "/bin/bash"
+        severity: "Informational"
+        severity_id: 1
+        time: 1740378302456
+      post_msg_kv: ""
+      pre_msg_kv: ""
+      timestamp: 1.740378302456E12
+      type: "EXECVE"
+    message: "type=EXECVE msg=audit(1740378302.456:2249): argc=3 a0=\"/bin/bash\" a1=\"-c\" a2=\"id\""
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740378302456
+ -
+  sample: |-
+    {
+      "host": "audit-server",
+      "message": "type=SOCKADDR msg=audit(1770316388.442:354317): saddr={ fam=inet laddr=1.2.3.4 lport=4444 }"
+    }
+  result:
+    custom:
+      event_id: 354317
+      fam: "inet"
+      laddr: "1.2.3.4"
+      lport: 4444
+      msg_raw: ""
+      ocsf:
+        activity_id: 1
+        activity_name: "Open"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "Network Activity"
+        class_uid: 4001
+        dst_endpoint:
+          ip: "1.2.3.4"
+          port: 4444
+        metadata:
+          event_code: "SOCKADDR"
+          original_time: "1.770316388442E9"
+          product:
+            name: "Auditd"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1770316388442
+      post_msg_kv: ""
+      pre_msg_kv: ""
+      timestamp: 1.770316388442E12
+      type: "SOCKADDR"
+    message: "type=SOCKADDR msg=audit(1770316388.442:354317): saddr={ fam=inet laddr=1.2.3.4 lport=4444 }"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1770316388442

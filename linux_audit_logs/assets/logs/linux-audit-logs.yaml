@@ -540,6 +540,15 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `host` to `ocsf.device.hostname`
+              sources:
+                - host
+              sourceType: attribute
+              target: ocsf.device.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: false
+              type: schema-remapper
     - type: pipeline
       name: OCSF sub pipeline for class File System Activity [1001]
       enabled: true
@@ -773,6 +782,15 @@ pipeline:
               targetFormat: string
               preserveSource: false
               overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `host` to `ocsf.device.hostname`
+              sources:
+                - host
+              sourceType: attribute
+              target: ocsf.device.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: false
               type: schema-remapper
     - type: pipeline
       name: OCSF sub pipeline for class File System Activity [1001] from SYSCALL
@@ -1014,6 +1032,15 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `host` to `ocsf.device.hostname`
+              sources:
+                - host
+              sourceType: attribute
+              target: ocsf.device.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: false
+              type: schema-remapper
     - type: pipeline
       name: OCSF sub pipeline for class Account Change [3001]
       enabled: true
@@ -1245,6 +1272,15 @@ pipeline:
               targetFormat: string
               preserveSource: false
               overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `host` to `ocsf.device.hostname`
+              sources:
+                - host
+              sourceType: attribute
+              target: ocsf.device.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: false
               type: schema-remapper
     - type: pipeline
       name: OCSF sub pipeline for class Authentication [3002]
@@ -1487,6 +1523,15 @@ pipeline:
               targetFormat: string
               preserveSource: false
               overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `host` to `ocsf.device.hostname`
+              sources:
+                - host
+              sourceType: attribute
+              target: ocsf.device.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: false
               type: schema-remapper
     - type: pipeline
       name: OCSF sub pipeline for role assign logs
@@ -1760,6 +1805,15 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `host` to `ocsf.device.hostname`
+              sources:
+                - host
+              sourceType: attribute
+              target: ocsf.device.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: false
+              type: schema-remapper
     - type: pipeline
       name: OCSF sub pipeline for class Group Management [3006]
       enabled: true
@@ -1987,6 +2041,15 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `host` to `ocsf.device.hostname`
+              sources:
+                - host
+              sourceType: attribute
+              target: ocsf.device.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: false
+              type: schema-remapper
     - type: pipeline
       name: OCSF sub pipeline for class Device Config State Change [5019]
       enabled: true
@@ -2188,6 +2251,15 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `host` to `ocsf.device.hostname`
+              sources:
+                - host
+              sourceType: attribute
+              target: ocsf.device.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: false
+              type: schema-remapper
     - type: pipeline
       name: OCSF pre-processing for EXECVE logs
       enabled: true
@@ -2354,6 +2426,15 @@ pipeline:
               targetFormat: string
               preserveSource: false
               overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `host` to `ocsf.device.hostname`
+              sources:
+                - host
+              sourceType: attribute
+              target: ocsf.device.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: false
               type: schema-remapper
     - type: pipeline
       name: OCSF sub pipeline for class Process Activity [1007] from SYSCALL
@@ -2573,6 +2654,15 @@ pipeline:
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `host` to `ocsf.device.hostname`
+              sources:
+                - host
+              sourceType: attribute
+              target: ocsf.device.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: false
               type: schema-remapper
     - type: pipeline
       name: OCSF pre-processing for SOCKADDR logs
