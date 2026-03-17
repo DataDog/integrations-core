@@ -833,7 +833,12 @@ class ClusterMetadataCollector:
             return {}
 
     def _save_latest_version_cache(self, cache: dict[str, SubjectVersionInfo]):
-        """Persist the latest version cache."""
+        """Persist the latest version cache, evicting oldest entries if over the size limit."""
+        if len(cache) > self.SCHEMA_ID_CACHE_MAX_SIZE:
+            # Evict arbitrary entries; evicted subjects will simply be re-fetched next run
+            keys_to_evict = list(cache)[: len(cache) - self.SCHEMA_ID_CACHE_MAX_SIZE]
+            for key in keys_to_evict:
+                del cache[key]
         try:
             self.check.write_persistent_cache(self.SCHEMA_LATEST_VERSION_CACHE_KEY, json.dumps(cache))
         except Exception as e:
