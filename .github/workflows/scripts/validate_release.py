@@ -78,6 +78,19 @@ def main() -> None:
             print("\nRelease validation failed — stable versions are not allowed on alpha/beta/rc branches:", file=sys.stderr)
             for r in mismatched_stable:
                 print(f"  {r['package']} ({r['version']})", file=sys.stderr)
+            write_summary(
+                build_summary(
+                    packages,
+                    results,
+                    mode,
+                    source_repo,
+                    ref,
+                    target,
+                    dry_run,
+                    dispatched=False,
+                    footer="> ⚠️ Validation failed — stable versions cannot be released from an alpha/beta/rc branch.",
+                )
+            )
             sys.exit(1)
 
     if errors:

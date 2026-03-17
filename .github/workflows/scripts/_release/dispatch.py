@@ -80,11 +80,9 @@ def dispatch_in_batches(
     if nbr_packages == 0:
         return
     total_batches = (nbr_packages + batch_size - 1) // batch_size
-    batch_num = 1
-    for start in range(0, nbr_packages, batch_size):
+    for batch_num, start in enumerate(range(0, nbr_packages, batch_size), 1):
         end = min(start + batch_size, nbr_packages)
         current_batch = packages[start:end]
         print(f"\nBatch {batch_num}/{total_batches}:")
         print("\n".join(f"  - {name}" for name in current_batch))
         send_dispatch(build_payload(current_batch, source_repo, ref, target), token)
-        batch_num += 1

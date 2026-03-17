@@ -40,7 +40,6 @@ def has_changelog_fragments(package: str, root: Path = Path(".")) -> bool:
     return any(_FRAGMENT_RE.match(f.name) for f in changelog_dir.iterdir())
 
 
-
 def validate_package(package: str, root: Path = Path("."), is_stable_release: bool = True) -> dict:
     """Validate a single package and return a result dict with ``type`` and ``dispatch`` keys.
 

@@ -71,11 +71,12 @@ class TestMain:
         assert exc_info.value.code == 2
 
     def test_stable_on_pre_release_branch_exits(self, monkeypatch, tmp_path):
-        self._base_env(monkeypatch, tmp_path, SOURCE_REPO="integrations-extras", IS_STABLE_RELEASE="false")
+        _, summary_file = self._base_env(monkeypatch, tmp_path, SOURCE_REPO="integrations-extras", IS_STABLE_RELEASE="false")
         with patch("validate_release.validate_packages", return_value=self._stable_result(dispatch=False)), \
              pytest.raises(SystemExit) as exc_info:
             validate_release.main()
         assert exc_info.value.code == 1
+        assert len(summary_file.read_text()) > 0
 
     def test_package_with_fragments_exits_and_writes_summary(self, monkeypatch, tmp_path):
         _, summary_file = self._base_env(monkeypatch, tmp_path)

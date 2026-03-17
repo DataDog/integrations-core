@@ -24,7 +24,7 @@ on:
         description: "Target environment (dev = no tag push, dev S3; prod = push tags, prod S3)"
         required: false
         type: string
-        default: prod
+        default: prod  # callers (e.g. trigger-release.yml) typically override this
       dry-run:
         description: >-
           When true, print what would be released and where without pushing tags
