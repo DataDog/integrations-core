@@ -17,6 +17,12 @@
       "name": "not-ready-pool",
       "type": "kubernetes",
       "status": "NOT_READY"
+    },
+    {
+      "id": "wp-4",
+      "name": "not_included_pool",
+      "type": "process",
+      "status": "READY"
     }
   ],
   "/work_queues/filter": [
@@ -63,6 +69,28 @@
       "priority": 1,
       "is_paused": false,
       "last_polled": "2026-01-20T15:01:54.123Z",
+      "concurrency_limit": 10
+    },
+    {
+      "id": "wq-5",
+      "name": "not-included-queue",
+      "work_pool_id": "wp-4",
+      "work_pool_name": "not_included_pool",
+      "status": "READY",
+      "priority": 1,
+      "is_paused": false,
+      "last_polled": "2026-01-20T15:01:50Z",
+      "concurrency_limit": 10
+    },
+    {
+      "id": "wq-6",
+      "name": "not_included_queue",
+      "work_pool_id": "wp-1",
+      "work_pool_name": "default-pool",
+      "status": "READY",
+      "priority": 2,
+      "is_paused": false,
+      "last_polled": "2026-01-20T15:01:48Z",
       "concurrency_limit": 10
     }
   ],
@@ -128,6 +156,15 @@
       "last_heartbeat_time": "2026-01-20T15:02:00.789Z"
     }
   ],
+  "/work_pools/not_included_pool/workers/filter": [
+    {
+      "id": "w-9",
+      "name": "worker-9",
+      "status": "ONLINE",
+      "work_pool_id": "wp-4",
+      "last_heartbeat_time": "2026-01-20T15:01:50Z"
+    }
+  ],
   "/deployments/filter": [
     {
       "id": "d-1",
@@ -163,6 +200,33 @@
       "work_pool_name": "not-ready-pool",
       "work_queue_name": "not-ready-queue",
       "status": "NOT_READY",
+      "paused": false
+    },
+    {
+      "id": "d-5",
+      "name": "deployment-5",
+      "flow_id": "f-5",
+      "work_pool_name": "not_included_pool",
+      "work_queue_name": "not-included-queue",
+      "status": "READY",
+      "paused": false
+    },
+    {
+      "id": "d-6",
+      "name": "deployment-6",
+      "flow_id": "f-6",
+      "work_pool_name": "default-pool",
+      "work_queue_name": "not_included_queue",
+      "status": "READY",
+      "paused": false
+    },
+    {
+      "id": "d-7",
+      "name": "not_included_deployment",
+      "flow_id": "f-7",
+      "work_pool_name": "default-pool",
+      "work_queue_name": "default-queue",
+      "status": "READY",
       "paused": false
     }
   ],
@@ -407,6 +471,48 @@
       "state_type": "RUNNING",
       "expected_start_time": "2026-01-20T15:01:00.123Z",
       "start_time": "2026-01-20T15:01:05.456Z"
+    },
+    {
+      "id": "fr-ni-completed",
+      "work_pool_id": "wp-4",
+      "work_pool_name": "not_included_pool",
+      "work_queue_id": "wq-5",
+      "work_queue_name": "not-included-queue",
+      "deployment_id": "d-5",
+      "flow_id": "f-5",
+      "flow_name": "flow-5",
+      "state_type": "COMPLETED",
+      "expected_start_time": "2026-01-20T15:00:00Z",
+      "start_time": "2026-01-20T15:00:01Z",
+      "end_time": "2026-01-20T15:00:10Z"
+    },
+    {
+      "id": "fr-niq-completed",
+      "work_pool_id": "wp-1",
+      "work_pool_name": "default-pool",
+      "work_queue_id": "wq-6",
+      "work_queue_name": "not_included_queue",
+      "deployment_id": "d-6",
+      "flow_id": "f-6",
+      "flow_name": "flow-6",
+      "state_type": "COMPLETED",
+      "expected_start_time": "2026-01-20T15:00:00Z",
+      "start_time": "2026-01-20T15:00:02Z",
+      "end_time": "2026-01-20T15:00:12Z"
+    },
+    {
+      "id": "fr-nid-completed",
+      "work_pool_id": "wp-1",
+      "work_pool_name": "default-pool",
+      "work_queue_id": "wq-1",
+      "work_queue_name": "default-queue",
+      "deployment_id": "d-7",
+      "flow_id": "f-7",
+      "flow_name": "flow-7",
+      "state_type": "COMPLETED",
+      "expected_start_time": "2026-01-20T15:00:00Z",
+      "start_time": "2026-01-20T15:00:03Z",
+      "end_time": "2026-01-20T15:00:11Z"
     }
   ],
 
@@ -574,6 +680,33 @@
       "flow_run_id": "fr-pending",
       "state_type": "SCHEDULED",
       "expected_start_time": "2026-01-20T15:00:29Z"
+    },
+    {
+      "id": "tr-ni-1",
+      "task_key": "task-ni",
+      "flow_run_id": "fr-ni-completed",
+      "state_type": "COMPLETED",
+      "expected_start_time": "2026-01-20T15:00:02Z",
+      "start_time": "2026-01-20T15:00:02Z",
+      "end_time": "2026-01-20T15:00:08Z"
+    },
+    {
+      "id": "tr-niq-1",
+      "task_key": "task-niq",
+      "flow_run_id": "fr-niq-completed",
+      "state_type": "COMPLETED",
+      "expected_start_time": "2026-01-20T15:00:03Z",
+      "start_time": "2026-01-20T15:00:03Z",
+      "end_time": "2026-01-20T15:00:09Z"
+    },
+    {
+      "id": "tr-nid-1",
+      "task_key": "task-nid",
+      "flow_run_id": "fr-nid-completed",
+      "state_type": "COMPLETED",
+      "expected_start_time": "2026-01-20T15:00:04Z",
+      "start_time": "2026-01-20T15:00:04Z",
+      "end_time": "2026-01-20T15:00:10Z"
     }
   ],
 
@@ -1343,8 +1476,88 @@
               "id": "evt-0305",
               "follows": null,
               "received": "2026-01-20T15:01:16.050000Z"
+            },
+            {
+              "occurred": "2026-01-20T15:01:17.000000Z",
+              "event": "prefect.flow-run.Completed",
+              "resource": {
+                "prefect.resource.id": "prefect.flow-run.fr-ni-completed",
+                "prefect.resource.name": "fr-ni-completed",
+                "prefect.run-count": "1",
+                "prefect.state-name": "Completed",
+                "prefect.state-type": "COMPLETED",
+                "prefect.state-message": "",
+                "prefect.state-timestamp": "2026-01-20T15:01:17.000000+00:00"
+              },
+              "related": [
+                { "prefect.resource.id": "prefect.flow.f-5", "prefect.resource.role": "flow", "prefect.resource.name": "flow-5" },
+                { "prefect.resource.id": "prefect.deployment.d-5", "prefect.resource.role": "deployment", "prefect.resource.name": "deployment-5" },
+                { "prefect.resource.id": "prefect.work-queue.wq-5", "prefect.resource.role": "work-queue", "prefect.resource.name": "not-included-queue" },
+                { "prefect.resource.id": "prefect.work-pool.wp-4", "prefect.resource.role": "work-pool", "prefect.resource.name": "not_included_pool", "prefect.work-pool.type": "process" }
+              ],
+              "payload": {
+                "initial_state": { "name": "Running", "type": "RUNNING" },
+                "intended": { "from": "RUNNING", "to": "COMPLETED" },
+                "validated_state": { "name": "Completed", "type": "COMPLETED" }
+              },
+              "id": "evt-ni-0001",
+              "follows": null,
+              "received": "2026-01-20T15:01:17.050000Z"
+            },
+            {
+              "occurred": "2026-01-20T15:01:18.000000Z",
+              "event": "prefect.flow-run.Completed",
+              "resource": {
+                "prefect.resource.id": "prefect.flow-run.fr-niq-completed",
+                "prefect.resource.name": "fr-niq-completed",
+                "prefect.run-count": "1",
+                "prefect.state-name": "Completed",
+                "prefect.state-type": "COMPLETED",
+                "prefect.state-message": "",
+                "prefect.state-timestamp": "2026-01-20T15:01:18.000000+00:00"
+              },
+              "related": [
+                { "prefect.resource.id": "prefect.flow.f-6", "prefect.resource.role": "flow", "prefect.resource.name": "flow-6" },
+                { "prefect.resource.id": "prefect.deployment.d-6", "prefect.resource.role": "deployment", "prefect.resource.name": "deployment-6" },
+                { "prefect.resource.id": "prefect.work-queue.wq-6", "prefect.resource.role": "work-queue", "prefect.resource.name": "not_included_queue" },
+                { "prefect.resource.id": "prefect.work-pool.wp-1", "prefect.resource.role": "work-pool", "prefect.resource.name": "default-pool", "prefect.work-pool.type": "process" }
+              ],
+              "payload": {
+                "initial_state": { "name": "Running", "type": "RUNNING" },
+                "intended": { "from": "RUNNING", "to": "COMPLETED" },
+                "validated_state": { "name": "Completed", "type": "COMPLETED" }
+              },
+              "id": "evt-niq-0001",
+              "follows": null,
+              "received": "2026-01-20T15:01:18.050000Z"
+            },
+            {
+              "occurred": "2026-01-20T15:01:19.000000Z",
+              "event": "prefect.flow-run.Completed",
+              "resource": {
+                "prefect.resource.id": "prefect.flow-run.fr-nid-completed",
+                "prefect.resource.name": "fr-nid-completed",
+                "prefect.run-count": "1",
+                "prefect.state-name": "Completed",
+                "prefect.state-type": "COMPLETED",
+                "prefect.state-message": "",
+                "prefect.state-timestamp": "2026-01-20T15:01:19.000000+00:00"
+              },
+              "related": [
+                { "prefect.resource.id": "prefect.flow.f-7", "prefect.resource.role": "flow", "prefect.resource.name": "flow-7" },
+                { "prefect.resource.id": "prefect.deployment.d-7", "prefect.resource.role": "deployment", "prefect.resource.name": "not_included_deployment" },
+                { "prefect.resource.id": "prefect.work-queue.wq-1", "prefect.resource.role": "work-queue", "prefect.resource.name": "default-queue" },
+                { "prefect.resource.id": "prefect.work-pool.wp-1", "prefect.resource.role": "work-pool", "prefect.resource.name": "default-pool", "prefect.work-pool.type": "process" }
+              ],
+              "payload": {
+                "initial_state": { "name": "Running", "type": "RUNNING" },
+                "intended": { "from": "RUNNING", "to": "COMPLETED" },
+                "validated_state": { "name": "Completed", "type": "COMPLETED" }
+              },
+              "id": "evt-nid-0001",
+              "follows": null,
+              "received": "2026-01-20T15:01:19.050000Z"
             }
-          
         
       ]
       

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable
+from typing import Callable
 
 import pytest
 
@@ -12,9 +12,6 @@ from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.docker import docker_run, get_docker_hostname
 from datadog_checks.dev.utils import find_free_port
 from datadog_checks.prefect import PrefectCheck
-
-if TYPE_CHECKING:
-    from datadog_checks.dev.http import MockResponse
 
 COMPOSE_FILE_E2E = Path(__file__).parent / "docker" / "docker-compose.yml"
 PREFECT_URL = "http://localhost:4200/api"
@@ -54,11 +51,25 @@ def dd_environment(instance: Callable[[str], dict[str, str | dict[str, list[str]
 
 
 @pytest.fixture
-def check(instance: Callable[[str], dict[str, str]]) -> PrefectCheck:
+def check(instance: Callable[..., dict[str, str | dict[str, list[str]] | None | bool | int]]) -> PrefectCheck:
     check = PrefectCheck(
         "prefect",
         {},
-        [instance(PREFECT_URL)],
+        [
+            instance(
+                PREFECT_URL,
+                work_pool_names={"exclude": ["^not_included_"]},
+                work_queue_names={"exclude": ["^not_included_"]},
+                deployment_names={"exclude": ["^not_included_"]},
+                event_names={
+                    "include": [
+                        r"^prefect\.task-run\..*$",
+                        r"^prefect\.flow-run\..*$",
+                        r"^prefect\.[a-z-]+\.(ready|not-ready)$",
+                    ]
+                },
+            )
+        ],
     )
 
     return check
@@ -88,23 +99,32 @@ def instance() -> Callable[[str], dict[str, str | dict[str, list[str]] | None | 
     return builder
 
 
-def apply_mock_from_file(filename: str) -> dict[str, MockResponse]:
+def _load_fixture(filename: str) -> dict:
     import json
 
-    from datadog_checks.dev.http import MockResponse
-
-    mocked_responses_path = Path(__file__).parent / "fixtures" / filename
-    with open(mocked_responses_path) as f:
-        mocks = json.load(f)
-
-    processed_metrics: dict[str, MockResponse] = {}
-    for endpoint, metrics in mocks.items():
-        processed_metrics[f"{PREFECT_URL}{endpoint}"] = [MockResponse(json_data=metrics, status_code=200)]
-
-    return processed_metrics
+    fixtures_path = Path(__file__).parent / "fixtures" / filename
+    with open(fixtures_path) as f:
+        return json.load(f)
 
 
 @pytest.fixture
-def mock_http_responses(mock_http_response_per_endpoint: Callable) -> None:
-    mock_http_response_per_endpoint(apply_mock_from_file("get_metrics.json"))
-    mock_http_response_per_endpoint(apply_mock_from_file("post_metrics.json"), method="requests.Session.post")
+def mock_prefect_client(mocker):
+    from json import JSONDecodeError
+    from unittest.mock import create_autospec
+
+    from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
+
+    from datadog_checks.prefect.check import PrefectClient
+
+    get_responses = _load_fixture("get_metrics.json")
+    post_responses = _load_fixture("post_metrics.json")
+
+    mock_client = create_autospec(PrefectClient, instance=True)
+    mock_client.http_exceptions = (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError)
+
+    mock_client.get.side_effect = lambda endpoint, **kwargs: get_responses[endpoint]
+    mock_client.paginate_filter.side_effect = lambda endpoint, payload=None: post_responses[endpoint]
+    mock_client.paginate_events.side_effect = lambda endpoint, payload=None: post_responses[endpoint].get("events", [])
+
+    mocker.patch("datadog_checks.prefect.check.PrefectClient", return_value=mock_client)
+    return mock_client

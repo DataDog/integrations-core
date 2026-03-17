@@ -279,8 +279,13 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self._add_worker_heartbeat_age_seconds(w, now, wtags)
 
     def _collect_deployment_metrics(self):
-        deployments = self.client.paginate_filter("/deployments/filter")
-        deployments = self.filter_metrics.filter_deployments(deployments)
+        all_deployments = self.client.paginate_filter("/deployments/filter")
+
+        # the mapping needs to happen before filtering to ensure that flow_runs have the correct deployment name
+        for d in all_deployments:
+            self.deployments_by_id[d.get('id', '')] = d.get('name', '')
+
+        deployments = self.filter_metrics.filter_deployments(all_deployments)
 
         for d in deployments:
             dtags = [
@@ -299,7 +304,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             ]
 
             self._clean_and_emit_metric("deployment.is_ready", 1.0 if d['status'] == 'READY' else 0.0, dtags)
-            self.deployments_by_id[d.get('id', '')] = d.get('name', '')
 
     def _get_runs(self, type: Literal["flow_runs", "task_runs"], now_iso: str) -> list[dict]:
         payload = {
@@ -313,14 +317,14 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         # task runs don't have an end_time filter
         if type == "flow_runs":
             payload[type]["end_time"] = {"after_": self.last_check_time_iso, "before_": now_iso}
-        runs = self.client.paginate_filter(f"/{type}/filter", payload)
-        runs = (
-            self.filter_metrics.filter_flow_runs(runs, self.deployments_by_id)
-            if type == "flow_runs"
-            else self.filter_metrics.filter_task_runs(runs, self.flow_runs_tags)
-        )
+        all_runs = self.client.paginate_filter(f"/{type}/filter", payload)
 
-        return runs
+        if type == "flow_runs":
+            for fr in all_runs:
+                self._define_flow_run_tags(fr)
+            return self.filter_metrics.filter_flow_runs(all_runs, self.deployments_by_id)
+        else:
+            return self.filter_metrics.filter_task_runs(all_runs, self.flow_runs_tags)
 
     def _define_flow_run_tags(self, fr: dict[str, str]) -> list[str]:
         d_id = fr.get('deployment_id', '')
@@ -361,16 +365,19 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self._aggregate_concurrency_in_use_metric(
                 state_type, fr.get('work_pool_name', ''), fr.get('work_queue_name', '')
             )
-            self._aggregate_metric("flow_runs.scheduled", 1.0 if state_type == 'SCHEDULED' else 0.0, fr_tags)
-            self._aggregate_metric("flow_runs.pending", 1.0 if state_type == 'PENDING' else 0.0, fr_tags)
-            self._aggregate_metric("flow_runs.failed.count", 1.0 if state_type == 'FAILED' else 0.0, fr_tags)
-            self._aggregate_metric(
-                "flow_runs.cancelled.count", 1.0 if state_type in ['CANCELLING', 'CANCELLED'] else 0.0, fr_tags
-            )
-            self._aggregate_metric("flow_runs.crashed.count", 1.0 if state_type == 'CRASHED' else 0.0, fr_tags)
-            self._aggregate_metric("flow_runs.paused", 1.0 if state_type == 'PAUSED' else 0.0, fr_tags)
-            self._aggregate_metric("flow_runs.completed.count", 1.0 if state_type == 'COMPLETED' else 0.0, fr_tags)
-            self._aggregate_metric("flow_runs.running", 1.0 if state_type == 'RUNNING' else 0.0, fr_tags)
+
+            flow_run_state_metrics = {
+                "flow_runs.scheduled": {'SCHEDULED'},
+                "flow_runs.pending": {'PENDING'},
+                "flow_runs.failed.count": {'FAILED'},
+                "flow_runs.cancelled.count": {'CANCELLING', 'CANCELLED'},
+                "flow_runs.crashed.count": {'CRASHED'},
+                "flow_runs.paused": {'PAUSED'},
+                "flow_runs.completed.count": {'COMPLETED'},
+                "flow_runs.running": {'RUNNING'},
+            }
+            for metric_name, states in flow_run_state_metrics.items():
+                self._aggregate_metric(metric_name, 1.0 if state_type in states else 0.0, fr_tags)
 
             if start_time and end_time:
                 self._clean_and_emit_metric(
@@ -427,12 +434,14 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             )
             task_tags.add(tuple(tr_tags_list))
 
-            self._aggregate_metric("task_runs.pending", 1.0 if state_type == 'PENDING' else 0.0, tr_tags_list)
-            self._aggregate_metric("task_runs.paused", 1.0 if state_type == 'PAUSED' else 0.0, tr_tags_list)
-            self._aggregate_metric(
-                "task_runs.cancelled.count", 1.0 if state_type == 'CANCELLING' else 0.0, tr_tags_list
-            )
-            self._aggregate_metric("task_runs.running", 1.0 if state_type == 'RUNNING' else 0.0, tr_tags_list)
+            task_run_state_metrics = {
+                "task_runs.pending": {'PENDING'},
+                "task_runs.paused": {'PAUSED'},
+                "task_runs.cancelled.count": {'CANCELLING'},
+                "task_runs.running": {'RUNNING'},
+            }
+            for metric_name, states in task_run_state_metrics.items():
+                self._aggregate_metric(metric_name, 1.0 if state_type in states else 0.0, tr_tags_list)
 
             self._aggregate_metric(
                 "task_runs.late_start.count",
@@ -531,11 +540,14 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         state_type = event.state_type
         task_tags = sorted(event.task_tags)
 
-        # Emit count metrics for terminal states
-        self._aggregate_metric("task_runs.cancelled.count", 1.0 if state_type == 'CANCELLED' else 0.0, task_tags)
-        self._aggregate_metric("task_runs.completed.count", 1.0 if state_type == 'COMPLETED' else 0.0, task_tags)
-        self._aggregate_metric("task_runs.failed.count", 1.0 if state_type == 'FAILED' else 0.0, task_tags)
-        self._aggregate_metric("task_runs.crashed.count", 1.0 if state_type == 'CRASHED' else 0.0, task_tags)
+        terminal_state_metrics = {
+            "task_runs.cancelled.count": {'CANCELLED'},
+            "task_runs.completed.count": {'COMPLETED'},
+            "task_runs.failed.count": {'FAILED'},
+            "task_runs.crashed.count": {'CRASHED'},
+        }
+        for metric_name, states in terminal_state_metrics.items():
+            self._aggregate_metric(metric_name, 1.0 if state_type in states else 0.0, task_tags)
 
         # Emit execution duration metric when task run has completed
         task_run_data = event.payload.get('task_run', {})
@@ -687,7 +699,7 @@ class PrefectClient:
         limit = 200
         offset = 0
         all_results: list[dict] = []
-        while True:
+        for _ in range(1000):
             payload['limit'] = limit
             payload['offset'] = offset
             try:
@@ -703,6 +715,8 @@ class PrefectClient:
         return all_results
 
     def paginate_events(self, endpoint: str, payload: dict | None = None) -> list[dict]:
+        """Events follow a different pagination pattern than filter endpoints.
+        By using next_page, event pagination is much faster."""
         if payload is None:
             payload = {}
 
@@ -713,7 +727,7 @@ class PrefectClient:
             self.log.error("Could not collect events: %s", e)
             return events
 
-        while True:
+        for _ in range(1000):
             events.extend(response.get("events", []))
             if not response.get("next_page"):
                 break
