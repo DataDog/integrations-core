@@ -18,14 +18,17 @@ def _row_label(typ: str, eligible: bool, dry_run: bool, was_dispatched: bool) ->
         if was_dispatched:
             return "✅ Dispatched"
         return "✅ Validated"
-
-    return {
-        v.STABLE:        "❌ Stable release blocked (pre-release branch)",
-        v.PRE_RELEASE:   "⏭️ Pre-release skipped (stable branch)",
-        v.NO_VERSION:    "⚠️ No version found",
-        v.UNRELEASED:    "⏭️ Placeholder version (0.0.1)",
-        v.HAS_FRAGMENTS: "❌ Pending changelog fragments",
-    }.get(typ, "⏭️ Skipped")
+    if typ == v.STABLE:
+        return "❌ Stable release blocked (pre-release branch)"
+    if typ == v.PRE_RELEASE:
+        return "⏭️ Pre-release skipped (stable branch)"
+    if typ == v.NO_VERSION:
+        return "⚠️ No version found"
+    if typ == v.UNRELEASED:
+        return "⏭️ Placeholder version (0.0.1)"
+    if typ == v.HAS_FRAGMENTS:
+        return "❌ Pending changelog fragments"
+    raise ValueError(f"unexpected validation type: {typ!r}")
 
 
 def build_summary(
