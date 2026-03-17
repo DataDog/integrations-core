@@ -1,0 +1,48 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "f1e2d3c4-b5a6-7890-1234-567890abcdef",
+  "app_id": "do-query-actions",
+  "owner": "agent-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Execute SQL queries against databases and report success/failure",
+    "title": "DO Query Actions",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Metrics",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 28902500,
+      "source_type_name": "DO Query Actions",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "do_query_actions.",
+        "check": "do_query_actions.query_status",
+        "metadata_path": "metadata.csv"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

@@ -1,0 +1,11 @@
+[env.collectors.datadog-checks]
+
+[envs.default]
+dependencies = [
+  "psycopg[c,pool]==3.3.3",
+  "boto3==1.42.54",
+  "azure-identity==1.25.2",
+]
+
+[[envs.default.matrix]]
+python = ["3.13"]
