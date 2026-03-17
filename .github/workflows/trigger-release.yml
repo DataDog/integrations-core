@@ -67,7 +67,7 @@ jobs:
     with:
       source-repo: integrations-core
       packages: ${{ inputs.packages || '' }}
-      source-repo-ref: ${{ inputs.source-repo-ref || github.sha }}
+      source-repo-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.source-repo-ref || github.sha }}
       target: ${{ inputs.target || 'dev' }}
       dry-run: ${{ inputs.dry-run || false }}
       ddev-version: ${{ inputs.ddev-version || '' }}

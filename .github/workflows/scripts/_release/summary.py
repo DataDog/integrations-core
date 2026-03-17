@@ -4,19 +4,28 @@ from . import validation as v
 _TARGET_REPO = "DataDog/agent-integration-wheels-release"
 ACTIONS_URL = f"https://github.com/{_TARGET_REPO}/actions"
 
-_TYPE_LABELS: dict[str, str] = {
-    v.NO_VERSION: "⚠️ No version found",
-    v.UNRELEASED: "⏭️ Unreleased (0.0.1)",
-    v.PRE_RELEASE: "🧪 Pre-release",
-    v.HAS_FRAGMENTS: "❌ Unreleased changelog fragments",
-    v.STABLE: "✅ Ready",
-}
-
 
 def _source_link(source_repo: str, ref: str) -> str:
     if ref:
         return f"[`{source_repo}@{ref[:12]}`](https://github.com/DataDog/{source_repo}/commit/{ref})"
     return source_repo
+
+
+def _row_label(typ: str, eligible: bool, dry_run: bool, was_dispatched: bool) -> str:
+    if eligible:
+        if dry_run:
+            return "🔄 Dry run"
+        if was_dispatched:
+            return "✅ Dispatched"
+        return "✅ Validated"
+
+    return {
+        v.STABLE:        "❌ Stable release blocked (pre-release branch)",
+        v.PRE_RELEASE:   "⏭️ Pre-release skipped (stable branch)",
+        v.NO_VERSION:    "⚠️ No version found",
+        v.UNRELEASED:    "⏭️ Placeholder version (0.0.1)",
+        v.HAS_FRAGMENTS: "❌ Pending changelog fragments",
+    }.get(typ, "⏭️ Skipped")
 
 
 def build_summary(
@@ -27,21 +36,21 @@ def build_summary(
     ref: str,
     target: str,
     dry_run: bool,
-    dispatched: bool,
+    was_dispatched: bool,
     footer: str = "",
 ) -> str:
     """Return the full Markdown summary for GITHUB_STEP_SUMMARY.
 
     Args:
-        packages:   Ordered list of package names to include in the table.
-        results:    Validation result dicts (``{"package", "version", "type", "dispatch"}``).
-        mode:       Human-readable detection mode string.
-        source_repo: Repository name (e.g. ``integrations-core``).
-        ref:        Commit SHA or ref used as the build source.
-        target:     Deployment target (``dev`` or ``prod``).
-        dry_run:    Whether this was a dry run.
-        dispatched: Whether wheel-build events were actually dispatched.
-        footer:     Optional extra paragraph appended after the package table.
+        packages:      Ordered list of package names to include in the table.
+        results:       Validation result dicts (``{"package", "version", "type", "dispatch"}``).
+        mode:          Human-readable detection mode string.
+        source_repo:   Repository name (e.g. ``integrations-core``).
+        ref:           Commit SHA or ref used as the build source.
+        target:        Deployment target (``dev`` or ``prod``).
+        dry_run:       Whether this was a dry run.
+        was_dispatched: Whether wheel-build events were actually dispatched.
+        footer:        Optional extra paragraph appended after the package table.
     """
     by_package = {r["package"]: r for r in results}
 
@@ -50,17 +59,12 @@ def build_summary(
         r = by_package.get(name, {})
         ver = r.get("version") or "—"
         typ = r.get("type", v.STABLE)
-        will_dispatch = r.get("dispatch", True)
-        if dry_run and will_dispatch:
-            label = "🔄 Dry run"
-        elif dispatched and will_dispatch:
-            label = "✅ Dispatched"
-        else:
-            label = _TYPE_LABELS.get(typ, "✅ Ready")
+        eligible = r.get("dispatch", True)
+        label = _row_label(typ, eligible, dry_run, was_dispatched)
         rows.append(f"| `{name}` | `{ver}` | {label} |")
 
     if not footer:
-        if dispatched:
+        if was_dispatched:
             footer = f"[Track downstream runs →]({ACTIONS_URL}?query=event:repository_dispatch)"
         elif dry_run:
             footer = "> Dry run — no tags pushed, no builds triggered"

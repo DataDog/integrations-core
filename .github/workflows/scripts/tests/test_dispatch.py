@@ -107,7 +107,7 @@ class TestBuildSummary:
             ref="abc1234567890",
             target="prod",
             dry_run=False,
-            dispatched=True,
+            was_dispatched=True,
         )
         return build_summary(packages or ["postgres"], self._results, **{**defaults, **kwargs})
 
@@ -120,23 +120,23 @@ class TestBuildSummary:
             ref="sha",
             target="prod",
             dry_run=False,
-            dispatched=True,
+            was_dispatched=True,
         )
-        assert "✅ Dispatched" in out       # stable and pre-release
-        assert "⏭️ Unreleased" in out       # 0.0.1 placeholder
+        assert "✅ Dispatched" in out
+        assert "⏭️ Placeholder version" in out
         assert "⚠️ No version" in out
-        assert "❌ Unreleased" in out       # has_fragments
+        assert "❌ Pending changelog" in out
 
     def test_pre_release_dry_run_label(self):
-        out = self._summary(packages=["mysql"], dry_run=True, dispatched=False)
+        out = self._summary(packages=["mysql"], dry_run=True, was_dispatched=False)
         assert "🔄 Dry run" in out
 
     def test_dry_run_label(self):
-        out = self._summary(dry_run=True, dispatched=False)
+        out = self._summary(dry_run=True, was_dispatched=False)
         assert "🔄 Dry run" in out
 
     def test_custom_footer(self):
-        out = self._summary(dispatched=False, footer="> Custom footer text")
+        out = self._summary(was_dispatched=False, footer="> Custom footer text")
         assert "Custom footer text" in out
 
     def test_ref_truncated_in_link(self):
@@ -144,3 +144,45 @@ class TestBuildSummary:
         out = self._summary(ref=full_sha)
         assert full_sha[:12] in out
         assert full_sha[12:] not in out.split("commit/")[0]
+
+    def test_stable_blocked_on_pre_release_branch(self):
+        results = [{"package": "postgres", "version": "1.2.3", "type": v.STABLE, "dispatch": False}]
+        out = build_summary(
+            ["postgres"],
+            results,
+            mode="auto",
+            source_repo="integrations-core",
+            ref="sha",
+            target="prod",
+            dry_run=False,
+            was_dispatched=False,
+        )
+        assert "❌ Stable release blocked (pre-release branch)" in out
+
+    def test_pre_release_skipped_on_stable_branch(self):
+        results = [{"package": "mysql", "version": "2.0.0b1", "type": v.PRE_RELEASE, "dispatch": False}]
+        out = build_summary(
+            ["mysql"],
+            results,
+            mode="auto",
+            source_repo="integrations-core",
+            ref="sha",
+            target="prod",
+            dry_run=False,
+            was_dispatched=False,
+        )
+        assert "⏭️ Pre-release skipped (stable branch)" in out
+
+    def test_eligible_not_dispatched(self):
+        results = [{"package": "postgres", "version": "1.2.3", "type": v.STABLE, "dispatch": True}]
+        out = build_summary(
+            ["postgres"],
+            results,
+            mode="auto",
+            source_repo="integrations-core",
+            ref="sha",
+            target="prod",
+            dry_run=False,
+            was_dispatched=False,
+        )
+        assert "✅ Validated" in out

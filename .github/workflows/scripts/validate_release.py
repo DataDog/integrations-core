@@ -87,7 +87,7 @@ def main() -> None:
                     ref,
                     target,
                     dry_run,
-                    dispatched=False,
+                    was_dispatched=False,
                     footer="> ⚠️ Validation failed — stable versions cannot be released from an alpha/beta/rc branch.",
                 )
             )
@@ -114,7 +114,7 @@ def main() -> None:
                 ref,
                 target,
                 dry_run,
-                dispatched=False,
+                was_dispatched=False,
                 footer="> ⚠️ Validation failed — run `ddev release make` to consolidate changelog fragments before releasing.",
             )
         )

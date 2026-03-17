@@ -43,13 +43,13 @@ def main() -> None:
         for name in packages:
             print(f"  - {name}")
         print("\nDRY RUN: no tags pushed, no builds triggered")
-        write_summary(build_summary(packages, results, mode, source_repo, ref, target, dry_run, dispatched=False))
+        write_summary(build_summary(packages, results, mode, source_repo, ref, target, dry_run, was_dispatched=False))
         return
 
     token = os.environ["GH_TOKEN"]
     dispatch_in_batches(packages, source_repo, ref, target, token)
 
-    write_summary(build_summary(packages, results, mode, source_repo, ref, target, dry_run, dispatched=True))
+    write_summary(build_summary(packages, results, mode, source_repo, ref, target, dry_run, was_dispatched=True))
 
 
 if __name__ == "__main__":
