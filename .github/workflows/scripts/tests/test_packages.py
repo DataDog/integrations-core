@@ -47,12 +47,12 @@ class TestResolvePackages:
     all_packages = ["mysql", "postgres", "redis"]
 
     def test_all_keyword(self):
-        packages, mode = resolve_packages("all", all_packages=self.all_packages)
+        packages, mode = resolve_packages(selected="all", all_packages=self.all_packages)
         assert packages == self.all_packages
         assert mode == f"all ({len(self.all_packages)} packages in repo)"
 
     def test_all_keyword_case_insensitive(self):
-        packages, _ = resolve_packages("ALL", all_packages=self.all_packages)
+        packages, _ = resolve_packages(selected="ALL", all_packages=self.all_packages)
         assert packages == self.all_packages
 
     def test_json_array(self):
@@ -62,7 +62,7 @@ class TestResolvePackages:
 
     def test_auto_detect(self):
         tags = ["postgres-1.0.0", "redis-2.0.0"]
-        packages, mode = resolve_packages("", all_packages=self.all_packages, head_tags=tags)
+        packages, mode = resolve_packages(selected="", all_packages=self.all_packages, head_tags=tags)
         assert packages == ["postgres", "redis"]
         assert mode == "auto-detect from tags at HEAD"
 
@@ -72,9 +72,9 @@ class TestResolvePackages:
 
     def test_invalid_json_exits(self):
         with pytest.raises(SystemExit):
-            resolve_packages("not-json", all_packages=self.all_packages)
+            resolve_packages(selected="not-json", all_packages=self.all_packages)
 
     def test_unknown_in_auto_detect_exits(self):
         tags = ["not-a-package-1.0.0"]
         with pytest.raises(SystemExit):
-            resolve_packages("", all_packages=self.all_packages, head_tags=tags)
+            resolve_packages(selected="", all_packages=self.all_packages, head_tags=tags)
