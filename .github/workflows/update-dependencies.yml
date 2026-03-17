@@ -57,6 +57,7 @@ jobs:
         {
           echo "summary<<${delimiter}"
           cat /tmp/dep-report.md
+          echo ""
           echo "${delimiter}"
         } >> "$GITHUB_OUTPUT"
     - name: Update licenses
