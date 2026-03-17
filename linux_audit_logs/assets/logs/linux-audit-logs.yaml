@@ -434,15 +434,6 @@ pipeline:
           expression: timestamp/1000
           target: original_timestamp
           replaceMissing: false
-        - name: Map `host` to `ocsf.device.hostname`
-          sources:
-            - host
-          sourceType: attribute
-          target: ocsf.device.hostname
-          targetFormat: string
-          preserveSource: false
-          overrideOnConflict: true
-          type: schema-remapper
     - type: pipeline
       name: OCSF sub pipeline for class Base Event [0]
       enabled: true
