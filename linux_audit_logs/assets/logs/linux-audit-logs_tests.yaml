@@ -1418,6 +1418,7 @@ tests:
       a2: "id"
       argc: 3
       event_id: 2249
+      host: "audit-server"
       msg_raw: ""
       ocsf:
         activity_id: 1
@@ -1486,6 +1487,7 @@ tests:
       fsgid: 1000
       fsuid: 502
       gid: 1000
+      host: "audit-server"
       items: 2
       key: "susp_activity"
       msg_raw: ""
@@ -1694,6 +1696,7 @@ tests:
       fsgid: 1000
       fsuid: 502
       gid: 1000
+      host: "audit-server"
       items: 1
       key: "perm_mod"
       msg_raw: ""
@@ -1789,6 +1792,7 @@ tests:
       fsgid: 1000
       fsuid: 502
       gid: 1000
+      host: "audit-server"
       items: 2
       key: "delete"
       msg_raw: ""
@@ -1863,6 +1867,7 @@ tests:
       a2: "id"
       argc: 3
       event_id: 2249
+      host: "audit-server"
       msg_raw: ""
       ocsf:
         activity_id: 1
@@ -1907,6 +1912,7 @@ tests:
     custom:
       event_id: 354317
       fam: "inet"
+      host: "audit-server"
       laddr: "1.2.3.4"
       lport: 4444
       msg_raw: ""
