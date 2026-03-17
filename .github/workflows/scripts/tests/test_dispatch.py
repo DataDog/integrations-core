@@ -2,7 +2,7 @@
 import http.client
 import io
 import urllib.error
-from unittest.mock import create_autospec, patch
+from unittest.mock import call, create_autospec, patch
 
 import pytest
 
@@ -72,9 +72,11 @@ class TestDispatchInBatches:
         packages = [f"pkg{i}" for i in range(8)]
         with patch("_release.dispatch.send_dispatch") as mock_send:
             dispatch_in_batches(packages, "repo", "ref", "prod", "tok", batch_size=3)
-        assert mock_send.call_count == 3
-        batches = [c.args[0]["client_payload"]["packages"] for c in mock_send.call_args_list]
-        assert batches == [packages[:3], packages[3:6], packages[6:]]
+        assert mock_send.mock_calls == [
+            call(build_payload(packages[:3], "repo", "ref", "prod"), "tok"),
+            call(build_payload(packages[3:6], "repo", "ref", "prod"), "tok"),
+            call(build_payload(packages[6:], "repo", "ref", "prod"), "tok"),
+        ]
 
     def test_passes_token(self):
         with patch("_release.dispatch.send_dispatch") as mock_send:

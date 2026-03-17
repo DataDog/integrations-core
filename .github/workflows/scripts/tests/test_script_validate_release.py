@@ -1,6 +1,6 @@
 """Tests for validate_release entry-point script."""
 import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 
@@ -53,8 +53,7 @@ class TestMain:
         with patch("validate_release.subprocess.run", return_value=MagicMock(returncode=0)) as mock_run, \
              patch("validate_release.validate_packages", return_value=self._stable_result()):
             validate_release.main()
-        ddev_call = mock_run.call_args_list[0]
-        assert ddev_call.args[0][:3] == ["ddev", "validate", "version"]
+        assert mock_run.mock_calls == [call(["ddev", "validate", "version", "postgres"])]
 
     def test_integrations_extras_skips_ddev_validate_version(self, monkeypatch, tmp_path):
         self._base_env(monkeypatch, tmp_path, SOURCE_REPO="integrations-extras")

@@ -1,5 +1,5 @@
 """Tests for tag_releases entry-point script."""
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 
@@ -23,6 +23,12 @@ class TestPackageArgs:
 
 
 class TestMain:
+    _GIT_NAME = call(["git", "config", "user.name", "github-actions[bot]"], check=True)
+    _GIT_EMAIL = call(
+        ["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"],
+        check=True,
+    )
+
     def _run_main(self, monkeypatch, env: dict, side_effects):
         for key, val in env.items():
             monkeypatch.setenv(key, val)
@@ -49,7 +55,11 @@ class TestMain:
     ])
     def test_push_flag(self, monkeypatch, env, expected_flag):
         mock_run = self._run_main(monkeypatch, env, self._side_effects(0))
-        assert expected_flag in mock_run.call_args_list[2].args[0]
+        assert mock_run.mock_calls == [
+            self._GIT_NAME,
+            self._GIT_EMAIL,
+            call(["ddev", "release", "tag", "all", "--skip-prerelease", expected_flag]),
+        ]
 
     def test_exit_code_3_retries_with_no_fetch(self, monkeypatch):
         side_effects = [
@@ -59,8 +69,12 @@ class TestMain:
             MagicMock(returncode=0),  # retry with --no-fetch
         ]
         mock_run = self._run_main(monkeypatch, {"TARGET": "dev"}, side_effects)
-        retry_call = mock_run.call_args_list[3]
-        assert "--no-fetch" in retry_call.args[0]
+        assert mock_run.mock_calls == [
+            self._GIT_NAME,
+            self._GIT_EMAIL,
+            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--no-push"]),
+            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--no-push", "--no-fetch"]),
+        ]
 
     @pytest.mark.parametrize("returncode", [0, 2])
     def test_success_exit_codes_do_not_exit(self, monkeypatch, returncode):
@@ -72,9 +86,3 @@ class TestMain:
             self._run_main(monkeypatch, {"TARGET": "dev"}, self._side_effects(1))
         assert exc_info.value.code == 1
 
-    def test_git_config_called_before_ddev(self, monkeypatch):
-        mock_run = self._run_main(monkeypatch, {"TARGET": "dev"}, self._side_effects(0))
-        calls = mock_run.call_args_list
-        assert calls[0].args[0][0] == "git"
-        assert calls[1].args[0][0] == "git"
-        assert calls[2].args[0][0] == "ddev"
