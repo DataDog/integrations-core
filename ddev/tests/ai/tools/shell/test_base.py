@@ -18,7 +18,6 @@ from ddev.ai.tools.shell.base import CmdTool, run_command
 
 
 def make_proc(returncode: int = 0, stdout: bytes = b"", stderr: bytes = b"") -> MagicMock:
-    """Build a mock subprocess object."""
     proc = MagicMock()
     proc.returncode = returncode
     proc.communicate = AsyncMock(return_value=(stdout, stderr))
@@ -27,8 +26,12 @@ def make_proc(returncode: int = 0, stdout: bytes = b"", stderr: bytes = b"") -> 
 
 
 def patch_proc(proc: MagicMock):
-    """Patch asyncio.create_subprocess_exec to return proc."""
     return patch("asyncio.create_subprocess_exec", new=AsyncMock(return_value=proc))
+
+
+async def _raise_timeout(coro, *args, **kwargs):
+    coro.close()
+    raise asyncio.TimeoutError()
 
 
 # ---------------------------------------------------------------------------
@@ -56,100 +59,69 @@ class SlowGreetTool(GreetTool):
     timeout = 60
 
 
-# ---------------------------------------------------------------------------
-# run_command — successful execution
-# ---------------------------------------------------------------------------
+@pytest.fixture
+def proc() -> MagicMock:
+    return make_proc(returncode=0, stdout=b"hello\n")
 
 
-class TestRunCommandSuccess:
-    def test_returns_success_true_on_zero_exit(self):
-        proc = make_proc(returncode=0, stdout=b"hello\n")
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["echo", "hello"]))
-        assert result.success is True
+@pytest.fixture
+def greet_tool() -> GreetTool:
+    return GreetTool()
 
-    def test_returns_stdout_as_data(self):
-        proc = make_proc(returncode=0, stdout=b"some output\n")
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.data == "some output\n"
 
-    def test_ignores_stderr_on_zero_exit(self):
-        proc = make_proc(returncode=0, stdout=b"out\n", stderr=b"warning\n")
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.data == "out\n"
-        assert "warning" not in result.data
-
-    def test_not_truncated_for_short_output(self):
-        proc = make_proc(stdout=b"short\n")
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.truncated is False
+@pytest.fixture
+def slow_greet_tool() -> SlowGreetTool:
+    return SlowGreetTool()
 
 
 # ---------------------------------------------------------------------------
-# run_command — failure exit codes
+# run_command — output and exit code handling
 # ---------------------------------------------------------------------------
 
 
-class TestRunCommandFailure:
-    def test_returns_success_false_on_nonzero_exit(self):
-        proc = make_proc(returncode=1, stderr=b"error\n")
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.success is False
-
-    def test_appends_stderr_to_stdout_on_failure(self):
-        proc = make_proc(returncode=1, stdout=b"partial\n", stderr=b"error\n")
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert "partial" in result.data
-        assert "error" in result.data
-
-    def test_uses_only_stderr_when_stdout_empty_on_failure(self):
-        proc = make_proc(returncode=1, stdout=b"", stderr=b"fatal error\n")
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.success is False and result.data == "fatal error\n"
-
-    def test_does_not_append_empty_stderr_on_failure(self):
-        proc = make_proc(returncode=1, stdout=b"output\n", stderr=b"")
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.success is False and result.data == "output\n"
+def test_run_command_success(proc):
+    with patch_proc(proc):
+        result = asyncio.run(run_command(["echo", "hello"]))
+    assert result.success is True
+    assert result.data == "hello\n"
+    assert result.truncated is False
 
 
-# ---------------------------------------------------------------------------
-# run_command — empty output
-# ---------------------------------------------------------------------------
+def test_run_command_failure_combines_stdout_and_stderr():
+    proc = make_proc(returncode=1, stdout=b"partial\n", stderr=b"error\n")
+    with patch_proc(proc):
+        result = asyncio.run(run_command(["cmd"]))
+    assert result.success is False
+    assert "partial" in result.data
+    assert "error" in result.data
 
 
-class TestRunCommandEmptyOutput:
-    def test_empty_stdout_returns_no_output_placeholder(self):
-        proc = make_proc(returncode=0, stdout=b"")
+def test_run_command_failure_stderr_only_when_no_stdout():
+    proc = make_proc(returncode=1, stdout=b"", stderr=b"fatal error\n")
+    with patch_proc(proc):
+        result = asyncio.run(run_command(["cmd"]))
+    assert result.success is False and result.data == "fatal error\n"
+
+
+def test_run_command_ignores_stderr_on_zero_exit():
+    proc = make_proc(returncode=0, stdout=b"out\n", stderr=b"warning\n")
+    with patch_proc(proc):
+        result = asyncio.run(run_command(["cmd"]))
+    assert result.success is True
+    assert "warning" not in result.data
+
+
+def test_run_command_empty_output():
+    for stdout in (b"", b"   \n  "):
+        proc = make_proc(returncode=0, stdout=stdout)
         with patch_proc(proc):
             result = asyncio.run(run_command(["cmd"]))
         assert result.data == "(no output)"
 
-    def test_whitespace_only_stdout_returns_no_output_placeholder(self):
-        proc = make_proc(returncode=0, stdout=b"   \n  ")
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.data == "(no output)"
-
-    def test_empty_output_on_zero_exit_is_success(self):
-        proc = make_proc(returncode=0, stdout=b"")
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.success is True
-
-    def test_empty_output_on_nonzero_exit_is_failure(self):
-        proc = make_proc(returncode=1, stdout=b"", stderr=b"")
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.success is False
-        assert result.data == "(no output)"
+    proc = make_proc(returncode=1, stdout=b"", stderr=b"")
+    with patch_proc(proc):
+        result = asyncio.run(run_command(["cmd"]))
+    assert result.success is False and result.data == "(no output)"
 
 
 # ---------------------------------------------------------------------------
@@ -157,58 +129,30 @@ class TestRunCommandEmptyOutput:
 # ---------------------------------------------------------------------------
 
 
-async def _raise_timeout(coro, *args, **kwargs):
-    coro.close()
-    raise asyncio.TimeoutError()
+def test_run_command_not_found():
+    with patch("asyncio.create_subprocess_exec", side_effect=FileNotFoundError()):
+        result = asyncio.run(run_command(["nonexistent"]))
+    assert result.success is False
+    assert "Command not found" in result.error
+    assert "nonexistent" in result.error
 
 
-class TestRunCommandExceptions:
-    def test_command_not_found_returns_failure(self):
-        with patch("asyncio.create_subprocess_exec", side_effect=FileNotFoundError()):
-            result = asyncio.run(run_command(["nonexistent"]))
-        assert result.success is False
+def test_run_command_timeout():
+    proc = make_proc()
+    with patch_proc(proc):
+        with patch("asyncio.wait_for", new=_raise_timeout):
+            result = asyncio.run(run_command(["sleep", "100"], timeout=5))
+    assert result.success is False
+    assert "5s" in result.error
+    proc.kill.assert_called_once()
 
-    def test_command_not_found_error_contains_command_name(self):
-        with patch("asyncio.create_subprocess_exec", side_effect=FileNotFoundError()):
-            result = asyncio.run(run_command(["nonexistent"]))
-        assert "nonexistent" in result.error
 
-    def test_command_not_found_error_message_format(self):
-        with patch("asyncio.create_subprocess_exec", side_effect=FileNotFoundError()):
-            result = asyncio.run(run_command(["nonexistent"]))
-        assert "Command not found" in result.error
-
-    def test_timeout_returns_failure(self):
-        proc = make_proc()
-        with patch_proc(proc):
-            with patch("asyncio.wait_for", new=_raise_timeout):
-                result = asyncio.run(run_command(["sleep", "100"], timeout=1))
-        assert result.success is False
-
-    def test_timeout_error_mentions_timeout_duration(self):
-        proc = make_proc()
-        with patch_proc(proc):
-            with patch("asyncio.wait_for", new=_raise_timeout):
-                result = asyncio.run(run_command(["sleep", "100"], timeout=5))
-        assert "5s" in result.error
-
-    def test_timeout_kills_process(self):
-        proc = make_proc()
-        with patch_proc(proc):
-            with patch("asyncio.wait_for", new=_raise_timeout):
-                asyncio.run(run_command(["sleep", "100"]))
-        proc.kill.assert_called_once()
-
-    def test_unexpected_exception_returns_failure(self):
-        with patch("asyncio.create_subprocess_exec", side_effect=OSError("permission denied")):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.success is False
-
-    def test_unexpected_exception_includes_type_and_message(self):
-        with patch("asyncio.create_subprocess_exec", side_effect=OSError("permission denied")):
-            result = asyncio.run(run_command(["cmd"]))
-        assert "OSError" in result.error
-        assert "permission denied" in result.error
+def test_run_command_unexpected_exception():
+    with patch("asyncio.create_subprocess_exec", side_effect=OSError("permission denied")):
+        result = asyncio.run(run_command(["cmd"]))
+    assert result.success is False
+    assert "OSError" in result.error
+    assert "permission denied" in result.error
 
 
 # ---------------------------------------------------------------------------
@@ -216,43 +160,24 @@ class TestRunCommandExceptions:
 # ---------------------------------------------------------------------------
 
 
-class TestRunCommandTruncation:
-    def test_large_output_is_truncated(self):
-        large = ("x" * 80 + "\n") * 700  # well over MAX_CHARS
-        proc = make_proc(stdout=large.encode())
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.truncated is True
+def test_run_command_truncation():
+    large = ("x" * 80 + "\n") * 700
+    proc = make_proc(stdout=large.encode())
+    with patch_proc(proc):
+        result = asyncio.run(run_command(["cmd"]))
+    assert result.truncated is True
+    assert result.total_size == len(large)
+    assert result.shown_size == len(result.data)
+    assert result.hint is not None
 
-    def test_truncated_result_has_total_size(self):
-        large = ("x" * 80 + "\n") * 700
-        proc = make_proc(stdout=large.encode())
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.total_size == len(large)
 
-    def test_truncated_result_has_shown_size(self):
-        large = ("x" * 80 + "\n") * 700
-        proc = make_proc(stdout=large.encode())
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.shown_size == len(result.data)
-
-    def test_truncated_result_has_hint(self):
-        large = ("x" * 80 + "\n") * 700
-        proc = make_proc(stdout=large.encode())
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.hint is not None
-
-    def test_output_at_limit_is_not_truncated(self):
-        exact = "x" * MAX_CHARS
-        proc = make_proc(stdout=exact.encode())
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.truncated is False
-        assert result.total_size is None
-        assert result.hint is None
+def test_run_command_no_truncation_at_limit():
+    proc = make_proc(stdout=("x" * MAX_CHARS).encode())
+    with patch_proc(proc):
+        result = asyncio.run(run_command(["cmd"]))
+    assert result.truncated is False
+    assert result.total_size is None
+    assert result.hint is None
 
 
 # ---------------------------------------------------------------------------
@@ -260,30 +185,20 @@ class TestRunCommandTruncation:
 # ---------------------------------------------------------------------------
 
 
-class TestCmdTool:
-    def test_call_dispatches_to_run_command_with_cmd_output(self):
-        tool = GreetTool()
+def test_cmd_tool_is_abstract():
+    with pytest.raises(TypeError):
+        CmdTool()  # type: ignore[abstract]
+
+
+def test_cmd_tool_timeouts(greet_tool: GreetTool, slow_greet_tool: SlowGreetTool):
+    assert GreetTool.timeout == 10
+    assert SlowGreetTool.timeout == 60
+
+
+def test_cmd_tool_dispatches_with_correct_timeout(greet_tool: GreetTool, slow_greet_tool: SlowGreetTool):
+    for tool, expected_timeout in [(greet_tool, 10), (slow_greet_tool, 60)]:
         with patch(
             "ddev.ai.tools.shell.base.run_command", new=AsyncMock(return_value=ToolResult(success=True))
         ) as mock_run:
             asyncio.run(tool.run({"name": "world"}))
-        mock_run.assert_called_once_with(["echo", "hello world"], timeout=10)
-
-    def test_default_timeout_is_ten(self):
-        assert GreetTool.timeout == 10
-
-    def test_subclass_can_override_timeout(self):
-        assert SlowGreetTool.timeout == 60
-
-    def test_overridden_timeout_passed_to_run_command(self):
-        tool = SlowGreetTool()
-        with patch(
-            "ddev.ai.tools.shell.base.run_command", new=AsyncMock(return_value=ToolResult(success=True))
-        ) as mock_run:
-            asyncio.run(tool.run({"name": "world"}))
-        mock_run.assert_called_once_with(["echo", "hello world"], timeout=60)
-
-    def test_cmd_method_is_abstract(self):
-        # Cannot instantiate CmdTool without implementing cmd()
-        with pytest.raises(TypeError):
-            CmdTool()  # type: ignore[abstract]
+        mock_run.assert_called_once_with(["echo", "hello world"], timeout=expected_timeout)
