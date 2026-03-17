@@ -284,7 +284,9 @@ class ClusterMetadataCollector:
                 return
 
         brokers = metadata.brokers
-        cluster_id = metadata.cluster_id if hasattr(metadata, 'cluster_id') else 'unknown'
+        cluster_id = self.config._kafka_cluster_id_override or (
+            metadata.cluster_id if hasattr(metadata, 'cluster_id') else 'unknown'
+        )
 
         self.log.debug("Found %s brokers in cluster %s", len(brokers), cluster_id)
         broker_tags = self._get_tags(cluster_id) + [f'bootstrap_servers:{self.config._kafka_connect_str}']
@@ -407,6 +409,7 @@ class ClusterMetadataCollector:
                     {
                         'collection_timestamp': int(time.time() * 1000),
                         'kafka_cluster_id': cluster_id,
+                        **self._original_cluster_id_field(),
                         'broker_id': str(broker_id),
                         'broker_host': info['broker_host'],
                         'broker_port': info['broker_port'],
@@ -422,7 +425,9 @@ class ClusterMetadataCollector:
 
         topic_partitions = self.client.get_topic_partitions()
 
-        cluster_id = metadata.cluster_id if hasattr(metadata, 'cluster_id') else 'unknown'
+        cluster_id = self.config._kafka_cluster_id_override or (
+            metadata.cluster_id if hasattr(metadata, 'cluster_id') else 'unknown'
+        )
         all_topics_metadata = metadata.topics
 
         self.log.debug("Found %s topics", len(topic_partitions))
@@ -617,6 +622,7 @@ class ClusterMetadataCollector:
                     {
                         'collection_timestamp': int(time.time() * 1000),
                         'kafka_cluster_id': cluster_id,
+                        **self._original_cluster_id_field(),
                         'topic': topic_name,
                         'config_type': 'topic',
                         'config': json.loads(info['event_text']),
@@ -633,7 +639,9 @@ class ClusterMetadataCollector:
 
     def _collect_consumer_group_metadata(self, metadata):
         self.log.debug("Collecting consumer group metadata")
-        cluster_id = metadata.cluster_id if hasattr(metadata, 'cluster_id') else 'unknown'
+        cluster_id = self.config._kafka_cluster_id_override or (
+            metadata.cluster_id if hasattr(metadata, 'cluster_id') else 'unknown'
+        )
         consumer_groups_future = self.client.kafka_client.list_consumer_groups()
         consumer_groups_result = consumer_groups_future.result(timeout=self.config._request_timeout)
 
@@ -709,7 +717,9 @@ class ClusterMetadataCollector:
             self.log.error("Failed to fetch subjects from Schema Registry: %s", e)
             return
 
-        cluster_id = metadata.cluster_id if hasattr(metadata, 'cluster_id') else 'unknown'
+        cluster_id = self.config._kafka_cluster_id_override or (
+            metadata.cluster_id if hasattr(metadata, 'cluster_id') else 'unknown'
+        )
 
         self.log.debug("Found %s schemas in schema registry", len(subjects))
 
@@ -799,6 +809,7 @@ class ClusterMetadataCollector:
                     {
                         'collection_timestamp': int(time.time() * 1000),
                         'kafka_cluster_id': cluster_id,
+                        **self._original_cluster_id_field(),
                         'subject': subject,
                         'topic': info['topic_name'],
                         'schema_for': info['schema_for'],
@@ -892,4 +903,11 @@ class ClusterMetadataCollector:
         tags = list(self.config._custom_tags)
         if cluster_id:
             tags.append(f'kafka_cluster_id:{cluster_id}')
+            if self.config._kafka_cluster_id_override:
+                tags.append(f'original_kafka_cluster_id:{self.config._auto_detected_cluster_id}')
         return tags
+
+    def _original_cluster_id_field(self) -> dict[str, str]:
+        if self.config._kafka_cluster_id_override:
+            return {'original_kafka_cluster_id': self.config._auto_detected_cluster_id}
+        return {}
