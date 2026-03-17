@@ -17,6 +17,7 @@ __all__ = ['MockHTTPResponse']
 class MockHTTPResponse:
     """Library-agnostic mock HTTP response implementing HTTPResponseProtocol."""
 
+    # Parameter order differs from MockResponse; not a compatibility concern since all callers use keyword args.
     def __init__(
         self,
         content: str | bytes = '',

@@ -13,16 +13,28 @@ from .conftest import instance
 
 def test_successful_metrics_collection(dd_run_check, mock_http_response, aggregator):
     status_metrics_response_data = {key: {"healthy": True} for key in constants.STATUS_METRICS_MAP.keys()}
+    status_metrics_response_data["gauges"] = {
+        "jvm.memory.heap.used": {"value": 123456789},
+        "nexus.analytics.bytes_transferred_by_format": {
+            "value": [{"maven": {"bytes_uploaded": 100, "bytes_downloaded": 200}}],
+        },
+        "nexus.analytics.blobstore_type_counts": {"value": {"file": 5}},
+    }
 
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=200,
-        json_data=status_metrics_response_data.update({"gauges": {"jvm.memory.heap.used": {"value": 123456789}}}),
+        json_data=status_metrics_response_data,
     )
 
     check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
     dd_run_check(check)
 
+    for metric_name in constants.STATUS_METRICS_MAP.values():
+        aggregator.assert_metric(f"sonatype_nexus.{metric_name}")
+    aggregator.assert_metric("sonatype_nexus.analytics.jvm.heap_memory_used")
+    aggregator.assert_metric("sonatype_nexus.analytics.uploaded_bytes_by_format")
+    aggregator.assert_metric("sonatype_nexus.analytics.downloaded_bytes_by_format")
+    aggregator.assert_metric("sonatype_nexus.analytics.blob_store.count_by_type")
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
