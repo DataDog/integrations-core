@@ -1,0 +1,1 @@
+Add kafka_cluster_id_override parameter to allow overriding the auto-detected cluster ID.
