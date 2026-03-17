@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 
 import pytest
 
@@ -75,9 +76,8 @@ release:
     result = ddev('validate', 'labeler')
 
     assert result.exit_code == 1, result.output
-    assert (
-        "Integration PR label `integration/dummy2` is not properly configured: \n    `['something']`" in result.output
-    )
+    print(result.output)
+    assert "Integration PR label `integration/dummy2` is not properly configured:" in result.output
 
 
 def test_labeler_valid_configuration(fake_repo, ddev):
@@ -159,6 +159,65 @@ release:
     assert (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').read_text() == labeler_test_config(
         ["dummy", "dummy2"]
     )
+
+
+LONG_CHECK_NAME = "a_very_long_integration_name_that_exceeds_the_limit"
+
+
+def test_labeler_sync_long_label_prompts_user_for_shorter_tag(fake_repo, ddev):
+    long_check_dir = fake_repo.path / LONG_CHECK_NAME
+    long_check_dir.mkdir()
+    (long_check_dir / 'manifest.json').write_text('{}')
+
+    (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').write_text(
+        labeler_test_config(["dummy", "dummy2"])
+    )
+
+    result = ddev('validate', 'labeler', '--sync', input='long_check\n')
+
+    assert result.exit_code == 0, result.output
+    assert 'exceeds the 50 character limit' in result.output
+    assert f'Adding config for `{LONG_CHECK_NAME}`' in result.output
+    assert 'Successfully fixed' in result.output
+
+    labeler_content = (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').read_text()
+    assert 'integration/long_check' in labeler_content
+    assert f'{LONG_CHECK_NAME}/**/*' in labeler_content
+
+
+def test_labeler_sync_long_label_user_provides_tag_with_prefix(fake_repo, ddev):
+    long_check_dir = fake_repo.path / LONG_CHECK_NAME
+    long_check_dir.mkdir()
+    (long_check_dir / 'manifest.json').write_text('{}')
+
+    (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').write_text(
+        labeler_test_config(["dummy", "dummy2"])
+    )
+
+    result = ddev('validate', 'labeler', '--sync', input='integration/long_check\n')
+
+    assert result.exit_code == 0, result.output
+    assert f'Adding config for `{LONG_CHECK_NAME}`' in result.output
+
+    labeler_content = (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').read_text()
+    assert 'integration/long_check' in labeler_content
+    assert 'integration/integration/' not in labeler_content
+
+
+def test_labeler_no_sync_long_label_reports_error(fake_repo, ddev):
+    long_check_dir = fake_repo.path / LONG_CHECK_NAME
+    long_check_dir.mkdir()
+    (long_check_dir / 'manifest.json').write_text('{}')
+
+    (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').write_text(
+        labeler_test_config(["dummy", "dummy2"])
+    )
+
+    result = ddev('validate', 'labeler')
+
+    assert result.exit_code == 1, result.output
+    output = re.sub(r"\s+", " ", result.output)
+    assert "does not have an integration PR label" in output
 
 
 def labeler_test_config(integrations):

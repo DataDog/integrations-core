@@ -1498,7 +1498,7 @@ integration/trend_micro_email_security:
 - changed-files:
   - any-glob-to-any-file:
     - trend_micro_email_security/**/*
-integration/trend_micro_vision_one_endpoint_security:
+integration/trend_micro_vision_one_eps:
 - changed-files:
   - any-glob-to-any-file:
     - trend_micro_vision_one_endpoint_security/**/*

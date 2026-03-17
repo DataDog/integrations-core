@@ -18,6 +18,13 @@ def labeler_config_for_check(check: str) -> list[dict[str, list[dict[str, list[s
     return [{"changed-files": [{"any-glob-to-any-file": [f"{check}/**/*"]}]}]
 
 
+def _extract_directory_from_config(config: list[dict]) -> str | None:
+    try:
+        return config[0]['changed-files'][0]['any-glob-to-any-file'][0].split('/')[0]
+    except (IndexError, KeyError, TypeError, AttributeError):
+        return None
+
+
 @click.command()
 @click.option('--sync', is_flag=True, help='Update the labeler configuration')
 @click.pass_obj
@@ -47,24 +54,51 @@ def labeler(app: Application, sync: bool):
 
     tracker = app.create_validation_tracker('labeler')
 
-    for label in pr_labels_config:
-        if label.startswith('integration'):
-            check_name = label.removeprefix('integration/')
-            if check_name not in valid_integrations:
-                if sync:
-                    new_pr_labels_config.pop(label)
-                    app.display_info(f'Removing `{label}` only found in labeler config')
-                    continue
+    # Build mapping from directory (in glob patterns) to label key
+    directory_to_label: dict[str, str] = {}
+    for label, config in pr_labels_config.items():
+        if not label.startswith('integration'):
+            continue
+        directory = _extract_directory_from_config(config)
+        if directory and directory in valid_integrations:
+            directory_to_label[directory] = label
+        else:
+            check_from_label = label.removeprefix('integration/')
+            if check_from_label in valid_integrations:
+                directory_to_label[check_from_label] = label
+            elif sync:
+                new_pr_labels_config.pop(label)
+                app.display_info(f'Removing `{label}` only found in labeler config')
+            else:
                 message = f'Unknown check label `{label}` found in PR labels config'
                 tracker.error((str(pr_labels_config_path),), message=message)
 
     # Check if valid integration has a label
     for check_name in valid_integrations:
-        integration_label = f"integration/{check_name}"
         expected_config = labeler_config_for_check(check_name)
 
-        if integration_label not in pr_labels_config:
+        if check_name not in directory_to_label:
+            integration_label = f"integration/{check_name}"
             if sync:
+                if len(integration_label) > 50:
+                    app.display_warning(
+                        f"Integration label `{integration_label}` exceeds the 50 character limit "
+                        f"({len(integration_label)} chars)"
+                    )
+                    max_tag_length = 50 - len("integration/")
+                    integration_tag = click.prompt(
+                        f'Enter a shorter integration name (max {max_tag_length} chars).'
+                        'This tag is only used to label PRs.',
+                        type=str,
+                    )
+                    if integration_tag.startswith('integration/'):
+                        integration_tag = integration_tag.removeprefix('integration/')
+                    integration_label = f"integration/{integration_tag}"
+                    if len(integration_label) > 50:
+                        app.display_error(
+                            f"Label `{integration_label}` is still too long ({len(integration_label)} chars), skipping"
+                        )
+                        continue
                 new_pr_labels_config[integration_label] = expected_config
                 app.display_info(f'Adding config for `{check_name}`')
                 continue
@@ -74,6 +108,7 @@ def labeler(app: Application, sync: bool):
             continue
 
         # Check if label config is properly configured
+        integration_label = directory_to_label[check_name]
         integration_label_config = pr_labels_config.get(integration_label)
         if integration_label_config != expected_config:
             if sync:
