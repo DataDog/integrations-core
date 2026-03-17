@@ -55,7 +55,7 @@ def resolve_packages(
         except json.JSONDecodeError as e:
             print(f"selected_PACKAGES is not valid JSON: {e}", file=sys.stderr)
             sys.exit(1)
-        mode = f"selected ({selected})"
+        mode = f"manual ({selected})"
     else:
         tags = head_tags if head_tags is not None else get_tags_at_head()
         packages = detect_from_tags(tags)
