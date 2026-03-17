@@ -53,7 +53,7 @@ prefect.server.work_pool.worker.heartbeat_age_seconds,gauge,,second,,Time since 
 prefect.server.work_pool.worker.is_online,gauge,,,,Whether the worker is online. Submits 1 when true and 0 when false.,0,prefect,worker online,,
 prefect.server.work_queue.backlog.age,gauge,,second,,Age of the oldest item in the queue backlog.,0,prefect,queue backlog age,,
 prefect.server.work_queue.backlog.size,gauge,,run,,Number of flow runs waiting in the queue backlog.,0,prefect,queue backlog size,,
-prefect.server.work_queue.concurrency.in_use,gauge,,run,percent,Percentage of concurrency in use by the queue.,0,prefect,queue concurrency in use,,
+prefect.server.work_queue.concurrency.in_use,gauge,,percent,,Percentage of concurrency in use by the queue.,0,prefect,queue concurrency in use,,
 prefect.server.work_queue.is_not_ready,gauge,,,,Whether the work queue is not ready to accept and dispatch flow runs. Submits 1 when true and 0 when false.,0,prefect,queue not ready,,
 prefect.server.work_queue.is_paused,gauge,,,,Whether the work queue is paused. Submits 1 when true and 0 when false.,0,prefect,queue paused,,
 prefect.server.work_queue.is_ready,gauge,,,,Whether the work queue is ready to accept and dispatch flow runs. Submits 1 when true and 0 when false.,0,prefect,queue ready,,

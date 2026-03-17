@@ -151,37 +151,37 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         # Flows that complete in this run of the check so that they are removed from the
         # flow_runs_tags cache after task runs are collected
         self.completed_flow_runs = set()
-        try:
-            self._collect_api_status_metrics()
 
-            self._collect_work_pool_metrics(now)
+        self._collect_api_status_metrics()
 
-            self._collect_work_queue_metrics(now)
+        self._collect_work_pool_metrics(now)
 
-            self._collect_deployment_metrics()
+        self._collect_work_queue_metrics(now)
 
-            self._collect_flow_run_metrics(now_iso, now)
+        self._collect_deployment_metrics()
 
-            self._collect_queue_aggregated_metrics(now)
+        self._collect_flow_run_metrics(now_iso, now)
 
-            self._collect_task_run_metrics(now_iso)
+        self._collect_queue_aggregated_metrics(now)
 
-            self._collect_event_metrics(now_iso)
+        self._collect_task_run_metrics(now_iso)
 
-            self._emit_aggregated_metrics()
-        finally:
-            self._clean_cache()
+        self._collect_event_metrics(now_iso)
 
-            self.last_check_time_iso = now_iso
-            self.last_check_time = now
+        self._emit_aggregated_metrics()
 
-            for key, value in (
-                (self.LAST_CHECK_TIME_CACHE_KEY, now_iso),
-                (self.DEPENDENCY_WAIT_KEY, json.dumps(self.dependency_wait)),
-                (self.FLOWS_AWAITING_RETRY_KEY, json.dumps(self.flows_awaiting_retry)),
-                (self.FLOW_RUNS_TAGS_KEY, json.dumps(self.flow_runs_tags)),
-            ):
-                self.write_persistent_cache(key, value)
+        self._clean_cache()
+
+        self.last_check_time_iso = now_iso
+        self.last_check_time = now
+
+        for key, value in (
+            (self.LAST_CHECK_TIME_CACHE_KEY, now_iso),
+            (self.DEPENDENCY_WAIT_KEY, json.dumps(self.dependency_wait)),
+            (self.FLOWS_AWAITING_RETRY_KEY, json.dumps(self.flows_awaiting_retry)),
+            (self.FLOW_RUNS_TAGS_KEY, json.dumps(self.flow_runs_tags)),
+        ):
+            self.write_persistent_cache(key, value)
 
     def _clean_cache(self):
         self.flow_runs_tags = {k: v for k, v in self.flow_runs_tags.items() if k not in self.completed_flow_runs}
@@ -303,7 +303,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 f"is_paused:{d.get('paused', '')}",
             ]
 
-            self._clean_and_emit_metric("deployment.is_ready", 1.0 if d['status'] == 'READY' else 0.0, dtags)
+            self._clean_and_emit_metric("deployment.is_ready", 1.0 if d.get('status', '') == 'READY' else 0.0, dtags)
 
     def _get_runs(self, type: Literal["flow_runs", "task_runs"], now_iso: str) -> list[dict]:
         payload = {
@@ -527,7 +527,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             retry_gap = (event.occurred - await_retry_timestamp).total_seconds()
 
             flow_run_tags = event.flow_tags
-            self._clean_and_emit_metric("flow_runs.retry_gaps_duration", retry_gap, flow_run_tags + self.base_tags)
+            self._clean_and_emit_metric("flow_runs.retry_gaps_duration", retry_gap, flow_run_tags)
 
     def _collect_task_run_metrics_from_events(self, event: Event) -> None:
         """
@@ -594,7 +594,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                     self._clean_and_emit_metric(
                         "task_runs.dependency_wait_duration",
                         (event.occurred - last_dep_finished).total_seconds(),
-                        task_tags + self.base_tags,
+                        task_tags,
                     )
                 else:
                     self.log.error(
@@ -705,7 +705,7 @@ class PrefectClient:
             try:
                 results = self.post(endpoint, payload)
             except self.http_exceptions as e:
-                self.log.error("Could not collect %s: %s", endpoint, e)
+                self.log.error("Could not collect %s: %s, data is incomplete", endpoint, e)
                 return all_results
 
             all_results.extend(results if isinstance(results, list) else [results])
@@ -735,7 +735,7 @@ class PrefectClient:
             try:
                 response = self.get(response.get("next_page"), pagination=True)
             except self.http_exceptions as e:
-                self.log.error("Could not collect next page of events: %s", e)
+                self.log.error("Could not collect next page of events: %s, data is incomplete", e)
                 return events
         return events
 
