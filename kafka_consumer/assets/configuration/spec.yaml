@@ -310,7 +310,8 @@ files:
           type: string
       - name: enable_cluster_monitoring
         description: |
-          (PREVIEW) Enable cluster monitoring to collect broker, topic, partition, consumer group,
+          (PREVIEW) Enable cluster monitoring to collect cluster-wide metrics for Data Streams
+          Monitoring. Collects broker, topic, partition, consumer group,
           and schema registry metadata. Events are cached and tagged with kafka_cluster_id.
           May increase resource consumption on large clusters.
 
@@ -323,6 +324,18 @@ files:
           type: boolean
           example: false
           display_default: false
+      - name: kafka_configs_refresh_interval
+        description: |
+          How often (in seconds) to re-fetch broker configurations, topic configurations,
+          and schema registry version checks from Kafka. A longer interval reduces load on
+          the Kafka cluster and Schema Registry. On clusters with many topics or schemas,
+          the check fetches in batches and gracefully degrades by re-fetching less often if
+          it cannot keep up within this interval.
+        fleet_configurable: true
+        value:
+          type: integer
+          example: 180
+          display_default: 180
       - name: schema_registry_url
         description: |
           Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.
