@@ -5,24 +5,20 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated
 
-from ddev.ai.tools.core.base import BaseTool
 from ddev.ai.tools.core.types import ToolResult
 
-from .file_registry import FileRegistry
+from .base import TextEdit
 
 
 @dataclass
 class AppendFileInput:
-    path: Annotated[str, "Path of the file to append"]
+    path: Annotated[str, "Path of the file to append to"]
     content: Annotated[str, "Content to append to the file"]
 
 
-class AppendFileTool(BaseTool[AppendFileInput]):
+class AppendFileTool(TextEdit[AppendFileInput]):
     """Appends content to the end of an existing file.
-    Only files registered in the FileRegistry can be appended to."""
-
-    def __init__(self, file_registry: FileRegistry):
-        self._file_registry = file_registry
+    The file must have been read first. Fails if the file was modified since the last read."""
 
     @property
     def name(self) -> str:
@@ -31,14 +27,14 @@ class AppendFileTool(BaseTool[AppendFileInput]):
     async def __call__(self, tool_input: AppendFileInput) -> ToolResult:
         path = Path(tool_input.path)
 
-        if not self._file_registry.is_registered(str(path)):
-            return ToolResult(
-                success=False, error=f"Not authorized to append to {path}: file is not registered in the FileRegistry"
-            )
+        current_content, fail = self._read_verified(str(path))
+        if fail:
+            return fail
 
-        if not path.exists():
-            return ToolResult(success=False, error=f"File not found: {path}")
+        content_to_append = tool_input.content.replace("\r\n", "\n")
+        separator = "" if not current_content or current_content.endswith("\n") else "\n"
+        new_content = current_content + separator + content_to_append
 
-        with path.open("a") as f:
-            f.write(tool_input.content)
+        path.write_text(new_content, encoding="utf-8")
+        self._on_write(str(path), new_content)
         return ToolResult(success=True, data=f"Content appended to: {path}")
