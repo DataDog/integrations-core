@@ -61,7 +61,18 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
         self.collect_events = self.config.collect_events
 
-        self.filter_metrics = self._set_up_filters()
+        def _to_dict(model):
+            if model is None:
+                return None
+            return {k: list(v) for k, v in model.model_dump().items() if v is not None}
+
+        self.filter_metrics = PrefectFilterMetrics(
+            log=self.log,
+            work_pool_names=_to_dict(self.config.work_pool_names),
+            work_queue_names=_to_dict(self.config.work_queue_names),
+            deployment_names=_to_dict(self.config.deployment_names),
+            event_names=_to_dict(self.config.event_names),
+        )
 
         self._get_last_check_time()
 
@@ -83,23 +94,9 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self.last_check_time_iso = last_check
             self.last_check_time = parsed_last_check
         else:
-            self.log.warning("Last check time not found, setting to now - min_collection_interval")
+            self.log.info("Last check time not found, setting to now - min_collection_interval")
             self.last_check_time = _utcnow() - timedelta(seconds=self.config.min_collection_interval)
             self.last_check_time_iso = self.last_check_time.isoformat()
-
-    def _set_up_filters(self):
-        def _to_dict(model):
-            if model is None:
-                return None
-            return {k: list(v) for k, v in model.model_dump().items() if v is not None}
-
-        return PrefectFilterMetrics(
-            log=self.log,
-            work_pool_names=_to_dict(self.config.work_pool_names),
-            work_queue_names=_to_dict(self.config.work_queue_names),
-            deployment_names=_to_dict(self.config.deployment_names),
-            event_names=_to_dict(self.config.event_names),
-        )
 
     def _clean_and_emit_metric(self, name: str, value: float, tags: list[str]):
         """
