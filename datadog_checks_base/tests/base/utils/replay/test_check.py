@@ -29,6 +29,8 @@ class ReplayCheck(AgentCheck):
     def check(self, _):
         self.gauge('metric', 0, tags=self.tags)
         self.service_check('sc', ServiceCheck.OK if self.redirecting else ServiceCheck.CRITICAL, tags=self.tags)
+        self.log.debug('Metric count: %d', 42)
+        self.set_external_tags([('myhost', {'src': ['tag:val']})])
 
 
 @pytest.mark.parametrize(
@@ -56,9 +58,12 @@ def test_replay_all(caplog, dd_run_check, aggregator, datadog_agent, init_config
     aggregator.assert_service_check('replay.sc', ServiceCheck.OK, count=1, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
 
-    expected_message = 'Initializing - replay - test:123'
-    for _, level, message in caplog.record_tuples:
-        if level == logging.DEBUG and message == expected_message:
-            break
-    else:
-        raise AssertionError('Expected DEBUG log with message: {}'.format(expected_message))
+    for expected_message in ('Initializing - replay - test:123', 'Metric count: 42'):
+        for _, level, message in caplog.record_tuples:
+            if level == logging.DEBUG and message == expected_message:
+                break
+        else:
+            raise AssertionError('Expected DEBUG log with message: {}'.format(expected_message))
+
+    datadog_agent.assert_external_tags('myhost', {'src': ['tag:val']})
+    datadog_agent.assert_external_tags_count(1)

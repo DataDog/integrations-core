@@ -59,11 +59,16 @@ class ReplayDatadogAgent(object):
 
 
 class ReplayLogger(logging.Logger):
-    def log(self, level, *args, **kwargs):
+    def log(self, level, msg, *args, **kwargs):
+        if args:
+            try:
+                msg = msg % args
+            except (TypeError, ValueError):
+                pass
         print(
             '{}:log:{}'.format(
                 MESSAGE_INDICATOR,
-                to_native_string(json.encode({'method': LOG_METHODS[level], 'args': [str(a) for a in args]})),
+                to_native_string(json.encode({'method': LOG_METHODS[level], 'args': [str(msg)]})),
             )
         )
 
