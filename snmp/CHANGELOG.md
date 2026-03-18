@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## Unreleased
+
+***Fixed***:
+
+* Meraki Cloud Controller: use `device_status` tag instead of `status` for device-level online/offline to avoid confusion with uplink status (connected/not_connected) per Cisco Meraki API semantics.
+
 ## 12.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
