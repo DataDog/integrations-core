@@ -66,13 +66,13 @@ jobs:
         ddev validate licenses --sync
       env:
         DD_GITHUB_USER: "${{ github.actor }}"
-        DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        DD_GITHUB_TOKEN: "${{ steps.token-generator.outputs.token }}"
     # We generate the changelog hoping we guess the PR number correctly.
     # We are likely to succeed because the job runs during quiet hours.
     # If we guess the PR number wrong, the validation will catch it and suggest a simple fix.
     - name: Update changelogs
       env:
-        DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        DD_GITHUB_TOKEN: "${{ steps.token-generator.outputs.token }}"
       run: |-
         ddev release changelog new added -m "Update dependencies"
     - name: Create Pull Request
