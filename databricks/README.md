@@ -110,6 +110,10 @@ For Datadog to access your Databricks cost data in Data Jobs Monitoring or [Clou
    ```
    The user granting these must have the `MANAGE` privilege on `CATALOG system`.
 
+#### Programmatic Management
+
+You can programmatically create, update, list, and delete Databricks integration accounts using this [Integrations API][37]. The API does not support reference tables.
+
 ## Data Collected
 
 ### Metrics
@@ -146,3 +150,4 @@ You can troubleshoot issues yourself by enabling the [Databricks web terminal][1
 [36]: https://docs.datadoghq.com/data_observability/
 [8]: https://docs.datadoghq.com/integrations/spark/#metrics
 [9]: https://docs.datadoghq.com/integrations/spark/#service-checks
+[37]: https://docs.datadoghq.com/api/latest/other-integrations/
