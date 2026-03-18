@@ -84,8 +84,11 @@ def run_with_isolation(check, aggregator, datadog_agent):
                 method = message['method']
                 value = getattr(datadog_agent, method)(*message['args'], **message['kwargs'])
                 if method not in KNOWN_DATADOG_AGENT_SETTER_METHODS:
-                    process.stdin.write(b'%s\n' % ensure_bytes(json.encode({'value': value})))
-                    process.stdin.flush()
+                    try:
+                        process.stdin.write(b'%s\n' % ensure_bytes(json.encode({'value': value})))
+                        process.stdin.flush()
+                    except BrokenPipeError:
+                        break
             elif message_type == 'error':
                 check.log.error(message[0]['traceback'])
                 break
