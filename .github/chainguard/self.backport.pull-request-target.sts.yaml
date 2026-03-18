@@ -33,3 +33,5 @@ claim_pattern:
 
 permissions:
   pull_requests: write
+  workflows: write
+  contents: write
