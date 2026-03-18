@@ -443,22 +443,18 @@ pipeline:
           target: original_timestamp
           replaceMissing: false
     - type: pipeline
-      name: Map `host` to `ocsf.device.hostname`
+      name: Set `ocsf.device.hostname` to Unknown
       enabled: true
       filter:
-        query: "-@type:(SOCKADDR) AND NOT (@type:SYSCALL AND @SYSCALL:(connect OR bind
+        query: "-@type:SOCKADDR AND NOT (@type:SYSCALL AND @SYSCALL:(connect OR bind
           OR listen OR accept OR accept4 OR sendto OR recvfrom))"
       processors:
-        - type: attribute-remapper
-          name: Map `host` to `ocsf.device.hostname`
+        - type: string-builder-processor
+          name: Set `ocsf.device.hostname` to Unknown
           enabled: true
-          sources:
-            - host
-          sourceType: attribute
+          template: Unknown
           target: ocsf.device.hostname
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
+          replaceMissing: false
     - type: pipeline
       name: OCSF sub pipeline for class Base Event [0]
       enabled: true
