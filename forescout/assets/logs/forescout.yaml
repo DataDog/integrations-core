@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: forescout
 metric_id: forescout
 backend_only: false

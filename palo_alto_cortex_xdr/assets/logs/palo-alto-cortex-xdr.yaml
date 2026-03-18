@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: palo-alto-cortex-xdr
 metric_id: palo-alto-cortex-xdr
 backend_only: false

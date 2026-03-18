@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: ibm_spectrum_lsf
 metric_id: ibm-spectrum-lsf
 backend_only: false

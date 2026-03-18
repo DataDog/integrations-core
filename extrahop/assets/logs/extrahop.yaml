@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: extrahop
 metric_id: extrahop
 backend_only: false

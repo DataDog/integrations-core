@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: arctic-wolf-aurora-endpoint-security
 metric_id: arctic-wolf-aurora-endpoint-security
 backend_only: false

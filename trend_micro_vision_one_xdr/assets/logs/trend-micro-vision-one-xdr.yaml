@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: trend-micro-vision-one-xdr
 metric_id: trend-micro-vision-one-xdr
 backend_only: false

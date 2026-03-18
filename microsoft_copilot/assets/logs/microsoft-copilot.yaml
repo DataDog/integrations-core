@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: microsoft-copilot
 metric_id: microsoft-copilot
 backend_only: false
