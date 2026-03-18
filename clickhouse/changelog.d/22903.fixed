@@ -1,1 +1,0 @@
-Fix ClickHouse Cloud query undercounting by using per-node checkpoint tracking to prevent cross-node query_log flush races from skipping queries

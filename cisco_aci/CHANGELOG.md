@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.13.1 / 2026-03-18
+
+***Fixed***:
+
+* Fix NDM tagging: use only device_id in device id_tags to prevent collisions when devices are unreachable, and add interface:{name} tag to interface metrics for proper metadata-to-metrics linking ([#22645](https://github.com/DataDog/integrations-core/pull/22645))
+
 ## 4.13.0 / 2026-02-19
 
 ***Added***:
