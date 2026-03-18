@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 9.4.0 / 2026-03-18
+
+***Added***:
+
+* elastic: add `prirep` and `index` tags to the `elasticsearch.shards` metric through an additional `detailed_shard_metrics` option ([#22426](https://github.com/DataDog/integrations-core/pull/22426))
+
 ## 9.3.0 / 2026-02-19
 
 ***Added***:
