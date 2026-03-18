@@ -1162,6 +1162,10 @@ integration/powerdns_recursor:
 - changed-files:
   - any-glob-to-any-file:
     - powerdns_recursor/**/*
+integration/prefect:
+- changed-files:
+  - any-glob-to-any-file:
+    - prefect/**/*
 integration/presto:
 - changed-files:
   - any-glob-to-any-file:
