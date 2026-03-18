@@ -10,6 +10,8 @@ jobs:
   update_dependencies:
     name: Update the dependencies
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC token federation with dd-octo-sts
     steps:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -29,7 +31,7 @@ jobs:
         ddev config set repos.core .
         ddev config set repo core
     - name: Create token
-      uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
+      uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80 # v1.0.3
       id: token-generator
       with:
         scope: DataDog/integrations-core
@@ -129,3 +131,4 @@ jobs:
         token: ${{ steps.token-generator.outputs.token }}
         commit-message: Fix changelog PR numbers
         branch: ${{ steps.cpr.outputs.pull-request-branch }}
+        base: master
