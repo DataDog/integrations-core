@@ -402,6 +402,10 @@ integration/crowdstrike_fdr:
 - changed-files:
   - any-glob-to-any-file:
     - crowdstrike_fdr/**/*
+integration/cyberark_endpoint_privilege_manager:
+- changed-files:
+  - any-glob-to-any-file:
+    - cyberark_endpoint_privilege_manager/**/*
 integration/databricks:
 - changed-files:
   - any-glob-to-any-file:
@@ -1162,6 +1166,10 @@ integration/powerdns_recursor:
 - changed-files:
   - any-glob-to-any-file:
     - powerdns_recursor/**/*
+integration/prefect:
+- changed-files:
+  - any-glob-to-any-file:
+    - prefect/**/*
 integration/presto:
 - changed-files:
   - any-glob-to-any-file:

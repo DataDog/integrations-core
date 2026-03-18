@@ -277,18 +277,18 @@ def upgrade_macos_python_version(app: Application, new_version: str, tracker: Va
         )
         return
 
-    # Define replacements: (pattern, new_value)
+    # Define replacements: (label, pattern, new_value)
     replacements = [
-        (r'^(\s*PYTHON_PATCH:\s*)\d+\s*$', rf'\g<1>{new_patch}'),
-        (r'^(\s*PBS_RELEASE:\s*)\d+\s*$', rf"\g<1>{pbs_info['release']}"),
-        (r'^(\s*PBS_SHA256__aarch64:\s*)[0-9a-f]+\s*$', rf"\g<1>{pbs_info['aarch64']}"),
-        (r'^(\s*PBS_SHA256__x86_64:\s*)[0-9a-f]+\s*$', rf"\g<1>{pbs_info['x86_64']}"),
+        ('PYTHON_PATCH', r'^(\s*PYTHON_PATCH:\s*)\d+\s*$', rf'\g<1>{new_patch}'),
+        ('PBS_RELEASE', r'^(\s*PBS_RELEASE:\s*)\d+\s*$', rf"\g<1>{pbs_info['release']}"),
+        ('PBS_SHA256__aarch64', r'^(\s*PBS_SHA256__aarch64:\s*)[0-9a-f]+\s*$', rf"\g<1>{pbs_info['aarch64']}"),
+        ('PBS_SHA256__x86_64', r'^(\s*PBS_SHA256__x86_64:\s*)[0-9a-f]+\s*$', rf"\g<1>{pbs_info['x86_64']}"),
     ]
 
-    for pattern, replacement in replacements:
+    for label, pattern, replacement in replacements:
         content, count = re.subn(pattern, replacement, content, count=1, flags=re.MULTILINE)
         if count == 0:
-            tracker.error(('macOS workflow',), message=f'Could not find pattern: {pattern}')
+            tracker.error(('macOS workflow',), message=f'Could not find {label} in workflow file')
             return
 
     write_file_safely(workflow_file, content, 'macOS workflow', tracker)
@@ -378,13 +378,16 @@ def get_pbs_release_info(app: Application, python_version: str) -> dict[str, str
             return None
 
         hashes = {'release': release}
+        sha_lines = sha_response.text.splitlines()
         for arch in ('aarch64', 'x86_64'):
             filename = f'cpython-{python_version}+{release}-{arch}-apple-darwin-install_only_stripped.tar.gz'
-            for line in sha_response.text.splitlines():
+            for line in sha_lines:
                 if filename in line:
                     sha_hash = line.split()[0]
                     if validate_sha256(sha_hash):
                         hashes[arch] = sha_hash
+                    else:
+                        app.display_warning(f"Invalid SHA256 hash for {arch}: {sha_hash}")
                     break
 
         # Verify we found both architectures
