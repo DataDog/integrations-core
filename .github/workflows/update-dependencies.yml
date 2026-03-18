@@ -29,12 +29,11 @@ jobs:
         ddev config set repos.core .
         ddev config set repo core
     - name: Create token
-      uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+      uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
       id: token-generator
       with:
-        app-id: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
-        private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
-        repositories: integrations-core
+        scope: DataDog/integrations-core
+        policy: self.create-pull-requests.schedule
     - name: Update dependencies
       run: |-
         ddev dep updates --sync --report /tmp/dep-report.md --report-type markdown
@@ -104,6 +103,8 @@ jobs:
     - name: Rename changelog files to actual PR number
       id: rename
       if: steps.cpr.outputs.pull-request-number != ''
+      env:
+        GH_TOKEN: ${{ steps.token-generator.outputs.token }}
       run: |-
         actual_pr="${{ steps.cpr.outputs.pull-request-number }}"
         branch="${{ steps.cpr.outputs.pull-request-branch }}"
