@@ -10,6 +10,9 @@ jobs:
   update_dependencies:
     name: Update the dependencies
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC token federation with dd-octo-sts
+      contents: read   # Required for actions/checkout
     steps:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -29,12 +32,11 @@ jobs:
         ddev config set repos.core .
         ddev config set repo core
     - name: Create token
-      uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+      uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80 # v1.0.3
       id: token-generator
       with:
-        app-id: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
-        private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
-        repositories: integrations-core
+        scope: DataDog/integrations-core
+        policy: self.create-pull-requests.schedule
     - name: Update dependencies
       run: |-
         ddev dep updates --sync --report /tmp/dep-report.md --report-type markdown
@@ -65,13 +67,13 @@ jobs:
         ddev validate licenses --sync
       env:
         DD_GITHUB_USER: "${{ github.actor }}"
-        DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        DD_GITHUB_TOKEN: "${{ steps.token-generator.outputs.token }}"
     # We generate the changelog hoping we guess the PR number correctly.
     # We are likely to succeed because the job runs during quiet hours.
     # If we guess the PR number wrong, the validation will catch it and suggest a simple fix.
     - name: Update changelogs
       env:
-        DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        DD_GITHUB_TOKEN: "${{ steps.token-generator.outputs.token }}"
       run: |-
         ddev release changelog new added -m "Update dependencies"
     - name: Create Pull Request
@@ -104,6 +106,8 @@ jobs:
     - name: Rename changelog files to actual PR number
       id: rename
       if: steps.cpr.outputs.pull-request-number != ''
+      env:
+        GH_TOKEN: ${{ steps.token-generator.outputs.token }}
       run: |-
         actual_pr="${{ steps.cpr.outputs.pull-request-number }}"
         branch="${{ steps.cpr.outputs.pull-request-branch }}"
@@ -128,3 +132,4 @@ jobs:
         token: ${{ steps.token-generator.outputs.token }}
         commit-message: Fix changelog PR numbers
         branch: ${{ steps.cpr.outputs.pull-request-branch }}
+        base: master
