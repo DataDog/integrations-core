@@ -151,3 +151,4 @@ datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/*
 datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/*
 !datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/.gitignore
 !datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/root.json
+.agint-review/
