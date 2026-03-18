@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from _release.dispatch import dispatch_in_batches
+from _release.dispatch import DispatchError, dispatch_in_batches
 from _release.github import parse_bool_env, write_summary
 from _release.summary import build_summary
 
@@ -21,6 +21,12 @@ def _load_validation(runner_temp: str) -> dict:
     except FileNotFoundError:
         print(
             f"Warning: validation results not found at {path}. Summary may be incomplete.",
+            file=sys.stderr,
+        )
+        return {}
+    except json.JSONDecodeError as e:
+        print(
+            f"Warning: validation results at {path} are not valid JSON: {e}. Summary may be incomplete.",
             file=sys.stderr,
         )
         return {}
@@ -47,7 +53,10 @@ def main() -> None:
         return
 
     token = os.environ["GH_TOKEN"]
-    dispatch_in_batches(packages, source_repo, ref, target, token)
+    try:
+        dispatch_in_batches(packages, source_repo, ref, target, token)
+    except DispatchError:
+        sys.exit(1)
 
     write_summary(build_summary(packages, results, mode, source_repo, ref, target, dry_run, was_dispatched=True))
 

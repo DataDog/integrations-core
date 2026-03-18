@@ -11,13 +11,7 @@ def _source_link(source_repo: str, ref: str) -> str:
     return source_repo
 
 
-def _row_label(typ: str, eligible: bool, dry_run: bool, was_dispatched: bool) -> str:
-    if eligible:
-        if dry_run:
-            return "🔄 Dry run"
-        if was_dispatched:
-            return "✅ Dispatched"
-        return "✅ Validated"
+def _ineligible_label(typ: str) -> str:
     if typ == v.STABLE:
         return "❌ Stable release blocked (pre-release branch)"
     if typ == v.PRE_RELEASE:
@@ -63,7 +57,10 @@ def build_summary(
         ver = r.get("version") or "—"
         typ = r.get("type", v.STABLE)
         eligible = r.get("dispatch", True)
-        label = _row_label(typ, eligible, dry_run, was_dispatched)
+        if eligible:
+            label = "🔄 Dry run" if dry_run else ("✅ Dispatched" if was_dispatched else "✅ Validated")
+        else:
+            label = _ineligible_label(typ)
         rows.append(f"| `{name}` | `{ver}` | {label} |")
 
     if not footer:

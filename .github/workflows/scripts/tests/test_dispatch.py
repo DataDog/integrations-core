@@ -6,8 +6,8 @@ from unittest.mock import call, create_autospec, patch
 
 import pytest
 
-from _release.dispatch import build_payload, dispatch_in_batches, send_dispatch
-from _release.summary import build_summary, _row_label
+from _release.dispatch import DispatchError, build_payload, dispatch_in_batches, send_dispatch
+from _release.summary import build_summary, _ineligible_label
 from _release import validation as v
 
 
@@ -22,21 +22,39 @@ class TestSendDispatch:
 
     def test_exits_on_4xx(self):
         with patch("_release.dispatch._urlopen", side_effect=self._http_error(422)), \
-             pytest.raises(SystemExit):
+             pytest.raises(DispatchError):
             send_dispatch(self._payload, "token", dispatch_url=self._url, max_attempts=1)
 
     def test_exits_after_5xx_exhausts_retries(self):
         with patch("_release.dispatch._urlopen", side_effect=self._http_error(500)), \
-             pytest.raises(SystemExit):
+             pytest.raises(DispatchError):
             send_dispatch(self._payload, "token", dispatch_url=self._url, max_attempts=1)
 
     def test_succeeds_after_transient_5xx(self):
         mock_ctx = create_autospec(http.client.HTTPResponse, instance=True)
         mock_ctx.__enter__.return_value = mock_ctx
         mock_ctx.status = 204
-        with patch("_release.dispatch.time.sleep"), \
+        with patch("_release.dispatch.time.sleep") as mock_sleep, \
              patch("_release.dispatch._urlopen", side_effect=[self._http_error(503), self._http_error(502), mock_ctx]):
             send_dispatch(self._payload, "token", dispatch_url=self._url, max_attempts=3)
+        assert mock_sleep.call_args_list == [call(2), call(4)]  # 2**1, 2**2
+
+    def test_retries_on_url_error(self):
+        url_error = urllib.error.URLError("Connection refused")
+        mock_ctx = create_autospec(http.client.HTTPResponse, instance=True)
+        mock_ctx.__enter__.return_value = mock_ctx
+        mock_ctx.status = 204
+        with patch("_release.dispatch.time.sleep") as mock_sleep, \
+             patch("_release.dispatch._urlopen", side_effect=[url_error, mock_ctx]):
+            send_dispatch(self._payload, "token", dispatch_url=self._url, max_attempts=3)
+        assert mock_sleep.call_args_list == [call(2)]  # retried once
+
+    def test_raises_on_url_error_after_exhausting_retries(self):
+        url_error = urllib.error.URLError("Connection refused")
+        with patch("_release.dispatch._urlopen", side_effect=url_error), \
+             patch("_release.dispatch.time.sleep"), \
+             pytest.raises(DispatchError):
+            send_dispatch(self._payload, "token", dispatch_url=self._url, max_attempts=2)
 
     def test_authorization_header_sent(self):
         mock_ctx = create_autospec(http.client.HTTPResponse, instance=True)
@@ -193,4 +211,4 @@ class TestBuildSummary:
 
     def test_unknown_type_raises(self):
         with pytest.raises(ValueError, match="unexpected validation type"):
-            _row_label("bogus_type", eligible=False, dry_run=False, was_dispatched=False)
+            _ineligible_label("bogus_type")

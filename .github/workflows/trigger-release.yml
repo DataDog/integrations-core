@@ -53,6 +53,8 @@ jobs:
       is-stable-release: ${{ steps.detect.outputs.is-stable-release }}
     steps:
       - id: detect
+        # Sets is-stable-release based on the branch: true for master/X.Y.x, false otherwise.
+        # Manual runs on master get "true", which blocks pre-release packages — conservative and intentional.
         run: |
           if [[ "$GITHUB_REF" =~ ^refs/heads/(master|[0-9]+\.[0-9]+\.x)$ ]]; then
             echo "is-stable-release=true" >> "$GITHUB_OUTPUT"

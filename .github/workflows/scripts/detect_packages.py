@@ -19,7 +19,11 @@ from _release.packages import get_all_packages, resolve_packages
 def main() -> None:
     selected = os.environ.get("SELECTED_PACKAGES", "").strip()
     all_packages = get_all_packages()
-    packages, mode = resolve_packages(selected, all_packages)
+    try:
+        packages, mode = resolve_packages(selected, all_packages)
+    except (ValueError, RuntimeError) as e:
+        print(e, file=sys.stderr)
+        sys.exit(1)
 
     print(f"Mode: {mode}")
 

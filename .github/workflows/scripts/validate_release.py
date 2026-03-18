@@ -19,7 +19,7 @@ from _release.validation import HAS_FRAGMENTS, NO_VERSION, PRE_RELEASE, STABLE, 
 
 
 def _parse_is_stable_release() -> bool:
-    """Parse IS_STABLE_RELEASE: 'false' → False, anything else → True."""
+    """Parse IS_STABLE_RELEASE: 'false' → False, anything else (including unset) → True (stable)."""
     return os.environ.get("IS_STABLE_RELEASE", "true").strip().lower() != "false"
 
 

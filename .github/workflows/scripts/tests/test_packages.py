@@ -66,15 +66,15 @@ class TestResolvePackages:
         assert packages == ["postgres", "redis"]
         assert mode == "auto-detect from tags at HEAD"
 
-    def test_unknown_package_exits(self):
-        with pytest.raises(SystemExit):
+    def test_unknown_package_raises(self):
+        with pytest.raises(ValueError, match="Unknown packages"):
             resolve_packages('["unknown_pkg"]', all_packages=self.all_packages)
 
-    def test_invalid_json_exits(self):
-        with pytest.raises(SystemExit):
+    def test_invalid_json_raises(self):
+        with pytest.raises(ValueError, match="SELECTED_PACKAGES is not valid JSON"):
             resolve_packages(selected="not-json", all_packages=self.all_packages)
 
-    def test_unknown_in_auto_detect_exits(self):
+    def test_unknown_in_auto_detect_raises(self):
         tags = ["not-a-package-1.0.0"]
-        with pytest.raises(SystemExit):
+        with pytest.raises(ValueError, match="Unknown packages"):
             resolve_packages(selected="", all_packages=self.all_packages, head_tags=tags)

@@ -1,7 +1,7 @@
 """Tests for dispatch_release entry-point script."""
 import json
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import dispatch_release
 
@@ -26,6 +26,12 @@ class TestLoadValidation:
         assert result["dry_run"] is False
 
     def test_file_absent_returns_empty_dict(self, tmp_path, capsys):
+        result = dispatch_release._load_validation(str(tmp_path))
+        assert result == {}
+        assert "Warning" in capsys.readouterr().err
+
+    def test_invalid_json_returns_empty_dict(self, tmp_path, capsys):
+        (tmp_path / "release_validation.json").write_text("not-valid-json{")
         result = dispatch_release._load_validation(str(tmp_path))
         assert result == {}
         assert "Warning" in capsys.readouterr().err
@@ -68,14 +74,9 @@ class TestMain:
         with patch("dispatch_release.dispatch_in_batches") as mock_dispatch, \
              patch("dispatch_release.write_summary"):
             dispatch_release.main()
-        mock_dispatch.assert_called_once()
-        call_args = mock_dispatch.call_args
-        packages, source_repo, ref, target, token = call_args.args
-        assert packages == ["postgres", "mysql"]
-        assert source_repo == "integrations-core"
-        assert ref == "abc123"
-        assert target == "prod"
-        assert token == "test-token"
+        assert mock_dispatch.mock_calls == [
+            call(["postgres", "mysql"], "integrations-core", "abc123", "prod", "test-token"),
+        ]
 
     def test_missing_validation_file_still_runs(self, monkeypatch, tmp_path):
         self._base_env(monkeypatch, tmp_path, write_validation=False)

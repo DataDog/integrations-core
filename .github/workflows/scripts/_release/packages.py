@@ -2,7 +2,6 @@
 import json
 import re
 import subprocess
-import sys
 from pathlib import Path
 
 _VERSION_SUFFIX_RE = re.compile(r"-\d+\.\d+\.\d+.*$")
@@ -17,7 +16,10 @@ def get_all_packages(root: Path = Path(".")) -> list[str]:
 
 def get_tags_at_head() -> list[str]:
     """Return the list of git tags pointing at HEAD."""
-    return subprocess.check_output(["git", "tag", "--points-at", "HEAD"], text=True).splitlines()
+    try:
+        return subprocess.check_output(["git", "tag", "--points-at", "HEAD"], text=True).splitlines()
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"Failed to get git tags at HEAD: {e}") from e
 
 
 def detect_from_tags(tags: list[str]) -> list[str]:
@@ -42,7 +44,7 @@ def resolve_packages(
     - empty string          → auto-detect from git tags at HEAD
 
     Returns ``(packages, mode_description)``.
-    Calls ``sys.exit(1)`` on invalid input or unknown package names.
+    Raises ``ValueError`` on invalid input or unknown package names.
     """
     selected = selected.strip()
 
@@ -53,8 +55,7 @@ def resolve_packages(
         try:
             packages = json.loads(selected)
         except json.JSONDecodeError as e:
-            print(f"selected_PACKAGES is not valid JSON: {e}", file=sys.stderr)
-            sys.exit(1)
+            raise ValueError(f"SELECTED_PACKAGES is not valid JSON: {e}") from e
         mode = f"manual ({selected})"
     else:
         tags = head_tags if head_tags is not None else get_tags_at_head()
@@ -63,7 +64,6 @@ def resolve_packages(
 
     unknown = sorted(set(packages) - set(all_packages))
     if unknown:
-        print(f"Unknown packages: {', '.join(unknown)}", file=sys.stderr)
-        sys.exit(1)
+        raise ValueError(f"Unknown packages: {', '.join(unknown)}")
 
     return packages, mode

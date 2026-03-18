@@ -11,6 +11,10 @@ DISPATCH_URL = f"https://api.github.com/repos/{_TARGET_REPO}/dispatches"
 MAX_ATTEMPTS = 5
 
 
+class DispatchError(Exception):
+    """Raised when a dispatch request fails after all retry attempts."""
+
+
 def build_payload(batch: list[str], source_repo: str, ref: str, target: str) -> dict:
     """Return the ``repository_dispatch`` payload for one batch."""
     return {
@@ -39,7 +43,7 @@ def send_dispatch(
     """POST a single ``repository_dispatch`` event to the wheels-release repo.
 
     Retries up to ``max_attempts`` times on 5xx errors with exponential backoff.
-    Calls ``sys.exit(1)`` on 4xx errors or after exhausting retries.
+    Raises ``DispatchError`` on 4xx errors or after exhausting retries.
     """
     req = urllib.request.Request(
         dispatch_url,
@@ -56,12 +60,17 @@ def send_dispatch(
             with _urlopen(req) as resp:
                 print(f"  Dispatched: HTTP {resp.status}")
                 return
-        except urllib.error.HTTPError as e:
-            body = e.read().decode()
-            if e.code < 500 or attempt == max_attempts:
-                print(body, file=sys.stderr)
-                sys.exit(1)
-            print(f"  HTTP {e.code} on attempt {attempt}/{max_attempts}, retrying...", file=sys.stderr)
+        except (urllib.error.HTTPError, urllib.error.URLError) as e:
+            if isinstance(e, urllib.error.HTTPError):
+                body = e.read().decode()
+                code = e.code
+            else:
+                body = str(e)
+                code = 503
+            if code < 500 or attempt == max_attempts:
+                print(f"HTTP {code}: {body}", file=sys.stderr)
+                raise DispatchError(f"HTTP {code}: {body}")
+            print(f"  HTTP {code} on attempt {attempt}/{max_attempts}, retrying...", file=sys.stderr)
             time.sleep(2**attempt)
 
 

@@ -37,7 +37,7 @@ on:
         required: false
         type: string
       is-stable-release:
-        description: "'true' for master/X.X.x (blocks pre-releases), 'false' for alpha/beta/rc (blocks stable), unset for workflow_dispatch (no restriction)."
+        description: "'true' for master/X.X.x (blocks pre-releases), 'false' for alpha/beta/rc (blocks stable). Unset defaults to stable behavior."
         required: false
         type: string
 
@@ -80,7 +80,7 @@ jobs:
         if: steps.tag.outcome == 'success'
         id: detect
         env:
-          MANUAL_PACKAGES: ${{ inputs.packages }}
+          SELECTED_PACKAGES: ${{ inputs.packages }}
         run: python .github/workflows/scripts/detect_packages.py
 
       - name: Validate release readiness

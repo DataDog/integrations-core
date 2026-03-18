@@ -86,3 +86,24 @@ class TestMain:
             self._run_main(monkeypatch, {"TARGET": "dev"}, self._side_effects(1))
         assert exc_info.value.code == 1
 
+    def test_retry_also_fails_raises_system_exit(self, monkeypatch):
+        side_effects = [
+            MagicMock(returncode=0),  # git config user.name
+            MagicMock(returncode=0),  # git config user.email
+            MagicMock(returncode=3),  # first ddev run → triggers retry
+            MagicMock(returncode=1),  # retry with --no-fetch also fails
+        ]
+        with patch("tag_releases.subprocess.run", side_effect=side_effects) as mock_run, \
+             pytest.raises(SystemExit) as exc_info:
+            for key in ("TARGET", "DRY_RUN", "SELECTED_PACKAGES"):
+                monkeypatch.delenv(key, raising=False)
+            monkeypatch.setenv("TARGET", "dev")
+            tag_releases.main()
+        assert exc_info.value.code == 1
+        assert mock_run.mock_calls == [
+            self._GIT_NAME,
+            self._GIT_EMAIL,
+            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--no-push"]),
+            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--no-push", "--no-fetch"]),
+        ]
+

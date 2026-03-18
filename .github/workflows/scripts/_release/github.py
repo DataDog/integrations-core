@@ -1,12 +1,13 @@
 """GitHub Actions I/O helpers."""
 import os
+from pathlib import Path
 
 
 def set_outputs(**kwargs: str) -> None:
     """Write key=value pairs to GITHUB_OUTPUT."""
     path = os.environ.get("GITHUB_OUTPUT")
     if path:
-        with open(path, "a") as f:
+        with Path(path).open("a") as f:
             for key, value in kwargs.items():
                 f.write(f"{key}={value}\n")
 
@@ -15,7 +16,7 @@ def write_summary(content: str) -> None:
     """Append markdown content to GITHUB_STEP_SUMMARY."""
     path = os.environ.get("GITHUB_STEP_SUMMARY")
     if path:
-        with open(path, "a") as f:
+        with Path(path).open("a") as f:
             f.write(content + "\n")
 
 

@@ -1,0 +1,99 @@
+{
+  "pr_number": 22656,
+  "repo": "DataDog/integrations-core",
+  "commit_sha": "5b19ea7c15320c2de13029f260a33ef3674b6733",
+  "author": "dkirov-dd",
+  "has_requests": true,
+  "comments": [
+    {
+      "path": ".github/workflows/dispatch-release.yml",
+      "line": 83,
+      "side": "RIGHT",
+      "body": "**Request**: I found a variable name bug that silently breaks manual releases. The \"Detect package list\" step sets `MANUAL_PACKAGES: ${{ inputs.packages }}`, but `detect_packages.py` reads `SELECTED_PACKAGES` (line 20). When an operator specifies packages via `workflow_dispatch`, the detect step sees an empty `SELECTED_PACKAGES` and falls back to auto-detecting from HEAD tags instead. The `tag_releases.py` step on line 76 correctly uses `SELECTED_PACKAGES`, so only detect is broken. Fix: rename `MANUAL_PACKAGES` to `SELECTED_PACKAGES` in that step's `env` block."
+    },
+    {
+      "path": ".github/workflows/scripts/_release/dispatch.py",
+      "line": 62,
+      "side": "RIGHT",
+      "body": "**Request**: `send_dispatch` calls `sys.exit(1)` directly inside a library function, making the entire dispatch path unusable outside a CLI context and untestable without patching `sys.exit`. The module already shows the right pattern: `dispatch_in_batches` raises `ValueError` for invalid `batch_size`. I'd introduce a `DispatchError` (or just `RuntimeError`) and let the entry-point `dispatch_release.py` decide to exit."
+    },
+    {
+      "path": ".github/workflows/scripts/_release/dispatch.py",
+      "line": 59,
+      "side": "RIGHT",
+      "body": "**Request**: `urllib.error.URLError` is never caught in the retry loop. Since `URLError` is the parent class of `HTTPError`, the retry-with-backoff logic is silently bypassed for network-level failures (DNS, connection refused, TCP timeout). A transient connection reset mid-batch crashes with a raw Python traceback, skipping all 5 retry attempts.\n\n```python\nexcept (urllib.error.HTTPError, urllib.error.URLError) as e:\n    if isinstance(e, urllib.error.HTTPError):\n        body = e.read().decode()\n        code = e.code\n    else:\n        body = str(e)\n        code = 503  # treat as retriable\n    if code < 500 or attempt == max_attempts:\n        ...\n```\n\n**Nit**: When the final failure is printed, `e.code` is omitted from the `print(body, ...)` line. Including it (e.g., `print(f\"HTTP {e.code}: {body}\", ...)`) would make log triage faster — it's already logged during retries but not on the terminal failure."
+    },
+    {
+      "path": ".github/workflows/scripts/_release/packages.py",
+      "line": 52,
+      "side": "RIGHT",
+      "body": "**Suggestion**: `resolve_packages` calls `sys.exit(1)` for invalid JSON (line 57) and unknown packages (line 67). This is inconsistent with `dispatch_in_batches` raising `ValueError`, and forces test code to use `pytest.raises(SystemExit)`. Raising `ValueError` here and catching it in `detect_packages.py`'s `main()` would make the library function properly reusable."
+    },
+    {
+      "path": ".github/workflows/scripts/_release/packages.py",
+      "line": 56,
+      "side": "RIGHT",
+      "body": "**Nit**: Error message has a mixed-case artifact — `selected_PACKAGES is not valid JSON` should be `SELECTED_PACKAGES`."
+    },
+    {
+      "path": ".github/workflows/scripts/_release/packages.py",
+      "line": 18,
+      "side": "RIGHT",
+      "body": "**Nit**: `get_tags_at_head` uses `subprocess.check_output`, which raises `subprocess.CalledProcessError` on non-zero exit (e.g., not a git repo, broken git install). No caller catches this, producing an unformatted traceback rather than a clean error message with `sys.exit(1)`."
+    },
+    {
+      "path": ".github/workflows/scripts/_release/github.py",
+      "line": 9,
+      "side": "RIGHT",
+      "body": "**Nit**: Both `set_outputs` and `write_summary` use bare `open(path, \"a\")` while every other file in `_release/` uses `Path(...).open(...)`. Minor consistency issue — `Path(path).open(\"a\")` would match the surrounding module style."
+    },
+    {
+      "path": ".github/workflows/scripts/_release/summary.py",
+      "line": 14,
+      "side": "RIGHT",
+      "body": "**Nit**: `_row_label` accepts `dry_run` and `was_dispatched` but only reads them in the `if eligible:` branch — the four type-dispatch branches below ignore them entirely. The signature is slightly misleading. Inlining the eligible label in the caller would clarify the contract."
+    },
+    {
+      "path": ".github/workflows/scripts/_release/validation.py",
+      "line": 43,
+      "side": "RIGHT",
+      "body": "**Praise**: `validate_package` is the cleanest function in this PR — pure, no side effects, no I/O, consistent `{package, version, type, dispatch}` shape across all five return paths. Good model for the other library modules."
+    },
+    {
+      "path": ".github/workflows/scripts/validate_release.py",
+      "line": 21,
+      "side": "RIGHT",
+      "body": "**Nit**: `_parse_is_stable_release()` maps an empty string to `True` (stable-branch behavior). The `dispatch-release.yml` input description says \"unset for workflow_dispatch (no restriction)\", implying empty should behave differently. In practice `trigger-release.yml` always passes an explicit value so this doesn't bite, but the comment/code mismatch is worth clarifying."
+    },
+    {
+      "path": ".github/workflows/scripts/dispatch_release.py",
+      "line": 17,
+      "side": "RIGHT",
+      "body": "**Nit**: `_load_validation` catches `FileNotFoundError` but not `json.JSONDecodeError`. If a previous step partially wrote the JSON (e.g., interrupted during `write_text`), the decode error propagates as an unhandled exception. Given the function's intent to degrade gracefully, catching `JSONDecodeError` alongside `FileNotFoundError` would be consistent with that intent."
+    },
+    {
+      "path": ".github/workflows/trigger-release.yml",
+      "line": 57,
+      "side": "RIGHT",
+      "body": "**Nit**: The detect step always sets `is-stable-release` to `\"true\"` or `\"false\"` for all events, including `workflow_dispatch`. The `dispatch-release.yml` input comment says \"unset for workflow_dispatch (no restriction)\" — but manual runs on master get `\"true\"` (blocking pre-release packages). Current behavior is safe and conservative; the comment is just misleading and worth updating."
+    },
+    {
+      "path": ".github/workflows/scripts/tests/test_dispatch.py",
+      "line": 33,
+      "side": "RIGHT",
+      "body": "**Suggestion**: `test_succeeds_after_transient_5xx` patches `time.sleep` but never asserts it was called. The exponential backoff (`2**attempt`) is a meaningful behavioral contract — someone accidentally removing or flattening it wouldn't be caught.\n\n```python\nwith patch(\"_release.dispatch.time.sleep\") as mock_sleep, \\\n     patch(...):\n    send_dispatch(...)\nassert mock_sleep.call_args_list == [call(2), call(4)]  # 2**1, 2**2\n```"
+    },
+    {
+      "path": ".github/workflows/scripts/tests/test_script_tag_releases.py",
+      "line": 64,
+      "side": "RIGHT",
+      "body": "**Suggestion**: There's no test for a failed retry — the case where `--no-fetch` also returns a non-zero, non-2 code. `tag_releases.py` lines 55-58 retry and then apply the same exit check. A test with side effects `[ok, ok, returncode=3, returncode=1]` would confirm the process exits rather than silently succeeding."
+    },
+    {
+      "path": ".github/workflows/scripts/tests/test_script_dispatch_release.py",
+      "line": 66,
+      "side": "RIGHT",
+      "body": "**Nit**: `test_non_dry_run_calls_dispatch_in_batches` unpacks `call_args.args` positionally (lines 72-78). This PR's own commits (`a98174d`, `552db170fb`) replaced this pattern with full `mock.call` assertions for clarity. Inconsistent with the rest of the test suite.\n\n```python\n# Instead of unpacking call_args.args individually:\nassert mock_dispatch.mock_calls == [\n    call([\"postgres\", \"mysql\"], \"integrations-core\", \"abc123\", \"prod\", \"test-token\")\n]\n```"
+    }
+  ]
+}
