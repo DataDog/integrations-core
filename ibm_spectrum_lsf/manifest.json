@@ -3,7 +3,7 @@
   "app_uuid": "5fba4c04-27ba-4b56-840b-db155ed030c8",
   "app_id": "ibm-spectrum-lsf",
   "owner": "agent-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
