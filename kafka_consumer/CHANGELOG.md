@@ -2,6 +2,25 @@
 
 <!-- towncrier release notes start -->
 
+## 7.0.0 / 2026-03-18
+
+***Changed***:
+
+* Broker configurations, topic configurations, and schema registry version checks are now collected in batches across multiple agent runs instead of all at once. This reduces load on large clusters but means that not all metrics are emitted in every check run. The batch sizes and refresh interval are controlled by the `kafka_configs_refresh_interval` configuration option. ([#22721](https://github.com/DataDog/integrations-core/pull/22721))
+
+***Added***:
+
+* Support IAM authentication for MSK clusters ([#22660](https://github.com/DataDog/integrations-core/pull/22660))
+* Support oauth for schema registry ([#22665](https://github.com/DataDog/integrations-core/pull/22665))
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+* Add kafka_cluster_id_override parameter to allow overriding the auto-detected cluster ID. ([#22768](https://github.com/DataDog/integrations-core/pull/22768))
+* Bump `confluent-kafka` to 2.13.2 ([#22829](https://github.com/DataDog/integrations-core/pull/22829))
+
+***Fixed***:
+
+* Don't report negative lag when data is dropped (broker offset goes down). ([#22679](https://github.com/DataDog/integrations-core/pull/22679))
+* URL-encode subject names in Schema Registry API calls to fix 404 errors for Protobuf reference subjects containing slashes. ([#22924](https://github.com/DataDog/integrations-core/pull/22924))
+
 ## 6.14.0 / 2026-02-19
 
 ***Added***:
