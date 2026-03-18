@@ -141,7 +141,7 @@ def labeler(app: Application, sync: bool):
     if sync:
         output = yaml.safe_dump(new_pr_labels_config, default_flow_style=False, sort_keys=True)
         pr_labels_config_path.write_text(output)
-        app.display_info(f'Successfully fixed {pr_labels_config_path}')
+        app.display_info(f'Successfully updated {pr_labels_config_path}')
 
     tracker.display()
 
