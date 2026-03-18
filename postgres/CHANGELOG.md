@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 23.5.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+***Fixed***:
+
+* Fixed a bug where `cloud_metadata.aws.instance_endpoint` was not populated for auto-detected RDS hosts, which could prevent query metrics from being properly associated with the database instance in the UI ([#22744](https://github.com/DataDog/integrations-core/pull/22744))
+
 ## 23.4.0 / 2026-02-19
 
 ***Added***:
