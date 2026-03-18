@@ -104,7 +104,7 @@ files:
       description: |
         Verify the server's SSL certificate hostname matches the connection target.
         Redis-py 6.0+ defaults this to true. Set to false if your certificate
-        does not match the connection hostname (e.g., connecting by IP).
+        does not match the connection hostname (for example, if connecting by IP).
       value:
         type: boolean
         example: true
