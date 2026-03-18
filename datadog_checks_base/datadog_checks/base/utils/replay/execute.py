@@ -100,4 +100,4 @@ def run_with_isolation(check, aggregator, datadog_agent):
             timer.cancel()
 
     if timed_out:
-        raise subprocess.TimeoutExpired(sys.executable, timeout)
+        check.log.error('Check timed out after %s seconds', timeout)

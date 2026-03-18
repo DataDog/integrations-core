@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-import subprocess
 
 import pytest
 
@@ -74,9 +73,11 @@ class SlowReplayCheck(AgentCheck):
         time.sleep(9999)
 
 
-def test_replay_timeout(dd_run_check):
+def test_replay_timeout(caplog, dd_run_check):
     instance = {'process_isolation': True, 'process_isolation_timeout': 1}
     check = SlowReplayCheck('slow_replay', {}, [instance])
 
-    with pytest.raises(subprocess.TimeoutExpired):
+    with caplog.at_level(logging.ERROR):
         dd_run_check(check)
+
+    assert any('timed out' in message for _, _, message in caplog.record_tuples)
