@@ -104,3 +104,4 @@ def run_with_isolation(check, aggregator, datadog_agent):
 
     if timed_out:
         check.log.error('Check timed out after %s seconds', timeout)
+        check.warning('Check timed out and possibly reported incomplete data.')
