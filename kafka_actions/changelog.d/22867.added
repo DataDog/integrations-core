@@ -1,1 +1,0 @@
-Add Schema Registry support for automatic schema fetching when reading Kafka messages with protobuf, avro, or JSON schemas.
