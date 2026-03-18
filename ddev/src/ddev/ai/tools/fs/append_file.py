@@ -27,14 +27,15 @@ class AppendFileTool(TextEdit[AppendFileInput]):
     async def __call__(self, tool_input: AppendFileInput) -> ToolResult:
         path = Path(tool_input.path)
 
-        current_content, fail = self._read_verified(str(path))
-        if fail:
-            return fail
+        async with self._registry.get_lock(str(path)):
+            current_content, fail = self._read_verified(str(path))
+            if fail:
+                return fail
 
-        content_to_append = tool_input.content.replace("\r\n", "\n")
-        separator = "" if not current_content or current_content.endswith("\n") else "\n"
-        new_content = current_content + separator + content_to_append
+            content_to_append = tool_input.content.replace("\r\n", "\n")
+            separator = "" if not current_content or current_content.endswith("\n") else "\n"
+            new_content = current_content + separator + content_to_append
 
-        path.write_text(new_content, encoding="utf-8")
-        self._on_write(str(path), new_content)
+            path.write_text(new_content, encoding="utf-8")
+            self._on_write(str(path), new_content)
         return ToolResult(success=True, data=f"Content appended to: {path}")

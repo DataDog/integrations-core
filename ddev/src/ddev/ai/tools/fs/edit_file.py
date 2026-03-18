@@ -32,25 +32,26 @@ class EditFileTool(TextEdit[EditFileInput]):
     async def __call__(self, tool_input: EditFileInput) -> ToolResult:
         path = Path(tool_input.path)
 
-        content, fail = self._read_verified(str(path))
-        if fail:
-            return fail
+        async with self._registry.get_lock(str(path)):
+            content, fail = self._read_verified(str(path))
+            if fail:
+                return fail
 
-        # Normalize line endings to avoid issues with different OSs
-        old_string = tool_input.old_string.replace("\r\n", "\n")
-        new_string = tool_input.new_string.replace("\r\n", "\n")
+            # Normalize line endings to avoid issues with different OSs
+            old_string = tool_input.old_string.replace("\r\n", "\n")
+            new_string = tool_input.new_string.replace("\r\n", "\n")
 
-        count = content.count(old_string) if old_string else 0
-        if count == 0:
-            return ToolResult(success=False, error="old_string not found in file")
-        if count > 1:
-            return ToolResult(
-                success=False,
-                error=f"old_string appears {count} times in the file",
-                hint="Include more surrounding context to make it unique",
-            )
+            count = content.count(old_string) if old_string else 0
+            if count == 0:
+                return ToolResult(success=False, error="old_string not found in file")
+            if count > 1:
+                return ToolResult(
+                    success=False,
+                    error=f"old_string appears {count} times in the file",
+                    hint="Include more surrounding context to make it unique",
+                )
 
-        new_content = content.replace(old_string, new_string, 1)
-        path.write_text(new_content, encoding="utf-8")
-        self._on_write(str(path), new_content)
+            new_content = content.replace(old_string, new_string, 1)
+            path.write_text(new_content, encoding="utf-8")
+            self._on_write(str(path), new_content)
         return ToolResult(success=True, data=f"File edited: {path}")

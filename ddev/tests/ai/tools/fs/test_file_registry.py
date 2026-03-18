@@ -77,3 +77,26 @@ def test_normalize_relative_and_absolute_are_same_key(registry: FileRegistry, tm
     registry.record(abs_path, "hello")
     assert registry.is_known(rel_path) is True
     assert registry.verify(rel_path, "hello") is True
+
+
+# ---------------------------------------------------------------------------
+# get_lock
+# ---------------------------------------------------------------------------
+
+
+def test_get_lock_same_path_returns_same_instance(registry: FileRegistry, tmp_path) -> None:
+    path = str(tmp_path / "file.txt")
+    assert registry.get_lock(path) is registry.get_lock(path)
+
+
+def test_get_lock_different_paths_return_different_instances(registry: FileRegistry, tmp_path) -> None:
+    path_a = str(tmp_path / "a.txt")
+    path_b = str(tmp_path / "b.txt")
+    assert registry.get_lock(path_a) is not registry.get_lock(path_b)
+
+
+def test_get_lock_normalizes_path(registry: FileRegistry, tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    abs_path = str(tmp_path / "file.txt")
+    rel_path = "file.txt"
+    assert registry.get_lock(abs_path) is registry.get_lock(rel_path)

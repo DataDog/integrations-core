@@ -29,10 +29,11 @@ class CreateFileTool(TextEdit[CreateFileInput]):
     async def __call__(self, tool_input: CreateFileInput) -> ToolResult:
         path = Path(tool_input.path)
 
-        if path.exists():
-            return ToolResult(success=False, error=f"File already exists: {path}")
+        async with self._registry.get_lock(str(path)):
+            if path.exists():
+                return ToolResult(success=False, error=f"File already exists: {path}")
 
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(tool_input.content, encoding="utf-8")
-        self._on_write(str(path), tool_input.content)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(tool_input.content, encoding="utf-8")
+            self._on_write(str(path), tool_input.content)
         return ToolResult(success=True, data=f"File created: {path}")

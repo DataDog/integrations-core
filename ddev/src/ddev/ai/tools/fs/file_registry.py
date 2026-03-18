@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import asyncio
 import hashlib
 from pathlib import Path
 
@@ -10,6 +11,7 @@ class FileRegistry:
 
     def __init__(self) -> None:
         self._hashes: dict[str, str] = {}
+        self._locks: dict[str, asyncio.Lock] = {}
 
     def _normalize(self, path: str) -> str:
         return Path(path).resolve().as_posix()
@@ -22,6 +24,12 @@ class FileRegistry:
 
     def is_known(self, path: str) -> bool:
         return self._normalize(path) in self._hashes
+
+    def get_lock(self, path: str) -> asyncio.Lock:
+        normalized = self._normalize(path)
+        if normalized not in self._locks:
+            self._locks[normalized] = asyncio.Lock()
+        return self._locks[normalized]
 
     def verify(self, path: str, content: str) -> bool:
         """Check whether content matches what was last recorded for path."""
