@@ -443,19 +443,6 @@ pipeline:
           target: original_timestamp
           replaceMissing: false
     - type: pipeline
-      name: Set `ocsf.device.hostname` to Unknown
-      enabled: true
-      filter:
-        query: "-@type:SOCKADDR AND NOT (@type:SYSCALL AND @SYSCALL:(connect OR bind
-          OR listen OR accept OR accept4 OR sendto OR recvfrom))"
-      processors:
-        - type: string-builder-processor
-          name: Set `ocsf.device.hostname` to Unknown
-          enabled: true
-          template: Unknown
-          target: ocsf.device.hostname
-          replaceMissing: false
-    - type: pipeline
       name: OCSF sub pipeline for class Base Event [0]
       enabled: true
       ocsf:
@@ -569,6 +556,12 @@ pipeline:
       filter:
         query: "@type:PATH"
       processors:
+        - type: string-builder-processor
+          name: Set `ocsf.device.hostname` to Unknown
+          enabled: true
+          template: Unknown
+          target: ocsf.device.hostname
+          replaceMissing: false
         - type: grok-parser
           name: Extracting file or folder name
           enabled: true
@@ -809,6 +802,12 @@ pipeline:
           OR mknod OR mknodat OR linkat OR symlinkat OR mount OR umount2 OR
           memfd_create)"
       processors:
+        - type: string-builder-processor
+          name: Set `ocsf.device.hostname` to Unknown
+          enabled: true
+          template: Unknown
+          target: ocsf.device.hostname
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 1001
           enabled: true
@@ -1043,6 +1042,12 @@ pipeline:
       filter:
         query: "@type:(ADD_USER OR DEL_USER OR USER_CHAUTHTOK)"
       processors:
+        - type: string-builder-processor
+          name: Set `ocsf.device.hostname` to Unknown
+          enabled: true
+          template: Unknown
+          target: ocsf.device.hostname
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3001
           enabled: true
@@ -1275,6 +1280,12 @@ pipeline:
       filter:
         query: "@type:USER_AUTH"
       processors:
+        - type: string-builder-processor
+          name: Set `ocsf.device.hostname` to Unknown
+          enabled: true
+          template: Unknown
+          target: ocsf.device.hostname
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3002
           enabled: true
@@ -1547,6 +1558,12 @@ pipeline:
       filter:
         query: "@type:(ROLE_ASSIGN OR ROLE_REMOVE)"
       processors:
+        - type: string-builder-processor
+          name: Set `ocsf.device.hostname` to Unknown
+          enabled: true
+          template: Unknown
+          target: ocsf.device.hostname
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3005
           enabled: true
@@ -1789,6 +1806,12 @@ pipeline:
       filter:
         query: "@type:(ADD_GROUP OR DEL_GROUP)"
       processors:
+        - type: string-builder-processor
+          name: Set `ocsf.device.hostname` to Unknown
+          enabled: true
+          template: Unknown
+          target: ocsf.device.hostname
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3006
           enabled: true
@@ -2016,6 +2039,12 @@ pipeline:
       filter:
         query: "@type:USER_MAC_CONFIG_CHANGE"
       processors:
+        - type: string-builder-processor
+          name: Set `ocsf.device.hostname` to Unknown
+          enabled: true
+          template: Unknown
+          target: ocsf.device.hostname
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 5019
           enabled: true
@@ -2254,6 +2283,12 @@ pipeline:
       filter:
         query: "@type:EXECVE"
       processors:
+        - type: string-builder-processor
+          name: Set `ocsf.device.hostname` to Unknown
+          enabled: true
+          template: Unknown
+          target: ocsf.device.hostname
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 1007
           enabled: true
@@ -2384,6 +2419,12 @@ pipeline:
       filter:
         query: "@type:SYSCALL AND @SYSCALL:execve"
       processors:
+        - type: string-builder-processor
+          name: Set `ocsf.device.hostname` to Unknown
+          enabled: true
+          template: Unknown
+          target: ocsf.device.hostname
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 1007
           enabled: true
