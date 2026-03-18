@@ -182,7 +182,8 @@ exclude = [
     'pymongo',      # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
     'foundationdb', # 7+ has a breaking changes
     'snowflake-connector-python', # 4.3.0 causes a size bump of 35Mb
-    'ddtrace' # 4.5.1 does not support MacOS 11, which is used by the Agent
+    'ddtrace', # 4.5.1 does not support MacOS 11, which is used by the Agent
+    'pyopenssl' # snowflake-connector-python requires pyopenssl<26.0.0, this override should be removed once snowflake-connector-python is removed
 
 ]
 
