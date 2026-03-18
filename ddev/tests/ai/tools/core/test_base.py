@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
-from dataclasses import dataclass
 from typing import Annotated
 
 import pytest
+from pydantic import Field
 
-from ddev.ai.tools.core.base import BaseTool, _get_input_type, _resolve_json_type, build_schema, safe_int
+from ddev.ai.tools.core.base import BaseToolInput, BaseTool, _get_input_type
 from ddev.ai.tools.core.types import ToolResult
 
 # ---------------------------------------------------------------------------
@@ -15,16 +15,14 @@ from ddev.ai.tools.core.types import ToolResult
 # ---------------------------------------------------------------------------
 
 
-@dataclass
-class SimpleInput:
-    message: Annotated[str, "A message to echo"]
+class SimpleInput(BaseToolInput):
+    message: Annotated[str, Field(description="A message to echo")]
 
 
-@dataclass
-class FullInput:
-    required_str: Annotated[str, "A required string"]
-    optional_int: Annotated[int | None, "An optional integer"] = None
-    flag: Annotated[bool, "A boolean flag"] = False
+class FullInput(BaseToolInput):
+    required_str: Annotated[str, Field(description="A required string")]
+    optional_int: Annotated[int | None, Field(description="An optional integer")] = None
+    flag: Annotated[bool, Field(description="A boolean flag")] = False
 
 
 class EchoTool(BaseTool[SimpleInput]):
@@ -61,104 +59,54 @@ class FullInputTool(BaseTool[FullInput]):
 
 
 # ---------------------------------------------------------------------------
-# safe_int
+# BaseToolInput.to_input_schema()
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize(
-    "value,expected",
-    [
-        (5, 5),
-        (3.7, 3),
-        ("42", 42),
-        ("0", 0),
-        ("-7", -7),
-    ],
-)
-def test_safe_int_valid_conversions(value, expected):
-    assert safe_int(value, default=0) == expected
-
-
-@pytest.mark.parametrize("value", ["abc", "3.5", "", None, [], {}])
-def test_safe_int_default(value):
-    assert safe_int(value, default=-1) == -1
-
-
-def test_safe_int_none_default():
-    assert safe_int("bad", default=None) is None
-    assert safe_int("bad") == 0
-    assert safe_int([1]) == 0
-
-
-# ---------------------------------------------------------------------------
-# _resolve_json_type
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    "hint,expected",
-    [
-        (str, "string"),
-        (int, "integer"),
-        (float, "number"),
-        (bool, "boolean"),
-    ],
-)
-def test_resolve_json_type_primitives(hint, expected):
-    assert _resolve_json_type(hint) == expected
-
-
-def test_resolve_json_type_unknown_type():
-    assert _resolve_json_type(list) is None
-    assert _resolve_json_type(dict) is None
-    assert _resolve_json_type(str | int) is None
-
-
-def test_resolve_json_type_optional_type():
-    assert _resolve_json_type(str | None) == "string"
-    assert _resolve_json_type(int | None) == "integer"
-
-
-# ---------------------------------------------------------------------------
-# build_schema
-# ---------------------------------------------------------------------------
-
-
-def test_build_schema_simple_input():
-    schema = build_schema(SimpleInput)
-
+def test_to_input_schema_type_and_required():
+    schema = SimpleInput.to_input_schema()
     assert schema["type"] == "object"
     assert schema["required"] == ["message"]
+
+
+def test_to_input_schema_field_description():
+    schema = SimpleInput.to_input_schema()
     assert schema["properties"]["message"]["description"] == "A message to echo"
     assert schema["properties"]["message"]["type"] == "string"
 
 
-def test_build_schema_full_input():
-    schema = build_schema(FullInput)
+def test_to_input_schema_no_title_keys():
+    schema = FullInput.to_input_schema()
+    assert "title" not in schema
+    for prop in schema["properties"].values():
+        assert "title" not in prop
 
-    assert "optional_int" not in schema.get("required", [])
-    assert "flag" not in schema.get("required", [])
+
+def test_to_input_schema_additional_properties_false():
+    assert SimpleInput.to_input_schema().get("additionalProperties") is False
+
+
+def test_to_input_schema_optional_fields_not_required():
+    schema = FullInput.to_input_schema()
     assert "required_str" in schema["required"]
-    assert schema["properties"]["flag"]["type"] == "boolean"
+    assert "optional_int" not in schema["required"]
+    assert "flag" not in schema["required"]
 
 
-def test_build_schema_all_optional():
-    @dataclass
-    class AllOptional:
-        x: Annotated[str, "x"] = "default"
-        y: Annotated[int, "y"] = 0
+def test_to_input_schema_anyof_flattened_for_optional_int():
+    schema = FullInput.to_input_schema()
+    prop = schema["properties"]["optional_int"]
+    assert "anyOf" not in prop
+    assert prop["type"] == "integer"
 
-    schema = build_schema(AllOptional)
+
+def test_to_input_schema_all_optional_no_required_key():
+    class AllOptional(BaseToolInput):
+        x: Annotated[str, Field(description="x")] = "default"
+        y: Annotated[int, Field(description="y")] = 0
+
+    schema = AllOptional.to_input_schema()
     assert "required" not in schema
-
-
-def test_build_schema_bad_input():
-    @dataclass
-    class BadInput:
-        field: Annotated[str | int, "ambiguous"]
-
-    with pytest.raises(TypeError, match="BadInput.field"):
-        build_schema(BadInput)
 
 
 # ---------------------------------------------------------------------------
@@ -223,11 +171,11 @@ def failing_tool() -> FailingTool:
 def test_build_tool(echo_tool: EchoTool):
     assert echo_tool.name == "echo"
     assert echo_tool.description == "Echo the message back."
-    assert echo_tool.input_schema == build_schema(SimpleInput)
+    assert echo_tool.input_schema == SimpleInput.to_input_schema()
     assert echo_tool.definition == {
         "name": "echo",
         "description": "Echo the message back.",
-        "input_schema": build_schema(SimpleInput),
+        "input_schema": SimpleInput.to_input_schema(),
     }
 
 

@@ -132,10 +132,8 @@ def test_read_file_tool_meta(read_file_tool: ReadFileTool):
 
 
 def test_read_file_cmd_cat(read_file_tool: ReadFileTool, path: str):
-    # all three forms that should produce cat
     assert read_file_tool.cmd(ReadFileInput(path=path)) == ["cat", path]
     assert read_file_tool.cmd(ReadFileInput(path=path, offset=0, limit=None)) == ["cat", path]
-    assert read_file_tool.cmd(ReadFileInput(path=path, offset=None, limit=None)) == ["cat", path]
 
 
 def test_read_file_cmd_offset_only(read_file_tool: ReadFileTool, path: str):
@@ -164,7 +162,3 @@ def test_read_file_cmd_offset_and_limit(read_file_tool: ReadFileTool, path: str,
     assert cmd == ["awk", expected_expr, path]
 
 
-def test_read_file_cmd_safe_int_coercion(read_file_tool: ReadFileTool, path: str):
-    # float offset truncated, None offset treated as 0
-    assert read_file_tool.cmd(ReadFileInput(path=path, offset=3.7, limit=None)) == ["awk", "NR>=4", path]  # type: ignore[arg-type]
-    assert read_file_tool.cmd(ReadFileInput(path=path, offset=None, limit=5)) == ["awk", "NR>=1 && NR<=5", path]

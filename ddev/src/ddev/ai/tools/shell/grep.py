@@ -1,17 +1,19 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from dataclasses import dataclass
 from typing import Annotated
+
+from pydantic import Field
+
+from ddev.ai.tools.core.base import BaseToolInput
 
 from .base import CmdTool
 
 
-@dataclass
-class GrepInput:
-    pattern: Annotated[str, "Regex pattern to search for"]
-    path: Annotated[str, "File or directory to search in"]
-    recursive: Annotated[bool, "Search recursively in directories (default: true)"] = True
+class GrepInput(BaseToolInput):
+    pattern: Annotated[str, Field(description="Regex pattern to search for")]
+    path: Annotated[str, Field(description="File or directory to search in")]
+    recursive: Annotated[bool, Field(description="Search recursively in directories (default: true)")] = True
 
 
 class GrepTool(CmdTool[GrepInput]):

@@ -1,16 +1,18 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from dataclasses import dataclass
 from typing import Annotated
+
+from pydantic import Field
+
+from ddev.ai.tools.core.base import BaseToolInput
 
 from .base import CmdTool
 
 
-@dataclass
-class ListFilesInput:
-    path: Annotated[str, "Path to list files from"]
-    recursive: Annotated[bool, "Whether to list recursively (default: false)"] = False
+class ListFilesInput(BaseToolInput):
+    path: Annotated[str, Field(description="Path to list files from")]
+    recursive: Annotated[bool, Field(description="Whether to list recursively (default: false)")] = False
 
 
 class ListFilesTool(CmdTool[ListFilesInput]):

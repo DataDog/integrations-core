@@ -1,15 +1,17 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from dataclasses import dataclass
 from typing import Annotated
+
+from pydantic import Field
+
+from ddev.ai.tools.core.base import BaseToolInput
 
 from .base import CmdTool
 
 
-@dataclass
-class MkdirInput:
-    path: Annotated[str, "Path of the directory to create"]
+class MkdirInput(BaseToolInput):
+    path: Annotated[str, Field(description="Path of the directory to create")]
 
 
 class MkdirTool(CmdTool[MkdirInput]):

@@ -2,12 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
-from dataclasses import dataclass
 from typing import Annotated
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from pydantic import Field
 
+from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.truncation import MAX_CHARS
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.shell.base import CmdTool, run_command
@@ -39,9 +40,8 @@ async def _raise_timeout(coro, *args, **kwargs):
 # ---------------------------------------------------------------------------
 
 
-@dataclass
-class GreetInput:
-    name: Annotated[str, "Name to greet"]
+class GreetInput(BaseToolInput):
+    name: Annotated[str, Field(description="Name to greet")]
 
 
 class GreetTool(CmdTool[GreetInput]):
