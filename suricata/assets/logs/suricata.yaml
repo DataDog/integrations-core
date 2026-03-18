@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: suricata
 metric_id: suricata
 backend_only: false

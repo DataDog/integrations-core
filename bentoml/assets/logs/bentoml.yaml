@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: bentoml
 metric_id: bentoml
 backend_only: false

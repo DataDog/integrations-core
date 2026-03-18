@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: checkpoint-quantum-firewall
 metric_id: checkpoint-quantum-firewall
 backend_only: false
