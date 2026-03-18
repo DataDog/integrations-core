@@ -46,7 +46,8 @@
       ]
     },
     "dashboards": {
-        "Nutanix - Overview": "assets/dashboards/nutanix_overview.json"
+        "Nutanix - Overview": "assets/dashboards/nutanix_overview.json",
+        "Nutanix - Activity Monitoring": "assets/dashboards/nutanix_activity_monitoring.json"
     },
     "monitors": {},
     "saved_views": {}
