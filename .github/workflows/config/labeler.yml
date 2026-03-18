@@ -450,6 +450,10 @@ integration/dnsfilter:
 - changed-files:
   - any-glob-to-any-file:
     - dnsfilter/**/*
+integration/do_query_actions:
+- changed-files:
+  - any-glob-to-any-file:
+    - do_query_actions/**/*
 integration/docker_daemon:
 - changed-files:
   - any-glob-to-any-file:
