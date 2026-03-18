@@ -27,7 +27,7 @@ jobs:
         id: octo-sts
         with:
           scope: DataDog/integrations-core
-          policy: self.create-pull-requests.schedule
+          policy: self.backport.pull-request-target
       - uses: tibdex/backport@9565281eda0731b1d20c4025c43339fb0a23812e # v2.0.4
         with:
           label_pattern: "^backport/(?<base>([^ ]+))$"
