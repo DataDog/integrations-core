@@ -12,7 +12,7 @@ files:
             fleet_configurable: true
             required: true
             description: |
-              The full path to the varnishstat binary and can contain additional arguments.
+              The full path to the varnishstat binary, and it can contain additional arguments.
               In order to support monitoring a Varnish instance which is running as a Docker
               container you need to wrap commands (varnishstat) with scripts which
               perform a docker exec on the running container.  Passing along template variables
@@ -41,7 +41,7 @@ files:
           - name: name
             description: |
               The name used in the varnishstat command for the
-              -n argument which will add a name:<INSTANCE_NAME> tag to all metrics.
+              -n argument, which will add a name:<INSTANCE_NAME> tag to all metrics.
             fleet_configurable: true
             value:
               type: string
@@ -50,7 +50,7 @@ files:
             description: |
               The path to the varnishadm binary signals the check to
               emit a service check status on backend health using `debug.health`.
-              Similar to the varnishstat command this path can contain additional arguments
+              Similar to the varnishstat command, this path can contain additional arguments
               in order to support service discovery.
 
               The service check is tagged by backend.
@@ -67,7 +67,7 @@ files:
               example: /etc/varnish/secret
           - name: daemon_host
             description: |
-              The parameters for specifying the host to connect to varnishadm.
+              The parameter for specifying the host to connect to varnishadm.
               Used in version 4.1.0 and above.
             fleet_configurable: true
             value:
@@ -75,7 +75,7 @@ files:
               example: localhost
           - name: daemon_port
             description: |
-              The parameters for specifying the port to connect to varnishadm.
+              The parameter for specifying the port to connect to varnishadm.
               Used in version 4.1.0 and above.
             fleet_configurable: true
             value:

@@ -679,8 +679,8 @@ instances:
     ## RabbitMQ Management Plugin Example
   -
     ## @param rabbitmq_api_url - string - optional - default: http://localhost:15672/api/
-    ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
-    ## url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
+    ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the API
+    ## URL of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
     #
     # rabbitmq_api_url: http://localhost:15672/api/
 
@@ -695,7 +695,7 @@ instances:
     # rabbitmq_pass: guest
 
     ## @param tag_families - boolean - optional - default: false
-    ## To tag queue "families" based off of regex matching.
+    ## To tag queue "families" based on regex matching.
     #
     # tag_families: false
 
@@ -766,7 +766,7 @@ instances:
     ## as the `exchange_family` tag.
     ## Named groups in your pattern behave like in `nodes_regexes`.
     ## Your pattern is compared to exchange names and exchange names prefixed by vhost.
-    ## For example, if you have a vhost named "myvhost" and a exchange named "myexchange", your
+    ## For example, if you have a vhost named "myvhost" and an exchange named "myexchange", your
     ## pattern is compared to:
     ##   - myexchange
     ##   - myvhost/myexchange

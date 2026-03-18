@@ -49,7 +49,7 @@ instances:
     ## For every instance, you need an `nginx_status_url` and can optionally
     ## supply a list of tags.  This plugin requires nginx to be compiled with
     ## the nginx stub status module option, and activated with the correct
-    ## configuration stanza.  On debian/ubuntu, this is included in the
+    ## configuration stanza.  On Debian/Ubuntu, this is included in the
     ## `nginx-extras` package.  For more details, see:
     ##
     ##   https://docs.datadoghq.com/integrations/nginx/
@@ -81,7 +81,7 @@ instances:
     ## there is an API that replaces the extended status API.
     ## See https://www.nginx.com/blog/nginx-plus-r13-released/
     ## If you're not using Stream servers, you can disable this part to remove errors in NGINX Plus API calls.
-    ## To use it set `use_plus_api_stream` to `true`.
+    ## To use it, set `use_plus_api_stream` to `true`.
     #
     # use_plus_api_stream: false
 

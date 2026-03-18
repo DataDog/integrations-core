@@ -144,7 +144,7 @@ instances:
         # refresh_interval: 600
 
     ## @param dbm - boolean - optional - default: false
-    ## Set to `true` enable Database Monitoring.
+    ## Set to `true` to enable Database Monitoring.
     #
     # dbm: false
 
@@ -158,8 +158,8 @@ instances:
     # cluster_name: <CLUSTER_NAME>
 
     ## @param reported_database_hostname - string - optional
-    ## Set the reported database hostname for the connected mongodb instance. This value overrides the mongodb hostname
-    ## detected by the Agent from mongodb admin command serverStatus. It can be useful to set a custom hostname
+    ## Set the reported database hostname for the connected MongoDB instance. This value overrides the MongoDB hostname
+    ## detected by the Agent from MongoDB admin command serverStatus. It can be useful to set a custom hostname
     ## when connecting to a remote database through a proxy.
     #
     # reported_database_hostname: <REPORTED_DATABASE_HOSTNAME>
@@ -438,7 +438,7 @@ instances:
     # system_database_stats: true
 
     ## @param free_storage_metrics - boolean - optional - default: true
-    ## Enabled or disable the collection of free storage metrics.
+    ## Enable or disable the collection of free storage metrics.
     ## By default, this option is enabled (`true`), meaning free storage metrics are collected.
     ## Set to `false` to disable collection of free storage metrics.
     ##
@@ -449,7 +449,7 @@ instances:
     # free_storage_metrics: true
 
     ## @param custom_queries - list of mappings - optional
-    ## Define custom queries to collect custom metrics on your Mongo
+    ## Define custom queries to collect custom metrics on your MongoDB instance.
     ## Note: Custom queries are ignored by default when the mongo node is a secondary of a replica set.
     ## You can add `run_on_secondary: true` for each query that you want to run on both primaries and secondaries.
     ## See https://docs.datadoghq.com/integrations/guide/mongo-custom-query-collection to learn more.
