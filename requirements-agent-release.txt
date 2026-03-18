@@ -104,7 +104,7 @@ datadog-hugging-face-tgi==1.4.0
 datadog-hyperv==3.3.0; sys_platform == 'win32'
 datadog-ibm-ace==4.5.0
 datadog-ibm-db2==4.3.0
-datadog-ibm-i==4.4.0; sys_platform != 'win32'
+datadog-ibm-i==4.5.0; sys_platform != 'win32'
 datadog-ibm-mq==8.8.0
 datadog-ibm-spectrum-lsf==1.3.0
 datadog-ibm-was==5.4.0
