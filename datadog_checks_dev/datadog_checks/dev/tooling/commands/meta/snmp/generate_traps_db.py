@@ -83,9 +83,7 @@ class _IndexedFileReader:
                     mtime=mtime,
                 ), decode(data)
 
-        raise error.PySmiReaderFileNotFoundError(
-            'source MIB {} not found'.format(mibname), reader=self
-        )
+        raise error.PySmiReaderFileNotFoundError('source MIB {} not found'.format(mibname), reader=self)
 
 
 def _name_for_output(name: str) -> str:
