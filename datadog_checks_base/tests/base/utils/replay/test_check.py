@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import subprocess
 
 import pytest
 
@@ -62,3 +63,20 @@ def test_replay_all(caplog, dd_run_check, aggregator, datadog_agent, init_config
             break
     else:
         raise AssertionError('Expected DEBUG log with message: {}'.format(expected_message))
+
+
+class SlowReplayCheck(AgentCheck):
+    __NAMESPACE__ = 'slow_replay'
+
+    def check(self, _):
+        import time
+
+        time.sleep(9999)
+
+
+def test_replay_timeout(dd_run_check):
+    instance = {'process_isolation': True, 'process_isolation_timeout': 1}
+    check = SlowReplayCheck('slow_replay', {}, [instance])
+
+    with pytest.raises(subprocess.TimeoutExpired):
+        dd_run_check(check)
