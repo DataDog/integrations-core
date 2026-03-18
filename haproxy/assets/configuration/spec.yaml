@@ -51,7 +51,7 @@ files:
         display_default: null
       description: |
         HAProxy URL to connect to gather metrics.
-        Set the appropriate <USERNAME> and <PASSWORD>, or use a Unix stats
+        Set the appropriate <USERNAME> and <PASSWORD>, or use a UNIX stats
         or admin socket directly: unix:///var/run/haproxy.sock
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
