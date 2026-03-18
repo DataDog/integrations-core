@@ -96,7 +96,7 @@ def test_labeler_sync_remove_integration_in_config(fake_repo, ddev):
     assert result.exit_code == 0, result.output
     assert 'Removing `integration/dummy3` only found in labeler config' in result.output
     assert 'Labeler configuration is valid' in result.output
-    assert 'Successfully fixed' in result.output
+    assert 'Successfully updated' in result.output
 
     assert (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').read_text() == labeler_test_config(
         ["dummy", "dummy2"]
@@ -111,7 +111,7 @@ def test_labeler_sync_add_integration_in_config(fake_repo, ddev):
     assert result.exit_code == 0, result.output
     assert 'Adding config for `dummy2`' in result.output
     assert 'Labeler configuration is valid' in result.output
-    assert 'Successfully fixed' in result.output
+    assert 'Successfully updated' in result.output
 
     assert (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').read_text() == labeler_test_config(
         ["dummy", "dummy2"]
@@ -154,7 +154,7 @@ release:
     assert result.exit_code == 0, result.output
     assert 'Fixing label config for `dummy2`' in result.output
     assert 'Labeler configuration is valid' in result.output
-    assert 'Successfully fixed' in result.output
+    assert 'Successfully updated' in result.output
     assert (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').read_text() == labeler_test_config(
         ["dummy", "dummy2"]
     )
@@ -177,7 +177,7 @@ def test_labeler_sync_long_label_prompts_user_for_shorter_tag(fake_repo, ddev):
     assert result.exit_code == 0, result.output
     assert 'exceeds the 50 character limit' in result.output
     assert f'Adding config for `{LONG_CHECK_NAME}`' in result.output
-    assert 'Successfully fixed' in result.output
+    assert 'Successfully updated' in result.output
 
     labeler_content = (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').read_text()
     assert 'integration/long_check' in labeler_content
