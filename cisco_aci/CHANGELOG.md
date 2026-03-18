@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 4.13.0 / 2026-02-19
+## 4.13.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 
@@ -12,7 +12,7 @@
 
 * Cisco ACI: Bypass OOB IP comparison when building topology ([#22572](https://github.com/DataDog/integrations-core/pull/22572))
 
-## 4.12.0 / 2026-02-11
+## 4.12.0 / 2026-02-11 / Agent 7.76.0
 
 ***Security***:
 
