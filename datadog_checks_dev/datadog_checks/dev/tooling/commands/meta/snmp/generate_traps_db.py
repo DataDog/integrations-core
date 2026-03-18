@@ -57,6 +57,10 @@ class _IndexedFileReader:
                     mtime = os.path.getmtime(fpath)
                 except OSError:
                     continue
+                if fname in self._index:
+                    raise ValueError(
+                        'Duplicate MIB filename {!r} found at {!r} and {!r}'.format(fname, self._index[fname][0], fpath)
+                    )
                 self._index[fname] = (fpath, mtime)
 
     def set_options(self, **kwargs):
@@ -75,7 +79,9 @@ class _IndexedFileReader:
             if entry is not None:
                 fpath, mtime = entry
                 with open(fpath, 'rb') as fp:
-                    data = fp.read()
+                    data = fp.read(self._delegate.maxMibSize)
+                if len(data) == self._delegate.maxMibSize:
+                    raise OSError('MIB {} too large'.format(fpath))
                 return MibInfo(
                     path='file://{}'.format(fpath),
                     file=mibfile,
