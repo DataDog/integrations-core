@@ -185,7 +185,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
     # Use a tolerant reader for HTTP(S) URLs that decodes with errors='replace'.
 
     def _make_readers(sources, fuzzy_matching=True):
-        from urllib.parse import urlparse, unquote
+        from urllib.parse import unquote, urlparse
 
         readers = []
         for src in sources:
