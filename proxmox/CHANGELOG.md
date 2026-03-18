@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.4.1 / 2026-03-18
+
+***Fixed***:
+
+* Handle non-200 HTTP response from /cluster/metrics/export when Proxmox Metric Server is not configured to prevent AttributeError. ([#22698](https://github.com/DataDog/integrations-core/pull/22698))
+
 ## 2.4.0 / 2026-02-19
 
 ***Added***:
