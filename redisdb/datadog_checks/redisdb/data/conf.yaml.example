@@ -86,6 +86,13 @@ instances:
     #
     # ssl_cert_reqs: 2
 
+    ## @param ssl_check_hostname - boolean - optional - default: true
+    ## Verify the server's SSL certificate hostname matches the connection target.
+    ## Redis-py 6.0+ defaults this to true. Set to false if your certificate
+    ## does not match the connection hostname (e.g., connecting by IP).
+    #
+    # ssl_check_hostname: true
+
     ## @param keys - list of strings - optional
     ## Enter the list of keys to collect the lengths from.
     ## The length is 1 for strings.
