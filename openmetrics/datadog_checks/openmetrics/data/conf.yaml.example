@@ -208,6 +208,14 @@ instances:
     ## Whether or not to send histogram buckets as Datadog distribution metrics. This implicitly
     ## enables the `collect_histogram_buckets` and `non_cumulative_histogram_buckets` options.
     ##
+    ## IMPORTANT:
+    ## - This option requires scraping an endpoint that exposes full Prometheus /
+    ##   OpenMetrics metadata (for example, `#TYPE <metric> histogram` and standard
+    ##   bucket labels). Prometheus *federate* endpoints strip `#TYPE` / `#HELP`
+    ##   information and expose metrics as untyped; they are not supported with
+    ##   `histogram_buckets_as_distributions` and may cause histogram processing
+    ##   errors.
+    ##
     ## Learn more about distribution metrics:
     ## https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#metric-types
     #
