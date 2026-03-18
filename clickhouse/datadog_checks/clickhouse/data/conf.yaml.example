@@ -112,8 +112,22 @@ instances:
         #
         # template: $env-$server:$port:$db
 
+    ## @param cluster_name - string - optional
+    ## The name of the ClickHouse cluster as shown in system.clusters.
+    ## When set, the agent connects to one node but collects metrics and samples
+    ## from all nodes in the cluster using clusterAllReplicas().
+    ## Use this for self-hosted ClickHouse clusters.
+    ##
+    ## To find your cluster name, run:
+    ##   SELECT DISTINCT cluster FROM system.clusters
+    ##
+    ## For ClickHouse Cloud managed service, use single_endpoint_mode: true instead.
+    #
+    # cluster_name: <CLUSTER_NAME>
+
     ## @param single_endpoint_mode - boolean - optional - default: false
     ## Set to `true` when connecting through a single endpoint for ClickHouse Cloud.
+    ## For self-hosted clusters, use cluster_name instead.
     #
     # single_endpoint_mode: false
 

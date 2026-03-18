@@ -235,6 +235,7 @@ def _apply_features(config: InstanceConfig, validation_result: ValidationResult)
         None if config.dbm else "Requires `dbm: true`",
     )
     validation_result.add_feature(FeatureKey.SINGLE_ENDPOINT_MODE, config.single_endpoint_mode)
+    validation_result.add_feature(FeatureKey.CLUSTER_MODE, bool(config.cluster_name))
 
 
 def _safefloat(value) -> float:

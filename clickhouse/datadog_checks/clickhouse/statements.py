@@ -271,6 +271,7 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
 
                 result_row = {
                     'normalized_query_hash': str(normalized_query_hash),
+                    'server_node': str(server_node) if server_node else '',
                     'query': str(query_text) if query_text else '',
                     'user': str(query_user) if query_user else '',
                     'query_type': str(query_type) if query_type else '',
