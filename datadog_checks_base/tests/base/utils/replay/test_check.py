@@ -34,31 +34,6 @@ class ReplayCheck(AgentCheck):
         self.set_external_tags([('myhost', {'src': ['tag:val']})])
 
 
-class ReplayCheckBadLog(AgentCheck):
-    __NAMESPACE__ = 'replay'
-
-    def check(self, _):
-        self.log.debug('TypeError format: %d', 'not_a_number')
-        self.log.debug('ValueError format: %c', 2**32)
-
-
-def test_replay_log_format_errors(caplog, dd_run_check, datadog_agent):
-    datadog_agent._config['log_level'] = 'debug'
-
-    check = ReplayCheckBadLog('replay', {}, [{'process_isolation': True}])
-    check.check_id = 'test:123'
-
-    with caplog.at_level(logging.DEBUG):
-        dd_run_check(check)
-
-    for expected_message in ('TypeError format: %d', 'ValueError format: %c'):
-        for _, level, message in caplog.record_tuples:
-            if level == logging.DEBUG and message == expected_message:
-                break
-        else:
-            raise AssertionError('Expected DEBUG log with raw format string: {}'.format(expected_message))
-
-
 @pytest.mark.parametrize(
     'init_config, instance_config',
     [
@@ -93,3 +68,28 @@ def test_replay_all(caplog, dd_run_check, aggregator, datadog_agent, init_config
 
     datadog_agent.assert_external_tags('myhost', {'src': ['tag:val']})
     datadog_agent.assert_external_tags_count(1)
+
+
+class ReplayCheckBadLog(AgentCheck):
+    __NAMESPACE__ = 'replay'
+
+    def check(self, _):
+        self.log.debug('TypeError format: %d', 'not_a_number')
+        self.log.debug('ValueError format: %c', 2**32)
+
+
+def test_replay_log_format_errors(caplog, dd_run_check, datadog_agent):
+    datadog_agent._config['log_level'] = 'debug'
+
+    check = ReplayCheckBadLog('replay', {}, [{'process_isolation': True}])
+    check.check_id = 'test:123'
+
+    with caplog.at_level(logging.DEBUG):
+        dd_run_check(check)
+
+    for expected_message in ('TypeError format: %d', 'ValueError format: %c'):
+        for _, level, message in caplog.record_tuples:
+            if level == logging.DEBUG and message == expected_message:
+                break
+        else:
+            raise AssertionError('Expected DEBUG log with raw format string: {}'.format(expected_message))
