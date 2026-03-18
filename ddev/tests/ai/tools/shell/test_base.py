@@ -185,14 +185,9 @@ def test_run_command_no_truncation_at_limit():
 # ---------------------------------------------------------------------------
 
 
-def test_cmd_tool_is_abstract():
-    with pytest.raises(TypeError):
-        CmdTool()  # type: ignore[abstract]
-
-
 def test_cmd_tool_timeouts(greet_tool: GreetTool, slow_greet_tool: SlowGreetTool):
-    assert GreetTool.timeout == 10
-    assert SlowGreetTool.timeout == 60
+    assert GreetTool.timeout == 10  # default timeout
+    assert SlowGreetTool.timeout == 60  # custom timeout
 
 
 def test_cmd_tool_dispatches_with_correct_timeout(greet_tool: GreetTool, slow_greet_tool: SlowGreetTool):

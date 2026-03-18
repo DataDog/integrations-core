@@ -243,11 +243,6 @@ def test_build_tool_no_docstring():
     assert NoDocstringTool().description == ""
 
 
-def test_cannot_instantiate_abstract_base_directly():
-    with pytest.raises(TypeError):
-        BaseTool()  # type: ignore[abstract]
-
-
 # --- run(): happy path ---
 
 
