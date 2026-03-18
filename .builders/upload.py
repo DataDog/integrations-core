@@ -78,21 +78,25 @@ def hash_file(path: Path) -> str:
 
 
 def hash_directory(path: Path) -> str:
-    """Compute a combined SHA256 hash of all files in a directory, sorted by relative path."""
+    """Compute a combined SHA256 hash of all files in a directory."""
     h = sha256()
-    for file_path in sorted(path.rglob('*')):
+    for file_path in sorted(path.rglob('*'), key=lambda p: p.relative_to(path)):
         if file_path.is_file():
+            h.update(file_path.relative_to(path).as_posix().encode())
             h.update(file_path.read_bytes())
     return h.hexdigest()
 
 
 def compute_input_hashes() -> dict[str, str]:
     """Compute SHA256 hashes for all dependency resolution inputs."""
-    return {
-        'agent_requirements.in': sha256(DIRECT_DEP_FILE.read_bytes()).hexdigest(),
-        '.github/workflows/resolve-build-deps.yaml': sha256(WORKFLOW_FILE.read_bytes()).hexdigest(),
-        '.builders': hash_directory(BUILDER_DIR),
-    }
+    try:
+        return {
+            'agent_requirements.in': hash_file(DIRECT_DEP_FILE),
+            '.github/workflows/resolve-build-deps.yaml': hash_file(WORKFLOW_FILE),
+            '.builders': hash_directory(BUILDER_DIR),
+        }
+    except FileNotFoundError as e:
+        raise RuntimeError(f'Missing dependency resolution input: {e}') from e
 
 
 def _build_number_of_wheel(wheel_info: dict) -> int:
@@ -298,10 +302,11 @@ def generate_lockfiles(targets_dir, lockfiles):
     targets_dir = Path(targets_dir)
     LOCK_FILE_DIR.mkdir(parents=True, exist_ok=True)
     with RESOLUTION_DIR.joinpath('metadata.json').open('w', encoding='utf-8') as f:
+        inputs = compute_input_hashes()
         contents = json.dumps(
             {
-                'inputs': compute_input_hashes(),
-                'sha256': sha256(DIRECT_DEP_FILE.read_bytes()).hexdigest(),
+                'inputs': inputs,
+                'sha256': inputs['agent_requirements.in'],
             },
             indent=2,
             sort_keys=True,

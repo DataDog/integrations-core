@@ -604,6 +604,25 @@ def test_generate_artifact_listings():
     assert 'href="package2/"' in root_html
 
 
+@pytest.fixture
+def patched_input_files(tmp_path, monkeypatch):
+    dep_file = tmp_path / 'agent_requirements.in'
+    dep_file.write_bytes(b'requests==2.31.0\n')
+
+    workflow_file = tmp_path / 'resolve-build-deps.yaml'
+    workflow_file.write_bytes(b'on: push\n')
+
+    builder_dir = tmp_path / '.builders'
+    builder_dir.mkdir()
+    (builder_dir / 'upload.py').write_bytes(b'# script\n')
+
+    monkeypatch.setattr(upload, 'DIRECT_DEP_FILE', dep_file)
+    monkeypatch.setattr(upload, 'WORKFLOW_FILE', workflow_file)
+    monkeypatch.setattr(upload, 'BUILDER_DIR', builder_dir)
+
+    return dep_file, workflow_file, builder_dir
+
+
 def test_hash_directory(tmp_path):
     (tmp_path / 'a.txt').write_bytes(b'hello')
     (tmp_path / 'b.txt').write_bytes(b'world')
@@ -614,21 +633,15 @@ def test_hash_directory(tmp_path):
     (tmp_path / 'a.txt').write_bytes(b'changed')
     assert upload.hash_directory(tmp_path) != result
 
+    (tmp_path / 'a.txt').write_bytes(b'hello')
+    assert upload.hash_directory(tmp_path) == result
 
-def test_compute_input_hashes(tmp_path, monkeypatch):
-    dep_file = tmp_path / 'agent_requirements.in'
-    dep_file.write_bytes(b'requests==2.31.0\n')
+    (tmp_path / 'a.txt').rename(tmp_path / 'z.txt')
+    assert upload.hash_directory(tmp_path) != result
 
-    workflow_file = tmp_path / 'resolve-build-deps.yaml'
-    workflow_file.write_bytes(b'on: push\n')
 
-    builder_dir = tmp_path / '.builders'
-    builder_dir.mkdir()
-    (builder_dir / 'upload.py').write_bytes(b'# script\n')
-
-    monkeypatch.setattr(upload, 'DIRECT_DEP_FILE', dep_file)
-    monkeypatch.setattr(upload, 'WORKFLOW_FILE', workflow_file)
-    monkeypatch.setattr(upload, 'BUILDER_DIR', builder_dir)
+def test_compute_input_hashes(patched_input_files):
+    _, _, builder_dir = patched_input_files
 
     result = upload.compute_input_hashes()
 
@@ -638,25 +651,12 @@ def test_compute_input_hashes(tmp_path, monkeypatch):
     assert result['.builders'] == upload.hash_directory(builder_dir)
 
 
-def test_generate_lockfiles_metadata_contains_inputs(tmp_path, monkeypatch):
-    dep_file = tmp_path / 'agent_requirements.in'
-    dep_file.write_bytes(b'requests==2.31.0\n')
-
-    workflow_file = tmp_path / 'resolve-build-deps.yaml'
-    workflow_file.write_bytes(b'on: push\n')
-
-    builder_dir = tmp_path / '.builders'
-    builder_dir.mkdir()
-    (builder_dir / 'upload.py').write_bytes(b'# script\n')
-
+def test_generate_lockfiles_metadata_contains_inputs(tmp_path, patched_input_files, monkeypatch):
     fake_deps_dir = tmp_path / '.deps'
     fake_resolved_dir = fake_deps_dir / 'resolved'
     fake_deps_dir.mkdir()
     fake_resolved_dir.mkdir()
 
-    monkeypatch.setattr(upload, 'DIRECT_DEP_FILE', dep_file)
-    monkeypatch.setattr(upload, 'WORKFLOW_FILE', workflow_file)
-    monkeypatch.setattr(upload, 'BUILDER_DIR', builder_dir)
     monkeypatch.setattr(upload, 'RESOLUTION_DIR', fake_deps_dir)
     monkeypatch.setattr(upload, 'LOCK_FILE_DIR', fake_resolved_dir)
 
@@ -665,6 +665,7 @@ def test_generate_lockfiles_metadata_contains_inputs(tmp_path, monkeypatch):
     metadata = json.loads((fake_deps_dir / 'metadata.json').read_text())
     assert 'inputs' in metadata
     assert set(metadata['inputs'].keys()) == {'agent_requirements.in', '.github/workflows/resolve-build-deps.yaml', '.builders'}
+    assert metadata['inputs']['agent_requirements.in'] == sha256(b'requests==2.31.0\n').hexdigest()
     assert metadata['sha256'] == sha256(b'requests==2.31.0\n').hexdigest()
 
 
