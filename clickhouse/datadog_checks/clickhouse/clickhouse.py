@@ -336,9 +336,7 @@ class ClickhouseCheck(DatabaseCheck):
         For single endpoint mode (ClickHouse Cloud): Returns clusterAllReplicas('default', system.<table>)
         For direct connection: Returns system.<table>
         """
-        cluster = self._config.cluster_name or (
-            'default' if self._config.single_endpoint_mode else None
-        )
+        cluster = self._config.cluster_name or ('default' if self._config.single_endpoint_mode else None)
         if cluster:
             return f"clusterAllReplicas('{cluster}', system.{table_name})"
         return f"system.{table_name}"
