@@ -25,6 +25,8 @@ from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
 from datadog_checks.base.utils.http import RequestsWrapper
 
+from .aggregator import aggregate_sample_data, should_aggregate
+
 
 class OpenMetricsScraper:
     """
@@ -108,6 +110,8 @@ class OpenMetricsScraper:
                 raise ConfigurationError(f'Entry #{i} of setting `exclude_labels` must be a string')
 
             self.exclude_labels.add(entry)
+
+        self._should_aggregate = should_aggregate(self.exclude_labels)
 
         include_labels = config.get('include_labels', [])
         if not isinstance(include_labels, list):
@@ -244,7 +248,12 @@ class OpenMetricsScraper:
             if transformer is None:
                 continue
 
-            transformer(metric, self.generate_sample_data(metric), runtime_data)
+            # When exclude_labels causes tag-set collisions, pre-aggregate by
+            # summing so transformers receive one sample per unique context.
+            sample_data = self.generate_sample_data(metric)
+            if self._should_aggregate:
+                sample_data = aggregate_sample_data(sample_data, metric.type)
+            transformer(metric, sample_data, runtime_data)
 
     def yield_metrics(self, runtime_data: dict) -> Generator[Metric]:
         if self.target_info:
