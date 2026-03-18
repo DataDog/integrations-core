@@ -40,6 +40,7 @@ def test_grep_cmd_full_command(grep_tool: GrepTool):
         "-n",
         "-E",
         "-r",
+        "--",
         "ERROR",
         "/var/log",
     ]
@@ -47,6 +48,7 @@ def test_grep_cmd_full_command(grep_tool: GrepTool):
         "grep",
         "-n",
         "-E",
+        "--",
         "ERROR",
         "/var/log",
     ]
