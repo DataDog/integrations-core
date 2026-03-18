@@ -367,8 +367,8 @@ class TestBuild:
         This is needed because the "release make" command does too much.
         '''
         from click.testing import CliRunner
-        from datadog_checks.dev.tooling.commands.release.changelog import changelog
-        from datadog_checks.dev.tooling.constants import set_root
+        from ddev.tooling.commands.release.changelog import changelog
+        from ddev.tooling.constants import set_root
 
         set_root(repo_with_towncrier.path)
 

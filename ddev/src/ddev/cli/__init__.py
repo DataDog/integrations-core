@@ -5,8 +5,8 @@ import os
 
 import click
 import pluggy
-from datadog_checks.dev.tooling.commands.create import create
-from datadog_checks.dev.tooling.commands.run import run
+from ddev.tooling.commands.create import create
+from ddev.tooling.commands.run import run
 
 from ddev._version import __version__
 from ddev.cli import upgrade_check

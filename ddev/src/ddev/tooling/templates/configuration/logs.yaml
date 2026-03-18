@@ -1,0 +1,16 @@
+name: logs
+description: |
+  Log Section
+
+  type - required - Type of log input source (tcp / udp / file / windows_event).
+  port / path / channel_path - required - Set port if type is tcp or udp.
+                                          Set path if type is file.
+                                          Set channel_path if type is windows_event.
+  source  - required - Attribute that defines which integration sent the logs.
+  encoding - optional - For file specifies the file encoding. Default is utf-8. Other
+                        possible values are utf-16-le and utf-16-be.
+  service - optional - The name of the service that generates the log.
+                       Overrides any `service` defined in the `init_config` section.
+  tags - optional - Add tags to the collected logs.
+
+  Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/

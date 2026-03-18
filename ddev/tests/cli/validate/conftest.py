@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from datadog_checks.dev.tooling.constants import set_root
+from ddev.tooling.constants import set_root
 
 from ddev.repo.core import Repository
 from tests.helpers.api import write_file

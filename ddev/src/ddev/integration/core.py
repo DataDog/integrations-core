@@ -171,10 +171,12 @@ class Integration:
 
     @property
     def project_metadata(self) -> dict:
-        import tomli
-
+        try:
+            import tomllib
+        except ModuleNotFoundError:
+            import tomli as tomllib
         with open(self.project_file, 'rb') as f:
-            return tomli.load(f)
+            return tomllib.load(f)
 
     @cached_property
     def is_valid(self) -> bool:

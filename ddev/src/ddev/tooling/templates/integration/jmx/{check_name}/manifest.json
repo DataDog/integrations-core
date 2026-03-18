@@ -1,0 +1,41 @@
+{{
+  "manifest_version": "2.0.0",
+  "app_uuid": "{app_uuid}",
+  "app_id": "{integration_id}",
+  "display_on_public_website": false,
+  "tile": {{
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "{description}",
+    "title": "{integration_name}",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
+    ]
+  }},
+  "assets": {{
+    "integration": {{
+      "auto_install": {auto_install},
+      "source_type_id": {source_type_id},
+      "source_type_name": "{integration_name}",
+      "configuration": {{
+        "spec": "assets/configuration/spec.yaml"
+      }},
+      "events": {{
+        "creates_events": false
+      }},
+      "metrics": {{
+        "prefix": "{check_name}.",
+        "check": "",
+        "metadata_path": "metadata.csv"
+      }}
+    }},
+    "dashboards": {{}},
+    "monitors": {{}},
+    "saved_views": {{}}
+  }},{pricing_plan}{terms}{author_info}
+}}

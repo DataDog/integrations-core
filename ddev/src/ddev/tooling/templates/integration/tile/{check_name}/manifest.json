@@ -1,0 +1,48 @@
+{{
+  "manifest_version": "2.0.0",
+  "app_uuid": "{app_uuid}",
+  "app_id": "{integration_id}",
+  "display_on_public_website": true,
+  "tile": {{
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "{description}",
+    "title": "{integration_name}",
+    "media": [
+      {{
+        "media_type": "image",
+        "caption": "FILL IN Image 1 caption",
+        "image_url": "<FILL IN>"
+      }},
+      {{
+        "media_type": "image",
+        "caption": "FILL IN Image 2 caption",
+        "image_url": "<FILL IN>"
+      }},
+      {{
+        "media_type": "image",
+        "caption": "FILL IN Image 3 caption",
+        "image_url": "<FILL IN>"
+      }}
+    ],
+    "classifier_tags": [
+      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::<FILL IN>",
+      "Offering::<FILL IN>",
+      "Queried Data Type::<FILL IN>",
+      "Submitted Data Type::<FILL IN>"
+    ]
+  }},
+  "assets": {{
+    "dashboards": {{
+        "{example_dashboard_short_name}": "assets/dashboards/<FILL IN>.json"
+    }},
+    "monitors": {{}},
+    "saved_views": {{}}
+  }},{pricing_plan}{terms}{author_info}
+}}
