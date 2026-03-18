@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import copy
+import re
 from typing import TYPE_CHECKING, cast
 
 import click
@@ -16,6 +17,18 @@ if TYPE_CHECKING:
 
 def labeler_config_for_check(check: str) -> list[dict[str, list[dict[str, list[str]]]]]:
     return [{"changed-files": [{"any-glob-to-any-file": [f"{check}/**/*"]}]}]
+
+
+def _find_duplicate_keys(raw_yaml: str) -> list[str]:
+    """Detect duplicate top-level keys that yaml.safe_load would silently discard."""
+    seen: set[str] = set()
+    duplicates: list[str] = []
+    for key in re.findall(r'^([a-zA-Z]\S*):(?:\s|$)', raw_yaml, re.MULTILINE):
+        if key in seen:
+            duplicates.append(key)
+        else:
+            seen.add(key)
+    return duplicates
 
 
 def _extract_directory_from_config(config: list[dict]) -> str | None:
@@ -49,10 +62,20 @@ def labeler(app: Application, sync: bool):
     if not pr_labels_config_path.exists():
         app.abort('Unable to find the PR Labels config file')
 
-    pr_labels_config = yaml.safe_load(pr_labels_config_path.read_text())
+    raw_yaml = pr_labels_config_path.read_text()
+    pr_labels_config = yaml.safe_load(raw_yaml)
     new_pr_labels_config = copy.deepcopy(pr_labels_config)
 
     tracker = app.create_validation_tracker('labeler')
+
+    duplicate_keys = _find_duplicate_keys(raw_yaml)
+    for key in duplicate_keys:
+        if sync:
+            # Duplicates are removed by default as loading the yaml file discards the first occurrence
+            app.display_info(f'Removing duplicate key `{key}` from labeler config')
+        else:
+            message = f'Duplicate key `{key}` found in labeler config; running `--sync` will keep the second occurrence'
+            tracker.error((str(pr_labels_config_path),), message=message)
 
     # Build mapping from directory (in glob patterns) to label key
     directory_to_label: dict[str, str] = {}
