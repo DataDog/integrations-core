@@ -30,7 +30,7 @@ def new(app: Application, entry_type: str | None, targets: tuple[str], message: 
     By default, changelog entries will be created for all integrations that have changed code. To create
     entries only for specific targets, you may pass them as additional arguments after the entry type.
     """
-    from datadog_checks.dev.tooling.commands.release.changelog import towncrier
+    from ddev.tooling.commands.release.changelog import towncrier
 
     create_command = None
 

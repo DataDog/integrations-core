@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
-from datadog_checks.dev.tooling.commands.release.build import build
-from datadog_checks.dev.tooling.commands.release.make import make
-from datadog_checks.dev.tooling.commands.release.tag import tag
-from datadog_checks.dev.tooling.commands.release.upload import upload
+from ddev.tooling.commands.release.build import build
+from ddev.tooling.commands.release.make import make
+from ddev.tooling.commands.release.tag import tag
+from ddev.tooling.commands.release.upload import upload
 
 from ddev.cli.release.agent import agent
 from ddev.cli.release.branch import branch

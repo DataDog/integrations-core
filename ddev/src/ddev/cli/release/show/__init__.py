@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
-from datadog_checks.dev.tooling.commands.release.show.changes import changes
-from datadog_checks.dev.tooling.commands.release.show.ready import ready
+from ddev.tooling.commands.release.show.changes import changes
+from ddev.tooling.commands.release.show.ready import ready
 
 
 @click.group(short_help='Show components of to-be released integrations')

@@ -5,8 +5,10 @@ import json
 from unittest import mock
 
 import pytest
-import tomli
-import tomli_w
+try:
+    import tomllib as tomli
+except ModuleNotFoundError:
+    import tomliimport tomli_w
 
 
 def test_pin(ddev, fake_repo):

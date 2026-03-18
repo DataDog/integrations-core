@@ -88,7 +88,7 @@ class Application(Terminal):
     def initialize_old_cli(self):
         from copy import deepcopy
 
-        from datadog_checks.dev.tooling.utils import initialize_root
+        from ddev.tooling.utils import initialize_root
 
         self.__config.update(deepcopy(self.config.raw_data))
         self.__config['color'] = not self.console.no_color

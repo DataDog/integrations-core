@@ -9,7 +9,7 @@ import os
 from typing import TYPE_CHECKING
 
 import click
-from datadog_checks.dev.ci import running_on_ci
+from ddev.utils.ci import running_on_ci
 
 log_level_str = os.environ.get('DDEV_LOG_LEVEL', 'INFO').upper()
 log_level = getattr(logging, log_level_str, logging.INFO)
@@ -68,7 +68,7 @@ def start(
     import os
     from contextlib import suppress
 
-    from datadog_checks.dev._env import deserialize_data
+    from ddev.utils.env_serialization import deserialize_data
 
     from ddev.e2e.agent import get_agent_interface
     from ddev.e2e.config import EnvDataStorage

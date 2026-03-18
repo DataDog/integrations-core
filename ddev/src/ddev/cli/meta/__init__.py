@@ -2,15 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
-from datadog_checks.dev.tooling.commands.meta.catalog import catalog
-from datadog_checks.dev.tooling.commands.meta.changes import changes
-from datadog_checks.dev.tooling.commands.meta.create_commits import create_example_commits
-from datadog_checks.dev.tooling.commands.meta.dashboard import dash
-from datadog_checks.dev.tooling.commands.meta.jmx import jmx
-from datadog_checks.dev.tooling.commands.meta.manifest import manifest
-from datadog_checks.dev.tooling.commands.meta.prometheus import prom
-from datadog_checks.dev.tooling.commands.meta.snmp import snmp
-from datadog_checks.dev.tooling.commands.meta.windows import windows
+from ddev.tooling.commands.meta.catalog import catalog
+from ddev.tooling.commands.meta.changes import changes
+from ddev.tooling.commands.meta.create_commits import create_example_commits
+from ddev.tooling.commands.meta.dashboard import dash
+from ddev.tooling.commands.meta.jmx import jmx
+from ddev.tooling.commands.meta.manifest import manifest
+from ddev.tooling.commands.meta.prometheus import prom
+from ddev.tooling.commands.meta.snmp import snmp
+from ddev.tooling.commands.meta.windows import windows
 
 from ddev.cli.meta.scripts import scripts
 

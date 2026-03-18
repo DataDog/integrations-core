@@ -30,7 +30,35 @@ dependencies = [
     "click~=8.1.6",
     "coverage",
     "datadog-api-client==2.20.0",
-    "datadog-checks-dev[cli]~=35.6",
+    # Dependencies ported from datadog-checks-dev[cli]
+    "aiohttp",
+    "aiomultiprocess",
+    "atomicwrites",
+    "beautifulsoup4==4.12.3",
+    "black==23.12.1",
+    "build>=0.7.0",
+    "codespell",
+    "colorama",
+    "datamodel-code-generator~=0.25.6",
+    "in-toto==2.0.0",
+    "jsonschema",
+    "markdown",
+    "orjson",
+    "packaging",
+    "pathspec>=0.10.0",
+    "pip-tools",
+    "platformdirs>=2.0.0a3",
+    "pydantic>=2.0.2",
+    "pysmi==1.6.2",
+    "pyyaml>=5.4.1",
+    "securesystemslib[crypto]==0.28.0",
+    "semver>=2.13.0",
+    "tabulate>=0.8.9",
+    "toml>=0.9.4, <1.0.0",
+    "towncrier==23.11.0",
+    "tox>=3.12.1, <4.0.0",
+    "twine>=1.11.0",
+    "virtualenv<20.22.0",
     "hatch>=1.8.1",
     "httpx",
     "jsonpointer",
@@ -88,7 +116,7 @@ extend-exclude = "src/ddev/_version.py"
 
 [tool.ruff]
 extend = "../pyproject.toml"
-exclude = []
+exclude = ["src/ddev/tooling/templates"]
 target-version = "py313"
 line-length = 120
 
@@ -136,3 +164,9 @@ ban-relative-imports = "parents"
 [tool.ruff.lint.per-file-ignores]
 #Tests can use assertions and relative imports
 "**/tests/**/*" = ["I252"]
+# Ported code from datadog_checks_dev - pre-existing style, will modernize incrementally
+"src/ddev/tooling/**/*" = ["TID252", "F401"]
+
+[tool.pytest.ini_options]
+# Only collect from the tests/ directory, not from src/ (which contains template files)
+testpaths = ["tests"]

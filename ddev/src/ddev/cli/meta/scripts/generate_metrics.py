@@ -44,7 +44,7 @@ def generate_metrics(app: Application, integration: str, site: str, api_key: str
     from datadog_api_client.v2.model.metric_point import MetricPoint
     from datadog_api_client.v2.model.metric_resource import MetricResource
     from datadog_api_client.v2.model.metric_series import MetricSeries
-    from datadog_checks.dev.utils import get_hostname
+    from ddev.utils._compat import get_hostname
 
     try:
         intg = app.repo.integrations.get(integration)

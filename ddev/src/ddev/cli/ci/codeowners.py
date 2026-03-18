@@ -1,5 +1,5 @@
 import click
-from datadog_checks.dev.tooling.codeowners import CodeOwners
+from ddev.tooling.codeowners import CodeOwners
 
 from ddev.cli.application import Application
 

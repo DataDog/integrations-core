@@ -9,7 +9,7 @@ from typing import Generator
 
 import pytest
 import vcr
-from datadog_checks.dev.tooling.utils import set_root
+from ddev.tooling.utils import set_root
 
 from ddev.cli.application import Application
 from ddev.cli.terminal import Terminal
