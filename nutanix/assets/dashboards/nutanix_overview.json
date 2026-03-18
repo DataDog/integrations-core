@@ -1,5 +1,5 @@
 {
-  "title": "Nutanix Overview",
+  "title": "Nutanix - Overview",
   "description": "Monitor Nutanix infrastructure health, performance, and resource utilization, by tracking clusters metrics, node / host metrics and VM metrics including IOPS, latency, bandwidth, CPU/memory usage, and storage. Filter by cluster, host, or VM for detailed analysis.",
   "widgets": [
     {
@@ -15,10 +15,9 @@
             "id": 4124810358470391,
             "definition": {
               "type": "image",
-              "url": "/api/v2/images/c5b5c45b-4f40-4cf1-8878-0d311ffa837f",
-              "url_dark_theme": "/api/v2/images/b1494644-3884-4a6e-9436-7c2919dfda1b",
-              "sizing": "contain",
-              "margin": "md",
+              "url": "https://static.datadoghq.com/static/images/logos/nutanix_large.svg",
+              "url_dark_theme": "https://static.datadoghq.com/static/images/logos/nutanix_reversed_large.svg",
+              "sizing": "cover",
               "has_background": false,
               "has_border": false,
               "vertical_align": "center",
@@ -3246,7 +3245,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 21,
+        "y": 42,
         "width": 12,
         "height": 11,
         "is_column_break": true
@@ -3265,7 +3264,7 @@
             "id": 9000000000000002,
             "definition": {
               "type": "note",
-              "content": "## Resource Capacity & Allocation\n\nThis section provides visibility into physical capacity (from hosts) vs allocated resources (to VMs) to help with capacity planning and detect overcommitment.",
+              "content": "## Resource Capacity & Allocation\n\nThis section provides visibility into physical capacity (from hosts) vs allocated resources (to VMs) to help with capacity planning and detect overcommitment.\n\n**Note:** Cluster-level capacity and allocation totals (including overcommit ratios) reflect all VMs in the cluster, regardless of the VM name filter. Only the per-VM allocation table below is filtered by VM name.",
               "background_color": "blue",
               "font_size": "14",
               "text_align": "left",
@@ -3370,7 +3369,6 @@
               "title": "Total Physical Memory",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -3459,7 +3457,6 @@
               "title": "Memory Allocated to VMs",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -3637,7 +3634,6 @@
               "title": "Cluster Resource Capacity by Cluster",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_table",
               "requests": [
                 {
@@ -3774,7 +3770,6 @@
               "title": "Host Resource Allocation by Host",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_table",
               "requests": [
                 {
@@ -3850,7 +3845,6 @@
               "title": "VM Resource Allocation",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_table",
               "requests": [
                 {
@@ -4047,7 +4041,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 32,
+        "y": 53,
         "width": 12,
         "height": 13
       }
