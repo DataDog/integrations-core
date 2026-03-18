@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 22.14.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+***Fixed***:
+
+* Fix `procedure_name` tag missing from query metrics when the `CONNECT` permission hasn't been granted to the datadog user. ([#22731](https://github.com/DataDog/integrations-core/pull/22731))
+* Fix `procedure_name` tag missing from activity metrics when the `CONNECT` permission hasn't been granted to the datadog user. ([#22796](https://github.com/DataDog/integrations-core/pull/22796))
+
 ## 22.13.1 / 2026-02-27
 
 ***Fixed***:
