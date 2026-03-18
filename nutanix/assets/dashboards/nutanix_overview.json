@@ -1,5 +1,5 @@
 {
-  "title": "Nutanix Overview",
+  "title": "Nutanix - Overview",
   "description": "Monitor Nutanix infrastructure health, performance, and resource utilization, by tracking clusters metrics, node / host metrics and VM metrics including IOPS, latency, bandwidth, CPU/memory usage, and storage. Filter by cluster, host, or VM for detailed analysis.",
   "widgets": [
     {
@@ -3264,7 +3264,7 @@
             "id": 9000000000000002,
             "definition": {
               "type": "note",
-              "content": "## Resource Capacity & Allocation\n\nThis section provides visibility into physical capacity (from hosts) vs allocated resources (to VMs) to help with capacity planning and detect overcommitment.",
+              "content": "## Resource Capacity & Allocation\n\nThis section provides visibility into physical capacity (from hosts) vs allocated resources (to VMs) to help with capacity planning and detect overcommitment.\n\n**Note:** Cluster-level capacity and allocation totals (including overcommit ratios) reflect all VMs in the cluster, regardless of the VM name filter. Only the per-VM allocation table below is filtered by VM name.",
               "background_color": "blue",
               "font_size": "14",
               "text_align": "left",

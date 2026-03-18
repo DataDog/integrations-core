@@ -1,6 +1,6 @@
 {
-  "title": "Nutanix Activity Monitoring",
-  "description": "Monitor Nutanix activity streams including events, tasks, audits, and alerts from Prism Central. Track alert severity, task status, audit actions, and event classifications across your Nutanix clusters.",
+  "title": "Nutanix - Activity Monitoring",
+  "description": "Monitor Nutanix activity streams from Prism Central, by tracking alerts, tasks, audits, and events including alert severity, task completion status, audit actions, and event classifications across your clusters.\n\nFilter by cluster or Prism Central instance for detailed analysis.",
   "widgets": [
     {
       "id": 0,
@@ -26,28 +26,7 @@
             "layout": {
               "x": 0,
               "y": 0,
-              "width": 3,
-              "height": 2
-            }
-          },
-          {
-            "id": 2,
-            "definition": {
-              "type": "note",
-              "content": "This dashboard provides visibility into Nutanix activity streams collected from Prism Central: **alerts**, **tasks**, **audits**, and **events**. Use the template variables to filter by cluster or Prism Central instance.",
-              "background_color": "purple",
-              "font_size": "14",
-              "text_align": "left",
-              "vertical_align": "center",
-              "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "left",
-              "has_padding": true
-            },
-            "layout": {
-              "x": 3,
-              "y": 0,
-              "width": 5,
+              "width": 6,
               "height": 2
             }
           },
@@ -88,10 +67,10 @@
               "precision": 0
             },
             "layout": {
-              "x": 8,
+              "x": 6,
               "y": 0,
-              "width": 2,
-              "height": 1
+              "width": 3,
+              "height": 2
             }
           },
           {
@@ -131,10 +110,31 @@
               "precision": 0
             },
             "layout": {
-              "x": 10,
+              "x": 9,
               "y": 0,
-              "width": 2,
-              "height": 1
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 2,
+            "definition": {
+              "type": "note",
+              "content": "**This dashboard provides visibility into activity streams collected from Prism Central, including alerts, tasks, audits, and events across your Nutanix clusters.**\n\nFurther reading for Nutanix monitoring:\n - [Datadog's Nutanix integration docs](https://docs.datadoghq.com/integrations/nutanix)",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
             }
           },
           {
@@ -174,10 +174,10 @@
               "precision": 0
             },
             "layout": {
-              "x": 8,
-              "y": 1,
-              "width": 2,
-              "height": 1
+              "x": 6,
+              "y": 2,
+              "width": 3,
+              "height": 2
             }
           },
           {
@@ -217,10 +217,10 @@
               "precision": 0
             },
             "layout": {
-              "x": 10,
-              "y": 1,
-              "width": 2,
-              "height": 1
+              "x": 9,
+              "y": 2,
+              "width": 3,
+              "height": 2
             }
           },
           {
@@ -329,7 +329,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 2,
+              "y": 4,
               "width": 12,
               "height": 3
             }
@@ -340,18 +340,39 @@
         "x": 0,
         "y": 0,
         "width": 12,
-        "height": 6
+        "height": 8
       }
     },
     {
       "id": 100,
       "definition": {
         "title": "Alerts",
-        "background_color": "vivid_red",
+        "background_color": "vivid_blue",
         "show_title": true,
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
+          {
+            "id": 107,
+            "definition": {
+              "type": "note",
+              "content": "Track alerts from Prism Central broken down by severity: **critical**, **warning**, and **info**. Use the severity trends to spot escalation patterns and the alert stream below to investigate individual alerts.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
           {
             "id": 101,
             "definition": {
@@ -402,7 +423,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 0,
+              "y": 1,
               "width": 4,
               "height": 2
             }
@@ -457,7 +478,7 @@
             },
             "layout": {
               "x": 4,
-              "y": 0,
+              "y": 1,
               "width": 4,
               "height": 2
             }
@@ -500,7 +521,7 @@
             },
             "layout": {
               "x": 8,
-              "y": 0,
+              "y": 1,
               "width": 4,
               "height": 2
             }
@@ -593,7 +614,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 2,
+              "y": 3,
               "width": 6,
               "height": 3
             }
@@ -650,7 +671,7 @@
             },
             "layout": {
               "x": 6,
-              "y": 2,
+              "y": 3,
               "width": 6,
               "height": 3
             }
@@ -676,7 +697,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 5,
+              "y": 6,
               "width": 12,
               "height": 4
             }
@@ -685,20 +706,41 @@
       },
       "layout": {
         "x": 0,
-        "y": 6,
+        "y": 8,
         "width": 12,
-        "height": 10
+        "height": 11
       }
     },
     {
       "id": 200,
       "definition": {
         "title": "Tasks",
-        "background_color": "vivid_blue",
+        "background_color": "vivid_green",
         "show_title": true,
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
+          {
+            "id": 207,
+            "definition": {
+              "type": "note",
+              "content": "Monitor Prism Central task execution with status breakdown: **succeeded**, **failed**, **running**, **queued**, and **canceled**. Identify task failure spikes over time and investigate individual operations in the task stream below.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
           {
             "id": 201,
             "definition": {
@@ -744,7 +786,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 0,
+              "y": 1,
               "width": 4,
               "height": 2
             }
@@ -799,7 +841,7 @@
             },
             "layout": {
               "x": 4,
-              "y": 0,
+              "y": 1,
               "width": 4,
               "height": 2
             }
@@ -842,7 +884,7 @@
             },
             "layout": {
               "x": 8,
-              "y": 0,
+              "y": 1,
               "width": 4,
               "height": 2
             }
@@ -971,7 +1013,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 2,
+              "y": 3,
               "width": 6,
               "height": 3
             }
@@ -1028,7 +1070,7 @@
             },
             "layout": {
               "x": 6,
-              "y": 2,
+              "y": 3,
               "width": 6,
               "height": 3
             }
@@ -1039,7 +1081,6 @@
               "title": "Task Stream",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -1055,7 +1096,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 5,
+              "y": 6,
               "width": 12,
               "height": 4
             }
@@ -1064,20 +1105,41 @@
       },
       "layout": {
         "x": 0,
-        "y": 16,
+        "y": 18,
         "width": 12,
-        "height": 10
+        "height": 11
       }
     },
     {
       "id": 300,
       "definition": {
         "title": "Audits",
-        "background_color": "vivid_green",
+        "background_color": "vivid_purple",
         "show_title": true,
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
+          {
+            "id": 304,
+            "definition": {
+              "type": "note",
+              "content": "Review administrative actions and configuration changes from Prism Central. Track audit volume trends to detect unusual admin activity and inspect individual entries in the audit stream below.",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
           {
             "id": 301,
             "definition": {
@@ -1116,7 +1178,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 0,
+              "y": 1,
               "width": 12,
               "height": 2
             }
@@ -1173,7 +1235,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 2,
+              "y": 3,
               "width": 12,
               "height": 3
             }
@@ -1184,7 +1246,6 @@
               "title": "Audit Stream",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -1200,7 +1261,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 5,
+              "y": 6,
               "width": 12,
               "height": 4
             }
@@ -1209,9 +1270,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 52,
+        "y": 56,
         "width": 12,
-        "height": 10,
+        "height": 11,
         "is_column_break": true
       }
     },
@@ -1224,6 +1285,27 @@
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
+          {
+            "id": 404,
+            "definition": {
+              "type": "note",
+              "content": "Monitor system events and state changes from Prism Central. Track event volume patterns to detect anomalies and investigate individual events in the stream below.",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
           {
             "id": 401,
             "definition": {
@@ -1262,7 +1344,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 0,
+              "y": 1,
               "width": 12,
               "height": 2
             }
@@ -1319,7 +1401,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 2,
+              "y": 3,
               "width": 12,
               "height": 3
             }
@@ -1330,7 +1412,6 @@
               "title": "Event Stream",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "requests": [
                 {
                   "response_format": "event_list",
@@ -1346,7 +1427,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 5,
+              "y": 6,
               "width": 12,
               "height": 4
             }
@@ -1355,9 +1436,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 62,
+        "y": 66,
         "width": 12,
-        "height": 10
+        "height": 11
       }
     }
   ],
