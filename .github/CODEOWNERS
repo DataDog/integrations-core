@@ -772,6 +772,7 @@ plaid/assets/logs/                                                  @DataDog/saa
 /cyberark_endpoint_privilege_manager/*.md                            @DataDog/saas-integrations @DataDog/documentation
 /cyberark_endpoint_privilege_manager/manifest.json                   @DataDog/saas-integrations @DataDog/documentation
 /cyberark_endpoint_privilege_manager/assets/logs/                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 /beyondtrust_privileged_remote_access/                               @DataDog/agent-integrations
 /beyondtrust_privileged_remote_access/*.md                           @DataDog/agent-integrations @DataDog/documentation
 /beyondtrust_privileged_remote_access/manifest.json                  @DataDog/agent-integrations @DataDog/documentation
