@@ -6,7 +6,7 @@
 
 ***Added***:
 
-* Add ClickHouse support for DBM with Query Metrics, Query Samples & Query Completions ([#22341](https://github.com/DataDog/integrations-core/pull/22341))
+* Add ClickHouse support for DBM with Query Metrics, Query Samples, and Query Completions ([#22341](https://github.com/DataDog/integrations-core/pull/22341))
 * Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
 
 ***Fixed***:
