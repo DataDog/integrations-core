@@ -17,7 +17,7 @@ def test_mock_response_json_with_custom_headers():
     headers = {'X-Custom': 'value'}
     response = MockHTTPResponse(json_data={'key': 'value'}, headers=headers)
 
-    assert response.headers['content-type'] == 'application/json'
+    assert response.headers['Content-Type'] == 'application/json'
     assert response.headers['x-custom'] == 'value'
 
 
@@ -83,3 +83,13 @@ def test_mock_response_reason_property():
     assert MockHTTPResponse(status_code=200).reason == 'OK'
     assert MockHTTPResponse(status_code=404).reason == 'Not Found'
     assert MockHTTPResponse(status_code=999).reason == ''
+
+
+def test_mock_response_headers_case_insensitive():
+    response = MockHTTPResponse(headers={'Content-Type': 'text/plain', 'X-Custom': 'val'})
+
+    assert response.headers['Content-Type'] == 'text/plain'
+    assert response.headers['content-type'] == 'text/plain'
+    assert response.headers.get('Content-Type') == 'text/plain'
+    assert 'Content-Type' in response.headers
+    assert 'content-type' in response.headers
