@@ -84,7 +84,7 @@ files:
         example: "<CERT_PEM_PATH>"
       fleet_configurable: true
     - name: ssl_ca_certs
-      description:  The path to the ca_certs file.
+      description:  The path to the CA certs file.
       value:
         type: string
         example: "<CERT_PATH>"
