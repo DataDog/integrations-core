@@ -23,6 +23,8 @@ def run_with_isolation(check, aggregator, datadog_agent):
     init_config.pop('process_isolation', None)
 
     timeout = instance.pop('process_isolation_timeout', init_config.pop('process_isolation_timeout', None))
+    if timeout is not None:
+        timeout = float(timeout)
 
     env_vars = dict(os.environ)
     env_vars[EnvVars.MESSAGE_INDICATOR] = message_indicator
@@ -55,6 +57,7 @@ def run_with_isolation(check, aggregator, datadog_agent):
     def _kill_on_timeout():
         nonlocal timed_out
         timed_out = True
+        # TODO: kill the entire process group to avoid orphaned child processes spawned by the check
         process.kill()
 
     timer = threading.Timer(timeout, _kill_on_timeout) if timeout is not None else None
