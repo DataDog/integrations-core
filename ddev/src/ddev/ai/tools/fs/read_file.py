@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from pathlib import Path
 from typing import Annotated
+
 from pydantic import Field
 
 from ddev.ai.tools.core.base import BaseToolInput
@@ -13,8 +14,12 @@ from .base import TextEdit
 
 class ReadFileInput(BaseToolInput):
     path: Annotated[str, Field(description="Absolute or relative path to the file to read")]
-    offset: Annotated[int, Field(description="Line number to start reading from (0-indexed, default: 0). Must be >= 0.")] = 0
-    limit: Annotated[int | None, Field(description="Number of lines to read (default: all remaining lines). Must be >= 1.")] = None
+    offset: Annotated[
+        int, Field(description="Line number to start reading from (0-indexed, default: 0). Must be >= 0.")
+    ] = 0
+    limit: Annotated[
+        int | None, Field(description="Number of lines to read (default: all remaining lines). Must be >= 1.")
+    ] = None
 
 
 class ReadFileTool(TextEdit[ReadFileInput]):
