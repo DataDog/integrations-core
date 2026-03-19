@@ -48,15 +48,15 @@ def validate_require_trusted_provider(
     """Return True if the value is allowed based on security settings, False if it should be blocked."""
     if security_config is None:
         return True
-    if not isinstance(value, str):
-        return True
     if not security_config.is_enabled():
         return True
     if security_config.is_check_excluded(security_config.check_name):
         return True
     if security_config.is_provider_trusted(security_config.provider):
         return True
-    return security_config.is_file_path_allowed(value)
+    if isinstance(value, str):
+        return security_config.is_file_path_allowed(value)
+    return False
 
 
 def check_field_trusted_provider(
