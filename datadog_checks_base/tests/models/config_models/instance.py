@@ -47,8 +47,8 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    auth_token: Optional[AuthToken] = None
     array: Optional[tuple[str, ...]] = None
+    auth_token: Optional[AuthToken] = None
     deprecated: Optional[str] = None
     flag: Optional[bool] = None
     hyphenated_name: Optional[str] = Field(None, alias='hyphenated-name')
