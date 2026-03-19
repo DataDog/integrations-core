@@ -110,6 +110,81 @@ def test_counter_given_exclude_labels_submits_summed_value(aggregator, dd_run_ch
     )
 
 
+def test_counter_given_exclude_labels_submits_monotonically_increasing_sums(
+    aggregator, dd_run_check, mock_http_response
+):
+    """Verify that summed counter values increase monotonically across scrapes,
+    enabling the agent aggregator to compute correct deltas.
+
+    Scrape t0: red=120, green=95, blue=88  → submitted sum=303
+    Scrape t1: red=130, green=100, blue=92 → submitted sum=322
+
+    The agent (Go side) computes 322 - 303 = 19, which equals the sum of
+    individual deltas: (130-120) + (100-95) + (92-88) = 10 + 5 + 4 = 19.
+    """
+    counter_t0 = """
+    # HELP car_counter_total The number of cars seen coming into lot
+    # TYPE car_counter_total counter
+    car_counter_total{make="honda", color="red"} 120
+    car_counter_total{make="honda", color="green"} 95
+    car_counter_total{make="honda", color="blue"} 88
+    """.strip()
+
+    counter_t1 = """
+    # HELP car_counter_total The number of cars seen coming into lot
+    # TYPE car_counter_total counter
+    car_counter_total{make="honda", color="red"} 130
+    car_counter_total{make="honda", color="green"} 100
+    car_counter_total{make="honda", color="blue"} 92
+    """.strip()
+
+    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
+    honda_tags = ['endpoint:test', 'make:honda']
+
+    mock_http_response(counter_t0)
+    dd_run_check(check)
+
+    t0_metrics = [m for m in aggregator.metrics('test.car_counter.count') if 'make:honda' in m.tags]
+    assert len(t0_metrics) == 1
+    assert t0_metrics[0].value == 303.0
+
+    aggregator.reset()
+
+    mock_http_response(counter_t1)
+    dd_run_check(check)
+
+    t1_metrics = [m for m in aggregator.metrics('test.car_counter.count') if 'make:honda' in m.tags]
+    assert len(t1_metrics) == 1
+    assert t1_metrics[0].value == 322.0
+
+    # The agent computes the delta: 322 - 303 = 19
+    # This equals sum of individual deltas: (10 + 5 + 4) = 19
+    assert t1_metrics[0].value - t0_metrics[0].value == 19.0
+
+
+def test_gauge_given_exclude_labels_not_present_in_metric_returns_individual_values(
+    aggregator, dd_run_check, mock_http_response
+):
+    """When the excluded label doesn't exist on a metric, no collisions occur
+    and each sample is submitted individually — no aggregation."""
+    payload = """
+    # HELP temperature Current temperature reading
+    # TYPE temperature gauge
+    temperature{sensor="kitchen"} 22.5
+    temperature{sensor="bedroom"} 19.0
+    temperature{sensor="garage"} 15.0
+    """.strip()
+
+    mock_http_response(payload)
+    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
+    dd_run_check(check)
+
+    aggregator.assert_metric('test.temperature', 22.5, tags=['endpoint:test', 'sensor:kitchen'])
+    aggregator.assert_metric('test.temperature', 19.0, tags=['endpoint:test', 'sensor:bedroom'])
+    aggregator.assert_metric('test.temperature', 15.0, tags=['endpoint:test', 'sensor:garage'])
+    aggregator.assert_all_metrics_covered()
+
+
 def test_summary_given_exclude_labels_passes_through_unchanged(aggregator, dd_run_check, mock_http_response):
     mock_http_response(SUMMARY_PAYLOAD)
     check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
