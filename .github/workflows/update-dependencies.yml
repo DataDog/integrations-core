@@ -104,7 +104,8 @@ jobs:
         base: master
         labels: bot,qa/skip-qa
         draft: false
-    - name: Fix changelog PR numbers
+    - name: Rename changelog files to actual PR number
+      id: rename
       if: steps.cpr.outputs.pull-request-number != ''
       env:
         GH_TOKEN: ${{ steps.token-generator.outputs.token }}
@@ -124,10 +125,20 @@ jobs:
           git mv "$file" "$dir/$actual_pr.$ext" 2>/dev/null || true
         done
 
-        git diff --cached --quiet && exit 0
-
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git config user.name "github-actions[bot]"
-        git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-        git commit -m "Fix changelog PR numbers"
-        git push origin "$branch"
+        if git diff --cached --quiet; then
+          echo "renamed=false" >> "$GITHUB_OUTPUT"
+        else
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git commit -m "Fix changelog PR numbers"
+          echo "renamed=true" >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        fi
+    - name: Push changelog fix
+      if: steps.rename.outputs.renamed == 'true'
+      uses: DataDog/commit-headless@action/v2.0.3
+      with:
+        token: ${{ steps.token-generator.outputs.token }}
+        branch: ${{ steps.cpr.outputs.pull-request-branch }}
+        command: push
+        commits: ${{ steps.rename.outputs.commit }}
