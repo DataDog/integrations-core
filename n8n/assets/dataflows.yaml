@@ -1,0 +1,9 @@
+provides:
+  - id: n8n-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: n8n-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

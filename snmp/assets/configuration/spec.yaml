@@ -91,6 +91,7 @@ files:
               definition_file: cisco-asr.yaml
         hidden: true
       - name: refresh_oids_cache_interval
+        legacy: true
         description: |
           Note: Beta feature, only available using python SNMP integration.
           Set this option to enable caching of OIDs. The value is the number of seconds before the
@@ -452,6 +453,7 @@ files:
           type: integer
           example: 5
       - name: enforce_mib_constraints
+        legacy: true
         fleet_configurable: true
         description: |
           If set to false, the the values returned are not checked to ensure they meet the MIB constraints.
@@ -460,6 +462,7 @@ files:
           type: boolean
           example: true
       - name: bulk_threshold
+        legacy: true
         fleet_configurable: true
         description: |
           The number of symbols in each table that triggers a BULK request.
@@ -469,6 +472,7 @@ files:
           type: integer
           example: 0
       - name: refresh_oids_cache_interval
+        legacy: true
         fleet_configurable: true
         description: |
           Note: Beta feature, only available using python SNMP integration.

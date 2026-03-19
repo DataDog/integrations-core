@@ -41,6 +41,9 @@ notify-failed-pipeline:
 release-auto:
   stage: release
   image: $TAGGER_IMAGE
+  id_tokens:
+    DDOCTOSTS_ID_TOKEN:
+      aud: dd-octo-sts
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
       when: never

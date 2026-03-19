@@ -1,0 +1,9 @@
+provides:
+  - id: aspdotnet-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: aspdotnet-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

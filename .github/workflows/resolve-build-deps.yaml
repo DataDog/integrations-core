@@ -144,7 +144,7 @@ jobs:
       run: bash .github/actions/setup-test-target-scripts/src/ensure-docker.sh
 
     - name: Log in to GitHub Packages
-      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+      uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
@@ -249,7 +249,7 @@ jobs:
     - name: Run the build
       env:
         # This sets the minimum macOS version compatible for all built artifacts
-        MACOSX_DEPLOYMENT_TARGET: "11.0" # https://docs.datadoghq.com/agent/supported_platforms/?tab=macos
+        MACOSX_DEPLOYMENT_TARGET: "12.0" # https://docs.datadoghq.com/agent/supported_platforms/?tab=macos
         CACHE_HIT: ${{ steps.cache-builder-root.outputs.cache-hit }}
       run: |
         # If we hit the cache, we can skip the builder setup

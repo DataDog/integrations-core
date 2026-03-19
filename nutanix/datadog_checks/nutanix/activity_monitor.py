@@ -139,13 +139,12 @@ class ActivityMonitor:
                 e.response.status_code if e.response else "error",
             )
             return 0
-        except Exception as e:
-            self.check.log.error(
-                "[PC:%s:%s] Unexpected error collecting %ss: %s",
+        except Exception:
+            self.check.log.exception(
+                "[PC:%s:%s] Unexpected error collecting %ss",
                 self.check.pc_ip,
                 self.check.pc_port,
                 activity_kind,
-                e,
             )
             return 0
 
@@ -380,9 +379,6 @@ class ActivityMonitor:
             if entity_name := entity.get("name"):
                 audit_tags.append(f"ntnx_affected_entity_name:{entity_name}")
 
-            # Add category tags from affected entity
-            audit_tags.extend(self.check.extract_category_tags(entity))
-
         audit_tags.append("ntnx_type:audit")
 
         self.check.event(
@@ -514,7 +510,6 @@ class ActivityMonitor:
                 task_tags.append(f"ntnx_entity_type:{entity_type}")
             if entity_name := entity.get("name"):
                 task_tags.append(f"ntnx_entity_name:{entity_name}")
-            task_tags.extend(self.check.extract_category_tags(entity))
 
             # Enrich with rendered alert title when the entity is an alert
             if entity_type == "monitoring:serviceability:alert":
@@ -568,7 +563,6 @@ class ActivityMonitor:
             if entity_type := source_entity.get("type"):
                 if entity_name := source_entity.get("name"):
                     tags.append(f"ntnx_{entity_type}_name:{entity_name}")
-            tags.extend(self.check.extract_category_tags(source_entity))
 
     def _add_cluster_name_tag(self, tags: list[str], cluster_id: str | None, fallback_name: str | None = None) -> None:
         """Add cluster name tag from ID lookup, with optional fallback."""

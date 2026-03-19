@@ -73,7 +73,7 @@ instances:
     # ssl_certfile: <CERT_PEM_PATH>
 
     ## @param ssl_ca_certs - string - optional
-    ## The path to the ca_certs file.
+    ## The path to the CA certs file.
     #
     # ssl_ca_certs: <CERT_PATH>
 
@@ -85,6 +85,13 @@ instances:
     ##   * 2 for ssl.CERT_REQUIRED (required and validated)
     #
     # ssl_cert_reqs: 2
+
+    ## @param ssl_check_hostname - boolean - optional - default: true
+    ## Verify the server's SSL certificate hostname matches the connection target.
+    ## Redis-py 6.0+ defaults this to true. Set to false if your certificate
+    ## does not match the connection hostname (for example, if connecting by IP).
+    #
+    # ssl_check_hostname: true
 
     ## @param keys - list of strings - optional
     ## Enter the list of keys to collect the lengths from.

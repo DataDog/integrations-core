@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 22.14.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+***Fixed***:
+
+* Fix `procedure_name` tag missing from query metrics when the `CONNECT` permission hasn't been granted to the Datadog user. ([#22731](https://github.com/DataDog/integrations-core/pull/22731))
+* Fix `procedure_name` tag missing from activity metrics when the `CONNECT` permission hasn't been granted to the Datadog user. ([#22796](https://github.com/DataDog/integrations-core/pull/22796))
+
+## 22.13.1 / 2026-02-27 / Agent 7.77.0
+
+***Fixed***:
+
+* Cancel SQLServer Agent history job on check cancellation ([#22753](https://github.com/DataDog/integrations-core/pull/22753))
+
 ## 22.13.0 / 2026-02-19
 
 ***Added***:
@@ -15,14 +32,14 @@
 * Updates collect_raw_query_statements config description ([#22611](https://github.com/DataDog/integrations-core/pull/22611))
 * Fix AgentJobs, Deadlocks and XE collections to run async by default ([#22633](https://github.com/DataDog/integrations-core/pull/22633))
 
-## 22.12.5 / 2026-02-27
+## 22.12.5 / 2026-02-27 / Agent 7.76.2
 
 ***Fixed***:
 
 * Fix AgentJobs, Deadlocks and XE collections to run async by default ([#22633](https://github.com/DataDog/integrations-core/pull/22633))
 * Cancel SQLServer agent history job on check cancel ([#22753](https://github.com/DataDog/integrations-core/pull/22753))
 
-## 22.12.4 / 2026-02-05
+## 22.12.4 / 2026-02-05 / Agent 7.76.0
 
 ***Fixed***:
 
