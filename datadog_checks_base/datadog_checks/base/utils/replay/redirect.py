@@ -63,7 +63,7 @@ class ReplayLogger(logging.Logger):
         if args:
             try:
                 msg = msg % args
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError, KeyError):
                 pass
         print(
             '{}:log:{}'.format(

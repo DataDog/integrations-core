@@ -75,7 +75,7 @@ class ReplayCheckBadLog(AgentCheck):
 
     def check(self, _):
         self.log.debug('TypeError format: %d', 'not_a_number')
-        self.log.debug('ValueError format: %c', 2**32)
+        self.log.debug('OverflowError format: %c', 2**32)
 
 
 def test_replay_log_format_errors(caplog, dd_run_check, datadog_agent):
@@ -87,7 +87,7 @@ def test_replay_log_format_errors(caplog, dd_run_check, datadog_agent):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
-    for expected_message in ('TypeError format: %d', 'ValueError format: %c'):
+    for expected_message in ('TypeError format: %d', 'OverflowError format: %c'):
         for _, level, message in caplog.record_tuples:
             if level == logging.DEBUG and message == expected_message:
                 break
