@@ -81,8 +81,12 @@ def hash_directory(path: Path) -> str:
     """Compute a combined SHA256 hash of all files in a directory."""
     h = sha256()
     for file_path in sorted(path.rglob('*'), key=lambda p: p.relative_to(path)):
-        if file_path.is_file():
-            h.update(file_path.relative_to(path).as_posix().encode())
+        rel = file_path.relative_to(path)
+        if file_path.is_file() and not any(
+            part in {'__pycache__', '.pytest_cache'} or part.endswith('.pyc')
+            for part in rel.parts
+        ):
+            h.update(rel.as_posix().encode())
             h.update(file_path.read_bytes())
     return h.hexdigest()
 
@@ -91,9 +95,9 @@ def compute_input_hashes() -> dict[str, str]:
     """Compute SHA256 hashes for all dependency resolution inputs."""
     try:
         return {
-            'agent_requirements.in': hash_file(DIRECT_DEP_FILE),
-            '.github/workflows/resolve-build-deps.yaml': hash_file(WORKFLOW_FILE),
-            '.builders': hash_directory(BUILDER_DIR),
+            DIRECT_DEP_FILE.relative_to(REPO_DIR).as_posix(): hash_file(DIRECT_DEP_FILE),
+            WORKFLOW_FILE.relative_to(REPO_DIR).as_posix(): hash_file(WORKFLOW_FILE),
+            BUILDER_DIR.relative_to(REPO_DIR).as_posix(): hash_directory(BUILDER_DIR),
         }
     except FileNotFoundError as e:
         raise RuntimeError(f'Missing dependency resolution input: {e}') from e
