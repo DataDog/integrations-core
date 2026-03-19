@@ -28,10 +28,10 @@ E2E_METRICS_PORT = 18009
 E2E_METRICS_URL = f'http://{HOST}:{E2E_METRICS_PORT}/metrics'
 
 E2E_INSTANCE = {
-    'controller_endpoint': E2E_METRICS_URL+'?param=test0',
-    'server_endpoint': E2E_METRICS_URL+'?param=test1',
-    'broker_endpoint': E2E_METRICS_URL+'?param=test2',
-    'minion_endpoint': E2E_METRICS_URL+'?param=test3',
+    'controller_endpoint': E2E_METRICS_URL,
+    'server_endpoint': E2E_METRICS_URL,
+    'broker_endpoint': E2E_METRICS_URL,
+    'minion_endpoint': E2E_METRICS_URL,
     'tags': ['test:e2e'],
 }
 
