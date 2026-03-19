@@ -1,0 +1,1 @@
+Fixed a bug where `cloud_metadata.aws.instance_endpoint` was not populated for auto-detected RDS hosts, which could prevent query metrics from being properly associated with the database instance in the UI

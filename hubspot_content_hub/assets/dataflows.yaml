@@ -1,0 +1,15 @@
+provides:
+  - id: hubspot-content-hub-reference-tables
+    always_on: false
+    granular: false
+    direction: inbound
+  - id: hubspot-content-hub-metrics
+    always_on: false
+    granular: false
+    data_type: metrics
+    direction: inbound
+  - id: hubspot-content-hub-logs
+    always_on: false
+    granular: false
+    data_type: logs
+    direction: inbound

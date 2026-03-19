@@ -1,0 +1,6 @@
+provides:
+  - id: tenable-io-logs
+    always_on: true
+    granular: false
+    data_type: logs
+    direction: inbound

@@ -59,6 +59,7 @@ files:
          Path to a file containing the client token. Overrides `client_token`.
          The token will be re-read after every authorization error.
       fleet_configurable: true
+      formats: ["path"]
       value:
         example: <CLIENT_TOKEN_PATH>
         type: string

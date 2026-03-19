@@ -2,13 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 7.11.0 / 2026-02-19
+## 7.11.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 
 * Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
 
-## 7.10.0 / 2026-02-11
+## 7.10.0 / 2026-02-11 / Agent 7.76.0
 
 ***Added***:
 
