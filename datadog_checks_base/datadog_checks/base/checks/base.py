@@ -438,13 +438,15 @@ class AgentCheck(object):
         The security config controls file path validation for untrusted providers.
         """
         if self.__security_config is None:
+            trusted_providers = datadog_agent.get_config('integration_trusted_providers')
             self.__security_config = SecurityConfig(
                 check_name=self.name,
                 provider=self.provider,
                 ignore_untrusted_file_params=bool(datadog_agent.get_config('integration_ignore_untrusted_file_params')),
                 file_paths_allowlist=datadog_agent.get_config('integration_file_paths_allowlist') or [],
-                trusted_providers=datadog_agent.get_config('integration_trusted_providers')
-                or list(DEFAULT_TRUSTED_PROVIDERS),
+                trusted_providers=trusted_providers
+                if trusted_providers is not None
+                else list(DEFAULT_TRUSTED_PROVIDERS),
                 excluded_checks=datadog_agent.get_config('integration_security_excluded_checks') or [],
             )
 
