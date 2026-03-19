@@ -1,4 +1,5 @@
 name: "Strimzi"
+fleet_configurable: true
 files:
 - name: strimzi.yaml
   options:
@@ -10,6 +11,7 @@ files:
     - name: cluster_operator_endpoint
       description: |
         Endpoint exposing the Cluster Operator's Prometheus metrics.
+      fleet_configurable: true
       value:
         display_default: null
         example: http://cluster-operator-address:8080/metrics
@@ -17,6 +19,7 @@ files:
     - name: topic_operator_endpoint
       description: |
         Endpoint exposing the Topic Operator's Prometheus metrics.
+      fleet_configurable: true
       value:
         display_default: null
         example: http://topic-operator-address:8080/metrics
@@ -24,6 +27,7 @@ files:
     - name: user_operator_endpoint
       description: |
         Endpoint exposing the User Operator's Prometheus metrics.
+      fleet_configurable: true
       value:
         display_default: null
         example: http://user-operator-address:8081/metrics

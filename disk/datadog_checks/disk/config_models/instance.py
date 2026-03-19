@@ -56,6 +56,7 @@ class InstanceConfig(BaseModel):
     device_tag_re: Optional[MappingProxyType[str, Any]] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     file_system_exclude: Optional[tuple[str, ...]] = None
     file_system_include: Optional[tuple[str, ...]] = None
     include_all_devices: Optional[bool] = None

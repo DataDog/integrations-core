@@ -1,4 +1,5 @@
 name: MySQL
+fleet_configurable: true
 files:
   - name: mysql.yaml
     options:
@@ -8,6 +9,7 @@ files:
             description: |
               Set to `true` to propagate the tags from `datadog.yaml` to the check.
               When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+            fleet_configurable: true
             value:
               example: false
               type: boolean
@@ -26,6 +28,7 @@ files:
               MySQL host to connect to.
               NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
               provide a value for the sock key (below).
+            fleet_configurable: true
             enabled: true
             value:
               type: string
@@ -35,6 +38,7 @@ files:
           - name: username
             description: |
               Username used to connect to MySQL.
+            fleet_configurable: true
             enabled: true
             value:
               type: string
@@ -44,6 +48,7 @@ files:
           - name: password
             description: |
               Password associated to the MySQL user.
+            fleet_configurable: true
             enabled: true
             secret: true
             value:
@@ -52,7 +57,9 @@ files:
           - name: port
             description: |
               Port to use when connecting to MySQL.
+            fleet_configurable: true
             enabled: true
+            formats: ["port"]
             value:
               type: number
               example: 3306
@@ -69,6 +76,7 @@ files:
             description: |
               Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
               and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+            fleet_configurable: true
             value:
               type: string
           - name: exclude_hostname
@@ -77,7 +85,7 @@ files:
             value:
               type: boolean
               example: false
-            default: false
+              default: false
           - name: database_identifier
             description: |
               Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
@@ -92,7 +100,7 @@ files:
               - name: template
                 value:
                   type: string
-                  display_default: "$resolved_hostname"
+                  default: "$resolved_hostname"
                   example: "$env-$resolved_hostname:$port"
                 description: |
                   The template to use for the database identifier. The default value is `$resolved_hostname`.
@@ -102,15 +110,16 @@ files:
                   - port: The port number of the instance.
                   - mysql_sock: The socket path of the instance.
                   In addition, you can use any key from the `tags` section of the configuration.
-                default: "$resolved_hostname"
           - name: sock
             description: |
               Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
-              If you specify a socket you dont need to specify a host.
+              If you specify a socket you don't need to specify a host.
+            fleet_configurable: true
             value:
               type: string
           - name: charset
             description: Charset you want to use.
+            fleet_configurable: true
             value:
               type: string
               example: utf8
@@ -126,6 +135,7 @@ files:
             description: |
               Maximum number of seconds to wait before timing out when connecting to MySQL.
               The default connection timeout is 10 seconds.
+            fleet_configurable: true
             value:
               type: number
               example: 10
@@ -134,6 +144,7 @@ files:
             description: |
               The timeout for reading from the connection in seconds.
               By default, no read timeout is set.
+            fleet_configurable: true
             value:
               type: number
               example: 10
@@ -154,10 +165,13 @@ files:
               properties:
                 - name: key
                   type: string
+                  formats: ["path"]
                 - name: cert
                   type: string
+                  formats: ["path"]
                 - name: ca
                   type: string
+                  formats: ["path"]
                 - name: check_hostname
                   type: boolean
               example:
@@ -188,6 +202,7 @@ files:
               name : MySQL status name on "SHOW GLOBAL STATUS"
               metric_name : metric name
               type : gauge | rate | count | ...
+            fleet_configurable: true
             value:
               type: array
               items:
@@ -383,8 +398,9 @@ files:
                   example: false
 
           - name: dbm
+            fleet_configurable: true
             description: |
-              Set to `true` enable Database Monitoring.
+              Set to `true` to enable Database Monitoring.
             enabled: false
             value:
               type: boolean
@@ -460,14 +476,17 @@ files:
                   example: 60
           - name: query_metrics
             description: Configure collection of query metrics
+            fleet_configurable: true
             options:
               - name: enabled
+                fleet_configurable: true
                 description: |
                   Enable collection of query metrics. Requires `dbm: true`.
                 value:
                   type: boolean
                   example: true
               - name: collection_interval
+                fleet_configurable: true
                 description: |
                   Set the query metric collection interval (in seconds). Each collection involves a single query to
                   `pg_stat_statements`. If a non-default value is chosen then that exact same value must be used for *every*
@@ -476,6 +495,7 @@ files:
                   type: number
                   example: 10
               - name: only_query_recent_statements
+                fleet_configurable: true
                 description: |
                   Enable querying only for statements that have been run since last collection. This may improve agent
                   performance and reduce database load. Enabling this option should not alter the total number of query
@@ -486,6 +506,7 @@ files:
                   display_default: false
               - name: collect_prepared_statements
                 hidden: true
+                fleet_configurable: true
                 description: |
                   Enable collection of prepared statements metrics. Prerequisites: `only_query_recent_statements: false`.
                   Defaults to true.
@@ -496,14 +517,17 @@ files:
 
           - name: query_samples
             description: Configure collection of query samples
+            fleet_configurable: true
             options:
               - name: enabled
+                fleet_configurable: true
                 description: |
                   Enables collection of query samples. Requires `dbm: true`.
                 value:
                   type: boolean
                   example: true
               - name: collection_interval
+                fleet_configurable: true
                 description: |
                   Sets the query sample collection interval (in seconds). Each collection involves a single query to one
                   of the `performance_schema.events_statements_*` tables, followed by at most one `EXPLAIN` query per
@@ -512,12 +536,14 @@ files:
                   type: number
                   example: 1
               - name: explained_queries_per_hour_per_query
+                fleet_configurable: true
                 description: |
                   Sets the rate limit for how many execution plans will be collected per hour per normalized query.
                 value:
                   type: integer
                   example: 60
               - name: samples_per_hour_per_query
+                fleet_configurable: true
                 description: |
                   Sets the rate limit for how many statement sample events will be ingested per hour per normalized
                   execution plan.
@@ -525,6 +551,7 @@ files:
                   type: integer
                   example: 15
               - name: explained_queries_cache_maxsize
+                fleet_configurable: true
                 description: |
                   Sets the max size of the cache used for the explained_queries_per_hour_per_query rate limit. This
                   should be increased for databases with a very large number of unique normalized queries which exceed the
@@ -533,6 +560,7 @@ files:
                   type: integer
                   example: 5000
               - name: seen_samples_cache_maxsize
+                fleet_configurable: true
                 description: |
                   Sets the max size of the cache used for the samples_per_hour_per_query rate limit. This should be
                   increased for databases with a very large number of unique normalized execution plans which exceed the
@@ -541,6 +569,7 @@ files:
                   type: integer
                   example: 10000
               - name: events_statements_row_limit
+                fleet_configurable: true
                 description: |
                   Sets the maximum number of rows to read out from a `performance_schema.events_statements_*` table during
                   a single collection.
@@ -548,6 +577,7 @@ files:
                   type: integer
                   example: 5000
               - name: explain_procedure
+                fleet_configurable: true
                 description: |
                   Overrides the default procedure used for collecting execution plans. The agent will use this
                   procedure in each schema where it exists: `{schema}.explain_statement({statement})`.
@@ -555,6 +585,7 @@ files:
                   type: string
                   example: explain_statement
               - name: fully_qualified_explain_procedure
+                fleet_configurable: true
                 description: |
                   Overrides the default fully qualified explain procedure used for collecting execution plans for
                   statements sent from connections that do not have a default schema configured.
@@ -562,12 +593,14 @@ files:
                   type: string
                   example: datadog.explain_statement
               - name: events_statements_enable_procedure
+                fleet_configurable: true
                 description: |
                   Overrides the default procedure used for enabling events statements consumers.
                 value:
                   type: string
                   example: datadog.enable_events_statements_consumers
               - name: events_statements_temp_table_name
+                fleet_configurable: true
                 description: |
                   Overrides the default fully qualified name for the temp table the agent creates while collecting
                   samples.
@@ -575,6 +608,7 @@ files:
                   type: string
                   example: datadog.temp_events
               - name: collection_strategy_cache_maxsize
+                fleet_configurable: true
                 description: |
                   Sets the max size of the cache used for caching collection strategies. This value should be increased
                   to be at least as many as the number of unique schemas that are being monitored.
@@ -582,6 +616,7 @@ files:
                   type: integer
                   example: 1000
               - name: collection_strategy_cache_ttl
+                fleet_configurable: true
                 description: |
                   Sets how long to cache collection strategies. This should only be decreased if the set of enabled
                   `events_statements_*` tables changes frequently enough to cause stale strategies to return empty

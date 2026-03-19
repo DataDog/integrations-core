@@ -13,6 +13,16 @@ CONFIG_GAUGE_KEYS = {
     'maxclients': 'redis.net.maxclients',
 }
 
+CLUSTER_INFO_GAUGE_KEYS = {
+    'cluster_slots_assigned': 'redis.cluster.slots_assigned',
+    'cluster_slots_ok': 'redis.cluster.slots_ok',
+    'cluster_slots_pfail': 'redis.cluster.slots_pfail',
+    'cluster_slots_fail': 'redis.cluster.slots_fail',
+    'cluster_known_nodes': 'redis.cluster.known_nodes',
+    'cluster_size': 'redis.cluster.size',
+    'cluster_current_epoch': 'redis.cluster.current_epoch',
+}
+
 GAUGE_KEYS = {
     'io_threads_active': 'redis.server.io_threads_active',
     'active_defrag_running': 'redis.active_defrag.running',

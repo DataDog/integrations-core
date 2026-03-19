@@ -3,43 +3,119 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Kafka client wrapper for kafka_actions check."""
 
+from __future__ import annotations
+
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from confluent_kafka import Consumer, KafkaException, Producer, TopicPartition
-from confluent_kafka.admin import AdminClient, ConfigResource, NewTopic, ResourceType
+from confluent_kafka.admin import AdminClient, ConfigResource, NewTopic, OffsetSpec, ResourceType
+
+try:
+    import boto3
+    from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
+
+    AWS_MSK_IAM_AVAILABLE = True
+except ImportError:
+    AWS_MSK_IAM_AVAILABLE = False
+
+if TYPE_CHECKING:
+    from datadog_checks.kafka_actions.config import KafkaActionsConfig
 
 
 class KafkaActionsClient:
     """Kafka client for performing actions on Kafka clusters."""
 
-    def __init__(self, config: dict[str, Any], log):
-        """Initialize Kafka client with configuration.
-
-        Args:
-            config: Kafka configuration dictionary
-            log: Logger instance
-        """
+    def __init__(self, config: KafkaActionsConfig, log):
         self.config = config
         self.log = log
         self.consumer = None
         self.producer = None
         self.admin_client = None
 
-    def _get_kafka_config(self) -> dict[str, str]:
-        """Build Kafka configuration from check config."""
-        kafka_config = {
-            'bootstrap.servers': self.config.get('kafka_connect_str', 'localhost:9092'),
-            'security.protocol': self.config.get('security_protocol', 'PLAINTEXT'),
+    def _get_authentication_config(self) -> dict[str, Any]:
+        """Build authentication configuration for librdkafka."""
+        config = {
+            "security.protocol": self.config._security_protocol.lower(),
         }
 
-        if self.config.get('sasl_mechanism'):
-            kafka_config['sasl.mechanism'] = self.config['sasl_mechanism']
-        if self.config.get('sasl_plain_username'):
-            kafka_config['sasl.username'] = self.config['sasl_plain_username']
-        if self.config.get('sasl_plain_password'):
-            kafka_config['sasl.password'] = self.config['sasl_plain_password']
+        extras_parameters = {
+            "ssl.ca.location": self.config._tls_ca_cert,
+            "ssl.certificate.location": self.config._tls_cert,
+            "ssl.key.location": self.config._tls_private_key,
+            "ssl.key.password": self.config._tls_private_key_password,
+            "ssl.endpoint.identification.algorithm": "https" if self.config._tls_validate_hostname else "none",
+            "ssl.crl.location": self.config._crlfile,
+            "enable.ssl.certificate.verification": self.config._tls_verify,
+            "sasl.mechanism": self.config._sasl_mechanism,
+            "sasl.username": self.config._sasl_plain_username,
+            "sasl.password": self.config._sasl_plain_password,
+            "sasl.kerberos.keytab": self.config._sasl_kerberos_keytab,
+            "sasl.kerberos.principal": self.config._sasl_kerberos_principal,
+            "sasl.kerberos.service.name": self.config._sasl_kerberos_service_name,
+        }
 
+        if self.config._sasl_mechanism == "OAUTHBEARER":
+            method = self.config._sasl_oauth_token_provider.get("method", "oidc")
+
+            if method == "aws_msk_iam":
+                if not AWS_MSK_IAM_AVAILABLE:
+                    raise Exception(
+                        "AWS MSK IAM authentication requires 'aws-msk-iam-sasl-signer-python' library. "
+                        "Install it with: pip install aws-msk-iam-sasl-signer-python"
+                    )
+
+                def _aws_msk_iam_oauth_cb(oauth_config):
+                    try:
+                        region = self.config._sasl_oauth_token_provider.get("aws_region")
+                        if not region:
+                            region = boto3.session.Session().region_name
+
+                        if not region:
+                            raise Exception(
+                                "AWS region could not be determined. Please specify 'aws_region' in "
+                                "sasl_oauth_token_provider configuration."
+                            )
+
+                        auth_token, expiry_ms = MSKAuthTokenProvider.generate_auth_token(region)
+                        self.log.debug("Generated AWS MSK IAM token for region %s, expires in %s ms", region, expiry_ms)
+                        return auth_token, expiry_ms / 1000
+                    except Exception as e:
+                        self.log.error("Failed to generate AWS MSK IAM token: %s", e)
+                        raise
+
+                extras_parameters['oauth_cb'] = _aws_msk_iam_oauth_cb
+
+            elif method == "oidc":
+                extras_parameters['sasl.oauthbearer.method'] = "oidc"
+                extras_parameters["sasl.oauthbearer.client.id"] = self.config._sasl_oauth_token_provider.get(
+                    "client_id"
+                )
+                extras_parameters["sasl.oauthbearer.token.endpoint.url"] = self.config._sasl_oauth_token_provider.get(
+                    "url"
+                )
+                extras_parameters["sasl.oauthbearer.client.secret"] = self.config._sasl_oauth_token_provider.get(
+                    "client_secret"
+                )
+                extras_parameters["sasl.oauthbearer.scope"] = self.config._sasl_oauth_token_provider.get("scope")
+                extras_parameters["sasl.oauthbearer.extensions"] = self.config._sasl_oauth_token_provider.get(
+                    "extensions"
+                )
+                if self.config._sasl_oauth_tls_ca_cert:
+                    extras_parameters["https.ca.location"] = self.config._sasl_oauth_tls_ca_cert
+
+        for key, value in extras_parameters.items():
+            if value:
+                config[key] = value
+
+        return config
+
+    def _get_kafka_config(self) -> dict[str, Any]:
+        """Build full Kafka configuration."""
+        kafka_config = {
+            'bootstrap.servers': self.config.kafka_connect_str,
+        }
+        kafka_config.update(self._get_authentication_config())
         return kafka_config
 
     def get_consumer(self, group_id: str = 'kafka_actions') -> Consumer:
@@ -115,6 +191,7 @@ class KafkaActionsClient:
         topic: str,
         partition: int = -1,
         start_offset: int = -2,
+        start_timestamp: int | None = None,
         max_messages: int = 1000,
         timeout_ms: int = 30000,
         group_id: str = 'kafka_actions',
@@ -128,6 +205,7 @@ class KafkaActionsClient:
             topic: Topic name
             partition: Partition number (-1 for all partitions)
             start_offset: Starting offset (-1 for latest, -2 for earliest)
+            start_timestamp: Starting timestamp in milliseconds since epoch. When set, start_offset is ignored.
             max_messages: Maximum messages to consume
             timeout_ms: Global timeout in milliseconds for the entire consumption
             group_id: Consumer group ID
@@ -145,9 +223,37 @@ class KafkaActionsClient:
                 if topic not in metadata.topics:
                     raise ValueError(f"Topic '{topic}' not found")
 
-                partitions = [TopicPartition(topic, p, start_offset) for p in metadata.topics[topic].partitions.keys()]
+                partition_ids = list(metadata.topics[topic].partitions.keys())
             else:
-                partitions = [TopicPartition(topic, partition, start_offset)]
+                partition_ids = [partition]
+
+            if start_timestamp is not None:
+                # Resolve timestamp to per-partition offsets using offsets_for_times.
+                timestamp_partitions = [TopicPartition(topic, p, start_timestamp) for p in partition_ids]
+                partitions = consumer.offsets_for_times(timestamp_partitions, timeout=10)
+                for tp in partitions:
+                    if tp.offset != -1:
+                        self.log.debug(
+                            "Partition %d: timestamp %d resolved to offset %d",
+                            tp.partition,
+                            start_timestamp,
+                            tp.offset,
+                        )
+            elif start_offset == -1:
+                # For "latest" offset, seek back from the high watermark to read the last N existing messages.
+                # Use AdminClient.list_offsets to fetch all high watermarks in a single batched call.
+                admin = self.get_admin_client()
+                offset_request = {TopicPartition(topic, p): OffsetSpec.latest() for p in partition_ids}
+                futures = admin.list_offsets(offset_request, request_timeout=10)
+
+                partitions = []
+                for tp, future in futures.items():
+                    result = future.result()
+                    seek_offset = max(0, result.offset - max_messages)
+                    partitions.append(TopicPartition(topic, tp.partition, seek_offset))
+                    self.log.debug("Partition %d: high=%d, seeking to %d", tp.partition, result.offset, seek_offset)
+            else:
+                partitions = [TopicPartition(topic, p, start_offset) for p in partition_ids]
 
             self.log.debug("Assigning partitions: %s", partitions)
             consumer.assign(partitions)

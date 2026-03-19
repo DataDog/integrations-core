@@ -20,6 +20,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
+from datadog_checks.sqlserver.utils import is_statement_proc
 
 try:
     import datadog_agent
@@ -384,7 +385,8 @@ class SqlserverActivity(DBMAsyncJob):
             )
             comments = statement['metadata'].get('comments', [])
             row['is_proc'] = bool(row.get('procedure_name'))
-            if row['is_proc'] and row.get('text'):
+            has_proc_context = row['is_proc'] or is_statement_proc(row.get('text', ''))[0]
+            if has_proc_context and row.get('text'):
                 try:
                     procedure_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True
@@ -393,6 +395,11 @@ class SqlserverActivity(DBMAsyncJob):
                     procedure_comments = procedure_statement['metadata'].get('comments', [])
                     if procedure_comments:
                         comments = list(set(comments + procedure_comments))
+                    if not row.get('procedure_name'):
+                        procedures = procedure_statement['metadata'].get('procedures')
+                        if procedures:
+                            row['procedure_name'] = procedures[0].lower()
+                            row['is_proc'] = True
                 except Exception as e:
                     row['procedure_signature'] = '__procedure_obfuscation_error__'
                     # if we fail to obfuscate the procedure text,
@@ -481,8 +488,8 @@ class SqlserverActivity(DBMAsyncJob):
 
         # re-use the check's conn module, but set extra_key=dbm-activity- to ensure we get our own
         # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
-        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
-            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+        with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 connections = self._get_active_connections(cursor)
                 request_cols = self._get_exec_requests_cols_cached(cursor, DM_EXEC_REQUESTS_COLS)
                 input_buffer_columns, input_buffer_join = self._get_input_buffer_columns_and_join()

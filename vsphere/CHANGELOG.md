@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 9.4.0 / 2026-03-18
+
+***Added***:
+
+* Add `ssl_ciphers` support for the SOAP connection to allow configuring TLS cipher suites when connecting to vCenter. ([#22723](https://github.com/DataDog/integrations-core/pull/22723))
+
+## 9.3.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+***Fixed***:
+
+* Update configuration file. ([#22580](https://github.com/DataDog/integrations-core/pull/22580))
+
 ## 9.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:

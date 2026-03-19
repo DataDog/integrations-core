@@ -183,6 +183,21 @@ mock_client.consumer_get_cluster_id_and_list_topics.return_value = (
             mock_client,
             id="valid config",
         ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {'method': 'aws_msk_iam'}},
+            does_not_raise(),
+            mock_client,
+            id="valid AWS MSK IAM config",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {'method': 'invalid_method'}},
+            pytest.raises(
+                Exception,
+                match="Invalid method 'invalid_method' for sasl_oauth_token_provider. Must be 'aws_msk_iam' or 'oidc'",
+            ),
+            None,
+            id="invalid method",
+        ),
     ],
 )
 def test_oauth_config(
@@ -237,6 +252,7 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
     )
     aggregator.assert_metric(
         "kafka.consumer_lag",
+        value=0,
         count=1,
         tags=[
             'consumer_group:consumer_group1',
@@ -1354,6 +1370,125 @@ def test_count_consumer_contexts(check, kafka_instance):
     assert kafka_consumer_check.count_consumer_contexts(consumer_offsets) == 3
 
 
+@pytest.mark.parametrize(
+    'oauth_config, expected_auth_keys',
+    [
+        pytest.param(
+            {'method': 'aws_msk_iam'},
+            ['oauth_cb'],  # AWS MSK IAM uses oauth_cb callback, not sasl.oauthbearer.method
+            id="AWS MSK IAM authentication",
+        ),
+        pytest.param(
+            {'method': 'oidc', 'url': 'http://fake.url', 'client_id': 'test_id', 'client_secret': 'test_secret'},
+            {
+                'sasl.oauthbearer.method': 'oidc',
+                'sasl.oauthbearer.client.id': 'test_id',
+                'sasl.oauthbearer.token.endpoint.url': 'http://fake.url',
+                'sasl.oauthbearer.client.secret': 'test_secret',
+            },
+            id="OIDC authentication",
+        ),
+    ],
+)
+def test_oauth_authentication_config(oauth_config, expected_auth_keys, kafka_instance, check):
+    """Test that OAuth authentication configuration is correctly set for both AWS MSK IAM and OIDC."""
+    kafka_instance.update(
+        {
+            'monitor_unlisted_consumer_groups': True,
+            'security_protocol': 'SASL_SSL',
+            'sasl_mechanism': 'OAUTHBEARER',
+            'sasl_oauth_token_provider': oauth_config,
+        }
+    )
+    kafka_consumer_check = check(kafka_instance)
+    auth_config = kafka_consumer_check.client._KafkaClient__get_authentication_config()
+
+    # Verify security protocol is set
+    assert auth_config['security.protocol'] == 'sasl_ssl'
+    assert auth_config['sasl.mechanism'] == 'OAUTHBEARER'
+
+    # Verify OAuth-specific configuration
+    if isinstance(expected_auth_keys, dict):
+        # OIDC: verify exact key-value pairs
+        for key, value in expected_auth_keys.items():
+            assert auth_config[key] == value
+    else:
+        # AWS MSK IAM: verify oauth_cb callback is present and callable
+        for key in expected_auth_keys:
+            assert key in auth_config
+            if key == 'oauth_cb':
+                assert callable(auth_config[key])
+
+
+@pytest.mark.parametrize(
+    'oauth_config, mock_boto3_region, expected_region, should_succeed',
+    [
+        pytest.param(
+            {'method': 'aws_msk_iam', 'aws_region': 'us-west-2'},
+            None,  # Explicitly configured region should be used regardless of boto3
+            'us-west-2',
+            True,
+            id="explicit region in config",
+        ),
+        pytest.param(
+            {'method': 'aws_msk_iam'},
+            'eu-central-1',  # Region detected by boto3
+            'eu-central-1',
+            True,
+            id="region from boto3 auto-detection",
+        ),
+        pytest.param(
+            {'method': 'aws_msk_iam'},
+            None,  # No region configured or detected
+            None,
+            False,
+            id="no region available - should fail",
+        ),
+    ],
+)
+def test_aws_msk_iam_region_handling(
+    oauth_config, mock_boto3_region, expected_region, should_succeed, kafka_instance, check
+):
+    """Test that AWS MSK IAM authentication properly handles region configuration."""
+    kafka_instance.update(
+        {
+            'monitor_unlisted_consumer_groups': True,
+            'security_protocol': 'SASL_SSL',
+            'sasl_mechanism': 'OAUTHBEARER',
+            'sasl_oauth_token_provider': oauth_config,
+        }
+    )
+
+    kafka_consumer_check = check(kafka_instance)
+
+    # Get the OAuth callback from the authentication config
+    auth_config = kafka_consumer_check.client._KafkaClient__get_authentication_config()
+    assert 'oauth_cb' in auth_config
+    oauth_callback = auth_config['oauth_cb']
+
+    # Mock boto3 session and MSKAuthTokenProvider
+    with mock.patch('datadog_checks.kafka_consumer.client.boto3') as mock_boto3_module:
+        mock_session = mock.Mock()
+        mock_session.region_name = mock_boto3_region
+        mock_boto3_module.session.Session.return_value = mock_session
+
+        with mock.patch('datadog_checks.kafka_consumer.client.MSKAuthTokenProvider') as mock_auth_provider:
+            mock_auth_provider.generate_auth_token.return_value = ('fake_token', 900000)
+
+            if should_succeed:
+                # Should successfully generate token
+                token, expiry = oauth_callback(None)
+                assert token == 'fake_token'
+                assert expiry == 900  # 900000ms / 1000 = 900s
+
+                # Verify the correct region was used
+                mock_auth_provider.generate_auth_token.assert_called_once_with(expected_region)
+            else:
+                # Should fail with clear error message about missing region
+                with pytest.raises(Exception, match="AWS region could not be determined"):
+                    oauth_callback(None)
+
+
 def test_consumer_group_state_fetched_once_per_group(check, kafka_instance, dd_run_check, aggregator):
     mock_client = seed_mock_client()
     # Set up two partitions for same topic to check multiple contexts in same consumer group
@@ -1389,3 +1524,19 @@ def test_consumer_group_state_fetched_once_per_group(check, kafka_instance, dd_r
                 metric,
                 tags=[f'partition:{partition}', 'consumer_group_state:STABLE'],
             )
+
+
+def test_kafka_cluster_id_override(check, kafka_instance, dd_run_check, aggregator):
+    """When kafka_cluster_id_override is set, metrics use the override and include original_kafka_cluster_id."""
+    mock_client = seed_mock_client(cluster_id="auto-detected-id")
+    kafka_instance["kafka_cluster_id_override"] = "my-override-id"
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    dd_run_check(kafka_consumer_check)
+
+    expected_override_tags = ['kafka_cluster_id:my-override-id', 'original_kafka_cluster_id:auto-detected-id']
+    for metric_name in ("kafka.broker_offset", "kafka.consumer_offset", "kafka.consumer_lag"):
+        for metric in aggregator.metrics(metric_name):
+            for tag in expected_override_tags:
+                assert tag in metric.tags, f"{tag} not in {metric.tags} for {metric_name}"

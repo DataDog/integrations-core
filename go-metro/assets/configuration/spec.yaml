@@ -1,4 +1,5 @@
 name: Go-Metro
+fleet_configurable: true
 files:
 - name: go-metro.yaml
   options:
@@ -6,36 +7,42 @@ files:
     options:
     - name: snaplen
       description: should be >=104 (to accommodate for the largest possible TCP header)
+      fleet_configurable: true
       required: true
       value:
         type: integer
         example: 512
     - name: idle_ttl
       description: Time after which an idle flow (no traffic received) is flushed.
+      fleet_configurable: true
       required: true
       value:
         type: integer
         example: 300
     - name: exp_ttl
       description: Time after which a finished flow is flushed.
+      fleet_configurable: true
       required: true
       value:
         type: integer
         example: 60
     - name: statsd_ip
       description: StatsD IP.
+      fleet_configurable: true
       required: true
       value:
         type: string
         example: 127.0.0.1
     - name: statsd_port
       description: StatsD Port.
+      fleet_configurable: true
       required: true
       value:
         type: integer
         example: 8125
     - name: log_to_file
       description: Whether or not this check should log in the Agent log file.
+      fleet_configurable: true
       required: true
       value:
         type: boolean
@@ -44,6 +51,7 @@ files:
       description: |
         Minimum level of logs logged by this check.
         available levels: trace, debug, info, warning, error, critical
+      fleet_configurable: true
       required: true
       value:
         type: string
@@ -53,6 +61,7 @@ files:
     options:
     - name: interface
       description: Name of the interface to sniff from.
+      fleet_configurable: true
       required: true
       value:
         type: string
@@ -61,6 +70,7 @@ files:
       description: |
         Include by IP - The check performs name lookup and tags with hostname if available.
         Which avoids having go-metro inspect every incoming/outgoing packet through the interface.
+      fleet_configurable: true
       required: true
       value:
         type: array
@@ -72,6 +82,7 @@ files:
       description: |
         Include by hostname - The check performs ip lookup and filter by hosts IP's
         which avoids having go-metro inspect every incoming/outgoing packet through the interface.
+      fleet_configurable: true
       required: true
       value:
         type: array
