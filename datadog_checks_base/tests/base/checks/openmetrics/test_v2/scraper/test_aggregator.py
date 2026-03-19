@@ -8,7 +8,6 @@ from datadog_checks.base.checks.openmetrics.v2.scraper.aggregator import (
     should_aggregate,
 )
 
-
 # --- should_aggregate ---
 
 
