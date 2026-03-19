@@ -40,7 +40,7 @@ def test_secure_field_blocked_from_untrusted_provider(dd_run_check):
     check.check_id = 'test:123'
 
     # Act & Assert
-    with pytest.raises(Exception, match="tls_cert.*not allowed from untrusted provider"):
+    with pytest.raises(ConfigurationError, match="tls_cert.*not allowed from untrusted provider"):
         dd_run_check(check)
 
 
