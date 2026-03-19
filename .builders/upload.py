@@ -22,6 +22,7 @@ REPO_DIR = BUILDER_DIR.parent
 RESOLUTION_DIR = REPO_DIR / '.deps'
 LOCK_FILE_DIR = RESOLUTION_DIR / 'resolved'
 DIRECT_DEP_FILE = REPO_DIR / 'agent_requirements.in'
+WORKFLOW_FILE = REPO_DIR / '.github/workflows/resolve-build-deps.yaml'
 CACHE_CONTROL = 'public, max-age=15'
 VALID_PROJECT_NAME = re.compile(r'^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$', re.IGNORECASE)
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
@@ -74,6 +75,32 @@ def hash_file(path: Path) -> str:
     """Calculate the hash of the file pointed at by `path`"""
     with path.open('rb') as f:
         return sha256(f.read()).hexdigest()
+
+
+def hash_directory(path: Path) -> str:
+    """Compute a combined SHA256 hash of all files in a directory."""
+    h = sha256()
+    for file_path in sorted(path.rglob('*'), key=lambda p: p.relative_to(path)):
+        rel = file_path.relative_to(path)
+        if file_path.is_file() and not any(
+            part in {'__pycache__', '.pytest_cache'} or part.endswith('.pyc')
+            for part in rel.parts
+        ):
+            h.update(rel.as_posix().encode())
+            h.update(file_path.read_bytes())
+    return h.hexdigest()
+
+
+def compute_input_hashes() -> dict[str, str]:
+    """Compute SHA256 hashes for all dependency resolution inputs."""
+    try:
+        return {
+            DIRECT_DEP_FILE.relative_to(REPO_DIR).as_posix(): hash_file(DIRECT_DEP_FILE),
+            WORKFLOW_FILE.relative_to(REPO_DIR).as_posix(): hash_file(WORKFLOW_FILE),
+            BUILDER_DIR.relative_to(REPO_DIR).as_posix(): hash_directory(BUILDER_DIR),
+        }
+    except FileNotFoundError as e:
+        raise RuntimeError(f'Missing dependency resolution input: {e}') from e
 
 
 def _build_number_of_wheel(wheel_info: dict) -> int:
@@ -279,9 +306,11 @@ def generate_lockfiles(targets_dir, lockfiles):
     targets_dir = Path(targets_dir)
     LOCK_FILE_DIR.mkdir(parents=True, exist_ok=True)
     with RESOLUTION_DIR.joinpath('metadata.json').open('w', encoding='utf-8') as f:
+        inputs = compute_input_hashes()
         contents = json.dumps(
             {
-                'sha256': sha256(DIRECT_DEP_FILE.read_bytes()).hexdigest(),
+                'inputs': inputs,
+                'sha256': inputs['agent_requirements.in'],
             },
             indent=2,
             sort_keys=True,
