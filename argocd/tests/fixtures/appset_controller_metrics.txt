@@ -325,3 +325,27 @@ argocd_appset_reconcile_bucket{controller="applicationset",le="0.005"} 155
 argocd_appset_reconcile_bucket{controller="applicationset",le="+Inf"} 1347
 argocd_appset_reconcile_sum{controller="applicationset"} 507.75374146199937
 argocd_appset_reconcile_count{controller="applicationset"} 1347
+# HELP argocd_github_api_requests_total Number of GitHub API calls.
+# TYPE argocd_github_api_requests_total counter
+argocd_github_api_requests_total{api="repos",status="200"} 500
+argocd_github_api_requests_total{api="repos",status="403"} 10
+# HELP argocd_github_api_request_duration_seconds GitHub API request duration.
+# TYPE argocd_github_api_request_duration_seconds histogram
+argocd_github_api_request_duration_seconds_bucket{api="repos",le="0.1"} 200
+argocd_github_api_request_duration_seconds_bucket{api="repos",le="0.5"} 400
+argocd_github_api_request_duration_seconds_bucket{api="repos",le="1"} 480
+argocd_github_api_request_duration_seconds_bucket{api="repos",le="+Inf"} 510
+argocd_github_api_request_duration_seconds_sum{api="repos"} 125.5
+argocd_github_api_request_duration_seconds_count{api="repos"} 510
+# HELP argocd_github_api_rate_limit_remaining Requests remaining in rate limit window.
+# TYPE argocd_github_api_rate_limit_remaining gauge
+argocd_github_api_rate_limit_remaining{api="core"} 4500
+# HELP argocd_github_api_rate_limit_limit Maximum requests per hour.
+# TYPE argocd_github_api_rate_limit_limit gauge
+argocd_github_api_rate_limit_limit{api="core"} 5000
+# HELP argocd_github_api_rate_limit_reset_seconds Time until rate limit window resets.
+# TYPE argocd_github_api_rate_limit_reset_seconds gauge
+argocd_github_api_rate_limit_reset_seconds{api="core"} 1800
+# HELP argocd_github_api_rate_limit_used Requests used in current rate limit window.
+# TYPE argocd_github_api_rate_limit_used gauge
+argocd_github_api_rate_limit_used{api="core"} 500
