@@ -632,16 +632,6 @@ class AgentCheck(object):
 
             try:
                 config_model = model.model_validate(config, context=context)
-
-                # Fallback security validation for fields in GLOBAL_SECURE_FIELDS.
-                # This catches secure fields in integrations that haven't regenerated
-                # their models with require_trusted_provider in the spec.
-                security_config = context.get('security_config')
-                configured_fields = context.get('configured_fields', frozenset())
-                for field_name in GLOBAL_SECURE_FIELDS & configured_fields:
-                    value = config.get(field_name)
-                    if value is not None:
-                        check_field_trusted_provider(field_name, value, security_config)
             except ValidationError as e:
                 errors = e.errors()
                 num_errors = len(errors)
@@ -663,6 +653,18 @@ class AgentCheck(object):
 
                 raise ConfigurationError('\n'.join(message_lines)) from None
             else:
+                # Fallback security validation for fields in GLOBAL_SECURE_FIELDS.
+                # This catches secure fields in integrations that haven't regenerated
+                # their models with require_trusted_provider in the spec.
+                try:
+                    security_config = context.get('security_config')
+                    configured_fields = context.get('configured_fields', frozenset())
+                    for field_name in GLOBAL_SECURE_FIELDS & configured_fields:
+                        value = config.get(field_name)
+                        if value is not None:
+                            check_field_trusted_provider(field_name, value, security_config)
+                except ValueError as e:
+                    raise ConfigurationError(str(e)) from None
                 return config_model
 
     def _get_config_model_context(self, config):
