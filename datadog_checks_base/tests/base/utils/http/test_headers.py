@@ -97,3 +97,34 @@ def test_extra_headers_on_http_method_call():
     # make sure the original headers are not modified
     assert http.options['headers'] == complete_headers
     assert extra_headers == {"foo": "bar"}
+
+
+def test_get_header_default_for_missing():
+    http = RequestsWrapper({}, {})
+    assert http.get_header('X-Missing') is None
+    assert http.get_header('X-Missing', 'fallback') == 'fallback'
+
+
+def test_get_header_case_insensitive():
+    http = RequestsWrapper({}, {})
+    assert http.get_header('accept') == '*/*'
+    assert http.get_header('Accept') == '*/*'
+    assert http.get_header('ACCEPT') == '*/*'
+
+
+def test_set_header():
+    http = RequestsWrapper({}, {})
+    http.set_header('X-Token', 'abc123')
+    assert http.get_header('X-Token') == 'abc123'
+    http.set_header('Accept', 'application/json')
+    assert http.get_header('Accept') == 'application/json'
+
+
+def test_set_header_case_insensitive():
+    http = RequestsWrapper({}, {})
+    http.set_header('accept', 'application/json')
+    # Overwrites the existing 'Accept' key (preserving original casing)
+    assert http.get_header('Accept') == 'application/json'
+    assert http.options['headers']['Accept'] == 'application/json'
+    # No duplicate key created
+    assert sum(1 for k in http.options['headers'] if k.lower() == 'accept') == 1

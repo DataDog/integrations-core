@@ -448,6 +448,20 @@ class RequestsWrapper(object):
         self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
         self._https_adapters = {}
 
+    def get_header(self, name: str, default: str | None = None) -> str | None:
+        """Look up a request header by name. Lookup is case-insensitive."""
+        for key, value in self.options['headers'].items():
+            if key.lower() == name.lower():
+                return value
+        return default
+
+    def set_header(self, name: str, value: str) -> None:
+        for key in self.options['headers']:
+            if key.lower() == name.lower():
+                self.options['headers'][key] = value
+                return
+        self.options['headers'][name] = value
+
     def get(self, url, **options):
         return self._request('get', url, options)
 

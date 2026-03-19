@@ -43,7 +43,7 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         self.scraper_configs.clear()
 
         # https://www.vaultproject.io/api-docs#the-x-vault-request-header
-        self.http.options['headers']['X-Vault-Request'] = 'true'
+        self.http.set_header('X-Vault-Request', 'true')
 
         # Before scrapers are configured
         self.check_initializations.insert(-1, self.parse_config)
@@ -240,10 +240,10 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                     }
                     if hasattr(self, '_http'):
                         del self._http
-                    self.http.options['headers']['X-Vault-Request'] = 'true'
+                    self.http.set_header('X-Vault-Request', 'true')
                 if self.config.client_token:
                     config['headers']['X-Vault-Token'] = self.config.client_token
-                    self.http.options['headers']['X-Vault-Token'] = self.config.client_token
+                    self.http.set_header('X-Vault-Token', self.config.client_token)
 
             self.scraper_configs.clear()
             self.scraper_configs.append(config)
