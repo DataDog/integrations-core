@@ -8,8 +8,8 @@ import pytest
 
 from ddev.cli.size.utils.common_funcs import (
     METRIC_VERSION,
-    build_metrics,
     _matches_gitignore,
+    build_metrics,
     check_python_version,
     compress,
     convert_to_human_readable_size,
