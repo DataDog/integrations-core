@@ -93,7 +93,6 @@ GLOBAL_SECURE_FIELDS = frozenset(
         'bearer_token_path',
         'auth_token',
         'private_key_path',
-        'certificate_path',
     ]
 )
 
