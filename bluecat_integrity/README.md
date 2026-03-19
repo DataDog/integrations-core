@@ -28,9 +28,9 @@ Configure the Datadog endpoint to forward BlueCat Integrity DHCP activity events
    - **Sink type**: Select HTTP.
    - On selecting HTTP, the following fields appear:
       - Output URI: Enter the webhook URL generated in step 1.
-9. On the **Certificate** tab, under CA certificate, export the public SSL certificate for *.datadoghq.com from your browser’s certificate viewer (the certificate presented when accessing Datadog over HTTPS) and upload it here.
+9. On the **Certificate** tab, under CA certificate, export the public SSL certificate for *.datadoghq.com from your browser's certificate viewer (the certificate presented when accessing Datadog over HTTPS) and upload it here.
 10. Click **Save**.
-11. Perform steps 5–10 on every server from which logs need to be collected.
+11. Perform steps 5-10 on every server from which logs need to be collected.
 
 
 Configure the Datadog endpoint to forward BlueCat Integrity DNS activity events as logs to Datadog.
@@ -47,9 +47,9 @@ Configure the Datadog endpoint to forward BlueCat Integrity DNS activity events 
    - **Sink type**: Select HTTP
    - On selecting HTTP, the following fields appear:
       - **Output URI**: Enter the webhook URL generated in step 1.
-9. On the **Certificate** tab, under CA certificate, export the public SSL certificate for *.datadoghq.com from your browser’s certificate viewer (the certificate presented when accessing Datadog over HTTPS) and upload it here.
+9. On the **Certificate** tab, under CA certificate, export the public SSL certificate for *.datadoghq.com from your browser's certificate viewer (the certificate presented when accessing Datadog over HTTPS) and upload it here.
 10. Click **Save**.
-11. Perform steps 5–10 on every server from which logs need to be collected.
+11. Perform steps 5-10 on every server from which logs need to be collected.
 
 
 ## Data Collected

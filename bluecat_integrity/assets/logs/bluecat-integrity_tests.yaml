@@ -48,9 +48,57 @@ tests:
     }
   result:
     custom:
+      dns:
+        flags:
+          rcode: "NoError"
       key: "3f87546e-54ad-4022-9dbc-123456789123"
       messageType: "ClientQuery"
       messageTypeId: 5
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 57895
+        destination:
+          geoip: {}
+          ip: "10.1.1.1"
+          port: 53
+      ocsf:
+        activity_id: 1
+        activity_name: "Query"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        dst_endpoint:
+          ip: "10.1.1.1"
+          name: "bdds2"
+          port: 53
+          uid: "4201fad9-b30e-1dc5-0833-123456789123"
+        metadata:
+          event_code: "ClientQuery"
+          log_name: "dnstap"
+          log_version: "1.0"
+          original_time: "2026-02-26T05:15:04.884701163Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "3f87546e-54ad-4022-9dbc-123456789123"
+          version: "1.5.0"
+        query:
+          class: "IN"
+          hostname: "C-Lab-24.contoso.local."
+          opcode: "Query"
+          opcode_id: 0
+          type: "SOA"
+        rcode: "NoError"
+        rcode_id: 0
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.10.10.10"
+          port: 57895
+        time: 1772082904884
       payloadType: "dnstap"
       requestData:
         fullRcode: 0
@@ -77,6 +125,7 @@ tests:
           questionType: "SOA"
         rcodeName: "NoError"
         time: 1772082903782342100
+      request_op_code_value: "Query"
       responseAddress: "10.1.1.1"
       responsePort: 53
       schemaVersion: "1.0"
@@ -135,6 +184,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1772082904884
  -
   sample: |-
     {
@@ -183,9 +233,56 @@ tests:
     }
   result:
     custom:
+      dns:
+        flags:
+          rcode: "Refused"
       key: "2683dd13-0065-4985-b1a0-123456789123"
       messageType: "ClientResponse"
       messageTypeId: 6
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 39927
+        destination:
+          geoip: {}
+          ip: "10.1.1.1"
+          port: 53
+      ocsf:
+        activity_id: 2
+        activity_name: "Response"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        dst_endpoint:
+          ip: "10.1.1.1"
+          name: "bdds1"
+          port: 53
+          uid: "42014a36-eed1-b7bd-5786-123456789123"
+        metadata:
+          event_code: "ClientResponse"
+          log_name: "dnstap"
+          log_version: "1.0"
+          original_time: "2026-02-19T17:29:00.526674843Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "2683dd13-0065-4985-b1a0-123456789123"
+          version: "1.5.0"
+        query:
+          class: "IN"
+          hostname: "google.com"
+          opcode_id: "Query"
+          type: "A"
+        rcode: "Refused"
+        rcode_id: 5
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.10.10.10"
+          port: 39927
+        time: 1771522140526
       payloadType: "dnstap"
       responseAddress: "10.1.1.1"
       responseData:
@@ -214,6 +311,7 @@ tests:
         rcodeName: "Refused"
         time: 1771522139229097200
       responsePort: 53
+      response_op_code_value: "Query"
       schemaVersion: "1.0"
       serverId: "bdds1"
       socketFamily: "INET"
@@ -270,6 +368,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1771522140526
  -
   sample: |-
     {
@@ -375,9 +474,56 @@ tests:
     }
   result:
     custom:
+      dns:
+        flags:
+          rcode: "NoError"
       key: "8ccd65b4-28f4-4681-a11e-ea12c4f42b25"
       messageType: "AuthResponse"
       messageTypeId: 2
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 18456
+        destination:
+          geoip: {}
+          ip: "10.1.1.1"
+          port: 53
+      ocsf:
+        activity_id: 2
+        activity_name: "Response"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        dst_endpoint:
+          ip: "10.1.1.1"
+          name: "bdds1"
+          port: 53
+          uid: "42014a36-eed1-b7bd-5786-869e412e536f"
+        metadata:
+          event_code: "AuthResponse"
+          log_name: "dnstap"
+          log_version: "1.0"
+          original_time: "2026-02-25T06:39:54.423618065Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "8ccd65b4-28f4-4681-a11e-ea12c4f42b25"
+          version: "1.5.0"
+        query:
+          class: "IN"
+          hostname: "google.local."
+          opcode_id: "Query"
+          type: "SOA"
+        rcode: "NoError"
+        rcode_id: 0
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.10.10.10"
+          port: 18456
+        time: 1772001594423
       payloadType: "dnstap"
       queryZone: "google.local."
       responseAddress: "10.1.1.1"
@@ -462,6 +608,7 @@ tests:
         rcodeName: "NoError"
         time: 1772001593205088500
       responsePort: 53
+      response_op_code_value: "Query"
       schemaVersion: "1.0"
       serverId: "bdds1"
       socketFamily: "INET"
@@ -575,6 +722,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1772001594423
  -
   sample: |-
     {
@@ -623,9 +771,57 @@ tests:
     }
   result:
     custom:
+      dns:
+        flags:
+          rcode: "NoError"
       key: "3d047532-8644-474d-a58b-123456789123"
       messageType: "AuthQuery"
       messageTypeId: 1
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 39927
+        destination:
+          geoip: {}
+          ip: "10.1.1.1"
+          port: 53
+      ocsf:
+        activity_id: 1
+        activity_name: "Query"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        dst_endpoint:
+          ip: "10.1.1.1"
+          name: "bdds1"
+          port: 53
+          uid: "42014a36-eed1-b7bd-5786-123456789123"
+        metadata:
+          event_code: "AuthQuery"
+          log_name: "dnstap"
+          log_version: "1.0"
+          original_time: "2026-02-19T17:29:00.526703911Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "3d047532-8644-474d-a58b-123456789123"
+          version: "1.5.0"
+        query:
+          class: "IN"
+          hostname: "google.com"
+          opcode: "Query"
+          opcode_id: 0
+          type: "A"
+        rcode: "NoError"
+        rcode_id: 0
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.10.10.10"
+          port: 39927
+        time: 1771522140526
       payloadType: "dnstap"
       requestData:
         fullRcode: 0
@@ -652,6 +848,7 @@ tests:
           questionType: "A"
         rcodeName: "NoError"
         time: 1771522139229097200
+      request_op_code_value: "Query"
       responseAddress: "10.1.1.1"
       responsePort: 53
       schemaVersion: "1.0"
@@ -710,6 +907,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1771522140526
  -
   sample: |-
     {
@@ -792,6 +990,36 @@ tests:
           xId: "0xcef7266d"
           yiaddr: "10.10.10.10"
       key: "9644c2bc-2391-4176-a964-123456789123"
+      message_direction_value: "BOOTREQUEST"
+      ocsf:
+        activity_id: 1
+        activity_name: "Discover"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DHCP Activity"
+        class_uid: 4004
+        connection_info:
+          direction: "Outbound"
+          direction_id: 2
+        dst_endpoint:
+          name: "bdds2"
+          uid: "4201fad9-b30e-1dc5-0833-123456789123"
+        metadata:
+          event_code: "DHCP Discover"
+          log_name: "dhcpv4-packet"
+          log_version: "1.0.0"
+          original_time: "2026-02-18T23:30:02.663295550Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "9644c2bc-2391-4176-a964-123456789123"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.10.10.10"
+          mac: "::1"
+        time: 1771457402663
       payloadType: "dhcpv4-packet"
       schemaVersion: "1.0.0"
       serverId: "bdds2"
@@ -846,6 +1074,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1771457402663
  -
   sample: |-
     {
@@ -934,6 +1163,36 @@ tests:
           xId: "0xbc7964fc"
           yiaddr: "10.10.10.10"
       key: "61f167bc-e954-4399-8ee2-123456789123"
+      message_direction_value: "BOOTREPLY"
+      ocsf:
+        activity_id: 5
+        activity_name: "Ack"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DHCP Activity"
+        class_uid: 4004
+        connection_info:
+          direction: "Inbound"
+          direction_id: 1
+        dst_endpoint:
+          name: "bdds1"
+          uid: "42014a36-eed1-b7bd-5786-123456789123"
+        metadata:
+          event_code: "DHCP Ack"
+          log_name: "dhcpv4-packet"
+          log_version: "1.0.0"
+          original_time: "2026-02-19T00:32:46.977179413Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "61f167bc-e954-4399-8ee2-123456789123"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.10.10.10"
+          mac: "::1"
+        time: 1771461166977
       payloadType: "dhcpv4-packet"
       schemaVersion: "1.0.0"
       serverId: "bdds1"
@@ -990,6 +1249,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1771461166977
  -
   sample: |-
     {
@@ -1053,6 +1313,31 @@ tests:
             optionId: 2
           transactionId: "0x353d6d"
       key: "d24f3877-7ae8-4794-aed2-123456789123"
+      ocsf:
+        activity_id: 5
+        activity_name: "Ack"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DHCP Activity"
+        class_uid: 4004
+        dst_endpoint:
+          name: "bdds1"
+          uid: "42014a36-eed1-b7bd-5786-123456789123"
+        is_renewal: false
+        metadata:
+          event_code: "REPLY"
+          log_name: "dhcpv6-packet"
+          log_version: "1.0.0"
+          original_time: "2026-02-19T00:32:46.977179413Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "d24f3877-7ae8-4794-aed2-123456789123"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1771461166977
+        transaction_uid: "0x353d6d"
       payloadType: "dhcpv6-packet"
       schemaVersion: "1.0.0"
       serverId: "bdds1"
@@ -1098,6 +1383,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1771461166977
  -
   sample: |-
     {
@@ -1161,6 +1447,31 @@ tests:
             optionId: 2
           transactionId: "0x433b40"
       key: "f8ede4f0-1ac7-4d0e-acc2-123456789123"
+      ocsf:
+        activity_id: 2
+        activity_name: "Offer"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DHCP Activity"
+        class_uid: 4004
+        dst_endpoint:
+          name: "bdds1"
+          uid: "42014a36-eed1-b7bd-5786-123456789123"
+        is_renewal: false
+        metadata:
+          event_code: "ADVERTISE"
+          log_name: "dhcpv6-packet"
+          log_version: "1.0.0"
+          original_time: "2026-02-19T00:32:46.977179413Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "f8ede4f0-1ac7-4d0e-acc2-123456789123"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1771461166977
+        transaction_uid: "0x433b40"
       payloadType: "dhcpv6-packet"
       schemaVersion: "1.0.0"
       serverId: "bdds1"
@@ -1206,3 +1517,4 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
+    timestamp: 1771461166977

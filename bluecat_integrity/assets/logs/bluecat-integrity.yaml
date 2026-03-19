@@ -3,6 +3,46 @@ metric_id: bluecat-integrity
 backend_only: false
 facets:
   - groups:
+      - DNS
+    name: Response Code
+    path: dns.flags.rcode
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - groups:
       - Web Access
     name: Client IP
     path: network.client.ip
@@ -13,6 +53,41 @@ facets:
     path: network.client.port
     source: log
   - groups:
+      - Geoip
+    name: Destination City Name
+    path: network.destination.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Code
+    path: network.destination.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Name
+    path: network.destination.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country ISO Code
+    path: network.destination.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country Name
+    path: network.destination.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision ISO Code
+    path: network.destination.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision Name
+    path: network.destination.geoip.subdivision.name
+    source: log
+  - groups:
       - Web Access
     name: Destination IP
     path: network.destination.ip
@@ -21,11 +96,6 @@ facets:
       - Web Access
     name: Destination Port
     path: network.destination.port
-    source: log
-  - groups:
-      - DNS
-    name: Response Code
-    path: dns.flags.rcode
     source: log
 pipeline:
   type: pipeline
@@ -290,23 +360,7 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: ocsf.metadata
-              sources:
-                - ocsf.metadata
-              sourceType: attribute
-              target: ocsf.metadata
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.metadata.product
-              sources:
-                - ocsf.metadata.product
-              sourceType: attribute
-              target: ocsf.metadata.product
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.time
+            - name: Map `ocsf.time` to `ocsf.time`
               sources:
                 - ocsf.time
               sourceType: attribute
@@ -315,7 +369,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.query.hostname
+            - name: Map `ocsf.query.hostname` to `ocsf.query.hostname`
               sources:
                 - ocsf.query.hostname
               sourceType: attribute
@@ -432,7 +486,7 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: ocsf.metadata.log_name
+            - name: Map `payloadType` to `ocsf.metadata.log_name`
               sources:
                 - payloadType
               sourceType: attribute
@@ -441,7 +495,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.log_version
+            - name: Map `schemaVersion` to `ocsf.metadata.log_version`
               sources:
                 - schemaVersion
               sourceType: attribute
@@ -450,7 +504,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.event_code
+            - name: Map `messageType` to `ocsf.metadata.event_code`
               sources:
                 - messageType
               sourceType: attribute
@@ -459,7 +513,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.uid
+            - name: Map `key` to `ocsf.metadata.uid`
               sources:
                 - key
               sourceType: attribute
@@ -468,7 +522,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.original_time
+            - name: Map `timestamp` to `ocsf.metadata.original_time`
               sources:
                 - timestamp
               sourceType: attribute
@@ -477,7 +531,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.query.class
+            - name: Map `ocsf.query.class` to `ocsf.query.class`
               sources:
                 - ocsf.query.class
               sourceType: attribute
@@ -486,7 +540,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.query.type
+            - name: Map `ocsf.query.type` to `ocsf.query.type`
               sources:
                 - ocsf.query.type
               sourceType: attribute
@@ -495,15 +549,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.src_endpoint
-              sources:
-                - ocsf.src_endpoint
-              sourceType: attribute
-              target: ocsf.src_endpoint
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.src_endpoint.ip
+            - name: Map `sourceAddress` to `ocsf.src_endpoint.ip`
               sources:
                 - sourceAddress
               sourceType: attribute
@@ -512,7 +558,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.src_endpoint.port
+            - name: Map `sourcePort` to `ocsf.src_endpoint.port`
               sources:
                 - sourcePort
               sourceType: attribute
@@ -521,15 +567,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.dst_endpoint
-              sources:
-                - ocsf.dst_endpoint
-              sourceType: attribute
-              target: ocsf.dst_endpoint
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.dst_endpoint.ip
+            - name: Map `responseAddress` to `ocsf.dst_endpoint.ip`
               sources:
                 - responseAddress
               sourceType: attribute
@@ -538,7 +576,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.dst_endpoint.port
+            - name: Map `responsePort` to `ocsf.dst_endpoint.port`
               sources:
                 - responsePort
               sourceType: attribute
@@ -547,7 +585,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.dst_endpoint.uid
+            - name: Map `sourceId` to `ocsf.dst_endpoint.uid`
               sources:
                 - sourceId
               sourceType: attribute
@@ -556,7 +594,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product.vendor_name
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
               sources:
                 - ocsf.metadata.product.vendor_name
               sourceType: attribute
@@ -565,64 +603,20 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product.name
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
               sources:
-                - metadata.product.name
+                - ocsf.metadata.product.name
               sourceType: attribute
               target: ocsf.metadata.product.name
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.query
+            - name: Map `ocsf.query` to `ocsf.query`
               sources:
                 - ocsf.query
               sourceType: attribute
               target: ocsf.query
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.answers
-              sources:
-                - ocsf.answers
-              sourceType: attribute
-              target: ocsf.answers
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.answers.type
-              sources:
-                - responseData.answers.recordType
-              sourceType: attribute
-              target: ocsf.answers.type
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.answers.rdata
-              sources:
-                - responseData.answers.rData
-              sourceType: attribute
-              target: ocsf.answers.rdata
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.answers.class
-              sources:
-                - responseData.answers.class
-              sourceType: attribute
-              target: ocsf.answers.class
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: ocsf.answers.ttl
-              sources:
-                - responseData.answers.ttl
-              sourceType: attribute
-              target: ocsf.answers.ttl
-              targetFormat: integer
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
@@ -663,13 +657,13 @@ pipeline:
                   ocsf.query.opcode:
                     - Unassigned
               type: schema-category-mapper
-            - name: ocsf.dst_endpoint.name
+            - name: Map `serverId` to `ocsf.dst_endpoint.name`
               sources:
                 - serverId
               sourceType: attribute
               target: ocsf.dst_endpoint.name
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
     - type: pipeline
@@ -718,7 +712,7 @@ pipeline:
             extensions: []
             profiles: []
           mappers:
-            - name: ocsf.metadata
+            - name: Map `ocsf.metadata` to `ocsf.metadata`
               sources:
                 - ocsf.metadata
               sourceType: attribute
@@ -726,7 +720,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.product
+            - name: Map `ocsf.metadata.product` to `ocsf.metadata.product`
               sources:
                 - ocsf.metadata.product
               sourceType: attribute
@@ -734,7 +728,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.time
+            - name: Map `ocsf.time` to `ocsf.time`
               sources:
                 - ocsf.time
               sourceType: attribute
@@ -924,7 +918,7 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: ocsf.metadata.event_code
+            - name: Map `data.dhcpv6Message.messageType`, `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
               sources:
                 - data.dhcpv6Message.messageType
                 - ocsf.metadata.event_code
@@ -934,7 +928,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.log_name
+            - name: Map `payloadType` to `ocsf.metadata.log_name`
               sources:
                 - payloadType
               sourceType: attribute
@@ -943,7 +937,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.transaction_uid
+            - name: Map `data.dhcpv6Message.transactionId` to `ocsf.transaction_uid`
               sources:
                 - data.dhcpv6Message.transactionId
               sourceType: attribute
@@ -952,7 +946,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.dst_endpoint.uid
+            - name: Map `sourceId` to `ocsf.dst_endpoint.uid`
               sources:
                 - sourceId
               sourceType: attribute
@@ -961,7 +955,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.dst_endpoint
+            - name: Map `ocsf.dst_endpoint` to `ocsf.dst_endpoint`
               sources:
                 - ocsf.dst_endpoint
               sourceType: attribute
@@ -969,7 +963,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.uid
+            - name: Map `key` to `ocsf.metadata.uid`
               sources:
                 - key
               sourceType: attribute
@@ -978,7 +972,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.log_version
+            - name: Map `schemaVersion` to `ocsf.metadata.log_version`
               sources:
                 - schemaVersion
               sourceType: attribute
@@ -987,7 +981,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.lease_dur
+            - name: Map `data.dhcpv4Message.options.leaseTime` to `ocsf.lease_dur`
               sources:
                 - data.dhcpv4Message.options.leaseTime
               sourceType: attribute
@@ -996,7 +990,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.metadata.original_time
+            - name: Map `timestamp` to `ocsf.metadata.original_time`
               sources:
                 - timestamp
               sourceType: attribute
@@ -1005,7 +999,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.src_endpoint
+            - name: Map `ocsf.src_endpoint` to `ocsf.src_endpoint`
               sources:
                 - ocsf.src_endpoint
               sourceType: attribute
@@ -1013,7 +1007,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.src_endpoint.ip
+            - name: Map `data.dhcpv4Message.ciaddr` to `ocsf.src_endpoint.ip`
               sources:
                 - data.dhcpv4Message.ciaddr
               sourceType: attribute
@@ -1022,7 +1016,7 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.src_endpoint.mac
+            - name: Map `data.dhcpv4Message.chaddr` to `ocsf.src_endpoint.mac`
               sources:
                 - data.dhcpv4Message.chaddr
               sourceType: attribute
@@ -1031,21 +1025,21 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.dst_endpoint.name
+            - name: Map `serverId` to `ocsf.dst_endpoint.name`
               sources:
                 - serverId
               sourceType: attribute
               target: ocsf.dst_endpoint.name
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: ocsf.connection_info
+            - name: Map `ocsf.connection_info` to `ocsf.connection_info`
               sources:
                 - ocsf.connection_info
               sourceType: attribute
               target: ocsf.connection_info
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: ocsf.connection_info.direction_id
