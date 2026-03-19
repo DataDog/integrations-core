@@ -136,7 +136,7 @@ class ClickhouseCheck(DatabaseCheck):
         self.tag_manager.set_tag("database_hostname", self.reported_hostname, replace=True)
         self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
         if self._config.cluster_name:
-            self.tag_manager.set_tag("clustername", self._config.cluster_name, replace=True)
+            self.tag_manager.set_tag("clickhouse_cluster", self._config.cluster_name, replace=True)
 
     def validate_config(self):
         """

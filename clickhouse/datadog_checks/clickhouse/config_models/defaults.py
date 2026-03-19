@@ -9,7 +9,7 @@
 
 
 def instance_cluster_name():
-    return 'my_cluster'
+    return None
 
 
 def instance_connect_timeout():
