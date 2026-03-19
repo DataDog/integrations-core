@@ -1,11 +1,11 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated
+from pydantic import Field
 
-from ddev.ai.tools.core.base import safe_int
+from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
 from .base import TextEdit
@@ -34,8 +34,8 @@ class ReadFileTool(TextEdit[ReadFileInput]):
 
         self._on_read(tool_input.path, content)
 
-        offset = max(0, safe_int(tool_input.offset, 0))
-        limit = max(1, safe_int(tool_input.limit, 1)) if tool_input.limit is not None else None
+        offset = max(0, tool_input.offset)
+        limit = max(1, tool_input.limit) if tool_input.limit is not None else None
         lines = content.splitlines(keepends=True)
         slice_ = lines[offset : offset + limit] if limit is not None else lines[offset:]
         return ToolResult(success=True, data="".join(slice_))

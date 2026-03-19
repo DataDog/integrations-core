@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Annotated
-
 from pydantic import Field
 
 from ddev.ai.tools.core.base import BaseToolInput
