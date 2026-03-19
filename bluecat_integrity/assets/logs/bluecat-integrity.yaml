@@ -1,0 +1,1067 @@
+id: bluecat-integrity
+metric_id: bluecat-integrity
+backend_only: false
+facets:
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - Web Access
+    name: Client Port
+    path: network.client.port
+    source: log
+  - groups:
+      - Web Access
+    name: Destination IP
+    path: network.destination.ip
+    source: log
+  - groups:
+      - Web Access
+    name: Destination Port
+    path: network.destination.port
+    source: log
+  - groups:
+      - DNS
+    name: Response Code
+    path: dns.flags.rcode
+    source: log
+pipeline:
+  type: pipeline
+  name: BlueCat Integrity
+  enabled: true
+  filter:
+    query: source:bluecat-integrity
+  processors:
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: pipeline
+      name: Parse DNS activity events
+      enabled: true
+      filter:
+        query: "@payloadType:dnstap"
+      processors:
+        - type: attribute-remapper
+          name: Map `sourceAddress` to `network.client.ip`
+          enabled: true
+          sources:
+            - sourceAddress
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `sourcePort` to `network.client.port`
+          enabled: true
+          sources:
+            - sourcePort
+          sourceType: attribute
+          target: network.client.port
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `responseAddress` to `network.destination.ip`
+          enabled: true
+          sources:
+            - responseAddress
+          sourceType: attribute
+          target: network.destination.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `responsePort` to `network.destination.port`
+          enabled: true
+          sources:
+            - responsePort
+          sourceType: attribute
+          target: network.destination.port
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `requestData.rcodeName`, `responseData.rcodeName` to `dns.flags.rcode`
+          enabled: true
+          sources:
+            - requestData.rcodeName
+            - responseData.rcodeName
+          sourceType: attribute
+          target: dns.flags.rcode
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - name: Lookup `responseData.header.opcode` to `response_op_code_value`
+          enabled: true
+          source: responseData.header.opcode
+          target: response_op_code_value
+          lookupTable: |-
+            0,Query
+            1,IQuery
+            2,Status
+            3,Unassigned
+            4,Notify
+            5,Update
+            6,DSO Message
+            7,Unassigned
+            8,Unassigned
+            9,Unassigned
+            10,Unassigned
+            11,Unassigned
+            12,Unassigned
+            13,Unassigned
+            14,Unassigned
+            15,Unassigned
+          type: lookup-processor
+        - name: Lookup `requestData.header.opcode` to `request_op_code_value`
+          enabled: true
+          source: requestData.header.opcode
+          target: request_op_code_value
+          lookupTable: |-
+            0,Query
+            1,IQuery
+            2,Status
+            3,Unassigned
+            4,Notify
+            5,Update
+            6,DSO Message
+            7,Unassigned
+            8,Unassigned
+            9,Unassigned
+            10,Unassigned
+            11,Unassigned
+            12,Unassigned
+            13,Unassigned
+            14,Unassigned
+            15,Unassigned
+          type: lookup-processor
+        - type: geo-ip-parser
+          name: Extract Geolocation information from Client IP
+          enabled: true
+          sources:
+            - network.client.ip
+          target: network.client.geoip
+          ip_processing_behavior: do-nothing
+        - type: geo-ip-parser
+          name: Extract Geolocation information from Destination IP
+          enabled: true
+          sources:
+            - network.destination.ip
+          target: network.destination.geoip
+          ip_processing_behavior: do-nothing
+    - type: pipeline
+      name: Parse DHCP activity events
+      enabled: true
+      filter:
+        query: "@payloadType:(dhcpv4-packet OR dhcpv6-packet)"
+      processors:
+        - name: Lookup `data.dhcpv4Message.op` to `message_direction_value`
+          enabled: true
+          source: data.dhcpv4Message.op
+          target: message_direction_value
+          lookupTable: |-
+            1,BOOTREQUEST
+            2,BOOTREPLY
+          type: lookup-processor
+    - type: pipeline
+      name: OCSF pre transformations
+      enabled: true
+      filter:
+        query: ""
+      processors:
+        - type: string-builder-processor
+          name: Add product name
+          enabled: true
+          template: BlueCat Integrity
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add product vendor
+          enabled: true
+          template: BlueCat
+          target: ocsf.metadata.product.vendor_name
+          replaceMissing: false
+        - type: grok-parser
+          name: Parse `timestamp` to `ocsf.time`
+          enabled: true
+          source: timestamp
+          samples:
+            - 2026-03-13T11:00:44.434252399Z
+          grok:
+            supportRules: ""
+            matchRules: rule_time %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSZ"):ocsf.time}
+    - type: pipeline
+      name: OCSF sub pipeline for class DNS Activity [4003]
+      enabled: true
+      filter:
+        query: "@payloadType:dnstap"
+      processors:
+        - type: string-builder-processor
+          name: Add query class for responseData
+          enabled: true
+          template: "%{responseData.question.class}"
+          target: ocsf.query.class
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add query class for requestData
+          enabled: true
+          template: "%{requestData.question.class}"
+          target: ocsf.query.class
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add query hostname for responseData
+          enabled: true
+          template: "%{responseData.question.domainName}"
+          target: ocsf.query.hostname
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add query hostname for requestData
+          enabled: true
+          template: "%{requestData.question.domainName}"
+          target: ocsf.query.hostname
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add query opcode id for responseData
+          enabled: true
+          template: "%{response_op_code_value}"
+          target: ocsf.query.opcode_id
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add query opcode id for requestData
+          enabled: true
+          template: "%{request_op_code_value}"
+          target: ocsf.query.opcode_id
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add query type for responseData
+          enabled: true
+          template: "%{responseData.question.questionType}"
+          target: ocsf.query.type
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add query type for requestData
+          enabled: true
+          template: "%{requestData.question.questionType}"
+          target: ocsf.query.type
+          replaceMissing: false
+        - type: schema-processor
+          name: Apply OCSF schema for 4003
+          enabled: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: DNS Activity
+            classUid: 4003
+            extensions: []
+            profiles: []
+          mappers:
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@requestData:*"
+                  name: Query
+                  id: 1
+                - filter:
+                    query: "@responseData:*"
+                  name: Response
+                  id: 2
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.metadata
+              sources:
+                - ocsf.metadata
+              sourceType: attribute
+              target: ocsf.metadata
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.metadata.product
+              sources:
+                - ocsf.metadata.product
+              sourceType: attribute
+              target: ocsf.metadata.product
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.time
+              sources:
+                - ocsf.time
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.query.hostname
+              sources:
+                - ocsf.query.hostname
+              sourceType: attribute
+              target: ocsf.query.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.rcode_id
+              categories:
+                - filter:
+                    query: "@responseData.fullRcode:0 OR @requestData.fullRcode:0"
+                  name: NoError
+                  id: 0
+                - filter:
+                    query: "@responseData.fullRcode:1 OR @requestData.fullRcode:1"
+                  name: FormError
+                  id: 1
+                - filter:
+                    query: "@responseData.fullRcode:2 OR @requestData.fullRcode:2"
+                  name: ServError
+                  id: 2
+                - filter:
+                    query: "@responseData.fullRcode:3 OR @requestData.fullRcode:3"
+                  name: NXDomain
+                  id: 3
+                - filter:
+                    query: "@responseData.fullRcode:4 OR @requestData.fullRcode:4"
+                  name: NotImp
+                  id: 4
+                - filter:
+                    query: "@responseData.fullRcode:5 OR @requestData.fullRcode:5"
+                  name: Refused
+                  id: 5
+                - filter:
+                    query: "@responseData.fullRcode:6 OR @requestData.fullRcode:6"
+                  name: YXDomain
+                  id: 6
+                - filter:
+                    query: "@responseData.fullRcode:7 OR @requestData.fullRcode:7"
+                  name: YXRRSet
+                  id: 7
+                - filter:
+                    query: "@responseData.fullRcode:8 OR @requestData.fullRcode:8"
+                  name: NXRRSet
+                  id: 8
+                - filter:
+                    query: "@responseData.fullRcode:9 OR @requestData.fullRcode:9"
+                  name: NotAuth
+                  id: 9
+                - filter:
+                    query: "@responseData.fullRcode:10 OR @requestData.fullRcode:10"
+                  name: NotZone
+                  id: 10
+                - filter:
+                    query: "@responseData.fullRcode:11 OR @requestData.fullRcode:11"
+                  name: DSOTYPENI
+                  id: 11
+                - filter:
+                    query: "@responseData.fullRcode:[12 TO 15] OR @requestData.fullRcode:[12 TO 15]"
+                  name: Unassigned
+                  id: 24
+                - filter:
+                    query: "@responseData.fullRcode:16 OR @requestData.fullRcode:16"
+                  name: BADSIG_VERS
+                  id: 16
+                - filter:
+                    query: "@responseData.fullRcode:17 OR @requestData.fullRcode:17"
+                  name: BADKEY
+                  id: 17
+                - filter:
+                    query: "@responseData.fullRcode:18 OR @requestData.fullRcode:18"
+                  name: BADTIME
+                  id: 18
+                - filter:
+                    query: "@responseData.fullRcode:19 OR @requestData.fullRcode:19"
+                  name: BADMODE
+                  id: 19
+                - filter:
+                    query: "@responseData.fullRcode:20 OR @requestData.fullRcode:20"
+                  name: BADNAME
+                  id: 20
+                - filter:
+                    query: "@responseData.fullRcode:21 OR @requestData.fullRcode:21"
+                  name: BADALG
+                  id: 21
+                - filter:
+                    query: "@responseData.fullRcode:22 OR @requestData.fullRcode:22"
+                  name: BADTRUNC
+                  id: 22
+                - filter:
+                    query: "@responseData.fullRcode:23 OR @requestData.fullRcode:23"
+                  name: BADCOOKIE
+                  id: 23
+                - filter:
+                    query: "@responseData.fullRcode:[24 TO 3840] OR @requestData.fullRcode:[24 TO
+                      3840]"
+                  name: Unassigned
+                  id: 24
+                - filter:
+                    query: "@responseData.fullRcode:[3841 TO 4095] OR @requestData.fullRcode:[3841
+                      TO 4095]"
+                  name: Reserved
+                  id: 25
+                - filter:
+                    query: "@responseData.fullRcode:[4096 TO 65534] OR @requestData.fullRcode:[4096
+                      TO 65534]"
+                  name: Unassigned
+                  id: 24
+              targets:
+                name: ocsf.rcode
+                id: ocsf.rcode_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.metadata.log_name
+              sources:
+                - payloadType
+              sourceType: attribute
+              target: ocsf.metadata.log_name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.metadata.log_version
+              sources:
+                - schemaVersion
+              sourceType: attribute
+              target: ocsf.metadata.log_version
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.metadata.event_code
+              sources:
+                - messageType
+              sourceType: attribute
+              target: ocsf.metadata.event_code
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.metadata.uid
+              sources:
+                - key
+              sourceType: attribute
+              target: ocsf.metadata.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.metadata.original_time
+              sources:
+                - timestamp
+              sourceType: attribute
+              target: ocsf.metadata.original_time
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.query.class
+              sources:
+                - ocsf.query.class
+              sourceType: attribute
+              target: ocsf.query.class
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.query.type
+              sources:
+                - ocsf.query.type
+              sourceType: attribute
+              target: ocsf.query.type
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.src_endpoint
+              sources:
+                - ocsf.src_endpoint
+              sourceType: attribute
+              target: ocsf.src_endpoint
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.src_endpoint.ip
+              sources:
+                - sourceAddress
+              sourceType: attribute
+              target: ocsf.src_endpoint.ip
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.src_endpoint.port
+              sources:
+                - sourcePort
+              sourceType: attribute
+              target: ocsf.src_endpoint.port
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.dst_endpoint
+              sources:
+                - ocsf.dst_endpoint
+              sourceType: attribute
+              target: ocsf.dst_endpoint
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.dst_endpoint.ip
+              sources:
+                - responseAddress
+              sourceType: attribute
+              target: ocsf.dst_endpoint.ip
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.dst_endpoint.port
+              sources:
+                - responsePort
+              sourceType: attribute
+              target: ocsf.dst_endpoint.port
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.dst_endpoint.uid
+              sources:
+                - sourceId
+              sourceType: attribute
+              target: ocsf.dst_endpoint.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.metadata.product.vendor_name
+              sources:
+                - ocsf.metadata.product.vendor_name
+              sourceType: attribute
+              target: ocsf.metadata.product.vendor_name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.metadata.product.name
+              sources:
+                - metadata.product.name
+              sourceType: attribute
+              target: ocsf.metadata.product.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.query
+              sources:
+                - ocsf.query
+              sourceType: attribute
+              target: ocsf.query
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.answers
+              sources:
+                - ocsf.answers
+              sourceType: attribute
+              target: ocsf.answers
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.answers.type
+              sources:
+                - responseData.answers.recordType
+              sourceType: attribute
+              target: ocsf.answers.type
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.answers.rdata
+              sources:
+                - responseData.answers.rData
+              sourceType: attribute
+              target: ocsf.answers.rdata
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.answers.class
+              sources:
+                - responseData.answers.class
+              sourceType: attribute
+              target: ocsf.answers.class
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.answers.ttl
+              sources:
+                - responseData.answers.ttl
+              sourceType: attribute
+              target: ocsf.answers.ttl
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.query.opcode_id
+              categories:
+                - filter:
+                    query: "@request_op_code_value:Query"
+                  name: Query
+                  id: 0
+                - filter:
+                    query: "@request_op_code_value:IQuery"
+                  name: Inverse Query
+                  id: 1
+                - filter:
+                    query: "@request_op_code_value:Status"
+                  name: Status
+                  id: 2
+                - filter:
+                    query: "@request_op_code_value:Notify"
+                  name: Notify
+                  id: 4
+                - filter:
+                    query: "@request_op_code_value:Update"
+                  name: Update
+                  id: 5
+                - filter:
+                    query: "@request_op_code_value:Unassigned"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.query.opcode
+                id: ocsf.query.opcode_id
+              fallback:
+                values:
+                  ocsf.query.opcode: Other
+                  ocsf.query.opcode_id: "99"
+                sources:
+                  ocsf.query.opcode:
+                    - Unassigned
+              type: schema-category-mapper
+            - name: ocsf.dst_endpoint.name
+              sources:
+                - serverId
+              sourceType: attribute
+              target: ocsf.dst_endpoint.name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+    - type: pipeline
+      name: OCSF sub pipeline for class DHCP Activity [4004]
+      enabled: true
+      filter:
+        query: "@payloadType:(dhcpv4-packet OR dhcpv6-packet)"
+      processors:
+        - type: string-builder-processor
+          name: Add event code
+          enabled: true
+          template: "%{data.dhcpv4Message.options.messageType}"
+          target: ocsf.metadata.event_code
+          replaceMissing: false
+        - type: category-processor
+          name: ocsf.is_renewal
+          enabled: true
+          categories:
+            - filter:
+                query: "@payloadType:dhcpv6-packet @data.dhcpv6Message.messageType:(RENEW OR
+                  REBIND)"
+              name: "True"
+            - filter:
+                query: "@payloadType:dhcpv6-packet -@data.dhcpv6Message.messageType:(RENEW OR
+                  REBIND)"
+              name: "False"
+          target: ocsf.is_renewal
+        - type: grok-parser
+          name: Convert `ocsf.is_renewal` to boolean type
+          enabled: true
+          source: ocsf.is_renewal
+          samples:
+            - "True"
+            - "False"
+          grok:
+            supportRules: ""
+            matchRules: convert_to_boolen_type %{boolean("True","False"):ocsf.is_renewal}
+        - type: schema-processor
+          name: Apply OCSF schema for 4004
+          enabled: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: DHCP Activity
+            classUid: 4004
+            extensions: []
+            profiles: []
+          mappers:
+            - name: ocsf.metadata
+              sources:
+                - ocsf.metadata
+              sourceType: attribute
+              target: ocsf.metadata
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.metadata.product
+              sources:
+                - ocsf.metadata.product
+              sourceType: attribute
+              target: ocsf.metadata.product
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.time
+              sources:
+                - ocsf.time
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@data.dhcpv6Message.messageType:SOLICIT"
+                  name: Discover
+                  id: 1
+                - filter:
+                    query: "@data.dhcpv6Message.messageType:ADVERTISE"
+                  name: Offer
+                  id: 2
+                - filter:
+                    query: "@data.dhcpv6Message.messageType:REQUEST"
+                  name: Request
+                  id: 3
+                - filter:
+                    query: "@data.dhcpv6Message.messageType:DECLINE"
+                  name: Decline
+                  id: 4
+                - filter:
+                    query: "@data.dhcpv6Message.messageType:REPLY"
+                  name: Ack
+                  id: 5
+                - filter:
+                    query: "@data.dhcpv6Message.messageType:REPLY"
+                  name: Nak
+                  id: 6
+                - filter:
+                    query: "@data.dhcpv6Message.messageType:RELEASE"
+                  name: Release
+                  id: 7
+                - filter:
+                    query: "@data.dhcpv6Message.messageType:INFORMATION-REQUEST"
+                  name: Inform
+                  id: 8
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:SOLICIT OR
+                      @data.dhcpv6Message.messageType:"DHCP Discover"'
+                  name: Discover
+                  id: 1
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:ADVERTISE OR
+                      @data.dhcpv6Message.messageType:"DHCP Offer"'
+                  name: Offer
+                  id: 2
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:REQUEST OR
+                      @data.dhcpv6Message.messageType:"DHCP Request"'
+                  name: Request
+                  id: 3
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:DECLINE OR
+                      @data.dhcpv6Message.messageType:"DHCP Decline"'
+                  name: Decline
+                  id: 4
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:REPLY OR
+                      @data.dhcpv6Message.messageType:"DHCP Ack"'
+                  name: Ack
+                  id: 5
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:REPLY OR
+                      @data.dhcpv6Message.messageType:"DHCP Nak"'
+                  name: Nak
+                  id: 6
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:RELEASE OR
+                      @data.dhcpv6Message.messageType:"DHCP Release"'
+                  name: Release
+                  id: 7
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:INFORMATION-REQUEST OR
+                      @data.dhcpv6Message.messageType:"DHCP Inform"'
+                  name: Inform
+                  id: 8
+                - filter:
+                    query: '@data.dhcpv4Message.options.messageType:"DHCP Expire"'
+                  name: Expire
+                  id: 9
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:SOLICIT OR
+                      @data.dhcpv4Message.options.messageType:"DHCP Discover"'
+                  name: Discover
+                  id: 1
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:ADVERTISE OR
+                      @data.dhcpv4Message.options.messageType:"DHCP Offer"'
+                  name: Offer
+                  id: 2
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:REQUEST OR
+                      @@data.dhcpv4Message.options.messageType:"DHCP Request"'
+                  name: Request
+                  id: 3
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:REQUEST OR
+                      @data.dhcpv4Message.options.messageType:"DHCP Request"'
+                  name: Request
+                  id: 3
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:DECLINE OR
+                      @data.dhcpv4Message.options.messageType:"DHCP Decline"'
+                  name: Decline
+                  id: 4
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:REPLY OR
+                      @data.dhcpv4Message.options.messageType:"DHCP Ack"'
+                  name: Ack
+                  id: 5
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:REPLY OR
+                      @data.dhcpv4Message.options.messageType:"DHCP Nak"'
+                  name: Nak
+                  id: 6
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:RELEASE OR
+                      @data.dhcpv4Message.options.messageType:"DHCP Release"'
+                  name: Release
+                  id: 7
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:INFORMATION-REQUEST OR
+                      @data.dhcpv4Message.options.messageType:"DHCP Inform"'
+                  name: Inform
+                  id: 8
+                - filter:
+                    query: '@data.dhcpv6Message.messageType:(REQUEST OR RENEW OR REBIND) OR
+                      @data.dhcpv4Message.options.messageType:"DHCP Request"'
+                  name: Request
+                  id: 3
+                - filter:
+                    query: -(@data.dhcpv6Message.messageType:(SOLICIT OR ADVERTISE OR REQUEST OR
+                      RENEW OR REBIND OR DECLINE OR REPLY OR RELEASE OR
+                      INFORMATION-REQUEST) OR
+                      @data.dhcpv4Message.options.messageType:("DHCP Discover"
+                      OR "DHCP Offer" OR "DHCP Request" OR "DHCP Decline" OR
+                      "DHCP Ack" OR "DHCP Nak" OR "DHCP Release" OR "DHCP
+                      Inform" OR "DHCP Expire"))
+                  name: Other
+                  id: 99
+                - filter:
+                    query: '@data.dhcpv4Message.options.messageType:"DHCP Ack"'
+                  name: Ack
+                  id: 5
+                - filter:
+                    query: '@data.dhcpv4Message.options.messageType:"DHCP Nak"'
+                  name: Nak
+                  id: 6
+                - filter:
+                    query: -(@data.dhcpv6Message.messageType:(SOLICIT OR ADVERTISE OR REQUEST OR
+                      RENEW OR REBIND OR DECLINE OR RELEASE OR
+                      INFORMATION-REQUEST) OR
+                      @data.dhcpv4Message.options.messageType:("DHCP Discover"
+                      OR "DHCP Offer" OR "DHCP Request" OR "DHCP Decline" OR
+                      "DHCP Ack" OR "DHCP Nak" OR "DHCP Release" OR "DHCP
+                      Inform" OR "DHCP Expire"))
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_id: "99"
+                  ocsf.activity_name: Other
+                sources:
+                  ocsf.activity_name:
+                    - data.dhcpv6Message.messageType
+                    - data.dhcpv4Message.options.messageType
+              type: schema-category-mapper
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.metadata.event_code
+              sources:
+                - data.dhcpv6Message.messageType
+                - ocsf.metadata.event_code
+              sourceType: attribute
+              target: ocsf.metadata.event_code
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.metadata.log_name
+              sources:
+                - payloadType
+              sourceType: attribute
+              target: ocsf.metadata.log_name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.transaction_uid
+              sources:
+                - data.dhcpv6Message.transactionId
+              sourceType: attribute
+              target: ocsf.transaction_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.dst_endpoint.uid
+              sources:
+                - sourceId
+              sourceType: attribute
+              target: ocsf.dst_endpoint.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.dst_endpoint
+              sources:
+                - ocsf.dst_endpoint
+              sourceType: attribute
+              target: ocsf.dst_endpoint
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.metadata.uid
+              sources:
+                - key
+              sourceType: attribute
+              target: ocsf.metadata.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.metadata.log_version
+              sources:
+                - schemaVersion
+              sourceType: attribute
+              target: ocsf.metadata.log_version
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.lease_dur
+              sources:
+                - data.dhcpv4Message.options.leaseTime
+              sourceType: attribute
+              target: ocsf.lease_dur
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.metadata.original_time
+              sources:
+                - timestamp
+              sourceType: attribute
+              target: ocsf.metadata.original_time
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.src_endpoint
+              sources:
+                - ocsf.src_endpoint
+              sourceType: attribute
+              target: ocsf.src_endpoint
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.src_endpoint.ip
+              sources:
+                - data.dhcpv4Message.ciaddr
+              sourceType: attribute
+              target: ocsf.src_endpoint.ip
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.src_endpoint.mac
+              sources:
+                - data.dhcpv4Message.chaddr
+              sourceType: attribute
+              target: ocsf.src_endpoint.mac
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.dst_endpoint.name
+              sources:
+                - serverId
+              sourceType: attribute
+              target: ocsf.dst_endpoint.name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.connection_info
+              sources:
+                - ocsf.connection_info
+              sourceType: attribute
+              target: ocsf.connection_info
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.connection_info.direction_id
+              categories:
+                - filter:
+                    query: "@message_direction_value:BOOTREQUEST"
+                  name: Outbound
+                  id: 2
+                - filter:
+                    query: "@message_direction_value:BOOTREPLY"
+                  name: Inbound
+                  id: 1
+              targets:
+                name: ocsf.connection_info.direction
+                id: ocsf.connection_info.direction_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper

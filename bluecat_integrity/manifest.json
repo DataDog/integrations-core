@@ -1,0 +1,78 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "9cd27dbc-d163-4604-8781-dbf39d8a195a",
+  "app_id": "bluecat-integrity",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into BlueCat Integrity DHCP and DNS activity events",
+    "title": "BlueCat Integrity",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "BlueCat Integrity Overview",
+        "image_url": "images/bluecat_integrity_overview_light.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "BlueCat Integrity Overview",
+        "image_url": "images/bluecat_integrity_overview_dark.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "BlueCat Integrity DNS Insights",
+        "image_url": "images/bluecat_integrity_dns_insights_light.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "BlueCat Integrity DNS Insights",
+        "image_url": "images/bluecat_integrity_dns_insights_dark.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "BlueCat Integrity DHCP Insights",
+        "image_url": "images/bluecat_integrity_dhcp_insights_light.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "BlueCat Integrity DHCP Insights",
+        "image_url": "images/bluecat_integrity_dhcp_insights_dark.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Network",
+      "Category::Security",
+      "Category::Log Collection",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 71394034,
+      "source_type_name": "BlueCat Integrity",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "BlueCat Integrity Overview": "assets/dashboards/bluecat_integrity_overview.json",
+      "BlueCat Integrity DNS Insights": "assets/dashboards/bluecat_integrity_dns_insights.json",
+      "BlueCat Integrity DHCP Insights": "assets/dashboards/bluecat_integrity_dhcp_insights.json"
+    },
+    "logs": {
+      "source": "bluecat-integrity"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
