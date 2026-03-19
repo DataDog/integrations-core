@@ -103,10 +103,10 @@ def status(
             from ddev.cli.size.utils.common_funcs import export_format
 
             export_format(app, format, modules_plat_ver, "status", platform, version, compressed)
-        if to_dd_org or to_dd_key:
+        if (to_dd_org or to_dd_key) and commit:
             from ddev.cli.size.utils.common_funcs import send_metrics_to_dd
 
-            send_metrics_to_dd(app, modules_plat_ver, to_dd_org, to_dd_key, compressed)
+            send_metrics_to_dd(app, commit, modules_plat_ver, to_dd_org, to_dd_key, compressed)
     except Exception as e:
         app.abort(str(e))
 
@@ -143,6 +143,9 @@ def validate_parameters(
 
     if to_dd_org and to_dd_key:
         errors.append("Specify either --to-dd-org or --to-dd-key, not both")
+
+    if (to_dd_org or to_dd_key) and not commit:
+        errors.append("In order to send metrics to Datadog, you need to provide a commit hash")
 
     if errors:
         app.abort("\n".join(errors))

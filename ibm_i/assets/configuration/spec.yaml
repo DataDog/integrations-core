@@ -1,4 +1,5 @@
 name: IBM i
+fleet_configurable: true
 files:
 - name: ibm_i.yaml
   options:
@@ -10,11 +11,13 @@ files:
     - name: system
       description: |
         The name of the IBM i system.
+      fleet_configurable: true
       value:
         type: string
     - name: hostname
       description: |
         Hostname used for this instance's metrics. If unset, HOST_NAME from SYSIBMADM.ENV_SYS_INFO will be used.
+      fleet_configurable: true
       value:
         type: string
         minLength: 1
@@ -22,27 +25,34 @@ files:
     - name: username
       description: |
         The user profile name used to authenticate to the system.
+      fleet_configurable: true
       value:
         type: string
     - name: password
       description: |
         The user profile password used to authenticate to the system.
+      fleet_configurable: true
+      secret: true
       value:
         type: string
     - name: driver
       description: |
         The name of the ODBC driver used to connect to the system.
+      fleet_configurable: true
       value:
         type: string
         example: iSeries Access ODBC Driver
     - name: connection_string
       description: |
         The raw connection string used to connect to the system, ignoring all of the above options.
+      fleet_configurable: true
+      secret: true
       value:
         type: string
     - name: severity_threshold
       description: |
         The minimum severity level for a message to be considered 'critical' (see ibm_i.message_queue.critical_size).
+      fleet_configurable: true
       value:
         type: integer
         minimum: 0
@@ -51,6 +61,7 @@ files:
     - name: job_query_timeout
       description: |
         The timeout (in seconds) applied to queries on job views (ACTIVE_JOB_INFO, JOB_INFO) made on the IBM i system.
+      fleet_configurable: true
       value:
         type: integer
         exclusiveMinimum: 0
@@ -58,6 +69,7 @@ files:
     - name: system_mq_query_timeout
       description: |
         The timeout (in seconds) applied to queries on message queue views (MESSAGE_QUEUE_INFO) made on the IBM i system.
+      fleet_configurable: true
       value:
         type: integer
         exclusiveMinimum: 0
@@ -65,6 +77,7 @@ files:
     - name: query_timeout
       description: |
         The timeout (in seconds) applied to queries made on the IBM i system.
+      fleet_configurable: true
       value:
         type: integer
         exclusiveMinimum: 0
@@ -72,6 +85,7 @@ files:
     - name: queries
       description: |
          List of queries to be run against the IBM i system. By default, all queries are run.
+      fleet_configurable: true
       value:
         type: array
         items: 

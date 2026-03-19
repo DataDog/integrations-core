@@ -2,7 +2,29 @@
 
 <!-- towncrier release notes start -->
 
-## 9.1.1 / 2025-10-31
+## 9.4.0 / 2026-03-18
+
+***Added***:
+
+* elastic: add `prirep` and `index` tags to the `elasticsearch.shards` metric through an additional `detailed_shard_metrics` option ([#22426](https://github.com/DataDog/integrations-core/pull/22426))
+
+## 9.3.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+## 9.2.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+***Fixed***:
+
+* Fix styling and grammatical errors in the config template ([#21879](https://github.com/DataDog/integrations-core/pull/21879))
+
+## 9.1.1 / 2025-10-31 / Agent 7.73.0
 
 ***Fixed***:
 

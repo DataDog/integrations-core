@@ -21,10 +21,7 @@
             "include_tags": true,
             "escalation_message": "",
             "avalanche_window": 20,
-            "new_group_delay": 60,
-            "silenced": {
-                "*": null
-            }
+            "new_group_delay": 60
         },
         "priority": null,
         "restriction_policy": {

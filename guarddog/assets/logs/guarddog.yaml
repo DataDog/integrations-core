@@ -1,0 +1,41 @@
+id: guarddog
+metric_id: guarddog
+backend_only: false
+facets: null
+pipeline:
+  type: pipeline
+  name: GuardDog
+  enabled: true
+  filter:
+    query: source:guarddog
+  processors:
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: category-processor
+      name: Define `severity` attribute based on `issues`
+      enabled: true
+      categories:
+        - name: warning
+          filter:
+            query: "@log.issues:>0"
+      target: severity
+    - type: status-remapper
+      name: Define `severity` as the official status of the log
+      enabled: true
+      sources:
+        - severity
+    - type: pipeline
+      name: Processing of Errors
+      enabled: true
+      filter:
+        query: "@log.result.errors:*"
+      processors:
+        - type: string-builder-processor
+          name: Define `has_errors` attribute
+          enabled: true
+          template: yes
+          target: has_errors
+          replaceMissing: false

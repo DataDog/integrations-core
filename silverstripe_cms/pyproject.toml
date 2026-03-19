@@ -29,7 +29,7 @@ classifiers = [
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=37.21.0",
+    "datadog-checks-base>=37.24.0",
 ]
 dynamic = [
     "version",
@@ -37,7 +37,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "psycopg[c,pool]==3.2.10",
+    "psycopg[c,pool]==3.3.3",
     "pymysql==1.1.2",
 ]
 

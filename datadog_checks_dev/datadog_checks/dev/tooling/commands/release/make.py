@@ -193,7 +193,7 @@ def make(ctx, checks, version, end, initial_release, skip_sign, sign_only, exclu
             req_file = get_agent_release_requirements()
             commit_targets.append(os.path.basename(req_file))
             echo_waiting('Updating the Agent requirements file... ', nl=False)
-            update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
+            update_agent_requirements(req_file, check, get_agent_requirement_line(check, version, ctx.obj))
             echo_success('success!')
 
         echo_waiting('Committing files...')

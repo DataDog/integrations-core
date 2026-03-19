@@ -12,7 +12,7 @@ from urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, urlparse, 
 import mock
 import pytest
 import urllib3
-from requests import RequestException
+from requests import ConnectionError, RequestException
 
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -1188,6 +1188,124 @@ def test_do_not_crash_on_version_collection_failure():
 
 
 @pytest.mark.unit
+def test_driver_startup_message_default_retries(aggregator, caplog):
+    """Default behavior (startup_wait_retries=3): retry 3 times then raise."""
+    from simplejson import JSONDecodeError
+
+    check = SparkCheck('spark', {}, [DRIVER_CONFIG])
+    response = MockResponse(content="Spark is starting up. Please wait a while until it's ready.")
+
+    with caplog.at_level(logging.DEBUG):
+        with mock.patch.object(check, '_rest_request', return_value=response):
+            # First 3 attempts should return None (default is 3 retries)
+            for i in range(3):
+                result = check._rest_request_to_json(
+                    DRIVER_CONFIG['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, []
+                )
+                assert result is None, f"Attempt {i + 1} should return None"
+
+            # 4th attempt should raise
+            with pytest.raises(JSONDecodeError):
+                check._rest_request_to_json(DRIVER_CONFIG['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, [])
+
+    assert 'spark driver not ready yet' in caplog.text.lower()
+    assert 'retries exhausted' in caplog.text.lower()
+
+    aggregator.assert_service_check(
+        SPARK_DRIVER_SERVICE_CHECK,
+        status=SparkCheck.CRITICAL,
+        tags=['url:{}'.format(DRIVER_CONFIG['spark_url'])],
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("retries_value", [0, -1, -5])
+def test_driver_startup_message_disabled(aggregator, retries_value):
+    """When startup_wait_retries<=0, treat startup messages as errors immediately."""
+    from simplejson import JSONDecodeError
+
+    config = DRIVER_CONFIG.copy()
+    config['startup_wait_retries'] = retries_value
+    check = SparkCheck('spark', {}, [config])
+    response = MockResponse(content="Spark is starting up. Please wait a while until it's ready.")
+
+    with mock.patch.object(check, '_rest_request', return_value=response):
+        with pytest.raises(JSONDecodeError):
+            check._rest_request_to_json(config['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, [])
+
+    aggregator.assert_service_check(
+        SPARK_DRIVER_SERVICE_CHECK,
+        status=SparkCheck.CRITICAL,
+        tags=['url:{}'.format(config['spark_url'])],
+    )
+
+
+@pytest.mark.unit
+def test_driver_startup_message_limited_retries(aggregator, caplog):
+    """When startup_wait_retries>0, retry N times then raise."""
+    from simplejson import JSONDecodeError
+
+    config = DRIVER_CONFIG.copy()
+    config['startup_wait_retries'] = 3
+    check = SparkCheck('spark', {}, [config])
+    response = MockResponse(content="Spark is starting up. Please wait a while until it's ready.")
+
+    with caplog.at_level(logging.DEBUG):
+        with mock.patch.object(check, '_rest_request', return_value=response):
+            # First 3 attempts should return None
+            for i in range(3):
+                result = check._rest_request_to_json(
+                    config['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, []
+                )
+                assert result is None, f"Attempt {i + 1} should return None"
+
+            # 4th attempt should raise
+            with pytest.raises(JSONDecodeError):
+                check._rest_request_to_json(config['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, [])
+
+    assert 'attempt 1/3' in caplog.text.lower()
+    assert 'attempt 3/3' in caplog.text.lower()
+    assert 'retries exhausted' in caplog.text.lower()
+
+    aggregator.assert_service_check(
+        SPARK_DRIVER_SERVICE_CHECK,
+        status=SparkCheck.CRITICAL,
+        tags=['url:{}'.format(config['spark_url'])],
+    )
+
+
+@pytest.mark.unit
+def test_driver_startup_retry_counter_resets_on_success(caplog):
+    """Verify the retry counter resets after a successful JSON response."""
+    config = DRIVER_CONFIG.copy()
+    config['startup_wait_retries'] = 2
+    check = SparkCheck('spark', {}, [config])
+    startup_response = MockResponse(content="Spark is starting up. Please wait a while until it's ready.")
+    success_response = MockResponse(json_data=[{"id": "app_001", "name": "TestApp"}])
+
+    with caplog.at_level(logging.DEBUG):
+        with mock.patch.object(check, '_rest_request', return_value=startup_response):
+            # Use 1 retry
+            result = check._rest_request_to_json(config['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, [])
+            assert result is None
+            assert check._startup_retry_count == 1
+
+        # Successful response resets counter
+        with mock.patch.object(check, '_rest_request', return_value=success_response):
+            result = check._rest_request_to_json(config['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, [])
+            assert result == [{"id": "app_001", "name": "TestApp"}]
+            assert check._startup_retry_count == 0
+
+        # After reset, we should have 2 retries available again
+        with mock.patch.object(check, '_rest_request', return_value=startup_response):
+            for _ in range(2):
+                result = check._rest_request_to_json(
+                    config['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, []
+                )
+                assert result is None
+
+
+@pytest.mark.unit
 def test_ssl(dd_run_check):
     run_ssl_server()
     c = SparkCheck('spark', {}, [SSL_CONFIG])
@@ -1465,3 +1583,188 @@ def test_integration_driver_2(aggregator, dd_run_check):
     )
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.unit
+def test_debounce_connection_failure(aggregator, dd_run_check, caplog):
+    # Mock connection failure
+    def connection_failure_mock(*args, **kwargs):
+        raise ConnectionError("Connection refused")
+
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Running']
+
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        c = SparkCheck('spark', {}, [instance])
+
+        # First run: expect warning, no CRITICAL check
+        with caplog.at_level(logging.WARNING):
+            dd_run_check(c)
+
+        assert "Connection failed. Suppressing error once to ensure driver is running" in caplog.text
+
+        # Verify no CRITICAL check sent for spark.driver.can_connect
+        service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+        assert len(service_checks) == 0
+
+        # Second run: expect CRITICAL (wrapped by dd_run_check as Exception)
+        with pytest.raises(Exception) as excinfo:
+            dd_run_check(c)
+
+        assert "Connection refused" in str(excinfo.value)
+
+        service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+        assert len(service_checks) == 1
+        assert service_checks[0].status == SparkCheck.CRITICAL
+
+
+@pytest.mark.unit
+def test_connection_failure_non_k8s(aggregator, dd_run_check):
+    def connection_failure_mock(*args, **kwargs):
+        raise ConnectionError("Connection refused")
+
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', []))
+
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        c = SparkCheck('spark', {}, [instance])
+
+        with pytest.raises(Exception) as excinfo:
+            dd_run_check(c)
+
+        assert "Connection refused" in str(excinfo.value)
+
+    service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+    assert len(service_checks) == 1
+    assert service_checks[0].status == SparkCheck.CRITICAL
+
+
+@pytest.mark.unit
+def test_debounce_connection_failure_terminal_phase(aggregator, dd_run_check, caplog):
+    def connection_failure_mock(*args, **kwargs):
+        raise ConnectionError("Connection refused")
+
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Failed']
+
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        c = SparkCheck('spark', {}, [instance])
+
+        with caplog.at_level(logging.DEBUG):
+            dd_run_check(c)
+
+        assert "Pod phase is terminal, suppressing request error" in caplog.text
+
+    # Expect NO service check because we suppress errors for failed pods
+    service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+    assert len(service_checks) == 0
+
+
+@pytest.mark.unit
+def test_debounce_connection_recovery(aggregator, dd_run_check, caplog):
+    # Mock connection failure
+    def connection_failure_mock(*args, **kwargs):
+        raise ConnectionError("Connection refused")
+
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Running']
+
+    c = SparkCheck('spark', {}, [instance])
+
+    # 1. Fail (Debounce)
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        with caplog.at_level(logging.WARNING):
+            dd_run_check(c)
+
+        assert "Connection failed. Suppressing error once to ensure driver is running" in caplog.text
+        # Verify no CRITICAL check sent
+        service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+        assert len(service_checks) == 0
+
+    caplog.clear()
+    aggregator.reset()
+
+    # 2. Success (Reset)
+    with mock.patch('requests.Session.get', driver_requests_get_mock):
+        dd_run_check(c)
+
+        # Verify success
+        service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+        assert len(service_checks) > 0
+        assert service_checks[0].status == SparkCheck.OK
+
+        # Verify internal state was reset
+        assert c._connection_error_seen is False
+
+    caplog.clear()
+    aggregator.reset()
+
+    # 3. Fail (Debounce again)
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        with caplog.at_level(logging.WARNING):
+            dd_run_check(c)
+
+        assert "Connection failed. Suppressing error once to ensure driver is running" in caplog.text
+        # Verify no CRITICAL check sent
+        service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+        assert len(service_checks) == 0
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "pod_phase",
+    ["Failed", "Succeeded", "Unknown"],
+)
+def test_debounce_connection_failure_all_terminal_phases(aggregator, dd_run_check, caplog, pod_phase):
+    """Test that all terminal pod phases suppress connection errors."""
+
+    def connection_failure_mock(*args, **kwargs):
+        raise ConnectionError("Connection refused")
+
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:{}'.format(pod_phase)]
+
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        c = SparkCheck('spark', {}, [instance])
+
+        with caplog.at_level(logging.DEBUG):
+            dd_run_check(c)
+
+        assert "Pod phase is terminal, suppressing request error" in caplog.text
+
+    service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+    assert len(service_checks) == 0
+
+
+@pytest.mark.unit
+def test_debounce_no_route_to_host(aggregator, dd_run_check, caplog):
+    """Test that 'No route to host' errors are also debounced."""
+
+    def connection_failure_mock(*args, **kwargs):
+        raise ConnectionError("No route to host")
+
+    instance = DRIVER_CONFIG.copy()
+    instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Running']
+
+    with mock.patch('requests.Session.get', side_effect=connection_failure_mock):
+        c = SparkCheck('spark', {}, [instance])
+
+        # First run: expect warning, no CRITICAL check
+        with caplog.at_level(logging.WARNING):
+            dd_run_check(c)
+
+        assert "Connection failed. Suppressing error once to ensure driver is running" in caplog.text
+
+        service_checks = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+        assert len(service_checks) == 0
+
+
+@pytest.mark.unit
+def test_get_pod_phase():
+    """Test _get_pod_phase static method."""
+    assert SparkCheck._get_pod_phase(['pod_phase:Running']) == 'running'
+    assert SparkCheck._get_pod_phase(['pod_phase:Failed']) == 'failed'
+    assert SparkCheck._get_pod_phase(['other:tag', 'pod_phase:Succeeded']) == 'succeeded'
+    assert SparkCheck._get_pod_phase(['other:tag']) is None
+    assert SparkCheck._get_pod_phase(None) is None
+    assert SparkCheck._get_pod_phase([]) is None

@@ -78,6 +78,7 @@ METRICS = {
     'litellm_team_budget_remaining_hours_metric': "team.budget.remaining_hours.metric",
     'litellm_team_max_budget_metric': "team.max_budget.metric",
     'litellm_total_tokens': "total.tokens",
+    'litellm_total_tokens_metric': "total.tokens",
     'process_start_time_seconds': {"name": "process.uptime.seconds", "type": "time_elapsed"},
     # Deprecated
     'litellm_llm_api_failed_requests_metric': "llm.api.failed_requests.metric",

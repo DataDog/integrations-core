@@ -424,3 +424,102 @@ class TestStatementMetrics:
         assert result[0]['calls'] == 1
         assert result[0]['total_time'] == 1
         assert result[0]['rows'] == 1
+
+    def test_compute_derivative_rows_with_mismatched_metric_columns(self):
+        """
+        Test that when metric columns differ between runs (e.g., pg_stat_statements plan/timing tracking
+        was enabled or disabled), the derivative is computed only for common columns without raising KeyError.
+        """
+        sm = StatementMetrics()
+
+        def key(row):
+            return (row['query'], row['db'], row['user'])
+
+        # Initial state - without plan timing columns
+        rows1 = [
+            {'calls': 10, 'total_time': 1000, 'query': 'SELECT 1', 'db': 'test', 'user': 'user1'},
+        ]
+        # Note: we request metrics that include plan timing columns, but row1 doesn't have them
+        metrics = ['calls', 'total_time', 'min_plan_time', 'max_plan_time']
+        sm.compute_derivative_rows(rows1, metrics, key=key)
+
+        # Second run - plan timing columns added (e.g., pg_stat_statements plan timing enabled)
+        rows2 = [
+            {
+                'calls': 15,
+                'total_time': 1500,
+                'min_plan_time': 0.1,
+                'max_plan_time': 0.5,
+                'query': 'SELECT 1',
+                'db': 'test',
+                'user': 'user1',
+            },
+        ]
+        # Should compute derivative only for common columns (calls, total_time), not raise KeyError
+        result = sm.compute_derivative_rows(rows2, metrics, key=key)
+        assert len(result) == 1
+        assert result[0]['calls'] == 5
+        assert result[0]['total_time'] == 500
+        # The new columns should be present in the result but not diffed
+        assert result[0]['min_plan_time'] == 0.1
+        assert result[0]['max_plan_time'] == 0.5
+
+        # Third run - with the new baseline (now has plan timing columns)
+        rows3 = [
+            {
+                'calls': 20,
+                'total_time': 2000,
+                'min_plan_time': 0.2,
+                'max_plan_time': 0.8,
+                'query': 'SELECT 1',
+                'db': 'test',
+                'user': 'user1',
+            },
+        ]
+        # Now all metrics should be computed
+        result = sm.compute_derivative_rows(rows3, metrics, key=key)
+        assert len(result) == 1
+        assert result[0]['calls'] == 5
+        assert result[0]['total_time'] == 500
+        # Plan timing columns should now show the diff since both rows have them
+        assert result[0]['min_plan_time'] == pytest.approx(0.1, abs=0.001)
+        assert result[0]['max_plan_time'] == pytest.approx(0.3, abs=0.001)
+
+    def test_compute_derivative_rows_with_columns_removed(self):
+        """
+        Test that when metric columns are removed between runs (e.g., pg_stat_statements plan timing
+        was disabled), the derivative is computed only for common columns without raising KeyError.
+        """
+        sm = StatementMetrics()
+
+        def key(row):
+            return (row['query'], row['db'], row['user'])
+
+        metrics = ['calls', 'total_time', 'min_plan_time', 'max_plan_time']
+
+        # Initial state - with plan timing columns
+        rows1 = [
+            {
+                'calls': 10,
+                'total_time': 1000,
+                'min_plan_time': 0.1,
+                'max_plan_time': 0.5,
+                'query': 'SELECT 1',
+                'db': 'test',
+                'user': 'user1',
+            },
+        ]
+        sm.compute_derivative_rows(rows1, metrics, key=key)
+
+        # Second run - plan timing columns removed (e.g., pg_stat_statements plan timing disabled)
+        rows2 = [
+            {'calls': 15, 'total_time': 1500, 'query': 'SELECT 1', 'db': 'test', 'user': 'user1'},
+        ]
+        # Should compute derivative only for common columns (calls, total_time), not raise KeyError
+        result = sm.compute_derivative_rows(rows2, metrics, key=key)
+        assert len(result) == 1
+        assert result[0]['calls'] == 5
+        assert result[0]['total_time'] == 500
+        # Plan timing columns should not be present in the result
+        assert 'min_plan_time' not in result[0]
+        assert 'max_plan_time' not in result[0]

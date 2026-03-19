@@ -455,6 +455,7 @@
                             "title": "Cluster Disk Utilization ",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -480,18 +481,29 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.filesystem.usage_pct{$scope,$cluster} by {kube_cluster_name}",
+                                            "query": "sum:kubernetes.node.filesystem.usage{$scope,$cluster} by {kube_cluster_name}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes_state.node.ephemeral_storage_capacity{$scope,$cluster} by {kube_cluster_name}",
                                             "aggregator": "last"
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1 * 100"
+                                            "number_format": {
+                                                "unit": {
+                                                    "label": "%",
+                                                    "type": "custom_unit_label"
+                                                }
+                                            },
+                                            "formula": "query1 / query2 * 100"
                                         }
                                     ]
                                 }
                             ],
-                            "custom_unit": "%",
                             "precision": 2
                         },
                         "layout": {
@@ -516,6 +528,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -524,13 +537,22 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.filesystem.usage{$scope,$cluster}"
+                                            "query": "sum:kubernetes.node.filesystem.usage{$scope,$cluster}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes_state.node.ephemeral_storage_capacity{$scope,$cluster}"
                                         }
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "alias": "usage"
+                                            "alias": "usage",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "capacity",
+                                            "formula": "query2"
                                         }
                                     ],
                                     "style": {
@@ -2947,7 +2969,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 35,
+                "y": 0,
                 "width": 12,
                 "height": 5,
                 "is_column_break": true
@@ -3302,7 +3324,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 40,
+                "y": 5,
                 "width": 12,
                 "height": 5
             }
@@ -3702,7 +3724,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 45,
+                "y": 10,
                 "width": 12,
                 "height": 5
             }
@@ -4088,7 +4110,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 50,
+                "y": 15,
                 "width": 12,
                 "height": 5
             }
@@ -4278,7 +4300,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 55,
+                "y": 20,
                 "width": 12,
                 "height": 3
             }
@@ -4547,7 +4569,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 58,
+                "y": 23,
                 "width": 12,
                 "height": 7
             }
@@ -4927,7 +4949,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 65,
+                "y": 30,
                 "width": 12,
                 "height": 5
             }
@@ -5027,7 +5049,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 70,
+                "y": 35,
                 "width": 12,
                 "height": 9
             }

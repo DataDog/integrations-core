@@ -1,4 +1,5 @@
 name: Kubernetes State
+fleet_configurable: true
 files:
 - name: kubernetes_state.yaml
   options:
@@ -8,6 +9,7 @@ files:
   - template: instances
     options:
     - name: kube_state_url
+      fleet_configurable: true
       required: true
       description: |
         To enable Kube State metrics you must specify the URL exposing the API
@@ -24,6 +26,7 @@ files:
         
         Resources enabled for join_standard_tags include:
         Pod, Deployment, ReplicaSet, DaemonSet, StatefulSet, Job, CronJob
+      fleet_configurable: true
       value:
         type: boolean
         example: false
@@ -32,6 +35,7 @@ files:
         By default the hostname for metrics containing the node label is
         overridden by the value of the label, this can be deactivated (all metrics
         will be attached to the host running KSM)
+      fleet_configurable: true
       value:
         type: boolean
         example: true

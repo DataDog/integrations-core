@@ -1,4 +1,5 @@
 name: Fly.io
+fleet_configurable: true
 files:
 - name: fly_io.yaml
   options:
@@ -36,6 +37,7 @@ files:
           (and the host tags) to the metrics. It is especially important to leave this parameter set to "true" when you are
           running the Agent inside a Fly.io app, because in this scenario the host tags are unrelated to other metrics.
     - name: org_slug
+      fleet_configurable: true
       display_priority: 5
       enabled: true
       required: true
@@ -47,6 +49,7 @@ files:
         example: <ORG_SLUG>
         type: string
     - name: machines_api_endpoint
+      fleet_configurable: true
       display_priority: 3
       enabled: true
       description: |
@@ -59,6 +62,7 @@ files:
         example: http://_api.internal:4280
         type: string
     - name: match_string
+      fleet_configurable: true
       display_priority: 1
       description: |
         Match string used to filter the Prometheus data requested from Fly.io.

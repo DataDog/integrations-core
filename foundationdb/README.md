@@ -21,6 +21,10 @@ but requires the [FoundationDB client][8] to be installed.
 
 ### Configuration
 
+#### Prepare FoundationDB
+
+As a best practice, Datadog recommends using a read-only user to monitor your FoundationDB cluster. This limits the access granted to the Datadog Agent.
+
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 

@@ -23,11 +23,11 @@ marketplace = "{MARKETPLACE_PATH}"
 agent = "{AGENT_PATH}"
 
 [agents.dev]
-docker = "datadog/agent-dev:master"
+docker = "registry.datadoghq.com/agent-dev:master-py3"
 local = "latest"
 
 [agents.7]
-docker = "datadog/agent:7"
+docker = "registry.datadoghq.com/agent:7"
 local = "7"
 
 [orgs.default]
@@ -71,11 +71,11 @@ marketplace = "{MARKETPLACE_PATH}"
 agent = "{AGENT_PATH}"
 
 [agents.dev]
-docker = "datadog/agent-dev:master"
+docker = "registry.datadoghq.com/agent-dev:master-py3"
 local = "latest"
 
 [agents.7]
-docker = "datadog/agent:7"
+docker = "registry.datadoghq.com/agent:7"
 local = "7"
 
 [orgs.default]

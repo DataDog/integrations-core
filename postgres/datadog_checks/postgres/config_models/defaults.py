@@ -52,10 +52,6 @@ def instance_collect_function_metrics():
     return False
 
 
-def instance_collect_wal_metrics():
-    return True
-
-
 def instance_data_directory():
     return '/usr/local/pgsql/data'
 
@@ -82,6 +78,10 @@ def instance_disable_generic_tags():
 
 def instance_empty_default_hostname():
     return False
+
+
+def instance_enable_legacy_tags_normalization():
+    return True
 
 
 def instance_exclude_hostname():

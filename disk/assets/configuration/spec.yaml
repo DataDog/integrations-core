@@ -1,4 +1,5 @@
 name: Disk
+fleet_configurable: true
 files:
   - name: disk.yaml
     example_name: conf.yaml.default
@@ -11,6 +12,7 @@ files:
 
               WARNING: Overriding these defaults could negatively impact your system or
               the performance of the check.
+            fleet_configurable: true
             value:
               example:
                 - iso9660$
@@ -35,6 +37,7 @@ files:
 
               WARNING: Overriding these defaults could negatively impact your system or
               the performance of the check.
+            fleet_configurable: true
             value:
               example:
                 - (/host)?/proc/sys/fs/binfmt_misc$
@@ -45,6 +48,7 @@ files:
       - template: instances
         options:
           - name: use_mount
+            fleet_configurable: true
             enabled: true
             description: |
               If enabled, metrics are tagged using mount points (for example `device:/`) instead of volumes
@@ -56,6 +60,7 @@ files:
             description: |
               Instruct the check to collect from partitions even without device names.
               Setting `use_mount` to true is strongly recommended in this case.
+            fleet_configurable: true
             value:
               example: false
               type: boolean
@@ -67,6 +72,7 @@ files:
               Character casing is ignored. For convenience, the regular expressions
               start matching from the beginning and therefore to match anywhere you
               must prepend `.*`. For exact matches append `$`.
+            fleet_configurable: true
             value:
                 example:
                   - ext[34]$
@@ -86,6 +92,7 @@ files:
               `include_all_devices` option.
 
               When conflicts arise, this will override `file_system_include`.
+            fleet_configurable: true
             value:
               example:
                 - tmpfs$
@@ -117,6 +124,7 @@ files:
               anywhere you must prepend `.*`. For exact matches append `$`.
 
               When conflicts arise, this will override `device_include`.
+            fleet_configurable: true
             value:
               example:
                - /dev/sde
@@ -131,6 +139,7 @@ files:
                Character casing is ignored on Windows. For convenience, the regular
                expressions start matching from the beginning and therefore to match
                anywhere you must prepend `.*`. For exact matches append `$`.
+            fleet_configurable: true
             value:
               example:
                 - '/dev/sda[1-3]'
@@ -145,6 +154,7 @@ files:
               Character casing is ignored on Windows. For convenience, the regular
               expressions start matching from the beginning and therefore to match
               anywhere you must prepend `.*`. For exact matches append `$`.
+            fleet_configurable: true
             value:
               example:
                - /proc/sys/fs/binfmt_misc
@@ -159,6 +169,7 @@ files:
               Set this to false to exclude pseudo, memory, duplicate or inaccessible file systems.
 
               For more fine-grained control, use the inclusion and exclusion options.
+            fleet_configurable: true
             value:
               example: true
               type: boolean
@@ -169,11 +180,13 @@ files:
               read-write -> OK
               read-only  -> CRITICAL
               other      -> UNKNOWN
+            fleet_configurable: true
             value:
               example: false
               type: boolean
           - name: tag_by_filesystem
             description: Instruct the check to tag all disks with their file system e.g. filesystem:ntfs.
+            fleet_configurable: true
             value:
               example: false
               type: boolean
@@ -181,6 +194,7 @@ files:
             description: |
               Instruct the check to tag all the metrics with disk label if there is one.
               Works on Linux only.
+            fleet_configurable: true
             value:
               example: true
               type: boolean
@@ -189,6 +203,7 @@ files:
               Instruct the check to read the labels from the blkid cache file instead of `blkid` executable.
               This parameter is used only if `tag_by_label` is true. It is incompatible with `use_lsblk`.
               Works on Linux only.
+            fleet_configurable: true
             value:
               example: /run/blkid/blkid.tab
               display_default: null
@@ -217,11 +232,13 @@ files:
               type: object
           - name: min_disk_size
             description: Exclude devices with a total disk size less than a minimum value (in MiB)
+            fleet_configurable: true
             value:
               example: 0
               type: number
           - name: timeout
             description: Timeout of the disk query in seconds
+            fleet_configurable: true
             value:
               example: 5
               display_default: 5
@@ -257,6 +274,7 @@ files:
                   type: string
                 - name: password
                   type: string
+                  secret: true
                 - name: host
                   type: string
                 - name: share
@@ -265,6 +283,7 @@ files:
                   type: string
 
           - name:  lowercase_device_tag
+            fleet_configurable: true
             description: |
               Enable this to lowercase the "device" tags for both partition and disk metrics.
               This is useful only in very specific circumstances:

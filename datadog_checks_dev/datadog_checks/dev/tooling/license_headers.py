@@ -76,8 +76,10 @@ def validate_license_headers(
                 yield from walk_recursively(child, gitignore_matcher.for_path(path))
                 continue
 
-            # Skip non-python files
             if child.suffix == '.py':
+                relpath = child.relative_to(check_path)
+                if relpath in ignoreset:
+                    continue
                 yield child
 
     def validate_license_header(path):

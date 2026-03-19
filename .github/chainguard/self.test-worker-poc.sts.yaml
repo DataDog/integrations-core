@@ -1,0 +1,11 @@
+issuer: https://token.actions.githubusercontent.com
+
+subject_pattern: repo:DataDog/integrations-core:.*
+
+claim_pattern:
+  job_workflow_ref: DataDog/integrations-core/.github/workflows/zz-test-worker-poc.yaml@.*
+  event_name: workflow_dispatch
+
+permissions:
+  checks: write
+

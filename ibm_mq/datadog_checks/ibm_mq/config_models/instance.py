@@ -35,6 +35,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    add_description_tags: Optional[bool] = None
     auto_discover_channels: Optional[bool] = None
     auto_discover_queues: Optional[bool] = None
     auto_discover_queues_via_names: Optional[bool] = None
@@ -48,10 +49,12 @@ class InstanceConfig(BaseModel):
     convert_endianness: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     host: Optional[str] = Field(None, min_length=1)
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     mqcd_version: Optional[float] = Field(None, ge=1.0)
+    normalize_description_tags: Optional[bool] = None
     override_hostname: Optional[bool] = None
     password: Optional[str] = Field(None, min_length=1)
     port: Optional[int] = None

@@ -922,3 +922,39 @@ operator_nodepool_status_condition_current_status_seconds{name="amd-spot",namesp
 # TYPE operator_nodepool_status_condition_count gauge
 operator_nodepool_status_condition_count{name="amd-spot",namespace="",reason="NodeClassReady",status="True",type="NodeClassReady"} 1
 operator_nodepool_status_condition_count{name="amd-spot",namespace="",reason="Ready",status="True",type="Ready"} 1
+# HELP operator_ec2nodeclass_status_condition_transition_seconds Measures the time in seconds that a condition has been in a particular true/false/unknown state before transitioning. e.g. Alarm := P99(Updated=Unknown) > 5 minutes
+# TYPE operator_ec2nodeclass_status_condition_transition_seconds histogram
+operator_ec2nodeclass_status_condition_transition_seconds_bucket{type="AMIsReady",status="True",le="0.005"} 0
+operator_ec2nodeclass_status_condition_transition_seconds_bucket{type="AMIsReady",status="True",le="+Inf"} 5
+operator_ec2nodeclass_status_condition_transition_seconds_sum{type="AMIsReady",status="True"} 2.5
+operator_ec2nodeclass_status_condition_transition_seconds_count{type="AMIsReady",status="True"} 5
+# HELP operator_ec2nodeclass_termination_current_time_seconds The current time in seconds since the start of ec2nodeclass termination
+# TYPE operator_ec2nodeclass_termination_current_time_seconds gauge
+operator_ec2nodeclass_termination_current_time_seconds{name="default"} 0
+# HELP operator_ec2nodeclass_termination_duration_seconds Duration of ec2nodeclass termination in seconds
+# TYPE operator_ec2nodeclass_termination_duration_seconds histogram
+operator_ec2nodeclass_termination_duration_seconds_bucket{name="default",le="0.005"} 0
+operator_ec2nodeclass_termination_duration_seconds_bucket{name="default",le="+Inf"} 1
+operator_ec2nodeclass_termination_duration_seconds_sum{name="default"} 0.5
+operator_ec2nodeclass_termination_duration_seconds_count{name="default"} 1
+# HELP operator_node_termination_current_time_seconds The current time in seconds since the start of node termination
+# TYPE operator_node_termination_current_time_seconds gauge
+operator_node_termination_current_time_seconds{name="test-node"} 0
+# HELP operator_nodeclaim_termination_current_time_seconds The current time in seconds since the start of nodeclaim termination
+# TYPE operator_nodeclaim_termination_current_time_seconds gauge
+operator_nodeclaim_termination_current_time_seconds{name="test-nodeclaim"} 0
+# HELP operator_nodepool_status_condition_transition_seconds Measures the time in seconds that a condition has been in a particular true/false/unknown state before transitioning. e.g. Alarm := P99(Updated=Unknown) > 5 minutes
+# TYPE operator_nodepool_status_condition_transition_seconds histogram
+operator_nodepool_status_condition_transition_seconds_bucket{type="Ready",status="True",le="0.005"} 0
+operator_nodepool_status_condition_transition_seconds_bucket{type="Ready",status="True",le="+Inf"} 10
+operator_nodepool_status_condition_transition_seconds_sum{type="Ready",status="True"} 5.0
+operator_nodepool_status_condition_transition_seconds_count{type="Ready",status="True"} 10
+# HELP operator_nodepool_termination_current_time_seconds The current time in seconds since the start of nodepool termination
+# TYPE operator_nodepool_termination_current_time_seconds gauge
+operator_nodepool_termination_current_time_seconds{name="default"} 0
+# HELP operator_nodepool_termination_duration_seconds Duration of nodepool termination in seconds
+# TYPE operator_nodepool_termination_duration_seconds histogram
+operator_nodepool_termination_duration_seconds_bucket{name="default",le="0.005"} 0
+operator_nodepool_termination_duration_seconds_bucket{name="default",le="+Inf"} 1
+operator_nodepool_termination_duration_seconds_sum{name="default"} 0.5
+operator_nodepool_termination_duration_seconds_count{name="default"} 1

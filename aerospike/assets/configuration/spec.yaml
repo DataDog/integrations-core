@@ -1,4 +1,5 @@
 name: Aerospike
+fleet_configurable: true
 files:
 - name: aerospike.yaml
   options:
@@ -6,7 +7,9 @@ files:
     options:
     - template: init_config/openmetrics
     - name: mappings
+      fleet_configurable: true
       hidden: true
+      legacy: true
       description: |
         Rate mappings. DO NOT EDIT unless you know what you're doing.
         See https://github.com/aerospike-community/aerospike-collectd/blob/master/aerospike_schema.yaml
@@ -370,19 +373,25 @@ files:
         openmetrics_endpoint.required: false
         openmetrics_endpoint.value.example: http://127.0.0.1:9145/metrics
     - name: host
+      fleet_configurable: true
       hidden: true
+      legacy: true
       description: Aerospike host to connect to.
       value:
         type: string
         example: localhost
     - name: port
+      fleet_configurable: true
       hidden: true
+      legacy: true
       description: Aerospike port to connect to.
       value:
         type: integer
         example: 3000
     - name: tls_name
+      fleet_configurable: true
       hidden: true
+      legacy: true
       value:
         type: string
       description: |
@@ -392,6 +401,7 @@ files:
         Note: TLS usage requires Aerospike Enterprise Edition
     - name: tls_config
       hidden: true
+      legacy: true
       description: |
         Note TLS usage requires Aerospike Enterprise Edition
         Key value pairs with a choice of the following elements:
@@ -414,6 +424,7 @@ files:
          keyfile: <KEY_FILE>
     - name: metrics
       hidden: true
+      legacy: true
       description: |
         All metrics collected by default. You probably don't want to do this,
         so list the ones you do want here. Check with:
@@ -426,7 +437,9 @@ files:
           - migrate_rx_objs
           - migrate_tx_objs
     - name: namespaces
+      fleet_configurable: true
       hidden: true
+      legacy: true
       description: All namespaces are collected by default. If you want to collect specific namespaces specify them here.
       value:
         type: array
@@ -436,7 +449,9 @@ files:
           - example_namespace
           - another_example_namespace
     - name: datacenters
+      fleet_configurable: true
       hidden: true
+      legacy: true
       description: |
         For Aerospike v4 or lower, all datacenters are collected by default.
         If you want to collect specific datacenters specify them here.
@@ -451,6 +466,7 @@ files:
           - another_example_datacenter
     - name: namespace_metrics
       hidden: true
+      legacy: true
       description: |
         All Namespace metrics collected by default. You probably don't want to do this,
         so list the ones you do want here. Check with:
@@ -471,6 +487,7 @@ files:
           - migrate-tx-partitions-remaining
     - name: datacenter_metrics
       hidden: true
+      legacy: true
       description: |
         All datacenter metrics collected by default. Specify which metrics you want here.
         List datacenters using this command:

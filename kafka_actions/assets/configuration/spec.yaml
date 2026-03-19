@@ -1,0 +1,703 @@
+name: Kafka Actions
+fleet_configurable: true
+files:
+- name: kafka_actions.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: remote_config_id
+      description: |
+        Remote configuration ID for tracking purposes.
+        This ID is automatically set by the Datadog backend via remote configuration.
+        This parameter is REQUIRED - the integration will not start without it.
+      fleet_configurable: true
+      required: true
+      value:
+        type: string
+        example: kafka-read-1732128000
+    
+    - name: kafka_connect_str
+      description: |
+        The Kafka connection string (bootstrap servers).
+      fleet_configurable: true
+      required: true
+      value:
+        type: string
+        example: localhost:9092
+    
+    - name: kafka_cluster_id
+      description: |
+        Expected Kafka cluster ID for verification.
+        If provided, the integration will verify that the connected Kafka cluster
+        matches this ID before executing any actions. This prevents accidentally
+        running actions against the wrong cluster.
+      fleet_configurable: true
+      value:
+        type: string
+        example: MkU3OEVBNTcwNTJENDM2Qk
+    
+    - name: security_protocol
+      description: |
+        Protocol used to communicate with brokers.
+        Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL.
+        Default: PLAINTEXT.
+      fleet_configurable: true
+      value:
+        type: string
+        example: PLAINTEXT
+        display_default: PLAINTEXT
+    
+    - name: sasl_mechanism
+      description: |
+        String picking sasl mechanism when security_protocol is SASL_PLAINTEXT or SASL_SSL.
+        Valid values are: PLAIN, GSSAPI, OAUTHBEARER, SCRAM-SHA-256, SCRAM-SHA-512.
+      fleet_configurable: true
+      value:
+        type: string
+        example: PLAIN
+        display_default: null
+
+    - name: sasl_plain_username
+      description: Username for sasl PLAIN or SCRAM authentication.
+      fleet_configurable: true
+      value:
+        type: string
+        example: <USERNAME>
+
+    - name: sasl_plain_password
+      description: Password for sasl PLAIN or SCRAM authentication.
+      fleet_configurable: true
+      secret: true
+      value:
+        type: string
+        example: <PASSWORD>
+
+    - name: sasl_kerberos_keytab
+      description: |
+        Path to Kerberos keytab file.
+        Note: If this config option is not used, the check will attempt to find
+        the keytab file using the environment variable KRB5_CLIENT_KTNAME.
+        Using `sasl_kerberos_keytab` will eventually be required and using the
+        environment variable directly will be deprecated.
+      fleet_configurable: true
+      value:
+        type: string
+
+    - name: sasl_kerberos_principal
+      description: |
+        Kerberos principal to use.
+      fleet_configurable: true
+      value:
+        type: string
+        example: kafkaclient
+
+    - name: sasl_kerberos_service_name
+      description: Service name to include in GSSAPI sasl mechanism handshake.
+      fleet_configurable: true
+      value:
+        type: string
+        example: kafka
+
+    - name: sasl_kerberos_domain_name
+      description: Kerberos domain name to use in GSSAPI sasl mechanism handshake.
+      fleet_configurable: true
+      value:
+        type: string
+        example: localhost
+        display_default: null
+
+    - name: sasl_oauth_token_provider
+      description: |
+        Settings for when `sasl_mechanism` is set to `OAUTHBEARER`.
+      fleet_configurable: true
+      options:
+      - name: method
+        description: |
+          The OAuth method to use. Either `aws_msk_iam` for AWS MSK IAM authentication
+          or `oidc` for standard OIDC authentication. Defaults to `oidc` for backwards compatibility.
+        value:
+          type: string
+          example: aws_msk_iam
+          display_default: oidc
+      - name: aws_region
+        description: |
+          AWS region for MSK IAM authentication. Required when method is `aws_msk_iam` and the region
+          cannot be automatically detected from the environment
+          (for example, through `AWS_REGION` or instance metadata).
+          If not specified, attempts to detect the region automatically.
+        value:
+          type: string
+          example: us-west-2
+      - name: url
+        fleet_configurable: true
+        description: |
+          The token endpoint. Required when method is `oidc`.
+        value:
+          type: string
+      - name: client_id
+        fleet_configurable: true
+        description: |
+          The client identifier. Required when method is `oidc`.
+        value:
+          type: string
+      - name: client_secret
+        fleet_configurable: true
+        secret: true
+        description: |
+          The client secret. Required when method is `oidc`.
+        value:
+          type: string
+      - name: scope
+        enabled: false
+        description: |
+          The OAuth scope to request. Required by most identity providers.
+          For example, a custom scope like 'kafka' or 'api://default'.
+        value:
+          type: string
+      - name: extensions
+        enabled: false
+        description: |
+          SASL/OAUTHBEARER extensions to pass to the broker.
+          For Confluent Cloud, this typically includes the logical cluster ID
+          and optionally the identity pool ID.
+          Format: 'logicalCluster=lkc-xxxxx' or 'logicalCluster=lkc-xxxxx,identityPoolId=pool-xxxxx'
+        value:
+          type: string
+      - name: tls_ca_cert
+        enabled: false
+        description: |
+          Path to a CA certificate file used to verify the OIDC token endpoint's TLS certificate.
+          This maps to librdkafka's `https.ca.location` property, which is separate from
+          the broker connection's `ssl.ca.location` (configured through the top-level `tls_ca_cert`).
+        value:
+          type: string
+          example: /path/to/oauth_ca_cert.pem
+
+    - template: instances/tls
+
+    - name: tls_crlfile
+      description: |
+        Filename path containing the CRL to check for certificate expiration.
+        By default, no CRL check is done. When providing a file, only the leaf certificate
+        will be checked against this CRL.
+      fleet_configurable: true
+      value:
+        type: string
+        example: <SSL_FILE_PATH>
+
+    # ========================================================================
+    # ACTIONS
+    # ========================================================================
+    # Only one action per instance is supported.
+    # ========================================================================
+    
+    # ========================================================================
+    # Action #1: read_messages
+    # ========================================================================
+    - name: read_messages
+      description: |
+        Configuration for reading messages from Kafka topics.
+        Messages are streamed in real-time and sent to Datadog as they arrive.
+        The check has a 20-second timeout for the entire operation.
+        Supports JSON, BSON, Protobuf, and Avro with optional Schema Registry integration.
+        Filtering is applied after deserialization using jq-style expressions.
+      fleet_configurable: true
+      value:
+        type: object
+        required:
+          - cluster
+          - topic
+        example:
+          cluster: prod-kafka-1
+          topic: orders
+          partition: -1
+          start_offset: -1
+          n_messages_retrieved: 10
+          max_scanned_messages: 1000
+          filter: '.value.status == "failed"'
+          value_format: json
+        properties:
+        - name: cluster
+          type: string
+          description: Kafka cluster identifier
+          example: prod-kafka-1
+        - name: topic
+          type: string
+          description: Topic to read messages from
+          example: orders
+        - name: partition
+          type: integer
+          description: Specific partition to read from (-1 for all partitions)
+          default: -1
+          example: -1
+        - name: start_offset
+          type: integer
+          description: |
+            Starting offset (-1 for latest, -2 for earliest, or specific offset).
+            Ignored when start_timestamp is set.
+          default: -1
+          example: -1
+        - name: start_timestamp
+          type: integer
+          description: |
+            Starting timestamp in milliseconds since epoch.
+            When set, the consumer seeks to the first message at or after this timestamp
+            in each partition. The start_offset parameter is ignored when this is set.
+          example: 1700000000000
+        - name: n_messages_retrieved
+          type: integer
+          description: |
+            Maximum number of matching messages to retrieve and send to Datadog.
+            The operation stops when this many matching messages are found.
+          default: 10
+          example: 10
+        - name: max_scanned_messages
+          type: integer
+          description: |
+            Maximum number of messages to scan through from Kafka.
+            If this limit is reached before n_messages_retrieved matching messages are found,
+            the operation stops and the event will indicate the limit was hit.
+            This prevents scanning through millions of messages.
+          default: 1000
+          example: 1000
+        - name: filter
+          type: string
+          description: |
+            jq-style expression to filter messages (optional).
+            Filtering happens AFTER deserialization.
+            Examples: '.value.price > 100', '.value.user.country == "US"'
+          example: '.value.status == "failed"'
+        - name: value_format
+          type: string
+          description: |
+            Message value format:
+            - json: JSON data (strict validation, fails if not valid JSON)
+            - bson: BSON (Binary JSON) data
+            - string: Plain UTF-8 text (use for non-JSON text messages)
+            - protobuf: Protocol Buffers
+            - avro: Apache Avro
+            Note: If any message fails deserialization, the read_messages action will stop immediately.
+            Ensure the format matches the actual messages in your topic.
+          default: json
+          example: json
+        - name: value_schema
+          type: string
+          description: Schema definition for protobuf/avro value
+        - name: value_uses_schema_registry
+          type: boolean
+          description: Whether value uses Schema Registry format
+          default: false
+        - name: key_format
+          type: string
+          description: |
+            Message key format:
+            - string: Plain UTF-8 text (most common for keys)
+            - json: JSON data (strict validation, fails if not valid JSON)
+            - bson: BSON (Binary JSON) data
+            - protobuf: Protocol Buffers
+            - avro: Apache Avro
+          default: json
+          example: json
+        - name: key_schema
+          type: string
+          description: Schema definition for protobuf/avro key
+        - name: key_uses_schema_registry
+          type: boolean
+          description: Whether key uses Schema Registry format
+          default: false
+        - name: consumer_group_id
+          type: string
+          description: |
+            Consumer group ID (optional).
+            If not provided, defaults to: datadog-agent-<remote_config_id>
+          example: "datadog-agent-kafka-read-1732128000"
+    
+    # ========================================================================
+    # Action #2: create_topic
+    # ========================================================================
+    - name: create_topic
+      description: |
+        Configuration for creating a new Kafka topic.
+      fleet_configurable: true
+      value:
+        type: object
+        required:
+          - cluster
+          - topic
+          - num_partitions
+          - replication_factor
+        example:
+          cluster: prod-kafka-1
+          topic: orders-v2
+          num_partitions: 6
+          replication_factor: 3
+          configs:
+            retention.ms: "604800000"
+            compression.type: "snappy"
+        properties:
+        - name: cluster
+          type: string
+          description: Kafka cluster identifier
+          example: prod-kafka-1
+        - name: topic
+          type: string
+          description: Topic name to create
+          example: orders-v2
+        - name: num_partitions
+          type: integer
+          description: Number of partitions
+          example: 6
+        - name: replication_factor
+          type: integer
+          description: Replication factor
+          example: 3
+        - name: configs
+          type: object
+          description: |
+            Topic configuration parameters.
+            Common configs: retention.ms, compression.type, min.insync.replicas, etc.
+          example:
+            retention.ms: "604800000"
+            compression.type: "snappy"
+    
+    # ========================================================================
+    # Action #3: update_topic_config
+    # ========================================================================
+    - name: update_topic_config
+      description: |
+        Configuration for updating an existing topic's configuration.
+      value:
+        type: object
+        required:
+          - cluster
+          - topic
+        example:
+          cluster: prod-kafka-1
+          topic: orders
+          num_partitions: 12
+          configs:
+            retention.ms: "1209600000"
+            max.message.bytes: "2097152"
+          delete_configs:
+            - retention.bytes
+            - compression.type
+        properties:
+        - name: cluster
+          type: string
+          description: Kafka cluster identifier
+          example: prod-kafka-1
+        - name: topic
+          type: string
+          description: Topic name to update
+          example: orders
+        - name: num_partitions
+          type: integer
+          description: New partition count (can only increase, cannot decrease)
+          example: 12
+        - name: configs
+          type: object
+          description: Configuration parameters to update
+          example:
+            retention.ms: "1209600000"
+            max.message.bytes: "2097152"
+        - name: delete_configs
+          type: array
+          items:
+            type: string
+          description: Configuration keys to reset to defaults
+          example:
+            - retention.bytes
+            - compression.type
+    
+    # ========================================================================
+    # Action #4: delete_topic
+    # ========================================================================
+    - name: delete_topic
+      description: |
+        Configuration for deleting a Kafka topic.
+        WARNING: This operation is irreversible and will cause data loss.
+      value:
+        type: object
+        required:
+          - cluster
+          - topic
+        example:
+          cluster: prod-kafka-1
+          topic: old-orders
+        properties:
+        - name: cluster
+          type: string
+          description: Kafka cluster identifier
+          example: prod-kafka-1
+        - name: topic
+          type: string
+          description: Topic name to delete
+          example: old-orders
+    
+    # ========================================================================
+    # Action #5: delete_consumer_group
+    # ========================================================================
+    - name: delete_consumer_group
+      description: |
+        Configuration for deleting a consumer group.
+        The consumer group must have no active members.
+      value:
+        type: object
+        required:
+          - cluster
+          - consumer_group
+        example:
+          cluster: prod-kafka-1
+          consumer_group: old-service-v1
+        properties:
+        - name: cluster
+          type: string
+          description: Kafka cluster identifier
+          example: prod-kafka-1
+        - name: consumer_group
+          type: string
+          description: Consumer group ID to delete
+          example: old-service-v1
+    
+    # ========================================================================
+    # Action #6: update_consumer_group_offsets
+    # ========================================================================
+    - name: update_consumer_group_offsets
+      description: |
+        Configuration for updating consumer group offsets.
+        WARNING: Can cause duplicate processing or data loss.
+        Consumer group should be stopped (no active members).
+      value:
+        type: object
+        required:
+          - cluster
+          - consumer_group
+          - offsets
+        example:
+          cluster: prod-kafka-1
+          consumer_group: order-processor
+          offsets:
+            - topic: orders
+              partition: 0
+              offset: 1000
+            - topic: orders
+              partition: 1
+              offset: 1500
+        properties:
+        - name: cluster
+          type: string
+          description: Kafka cluster identifier
+          example: prod-kafka-1
+        - name: consumer_group
+          type: string
+          description: Consumer group ID to update
+          example: order-processor
+        - name: offsets
+          type: array
+          description: List of topic-partition-offset tuples to update
+          items:
+            type: object
+            required:
+              - topic
+              - partition
+              - offset
+            properties:
+            - name: topic
+              type: string
+              description: Topic name
+            - name: partition
+              type: integer
+              description: Partition number
+            - name: offset
+              type: integer
+              description: New offset value
+          example:
+            - topic: orders
+              partition: 0
+              offset: 1000
+            - topic: orders
+              partition: 1
+              offset: 1500
+    
+    # ========================================================================
+    # Action #7: produce_message
+    # ========================================================================
+    - name: produce_message
+      description: |
+        Configuration for producing a message to a Kafka topic.
+        All values (key, value, headers) must be base64-encoded to ensure
+        safe transmission via YAML and support for binary data.
+      value:
+        type: object
+        required:
+          - cluster
+          - topic
+          - value
+        example:
+          cluster: prod-kafka-1
+          topic: test-topic
+          key: "MTIzNDU="
+          value: "eyJvcmRlcl9pZCI6ICIxMjM0NSIsICJzdGF0dXMiOiAicGVuZGluZyJ9"
+          partition: -1
+          headers:
+            source: "ZGF0YWRvZy1hZ2VudA=="
+        properties:
+        - name: cluster
+          type: string
+          description: Kafka cluster identifier
+          example: prod-kafka-1
+        - name: topic
+          type: string
+          description: Topic to produce to
+          example: test-topic
+        - name: key
+          type: string
+          description: |
+            Message key (optional), base64-encoded.
+            If not provided, the message will have a null key in Kafka.
+            Example: "12345" -> base64 -> "MTIzNDU="
+          example: "MTIzNDU="
+        - name: value
+          type: string
+          description: |
+            Message value, base64-encoded.
+            Example: '{"order_id": "12345"}' -> base64 -> "eyJvcmRlcl9pZCI6ICIxMjM0NSJ9"
+          example: "eyJvcmRlcl9pZCI6ICIxMjM0NSIsICJzdGF0dXMiOiAicGVuZGluZyJ9"
+        - name: partition
+          type: integer
+          description: Specific partition (-1 for automatic partitioning)
+          default: -1
+          example: -1
+        - name: headers
+          type: object
+          description: |
+            Message headers (metadata). Values must be base64-encoded.
+            Example: source: "datadog-agent" -> base64 -> "ZGF0YWRvZy1hZ2VudA=="
+          example:
+            source: "ZGF0YWRvZy1hZ2VudA=="
+    
+    # ========================================================================
+    # Schema Registry Configuration
+    # ========================================================================
+    - name: schema_registry_url
+      description: |
+        Schema Registry URL. When set, schemas are fetched automatically from the registry
+        using the schema ID embedded in each message, eliminating the need to provide
+        schemas inline in the configuration.
+      fleet_configurable: true
+      value:
+        type: string
+        example: http://localhost:8081
+    - name: schema_registry_username
+      description: |
+        Username for Schema Registry Basic Authentication.
+        Used in combination with schema_registry_password.
+      fleet_configurable: true
+      value:
+        type: string
+        example: <USERNAME>
+    - name: schema_registry_password
+      description: |
+        Password for Schema Registry Basic Authentication.
+        Used in combination with schema_registry_username.
+      fleet_configurable: true
+      secret: true
+      value:
+        type: string
+        example: <PASSWORD>
+    - name: schema_registry_tls_verify
+      description: |
+        Whether to verify the Schema Registry TLS certificate.
+        Set to false to disable verification (not recommended for production).
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: true
+        display_default: true
+    - name: schema_registry_tls_ca_cert
+      description: |
+        Path to a custom CA certificate file for Schema Registry TLS verification.
+        If not specified, uses the system's default CA bundle.
+      fleet_configurable: true
+      value:
+        type: string
+        example: /path/to/ca_cert.pem
+    - name: schema_registry_tls_cert
+      description: |
+        Path to the client certificate file for Schema Registry mutual TLS authentication.
+        Must be used in combination with schema_registry_tls_key.
+      fleet_configurable: true
+      value:
+        type: string
+        example: /path/to/client_cert.pem
+    - name: schema_registry_tls_key
+      description: |
+        Path to the client private key file for Schema Registry mutual TLS authentication.
+        Must be used in combination with schema_registry_tls_cert.
+      fleet_configurable: true
+      value:
+        type: string
+        example: /path/to/client_key.pem
+    - name: schema_registry_oauth_token_provider
+      description: |
+        OAuth token provider settings for Schema Registry authentication.
+        When configured, the check will fetch an OAuth token and use it as a Bearer token
+        for Schema Registry HTTP requests.
+      fleet_configurable: true
+      options:
+      - name: url
+        fleet_configurable: true
+        required: true
+        enabled: false
+        description: |
+          The token endpoint.
+        value:
+          type: string
+      - name: client_id
+        fleet_configurable: true
+        required: true
+        enabled: false
+        description: |
+          The client identifier.
+        value:
+          type: string
+      - name: client_secret
+        fleet_configurable: true
+        secret: true
+        required: true
+        enabled: false
+        description: |
+          The client secret.
+        value:
+          type: string
+      - name: scope
+        enabled: false
+        description: |
+          The OAuth scope to request.
+        value:
+          type: string
+      - name: custom_headers
+        enabled: false
+        description: |
+          Additional HTTP headers to include in Schema Registry requests.
+          For Confluent Cloud, this typically includes the identity pool ID and
+          the Schema Registry cluster ID.
+          Example:
+            Confluent-Identity-Pool-Id: pool-xxxxx
+            target-sr-cluster: lsrc-xxxxx
+        value:
+          type: object
+          additionalProperties:
+            type: string
+      - name: tls_ca_cert
+        enabled: false
+        description: |
+          Path to a CA certificate file used to verify the OIDC token endpoint's TLS certificate.
+        value:
+          type: string
+          example: /path/to/oauth_ca_cert.pem
+
+    - template: instances/default

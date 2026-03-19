@@ -1,4 +1,5 @@
 name: BeyondTrust Password Safe
+fleet_configurable: true
 files:
 - name: beyondtrust_password_safe.yaml
   options:

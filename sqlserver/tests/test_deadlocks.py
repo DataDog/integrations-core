@@ -49,7 +49,7 @@ def dbm_instance(instance_session_default):
     instance_docker['query_metrics'] = {'enabled': False}
     instance_docker['procedure_metrics'] = {'enabled': False}
     instance_docker['collect_settings'] = {'enabled': False}
-    instance_docker['deadlocks_collection'] = {'enabled': True, 'collection_interval': 0.1}
+    instance_docker['deadlocks_collection'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     return instance_docker
 
 

@@ -45,7 +45,7 @@ metrics:
   - MIB: DELLEMC-OS10-CHASSIS-MIB
     table:
       OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.1.4
-      name: dell.os10CardTable
+      name: os10CardTable
     symbols:
       - OID: 1.3.6.1.4.1.674.11000.5000.100.4.1.1.4.1.5
         name: dell.os10CardTemp

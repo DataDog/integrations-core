@@ -201,6 +201,6 @@
     "reflow_type": "fixed",
     "tags": [
         "team:container-platform",
-        "team:combined-agent"
+        "team:agent-on-call"
     ]
 }

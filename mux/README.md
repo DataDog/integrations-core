@@ -41,7 +41,7 @@ The Mux integration does not include any logs.
 
 ### Metrics
 
-The Mux integration collects and forwards mux metrics data to Datadog. See [metadata.csv][4] for a list of metrics provided by this integration.
+See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Service Checks
 

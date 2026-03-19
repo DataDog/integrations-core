@@ -1,8 +1,8 @@
-# Agent Check: {integration_name}
+# Event Integration: {integration_name}
 
 ## Overview
 
-This check monitors [{integration_name}][1].
+This is an event source integration, allowing you to ingest data from [{integration_name}][1] as events.
 
 Include a high level overview of what this integration does:
 - What does your product do (in 1-2 sentences)?
@@ -31,15 +31,11 @@ Include a high level overview of what this integration does:
 
 ### Events
 
-{integration_name} includes events.
-
-### Service Checks
-
-See [service_checks.json][4] for a list of service checks provided by this integration.
+The {integration_name} source surfaces {integration_name} data in the Datadog event stream.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][2].
 
 {integration_links}
 

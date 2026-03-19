@@ -2,6 +2,28 @@
 
 <!-- towncrier release notes start -->
 
+## 1.4.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+***Fixed***:
+
+* Update conf.yaml to display 'default' field defined in spec.yaml ([#21744](https://github.com/DataDog/integrations-core/pull/21744))
+
+## 1.3.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 1.2.1 / 2025-11-19 / Agent 7.73.0
+
+***Fixed***:
+
+* Fix device discovery for older versions of Lustre (<2.15.5) ([#21901](https://github.com/DataDog/integrations-core/pull/21901))
+
 ## 1.2.0 / 2025-10-31
 
 ***Security***:

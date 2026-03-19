@@ -210,7 +210,7 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
 
             # integration header
             integration = row['integration']
-            normalized_integration = current_check.normalized_display_name
+            normalized_integration = current_check.metadata_integration_name
             if integration != normalized_integration and normalized_integration not in excluded:
                 errors = True
 

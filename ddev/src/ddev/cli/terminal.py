@@ -243,8 +243,17 @@ class Terminal:
 
         self._output(f'DEBUG: {text}', None, stderr=stderr, indent=indent, link=link, **kwargs)
 
-    def display_header(self, title=''):
-        self.console.rule(Text(title, self._style_level_success))
+    def display_header(
+        self,
+        title='',
+        text_style: Style | str | None = None,
+        characters: str | None = None,
+        line_style: Style | str | None = None,
+    ):
+        text_style = text_style or self._style_level_success
+        characters = characters or "─"
+        line_style = line_style or "rule.line"
+        self.console.rule(Text(title, text_style), characters=characters, style=line_style)
 
     def display_markdown(self, text, stderr=False, **kwargs):
         from rich.markdown import Markdown

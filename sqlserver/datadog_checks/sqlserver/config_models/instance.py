@@ -74,6 +74,7 @@ class CollectSchemas(BaseModel):
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     max_execution_time: Optional[float] = None
+    max_tables: Optional[int] = None
 
 
 class CollectSettings(BaseModel):
@@ -453,6 +454,7 @@ class InstanceConfig(BaseModel):
     driver: Optional[str] = None
     dsn: Optional[str] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     exclude_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
     host: str

@@ -1,4 +1,5 @@
 name: JBoss/WildFly
+fleet_configurable: true
 files:
 - name: jboss_wildfly.yaml
   options:
@@ -13,6 +14,7 @@ files:
       description: |
         These are the client JARs which allow connecting to the JBoss default JMX implementation.
         See documentation: https://docs.datadoghq.com/integrations/java/#monitoring-jboss-wildfly-applications
+      fleet_configurable: true
       value:
         type: array
         items:

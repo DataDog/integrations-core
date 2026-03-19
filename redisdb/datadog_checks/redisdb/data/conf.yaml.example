@@ -73,7 +73,7 @@ instances:
     # ssl_certfile: <CERT_PEM_PATH>
 
     ## @param ssl_ca_certs - string - optional
-    ## The path to the ca_certs file.
+    ## The path to the CA certs file.
     #
     # ssl_ca_certs: <CERT_PATH>
 

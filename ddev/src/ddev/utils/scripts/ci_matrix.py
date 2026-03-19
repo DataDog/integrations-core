@@ -51,6 +51,9 @@ TESTABLE_FILE_PATTERN = re.compile(
   | pyproject\.toml
   | datadog_checks/[^/]+/data/metrics\.yaml
   | datadog_checks/snmp/data/default_profiles/.+
+  # Add templates files from dcd to the list of testeable files to ensure template formatting
+  # tests are not ignored and break on master
+  | datadog_checks/dev/tooling/templates/configuration/.+yaml
     """,
     re.VERBOSE,
 )
@@ -74,8 +77,8 @@ PLATFORMS = {
     'linux': __plat('Linux', 'ubuntu-22.04'),
     # https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md
     'windows': __plat('Windows', 'windows-2022'),
-    # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
-    'macos': __plat('macOS', 'macos-13'),
+    # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md
+    'macos': __plat('macOS', 'macos-14-large'),
 }
 
 # The following integrations are no longer tested in CI

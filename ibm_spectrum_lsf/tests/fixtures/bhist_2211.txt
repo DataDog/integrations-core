@@ -1,0 +1,32 @@
+Job <2211>, Job Name <CPU_run.sh_1769033579>, User <test>, Project <default
+                     >, Command <bash run.sh>
+Wed Jan 21 22:12:59: Submitted from host <ip-11-21-111-198.ec2.internal>, to Qu
+                     eue <normal>, CWD <$HOME>, Requested Resources <rusage[mem
+                     =2869]>;
+Wed Jan 21 22:12:59: Dispatched 1 Task(s) on Host(s) <ip-11-21-111-198.ec2.internal>, 
+                     Allocated 1 Slot(s) on Host(s) <ip-11-21-111-198.ec2.internal>,
+                     Effective RES_REQ <select[type == local] orde
+                     r[r15s:pg] rusage[mem=2869.00] >;
+Wed Jan 21 22:12:59: Starting (Pid 15729);
+Wed Jan 21 22:12:59: Running with execution home </home/test, Execution CW
+                     D </home/test>, Execution Pid <15729>;
+Wed Jan 21 22:15:00: Exited with exit code 140. The CPU time used is 0.2 second
+                     s;
+Wed Jan 21 22:15:00: Completed <exit>; TERM_RUNLIMIT: job killed after reaching
+                      LSF run time limit;
+
+ RUNLIMIT
+ 2.0 min of ip-11-21-111-198.ec2.internal
+
+MEMORY USAGE:
+MAX MEM: 9 Mbytes;  AVG MEM: 8 Mbytes; MEM Efficiency: 0.31%
+
+CPU USAGE:
+CPU PEAK: 0.00 ;  CPU PEAK DURATION: 0 second(s)
+CPU AVERAGE EFFICIENCY: 0.00% ;  CPU PEAK EFFICIENCY: 0.00%
+
+Summary of time in seconds spent in various states by  Wed Jan 21 22:15:00
+  PEND     PSUSP    RUN      USUSP    SSUSP    UNKWN    TOTAL
+  0        0        121      0        0        0        121
+
+You have new mail in /var/spool/mail/test

@@ -10,6 +10,8 @@ FILESYSTEM_DISCOVERY_PARAM_MAPPING = {
     'client': (r'llite.*.stats', r'(?<=llite\.).*(?=-[^-]*\.stats)'),
 }
 
+DEVICE_ATTR_NAMES = ['index', 'status', 'type', 'name', 'uuid', 'refcount']
+
 IGNORED_STATS = {
     'snapshot_time',
     'start_time',

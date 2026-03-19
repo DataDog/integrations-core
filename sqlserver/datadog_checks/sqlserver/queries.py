@@ -14,48 +14,49 @@ WHERE db.name IN ({});
 
 SCHEMA_QUERY = """
 SELECT
-    s.name AS name, s.schema_id AS id, dp.name AS owner_name
+    s.name AS schema_name, s.schema_id AS schema_id, dp.name AS owner_name
 FROM
     sys.schemas AS s JOIN sys.database_principals dp ON s.principal_id = dp.principal_id
 WHERE s.name NOT IN ('sys', 'information_schema')
 """
 
-TABLES_IN_SCHEMA_QUERY = """
+TABLES_QUERY = """
 SELECT
-    object_id AS id, name
+    object_id AS table_id, name AS table_name, schema_id
 FROM
     sys.tables
-WHERE schema_id=?
 """
 
 COLUMN_QUERY = """
 SELECT
-    column_name AS name, data_type, column_default, is_nullable AS nullable , table_name, ordinal_position
+    c.name, t.name as data_type, coalesce(dc.definition, 'None') as "default", c.is_nullable AS nullable
 FROM
-    INFORMATION_SCHEMA.COLUMNS
-WHERE
-    table_name IN ({}) and table_schema='{}';
+    sys.columns c
+    INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
+    LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id
+WHERE c.object_id = schema_tables.table_id
 """
 
 PARTITIONS_QUERY = """
 SELECT
-    object_id AS id, COUNT(*) AS partition_count
+    COUNT(*) AS partition_count
 FROM
     sys.partitions
 WHERE
-    object_id IN ({}) GROUP BY object_id;
+    object_id = schema_tables.table_id
+GROUP BY object_id
 """
 
 INDEX_QUERY = """
 SELECT
-    i.object_id AS id, i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint,
-    i.is_disabled, STRING_AGG(c.name, ',') AS column_names
+    i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint,
+    i.is_disabled, STRING_AGG(CAST(c.name AS NVARCHAR(MAX)), ',') AS column_names
 FROM
     sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id
     AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
-WHERE
-    i.object_id IN ({}) GROUP BY i.object_id, i.name, i.type,
-    i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled;
+WHERE i.object_id = schema_tables.table_id
+GROUP BY i.object_id, i.name, i.type,
+    i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled
 """
 
 INDEX_QUERY_PRE_2017 = """
@@ -75,8 +76,7 @@ SELECT
         FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS column_names
 FROM
     sys.indexes i
-WHERE
-    i.object_id IN ({})
+WHERE i.object_id = schema_tables.table_id
 GROUP BY
     i.object_id,
     i.name,
@@ -85,12 +85,11 @@ GROUP BY
     i.is_unique,
     i.is_primary_key,
     i.is_unique_constraint,
-    i.is_disabled;
+    i.is_disabled
 """
 
 FOREIGN_KEY_QUERY = """
 SELECT
-    FK.parent_object_id AS table_id,
     FK.name AS foreign_key_name,
     OBJECT_NAME(FK.parent_object_id) AS referencing_table,
     STRING_AGG(COL_NAME(FKC.parent_object_id, FKC.parent_column_id),',') AS referencing_column,
@@ -101,14 +100,13 @@ SELECT
 FROM
     sys.foreign_keys AS FK
     JOIN sys.foreign_key_columns AS FKC ON FK.object_id = FKC.constraint_object_id
-WHERE
-    FK.parent_object_id IN ({})
+WHERE FK.parent_object_id = schema_tables.table_id
 GROUP BY
     FK.name,
     FK.parent_object_id,
     FK.referenced_object_id,
     FK.delete_referential_action_desc,
-    FK.update_referential_action_desc;
+    FK.update_referential_action_desc
 """
 
 FOREIGN_KEY_QUERY_PRE_2017 = """
@@ -131,15 +129,14 @@ SELECT
     FK.update_referential_action_desc AS update_action
 FROM
     sys.foreign_keys AS FK
-WHERE
-    FK.parent_object_id IN ({})
+WHERE FK.parent_object_id = schema_tables.table_id
 GROUP BY
     FK.name,
     FK.object_id,
     FK.parent_object_id,
     FK.referenced_object_id,
     FK.delete_referential_action_desc,
-    FK.update_referential_action_desc;
+    FK.update_referential_action_desc
 """
 
 DEFAULT_DM_XE_TARGETS = "sys.dm_xe_session_targets"

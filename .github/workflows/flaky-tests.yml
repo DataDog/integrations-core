@@ -47,11 +47,3 @@ jobs:
 
     uses: ./.github/workflows/test-results-master.yml
     secrets: inherit
-
-  submit-traces:
-    needs:
-    - test
-    if: success() || failure()
-
-    uses: ./.github/workflows/submit-traces.yml
-    secrets: inherit

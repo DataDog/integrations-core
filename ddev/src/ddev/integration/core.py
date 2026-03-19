@@ -101,6 +101,13 @@ class Integration:
         return normalized_integration.lower()
 
     @cached_property
+    def metadata_integration_name(self) -> str:
+        if name := cast(str, self.repo_config.get(f'/overrides/validate/metadata/integration/{self.name}', None)):
+            return name
+
+        return self.normalized_display_name
+
+    @cached_property
     def project_file(self) -> Path:
         return self.path / 'pyproject.toml'
 
