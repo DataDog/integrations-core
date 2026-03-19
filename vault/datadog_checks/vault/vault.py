@@ -318,7 +318,7 @@ class Vault(OpenMetricsBaseCheck):
             self.set_client_token(f.read().decode('utf-8'))
 
     def _set_header(self, http_wrapper, header, value):
-        http_wrapper.options['headers'][header] = value
+        http_wrapper.set_header(header, value)
 
     def get_scraper_config(self, instance):
         # This validation is called during `__init__` but we don't need it
