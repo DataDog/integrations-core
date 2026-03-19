@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from ddev.ai.tools.core.truncation import MAX_CHARS, extract_error_lines, truncate
+from ddev.ai.tools.core.truncation import extract_error_lines, truncate
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -82,12 +82,12 @@ def test_extract_error_lines_empty_input_returns_empty():
     "content,expected_truncated",
     [
         ("hello world", False),
-        (make_content(MAX_CHARS), False),
-        (make_content(MAX_CHARS + 1), True),
+        (make_content(50), False),
+        (make_content(50 + 1), True),
     ],
 )
 def test_max_char_limit(content, expected_truncated):
-    result = truncate(content, max_chars=MAX_CHARS)
+    result = truncate(content, max_chars=50)
     assert result.truncated is expected_truncated
     if not expected_truncated:
         assert result.meta is None
