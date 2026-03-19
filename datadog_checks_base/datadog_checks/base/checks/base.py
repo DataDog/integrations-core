@@ -642,8 +642,6 @@ class AgentCheck(object):
                     value = config.get(field_name)
                     if value is not None:
                         check_field_trusted_provider(field_name, value, security_config)
-            except ValueError as e:
-                raise ConfigurationError(str(e)) from None
             except ValidationError as e:
                 errors = e.errors()
                 num_errors = len(errors)
