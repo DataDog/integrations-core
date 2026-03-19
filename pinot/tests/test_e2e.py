@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import CONTROLLER_NAMESPACE
-from .conftest import E2E_METRICS_URL
+from .common import BROKER_NAMESPACE, CONTROLLER_NAMESPACE, MINION_NAMESPACE, SERVER_NAMESPACE
 
 pytestmark = pytest.mark.e2e
 
@@ -17,32 +16,18 @@ def test_check(dd_agent_check, e2e_instance):
 
     In QuickStart mode, all Pinot components (Controller, Server, Broker, Minion)
     run in the same JVM, so all metrics are exposed on a single JMX endpoint.
+    All four component endpoints are configured to point at that shared endpoint,
+    each collecting its component-specific metrics under its own namespace.
     """
     aggregator = dd_agent_check(e2e_instance, rate=True)
 
-    # Verify service check - uses controller namespace since e2e_instance uses controller_endpoint
-    aggregator.assert_service_check(f'{CONTROLLER_NAMESPACE}.openmetrics.health', ServiceCheck.OK)
+    for namespace in (CONTROLLER_NAMESPACE, SERVER_NAMESPACE, BROKER_NAMESPACE, MINION_NAMESPACE):
+        aggregator.assert_metric(f'{namespace}.can_connect', value=1)
 
-    # Verify some common JVM metrics are collected
-    # These should be present for any Pinot component
-    jvm_metrics = [
-        'pinot.controller.jvm_memory_bytes_used',
-        'pinot.controller.jvm_threads_current',
-    ]
+    metadata_metrics = get_metadata_metrics()
 
-    for metric in jvm_metrics:
-        aggregator.assert_metric(metric, at_least=1)
-
-    # Verify endpoint tag is present
-    aggregator.assert_metric_has_tag(
-        'pinot.controller.jvm_memory_bytes_used',
-        f'endpoint:{E2E_METRICS_URL}',
-        at_least=1,
-    )
-
-    # Verify custom tag is present
-    aggregator.assert_metric_has_tag(
-        'pinot.controller.jvm_memory_bytes_used',
-        'test:e2e',
-        at_least=1,
+    aggregator.assert_metrics_using_metadata(
+        metadata_metrics,
+        check_submission_type=True,
+        check_symmetric_inclusion=False,
     )

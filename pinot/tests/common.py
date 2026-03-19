@@ -46,29 +46,56 @@ SERVER_NAMESPACE = 'pinot.server'
 BROKER_NAMESPACE = 'pinot.broker'
 MINION_NAMESPACE = 'pinot.minion'
 
-# Sample metrics to check for each component (unit tests)
-# Using gauge metrics that are guaranteed to be present in fixtures
-# The namespace (e.g., pinot.controller) is the prefix, followed by the metric name
+# Metrics to assert for each component (unit tests)
+# Must include all metrics emitted by fixtures for assert_all_metrics_covered()
 CONTROLLER_METRICS = [
+    'pinot.controller.can_connect',
+    'pinot.controller.jmx_scrape_duration_seconds',
+    'pinot.controller.jmx_scrape_error',
+    'pinot.controller.jvm_gc_collection_seconds.count',
+    'pinot.controller.jvm_gc_collection_seconds.sum',
+    'pinot.controller.jvm_memory_bytes_committed',
     'pinot.controller.jvm_memory_bytes_used',
     'pinot.controller.jvm_threads_current',
+    'pinot.controller.jvm_threads_daemon',
+    'pinot.controller.jvm_threads_peak',
+    'pinot.controller.pinot_controller_helix_connected_Value',
+    'pinot.controller.pinot_controller_offlineTableCount_Value',
+    'pinot.controller.pinot_controller_realtimeTableCount_Value',
+    'pinot.controller.process_max_fds',
     'pinot.controller.process_open_fds',
+    'pinot.controller.process_resident_memory_bytes',
+    'pinot.controller.process_start_time_seconds',
+    'pinot.controller.process_virtual_memory_bytes',
 ]
 
 SERVER_METRICS = [
+    'pinot.server.can_connect',
+    'pinot.server.jvm_memory_bytes_committed',
     'pinot.server.jvm_memory_bytes_used',
     'pinot.server.jvm_threads_current',
+    'pinot.server.jvm_threads_daemon',
+    'pinot.server.pinot_server_helix_connected_Value',
+    'pinot.server.pinot_server_queries_Count',
+    'pinot.server.process_max_fds',
     'pinot.server.process_open_fds',
+    'pinot.server.process_resident_memory_bytes',
 ]
 
 BROKER_METRICS = [
+    'pinot.broker.can_connect',
     'pinot.broker.jvm_memory_bytes_used',
     'pinot.broker.jvm_threads_current',
+    'pinot.broker.pinot_broker_helix_connected_Value',
+    'pinot.broker.pinot_broker_queriesKilled_Count',
     'pinot.broker.process_open_fds',
 ]
 
 MINION_METRICS = [
+    'pinot.minion.can_connect',
     'pinot.minion.jvm_memory_bytes_used',
     'pinot.minion.jvm_threads_current',
+    'pinot.minion.pinot_minion_connected_Value',
+    'pinot.minion.pinot_minion_numberOfTasks_Value',
     'pinot.minion.process_open_fds',
 ]

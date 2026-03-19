@@ -4,20 +4,19 @@ services:
     container_name: pinot
     hostname: pinot
     ports:
-      # ZooKeeper (internal port 2123 -> host 12123)
+      # ZooKeeper
       - "12123:2123"
-      # Controller (internal port 9000 -> host 19000)
+      # Controller
       - "19000:9000"
-      # Broker (internal port 8000 -> host 18000)
+      # Broker
       - "18000:8000"
-      # Server (internal port 7050 -> host 17050)
+      # Server
       - "17050:7050"
-      # Minion (internal port 6000 -> host 16000)
+      # Minion
       - "16000:6000"
-      # JMX Prometheus exporter (internal port 8009 -> host 18009)
+      # JMX Prometheus exporter
       - "18009:8009"
     environment:
-      # Enable JMX Prometheus exporter for metrics using built-in config
       JAVA_OPTS: >-
         -javaagent:/opt/pinot/etc/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=8009:/opt/pinot/etc/jmx_prometheus_javaagent/configs/pinot.yml
         -Xms512m

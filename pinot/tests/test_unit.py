@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.pinot import PinotCheck
 
@@ -48,8 +47,6 @@ def test_check_mock_pinot_openmetrics(
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_service_check(f'{namespace}.openmetrics.health', ServiceCheck.OK)
-    assert len(aggregator.service_check_names) == 1
 
 
 def test_empty_instance(dd_run_check):
@@ -76,7 +73,7 @@ def test_multiple_endpoints(dd_run_check, aggregator, mock_http_response):
     check = PinotCheck('pinot', {}, [instance])
     dd_run_check(check)
 
-    # Each endpoint has its own namespace and service check
-    aggregator.assert_service_check('pinot.controller.openmetrics.health', ServiceCheck.OK)
-    aggregator.assert_service_check('pinot.server.openmetrics.health', ServiceCheck.OK)
-    assert len(aggregator.service_check_names) == 2
+    # Each endpoint has its own namespace and can_connect gauge
+    aggregator.assert_metric('pinot.controller.can_connect', value=1)
+    aggregator.assert_metric('pinot.server.can_connect', value=1)
+    assert len(aggregator.service_check_names) == 0
