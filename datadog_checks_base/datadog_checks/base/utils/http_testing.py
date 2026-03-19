@@ -14,6 +14,26 @@ from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 __all__ = ['MockHTTPResponse']
 
 
+class _CaseInsensitiveDict(dict):
+    def __init__(self, data=None):
+        super().__init__()
+        if data:
+            for k, v in data.items():
+                self[k] = v
+
+    def __setitem__(self, key, value):
+        super().__setitem__(key.lower(), value)
+
+    def __getitem__(self, key):
+        return super().__getitem__(key.lower())
+
+    def __contains__(self, key):
+        return super().__contains__(key.lower() if isinstance(key, str) else key)
+
+    def get(self, key, default=None):
+        return super().get(key.lower(), default)
+
+
 class MockHTTPResponse:
     """Library-agnostic mock HTTP response implementing HTTPResponseProtocol."""
 
@@ -48,7 +68,7 @@ class MockHTTPResponse:
 
         self._content = content.encode('utf-8') if isinstance(content, str) else content
         self.status_code = status_code
-        self.headers = {k.lower(): v for k, v in (headers or {}).items()}
+        self.headers = _CaseInsensitiveDict(headers or {})
         self.cookies = cookies or {}
         self.encoding: str | None = None
         self.elapsed = timedelta(seconds=elapsed_seconds)
