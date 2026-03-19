@@ -18,6 +18,7 @@ jobs:
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         fetch-depth: 0
+        persist-credentials: false
     - name: Set up Python
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
@@ -103,8 +104,7 @@ jobs:
         base: master
         labels: bot,qa/skip-qa
         draft: false
-    - name: Rename changelog files to actual PR number
-      id: rename
+    - name: Fix changelog PR numbers
       if: steps.cpr.outputs.pull-request-number != ''
       env:
         GH_TOKEN: ${{ steps.token-generator.outputs.token }}
@@ -112,24 +112,22 @@ jobs:
         actual_pr="${{ steps.cpr.outputs.pull-request-number }}"
         branch="${{ steps.cpr.outputs.pull-request-branch }}"
 
-        # Resolve the actual base branch from the PR (avoids hardcoding 'master')
         base_branch=$(gh pr view "$actual_pr" --json baseRefName -q '.baseRefName')
 
         git fetch origin "$branch" "$base_branch"
         git checkout "$branch"
 
-        git diff "origin/$base_branch"...HEAD --name-only --diff-filter=A | grep 'changelog\.d/' | while read -r file; do
+        git diff "origin/$base_branch"...HEAD --name-only --diff-filter=A \
+          | grep 'changelog\.d/' | while read -r file; do
           ext="${file##*.}"
           dir=$(dirname "$file")
           git mv "$file" "$dir/$actual_pr.$ext" 2>/dev/null || true
         done
 
-        git diff --cached --quiet && echo "renamed=false" >> "$GITHUB_OUTPUT" || echo "renamed=true" >> "$GITHUB_OUTPUT"
-    - name: Fix changelog PR numbers
-      if: steps.rename.outputs.renamed == 'true'
-      uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
-      with:
-        token: ${{ steps.token-generator.outputs.token }}
-        commit-message: Fix changelog PR numbers
-        branch: ${{ steps.cpr.outputs.pull-request-branch }}
-        base: master
+        git diff --cached --quiet && exit 0
+
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git config user.name "github-actions[bot]"
+        git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+        git commit -m "Fix changelog PR numbers"
+        git push origin "$branch"
