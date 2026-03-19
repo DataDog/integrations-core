@@ -32,7 +32,8 @@ class SecurityConfig:
         """Return whether the resolved path falls under any allowed prefix directory."""
         resolved = os.path.realpath(path)
         return any(
-            resolved == allowed or resolved.startswith(allowed + os.sep) for allowed in self.file_paths_allowlist
+            resolved == os.path.realpath(allowed) or resolved.startswith(os.path.realpath(allowed) + os.sep)
+            for allowed in self.file_paths_allowlist
         )
 
     def is_check_excluded(self, check_name: str) -> bool:
