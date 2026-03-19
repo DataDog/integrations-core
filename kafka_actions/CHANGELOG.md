@@ -2,6 +2,21 @@
 
 <!-- towncrier release notes start -->
 
+## 2.4.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+* Add support for Kerberos (GSSAPI), OAuth (OAUTHBEARER with OIDC and AWS MSK IAM), and TLS/SSL certificate authentication, matching kafka_consumer authentication options. ([#22818](https://github.com/DataDog/integrations-core/pull/22818))
+* Bump `confluent-kafka` to 2.13.2 ([#22829](https://github.com/DataDog/integrations-core/pull/22829))
+* Add Schema Registry support for automatic schema fetching when reading Kafka messages with protobuf, avro, or JSON schemas. ([#22867](https://github.com/DataDog/integrations-core/pull/22867))
+* Add start_timestamp support for read_messages action to seek by timestamp instead of offset. ([#22893](https://github.com/DataDog/integrations-core/pull/22893))
+
+***Fixed***:
+
+* Fix consumer timeout when reading latest N messages by seeking back from high watermark instead of positioning at OFFSET_END ([#22797](https://github.com/DataDog/integrations-core/pull/22797))
+* Use the actual Kafka message timestamp instead of current time for message_timestamp in read_messages events. ([#22895](https://github.com/DataDog/integrations-core/pull/22895))
+
 ## 2.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
