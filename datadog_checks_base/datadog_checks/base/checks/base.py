@@ -93,6 +93,10 @@ GLOBAL_SECURE_FIELDS = frozenset(
         'bearer_token_path',
         'auth_token',
         'private_key_path',
+        'java_bin_path',
+        'trust_store_path',
+        'key_store_path',
+        'tools_jar_path',
     ]
 )
 
