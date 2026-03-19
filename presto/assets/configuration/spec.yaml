@@ -1,4 +1,5 @@
 name: Presto
+fleet_configurable: true
 files:
 - name: presto.yaml
   options:

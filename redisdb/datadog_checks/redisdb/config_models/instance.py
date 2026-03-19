@@ -40,6 +40,7 @@ class InstanceConfig(BaseModel):
     disable_connection_cache: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     host: str
     keys: Optional[tuple[str, ...]] = None
     metric_patterns: Optional[MetricPatterns] = None
@@ -53,6 +54,7 @@ class InstanceConfig(BaseModel):
     ssl_ca_certs: Optional[str] = None
     ssl_cert_reqs: Optional[int] = None
     ssl_certfile: Optional[str] = None
+    ssl_check_hostname: Optional[bool] = None
     ssl_keyfile: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
     unix_socket_path: Optional[str] = None

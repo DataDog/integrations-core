@@ -75,7 +75,7 @@ instances:
 
     ## @param spark_cluster_mode - string - optional - default: spark_yarn_mode
     ## To enable monitoring of a Standalone Spark cluster, the spark cluster
-    ## mode must be set. Choose the cluster mode between :
+    ## mode must be set. Choose the cluster mode from:
     ##  * `spark_yarn_mode`
     ##  * `spark_standalone_mode`
     ##  * `spark_mesos_mode`
@@ -86,7 +86,7 @@ instances:
     ## @param spark_ui_ports - list of integers - optional
     ## If you're using multiple frameworks with Mesos, you can specify which
     ## port(s) the Spark Web UI runs on and the check filters out the frameworks
-    ## whose port don't match. If the check attempts to connect to a framework that
+    ## whose ports don't match. If the check attempts to connect to a framework that
     ## requires authentication it will fail; this is to prevent that.
     #
     # spark_ui_ports:
@@ -100,7 +100,7 @@ instances:
     # spark_pre_20_mode: false
 
     ## @param spark_proxy_enabled - boolean - optional - default: false
-    ## If you have enabled the spark UI proxy, set this to `true`
+    ## If you have enabled the Spark UI proxy, set this to `true`
     #
     # spark_proxy_enabled: false
 

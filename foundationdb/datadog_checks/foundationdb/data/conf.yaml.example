@@ -15,10 +15,9 @@ instances:
 
   -
     ## @param cluster_file - string - optional - default: /var/lib/foundationdb/fdb.cluster
-    ## A path to the cluster file specifing connection to the FoundationDB.
+    ## A path to the cluster file specifying connection to the FoundationDB.
     ## If the check does not pass, it will rely on the binding library to find
-    ## the file using standard locations (e.g. `/etc/foundationdb/fdb.cluster` or
-    ## `/etc/foundationdb/fdb.cluster`).
+    ## the file using standard locations (e.g. `/etc/foundationdb/fdb.cluster`).
     #
     # cluster_file: /var/lib/foundationdb/fdb.cluster
 
@@ -38,7 +37,7 @@ instances:
     # tls_verify_peers: <TLS_VERIFY_PEERS>
 
     ## @param tls_password - string - optional
-    ## The byte-string representing the passcode for unencrypting the private key
+    ## The byte-string representing the passcode for decrypting the private key
     #
     # tls_password: <TLS_PASSWORD>
 

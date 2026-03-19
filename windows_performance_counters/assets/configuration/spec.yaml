@@ -1,4 +1,5 @@
 name: Windows performance counters
+fleet_configurable: true
 files:
 - name: windows_performance_counters.yaml
   options:

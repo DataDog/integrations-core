@@ -1,4 +1,5 @@
 name: TCP
+fleet_configurable: true
 files:
 - name: tcp_check.yaml
   options:
@@ -9,23 +10,27 @@ files:
     options:
     - name: name
       description: Name to assign to your TCP check instance.
+      fleet_configurable: true
       required: true
       value:
         type: string
         example: <TCP_CHECK_INSTANCE_NAME>
     - name: host
       description: Host to connect to.
+      fleet_configurable: true
       required: true
       value:
         type: string
         example: <TCP_HOST_TO_CONNECT_TO>
     - name: port
       description: Port of the host to connect to.
+      fleet_configurable: true
       required: true
       value:
         type: integer
     - name: timeout
       description: Timeout of the TCP query in second.
+      fleet_configurable: true
       value:
         type: number
         example: 10
@@ -34,10 +39,12 @@ files:
         The `collect_response_time` parameter instructs the check to create a
         metric 'network.tcp.response_time', tagged with the host name,
         reporting the response time in seconds.
+      fleet_configurable: true
       value:
         type: boolean
         example: false
     - name: ip_cache_duration
+      fleet_configurable: true
       value:
         display_default: null
         example: 120
@@ -49,12 +56,14 @@ files:
         Set ip_cache_duration to `0` if the check should resolve the IP address on every check run.
     - name: multiple_ips
       description: Enable to run the check against all IPs attached to `host`.
+      fleet_configurable: true
       value:
         default: false
         example: false
         type: boolean
     - name: ipv4_only
       description: Enable to run the check against only IPv4-formatted addresses on every check run.
+      fleet_configurable: true
       value:
         default: false
         example: false

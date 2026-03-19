@@ -1,4 +1,5 @@
 name: StatsD
+fleet_configurable: true
 
 files:
   - name: statsd.yaml
@@ -10,11 +11,13 @@ files:
         options:
           - name: host
             description: Host to collect StatsD data from.
+            fleet_configurable: true
             value:
               example: localhost
               type: string
           - name: port
             description: Port to use to collect StatsD data.
+            fleet_configurable: true
             value:
               example: 8126
               type: integer

@@ -1,0 +1,6 @@
+provides:
+  - id: cisco-secure-email-threat-defense-logs
+    always_on: true
+    granular: true
+    data_type: logs
+    direction: inbound

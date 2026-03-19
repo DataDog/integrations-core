@@ -55,6 +55,10 @@ For Agent versions >= 7.58:
 On Linux there may be need for XML functionality. If you encounter errors during
 the build process, install `libxslt-dev` (or `libxslt-devel` for RPM).
 
+#### Prepare IBM DB2
+
+As a best practice, Datadog recommends creating the machine user with read-only access to limit the permissions granted to the Datadog Agent.
+
 #### Enable monitoring
 
 The IBM Db2 integration pulls data using the following table functions:

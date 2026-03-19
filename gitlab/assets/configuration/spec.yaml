@@ -1,4 +1,5 @@
 name: Gitlab
+fleet_configurable: true
 files:
 - name: gitlab.yaml
   options:
@@ -8,6 +9,8 @@ files:
   - template: instances
     options:
     - name: gitlab_url
+      fleet_configurable: true
+      formats: ["url"]
       display_priority: 2
       description: |
         The GitLab external URL to probe for service health status
@@ -16,6 +19,7 @@ files:
       value:
         type: string
     - name: api_token
+      fleet_configurable: true
       display_priority: 1
       description: |
         The GitLab API token for this instance
@@ -26,12 +30,15 @@ files:
     - name: prometheus_endpoint
       description: |
         Deprecated alias for `prometheus_url`.
+      fleet_configurable: true
       hidden: true
+      legacy: true
       value:
         type: string
     - name: gitaly_server_endpoint
       description: |
         Endpoint exposing the Gitaly server's Prometheus metrics (only available when `openmetrics_endpoint` is used).
+      fleet_configurable: true
       display_priority: 4
       value:
         display_default: null

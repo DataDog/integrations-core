@@ -338,12 +338,33 @@ VALUES (
 );
 """
 
+IDEMPOTENT_JOB_CREATION_QUERY = """\
+IF NOT EXISTS (SELECT 1 FROM msdb.dbo.sysjobs WHERE name = 'Job 1')
+BEGIN
+    EXEC msdb.dbo.sp_add_job @job_name = 'Job 1'
+END
+IF NOT EXISTS (SELECT 1 FROM msdb.dbo.sysjobs WHERE name = 'Job 2')
+BEGIN
+    EXEC msdb.dbo.sp_add_job @job_name = 'Job 2'
+END
+"""
+
+CLEANUP_TEST_DATA_QUERY = """\
+DELETE FROM msdb.dbo.sysjobactivity
+WHERE job_id IN (SELECT job_id FROM msdb.dbo.sysjobs WHERE name IN ('Job 1', 'Job 2'));
+DELETE FROM msdb.dbo.sysjobhistory
+WHERE job_id IN (SELECT job_id FROM msdb.dbo.sysjobs WHERE name IN ('Job 1', 'Job 2'));
+"""
+
+KEY_PREFIX = "dbm-test-"
+
 
 @pytest.fixture
 def agent_jobs_instance(instance_docker):
     instance_docker['dbm'] = True
     instance_docker['agent_jobs'] = {
         'enabled': True,
+        'run_sync': True,
         'collection_interval': 1.0,
         'history_row_limit': 10000,
     }
@@ -381,8 +402,8 @@ def test_connection_with_agent_history(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
 
-    with check.connection.open_managed_default_connection():
-        with check.connection.get_managed_cursor() as cursor:
+    with check.connection.open_managed_default_connection(KEY_PREFIX):
+        with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             last_collection_time_filter = "{last_collection_time}".format(last_collection_time=10000)
             history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=10000)
             query = AGENT_HISTORY_QUERY.format(
@@ -398,8 +419,8 @@ def test_connection_with_agent_activity_duration(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
 
-    with check.connection.open_managed_default_connection():
-        with check.connection.get_managed_cursor() as cursor:
+    with check.connection.open_managed_default_connection(KEY_PREFIX):
+        with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             cursor.execute(AGENT_ACTIVITY_DURATION_QUERY)
 
 
@@ -408,8 +429,8 @@ def test_connection_with_agent_activity_steps(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
 
-    with check.connection.open_managed_default_connection():
-        with check.connection.get_managed_cursor() as cursor:
+    with check.connection.open_managed_default_connection(KEY_PREFIX):
+        with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             cursor.execute(AGENT_ACTIVITY_STEPS_QUERY)
 
 
@@ -443,8 +464,8 @@ def test_history_output(instance_docker, sa_conn):
                 cursor.execute(query)
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
-    with check.connection.open_managed_default_connection():
-        with check.connection.get_managed_cursor() as cursor:
+    with check.connection.open_managed_default_connection(KEY_PREFIX):
+        with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             last_collection_time_filter = "{last_collection_time}".format(last_collection_time=now - 1)
             history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=10000)
             query = AGENT_HISTORY_QUERY.format(
@@ -468,20 +489,38 @@ def test_history_output(instance_docker, sa_conn):
             )
 
 
-@pytest.mark.flaky
+@pytest.mark.usefixtures('dd_environment')
 def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, sa_conn):
+    test_now = time.time()
+    test_later = test_now + 10
     with sa_conn as conn:
         with conn.cursor() as cursor:
+            cursor.execute(IDEMPOTENT_JOB_CREATION_QUERY)
+            cursor.execute(CLEANUP_TEST_DATA_QUERY)
+            run_date_now, run_time_now = history_date_time_from_time(test_now)
+            run_date_later, run_time_later = history_date_time_from_time(test_later)
+            for job_number, step_id in [(1, 1), (1, 2), (2, 1), (1, 0)]:
+                cursor.execute(
+                    HISTORY_INSERTION_QUERY.format(
+                        job_number=job_number, step_id=step_id, run_date=run_date_now, run_time=run_time_now
+                    )
+                )
+            for job_number, step_id in [(2, 0), (1, 1), (2, 1), (2, 0), (2, 1)]:
+                cursor.execute(
+                    HISTORY_INSERTION_QUERY.format(
+                        job_number=job_number, step_id=step_id, run_date=run_date_later, run_time=run_time_later
+                    )
+                )
             cursor.execute(SESSION_INSERTION_QUERY)
             cursor.execute("SELECT * FROM msdb.dbo.syssessions")
             results = cursor.fetchall()
-            assert len(results) == 1, "should have a session of the agent"
+            assert len(results) >= 1, "should have a session of the agent"
             cursor.execute(ACTIVITY_INSERTION_QUERY)
             cursor.execute("SELECT * FROM msdb.dbo.sysjobactivity")
             results = cursor.fetchall()
             assert len(results) >= 1, "should have 1 entry in activity and potentially built in job activity"
     check = SQLServer(CHECK_NAME, {}, [agent_jobs_instance])
-    check.agent_history._last_collection_time = now - 1
+    check.agent_history._last_collection_time = test_now - 1
     time.sleep(1)
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
@@ -497,7 +536,6 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
     assert len(history_rows) == 7, "should have 7 rows of history associated with new completed jobs"
     history_row = history_rows[0]
 
-    # assert that all main fields are present
     assert history_row['job_name']
     assert history_row['job_id']
     assert history_row['step_id'] is not None
@@ -510,7 +548,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
     assert history_row['message']
     for mname in EXPECTED_AGENT_JOBS_METRICS_COMMON:
         aggregator.assert_metric(mname, count=1)
-    assert check.agent_history._last_collection_time > now, "should update last collection time appropriately"
+    assert check.agent_history._last_collection_time > test_now, "should update last collection time appropriately"
     time.sleep(2)
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
