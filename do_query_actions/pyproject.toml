@@ -37,8 +37,8 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "azure-identity==1.25.2",
-    "boto3==1.42.54",
+    "azure-identity==1.25.3",
+    "boto3==1.42.71",
     "psycopg[c,pool]==3.3.3",
 ]
 
