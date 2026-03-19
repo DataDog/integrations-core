@@ -32,14 +32,14 @@ class BaseToolInput(BaseModel):
         return schema
 
 
-def _get_input_type(cls: type) -> type:
+def _get_input_type(cls: type) -> type[BaseToolInput]:
     """Extract the TInput type from a BaseTool subclass"""
     if resolved := _resolve_base_tool_arg(cls, {}):
         return resolved
     raise TypeError(f"{cls.__name__} must be parameterized with an input type: class MyTool(BaseTool[MyInput])")
 
 
-def _resolve_base_tool_arg(cls: type, type_map: dict[Any, Any]) -> type | None:
+def _resolve_base_tool_arg(cls: type, type_map: dict[Any, Any]) -> type[BaseToolInput] | None:
     """Resolve the TInput type from a BaseTool subclass, resolving through intermediate generics."""
     for base in get_original_bases(cls):
         origin = typing.get_origin(base) or base
@@ -95,7 +95,7 @@ class BaseTool[TInput: BaseToolInput](ABC):
         """Coerce raw dict to the typed Input class and delegate to __call__."""
         try:
             input_cls = _get_input_type(type(self))
-            validated = input_cls.model_validate(raw)
+            validated: TInput = input_cls.model_validate(raw)  # type: ignore[assignment]
         except (TypeError, ValueError) as e:
             return ToolResult(success=False, error=str(e))
         try:

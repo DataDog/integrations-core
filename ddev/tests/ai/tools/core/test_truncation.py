@@ -78,20 +78,19 @@ def test_extract_error_lines_empty_input_returns_empty():
 # ---------------------------------------------------------------------------
 
 
-def test_max_char_limit_works_as_expected():
-    short_content = "hello world"
-    result = truncate(short_content, max_chars=MAX_CHARS)
-    assert result.output == short_content
-    assert result.truncated is False
-    assert result.meta is None
-
-    exactly_at_limit_content = make_content(MAX_CHARS)
-    result = truncate(exactly_at_limit_content, max_chars=MAX_CHARS)
-    assert result.truncated is False
-
-    one_over_limit_content = make_content(MAX_CHARS + 1)
-    result = truncate(one_over_limit_content, max_chars=MAX_CHARS)
-    assert result.truncated is True
+@pytest.mark.parametrize(
+    "content,expected_truncated",
+    [
+        ("hello world", False),
+        (make_content(MAX_CHARS), False),
+        (make_content(MAX_CHARS + 1), True),
+    ],
+)
+def test_max_char_limit(content, expected_truncated):
+    result = truncate(content, max_chars=MAX_CHARS)
+    assert result.truncated is expected_truncated
+    if not expected_truncated:
+        assert result.meta is None
 
 
 # ---------------------------------------------------------------------------

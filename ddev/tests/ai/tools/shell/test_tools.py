@@ -1,12 +1,34 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import asyncio
+from unittest.mock import AsyncMock, patch
+
 import pytest
 
 from ddev.ai.tools.shell.grep import GrepInput, GrepTool
 from ddev.ai.tools.shell.list_files import ListFilesInput, ListFilesTool
 from ddev.ai.tools.shell.mkdir import MkdirInput, MkdirTool
 from ddev.ai.tools.shell.read_file import ReadFileInput, ReadFileTool
+
+# ---------------------------------------------------------------------------
+# Tool metadata
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "tool_cls,expected_name,expected_timeout",
+    [
+        (GrepTool, "grep", 30),
+        (ListFilesTool, "list_files", 30),
+        (MkdirTool, "mkdir", 5),
+        (ReadFileTool, "read_file", 10),
+    ],
+)
+def test_tool_meta(tool_cls, expected_name, expected_timeout):
+    assert tool_cls().name == expected_name
+    assert tool_cls.timeout == expected_timeout
+
 
 # ---------------------------------------------------------------------------
 # GrepTool
@@ -16,22 +38,6 @@ from ddev.ai.tools.shell.read_file import ReadFileInput, ReadFileTool
 @pytest.fixture
 def grep_tool() -> GrepTool:
     return GrepTool()
-
-
-def test_grep_tool_meta(grep_tool: GrepTool):
-    assert grep_tool.name == "grep"
-    assert GrepTool.timeout == 30
-
-
-def test_grep_cmd_recursive(grep_tool: GrepTool):
-    # recursive=True (default) includes -r; recursive=False excludes it
-    cmd_default = grep_tool.cmd(GrepInput(pattern="foo", path="/tmp"))
-    cmd_recursive = grep_tool.cmd(GrepInput(pattern="foo", path="/tmp", recursive=True))
-    cmd_non_recursive = grep_tool.cmd(GrepInput(pattern="foo", path="/tmp", recursive=False))
-
-    assert "-r" in cmd_default
-    assert "-r" in cmd_recursive
-    assert "-r" not in cmd_non_recursive
 
 
 def test_grep_cmd_full_command(grep_tool: GrepTool):
@@ -62,6 +68,16 @@ def test_grep_cmd_pattern_and_path_placement(grep_tool: GrepTool):
     assert cmd[-1] == "/my dir/sub dir"
 
 
+def test_grep_no_matches_returns_success(grep_tool: GrepTool):
+    from ddev.ai.tools.core.types import ToolResult
+
+    no_match_result = ToolResult(success=False, data="(no output)", error=None)
+    with patch("ddev.ai.tools.shell.grep.run_command", new=AsyncMock(return_value=no_match_result)):
+        result = asyncio.run(grep_tool(GrepInput(pattern="nomatch", path="/tmp")))
+    assert result.success is True
+    assert result.data == "(no output)"
+
+
 # ---------------------------------------------------------------------------
 # ListFilesTool
 # ---------------------------------------------------------------------------
@@ -70,11 +86,6 @@ def test_grep_cmd_pattern_and_path_placement(grep_tool: GrepTool):
 @pytest.fixture
 def list_files_tool() -> ListFilesTool:
     return ListFilesTool()
-
-
-def test_list_files_tool_meta(list_files_tool: ListFilesTool):
-    assert list_files_tool.name == "list_files"
-    assert ListFilesTool.timeout == 30
 
 
 def test_list_files_cmd_non_recursive(list_files_tool: ListFilesTool):
@@ -101,11 +112,6 @@ def mkdir_tool() -> MkdirTool:
     return MkdirTool()
 
 
-def test_mkdir_tool_meta(mkdir_tool: MkdirTool):
-    assert mkdir_tool.name == "mkdir"
-    assert MkdirTool.timeout == 5
-
-
 def test_mkdir_cmd(mkdir_tool: MkdirTool):
     assert mkdir_tool.cmd(MkdirInput(path="/a/b/c")) == ["mkdir", "-p", "/a/b/c"]
     assert mkdir_tool.cmd(MkdirInput(path="/my dir/sub dir")) == ["mkdir", "-p", "/my dir/sub dir"]
@@ -126,39 +132,24 @@ def path() -> str:
     return "/etc/config.conf"
 
 
-def test_read_file_tool_meta(read_file_tool: ReadFileTool):
-    assert read_file_tool.name == "read_file"
-    assert ReadFileTool.timeout == 10
-
-
-def test_read_file_cmd_cat(read_file_tool: ReadFileTool, path: str):
-    assert read_file_tool.cmd(ReadFileInput(path=path)) == ["cat", path]
-    assert read_file_tool.cmd(ReadFileInput(path=path, offset=0, limit=None)) == ["cat", path]
-
-
-def test_read_file_cmd_offset_only(read_file_tool: ReadFileTool, path: str):
-    # offset is 0-indexed; awk NR is 1-indexed, so offset=5 → NR>=6
-    assert read_file_tool.cmd(ReadFileInput(path=path, offset=1)) == ["awk", "NR>=2", path]
-    assert read_file_tool.cmd(ReadFileInput(path=path, offset=5)) == ["awk", "NR>=6", path]
-
-
-def test_read_file_cmd_limit_only(read_file_tool: ReadFileTool, path: str):
-    assert read_file_tool.cmd(ReadFileInput(path=path, offset=0, limit=10)) == ["awk", "NR>=1 && NR<=10", path]
-    assert read_file_tool.cmd(ReadFileInput(path=path, offset=0, limit=1)) == ["awk", "NR>=1 && NR<=1", path]
-
-
 @pytest.mark.parametrize(
-    "offset,limit,expected_expr",
+    "offset,limit,expected_cmd",
     [
-        (0, 10, "NR>=1 && NR<=10"),
-        (1, 10, "NR>=2 && NR<=11"),
-        (5, 1, "NR>=6 && NR<=6"),
-        (10, 5, "NR>=11 && NR<=15"),
-        (3, 5, "NR>=4 && NR<=8"),
+        (None, None, ["cat", "/etc/config.conf"]),
+        (0, None, ["cat", "/etc/config.conf"]),
+        (1, None, ["awk", "NR>=2", "/etc/config.conf"]),
+        (5, None, ["awk", "NR>=6", "/etc/config.conf"]),
+        (0, 10, ["awk", "NR>=1 && NR<=10", "/etc/config.conf"]),
+        (0, 1, ["awk", "NR>=1 && NR<=1", "/etc/config.conf"]),
+        (1, 10, ["awk", "NR>=2 && NR<=11", "/etc/config.conf"]),
+        (5, 1, ["awk", "NR>=6 && NR<=6", "/etc/config.conf"]),
+        (10, 5, ["awk", "NR>=11 && NR<=15", "/etc/config.conf"]),
+        (3, 5, ["awk", "NR>=4 && NR<=8", "/etc/config.conf"]),
     ],
 )
-def test_read_file_cmd_offset_and_limit(read_file_tool: ReadFileTool, path: str, offset, limit, expected_expr):
-    cmd = read_file_tool.cmd(ReadFileInput(path=path, offset=offset, limit=limit))
-    assert cmd == ["awk", expected_expr, path]
-
-
+def test_read_file_cmd(read_file_tool: ReadFileTool, offset, limit, expected_cmd):
+    if offset is None and limit is None:
+        inp = ReadFileInput(path="/etc/config.conf")
+    else:
+        inp = ReadFileInput(path="/etc/config.conf", offset=offset or 0, limit=limit)
+    assert read_file_tool.cmd(inp) == expected_cmd

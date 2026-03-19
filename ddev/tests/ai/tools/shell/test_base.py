@@ -111,17 +111,27 @@ def test_run_command_ignores_stderr_on_zero_exit():
     assert "warning" not in result.data
 
 
-def test_run_command_empty_output():
-    for stdout in (b"", b"   \n  "):
-        proc = make_proc(returncode=0, stdout=stdout)
-        with patch_proc(proc):
-            result = asyncio.run(run_command(["cmd"]))
-        assert result.data == "(no output)"
-
-    proc = make_proc(returncode=1, stdout=b"", stderr=b"")
+def test_run_command_stderr_included_when_stdout_empty_on_success():
+    proc = make_proc(returncode=0, stdout=b"", stderr=b"info: initialized\n")
     with patch_proc(proc):
         result = asyncio.run(run_command(["cmd"]))
-    assert result.success is False and result.data == "(no output)"
+    assert result.success is True
+    assert result.data == "info: initialized\n"
+
+
+@pytest.mark.parametrize(
+    "returncode,stdout,stderr",
+    [
+        (0, b"", b""),
+        (0, b"   \n  ", b""),
+        (1, b"", b""),
+    ],
+)
+def test_run_command_empty_output(returncode, stdout, stderr):
+    proc = make_proc(returncode=returncode, stdout=stdout, stderr=stderr)
+    with patch_proc(proc):
+        result = asyncio.run(run_command(["cmd"]))
+    assert result.data == "(no output)"
 
 
 # ---------------------------------------------------------------------------

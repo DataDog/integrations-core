@@ -7,7 +7,7 @@ from typing import Annotated
 import pytest
 from pydantic import Field
 
-from ddev.ai.tools.core.base import BaseToolInput, BaseTool, _get_input_type
+from ddev.ai.tools.core.base import BaseTool, BaseToolInput, _get_input_type
 from ddev.ai.tools.core.types import ToolResult
 
 # ---------------------------------------------------------------------------
@@ -203,15 +203,17 @@ def test_run_valid_input_returns_success(echo_tool: EchoTool):
 # --- run(): input validation failures ---
 
 
-def test_run_missing_required_field_returns_failure(echo_tool: EchoTool):
-    result = asyncio.run(echo_tool.run({}))
+@pytest.mark.parametrize(
+    "raw",
+    [
+        {},
+        {"message": "hi", "extra": "oops"},
+    ],
+)
+def test_run_invalid_input_returns_failure(echo_tool: EchoTool, raw: dict):
+    result = asyncio.run(echo_tool.run(raw))
     assert result.success is False
     assert result.error is not None
-
-
-def test_run_unexpected_extra_field_returns_failure(echo_tool: EchoTool):
-    result = asyncio.run(echo_tool.run({"message": "hi", "extra": "oops"}))
-    assert result.success is False
 
 
 # --- run(): __call__ exception handling ---

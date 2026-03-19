@@ -12,8 +12,12 @@ from .base import CmdTool
 
 class ReadFileInput(BaseToolInput):
     path: Annotated[str, Field(description="Absolute or relative path to the file to read")]
-    offset: Annotated[int, Field(description="Line number to start reading from (0-indexed, default: 0). Must be >= 0.")] = 0
-    limit: Annotated[int | None, Field(description="Number of lines to read (default: all remaining lines). Must be >= 1.")] = None
+    offset: Annotated[
+        int, Field(description="Line number to start reading from (0-indexed, default: 0). Must be >= 0.", ge=0)
+    ] = 0
+    limit: Annotated[
+        int | None, Field(description="Number of lines to read (default: all remaining lines). Must be >= 1.", ge=1)
+    ] = None
 
 
 class ReadFileTool(CmdTool[ReadFileInput]):
@@ -27,8 +31,8 @@ class ReadFileTool(CmdTool[ReadFileInput]):
 
     def cmd(self, tool_input: ReadFileInput) -> list[str]:
         path = tool_input.path
-        offset = max(0, tool_input.offset)
-        limit = max(1, tool_input.limit) if tool_input.limit is not None else None
+        offset = tool_input.offset
+        limit = tool_input.limit
         if offset == 0 and limit is None:
             return ["cat", path]
         start = offset + 1

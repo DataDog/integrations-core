@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
 
+import pytest
+
 from ddev.ai.tools.core.registry import ALLOWED_TOOL_CALLERS, ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
 
@@ -41,21 +43,17 @@ class FakeTool:
 # ---------------------------------------------------------------------------
 
 
-def test_registers_tools_by_name():
-    tool = FakeTool("alpha")
-    registry = ToolRegistry([tool])
-    assert registry._tools["alpha"] is tool
-
-
-def test_empty_list_creates_empty_registry():
-    registry = ToolRegistry([])
-    assert registry._tools == {}
-
-
-def test_multiple_tools_all_registered():
-    tools = [FakeTool("a"), FakeTool("b"), FakeTool("c")]
+@pytest.mark.parametrize(
+    "tools,expected_names",
+    [
+        ([FakeTool("alpha")], {"alpha"}),
+        ([], set()),
+        ([FakeTool("a"), FakeTool("b"), FakeTool("c")], {"a", "b", "c"}),
+    ],
+)
+def test_registry_registers_tools(tools, expected_names):
     registry = ToolRegistry(tools)
-    assert set(registry._tools.keys()) == {"a", "b", "c"}
+    assert set(registry._tools.keys()) == expected_names
 
 
 def test_duplicate_name_last_one_wins():

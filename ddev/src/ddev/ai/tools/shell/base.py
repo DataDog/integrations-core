@@ -5,12 +5,12 @@ import asyncio
 from abc import abstractmethod
 from typing import ClassVar
 
-from ddev.ai.tools.core.base import BaseTool
+from ddev.ai.tools.core.base import BaseTool, BaseToolInput
 from ddev.ai.tools.core.truncation import TruncateResult, truncate
 from ddev.ai.tools.core.types import ToolResult
 
 
-class CmdTool[TInput](BaseTool[TInput]):
+class CmdTool[TInput: BaseToolInput](BaseTool[TInput]):
     """Base for tools that execute shell commands."""
 
     timeout: ClassVar[int] = 10
@@ -46,6 +46,8 @@ async def run_command(cmd: list[str], timeout: int = 10) -> ToolResult:
     output = stdout
     if proc.returncode != 0 and stderr:
         output = (output + "\n" + stderr) if output else stderr
+    elif not output and stderr:
+        output = stderr
 
     if not output.strip():
         return ToolResult(success=proc.returncode == 0, data="(no output)")

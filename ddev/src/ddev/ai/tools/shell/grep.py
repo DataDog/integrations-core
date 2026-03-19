@@ -6,8 +6,9 @@ from typing import Annotated
 from pydantic import Field
 
 from ddev.ai.tools.core.base import BaseToolInput
+from ddev.ai.tools.core.types import ToolResult
 
-from .base import CmdTool
+from .base import CmdTool, run_command
 
 
 class GrepInput(BaseToolInput):
@@ -26,6 +27,13 @@ class GrepTool(CmdTool[GrepInput]):
     @property
     def name(self) -> str:
         return "grep"
+
+    async def __call__(self, tool_input: GrepInput) -> ToolResult:
+        result = await run_command(self.cmd(tool_input), timeout=self.timeout)
+        # grep exits 1 when no lines match — not a failure
+        if not result.success and result.error is None:
+            return result.model_copy(update={"success": True})
+        return result
 
     def cmd(self, tool_input: GrepInput) -> list[str]:
         cmd = ["grep", "-n", "-E"]
