@@ -8,6 +8,7 @@ Tests for security validation of configuration fields marked with `require_trust
 import pytest
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.models.validation.security import SecurityConfig
 
 from .config_models import ConfigMixin
@@ -86,3 +87,42 @@ def test_non_secure_field_allowed_from_any_provider(dd_run_check):
 
     # Assert
     assert check.config.timeout == 30
+
+
+def test_fallback_global_secure_field_blocked_from_untrusted_provider(dd_run_check):
+    """Fields in GLOBAL_SECURE_FIELDS but not in the model's SECURE_FIELD_NAMES are caught by the fallback."""
+    instance = {'tls_private_key': '/etc/ssl/key.pem'}
+    security_config = SecurityConfig(check_name='test', provider='kubernetes', ignore_untrusted_file_params=True)
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    with pytest.raises(ConfigurationError, match="tls_private_key.*not allowed from untrusted provider"):
+        dd_run_check(check)
+
+
+def test_secure_field_allowed_via_allowlist(dd_run_check):
+    """Secure fields with paths in the allowlist are allowed."""
+    instance = {'tls_cert': '/etc/ssl/cert.pem'}
+    security_config = SecurityConfig(
+        check_name='test', provider='kubernetes', ignore_untrusted_file_params=True, file_paths_allowlist=['/etc/ssl']
+    )
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    dd_run_check(check)
+
+    assert check.config.tls_cert == '/etc/ssl/cert.pem'
+
+
+def test_secure_field_allowed_when_check_excluded(dd_run_check):
+    """Secure fields are allowed when the check is in the excluded list."""
+    instance = {'tls_cert': '/etc/ssl/cert.pem'}
+    security_config = SecurityConfig(
+        check_name='test', provider='kubernetes', ignore_untrusted_file_params=True, excluded_checks=['test']
+    )
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    dd_run_check(check)
+
+    assert check.config.tls_cert == '/etc/ssl/cert.pem'
