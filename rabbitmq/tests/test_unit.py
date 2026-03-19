@@ -26,12 +26,10 @@ pytestmark = [pytest.mark.unit, common.requires_management]
 
 def test__get_data(check, mock_http):
     mock_http.get.side_effect = [requests.exceptions.HTTPError, ValueError]
-    with pytest.raises(RabbitMQException) as e:
+    with pytest.raises(RabbitMQException):
         check._get_data('')
-        assert isinstance(e, RabbitMQException)
-    with pytest.raises(RabbitMQException) as e:
+    with pytest.raises(RabbitMQException):
         check._get_data('')
-        assert isinstance(e, RabbitMQException)
 
 
 def test_status_check(check, aggregator):
