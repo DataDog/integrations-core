@@ -48,6 +48,14 @@ class FileDataEntryPlatformVersion(FileDataEntry):
     Python_Version: str  # Target Python version (e.g. 3.12)
 
 
+class MetricBatches(TypedDict):
+    size: list[dict]
+    integration_count: list[dict]
+    dependency_count: list[dict]
+    total_size: list[dict]
+    sizes: dict[str, dict[str, int]]
+
+
 class CommitEntry(TypedDict):
     Size_Bytes: int  # Total size in bytes at commit
     Version: str  # Version of the Integration/Dependency at commit
@@ -856,7 +864,7 @@ def build_metrics(
     compressed: bool,
     branch: str,
     size_source: str,
-) -> tuple[list[dict], list[dict], list[dict], list[dict], dict[str, dict[str, int]]]:
+) -> MetricBatches:
     """Build size, integration count, dependency count, and total size metrics from module data."""
     metric_name = "datadog.agent_integrations"
     size_type = "compressed" if compressed else "uncompressed"
@@ -948,7 +956,13 @@ def build_metrics(
                 }
             )
 
-    return size_metrics, n_integrations_metrics, n_dependencies_metrics, total_size_metrics, sizes
+    return MetricBatches(
+        size=size_metrics,
+        integration_count=n_integrations_metrics,
+        dependency_count=n_dependencies_metrics,
+        total_size=total_size_metrics,
+        sizes=sizes,
+    )
 
 
 def dispatch_metrics(
@@ -985,19 +999,20 @@ def send_metrics_to_dd(
         api_host=f"https://api.{config_file_info['site']}",
     )
 
-    size_metrics, n_integrations_metrics, n_dependencies_metrics, total_size_metrics, sizes = build_metrics(
-        commit, modules, compressed, branch, size_source
-    )
+    metrics = build_metrics(commit, modules, compressed, branch, size_source)
 
     summary_lines = [
         f"Platform: {platform}, Python: {py_version}, Size: "
         f"{convert_to_human_readable_size(size_bytes)} ({size_bytes} bytes)"
-        for platform, py_versions in sizes.items()
+        for platform, py_versions in metrics["sizes"].items()
         for py_version, size_bytes in py_versions.items()
     ]
 
     total_metrics_count = (
-        len(size_metrics) + len(n_integrations_metrics) + len(n_dependencies_metrics) + len(total_size_metrics)
+        len(metrics["size"])
+        + len(metrics["integration_count"])
+        + len(metrics["dependency_count"])
+        + len(metrics["total_size"])
     )
     app.display(f"Sending {total_metrics_count} metrics to Datadog...")
     app.display("\nMetric summary:")
@@ -1006,14 +1021,14 @@ def send_metrics_to_dd(
     app.display_debug(f"Size source: {size_source}")
 
     batches = [
-        (size_metrics, "Metrics"),
-        (n_integrations_metrics, "N integrations metrics"),
-        (n_dependencies_metrics, "N dependencies metrics"),
-        (total_size_metrics, "Total size metrics"),
+        (metrics["size"], "Metrics"),
+        (metrics["integration_count"], "N integrations metrics"),
+        (metrics["dependency_count"], "N dependencies metrics"),
+        (metrics["total_size"], "Total size metrics"),
     ]
-    for metrics, label in batches:
+    for batch, label in batches:
         try:
-            dispatch_metrics(app, metrics, label)
+            dispatch_metrics(app, batch, label)
         except Exception:
             app.display_warning(f"Failed to send {label}")
 

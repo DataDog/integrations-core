@@ -477,12 +477,12 @@ def test_build_metrics():
         "ddev.cli.size.utils.common_funcs.get_commit_data",
         return_value=(fake_timestamp, fake_message, fake_tickets, fake_prs),
     ):
-        size_metrics, integration_metrics, dependency_metrics, total_metrics, sizes = build_metrics(
+        result = build_metrics(
             commit="abc123",
             modules=modules,
             compressed=True,
             branch="main",
-            size_source="local",
+            size_source="declared",
         )
 
     common_size_tags = [
@@ -493,10 +493,10 @@ def test_build_metrics():
         "pr_number:9999",
         f"commit_message:{fake_message}",
         "branch:main",
-        "size_source:local",
+        "size_source:declared",
     ]
 
-    assert size_metrics == [
+    assert result["size"] == [
         {
             "metric": "datadog.agent_integrations.size",
             "type": "gauge",
@@ -548,7 +548,7 @@ def test_build_metrics():
         "compression:compressed",
         f"metrics_version:{METRIC_VERSION}",
         "branch:main",
-        "size_source:local",
+        "size_source:declared",
     ]
     macos_common_tags = [
         "platform:macos-x86_64",
@@ -557,10 +557,10 @@ def test_build_metrics():
         "compression:compressed",
         f"metrics_version:{METRIC_VERSION}",
         "branch:main",
-        "size_source:local",
+        "size_source:declared",
     ]
 
-    assert integration_metrics == [
+    assert result["integration_count"] == [
         {
             "metric": "datadog.agent_integrations.integration_count",
             "type": "gauge",
@@ -575,7 +575,7 @@ def test_build_metrics():
         },
     ]
 
-    assert dependency_metrics == [
+    assert result["dependency_count"] == [
         {
             "metric": "datadog.agent_integrations.dependency_count",
             "type": "gauge",
@@ -590,7 +590,7 @@ def test_build_metrics():
         },
     ]
 
-    assert total_metrics == [
+    assert result["total_size"] == [
         {
             "metric": "datadog.agent_integrations.total_size",
             "type": "gauge",
@@ -605,7 +605,7 @@ def test_build_metrics():
         },
     ]
 
-    assert sizes == {
+    assert result["sizes"] == {
         "linux-x86_64": {"3.12": 1500},
         "macos-x86_64": {"3.12": 2000},
     }
