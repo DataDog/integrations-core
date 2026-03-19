@@ -139,7 +139,6 @@ def test_counter_given_exclude_labels_submits_monotonically_increasing_sums(
     """.strip()
 
     check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
-    honda_tags = ['endpoint:test', 'make:honda']
 
     mock_http_response(counter_t0)
     dd_run_check(check)
