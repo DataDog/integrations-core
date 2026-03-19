@@ -938,13 +938,27 @@ def build_metrics(
 
 def dispatch_metrics(
     app: Application,
-    org: str | None,
-    key: str | None,
     metrics: list[dict],
     label: str,
 ) -> None:
-    """Initialize the Datadog API client and send a batch of metrics."""
-    config_file_info = app.config.orgs.get(org, {}) if org else {'api_key': key, 'site': 'datadoghq.com'}
+    """Send a batch of metrics to Datadog."""
+    app.display_debug(f"Sending {label}: {metrics}")
+    result = api.Metric.send(metrics=metrics)
+    if result.get("status") != "ok":
+        raise RuntimeError(f"Failed to send {label}: {result}")
+
+
+def send_metrics_to_dd(
+    app: Application,
+    commit: str,
+    modules: list[FileDataEntryPlatformVersion],
+    org: str | None,
+    api_key: str | None,
+    compressed: bool,
+    branch: str,
+    size_source: str,
+) -> None:
+    config_file_info = app.config.orgs.get(org, {}) if org else {'api_key': api_key, 'site': 'datadoghq.com'}
 
     if "api_key" not in config_file_info:
         raise RuntimeError("No API key found in config file")
@@ -956,20 +970,6 @@ def dispatch_metrics(
         api_host=f"https://api.{config_file_info['site']}",
     )
 
-    app.display_debug(f"Sending {label}: {metrics}")
-    api.Metric.send(metrics=metrics)
-
-
-def send_metrics_to_dd(
-    app: Application,
-    commit: str,
-    modules: list[FileDataEntryPlatformVersion],
-    org: str | None,
-    key: str | None,
-    compressed: bool,
-    branch: str,
-    size_source: str,
-) -> None:
     size_metrics, n_integrations_metrics, n_dependencies_metrics, total_size_metrics, sizes = build_metrics(
         commit, modules, compressed, branch, size_source
     )
@@ -981,24 +981,31 @@ def send_metrics_to_dd(
         for py_version, size_bytes in py_versions.items()
     ]
 
-    total_metrics = (
+    total_metrics_count = (
         len(size_metrics) + len(n_integrations_metrics) + len(n_dependencies_metrics) + len(total_size_metrics)
     )
-    app.display(f"Sending {total_metrics} metrics to Datadog...")
+    app.display(f"Sending {total_metrics_count} metrics to Datadog...")
     app.display("\nMetric summary:")
     app.display("\n".join(summary_lines))
     app.display_debug(f"Branch: {branch}")
     app.display_debug(f"Size source: {size_source}")
 
-    dispatch_metrics(app, org, key, size_metrics, "Metrics")
-    dispatch_metrics(app, org, key, n_integrations_metrics, "N integrations metrics")
-    dispatch_metrics(app, org, key, n_dependencies_metrics, "N dependencies metrics")
-    dispatch_metrics(app, org, key, total_size_metrics, "Total size metrics")
+    batches = [
+        (size_metrics, "Metrics"),
+        (n_integrations_metrics, "N integrations metrics"),
+        (n_dependencies_metrics, "N dependencies metrics"),
+        (total_size_metrics, "Total size metrics"),
+    ]
+    for metrics, label in batches:
+        try:
+            dispatch_metrics(app, metrics, label)
+        except Exception:
+            app.display_warning(f"Failed to send {label}")
 
 
 def get_commit_data(commit: str) -> tuple[int, str, list[str], list[str]]:
     '''
-    Gets the timestamp, message, tickets and PRs of a given commit. If no commit is provided, it uses the last commit.
+    Gets the timestamp, message, tickets and PRs of a given commit.
     '''
     result = subprocess.run(
         ["git", "show", "-s", "--format=%ct,%s", commit],

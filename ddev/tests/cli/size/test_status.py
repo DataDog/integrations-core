@@ -126,6 +126,12 @@ def test_status(ddev, mock_size_status, args):
         ("linux-x86_64", "3.12", [], None, "test-key", "abc123", None, False, True),
         # Invalid format
         ("linux-x86_64", "3.12", ["invalid-format"], None, None, None, None, False, True),
+        # Happy path: to_dd_key with commit and branch
+        ("linux-x86_64", "3.12", [], None, "test-key", "abc123", "main", False, False),
+        # --to-dd-org without --commit
+        ("linux-x86_64", "3.12", [], "test-org", None, None, "main", False, True),
+        # --to-dd-org without --branch
+        ("linux-x86_64", "3.12", [], "test-org", None, "abc123", None, False, True),
         # Both to_dd_org and to_dd_key
         ("linux-x86_64", "3.12", [], "test-org", "test-key", None, None, False, True),
         # Multiple errors
@@ -141,6 +147,9 @@ def test_status(ddev, mock_size_status, args):
         "to_dd_key_without_commit",
         "to_dd_key_without_branch",
         "invalid_format",
+        "valid_to_dd_key_with_commit_and_branch",
+        "to_dd_org_without_commit",
+        "to_dd_org_without_branch",
         "to_dd_org_and_to_dd_key",
         "multiple_errors",
     ],
