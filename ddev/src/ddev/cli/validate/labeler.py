@@ -72,9 +72,11 @@ def labeler(app: Application, sync: bool):
     for key in duplicate_keys:
         if sync:
             # Duplicates are removed by default as loading the yaml file discards the first occurrence
-            app.display_info(f'Removing duplicate key `{key}` from labeler config')
+            app.display_info(
+                f'Removing duplicate key `{key}` from labeler config. Only the last occurrence will be kept.'
+            )
         else:
-            message = f'Duplicate key `{key}` found in labeler config; running `--sync` will keep the second occurrence'
+            message = f'Duplicate key `{key}` found in labeler config; running `--sync` will keep the last occurrence'
             tracker.error((str(pr_labels_config_path),), message=message)
 
     # Build mapping from directory (in glob patterns) to label key
