@@ -129,6 +129,60 @@ def test_auth_token_blocked_from_untrusted_provider(dd_run_check):
         dd_run_check(check)
 
 
+def test_auth_token_allowed_via_allowlist(dd_run_check):
+    """Object-typed secure fields are allowed when all nested file paths are in the allowlist."""
+    instance = {
+        'auth_token': {
+            'reader': {'type': 'file', 'path': '/etc/secret'},
+            'writer': {'type': 'header', 'name': 'Authorization'},
+        }
+    }
+    security_config = SecurityConfig(
+        check_name='test', provider='kubernetes', ignore_untrusted_file_params=True, file_paths_allowlist=['/etc']
+    )
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    dd_run_check(check)
+
+    assert check.config.auth_token.reader['path'] == '/etc/secret'
+
+
+def test_auth_token_blocked_when_path_not_in_allowlist(dd_run_check):
+    """auth_token with a file reader is blocked when the path is not covered by the allowlist."""
+    instance = {
+        'auth_token': {
+            'reader': {'type': 'file', 'path': '/var/secrets/token'},
+            'writer': {'type': 'header', 'name': 'Authorization'},
+        }
+    }
+    security_config = SecurityConfig(
+        check_name='test', provider='kubernetes', ignore_untrusted_file_params=True, file_paths_allowlist=['/etc']
+    )
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    with pytest.raises(Exception, match="(?s)ConfigurationError.*auth_token.*not allowed from untrusted provider"):
+        dd_run_check(check)
+
+
+def test_auth_token_oauth_allowed_from_untrusted_provider(dd_run_check):
+    """auth_token with a non-file reader type is allowed since it has no local file paths."""
+    instance = {
+        'auth_token': {
+            'reader': {'type': 'oauth', 'url': 'https://example.com/token', 'client_id': 'id', 'client_secret': 's'},
+            'writer': {'type': 'header', 'name': 'Authorization'},
+        }
+    }
+    security_config = SecurityConfig(check_name='test', provider='kubernetes', ignore_untrusted_file_params=True)
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    dd_run_check(check)
+
+    assert check.config.auth_token.reader['type'] == 'oauth'
+
+
 def test_secure_field_allowed_when_check_excluded(dd_run_check):
     """Secure fields are allowed when the check is in the excluded list."""
     instance = {'tls_cert': '/etc/ssl/cert.pem'}

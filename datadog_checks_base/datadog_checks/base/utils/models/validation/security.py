@@ -41,7 +41,23 @@ class SecurityConfig:
         return check_name in self.excluded_checks
 
 
+def _get_auth_token_file_paths(value: dict) -> list[str]:
+    """Extract file paths from an auth_token object when reader.type is 'file'."""
+    reader = value.get('reader')
+    if not isinstance(reader, dict):
+        return []
+    if reader.get('type') != 'file':
+        return []
+    paths: list[str] = []
+    for key in ('path', 'private_key_path'):
+        path = reader.get(key)
+        if isinstance(path, str):
+            paths.append(path)
+    return paths
+
+
 def validate_require_trusted_provider(
+    field_name: str,
     value: object,
     security_config: SecurityConfig | None = None,
 ) -> bool:
@@ -56,6 +72,13 @@ def validate_require_trusted_provider(
         return True
     if isinstance(value, str):
         return security_config.is_file_path_allowed(value)
+    # auth_token is the only non-string field with require_trusted_provider;
+    # validate its reader.path when reader.type is 'file'
+    if field_name == 'auth_token' and isinstance(value, dict):
+        file_paths = _get_auth_token_file_paths(value)
+        if file_paths:
+            return all(security_config.is_file_path_allowed(p) for p in file_paths)
+        return True
     return False
 
 
@@ -65,6 +88,6 @@ def check_field_trusted_provider(
     security_config: SecurityConfig | None,
 ) -> None:
     """Raise ValueError if the field value is not allowed from an untrusted provider."""
-    if not validate_require_trusted_provider(value, security_config):
+    if not validate_require_trusted_provider(field_name, value, security_config):
         provider = security_config.provider
         raise ValueError(f"Field '{field_name}' is not allowed from untrusted provider '{provider}'")
