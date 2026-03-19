@@ -84,6 +84,11 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
         if f in instance:
             args[f] = instance[f]
 
+    # cluster_name has a spec example value ('my_cluster') that is not a real default —
+    # only use it when the user explicitly configures it.
+    if 'cluster_name' not in instance:
+        args['cluster_name'] = None
+
     # Handle deprecated 'user' option
     # If both 'user' and 'username' are present, 'username' takes precedence
     if 'user' in instance:
