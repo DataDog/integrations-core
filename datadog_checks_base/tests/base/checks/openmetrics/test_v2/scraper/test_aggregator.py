@@ -25,6 +25,19 @@ car_counter_total{make="toyota", model="corolla", color="#900C3F"} 55
 car_counter_total{make="toyota", model="corolla", color="#DAF7A6"} 60
 """.strip()
 
+SUMMARY_PAYLOAD = """
+# HELP rpc_duration RPC latency distributions
+# TYPE rpc_duration summary
+rpc_duration{handler="api", color="red", quantile="0.5"} 100
+rpc_duration{handler="api", color="blue", quantile="0.5"} 80
+rpc_duration{handler="api", color="red", quantile="0.99"} 500
+rpc_duration{handler="api", color="blue", quantile="0.99"} 400
+rpc_duration_sum{handler="api", color="red"} 5000
+rpc_duration_sum{handler="api", color="blue"} 3000
+rpc_duration_count{handler="api", color="red"} 50
+rpc_duration_count{handler="api", color="blue"} 30
+""".strip()
+
 HISTOGRAM_PAYLOAD = """
 # HELP request_duration A histogram of request durations
 # TYPE request_duration histogram
@@ -94,6 +107,33 @@ def test_counter_given_exclude_labels_submits_summed_value(aggregator, dd_run_ch
         185.0,
         metric_type=aggregator.MONOTONIC_COUNT,
         tags=['endpoint:test', 'make:toyota', 'model:corolla'],
+    )
+
+
+def test_summary_given_exclude_labels_passes_through_unchanged(aggregator, dd_run_check, mock_http_response):
+    mock_http_response(SUMMARY_PAYLOAD)
+    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'test.rpc_duration.sum',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=['endpoint:test', 'handler:api'],
+    )
+    aggregator.assert_metric(
+        'test.rpc_duration.count',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=['endpoint:test', 'handler:api'],
+    )
+    aggregator.assert_metric(
+        'test.rpc_duration.quantile',
+        metric_type=aggregator.GAUGE,
+        tags=['endpoint:test', 'handler:api', 'quantile:0.5'],
+    )
+    aggregator.assert_metric(
+        'test.rpc_duration.quantile',
+        metric_type=aggregator.GAUGE,
+        tags=['endpoint:test', 'handler:api', 'quantile:0.99'],
     )
 
 
