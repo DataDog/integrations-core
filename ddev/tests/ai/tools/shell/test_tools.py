@@ -21,7 +21,6 @@ from ddev.ai.tools.shell.mkdir import MkdirInput, MkdirTool
         (GrepTool, "grep", 30),
         (ListFilesTool, "list_files", 30),
         (MkdirTool, "mkdir", 5),
-        (ReadFileTool, "read_file", 10),
     ],
 )
 def test_tool_meta(tool_cls, expected_name, expected_timeout):

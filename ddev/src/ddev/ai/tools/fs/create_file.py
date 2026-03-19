@@ -1,19 +1,20 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated
 
+from pydantic import Field
+
+from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
 from .base import TextEdit
 
 
-@dataclass
-class CreateFileInput:
-    path: Annotated[str, "Path of the file to create"]
-    content: Annotated[str, "Content of the file to create"] = ""
+class CreateFileInput(BaseToolInput):
+    path: Annotated[str, Field(description="Path of the file to create")]
+    content: Annotated[str, Field(description="Content of the file to create")] = ""
 
 
 class CreateFileTool(TextEdit[CreateFileInput]):

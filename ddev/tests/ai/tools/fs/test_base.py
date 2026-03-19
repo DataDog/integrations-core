@@ -1,11 +1,12 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from dataclasses import dataclass
 from typing import Annotated
 
 import pytest
+from pydantic import Field
 
+from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.fs.base import TextEdit
 from ddev.ai.tools.fs.file_registry import FileRegistry
@@ -15,9 +16,8 @@ from ddev.ai.tools.fs.file_registry import FileRegistry
 # ---------------------------------------------------------------------------
 
 
-@dataclass
-class DummyInput:
-    path: Annotated[str, "Path"]
+class DummyInput(BaseToolInput):
+    path: Annotated[str, Field(description="Path")]
 
 
 class DummyTool(TextEdit[DummyInput]):

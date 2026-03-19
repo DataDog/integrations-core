@@ -1,19 +1,20 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated
 
+from pydantic import Field
+
+from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
 from .base import TextEdit
 
 
-@dataclass
-class AppendFileInput:
-    path: Annotated[str, "Path of the file to append to"]
-    content: Annotated[str, "Content to append to the file"]
+class AppendFileInput(BaseToolInput):
+    path: Annotated[str, Field(description="Path of the file to append to")]
+    content: Annotated[str, Field(description="Content to append to the file")]
 
 
 class AppendFileTool(TextEdit[AppendFileInput]):

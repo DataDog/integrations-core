@@ -1,23 +1,27 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated
 
+from pydantic import Field
+
+from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
 from .base import TextEdit
 
 
-@dataclass
-class EditFileInput:
-    path: Annotated[str, "Path of the file to edit"]
+class EditFileInput(BaseToolInput):
+    path: Annotated[str, Field(description="Path of the file to edit")]
     old_string: Annotated[
         str,
-        "Exact text to replace. Must appear exactly once in the file (hint: include surrounding context if needed)",
+        Field(
+            description="Exact text to replace. Must appear exactly once in the file \
+        (hint: include surrounding context if needed)"
+        ),
     ]
-    new_string: Annotated[str, "Text to replace old_string with"]
+    new_string: Annotated[str, Field(description="Text to replace old_string with")]
 
 
 class EditFileTool(TextEdit[EditFileInput]):

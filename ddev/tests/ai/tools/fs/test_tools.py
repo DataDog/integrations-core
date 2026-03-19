@@ -55,8 +55,17 @@ def known_file(tmp_path, read_tool: ReadFileTool):
 # ---------------------------------------------------------------------------
 
 
-def test_read_file_tool_meta(read_tool: ReadFileTool) -> None:
-    assert read_tool.name == "read_file"
+@pytest.mark.parametrize(
+    "tool_cls,expected_name",
+    [
+        (ReadFileTool, "read_file"),
+        (CreateFileTool, "create_file"),
+        (EditFileTool, "edit_file"),
+        (AppendFileTool, "append_file"),
+    ],
+)
+def test_tool_meta(tool_cls, expected_name) -> None:
+    assert tool_cls(FileRegistry()).name == expected_name
 
 
 def test_read_file_success(read_tool: ReadFileTool, tmp_path) -> None:
@@ -95,8 +104,7 @@ def test_read_file_missing_file(read_tool: ReadFileTool, tmp_path) -> None:
         (1, 1, "b\n"),
         (2, 10, "c\n"),  # limit exceeds remaining lines
         (100, None, ""),  # offset beyond EOF
-        (0, 0, "a\n"),  # limit 0 is clamped to 1
-        (1.9, 1, "b\n"),  # safe_int coercion
+        (1.0, 1, "b\n"),
     ],
 )
 def test_read_file_with_offset_and_limit(read_tool: ReadFileTool, tmp_path, offset, limit, expected) -> None:
@@ -122,10 +130,6 @@ def test_read_file_no_trailing_newline(read_tool: ReadFileTool, tmp_path) -> Non
 # ---------------------------------------------------------------------------
 # CreateFileTool
 # ---------------------------------------------------------------------------
-
-
-def test_create_file_tool_meta(create_tool: CreateFileTool) -> None:
-    assert create_tool.name == "create_file"
 
 
 def test_create_file_success(create_tool: CreateFileTool, tmp_path) -> None:
@@ -182,10 +186,6 @@ def test_create_file_registers_in_registry(create_tool: CreateFileTool, registry
 # ---------------------------------------------------------------------------
 
 
-def test_edit_file_tool_meta(edit_tool: EditFileTool) -> None:
-    assert edit_tool.name == "edit_file"
-
-
 def test_edit_file_success(edit_tool: EditFileTool, known_file) -> None:
     result = asyncio.run(edit_tool.run({"path": str(known_file), "old_string": "line two", "new_string": "line TWO"}))
 
@@ -204,24 +204,18 @@ def test_edit_file_requires_prior_read(edit_tool: EditFileTool, tmp_path) -> Non
     assert "read the file first" in result.error
 
 
-def test_edit_file_fails_if_old_string_not_found(edit_tool: EditFileTool, known_file) -> None:
-    result = asyncio.run(edit_tool.run({"path": str(known_file), "old_string": "does not exist", "new_string": "x"}))
+@pytest.mark.parametrize("old_string", ["does not exist", ""])
+def test_edit_file_fails_if_old_string_not_found_or_empty(edit_tool: EditFileTool, known_file, old_string) -> None:
+    result = asyncio.run(edit_tool.run({"path": str(known_file), "old_string": old_string, "new_string": "x"}))
 
     assert result.success is False
     assert "not found" in result.error
 
 
-def test_edit_file_fails_if_old_string_empty(edit_tool: EditFileTool, known_file) -> None:
-    result = asyncio.run(edit_tool.run({"path": str(known_file), "old_string": "", "new_string": "x"}))
-
-    assert result.success is False
-    assert "not found" in result.error
-
-
-def test_edit_file_fails_if_old_string_ambiguous(edit_tool: EditFileTool, registry: FileRegistry, tmp_path) -> None:
+def test_edit_file_fails_if_old_string_ambiguous(edit_tool: EditFileTool, read_tool: ReadFileTool, tmp_path) -> None:
     f = tmp_path / "dup.txt"
     f.write_text("foo\nfoo\nfoo\n", encoding="utf-8")
-    asyncio.run(ReadFileTool(registry).run({"path": str(f)}))
+    asyncio.run(read_tool.run({"path": str(f)}))
 
     result = asyncio.run(edit_tool.run({"path": str(f), "old_string": "foo", "new_string": "bar"}))
 
@@ -247,29 +241,24 @@ def test_edit_file_updates_registry(edit_tool: EditFileTool, registry: FileRegis
     assert registry.verify(str(known_file), "line one\nline two\nline three\n") is False
 
 
-def test_edit_file_normalizes_crlf_in_old_string(edit_tool: EditFileTool, registry: FileRegistry, tmp_path) -> None:
+@pytest.mark.parametrize(
+    "file_content,old_string,new_string,expected",
+    [
+        ("line one\nline two\n", "line one\r\nline two", "replaced", "replaced\n"),  # CRLF in old_string
+        ("line one\n", "line one", "A\r\nB", "A\nB\n"),  # CRLF in new_string
+    ],
+)
+def test_edit_file_normalizes_crlf(
+    edit_tool: EditFileTool, read_tool: ReadFileTool, tmp_path, file_content, old_string, new_string, expected
+) -> None:
     f = tmp_path / "file.txt"
-    f.write_text("line one\nline two\n", encoding="utf-8")
-    asyncio.run(ReadFileTool(registry).run({"path": str(f)}))
+    f.write_text(file_content, encoding="utf-8")
+    asyncio.run(read_tool.run({"path": str(f)}))
 
-    # old_string uses CRLF — should still match the LF content on disk
-    result = asyncio.run(
-        edit_tool.run({"path": str(f), "old_string": "line one\r\nline two", "new_string": "replaced"})
-    )
+    result = asyncio.run(edit_tool.run({"path": str(f), "old_string": old_string, "new_string": new_string}))
 
     assert result.success is True
-    assert f.read_text(encoding="utf-8") == "replaced\n"
-
-
-def test_edit_file_normalizes_crlf_in_new_string(edit_tool: EditFileTool, registry: FileRegistry, tmp_path) -> None:
-    f = tmp_path / "file.txt"
-    f.write_text("line one\n", encoding="utf-8")
-    asyncio.run(ReadFileTool(registry).run({"path": str(f)}))
-
-    result = asyncio.run(edit_tool.run({"path": str(f), "old_string": "line one", "new_string": "A\r\nB"}))
-
-    assert result.success is True
-    assert f.read_text(encoding="utf-8") == "A\nB\n"
+    assert f.read_text(encoding="utf-8") == expected
 
 
 def test_edit_file_new_string_can_be_empty(edit_tool: EditFileTool, known_file) -> None:
@@ -283,10 +272,6 @@ def test_edit_file_new_string_can_be_empty(edit_tool: EditFileTool, known_file) 
 # ---------------------------------------------------------------------------
 # AppendFileTool
 # ---------------------------------------------------------------------------
-
-
-def test_append_file_tool_meta(append_tool: AppendFileTool) -> None:
-    assert append_tool.name == "append_file"
 
 
 def test_append_file_success(append_tool: AppendFileTool, known_file) -> None:
@@ -307,11 +292,11 @@ def test_append_file_requires_prior_read(append_tool: AppendFileTool, tmp_path) 
 
 
 def test_append_file_adds_separator_when_no_trailing_newline(
-    append_tool: AppendFileTool, registry: FileRegistry, tmp_path
+    append_tool: AppendFileTool, read_tool: ReadFileTool, tmp_path
 ) -> None:
     f = tmp_path / "file.txt"
     f.write_text("no newline", encoding="utf-8")
-    asyncio.run(ReadFileTool(registry).run({"path": str(f)}))
+    asyncio.run(read_tool.run({"path": str(f)}))
 
     asyncio.run(append_tool.run({"path": str(f), "content": "appended"}))
 
@@ -326,10 +311,10 @@ def test_append_file_no_separator_when_trailing_newline(append_tool: AppendFileT
     assert "three\nappended" in text  # no double newline between existing content and appended
 
 
-def test_append_file_empty_file(append_tool: AppendFileTool, registry: FileRegistry, tmp_path) -> None:
+def test_append_file_empty_file(append_tool: AppendFileTool, read_tool: ReadFileTool, tmp_path) -> None:
     f = tmp_path / "empty.txt"
     f.write_text("", encoding="utf-8")
-    asyncio.run(ReadFileTool(registry).run({"path": str(f)}))
+    asyncio.run(read_tool.run({"path": str(f)}))
 
     result = asyncio.run(append_tool.run({"path": str(f), "content": "first line"}))
 

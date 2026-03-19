@@ -1,20 +1,19 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from dataclasses import dataclass
 from typing import Annotated
 
 import httpx
+from pydantic import Field
 
-from ddev.ai.tools.core.base import BaseTool
+from ddev.ai.tools.core.base import BaseTool, BaseToolInput
 from ddev.ai.tools.core.truncation import TruncateResult, truncate
 from ddev.ai.tools.core.types import ToolResult
 
 
-@dataclass
-class HttpGetInput:
-    url: Annotated[str, "Full URL to probe (must start with http:// or https://)"]
-    timeout: Annotated[float, "Request timeout in seconds (default: 10)"] = 10.0
+class HttpGetInput(BaseToolInput):
+    url: Annotated[str, Field(description="Full URL to probe (must start with http:// or https://)")]
+    timeout: Annotated[float, Field(description="Request timeout in seconds (default: 10)", gt=0)] = 10.0
 
 
 class HttpGetTool(BaseTool[HttpGetInput]):

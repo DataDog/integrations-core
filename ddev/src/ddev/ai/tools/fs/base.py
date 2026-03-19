@@ -3,13 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from pathlib import Path
 
-from ddev.ai.tools.core.base import BaseTool
+from ddev.ai.tools.core.base import BaseTool, BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
 from .file_registry import FileRegistry
 
 
-class TextEdit[TInput](BaseTool[TInput]):
+class TextEdit[TInput: BaseToolInput](BaseTool[TInput]):
     """Abstract base for file system tools with hash-based consistency checks."""
 
     def __init__(self, file_registry: FileRegistry) -> None:

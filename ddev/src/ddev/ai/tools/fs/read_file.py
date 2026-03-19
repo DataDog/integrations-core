@@ -15,10 +15,10 @@ from .base import TextEdit
 class ReadFileInput(BaseToolInput):
     path: Annotated[str, Field(description="Absolute or relative path to the file to read")]
     offset: Annotated[
-        int, Field(description="Line number to start reading from (0-indexed, default: 0). Must be >= 0.")
+        int, Field(description="Line number to start reading from (0-indexed, default: 0). Must be >= 0.", ge=0)
     ] = 0
     limit: Annotated[
-        int | None, Field(description="Number of lines to read (default: all remaining lines). Must be >= 1.")
+        int | None, Field(description="Number of lines to read (default: all remaining lines). Must be >= 1.", ge=1)
     ] = None
 
 
@@ -39,8 +39,8 @@ class ReadFileTool(TextEdit[ReadFileInput]):
 
         self._on_read(tool_input.path, content)
 
-        offset = max(0, tool_input.offset)
-        limit = max(1, tool_input.limit) if tool_input.limit is not None else None
+        offset = tool_input.offset
+        limit = tool_input.limit
         lines = content.splitlines(keepends=True)
         slice_ = lines[offset : offset + limit] if limit is not None else lines[offset:]
         return ToolResult(success=True, data="".join(slice_))
