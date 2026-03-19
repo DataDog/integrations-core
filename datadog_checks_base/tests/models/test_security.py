@@ -39,7 +39,7 @@ def test_secure_field_blocked_from_untrusted_provider(dd_run_check):
     check.check_id = 'test:123'
 
     # Act & Assert
-    with pytest.raises(Exception, match="ConfigurationError.*tls_cert.*not allowed from untrusted provider"):
+    with pytest.raises(Exception, match="(?s)ConfigurationError.*tls_cert.*not allowed from untrusted provider"):
         dd_run_check(check)
 
 
@@ -95,7 +95,7 @@ def test_fallback_global_secure_field_blocked_from_untrusted_provider(dd_run_che
     check = Check('test', {}, [instance], security_config=security_config)
     check.check_id = 'test:123'
 
-    with pytest.raises(Exception, match="ConfigurationError.*tls_private_key.*not allowed from untrusted provider"):
+    with pytest.raises(Exception, match="(?s)ConfigurationError.*tls_private_key.*not allowed from untrusted provider"):
         dd_run_check(check)
 
 
