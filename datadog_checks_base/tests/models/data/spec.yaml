@@ -81,3 +81,15 @@ files:
       value:
         type: string
         require_trusted_provider: true
+    - name: auth_token
+      description: Authentication token configuration
+      value:
+        type: object
+        require_trusted_provider: true
+        properties:
+          - name: reader
+            type: object
+            properties: []
+          - name: writer
+            type: object
+            properties: []

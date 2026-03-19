@@ -113,6 +113,22 @@ def test_secure_field_allowed_via_allowlist(dd_run_check):
     assert check.config.tls_cert == '/etc/ssl/cert.pem'
 
 
+def test_auth_token_blocked_from_untrusted_provider(dd_run_check):
+    """Object-typed secure fields like auth_token are blocked from untrusted providers."""
+    instance = {
+        'auth_token': {
+            'reader': {'type': 'file', 'path': '/etc/secret'},
+            'writer': {'type': 'header', 'name': 'Authorization'},
+        }
+    }
+    security_config = SecurityConfig(check_name='test', provider='kubernetes', ignore_untrusted_file_params=True)
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    with pytest.raises(Exception, match="(?s)ConfigurationError.*auth_token.*not allowed from untrusted provider"):
+        dd_run_check(check)
+
+
 def test_secure_field_allowed_when_check_excluded(dd_run_check):
     """Secure fields are allowed when the check is in the excluded list."""
     instance = {'tls_cert': '/etc/ssl/cert.pem'}

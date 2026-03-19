@@ -20,7 +20,16 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, deprecations, validators
 
 
-SECURE_FIELD_NAMES = frozenset(['tls_cert'])
+SECURE_FIELD_NAMES = frozenset(['auth_token', 'tls_cert'])
+
+
+class AuthToken(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    reader: Optional[MappingProxyType[str, Any]] = None
+    writer: Optional[MappingProxyType[str, Any]] = None
 
 
 class Obj(BaseModel):
@@ -38,6 +47,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    auth_token: Optional[AuthToken] = None
     array: Optional[tuple[str, ...]] = None
     deprecated: Optional[str] = None
     flag: Optional[bool] = None
