@@ -104,20 +104,19 @@ def test_read_verified_handles_oserror(tool: DummyTool, registry: FileRegistry, 
 # ---------------------------------------------------------------------------
 
 
-def test_on_read_registers_path(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
+@pytest.mark.parametrize(
+    "method,content",
+    [
+        ("_on_read", "content"),
+        ("_on_write", "written"),
+    ],
+)
+def test_on_read_and_on_write_register_path(tool: DummyTool, registry: FileRegistry, tmp_path, method, content) -> None:
     path = str(tmp_path / "file.txt")
-    tool._on_read(path, "content")
+    getattr(tool, method)(path, content)
 
     assert registry.is_known(path) is True
-    assert registry.verify(path, "content") is True
-
-
-def test_on_write_registers_path(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
-    path = str(tmp_path / "file.txt")
-    tool._on_write(path, "written")
-
-    assert registry.is_known(path) is True
-    assert registry.verify(path, "written") is True
+    assert registry.verify(path, content) is True
 
 
 def test_on_write_updates_hash_after_on_read(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:

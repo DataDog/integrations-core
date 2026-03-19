@@ -50,11 +50,6 @@ def known_file(tmp_path, read_tool: ReadFileTool):
     return f
 
 
-# ---------------------------------------------------------------------------
-# ReadFileTool
-# ---------------------------------------------------------------------------
-
-
 @pytest.mark.parametrize(
     "tool_cls,expected_name",
     [
@@ -68,6 +63,11 @@ def test_tool_meta(tool_cls, expected_name) -> None:
     assert tool_cls(FileRegistry()).name == expected_name
 
 
+# ---------------------------------------------------------------------------
+# ReadFileTool
+# ---------------------------------------------------------------------------
+
+
 def test_read_file_success(read_tool: ReadFileTool, tmp_path) -> None:
     f = tmp_path / "config.txt"
     f.write_text("hello\nworld\n", encoding="utf-8")
@@ -78,14 +78,24 @@ def test_read_file_success(read_tool: ReadFileTool, tmp_path) -> None:
     assert result.data == "hello\nworld\n"
 
 
-def test_read_file_registers_in_registry(read_tool: ReadFileTool, registry: FileRegistry, tmp_path) -> None:
+@pytest.mark.parametrize(
+    "tool_fixture,content",
+    [
+        ("read_tool", "content"),
+        ("create_tool", "hi"),
+    ],
+)
+def test_tool_registers_in_registry(request, registry: FileRegistry, tmp_path, tool_fixture, content) -> None:
+    tool = request.getfixturevalue(tool_fixture)
     f = tmp_path / "file.txt"
-    f.write_text("content", encoding="utf-8")
-
-    asyncio.run(read_tool.run({"path": str(f)}))
+    if isinstance(tool, ReadFileTool):
+        f.write_text(content, encoding="utf-8")
+        asyncio.run(tool.run({"path": str(f)}))
+    else:
+        asyncio.run(tool.run({"path": str(f), "content": content}))
 
     assert registry.is_known(str(f)) is True
-    assert registry.verify(str(f), "content") is True
+    assert registry.verify(str(f), content) is True
 
 
 def test_read_file_missing_file(read_tool: ReadFileTool, tmp_path) -> None:
@@ -172,26 +182,28 @@ def test_create_file_fails_if_file_already_exists(create_tool: CreateFileTool, t
     assert f.read_text(encoding="utf-8") == "original"
 
 
-def test_create_file_registers_in_registry(create_tool: CreateFileTool, registry: FileRegistry, tmp_path) -> None:
-    f = tmp_path / "file.txt"
-
-    asyncio.run(create_tool.run({"path": str(f), "content": "hi"}))
-
-    assert registry.is_known(str(f)) is True
-    assert registry.verify(str(f), "hi") is True
-
-
 # ---------------------------------------------------------------------------
 # EditFileTool
 # ---------------------------------------------------------------------------
 
 
-def test_edit_file_success(edit_tool: EditFileTool, known_file) -> None:
-    result = asyncio.run(edit_tool.run({"path": str(known_file), "old_string": "line two", "new_string": "line TWO"}))
+@pytest.mark.parametrize(
+    "old_string,new_string,expected_in,expected_out",
+    [
+        ("line two", "line TWO", "line TWO", "line two"),
+        ("line two\n", "", None, "line two"),
+    ],
+)
+def test_edit_file_success(
+    edit_tool: EditFileTool, known_file, old_string, new_string, expected_in, expected_out
+) -> None:
+    result = asyncio.run(edit_tool.run({"path": str(known_file), "old_string": old_string, "new_string": new_string}))
 
     assert result.success is True
-    assert "line TWO" in known_file.read_text(encoding="utf-8")
-    assert "line two" not in known_file.read_text(encoding="utf-8")
+    content = known_file.read_text(encoding="utf-8")
+    if expected_in is not None:
+        assert expected_in in content
+    assert expected_out not in content
 
 
 def test_edit_file_requires_prior_read(edit_tool: EditFileTool, tmp_path) -> None:
@@ -261,24 +273,27 @@ def test_edit_file_normalizes_crlf(
     assert f.read_text(encoding="utf-8") == expected
 
 
-def test_edit_file_new_string_can_be_empty(edit_tool: EditFileTool, known_file) -> None:
-    # Replacing with empty string is a valid deletion
-    result = asyncio.run(edit_tool.run({"path": str(known_file), "old_string": "line two\n", "new_string": ""}))
-
-    assert result.success is True
-    assert "line two" not in known_file.read_text(encoding="utf-8")
-
-
 # ---------------------------------------------------------------------------
 # AppendFileTool
 # ---------------------------------------------------------------------------
 
 
-def test_append_file_success(append_tool: AppendFileTool, known_file) -> None:
-    result = asyncio.run(append_tool.run({"path": str(known_file), "content": "line four\n"}))
+@pytest.mark.parametrize(
+    "content,expected_in,expected_not_in",
+    [
+        ("line four\n", "line four\n", None),
+        ("appended", "three\nappended", None),
+        ("A\r\nB\r\n", "A\nB\n", "\r"),
+    ],
+)
+def test_append_file_success(append_tool: AppendFileTool, known_file, content, expected_in, expected_not_in) -> None:
+    result = asyncio.run(append_tool.run({"path": str(known_file), "content": content}))
 
     assert result.success is True
-    assert known_file.read_text(encoding="utf-8").endswith("line four\n")
+    text = known_file.read_text(encoding="utf-8")
+    assert expected_in in text
+    if expected_not_in is not None:
+        assert expected_not_in not in text
 
 
 def test_append_file_requires_prior_read(append_tool: AppendFileTool, tmp_path) -> None:
@@ -291,35 +306,24 @@ def test_append_file_requires_prior_read(append_tool: AppendFileTool, tmp_path) 
     assert "read the file first" in result.error
 
 
-def test_append_file_adds_separator_when_no_trailing_newline(
-    append_tool: AppendFileTool, read_tool: ReadFileTool, tmp_path
+@pytest.mark.parametrize(
+    "initial,appended,expected",
+    [
+        ("no newline", "appended", "no newline\nappended"),
+        ("", "first line", "first line"),
+    ],
+)
+def test_append_file_separator(
+    append_tool: AppendFileTool, read_tool: ReadFileTool, tmp_path, initial, appended, expected
 ) -> None:
     f = tmp_path / "file.txt"
-    f.write_text("no newline", encoding="utf-8")
+    f.write_text(initial, encoding="utf-8")
     asyncio.run(read_tool.run({"path": str(f)}))
 
-    asyncio.run(append_tool.run({"path": str(f), "content": "appended"}))
-
-    assert f.read_text(encoding="utf-8") == "no newline\nappended"
-
-
-def test_append_file_no_separator_when_trailing_newline(append_tool: AppendFileTool, known_file) -> None:
-    # known_file ends with \n already
-    asyncio.run(append_tool.run({"path": str(known_file), "content": "appended"}))
-
-    text = known_file.read_text(encoding="utf-8")
-    assert "three\nappended" in text  # no double newline between existing content and appended
-
-
-def test_append_file_empty_file(append_tool: AppendFileTool, read_tool: ReadFileTool, tmp_path) -> None:
-    f = tmp_path / "empty.txt"
-    f.write_text("", encoding="utf-8")
-    asyncio.run(read_tool.run({"path": str(f)}))
-
-    result = asyncio.run(append_tool.run({"path": str(f), "content": "first line"}))
+    result = asyncio.run(append_tool.run({"path": str(f), "content": appended}))
 
     assert result.success is True
-    assert f.read_text(encoding="utf-8") == "first line"
+    assert f.read_text(encoding="utf-8") == expected
 
 
 def test_append_file_fails_if_file_changed_externally(append_tool: AppendFileTool, known_file) -> None:
@@ -336,14 +340,6 @@ def test_append_file_updates_registry(append_tool: AppendFileTool, registry: Fil
 
     new_content = known_file.read_text(encoding="utf-8")
     assert registry.verify(str(known_file), new_content) is True
-
-
-def test_append_file_normalizes_crlf(append_tool: AppendFileTool, known_file) -> None:
-    asyncio.run(append_tool.run({"path": str(known_file), "content": "A\r\nB\r\n"}))
-
-    text = known_file.read_text(encoding="utf-8")
-    assert "A\nB\n" in text
-    assert "\r" not in text
 
 
 # ---------------------------------------------------------------------------
@@ -383,26 +379,7 @@ def test_workflow_create_read_edit_append(
     assert registry.verify(str(f), f.read_text(encoding="utf-8")) is True
 
 
-def test_workflow_stale_file_blocks_edit(
-    read_tool: ReadFileTool,
-    edit_tool: EditFileTool,
-    tmp_path,
-) -> None:
-    f = tmp_path / "shared.txt"
-    f.write_text("original content\n", encoding="utf-8")
-
-    asyncio.run(read_tool.run({"path": str(f)}))
-
-    # Simulate an external process modifying the file
-    f.write_text("content changed by someone else\n", encoding="utf-8")
-
-    result = asyncio.run(edit_tool.run({"path": str(f), "old_string": "original content", "new_string": "my edit"}))
-
-    assert result.success is False
-    assert "Re-read and retry" in result.error
-
-
-def test_workflow_stale_file_recoverable_after_re_read(
+def test_workflow_stale_file(
     read_tool: ReadFileTool,
     edit_tool: EditFileTool,
     tmp_path,
@@ -411,18 +388,14 @@ def test_workflow_stale_file_recoverable_after_re_read(
     f.write_text("original\n", encoding="utf-8")
 
     asyncio.run(read_tool.run({"path": str(f)}))
-
-    # External change
     f.write_text("updated externally\n", encoding="utf-8")
 
-    # Edit fails
-    r = asyncio.run(edit_tool.run({"path": str(f), "old_string": "original", "new_string": "x"}))
-    assert r.success is False
+    result = asyncio.run(edit_tool.run({"path": str(f), "old_string": "original", "new_string": "my edit"}))
+    assert result.success is False
+    assert "Re-read and retry" in result.error
 
-    # Re-read to sync the registry
     asyncio.run(read_tool.run({"path": str(f)}))
 
-    # Now edit succeeds against the new content
-    r = asyncio.run(edit_tool.run({"path": str(f), "old_string": "updated externally", "new_string": "final"}))
-    assert r.success is True
+    result = asyncio.run(edit_tool.run({"path": str(f), "old_string": "updated externally", "new_string": "final"}))
+    assert result.success is True
     assert f.read_text(encoding="utf-8") == "final\n"

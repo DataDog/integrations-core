@@ -16,14 +16,18 @@ def registry() -> FileRegistry:
 # ---------------------------------------------------------------------------
 
 
-def test_unknown_path_not_known(registry: FileRegistry, tmp_path) -> None:
-    assert registry.is_known(str(tmp_path / "file.txt")) is False
-
-
-def test_record_makes_path_known(registry: FileRegistry, tmp_path) -> None:
+@pytest.mark.parametrize(
+    "record,expected",
+    [
+        (False, False),
+        (True, True),
+    ],
+)
+def test_is_known(registry: FileRegistry, tmp_path, record, expected) -> None:
     path = str(tmp_path / "file.txt")
-    registry.record(path, "hello")
-    assert registry.is_known(path) is True
+    if record:
+        registry.record(path, "hello")
+    assert registry.is_known(path) is expected
 
 
 # ---------------------------------------------------------------------------
@@ -31,21 +35,19 @@ def test_record_makes_path_known(registry: FileRegistry, tmp_path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_verify_matches_recorded_content(registry: FileRegistry, tmp_path) -> None:
+@pytest.mark.parametrize(
+    "recorded_content,verify_content,expected",
+    [
+        ("hello", "hello", True),
+        ("hello", "world", False),
+        (None, "any content", False),
+    ],
+)
+def test_verify(registry: FileRegistry, tmp_path, recorded_content, verify_content, expected) -> None:
     path = str(tmp_path / "file.txt")
-    registry.record(path, "hello")
-    assert registry.verify(path, "hello") is True
-
-
-def test_verify_fails_for_changed_content(registry: FileRegistry, tmp_path) -> None:
-    path = str(tmp_path / "file.txt")
-    registry.record(path, "hello")
-    assert registry.verify(path, "world") is False
-
-
-def test_verify_fails_for_unknown_path(registry: FileRegistry, tmp_path) -> None:
-    path = str(tmp_path / "file.txt")
-    assert registry.verify(path, "any content") is False
+    if recorded_content is not None:
+        registry.record(path, recorded_content)
+    assert registry.verify(path, verify_content) is expected
 
 
 # ---------------------------------------------------------------------------
