@@ -52,7 +52,7 @@ def test_check_filters_metrics_config(
 
     final_config = check.get_config_with_defaults(instance_config)
 
-    prefixed_metrics = {expected_prefix: [] for expected_prefix in expected_prefixes}
+    prefixed_metrics: dict[str, list] = {expected_prefix: [] for expected_prefix in expected_prefixes}
 
     for expected_prefix in expected_prefixes:
         prefixed_metrics[expected_prefix].extend(

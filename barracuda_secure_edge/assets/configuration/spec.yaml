@@ -1,4 +1,5 @@
 name: barracuda_secure_edge
+fleet_configurable: true
 files:
 - name: barracuda_secure_edge.yaml
   options:

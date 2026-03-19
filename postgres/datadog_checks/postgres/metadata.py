@@ -113,9 +113,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._collect_extensions_enabled = self._collect_pg_settings_enabled
         self._collect_schemas_enabled = config.collect_schemas.enabled
         self._schema_collector = PostgresSchemaCollector(check) if config.collect_schemas.enabled else None
-        self._pg_settings_cached = None
         self._compiled_patterns_cache = {}
-        self._extensions_cached = None
         self._time_since_last_extension_query = 0
         self._time_since_last_settings_query = 0
         self._last_schemas_query_time = 0
@@ -155,7 +153,7 @@ class PostgresMetadata(DBMAsyncJob):
         # Only query if configured, according to interval
         elapsed_s = time.time() - self._time_since_last_extension_query
         if elapsed_s >= self.pg_extensions_collection_interval and self._collect_extensions_enabled:
-            self._extensions_cached = self._collect_postgres_extensions()
+            extensions = self._collect_postgres_extensions()
             event = {
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
@@ -167,7 +165,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "tags": self._tags_no_db,
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._check.cloud_metadata,
-                "metadata": self._extensions_cached,
+                "metadata": extensions,
             }
             self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
@@ -192,7 +190,7 @@ class PostgresMetadata(DBMAsyncJob):
         # don't report more often than the configured collection interval
         elapsed_s = time.time() - self._time_since_last_settings_query
         if elapsed_s >= self.pg_settings_collection_interval and self._collect_pg_settings_enabled:
-            self._pg_settings_cached = self._collect_postgres_settings()
+            settings = self._collect_postgres_settings()
             event = {
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
@@ -204,7 +202,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "tags": self._tags_no_db,
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._check.cloud_metadata,
-                "metadata": self._pg_settings_cached,
+                "metadata": settings,
             }
             self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
@@ -265,4 +263,4 @@ class PostgresMetadata(DBMAsyncJob):
                     has_more_results = cursor.nextset()
                 self._log.debug("Loaded %s rows from pg_settings", rows)
                 self._log.debug("Loaded %s rows from pg_settings", len(rows))
-                return rows
+                return [dict(row) for row in rows]

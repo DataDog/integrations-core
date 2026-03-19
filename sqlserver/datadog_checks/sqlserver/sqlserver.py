@@ -124,6 +124,8 @@ if adodbapi is None and pyodbc is None:
 
 set_default_driver_conf()
 
+KEY_PREFIX = "dbm-sqlserver-"
+
 
 class SQLServer(DatabaseCheck):
     __NAMESPACE__ = "sqlserver"
@@ -161,6 +163,7 @@ class SQLServer(DatabaseCheck):
         self.databases = set()
         self.autodiscovery_query = None
         self._ad_last_check = 0
+        self._ad_initial_discovery_done = False
         self._index_usage_last_check_ts = 0
         self._sql_counter_types = {}
         self.proc_type_mapping = {"gauge": self.gauge, "rate": self.rate, "histogram": self.histogram}
@@ -208,6 +211,7 @@ class SQLServer(DatabaseCheck):
         self.activity.cancel()
         self.sql_metadata.cancel()
         self.deadlocks.cancel()
+        self.agent_history.cancel()
 
         # Cancel all XE session handlers
         for handler in self.xe_session_handlers:
@@ -411,8 +415,8 @@ class SQLServer(DatabaseCheck):
         }
         missing_keys = expected_keys - set(self.static_info_cache.keys())
         if missing_keys:
-            with self.connection.open_managed_default_connection():
-                with self.connection.get_managed_cursor() as cursor:
+            with self.connection.open_managed_default_connection(KEY_PREFIX):
+                with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                     if STATIC_INFO_VERSION not in self.static_info_cache:
                         cursor.execute("select @@version")
                         results = cursor.fetchall()
@@ -533,8 +537,8 @@ class SQLServer(DatabaseCheck):
                         self.log.warning("Database %s does not exist. Disabling checks for this instance.", context)
                         return
             if self.instance.get("stored_procedure") is None:
-                with self.connection.open_managed_default_connection():
-                    with self.connection.get_managed_cursor() as cursor:
+                with self.connection.open_managed_default_connection(KEY_PREFIX):
+                    with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                         self.autodiscover_databases(cursor)
                     self._make_metric_list_to_collect(self._config.custom_metrics)
         except SQLConnectionError:
@@ -590,6 +594,10 @@ class SQLServer(DatabaseCheck):
             self._ad_last_check = now
             if filtered_dbs != self.databases:
                 self.log.debug("Databases updated from previous autodiscovery check.")
+                if self._ad_initial_discovery_done and self._database_metrics is not None:
+                    self.log.info("Invalidating database metrics cache due to database list change.")
+                    self._database_metrics = None
+                self._ad_initial_discovery_done = True
                 self.databases = filtered_dbs
                 return True
         return False
@@ -754,7 +762,7 @@ class SQLServer(DatabaseCheck):
         cached = self._sql_counter_types.get(counter_name)
         if cached:
             return cached
-        with self.connection.get_managed_cursor() as cursor:
+        with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             cursor.execute(COUNTER_TYPE_QUERY, (counter_name,))
             (sql_counter_type,) = cursor.fetchone()
             if sql_counter_type == PERF_LARGE_RAW_BASE:
@@ -832,8 +840,8 @@ class SQLServer(DatabaseCheck):
                     self.log.warning("failed service check for auto discovered database: %s", e)
 
     def _check_connections_by_use_db(self):
-        with self.connection.open_managed_default_connection():
-            with self.connection.get_managed_cursor() as cursor:
+        with self.connection.open_managed_default_connection(KEY_PREFIX):
+            with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                 for db in self.databases:
                     check_err_message = "Database {} connection service check failed: {}"
                     try:
@@ -1030,22 +1038,22 @@ class SQLServer(DatabaseCheck):
 
     def collect_metrics(self):
         """Fetch the metrics from all the associated database tables."""
-        with self.connection.open_managed_default_connection():
+        with self.connection.open_managed_default_connection(KEY_PREFIX):
             if not self._config.only_custom_queries:
-                with self.connection.get_managed_cursor() as cursor:
+                with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                     self.load_basic_metrics(cursor)
 
             # Neither pyodbc nor adodbapi are able to read results of a query if the number of rows affected
             # statement are returned as part of the result set, so we disable for the entire connection
             # this is important mostly for custom_queries or the stored_procedure feature
             # https://docs.microsoft.com/en-us/sql/t-sql/statements/set-nocount-transact-sql
-            with self.connection.get_managed_cursor() as cursor:
+            with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                 cursor.execute("SET NOCOUNT ON")
             try:
                 if not self._config.only_custom_queries:
                     # restore the current database after executing dynamic queries
                     # this is to ensure the current database context is not changed
-                    with self.connection.restore_current_database_context():
+                    with self.connection.restore_current_database_context(KEY_PREFIX):
                         if self.database_metrics:
                             for database_metric in self.database_metrics:
                                 database_metric.execute()
@@ -1053,11 +1061,11 @@ class SQLServer(DatabaseCheck):
                 # reuse the connection for custom queries
                 self._query_manager.execute()
             finally:
-                with self.connection.get_managed_cursor() as cursor:
+                with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                     cursor.execute("SET NOCOUNT OFF")
 
     def execute_query_raw(self, query, db=None):
-        with self.connection.get_managed_cursor() as cursor:
+        with self.connection.get_managed_cursor(KEY_PREFIX) as cursor:
             if db:
                 ctx = construct_use_statement(db)
                 self.log.debug("changing cursor context via use statement: %s", ctx)

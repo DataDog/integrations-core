@@ -40,14 +40,16 @@ Integrate Cato Networks with Datadog to gain insights into audit logs and events
 ### Event Log collection
 
 #### Configure AWS S3 Bucket
-When configuring the AWS bucket, use **cato-networks** as the **S3 prefix**.
-For more information, see [Configuring the AWS S3 Bucket][2].
+For more information about configuring an AWS S3 Bucket, see [Configuring the AWS S3 Bucket][2].
 
 #### Set up event integration in CATO networks
 For more information on configuring the event integration in a CATO network, see [Adding Amazon S3 Integration for Events][3].
 
 #### Configure Datadog Forwarder
-See information on configuring the [Datadog Forwarder][4]. When configuring the Lambda Forwarder, set the environment variable **DD_SOURCE** to **cato-networks**.
+See the [Datadog Forwarder][4] documentation for detailed configuration instructions. When configuring the Datadog Forwarder, set the **source** as follows:
+- For CloudFormation deployments, set `DdSource` to `cato-networks`.
+- For Terraform deployments, set `dd_source` to `cato-networks`.
+- For manual deployments, set the `DD_SOURCE` environment variable to `cato-networks`.
 
 
 ## Data collected

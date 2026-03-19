@@ -1,4 +1,5 @@
 name: Wazuh
+fleet_configurable: true
 files:
 - name: wazuh.yaml
   options:

@@ -1,4 +1,5 @@
 name: Linux proc extras
+fleet_configurable: true
 files:
 - name: linux_proc_extras.yaml
   options:
@@ -11,6 +12,7 @@ files:
       description: |
         Optionally include CPU/IRQ interrupt metrics.  This can dramatically increase cardinality
         for large systems, so use with caution.
+      fleet_configurable: true
       value:
         type: boolean
         example: false

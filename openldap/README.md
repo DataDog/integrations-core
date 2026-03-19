@@ -19,6 +19,8 @@ The OpenLDAP integration is packaged with the Agent. To start gathering your Ope
 
 #### Prepare OpenLDAP
 
+The user created in these steps is granted read-only access to the monitor backend. As a best practice, Datadog recommends this read-only setup to limit the permissions granted to the Datadog Agent.
+
 If the `cn=Monitor` backend is not configured on your server, follow these steps:
 
 1. Check if monitoring is enabled on your installation:

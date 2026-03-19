@@ -1,4 +1,5 @@
 name: IBM WAS
+fleet_configurable: true
 files:
   - name: ibm_was.yaml
     options:
@@ -9,6 +10,7 @@ files:
       - template: instances
         options:
           - name: servlet_url
+            fleet_configurable: true
             required: true
             description: |
               The URL of the PerfServlet configured to report metrics.

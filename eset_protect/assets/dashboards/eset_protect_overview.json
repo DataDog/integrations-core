@@ -187,7 +187,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:Threat_Event $event_type $severity $hostname $group_name $os_name"
+                                                "query": "source:eset-protect @event_type:Threat_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -253,7 +253,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:Threat_Event $event_type $severity $hostname $group_name $os_name"
+                                                "query": "source:eset-protect @event_type:Threat_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -303,7 +303,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:FirewallAggregated_Event $event_type $severity $hostname $group_name $os_name"
+                                                "query": "source:eset-protect @event_type:FirewallAggregated_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -369,7 +369,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:FirewallAggregated_Event $event_type $severity $hostname $group_name $os_name"
+                                                "query": "source:eset-protect @event_type:FirewallAggregated_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -419,7 +419,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:FilteredWebsites_Event $event_type $severity $hostname $group_name $os_name"
+                                                "query": "source:eset-protect @event_type:FilteredWebsites_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -485,7 +485,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:FilteredWebsites_Event $event_type $severity $hostname $group_name $os_name"
+                                                "query": "source:eset-protect @event_type:FilteredWebsites_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -535,7 +535,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:Audit_Event $event_type $severity $hostname $group_name $os_name"
+                                                "query": "source:eset-protect @event_type:Audit_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -601,7 +601,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:eset-protect service:Audit_Event $event_type $severity $hostname $group_name $os_name"
+                                                "query": "source:eset-protect @event_type:Audit_Event $event_type $severity $hostname $group_name $os_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -966,7 +966,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "service",
+                                                    "facet": "@event_type",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1039,7 +1039,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "service",
+                                            "field": "@event_type",
                                             "width": "auto"
                                         },
                                         {
@@ -1751,7 +1751,7 @@
     "template_variables": [
         {
             "name": "event_type",
-            "prefix": "service",
+            "prefix": "@event_type",
             "available_values": [
                 "Threat_Event",
                 "FirewallAggregated_Event",

@@ -13,6 +13,9 @@ The Sophos Central Cloud integration seamlessly collects all the above listed lo
 
 ## Setup
 
+### Prerequisites
+- A Sophos Central tenant account.
+
 ### Generate API credentials in Sophos Central Cloud
 
 1. Log into your [**Sophos Central account**][2].
