@@ -136,7 +136,7 @@ jobs:
         fi
     - name: Push changelog fix
       if: steps.rename.outputs.renamed == 'true'
-      uses: DataDog/commit-headless@action/v2.0.3
+      uses: DataDog/commit-headless@05d7b7ee023e2c7d01c47832d420c2503cd416f3 # action/v2.0.3
       with:
         token: ${{ steps.token-generator.outputs.token }}
         branch: ${{ steps.cpr.outputs.pull-request-branch }}
