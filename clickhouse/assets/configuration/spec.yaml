@@ -124,7 +124,6 @@ files:
       value:
         type: string
         example: my_cluster
-        default: ~
     - name: single_endpoint_mode
       description: |
         Set to `true` when connecting through a single endpoint for ClickHouse Cloud.
