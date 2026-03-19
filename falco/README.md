@@ -131,6 +131,7 @@ Update the settings in the configuration file (`falco.yaml`) as shown below:
 **Note**: Ensure the `datadog-agent` user has read and execute access to tail the log files you want to collect from.
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
+>>>>>>> master
 
 ## Data Collected
 
