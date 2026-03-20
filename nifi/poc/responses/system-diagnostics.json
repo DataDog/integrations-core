@@ -1,35 +1,35 @@
 {
   "systemDiagnostics": {
     "aggregateSnapshot": {
-      "totalNonHeap": "177.38 MB",
-      "totalNonHeapBytes": 185991168,
-      "usedNonHeap": "173.67 MB",
-      "usedNonHeapBytes": 182110368,
-      "freeNonHeap": "3.7 MB",
-      "freeNonHeapBytes": 3880800,
+      "totalNonHeap": "168 MB",
+      "totalNonHeapBytes": 176160768,
+      "usedNonHeap": "164.29 MB",
+      "usedNonHeapBytes": 172266584,
+      "freeNonHeap": "3.71 MB",
+      "freeNonHeapBytes": 3894184,
       "maxNonHeap": "-1 bytes",
       "maxNonHeapBytes": -1,
       "totalHeap": "1,024 MB",
       "totalHeapBytes": 1073741824,
-      "usedHeap": "239.44 MB",
-      "usedHeapBytes": 251072000,
-      "freeHeap": "784.56 MB",
-      "freeHeapBytes": 822669824,
+      "usedHeap": "207.19 MB",
+      "usedHeapBytes": 217252040,
+      "freeHeap": "816.81 MB",
+      "freeHeapBytes": 856489784,
       "maxHeap": "1,024 MB",
       "maxHeapBytes": 1073741824,
-      "heapUtilization": "23.0%",
+      "heapUtilization": "20.0%",
       "availableProcessors": 16,
-      "processorLoadAverage": 2.43212890625,
+      "processorLoadAverage": 1.732421875,
       "totalThreads": 88,
-      "daemonThreads": 48,
-      "uptime": "00:11:25.117",
+      "daemonThreads": 44,
+      "uptime": "00:00:34.131",
       "flowFileRepositoryStorageUsage": {
         "freeSpace": "830.57 GB",
         "totalSpace": "910.74 GB",
         "usedSpace": "80.16 GB",
-        "freeSpaceBytes": 891819769856,
+        "freeSpaceBytes": 891819843584,
         "totalSpaceBytes": 977896124416,
-        "usedSpaceBytes": 86076354560,
+        "usedSpaceBytes": 86076280832,
         "utilization": "9.0%"
       },
       "contentRepositoryStorageUsage": [
@@ -38,9 +38,9 @@
           "freeSpace": "830.57 GB",
           "totalSpace": "910.74 GB",
           "usedSpace": "80.16 GB",
-          "freeSpaceBytes": 891819769856,
+          "freeSpaceBytes": 891819843584,
           "totalSpaceBytes": 977896124416,
-          "usedSpaceBytes": 86076354560,
+          "usedSpaceBytes": 86076280832,
           "utilization": "9.0%"
         }
       ],
@@ -50,9 +50,9 @@
           "freeSpace": "830.57 GB",
           "totalSpace": "910.74 GB",
           "usedSpace": "80.16 GB",
-          "freeSpaceBytes": 891819769856,
+          "freeSpaceBytes": 891819843584,
           "totalSpaceBytes": 977896124416,
-          "usedSpaceBytes": 86076354560,
+          "usedSpaceBytes": 86076280832,
           "utilization": "9.0%"
         }
       ],
@@ -60,14 +60,14 @@
         {
           "name": "G1 Young Generation",
           "collectionCount": 12,
-          "collectionTime": "00:00:00.063",
-          "collectionMillis": 63
+          "collectionTime": "00:00:00.061",
+          "collectionMillis": 61
         },
         {
           "name": "G1 Concurrent GC",
           "collectionCount": 8,
-          "collectionTime": "00:00:00.010",
-          "collectionMillis": 10
+          "collectionTime": "00:00:00.007",
+          "collectionMillis": 7
         },
         {
           "name": "G1 Old Generation",
@@ -76,7 +76,7 @@
           "collectionMillis": 0
         }
       ],
-      "statsLastRefreshed": "18:00:26 UTC",
+      "statsLastRefreshed": "18:08:58 UTC",
       "versionInfo": {
         "niFiVersion": "2.8.0",
         "javaVendor": "BellSoft",

@@ -13,11 +13,15 @@ mkdir -p "$OUTPUT_DIR"
 
 # --- Authenticate ---
 echo "Authenticating..."
-TOKEN=$(curl -sk -X POST "${NIFI_API_URL}/access/token" \
-    -d "username=${NIFI_USERNAME}&password=${NIFI_PASSWORD}")
+TOKEN_RESPONSE=$(mktemp)
+HTTP_CODE=$(curl -sk -X POST "${NIFI_API_URL}/access/token" \
+    -d "username=${NIFI_USERNAME}&password=${NIFI_PASSWORD}" \
+    -o "$TOKEN_RESPONSE" -w '%{http_code}' 2>/dev/null || echo "000")
+TOKEN=$(cat "$TOKEN_RESPONSE")
+rm -f "$TOKEN_RESPONSE"
 
-if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-    echo "ERROR: Failed to obtain auth token"
+if [ "$HTTP_CODE" != "201" ] || [ -z "$TOKEN" ]; then
+    echo "ERROR: Failed to obtain auth token (HTTP ${HTTP_CODE})"
     exit 1
 fi
 
