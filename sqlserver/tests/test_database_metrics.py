@@ -22,6 +22,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverAvailabilityReplicasMetrics,
     SqlserverDatabaseBackupMetrics,
     SqlserverDatabaseFilesMetrics,
+    SqlserverDatabaseMemoryMetrics,
     SqlserverDatabaseReplicationStatsMetrics,
     SqlserverDatabaseStatsMetrics,
     SqlserverDBFragmentationMetrics,
@@ -1692,3 +1693,109 @@ def test_sqlserver_database_metrics_init(
     assert len(database_file_metrics) == 1
     assert database_file_metrics[0].enabled is True
     assert 'tempdb' in database_file_metrics[0].databases
+
+
+@pytest.mark.unit
+def test_sqlserver_database_memory_metrics_configuration(init_config, instance_docker_metrics):
+    """Test database memory metrics configuration and properties."""
+    # Test with metrics disabled
+    instance_docker_metrics['database_metrics'] = {
+        'db_memory_metrics': {'enabled': False},
+    }
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    memory_metrics = SqlserverDatabaseMemoryMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=lambda x, y: [],
+    )
+
+    assert memory_metrics.enabled is False
+    assert memory_metrics.collection_interval == 300  # Default value
+
+    # Test with metrics enabled and custom collection interval
+    instance_docker_metrics['database_metrics'] = {
+        'db_memory_metrics': {
+            'enabled': True,
+            'collection_interval': 600,
+        },
+    }
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    memory_metrics = SqlserverDatabaseMemoryMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=lambda x, y: [],
+    )
+
+    assert memory_metrics.enabled is True
+    assert memory_metrics.collection_interval == 600
+    assert memory_metrics.databases == [None]  # Instance-level query
+
+    # Check query configuration
+    queries = memory_metrics.queries
+    assert len(queries) == 1
+    assert queries[0]['collection_interval'] == 600
+    assert 'WITH (NOLOCK)' in queries[0]['query']
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('include_db_memory_metrics', [True, False])
+def test_sqlserver_database_memory_metrics(
+    aggregator,
+    init_config,
+    instance_docker_metrics,
+    include_db_memory_metrics,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'db_memory_metrics': {'enabled': include_db_memory_metrics},
+    }
+
+    mocked_results = [
+        ('master', 7.8125, 0.78125),
+        ('tempdb', 39.0625, 7.8125),
+        ('msdb', 15.625, 1.5625),
+        ('datadog_test', 23.4375, 2.34375),
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    # Set up tags that are normally populated by check() via a live DB connection
+    sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME] = "stubbed.hostname"
+    sqlserver_check.tag_manager.set_tag("database_hostname", "stubbed.hostname", replace=True)
+    sqlserver_check.tag_manager.set_tag("database_instance", "stubbed.hostname", replace=True)
+    sqlserver_check.tag_manager.set_tag("dd.internal.resource:database_instance", "stubbed.hostname", replace=True)
+    sqlserver_check.tag_manager.set_tag("sqlserver_servername", "stubbed.hostname", replace=True, normalize=True)
+
+    def execute_query_handler_mocked(query, db=None):
+        return mocked_results
+
+    memory_metrics = SqlserverDatabaseMemoryMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+    )
+
+    memory_metrics.execute()
+
+    if not include_db_memory_metrics:
+        assert memory_metrics.enabled is False
+    else:
+        tags = sqlserver_check._config.tags + [
+            "database_hostname:{}".format("stubbed.hostname"),
+            "database_instance:{}".format("stubbed.hostname"),
+            "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+        ]
+        for result in mocked_results:
+            db, *metric_values = result
+            metrics = zip(memory_metrics.metric_names()[0], metric_values)
+            expected_tags = [
+                f'db:{db}',
+            ] + tags
+            for metric_name, metric_value in metrics:
+                aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
