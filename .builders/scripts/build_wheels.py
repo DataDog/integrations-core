@@ -427,6 +427,13 @@ def main():
             CUSTOM_EXTERNAL_INDEX,
         ]
 
+        # Apply version constraints for transitive dependencies if available.
+        # This is passed as -c rather than via PIP_CONSTRAINT to avoid
+        # constraining the build dependencies installed earlier.
+        constraints_file = MOUNT_DIR / 'constraints.txt'
+        if constraints_file.is_file():
+            command_args.extend(['-c', str(constraints_file)])
+
         check_process(command_args, env=env_vars)
 
         # Classify wheels

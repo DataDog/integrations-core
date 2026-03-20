@@ -135,9 +135,6 @@ def build_macos():
             'DD_BUILD_COMMAND': f'bash {build_context_dir}/extra_build.sh'
         }
 
-        if args.constraints and (mount_dir / 'constraints.txt').is_file():
-            env['PIP_CONSTRAINT'] = str(mount_dir / 'constraints.txt')
-
         if not args.skip_setup:
             check_process(
                 ['bash', str(HERE / 'images' / image / 'builder_setup.sh')],
@@ -249,16 +246,11 @@ def build_image():
             if args.digest:
                 script_args.append('--use-built-index')
 
-            docker_env_args = ['-e', 'PYTHONDONTWRITEBYTECODE=1']
-            if args.constraints and (mount_dir / 'constraints.txt').is_file():
-                constraints_container_path = f'{internal_mount_dir}/constraints.txt'
-                docker_env_args.extend(['-e', f'PIP_CONSTRAINT={constraints_container_path}'])
-
             check_process([
                 'docker', 'run', '--rm',
                 '-v', f'{mount_dir}:{internal_mount_dir}',
                 # Anything created within directories mounted to the container cannot be removed by the host
-                *docker_env_args,
+                '-e', 'PYTHONDONTWRITEBYTECODE=1',
                 image_name, *script_args,
             ])
 
