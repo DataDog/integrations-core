@@ -92,6 +92,7 @@ class Apache(AgentCheck):
         except Exception as e:
             self.log.warning("Caught exception %s", e)
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
+            self.warning("For Apache troubleshooting, please visit: https://docs.datadoghq.com/integrations/apache/?tab=host#troubleshooting")
             raise
         else:
             self.service_check(service_check_name, AgentCheck.OK, tags=service_check_tags)
