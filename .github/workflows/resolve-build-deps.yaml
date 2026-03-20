@@ -118,14 +118,8 @@ jobs:
       - name: Determine resolution cutoff timestamp
         id: timestamp
         run: |
-          # Use the commit timestamp for reproducibility on re-runs
-          if [[ -n "${HEAD_COMMIT_TIMESTAMP}" ]]; then
-            echo "cutoff=${HEAD_COMMIT_TIMESTAMP}" >> "${GITHUB_OUTPUT}"
-          else
-            echo "cutoff=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "${GITHUB_OUTPUT}"
-          fi
-        env:
-          HEAD_COMMIT_TIMESTAMP: ${{ github.event.head_commit.timestamp }}
+          # Use the checked-out commit timestamp for reproducibility on re-runs
+          echo "cutoff=$(git log -1 --format=%cI)" >> "${GITHUB_OUTPUT}"
 
       - name: Install uv
         uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
