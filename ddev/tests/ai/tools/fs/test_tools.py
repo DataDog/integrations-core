@@ -75,7 +75,7 @@ def test_read_file_success(read_tool: ReadFileTool, tmp_path) -> None:
     result = asyncio.run(read_tool.run({"path": str(f)}))
 
     assert result.success is True
-    assert result.data == "1: hello\n2: world\n"
+    assert result.data == "0: hello\n1: world\n"
 
 
 @pytest.mark.parametrize(
@@ -108,13 +108,13 @@ def test_read_file_missing_file(read_tool: ReadFileTool, tmp_path) -> None:
 @pytest.mark.parametrize(
     "offset, limit, expected",
     [
-        (1, None, "2: b\n3: c\n"),
-        (0, 2, "1: a\n2: b\n"),
-        (1, 2, "2: b\n3: c\n"),
-        (1, 1, "2: b\n"),
-        (2, 10, "3: c\n"),  # limit exceeds remaining lines
+        (1, None, "1: b\n2: c\n"),
+        (0, 2, "0: a\n1: b\n"),
+        (1, 2, "1: b\n2: c\n"),
+        (1, 1, "1: b\n"),
+        (2, 10, "2: c\n"),  # limit exceeds remaining lines
         (100, None, ""),  # offset beyond EOF
-        (1.0, 1, "2: b\n"),
+        (1.0, 1, "1: b\n"),
     ],
 )
 def test_read_file_with_offset_and_limit(read_tool: ReadFileTool, tmp_path, offset, limit, expected) -> None:
@@ -134,7 +134,7 @@ def test_read_file_no_trailing_newline(read_tool: ReadFileTool, tmp_path) -> Non
     result = asyncio.run(read_tool.run({"path": str(f)}))
 
     assert result.success is True
-    assert result.data == "1: no newline at end"
+    assert result.data == "0: no newline at end"
 
 
 # ---------------------------------------------------------------------------

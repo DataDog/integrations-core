@@ -25,6 +25,7 @@ class ReadFileInput(BaseToolInput):
 class ReadFileTool(TextEdit[ReadFileInput]):
     """Reads contents of a text file from the host filesystem.
     Use to inspect config files, logs, source code. Do not use for binary files.
+    The output is a numbered list of lines starting from 0.
     Supports offset/limit for paging through large files."""
 
     @property
@@ -44,5 +45,5 @@ class ReadFileTool(TextEdit[ReadFileInput]):
         lines = content.splitlines(keepends=True)
         slice_ = lines[offset : offset + limit] if limit is not None else lines[offset:]
         width = len(str(offset + len(slice_)))
-        numbered = "".join(f"{offset + i + 1:{width}}: {line}" for i, line in enumerate(slice_))
+        numbered = "".join(f"{offset + i:{width}}: {line}" for i, line in enumerate(slice_))
         return ToolResult(success=True, data=numbered)
