@@ -68,7 +68,10 @@ def run_with_isolation(check, aggregator, datadog_agent):
                 getattr(check.log, message['method'])(*message['args'])
             elif message_type == 'datadog_agent':
                 method = message['method']
-                value = getattr(datadog_agent, method)(*message['args'], **message['kwargs'])
+                args = message['args']
+                if method == 'set_external_tags':
+                    args = [[tuple(item) for item in args[0]]]
+                value = getattr(datadog_agent, method)(*args, **message['kwargs'])
                 if method not in KNOWN_DATADOG_AGENT_SETTER_METHODS:
                     process.stdin.write(b'%s\n' % ensure_bytes(json.encode({'value': value})))
                     process.stdin.flush()
