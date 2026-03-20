@@ -15,6 +15,8 @@ __all__ = ['MockHTTPResponse']
 
 
 class _CaseInsensitiveDict(dict):
+    """Case-insensitive dict for HTTP headers. Keys are stored lowercased."""
+
     def __init__(self, data=None):
         super().__init__()
         if data:
@@ -22,16 +24,31 @@ class _CaseInsensitiveDict(dict):
                 self[k] = v
 
     def __setitem__(self, key, value):
-        super().__setitem__(key.lower(), value)
+        super().__setitem__(key.lower() if isinstance(key, str) else key, value)
 
     def __getitem__(self, key):
-        return super().__getitem__(key.lower())
+        return super().__getitem__(key.lower() if isinstance(key, str) else key)
 
     def __contains__(self, key):
         return super().__contains__(key.lower() if isinstance(key, str) else key)
 
+    def __delitem__(self, key):
+        super().__delitem__(key.lower() if isinstance(key, str) else key)
+
     def get(self, key, default=None):
-        return super().get(key.lower(), default)
+        return super().get(key.lower() if isinstance(key, str) else key, default)
+
+    def pop(self, key, *args):
+        return super().pop(key.lower() if isinstance(key, str) else key, *args)
+
+    def update(self, other=(), **kwargs):
+        if isinstance(other, dict):
+            other = {(k.lower() if isinstance(k, str) else k): v for k, v in other.items()}
+        kwargs = {k.lower(): v for k, v in kwargs.items()}
+        super().update(other, **kwargs)
+
+    def setdefault(self, key, default=None):
+        return super().setdefault(key.lower() if isinstance(key, str) else key, default)
 
 
 class MockHTTPResponse:

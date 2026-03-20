@@ -91,5 +91,27 @@ def test_mock_response_headers_case_insensitive():
     assert response.headers['Content-Type'] == 'text/plain'
     assert response.headers['content-type'] == 'text/plain'
     assert response.headers.get('Content-Type') == 'text/plain'
-    assert 'Content-Type' in response.headers
-    assert 'content-type' in response.headers
+    assert response.headers.get('cOnTeNt-tYpE') == 'text/plain'
+
+
+def test_mock_response_headers_delete_and_pop():
+    response = MockHTTPResponse(headers={'Content-Type': 'text/plain', 'X-Custom': 'val'})
+
+    del response.headers['Content-Type']
+    assert 'content-type' not in response.headers
+
+    assert response.headers.pop('X-Custom') == 'val'
+    assert response.headers.pop('X-Custom', 'gone') == 'gone'
+
+
+def test_mock_response_headers_update_and_setdefault():
+    response = MockHTTPResponse(headers={'Content-Type': 'text/plain'})
+
+    response.headers.update({'X-New': 'new_val'})
+    assert response.headers['x-new'] == 'new_val'
+
+    response.headers.setdefault('X-Default', 'default_val')
+    assert response.headers['x-default'] == 'default_val'
+
+    response.headers.setdefault('Content-Type', 'should-not-change')
+    assert response.headers['content-type'] == 'text/plain'
