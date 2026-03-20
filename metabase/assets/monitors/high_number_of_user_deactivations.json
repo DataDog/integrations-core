@@ -8,11 +8,11 @@
 		"id": 154754660,
 		"name": "High number of user deactivations",
 		"type": "log alert",
-		"query": "logs(\"source:metabase service:activity-events @evt.name:user-deactivated\").index(\"*\").rollup(\"count\").last(\"12h\") > 10",
+		"query": "logs(\"source:metabase (service:activity-events OR @vendor.endpoint:activity-events) @evt.name:user-deactivated\").index(\"*\").rollup(\"count\").last(\"12h\") > 10",
 		"message": "{{#is_alert}}\n\nThis indicates a significant rise in user account deactivations, potentially highlighting policy violations, insider threats or security risk.\n\n{{/is_alert}}\n\n{{#is_warning}}\n\nThis indicates a significant increase in user account deactivations. Immediate attention is required to address this trend.\n\n{{/is_warning}}\n\n@example@example.com",
 		"tags": [
 			"integration:metabase",
-			"service:activity-events"
+			"vendor.endpoint:activity-events"
 		],
 		"options": {
 			"thresholds": {
