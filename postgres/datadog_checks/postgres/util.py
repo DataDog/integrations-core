@@ -587,7 +587,7 @@ FROM pg_stat_activity
 GROUP BY application_name, datname, usename, backend_type, wait_event
 """.strip(),
 }
-    
+
 CONNECTION_METRICS = {
     'descriptors': [('database_name', 'db')],
     'metrics': {

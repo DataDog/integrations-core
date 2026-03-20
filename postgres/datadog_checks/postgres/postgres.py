@@ -349,10 +349,8 @@ class PostgreSql(DatabaseCheck):
             return None
 
         self.log.debug("Generating dynamic queries")
-
         queries = []
         per_database_queries = []  # queries that need to be run per database, used for autodiscovery
-
         if self.version >= V9_2:
             q_pg_stat_database = copy.deepcopy(QUERY_PG_STAT_DATABASE)
             if len(self._config.ignore_databases) > 0:
