@@ -3658,10 +3658,14 @@ jobs:
         - py3.13-linux-FreeTDS-2019-ha
         - py3.13-linux-FreeTDS-2022-single
         - py3.13-linux-FreeTDS-2022-ha
+        - py3.13-linux-FreeTDS-2025-single
+        - py3.13-linux-FreeTDS-2025-ha
         - py3.13-linux-odbc-2019-single
         - py3.13-linux-odbc-2019-ha
         - py3.13-linux-odbc-2022-single
         - py3.13-linux-odbc-2022-ha
+        - py3.13-linux-odbc-2025-single
+        - py3.13-linux-odbc-2025-ha
         - py3.13-linux-2022-newyork
         - py3.13-linux-2022-tokyo
       fail-fast: false
