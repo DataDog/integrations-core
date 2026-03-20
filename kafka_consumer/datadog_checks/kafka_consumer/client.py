@@ -282,10 +282,13 @@ class KafkaClient:
         desc = self.kafka_client.describe_consumer_groups([consumer_group])[consumer_group].result()
         return desc.state.name
 
-    def describe_log_dirs(self):
-        """Call DescribeLogDirs for all brokers, return list of LogDirDescription."""
-        future = self.kafka_client.describe_log_dirs(request_timeout=self.config._request_timeout)
-        return future.result(timeout=self.config._request_timeout)
+    def describe_log_dirs(self) -> dict[int, list]:
+        """Call DescribeLogDirs for all brokers, return {broker_id: [LogDirDescription]}."""
+        futures = self.kafka_client.describe_log_dirs(request_timeout=self.config._request_timeout)
+        results = {}
+        for broker_id, future in futures.items():
+            results[broker_id] = future.result(timeout=self.config._request_timeout)
+        return results
 
     def close_admin_client(self):
         self._kafka_client = None
