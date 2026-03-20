@@ -744,13 +744,6 @@ pipeline:
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
-            -type: schema-remapper
-              name: Map `logger.name` to `ocsf.activity_name`
-              sources:
-                - logger.name
-              target: ocsf.activity_name
-              preserveSource: true
-              overrideOnConflict: true
             - type: schema-category-mapper
               name: ocsf.severity_id
               categories:
