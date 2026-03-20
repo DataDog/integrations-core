@@ -120,6 +120,10 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
                 **dict_defaults.instance_query_completions().model_dump(),
                 **(instance.get('query_completions', {})),
             },
+            "query_errors": {
+                **dict_defaults.instance_query_errors().model_dump(),
+                **(instance.get('query_errors', {})),
+            },
             # Tags - ensure we have a list, not None
             "tags": list(instance.get('tags', [])),
             # Other settings
@@ -188,6 +192,13 @@ def _apply_validated_defaults(args: dict, instance: dict, validation_result: Val
             f"query_completions.collection_interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
+    if _safefloat(args.get('query_errors', {}).get('collection_interval')) <= 0:
+        default_value = dict_defaults.instance_query_errors().collection_interval
+        args['query_errors']['collection_interval'] = default_value
+        validation_result.add_warning(
+            f"query_errors.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
 
 def _validate_config(config: InstanceConfig, instance: dict, validation_result: ValidationResult):
     """Validate the configuration and add warnings/errors."""
@@ -203,6 +214,7 @@ def _validate_config(config: InstanceConfig, instance: dict, validation_result: 
             'query_completions',
             config.query_completions.enabled if config.query_completions else False,
         ),
+        ('query_errors', config.query_errors.enabled if config.query_errors else False),
     ]
     for feature_name, _is_enabled in dbm_features:
         if instance.get(feature_name, {}).get('enabled') and not config.dbm:
@@ -232,6 +244,11 @@ def _apply_features(config: InstanceConfig, validation_result: ValidationResult)
     validation_result.add_feature(
         FeatureKey.QUERY_COMPLETIONS,
         config.query_completions.enabled and config.dbm,
+        None if config.dbm else "Requires `dbm: true`",
+    )
+    validation_result.add_feature(
+        FeatureKey.QUERY_ERRORS,
+        config.query_errors.enabled and config.dbm,
         None if config.dbm else "Requires `dbm: true`",
     )
     validation_result.add_feature(FeatureKey.SINGLE_ENDPOINT_MODE, config.single_endpoint_mode)
