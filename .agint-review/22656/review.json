@@ -1,0 +1,45 @@
+{
+  "pr_number": 22656,
+  "repo": "DataDog/integrations-core",
+  "commit_sha": "8bd382df93626a2744784b25148bbc3e5df91f9c",
+  "author": "dkirov-dd",
+  "has_requests": false,
+  "comments": [
+    {
+      "path": ".github/workflows/scripts/tag_releases.py",
+      "line": 29,
+      "side": "RIGHT",
+      "body": "**Nit**: `_package_args` returns `[\"all\"]` when the parsed JSON array is empty (`[]`). This means `packages: '[]'` and `packages: ''` behave identically — both tag every package in the repo. The parallel path in `resolve_packages` treats `[]` as \"release nothing\" (returns an empty list → `has_packages=false`, skipping dispatch entirely). An operator who passes `'[]'` to cancel a run might instead trigger an unintended \"tag all\" in the tagging step while the detect step correctly no-ops."
+    },
+    {
+      "path": ".github/workflows/scripts/_release/dispatch.py",
+      "line": 68,
+      "side": "RIGHT",
+      "body": "**Nit**: When a `URLError` is caught (DNS failure, connection refused, etc.), `code` is set to `503` and the retry log prints `\"HTTP 503 on attempt 1/5\"`. Since 503 is a real HTTP status code, an operator seeing this in CI logs might spend time looking for a GitHub API 503 response when the failure was a local network error. A sentinel value like `0` or a conditional print that distinguishes network errors from HTTP errors would make triage faster:\n\n```python\nif isinstance(e, urllib.error.HTTPError):\n    print(f\"  HTTP {code} on attempt {attempt}/{max_attempts}, retrying...\", ...)\nelse:\n    print(f\"  Network error on attempt {attempt}/{max_attempts} ({body}), retrying...\", ...)\n```"
+    },
+    {
+      "path": ".github/workflows/scripts/dispatch_release.py",
+      "line": 56,
+      "side": "RIGHT",
+      "body": "**Suggestion**: On `DispatchError`, `sys.exit(1)` is called before `write_summary`. This means a dispatch failure produces no GitHub step summary — the summary tab is empty and operators must dig through raw step logs to understand which packages were being released and why it failed. `validate_release.py` sets the right precedent by writing a summary before exiting on failure. Even a minimal summary here (the package list + error banner) would significantly improve operator UX on failure."
+    },
+    {
+      "path": ".github/workflows/trigger-release.yml",
+      "line": 73,
+      "side": "RIGHT",
+      "body": "**Suggestion**: `${{ inputs.target || 'dev' }}` causes all push-triggered runs (where `inputs.target` is empty) to target dev S3, never prod. Prod releases require an explicit `workflow_dispatch`. This is safe and intentional, but non-obvious — someone debugging why prod wheels aren't being built from master pushes would need to trace this expression. A one-line comment (like the one added to the `detect` step above) would prevent the confusion:\n\n```yaml\n# Push-triggered runs default to dev; prod requires explicit workflow_dispatch.\ntarget: ${{ inputs.target || 'dev' }}\n```"
+    },
+    {
+      "path": ".github/workflows/scripts/_release/validation.py",
+      "line": 43,
+      "side": "RIGHT",
+      "body": "**Praise**: `validate_package` and `validate_packages` are the cleanest functions in this PR — pure, no I/O, no side effects, and a consistent `{package, version, type, dispatch}` shape across all five validation paths. They're easy to unit test and easy to reason about in isolation. This is the right model for library modules."
+    },
+    {
+      "path": ".github/workflows/scripts/_release/dispatch.py",
+      "line": 14,
+      "side": "RIGHT",
+      "body": "**Praise**: The `DispatchError` refactoring is well-executed. Raising from library code and catching at the entry point gives `dispatch_in_batches` a clean, testable contract — the two new `URLError` tests (`test_retries_on_url_error`, `test_raises_on_url_error_after_exhausting_retries`) specifically verify the extended retry behavior, and the backoff assertion in `test_succeeds_after_transient_5xx` now guards the `2**attempt` formula as a behavioral contract."
+    }
+  ]
+}

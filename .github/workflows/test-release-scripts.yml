@@ -6,13 +6,13 @@ on:
       - master
     paths:
       - ".github/workflows/scripts/**"
-      - ".github/workflows/dispatch-release.yml"
-      - ".github/workflows/trigger-release.yml"
+      - ".github/workflows/release-dispatch.yml"
+      - ".github/workflows/release-trigger.yml"
   pull_request:
     paths:
       - ".github/workflows/scripts/**"
-      - ".github/workflows/dispatch-release.yml"
-      - ".github/workflows/trigger-release.yml"
+      - ".github/workflows/release-dispatch.yml"
+      - ".github/workflows/release-trigger.yml"
 
 jobs:
   test:

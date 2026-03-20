@@ -1,6 +1,6 @@
 name: Dispatch Release
 
-# Reusable workflow — intended to be called by a trigger-release workflow in an
+# Reusable workflow — intended to be called by a release-trigger workflow in an
 # integration repository (integrations-core, integrations-extras, marketplace).
 
 on:
@@ -24,7 +24,7 @@ on:
         description: "Target environment (dev = no tag push, dev S3; prod = push tags, prod S3)"
         required: false
         type: string
-        default: prod  # callers (e.g. trigger-release.yml) typically override this
+        default: prod  # callers (e.g. release-trigger.yml) typically override this
       dry-run:
         description: >-
           When true, print what would be released and where without pushing tags
