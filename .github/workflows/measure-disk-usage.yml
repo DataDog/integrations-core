@@ -42,6 +42,7 @@ jobs:
         HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
       run: |
         echo "Running for locked uncompressed sizes"
+        # locked sizes json is not created as locked sizes don't rely on the previous commit
         ddev -v size status --commit "$HEAD_SHA" --to-dd-key ${{ secrets.DD_API_KEY }} --branch "$HEAD_BRANCH"
         echo "Running for declared uncompressed sizes"
         ddev -v size status --commit "$HEAD_SHA" --to-dd-key ${{ secrets.DD_API_KEY }} --branch "$HEAD_BRANCH" --format json --declared
@@ -54,6 +55,7 @@ jobs:
 
       run: |
         echo "Running for locked compressed sizes"
+        # locked sizes json is not created as locked sizes don't rely on the previous commit
         ddev -v size status --commit "$HEAD_SHA" --to-dd-key ${{ secrets.DD_API_KEY }} --branch "$HEAD_BRANCH" --compressed
         echo "Running for declared compressed sizes"
         ddev -v size status --commit "$HEAD_SHA" --to-dd-key ${{ secrets.DD_API_KEY }} --branch "$HEAD_BRANCH" --compressed --format json --declared
