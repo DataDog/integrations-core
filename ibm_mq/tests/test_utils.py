@@ -24,6 +24,33 @@ def test_sanitize_strings(input_string, expected):
 
 
 @pytest.mark.parametrize(
+    'input_string,expected',
+    [
+        pytest.param('Production Queue', 'production_queue', id='spaces_to_underscores'),
+        pytest.param('Dev-Channel-01', 'dev-channel-01', id='hyphens'),
+        pytest.param('SYSTEM.ADMIN.QUEUE', 'system_admin_queue', id='lowercase_dots_to_underscores'),
+        pytest.param('Test Queue (v2)', 'test_queue_v2', id='special_chars'),
+        pytest.param('__Leading_and_Trailing__', 'leading_and_trailing', id='underscores_trimmed'),
+        pytest.param('queue@#$%^&*()name', 'queue_name', id='special_characters_replaced'),
+        pytest.param('', '', id='empty_string'),
+        pytest.param('a' * 201, 'a' * 200, id='length_limit_200'),
+        pytest.param('Valid_tag-123', 'valid_tag-123', id='valid_tags_unchanged'),
+        pytest.param('UPPER CASE WITH SPACES', 'upper_case_with_spaces', id='uppercase_with_spaces'),
+        pytest.param('Queue/Topic/Name', 'queue_topic_name', id='slashes_to_underscores'),
+        pytest.param('Test: Description', 'test_description', id='colons_replaced'),
+        pytest.param('Channel for DEV.QUEUE', 'channel_for_dev_queue', id='channel_description'),
+        pytest.param(
+            'Main production queue for orders', 'main_production_queue_for_orders', id='realistic_queue_description'
+        ),
+    ],
+)
+def test_normalize_desc_tag(input_string, expected):
+    from datadog_checks.ibm_mq.utils import normalize_desc_tag
+
+    assert expected == normalize_desc_tag(input_string)
+
+
+@pytest.mark.parametrize(
     'datestamp,timestamp,time_zone',
     [
         pytest.param('2021-09-08', '19.19.41', 'UTC', id='elapsed a'),

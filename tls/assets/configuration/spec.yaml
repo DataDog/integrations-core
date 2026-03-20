@@ -1,4 +1,5 @@
 name: TLS
+fleet_configurable: true
 files:
 - name: tls.yaml
   options:
@@ -9,6 +10,7 @@ files:
         The expected versions of TLS/SSL when connecting to `server`. Any protocol versions
         negotiated by connections that are not in this list makes the service check
         `tls.version` send CRITICAL.
+      fleet_configurable: true
       value:
         type: array
         items:
@@ -19,6 +21,7 @@ files:
     - name: fetch_intermediate_certs
       description: |
         Whether or not to perform AIA chasing in order to load the full certificate chain.
+      fleet_configurable: true
       value:
         example: false
         type: boolean
@@ -27,11 +30,13 @@ files:
     options:
     - name: server
       description: The hostname or IP address with which to connect.
+      fleet_configurable: true
       required: true
       value:
         type: string
     - name: port
       description: The port that is used. This overrides any port specified in `server`.
+      fleet_configurable: true
       value:
         type: integer
         example: 443
@@ -39,6 +44,7 @@ files:
       description: |
         The transport protocol to use when connecting to `server`.
         Currently, only TCP is supported.
+      fleet_configurable: true
       value:
         type: string
         example: TCP
@@ -47,6 +53,7 @@ files:
         The path to a local certificate in lieu of a server/port. In this mode, the
         service checks `tls.can_connect` and `tls.version` are unavailable. The
         certificate can be in PEM or DER format.
+      fleet_configurable: true
       value:
         type: string
     - name: server_hostname
@@ -54,6 +61,7 @@ files:
         The hostname of the service with which to connect for servers that support SNI. This
         is also the value used for hostname validation. If not specified, `server` parameter is used.
         See: https://en.wikipedia.org/wiki/Server_Name_Indication
+      fleet_configurable: true
       value:
         type: string
     - name: allowed_versions
@@ -70,6 +78,7 @@ files:
           TLSv1.1
           TLSv1.2
           TLSv1.3
+      fleet_configurable: true
       value:
         type: array
         items:
@@ -78,6 +87,7 @@ files:
           - 'TLSv1.2'
           - 'TLSv1.3'
     - name: fetch_intermediate_certs
+      fleet_configurable: true
       description: |
         Whether or not to perform AIA chasing in order to load the full certificate chain.
 
@@ -86,6 +96,7 @@ files:
         example: false
         type: boolean
     - name: send_cert_duration
+      fleet_configurable: true
       description: |
         Whether or not to send the certificate's valid issue duration as `tls.issued_days` and `tls.issued_seconds`.
       value:
@@ -99,6 +110,7 @@ files:
         example: 60
         type: number
     - name: days_warning
+      fleet_configurable: true
       description: |
         Number of days before certificate expiration from which the service check
         `tls.cert_expiration` begins emitting WARNING.
@@ -106,6 +118,7 @@ files:
         type: number
         example: 14.0
     - name: days_critical
+      fleet_configurable: true
       description: |
         Number of days before certificate expiration from which the service check
         `tls.cert_expiration` begins emitting CRITICAL.
@@ -113,23 +126,27 @@ files:
         type: number
         example: 7.0
     - name: seconds_warning
+      fleet_configurable: true
       description: |
         Number of seconds before certificate expiration from which the service check
         `tls.cert_expiration` begins emitting WARNING. Overrides `days_warning`.
       value:
         type: integer
     - name: seconds_critical
+      fleet_configurable: true
       description: |
         Number of seconds before certificate expiration from which the service check
         `tls.cert_expiration` begins emitting CRITICAL. Overrides `days_critical`.
       value:
         type: integer
     - name: timeout
+      fleet_configurable: true
       description: The timeout for connecting to `server`.
       value:
         type: integer
         example: 10
     - name: name
+      fleet_configurable: true
       description: Unique identifier for this instance that is added as a tag to all data emitted.
       value:
         type: string

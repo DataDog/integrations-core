@@ -1,4 +1,5 @@
 name: Slurm
+fleet_configurable: true
 files:
 - name: slurm.yaml
   options:
@@ -16,26 +17,31 @@ files:
     options:
     - name: collect_sinfo_stats
       description: Whether or not to collect statistics from the sinfo command.
+      fleet_configurable: true
       value:
         type: boolean
         example: True
     - name: collect_sdiag_stats
       description: Whether or not to collect statistics from the sdiag command.
+      fleet_configurable: true
       value:
         type: boolean
         example: True
     - name: collect_squeue_stats
       description: Whether or not to collect statistics from the squeue command.
+      fleet_configurable: true
       value:
         type: boolean
         example: True
     - name: collect_sacct_stats
       description: Whether or not to collect statistics from the sacct command.
+      fleet_configurable: true
       value:
         type: boolean
         example: True
     - name: collect_sshare_stats
       description: Whether or not to collect statistics from the sshare command.
+      fleet_configurable: true
       value:
         type: boolean
         example: True
@@ -43,16 +49,19 @@ files:
       description: |
         Whether or not to collect statistics from the scontrol command. This is mainly used in the worker 
         node to collect the list of running jobs along with their PIDs.
+      fleet_configurable: true
       value:
         type: boolean
         example: False
     - name: collect_gpu_stats
       description: Whether or not to collect GPU statistics when Slurm is configured to use GPUs.
+      fleet_configurable: true
       value:
         type: boolean
         example: False
     - name: collect_seff_stats
       description: Whether or not to collect seff statistics.
+      fleet_configurable: true
       value:
         type: boolean
         example: False
@@ -62,36 +71,43 @@ files:
         3. Level 1 collects data only for partitions. Level 2 collects data from individual nodes. Level 3 
         collects data from from individual nodes as well but is more verbose and includes data such as CPU and 
         memory usage as reported from the OS, as well as additional tags.
+      fleet_configurable: true
       value:
         type: integer
         example: 1
     - name: sinfo_path
       description: Full path to the sinfo binary.
+      fleet_configurable: true
       value:
         type: string
         example: /usr/bin/sinfo
     - name: sacct_path
       description: Full path to the sacct binary.
+      fleet_configurable: true
       value:
         type: string
         example: /usr/bin/sacct
     - name: sdiag_path
       description: Full path to the sdiag binary.
+      fleet_configurable: true
       value:
         type: string
         example: /usr/bin/sdiag
     - name: sshare_path
       description: Full path to the sshare binary.
+      fleet_configurable: true
       value:
         type: string
         example: /usr/bin/sshare
     - name: squeue_path
       description: Full path to the squeue binary.
+      fleet_configurable: true
       value:
         type: string
         example: /usr/bin/squeue
     - name: scontrol_path
       description: Full path to the scontrol binary.
+      fleet_configurable: true
       value:
         type: string
         example: /usr/bin/scontrol

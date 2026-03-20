@@ -33,21 +33,32 @@ include = ["datadog_checks_tests_helper"]
         '.github/workflows/config',
         'labeler.yml',
         """changelog/no-changelog:
-- any:
-  - requirements-agent-release.txt
-  - '*/__about__.py'
+- changed-files:
+  - any-glob-to-any-file:
+    - requirements-agent-release.txt
+    - '*/__about__.py'
 - all:
-  - '!*/datadog_checks/**'
-  - '!*/pyproject.toml'
-  - '!ddev/src/**'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '!*/datadog_checks/**'
+      - '!*/pyproject.toml'
+      - '!ddev/src/**'
 integration/datadog_checks_tests_helper:
-- datadog_checks_tests_helper/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - datadog_checks_tests_helper/**/*
 integration/dummy:
-- dummy/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - dummy/**/*
 integration/dummy2:
-- dummy2/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - dummy2/**/*
 release:
-- '*/__about__.py'
+- changed-files:
+  - any-glob-to-any-file:
+    - '*/__about__.py'
 """,
     ),
 ]

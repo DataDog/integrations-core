@@ -1,1 +1,0 @@
-Ensure correct commit attribution when sending size metrics by requiring an explicit commit in the ddev size status command.

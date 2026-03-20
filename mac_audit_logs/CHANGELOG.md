@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 1.2.0 / 2025-11-26
+## 1.3.1 / 2026-03-18
+
+***Fixed***:
+
+* Skip over directories and files that don't match the log file pattern. ([#22479](https://github.com/DataDog/integrations-core/pull/22479))
+
+## 1.3.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+## 1.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 

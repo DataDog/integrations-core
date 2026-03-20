@@ -26,9 +26,11 @@ from datadog_checks.sqlserver.metrics import SqlFractionMetric
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
     Database,
+    construct_use_statement,
     extract_sql_comments_and_procedure_name,
     get_unixodbc_sysconfig,
     is_non_empty_file,
+    parse_sqlserver_major_version,
     parse_sqlserver_year,
     set_default_driver_conf,
 )
@@ -43,6 +45,24 @@ except ImportError:
 
 # mark the whole module
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    'db_name, expected',
+    [
+        ('my_database', 'USE [my_database];'),
+        (']rh_bracket]', 'USE []]rh_bracket]]];'),
+        ('[lh_bracket[', 'USE [[lh_bracket[];'),
+        ('[bracketed]', 'USE [[bracketed]]];'),
+    ],
+)
+def test_construct_use_statement(db_name, expected):
+    """
+    Test functionality of constructing USE statement
+    """
+    use_stmt = construct_use_statement(db_name)
+
+    assert use_stmt == expected
 
 
 def test_get_cursor(instance_docker):
@@ -281,6 +301,60 @@ def test_azure_autodiscovery_exclude_override(instance_autodiscovery):
     assert check.databases == {Database("tempdb", "tempdb")}
 
 
+def test_autodiscovery_resets_database_metrics_on_db_removal(instance_autodiscovery):
+    """When autodiscovery detects databases were removed, _database_metrics must be
+    reset so that query executors are rebuilt without the deleted databases."""
+    fetchall_results, mock_cursor = _mock_database_list()
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+
+    # First autodiscovery run — discovers all databases
+    check.autodiscover_databases(mock_cursor)
+    assert check.databases == {Database(r.name) for r in fetchall_results}
+
+    # Simulate _database_metrics being built (as happens during collect_metrics)
+    check._database_metrics = [mock.MagicMock()]
+    assert check._database_metrics is not None
+
+    # Second autodiscovery run with a database removed — simulate by returning fewer rows
+    Row = namedtuple('Row', 'name')
+    reduced_results = [Row('master'), Row('tempdb'), Row('msdb')]
+    mock_cursor.fetchall.return_value = iter(reduced_results)
+    check._ad_last_check = 0  # force autodiscovery to run again
+
+    changed = check.autodiscover_databases(mock_cursor)
+    assert changed is True
+    assert check.databases == {Database('master'), Database('tempdb'), Database('msdb')}
+    assert check._database_metrics is None
+
+
+def test_autodiscovery_resets_database_metrics_on_db_addition(instance_autodiscovery):
+    """When autodiscovery detects new databases were added, _database_metrics must be
+    reset so that query executors are rebuilt to include the new databases."""
+    Row = namedtuple('Row', 'name')
+    initial_results = [Row('master'), Row('tempdb')]
+    mock_cursor = mock.MagicMock()
+    mock_cursor.fetchall.return_value = iter(initial_results)
+
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+
+    # First autodiscovery run
+    check.autodiscover_databases(mock_cursor)
+    assert check.databases == {Database('master'), Database('tempdb')}
+
+    # Simulate _database_metrics being built
+    check._database_metrics = [mock.MagicMock()]
+
+    # Second autodiscovery run with a database added
+    expanded_results = [Row('master'), Row('tempdb'), Row('newdb')]
+    mock_cursor.fetchall.return_value = iter(expanded_results)
+    check._ad_last_check = 0
+
+    changed = check.autodiscover_databases(mock_cursor)
+    assert changed is True
+    assert check.databases == {Database('master'), Database('tempdb'), Database('newdb')}
+    assert check._database_metrics is None
+
+
 @pytest.mark.parametrize(
     'base_name',
     [
@@ -496,6 +570,13 @@ Microsoft SQL Server 2019 (RTM-CU12) (KB5004524) - 15.0.4153.1 (X64)
 )
 def test_parse_sqlserver_year(version, expected_year):
     assert parse_sqlserver_year(version) == expected_year
+
+
+@pytest.mark.parametrize(
+    "version,expected_major_version", [(SQL_SERVER_2012_VERSION_EXAMPLE, 11), (SQL_SERVER_2019_VERSION_EXAMPLE, 15)]
+)
+def test_parse_sqlserver_major_version(version, expected_major_version):
+    assert parse_sqlserver_major_version(version) == expected_major_version
 
 
 @pytest.mark.parametrize(
@@ -920,3 +1001,22 @@ def test_only_custom_queries_validation_warnings(caplog):
     warning_count = len([record for record in caplog.records if record.levelno >= logging.WARNING])
     warning_messages = [record.message for record in caplog.records if record.levelno >= logging.WARNING]
     assert warning_count == 0, f"Expected no warnings but found {warning_count} warnings: {warning_messages}"
+
+
+@pytest.mark.parametrize(
+    'exclude_hostname, expected_hostname',
+    [
+        (False, 'resolved.hostname'),
+        (True, None),
+    ],
+)
+def test_debug_stats_kwargs_respects_exclude_hostname(exclude_hostname, expected_hostname):
+    instance = {
+        'host': DOCKER_SERVER,
+        'username': 'sa',
+        'password': 'Password12!',
+        'exclude_hostname': exclude_hostname,
+    }
+    with mock.patch('datadog_checks.sqlserver.SQLServer.resolve_db_host', return_value='resolved.hostname'):
+        check = SQLServer(CHECK_NAME, {}, [instance])
+    assert check.debug_stats_kwargs()['hostname'] == expected_hostname

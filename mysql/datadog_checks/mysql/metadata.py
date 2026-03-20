@@ -5,15 +5,15 @@ import time
 from contextlib import closing
 from operator import attrgetter
 
-import pymysql  # type: ignore
+import pymysql
 
 from datadog_checks.mysql.cursor import CommenterDictCursor
-from datadog_checks.mysql.schemas import MySqlSchemaCollector
+from datadog_checks.mysql.databases_data import DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL, DatabasesData
 
 from .util import ManagedAuthConnectionMixin, connect_with_session_variables
 
 try:
-    import datadog_agent  # type: ignore
+    import datadog_agent
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
@@ -27,7 +27,7 @@ from datadog_checks.base.utils.tracking import tracked_method
 
 # default pg_settings collection interval in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
-DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
+
 MARIADB_TABLE_NAME = "information_schema.GLOBAL_VARIABLES"
 MYSQL_TABLE_NAME = "performance_schema.global_variables"
 
@@ -48,23 +48,24 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
     """
 
     def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
+        self._databases_data_enabled = is_affirmative(config.schemas_config.get("enabled", False))
+        self._databases_data_collection_interval = config.schemas_config.get(
+            "collection_interval", DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL
+        )
         self._settings_enabled = is_affirmative(config.settings_config.get('enabled', True))
-        self._schemas_enabled = is_affirmative(config.schemas_config.get('enabled', False))
 
         self._settings_collection_interval = float(
             config.settings_config.get('collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL)
         )
-        self._schemas_collection_interval = float(
-            config.schemas_config.get('collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
-        )
 
-        if self._schemas_enabled and not self._settings_enabled:
-            self.collection_interval = self._schemas_collection_interval
-        elif not self._schemas_enabled and self._settings_enabled:
+        if self._databases_data_enabled and not self._settings_enabled:
+            self.collection_interval = self._databases_data_collection_interval
+        elif not self._databases_data_enabled and self._settings_enabled:
             self.collection_interval = self._settings_collection_interval
         else:
-            self.collection_interval = min(self._settings_collection_interval, self._schemas_collection_interval)
-        self.enabled = self._settings_enabled or self._schemas_enabled
+            self.collection_interval = min(self._databases_data_collection_interval, self._settings_collection_interval)
+
+        self.enabled = self._databases_data_enabled or self._settings_enabled
 
         super(MySQLMetadata, self).__init__(
             check,
@@ -84,9 +85,9 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
         self._uses_managed_auth = uses_managed_auth
         self._db_created_at = 0
         self._db = None
-        self._schemas_collector = MySqlSchemaCollector(check)
+        self._databases_data = DatabasesData(self, check, config)
         self._last_settings_collection_time = 0
-        self._last_schemas_collection_time = 0
+        self._last_databases_collection_time = 0
 
     def get_db_connection(self):
         """
@@ -146,10 +147,19 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
                                 These may be unavailable until the error is resolved. The error - {}""".format(e)
                 )
 
-        elapsed_time_schemas = time.time() - self._last_schemas_collection_time
-        if self._schemas_enabled and elapsed_time_schemas >= self._schemas_collection_interval:
-            self._last_schemas_collection_time = time.time()
-            self._schemas_collector.collect_schemas()
+        elapsed_time_databases = time.time() - self._last_databases_collection_time
+        if self._databases_data_enabled and elapsed_time_databases >= self._databases_data_collection_interval:
+            self._last_databases_collection_time = time.time()
+            try:
+                self._databases_data.collect_databases_data(self._tags)
+            except Exception as e:
+                self._log.error(
+                    """An error occurred while collecting schema data.
+                                These may be unavailable until the error is resolved. The error - {}""".format(e)
+                )
+
+    def shut_down(self):
+        self._databases_data.shut_down()
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def report_mysql_metadata(self):

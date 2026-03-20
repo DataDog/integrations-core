@@ -1,0 +1,139 @@
+id: "bluecat-edge"
+tests:
+ -
+  sample: |-
+    {
+      "site_details" : {
+        "name" : "House India",
+        "id" : "955ff30b-93a9-4f13-9de1-aeaa25190f48"
+      },
+      "vendor" : {
+        "endpoint" : "dns-query-logs"
+      },
+      "query_log" : {
+        "queryClassId" : 1,
+        "query" : "amazon.in.",
+        "latency" : 0,
+        "source" : "10.41.13.131",
+        "matchedPolicies" : [ {
+          "criteria" : {
+            "queryDomain" : "amazon.in"
+          },
+          "name" : "Local Policy",
+          "id" : "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575",
+          "eventType" : "block"
+        } ],
+        "queryType" : "A",
+        "queryId" : 8121,
+        "appliedPolicyId" : "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575",
+        "queryProtocol" : "UDP",
+        "actionTaken" : "block",
+        "response" : "NXDOMAIN",
+        "identity" : {
+          "identityId" : "identity_id_example",
+          "userId" : "example@test.bluecat.com"
+        },
+        "drsId" : "87a16e58-11d3-4d45-a574-af92520d3b99",
+        "authority" : [ {
+          "recordType" : "SOA",
+          "domainName" : ".",
+          "parsed" : true,
+          "rData" : "a.root-servers.net a.root-servers.net 2026011601 3600 1800 7200 300"
+        } ],
+        "siteId" : "955ff30b-93a9-4f13-9de1-aeaa25190f48",
+        "time" : 1770186142000,
+        "id" : "1768799730903712CBD65A6B0963C276D07800E643DBG"
+      }
+    }
+  result:
+    custom:
+      dns:
+        flags:
+          rcode: "NXDOMAIN"
+        id: 8121
+        question:
+          name: "amazon.in."
+          type: "A"
+      network:
+        client:
+          geoip: {}
+          ip: "10.41.13.131"
+      query_log:
+        actionTaken: "block"
+        appliedPolicyId: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
+        authority:
+         -
+          recordType: "SOA"
+          domainName: "."
+          parsed: true
+          rData: "a.root-servers.net a.root-servers.net 2026011601 3600 1800 7200 300"
+        drsId: "87a16e58-11d3-4d45-a574-af92520d3b99"
+        id: "1768799730903712CBD65A6B0963C276D07800E643DBG"
+        identity:
+          identityId: "identity_id_example"
+        latency: 0
+        matchedPolicies:
+         -
+          criteria:
+            queryDomain: "amazon.in"
+          name: "Local Policy"
+          id: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
+          eventType: "block"
+        queryClassId: 1
+        queryProtocol: "UDP"
+        siteId: "955ff30b-93a9-4f13-9de1-aeaa25190f48"
+        time: 1770186142000
+      site_details:
+        id: "955ff30b-93a9-4f13-9de1-aeaa25190f48"
+        name: "House India"
+      usr:
+        id: "example@test.bluecat.com"
+      vendor:
+        endpoint: "dns-query-logs"
+    message: |-
+      {
+        "site_details" : {
+          "name" : "House India",
+          "id" : "955ff30b-93a9-4f13-9de1-aeaa25190f48"
+        },
+        "vendor" : {
+          "endpoint" : "dns-query-logs"
+        },
+        "query_log" : {
+          "queryClassId" : 1,
+          "query" : "amazon.in.",
+          "latency" : 0,
+          "source" : "10.41.13.131",
+          "matchedPolicies" : [ {
+            "criteria" : {
+              "queryDomain" : "amazon.in"
+            },
+            "name" : "Local Policy",
+            "id" : "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575",
+            "eventType" : "block"
+          } ],
+          "queryType" : "A",
+          "queryId" : 8121,
+          "appliedPolicyId" : "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575",
+          "queryProtocol" : "UDP",
+          "actionTaken" : "block",
+          "response" : "NXDOMAIN",
+          "identity" : {
+            "identityId" : "identity_id_example",
+            "userId" : "example@test.bluecat.com"
+          },
+          "drsId" : "87a16e58-11d3-4d45-a574-af92520d3b99",
+          "authority" : [ {
+            "recordType" : "SOA",
+            "domainName" : ".",
+            "parsed" : true,
+            "rData" : "a.root-servers.net a.root-servers.net 2026011601 3600 1800 7200 300"
+          } ],
+          "siteId" : "955ff30b-93a9-4f13-9de1-aeaa25190f48",
+          "time" : 1770186142000,
+          "id" : "1768799730903712CBD65A6B0963C276D07800E643DBG"
+        }
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1770186142000

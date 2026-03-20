@@ -17,8 +17,6 @@ class SqlserverFileStatsMetrics(SqlserverDatabaseMetricsBase):
     def enabled(self):
         if not self.include_file_stats_metrics:
             return False
-        if not self.year and not is_azure_database(self.engine_edition):
-            return False
         return True
 
     @property
@@ -56,7 +54,7 @@ class SqlserverFileStatsMetrics(SqlserverDatabaseMetricsBase):
             "io_stall": {"name": "files.io_stall", "type": "monotonic_count"},
         }
 
-        if self.year <= 2012 and not is_azure_database(self.engine_edition):
+        if self.major_version <= 11 and not is_azure_database(self.engine_edition):
             column_definitions.pop("io_stall_queued_read_ms")
             column_definitions.pop("io_stall_queued_write_ms")
 
@@ -68,7 +66,7 @@ class SqlserverFileStatsMetrics(SqlserverDatabaseMetricsBase):
             metric_columns.append(column_definitions[column])
 
         query_filter = ""
-        if self.year == 2022:
+        if self.major_version >= 16:
             query_filter = "WHERE DB_NAME(fs.database_id) not like 'model_%'"
 
         query = """

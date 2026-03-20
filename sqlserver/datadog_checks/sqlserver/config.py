@@ -32,7 +32,9 @@ class SQLServerConfig:
         self.autodiscovery_exclude: list[str] = instance.get('autodiscovery_exclude', ['model']) or ['model']
         self.autodiscovery_db_service_check: bool = is_affirmative(instance.get('autodiscovery_db_service_check', True))
         self.min_collection_interval: int = instance.get('min_collection_interval', 15)
-        self.autodiscovery_interval: int = instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
+        self.autodiscovery_interval: int = instance.get(
+            'database_autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL
+        )
         self.database_instance_collection_interval: int = instance.get(
             'database_instance_collection_interval', DEFAULT_LONG_METRICS_COLLECTION_INTERVAL
         )

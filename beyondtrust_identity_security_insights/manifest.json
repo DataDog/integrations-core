@@ -3,7 +3,7 @@
   "app_uuid": "1ea8fd4a-c95e-460f-a2ec-703d8dccef5e",
   "app_id": "beyondtrust-identity-security-insights",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

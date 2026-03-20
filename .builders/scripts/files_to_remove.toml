@@ -1,0 +1,59 @@
+excluded_paths = [
+  # --- Type annotation ---
+  "krb5/**/*.pyi",
+  "krb5/**/py.typed",
+
+  "Cryptodome/**/*.pyi",
+  "Cryptodome/**/py.typed",
+
+  "ddtrace/**/*.pyi",
+  "ddtrace/**/py.typed",
+
+  "pyVmomi/**/*.pyi",
+  "pyVmomi/**/py.typed",
+
+  "gssapi/**/*.pyi",
+  "gssapi/**/py.typed",
+
+  # --- Tests ---
+
+  "idlelib/idle_test/",
+  "bs4/tests/",
+  "Cryptodome/SelfTest/",
+  "gssapi/tests/",
+  "keystoneauth1/tests/",
+  "lazy_loader/tests/",
+  "openstack/tests/",
+  "os_service_types/tests/",
+  "pbr/tests/",
+  "pkg_resources/tests/",
+  "pip/_vendor/colorama/tests/",
+  "psutil/tests/",
+  "requests_unixsocket/tests/",
+  "securesystemslib/_vendor/ed25519/test_data/",
+  "setuptools/_distutils/compilers/C/tests/",
+  "setuptools/_vendor/packaging/tests/",
+  "setuptools/_distutils/tests/",
+  "setuptools/tests/",
+  "simplejson/tests/",
+  "stevedore/tests/",
+  "supervisor/tests/",
+  "/test/",
+  "vertica_python/tests/",
+  "websocket/tests/",
+  "win32com/test/",
+
+  # --- Botocore ---
+  "botocore/data/*",
+  # We use sts in several integrations for assuming roles:
+  # - amazon_msk
+  # - postres
+  # - mysql
+  "!botocore/data/sts",
+  # amazon_msk also needs the kafka client.
+  "!botocore/data/kafka",
+  # postgres and mysql also need the rds.
+  "!botocore/data/rds",
+  # Riakcs integration monitors s3.
+  "!botocore/data/s3",
+]

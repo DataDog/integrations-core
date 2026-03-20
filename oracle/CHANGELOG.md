@@ -1,8 +1,6 @@
 # CHANGELOG - oracle
 
-<!-- towncrier release notes start -->
-
-## 6.2.0 / 2025-11-26
+## 6.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 

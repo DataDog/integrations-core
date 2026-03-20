@@ -2,15 +2,49 @@
 
 <!-- towncrier release notes start -->
 
+## 15.14.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+## 15.13.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Support collecting both group replication and traditional primary/replica replication metrics simultaneously. This enables monitoring of hybrid MySQL topologies where a server participates in group replication while also having traditional replicas connected. ([#22485](https://github.com/DataDog/integrations-core/pull/22485))
+
+## 15.12.0 / 2026-02-11 / Agent 7.76.0
+
+***Security***:
+
+* Bump `cryptography` to 46.0.5 ([#22607](https://github.com/DataDog/integrations-core/pull/22607))
+
+## 15.11.2 / 2026-01-21
+
+***Fixed***:
+
+* Skip sample and explain plan collection when statement timer instrumentation is not enabled ([#22264](https://github.com/DataDog/integrations-core/pull/22264))
+* Fixes a performance issue when collecting `mysql.performance.errors_raised` metric by switching to a global aggregation instead of a per-user aggregation that we aggregated manually. ([#22373](https://github.com/DataDog/integrations-core/pull/22373))
+* Fix KeyError in statement metrics when available metric columns change between collection cycles. ([#22318](https://github.com/DataDog/integrations-core/pull/22318))
+  Optimize StatementMetrics cache to only store fields we need to compute statement metrics. ([#22358](https://github.com/DataDog/integrations-core/pull/22358)) ([#22376](https://github.com/DataDog/integrations-core/pull/22376))
+
+## 15.11.1 / 2025-12-16 / Agent 7.74.0
+
+***Fixed***:
+
+* Revert "Migrate MySQL to new schema collector" to avoid breaking schema collection on older versions of Mysql/MariaDB ([#22103](https://github.com/DataDog/integrations-core/pull/22103))
+
 ## 15.11.0 / 2025-11-26
 
 ***Added***:
 
-* Migrate SQL Server to a new schema collector, which provides improved performance in the Agent and allows the backend to handle larger schema collections ([#21729](https://github.com/DataDog/integrations-core/pull/21729))
+* Migrate Mysql to a new schema collector, which provides improved performance in the Agent and allows the backend to handle larger schema collections ([#21729](https://github.com/DataDog/integrations-core/pull/21729))
 * Add DBM Agent health events to MySQL, including basic initialization checks, unhandled errors, and missed collections ([#21867](https://github.com/DataDog/integrations-core/pull/21867))
 * Upgrade base version for Postgres, MySQL, and SQLServer ([#21906](https://github.com/DataDog/integrations-core/pull/21906))
 
-## 15.10.0 / 2025-10-31
+## 15.10.0 / 2025-10-31 / Agent 7.73.0
 
 ***Added***:
 

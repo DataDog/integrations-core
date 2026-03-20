@@ -1,5 +1,9 @@
 # Agent Check: Snowflake
 
+**Deprecation Notice:** The Agent based Snowflake integration is officially deprecated and no longer supported. Please 
+  utilize the updated [Snowflake Integration](https://docs.datadoghq.com/integrations/snowflake-web/). 
+
+  
 ## Overview
 
 This check monitors [Snowflake][1] through the Datadog Agent. Snowflake is a SaaS-analytic data warehouse and runs completely on cloud infrastructure. 
@@ -24,6 +28,8 @@ The Snowflake check is included in the [Datadog Agent][2] package.
 
 ### Configuration
 <div class="alert alert-warning">Snowflake recommends granting permissions to an alternate role like `SYSADMIN`. Read more about controlling <a href="https://docs.snowflake.com/en/user-guide/security-access-control-considerations.html#control-the-assignment-of-the-accountadmin-role-to-users">ACCOUNTADMIN role</a> for more information.</div>
+
+As a best practice, Datadog recommends creating a dedicated role and user with read-only access to monitor your Snowflake instance. This limits the access granted to the Datadog Agent.
 
 1. Create a Datadog specific role and user to monitor Snowflake. In Snowflake, run the following to create a custom role with access to the ACCOUNT_USAGE schema.
 

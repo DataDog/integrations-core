@@ -6,8 +6,8 @@
             "id": 6795959842001555,
             "definition": {
                 "type": "image",
-                "url": "https://www.proofpoint.com/sites/default/files/styles/image_auto_200/public/pr/Proofpoint-logo-reg-K.png.webp",
-                "url_dark_theme": "https://www.proofpoint.com/sites/default/files/styles/image_auto_200/public/pr/Proofpoint-logo-reg-Reversed.png.webp",
+                "url": "/static/images/logos/proofpoint-tap_large.svg",
+                "url_dark_theme": "/static/images/logos/proofpoint-tap_reversed_large.svg",
                 "sizing": "contain",
                 "margin": "md",
                 "has_background": true,

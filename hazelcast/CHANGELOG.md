@@ -2,13 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 6.4.0 / 2025-11-26
+## 6.5.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+## 6.4.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 
 * Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
 
-## 6.3.1 / 2025-10-31
+## 6.3.1 / 2025-10-31 / Agent 7.73.0
 
 ***Fixed***:
 

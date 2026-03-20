@@ -1,19 +1,22 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import json
 import subprocess
+import time
 
 import mock
 import psutil
-import pymysql  # type: ignore
+import pymysql
 import pytest
 
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
+from datadog_checks.mysql.databases_data import DatabasesData, SubmitData
 from datadog_checks.mysql.version_utils import parse_version
 
 from . import common
+from .utils import deep_compare
 
 pytestmark = pytest.mark.unit
 
@@ -332,6 +335,114 @@ def test_service_check(disable_generic_tags, expected_tags, hostname):
     assert set(check._service_check_tags(hostname)) == expected_tags
 
 
+class DummyLogger:
+    def debug(*args):
+        pass
+
+    def error(*args):
+        pass
+
+
+def set_up_submitter_unit_test():
+    submitted_data = []
+    base_event = {
+        "host": "some",
+        "agent_version": 0,
+        "dbms": "sqlserver",
+        "kind": "sqlserver_databases",
+        "collection_interval": 1200,
+        "dbms_version": "some",
+        "tags": "some",
+        "cloud_metadata": "some",
+    }
+
+    def submitData(data):
+        submitted_data.append(data)
+
+    dataSubmitter = SubmitData(submitData, base_event, DummyLogger())
+    return dataSubmitter, submitted_data
+
+
+def test_submit_data():
+    dataSubmitter, submitted_data = set_up_submitter_unit_test()
+
+    dataSubmitter.store_db_infos(
+        [
+            {"name": "test_db1", "default_character_set_name": "latin1"},
+            {"name": "test_db2", "default_character_set_name": "latin1"},
+        ]
+    )
+
+    dataSubmitter.store("test_db1", [1, 2], 5)
+    dataSubmitter.store("test_db2", [1, 2], 5)
+    assert dataSubmitter.columns_since_last_submit() == 10
+    dataSubmitter.store("test_db1", [1, 2], 10)
+
+    dataSubmitter.submit()
+
+    assert dataSubmitter.columns_since_last_submit() == 0
+
+    expected_data = {
+        "host": "some",
+        "agent_version": 0,
+        "dbms": "sqlserver",
+        "kind": "sqlserver_databases",
+        "collection_interval": 1200,
+        "dbms_version": "some",
+        "tags": "some",
+        "cloud_metadata": "some",
+        "metadata": [
+            {"name": "test_db1", "default_character_set_name": "latin1", "tables": [1, 2, 1, 2]},
+            {"name": "test_db2", "default_character_set_name": "latin1", "tables": [1, 2]},
+        ],
+    }
+
+    data = json.loads(submitted_data[0])
+    data.pop("timestamp")
+    assert deep_compare(data, expected_data)
+
+
+def test_fetch_throws():
+    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+    databases_data = DatabasesData({}, check, check._config)
+    with (
+        mock.patch('time.time', side_effect=[0, 9999999]),
+        mock.patch(
+            'datadog_checks.mysql.databases_data.DatabasesData._get_tables',
+            return_value=[{"name": "mytable1"}, {"name": "mytable2"}],
+        ),
+        mock.patch('datadog_checks.mysql.databases_data.DatabasesData._get_tables', return_value=[1, 2]),
+    ):
+        with pytest.raises(StopIteration):
+            databases_data._fetch_database_data("dummy_cursor", time.time(), "my_db")
+
+
+def test_submit_is_called_if_too_many_columns():
+    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+    databases_data = DatabasesData({}, check, check._config)
+    with (
+        mock.patch('time.time', side_effect=[0, 0]),
+        mock.patch('datadog_checks.mysql.databases_data.DatabasesData._get_tables', return_value=[1, 2]),
+        mock.patch('datadog_checks.mysql.databases_data.SubmitData.submit') as mocked_submit,
+        mock.patch(
+            'datadog_checks.mysql.databases_data.DatabasesData._get_tables_data',
+            return_value=(1000_000, {"name": "my_table"}),
+        ),
+    ):
+        databases_data._fetch_database_data("dummy_cursor", time.time(), "my_db")
+        assert mocked_submit.call_count == 2
+
+
+def test_exception_handling_by_do_for_dbs():
+    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+    databases_data = DatabasesData({}, check, check._config)
+    with mock.patch(
+        'datadog_checks.mysql.databases_data.DatabasesData._fetch_database_data',
+        side_effect=Exception("Can't connect to DB"),
+    ):
+        databases_data._fetch_for_databases([{"name": "my_db"}], "dummy_cursor")
+
+
 def test_update_aurora_replication_role():
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
 
@@ -490,3 +601,113 @@ def test_set_cluster_tags(
         # Check that no replication_role tag is present
         replication_role_tags = [tag for tag in tags if tag.startswith('replication_role:')]
         assert len(replication_role_tags) == 0
+
+
+def test_collect_replication_metrics_returns_empty_for_pure_group_replication():
+    """Test that _collect_replication_metrics returns {} for a pure group replication node."""
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    mysql_check._group_replication_active = True
+    mysql_check._get_replica_stats = mock.MagicMock(return_value={})
+    mysql_check._get_replicas_connected_count = mock.MagicMock(return_value={'Replicas_connected': 0})
+
+    results = {}
+    replication_metrics = mysql_check._collect_replication_metrics(mock.MagicMock(), results, above_560=True)
+
+    assert replication_metrics == {}
+    assert results == {}
+
+
+def test_collect_replication_metrics_returns_vars_for_traditional_source_with_zero_replicas():
+    """Test that a traditional source with 0 connected replicas still returns REPLICA_VARS
+    so _check_replication_status can emit a WARNING for replica-loss detection."""
+    from datadog_checks.mysql.const import REPLICA_VARS
+
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    mysql_check._group_replication_active = False
+    mysql_check._get_replica_stats = mock.MagicMock(return_value={})
+    mysql_check._get_replicas_connected_count = mock.MagicMock(return_value={'Replicas_connected': 0})
+
+    results = {}
+    replication_metrics = mysql_check._collect_replication_metrics(mock.MagicMock(), results, above_560=True)
+
+    assert replication_metrics == REPLICA_VARS
+    assert results.get('Replicas_connected') == 0
+
+
+def test_collect_replication_metrics_returns_vars_when_replica():
+    """Test that _collect_replication_metrics returns REPLICA_VARS when this node is a replica."""
+    from datadog_checks.mysql.const import REPLICA_VARS
+
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    replica_stats = {
+        'Seconds_Behind_Source': {'channel:default': 5},
+        'Slave_IO_Running': {'channel:default': 'Yes'},
+        'Slave_SQL_Running': {'channel:default': 'Yes'},
+    }
+    mysql_check._get_replica_stats = mock.MagicMock(return_value=replica_stats)
+    mysql_check._get_replicas_connected_count = mock.MagicMock(return_value={'Replicas_connected': 0})
+
+    results = {}
+    replication_metrics = mysql_check._collect_replication_metrics(mock.MagicMock(), results, above_560=True)
+
+    assert replication_metrics == REPLICA_VARS
+    assert 'Seconds_Behind_Source' in results
+
+
+def test_collect_replication_metrics_returns_vars_when_has_replicas_connected():
+    """Test that _collect_replication_metrics returns REPLICA_VARS when replicas are connected."""
+    from datadog_checks.mysql.const import REPLICA_VARS
+
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    mysql_check._get_replica_stats = mock.MagicMock(return_value={})
+    mysql_check._get_replicas_connected_count = mock.MagicMock(return_value={'Replicas_connected': 2})
+
+    results = {}
+    replication_metrics = mysql_check._collect_replication_metrics(mock.MagicMock(), results, above_560=True)
+
+    assert replication_metrics == REPLICA_VARS
+    assert results.get('Replicas_connected') == 2
+
+
+def test_source_with_zero_replicas_emits_warning_service_check(aggregator, instance_basic):
+    """Test that a source with 0 connected replicas emits WARNING for replica-loss detection."""
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
+    mysql_check.service_check_tags = ['foo:bar']
+    mysql_check.global_variables._variables = {'log_bin': 'ON'}
+
+    mocked_results = {
+        'Replicas_connected': 0,
+    }
+
+    mysql_check._check_replication_status(mocked_results)
+
+    aggregator.assert_service_check(
+        'mysql.replication.slave_running',
+        status=MySql.WARNING,
+        tags=['foo:bar', 'replication_mode:source'],
+        count=1,
+    )
+    aggregator.assert_service_check(
+        'mysql.replication.replica_running',
+        status=MySql.WARNING,
+        tags=['foo:bar', 'replication_mode:source'],
+        count=1,
+    )
+
+
+@pytest.mark.parametrize(
+    'exclude_hostname, expected_hostname',
+    [
+        (False, 'resolved.hostname'),
+        (True, None),
+    ],
+)
+def test_debug_stats_kwargs_respects_exclude_hostname(exclude_hostname, expected_hostname):
+    instance = {'server': 'localhost', 'user': 'datadog', 'exclude_hostname': exclude_hostname}
+    with mock.patch('datadog_checks.mysql.MySql.resolve_db_host', return_value='resolved.hostname'):
+        mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance])
+    assert mysql_check.debug_stats_kwargs()['hostname'] == expected_hostname

@@ -57,6 +57,56 @@ facets:
     name: Client IP
     path: network.client.ip
     source: log
+  - groups:
+      - OCSF
+    name: Activity ID
+    path: ocsf.activity_id
+    source: log
+  - groups:
+      - OCSF
+    name: Category ID
+    path: ocsf.category_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Category
+    path: ocsf.category_name
+    source: log
+  - groups:
+      - OCSF
+    name: Class ID
+    path: ocsf.class_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Class
+    path: ocsf.class_name
+    source: log
+  - groups:
+      - OCSF
+    name: Source IP Address
+    path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Event Code
+    path: ocsf.metadata.event_code
+    source: log
+  - groups:
+      - OCSF
+    name: Status
+    path: ocsf.status
+    source: log
+  - groups:
+      - OCSF
+    name: Status ID
+    path: ocsf.status_id
+    source: log
+  - groups:
+      - OCSF
+    name: Request URL String
+    path: ocsf.http_request.url.url_string
+    source: log
 pipeline:
   type: pipeline
   name: Nginx
@@ -175,7 +225,7 @@ pipeline:
           name: Add ocsf.metadata.product.vendor_name
           enabled: true
           template: "F5"
-          target: ocsf.metadata.product.name
+          target: ocsf.metadata.product.vendor_name
           replaceMissing: false
         - type: grok-parser
           name: Parsing `ocsf.http_request.url.query_string` from `http.url`
@@ -247,6 +297,36 @@ pipeline:
               targets:
                 name: ocsf.severity
                 id: ocsf.severity_id
+            - type: schema-category-mapper
+              name: ocsf.src_endpoint.os.type_id
+              categories:
+                - filter:
+                    query: "@http.useragent_details.os.family:Windows"
+                  name: Windows
+                  id: 100
+                - filter:
+                    query: '@http.useragent_details.os.family:(Linux OR "Red Hat" OR Ubuntu OR Debian OR Fedora OR CentOS OR *BSD*)'
+                  name: Linux
+                  id: 200
+                - filter:
+                    query: "@http.useragent_details.os.family:Android"
+                  name: Android
+                  id: 201
+                - filter:
+                    query: '@http.useragent_details.os.family:("Mac OS X" OR macOS)'
+                  name: macOS
+                  id: 300
+                - filter:
+                    query: "@http.useragent_details.os.family:iOS"
+                  name: Ios
+                  id: 301
+                - filter:
+                    query: "@http.useragent_details.os.family:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.src_endpoint.os.type
+                id: ocsf.src_endpoint.os.type_id
             - type: schema-category-mapper
               name: ocsf.status_id
               categories:
@@ -343,10 +423,10 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `http.os.family` to `ocsf.src_endpoint.os`
+              name: Map `http.useragent_details.os.family` to `ocsf.src_endpoint.os.name`
               sources:
-                - http.os.family
-              target: ocsf.src_endpoint.os
+                - http.useragent_details.os.family
+              target: ocsf.src_endpoint.os.name
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper

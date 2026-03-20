@@ -1,4 +1,5 @@
 - name: proxy
+  fleet_configurable: true
   value:
     example:
       http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
@@ -32,6 +33,7 @@
     the client or proxy. If you want to resolve the domains on the proxy
     server, use `socks5h` as the scheme.
 - name: skip_proxy
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -73,7 +75,9 @@
     The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`. /noqa
     Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials /noqa
 
+  fleet_configurable: true
 - name: use_legacy_auth_encoding
+  fleet_configurable: true
   value:
     example: true
     type: boolean
@@ -83,12 +87,15 @@
   value:
     type: string
   description: The username to use if services are behind basic or digest auth.
+  fleet_configurable: true
 - name: password
   secret: true
   value:
     type: string
   description: The password to use if services are behind basic or NTLM auth.
+  fleet_configurable: true
 - name: ntlm_domain
+  fleet_configurable: true
   value:
     example: <NTLM_DOMAIN>\<USERNAME>
     type: string
@@ -97,6 +104,7 @@
     the domain used in the check. For NTLM Auth, append
     the username to domain, not as the `username` parameter.
 - name: kerberos_auth
+  fleet_configurable: true
   value:
     example: disabled
     type: string
@@ -114,12 +122,14 @@
 
     See https://github.com/requests/requests-kerberos#mutual-authentication
 - name: kerberos_cache
+  fleet_configurable: true
   value:
     type: string
   description: |
     Sets the KRB5CCNAME environment variable.
     It should point to a credential cache with a valid TGT.
 - name: kerberos_delegate
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -128,6 +138,7 @@
 
     See https://github.com/requests/requests-kerberos#delegation
 - name: kerberos_force_initiate
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -137,6 +148,7 @@
 
     See https://github.com/requests/requests-kerberos#preemptive-authentication
 - name: kerberos_hostname
+  fleet_configurable: true
   value:
     type: string
   description: |
@@ -145,6 +157,7 @@
 
     See https://github.com/requests/requests-kerberos#hostname-override
 - name: kerberos_principal
+  fleet_configurable: true
   value:
     type: string
   description: |
@@ -153,11 +166,15 @@
 
     See https://github.com/requests/requests-kerberos#explicit-principal
 - name: kerberos_keytab
+  fleet_configurable: true
+  formats: ["path"]
   value:
     example: <KEYTAB_FILE_PATH>
     type: string
   description: Set the path to your Kerberos key tab file.
 - name: auth_token
+  secret: true
+  fleet_configurable: true
   value:
     example:
       reader:
@@ -205,6 +222,7 @@
         value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
         placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
 - name: aws_region
+  fleet_configurable: true
   value:
     type: string
   description: |
@@ -212,6 +230,7 @@
 
     See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 - name: aws_host
+  fleet_configurable: true
   value:
     type: string
   description: |
@@ -223,6 +242,7 @@
 
     See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 - name: aws_service
+  fleet_configurable: true
   value:
     type: string
   description: |
@@ -233,17 +253,20 @@
 
     See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 - name: tls_verify
+  fleet_configurable: true
   value:
     example: true
     type: boolean
   description: Instructs the check to validate the TLS certificate of services.
 - name: tls_use_host_header
+  fleet_configurable: true
   value:
     example: false
     type: boolean
   description: |
     If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
 - name: tls_ignore_warning
+  fleet_configurable: true
   value:
     example: false
     type: boolean
@@ -251,6 +274,7 @@
     If `tls_verify` is disabled, security warnings are logged by the check.
     Disable those by setting `tls_ignore_warning` to true.
 - name: tls_cert
+  fleet_configurable: true
   value:
     example: <CERT_PATH>
     type: string
@@ -259,6 +283,7 @@
     number of CA certificates needed to establish the certificate's authenticity for
     use when connecting to services. It may also contain an unencrypted private key to use.
 - name: tls_private_key
+  fleet_configurable: true
   value:
     example: <PRIVATE_KEY_PATH>
     type: string
@@ -266,6 +291,7 @@
     The unencrypted private key to use for `tls_cert` when connecting to services. This is
     required if `tls_cert` is set and it does not already contain a private key.
 - name: tls_ca_cert
+  fleet_configurable: true
   value:
     example: <CA_CERT_PATH>
     type: string
@@ -275,6 +301,7 @@
     must have been processed using the `openssl rehash` command. See:
     https://www.openssl.org/docs/man3.2/man1/c_rehash.html
 - name: tls_protocols_allowed
+  fleet_configurable: true
   value:
     example:
     - 'SSLv3'
@@ -296,6 +323,7 @@
     The list of ciphers suites to use when connecting to an endpoint. If not specified, 
     `ALL` ciphers are used. For list of ciphers see: 
     https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+  fleet_configurable: true
   value:
     type: array
     items:
@@ -305,6 +333,7 @@
       - 'TLS_CHACHA20_POLY1305_SHA256'
       - 'TLS_AES_128_GCM_SHA256'
 - name: headers
+  fleet_configurable: true
   value:
     example:
       Host: <ALTERNATIVE_HOSTNAME>
@@ -317,6 +346,7 @@
 
     This overrides any default headers.
 - name: extra_headers
+  fleet_configurable: true
   value:
     example:
       Host: <ALTERNATIVE_HOSTNAME>
@@ -331,31 +361,38 @@
     The timeout for accessing services.
 
     This overrides the `timeout` setting in `init_config`.
+  fleet_configurable: true
 - name: connect_timeout
+  fleet_configurable: true
   value:
     type: number
   description: The connect timeout for accessing services. Defaults to `timeout`.
 - name: read_timeout
+  fleet_configurable: true
   value:
     type: number
   description: The read timeout for accessing services. Defaults to `timeout`.
 - name: request_size
   description: |
     The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+  fleet_configurable: true
   value:
     example: 16
     type: number
 - name: log_requests
+  fleet_configurable: true
   value:
     example: false
     type: boolean
   description: Whether or not to debug log the HTTP(S) requests made, including the method and URL.
 - name: persist_connections
+  fleet_configurable: true
   value:
     example: false
     type: boolean
   description: Whether or not to persist cookies and use connection pooling for improved performance.
 - name: allow_redirects
+  fleet_configurable: true
   value:
     example: true
     type: boolean

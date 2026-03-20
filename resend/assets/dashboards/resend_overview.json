@@ -1,0 +1,4354 @@
+{
+  "title": "Resend Overview",
+  "description": "Track the effectiveness of Resend broadcast and transactional email.",
+  "widgets": [
+    {
+      "id": 2074004104711888,
+      "definition": {
+        "type": "image",
+        "url": "/api/v2/images/1bba9a73-2985-400a-8c2d-a5f12b792ced",
+        "url_dark_theme": "/api/v2/images/a2d769f7-8400-4e0d-ba3a-cba734b093b0",
+        "sizing": "contain",
+        "has_background": true,
+        "has_border": false,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 1
+      }
+    },
+    {
+      "id": 1511984411456656,
+      "definition": {
+        "title": "Overview",
+        "background_color": "white",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1383597922205404,
+            "definition": {
+              "title": "Sent",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.sent $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 7878012237089596,
+            "definition": {
+              "title": "Opened",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.opened $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 2,
+              "y": 0,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 6835247829337743,
+            "definition": {
+              "title": "Failed",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.failed $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 5890320592767403,
+            "definition": {
+              "title": "Delivery Delayed",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivery_delayed $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 3,
+              "height": 1
+            }
+          },
+          {
+            "id": 7736845146581511,
+            "definition": {
+              "title": "Delivered",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivered $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 5364741650165821,
+            "definition": {
+              "title": "Clicked",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.clicked $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 8267569285204591,
+            "definition": {
+              "title": "Complained",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.complained $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 5104249621174987,
+            "definition": {
+              "title": "Dropped/Bounced",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 3,
+              "height": 1
+            }
+          },
+          {
+            "id": 2423901784002468,
+            "definition": {
+              "title": "Delivered",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "min(100, (query2 / query1) * 100)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivered $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.sent $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 92,
+                      "palette": "white_on_green"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 50,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 50,
+                      "palette": "white_on_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 1,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 2030625126344917,
+            "definition": {
+              "title": "Clicked",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "min(100, (query2 / query1) * 100)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.clicked $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.sent $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 65,
+                      "palette": "white_on_green"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 30,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 30,
+                      "palette": "white_on_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 1,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 2,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 3529713767121673,
+            "definition": {
+              "title": "Unsubscribed",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "min(100, (query2 / query1) * 100)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:contact.updated @data.unsubscribed:1 $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count",
+                        "metric": "@data.email"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivered $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 5,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 2,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "<=",
+                      "value": 2,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 1,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 3723469971147644,
+            "definition": {
+              "title": "Failed/Bounced",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "min(100, (query2 / query1) * 100)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:(email.failed OR email.bounced) $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.sent $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "value": 5,
+                      "palette": "white_on_green"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 10,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 10,
+                      "palette": "white_on_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 1,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 7952409078053929,
+            "definition": {
+              "title": "Monitor Status",
+              "type": "manage_status",
+              "display_format": "list",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(source:resend) $template_id",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 9,
+              "height": 3
+            }
+          },
+          {
+            "id": 5777119894390674,
+            "definition": {
+              "title": "Unsubscribe Activity to Email Delivery",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Delivered",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Unsubscribed",
+                      "style": {
+                        "palette": "orange",
+                        "palette_index": 6
+                      },
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivered $template_id $domain $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:contact.updated @data.unsubscribed:1 $priority $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 9,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 3,
+        "y": 0,
+        "width": 9,
+        "height": 11
+      }
+    },
+    {
+      "id": 8917290706883810,
+      "definition": {
+        "type": "note",
+        "content": "Gain better visibility into your broadcast and transactional email performance by monitoring events with this dashboard.\n\nBeyond email events such as Bounced Email, Clicked Email, etc., this dashboard displays domain and contact updates which can alert you to unexpected changes.\n\nDefine Resend tags when submitting transactional email and surface these tags in this Dashboard to filter the display. For example, a `priority` tag with values in _high_, _normal_, and _low_. See the [api documentation](https://resend.com/docs/api-reference/emails/send-email).\n\nUse the `domain`, `broadcast_id` , `template_id`, and `priority` template variables to restrict data to a subset of broadcasts or email.",
+        "background_color": "blue",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "top",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 1,
+        "width": 3,
+        "height": 10
+      }
+    },
+    {
+      "id": 7150718728972441,
+      "definition": {
+        "title": "Broadcast Email",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3109671020016291,
+            "definition": {
+              "type": "note",
+              "content": "Email events describe states and final disposition of the broadcast as well as click activity within the opened email. See the [description of email deliverability](https://resend.com/docs/dashboard/emails/introduction#understand-email-events).",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "bottom",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 8329971943698914,
+            "definition": {
+              "title": "Email Broadcast Performance Summary",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.sent @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivered @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.opened @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query4",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.clicked @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query5",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced @data.broadcast_id:* @data.bounce.type:Permanent $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query6",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced @data.broadcast_id:* @data.bounce.type:Undetermined $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query7",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced @data.broadcast_id:* @data.bounce.type:Transient $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query8",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.failed @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query9",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.complained @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 90,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Sent",
+                      "formula": "query1"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Delivered",
+                      "formula": "query2"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Opened",
+                      "formula": "query3"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Clicked",
+                      "formula": "query4"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Hard Bounce",
+                      "formula": "query5"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Undetermined Bounce",
+                      "formula": "query6"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Soft Bounce",
+                      "formula": "query7"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Failed",
+                      "formula": "query8"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Complained",
+                      "formula": "query9"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 1601260360695293,
+            "definition": {
+              "title": "Opened Email Percentage",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "min(100, (query1 / query2) * 100)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.opened @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivered @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "value": 10,
+                      "palette": "white_on_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 8108409578166421,
+            "definition": {
+              "type": "note",
+              "content": "Opened and Clicked Email percentages are calculated by comparing the volume of Opened and Clicked Email compared to Delivered Email **within the same time span of the dashboard view**.\n\nResend [cautions on using open rates](https://resend.com/docs/knowledge-base/why-are-my-open-rates-not-accurate) as a measure and advises focusing on click rate metrics.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 3381654448226522,
+            "definition": {
+              "title": "Clicked Email Percentage",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "min(100, (query1 / query2) * 100)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.clicked @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivered @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "value": 10,
+                      "palette": "white_on_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 763900043629789,
+            "definition": {
+              "title": "Clicked Email Locations",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "geomap",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.clicked @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@network.client.geoip.subdivision.iso_code",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "palette": "yellow_to_green",
+                "palette_flip": false
+              },
+              "view": {
+                "focus": "US"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 6
+            }
+          },
+          {
+            "id": 6836248737505238,
+            "definition": {
+              "title": "Most Clicked URLs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.clicked @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.click.link",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "count",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 13,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 2798246755564723,
+            "definition": {
+              "title": "Most Clicked Domains",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.clicked @data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivered @data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "min(100, (query1 / query2) * 100)"
+                    }
+                  ],
+                  "sort": {
+                    "count": 20,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 13,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 897131023425208,
+            "definition": {
+              "title": "Email Open and Clicked Activity ",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    },
+                    {
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.opened @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.clicked @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 16,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 2556161432574455,
+            "definition": {
+              "title": "Email Event Breakdown",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.* @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@type",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query2"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 16,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 6584282377664387,
+            "definition": {
+              "type": "note",
+              "content": "Bounces are often categorized as _hard_ and _soft_, where _hard_ bounces signify a later delivery attempt will not work and _soft_ implies a retry should be performed later.\n\nSee the [description of bounce types and subtypes](https://resend.com/docs/dashboard/emails/email-bounces#bounce-types-and-subtypes).",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 19,
+              "width": 12,
+              "height": 2
+            }
+          },
+          {
+            "id": 1554629846571348,
+            "definition": {
+              "title": "Email Event Trends: Spam, Bounces, and Failures",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "style": {
+                        "palette": "warm",
+                        "palette_index": 3
+                      },
+                      "alias": "Hard Bounced",
+                      "formula": "query1"
+                    },
+                    {
+                      "style": {
+                        "palette": "orange",
+                        "palette_index": 4
+                      },
+                      "alias": "Soft Bounced",
+                      "formula": "query2"
+                    },
+                    {
+                      "style": {
+                        "palette": "warm",
+                        "palette_index": 0
+                      },
+                      "alias": "Marked as Spam",
+                      "formula": "query3"
+                    },
+                    {
+                      "style": {
+                        "palette": "warm",
+                        "palette_index": 4
+                      },
+                      "alias": "Failed",
+                      "formula": "query4"
+                    },
+                    {
+                      "style": {
+                        "palette": "warm",
+                        "palette_index": 4
+                      },
+                      "alias": "Undetermined",
+                      "formula": "query5"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced @data.broadcast_id:* @data.bounce.type:Permanent $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced @data.broadcast_id:* @data.bounce.type:Transient $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.complained @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query4",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.Failed @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query5",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced @data.broadcast_id:* @data.bounce.type:Undetermined $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 21,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 4523940487974232,
+            "definition": {
+              "title": "Bounce Types and Reasons",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_pattern_stream",
+                    "query_string": "source:resend service:events @type:email.bounced @data.broadcast_id:* $template_id $domain $broadcast_id",
+                    "indexes": [],
+                    "clustering_pattern_field_path": "@data.bounce.subType",
+                    "group_by": [
+                      {
+                        "facet": "@data.bounce.message"
+                      }
+                    ],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "matches",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "volume",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@data.bounce.subType",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@data.bounce.message",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 24,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 6281401150190870,
+            "definition": {
+              "title": "Top Broadcasts for Soft Bounced Email Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced @data.broadcast_id:* @data.bounce.type:Transient $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.sent @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 10,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 5,
+                      "palette": "white_on_yellow"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "min(100, (query1 / query2) * 100)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ],
+                    "count": 20
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "scaling": "absolute"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 27,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 5154411203269646,
+            "definition": {
+              "title": "Most Clicked Broadcasts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.clicked @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivered @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "min(100, (query1 / query2) * 100)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ],
+                    "count": 20
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 27,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 8845020192633430,
+            "definition": {
+              "title": "Top Broadcasts for Hard Bounced Email Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced @data.broadcast_id:* @data.bounce.type:(Permanent OR Undetermined) $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.sent @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 10,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 5,
+                      "palette": "white_on_yellow"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "min(100, (query1 / query2) * 100)"
+                    }
+                  ],
+                  "sort": {
+                    "count": 20,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "scaling": "absolute"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 30,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 3047207702675200,
+            "definition": {
+              "title": "Most Complained Broadcasts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.complained @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivered @data.broadcast_id:* $template_id $domain $broadcast_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.broadcast_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 10,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 5,
+                      "palette": "white_on_yellow"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "min(100, (query1 / query2) * 100)"
+                    }
+                  ],
+                  "sort": {
+                    "count": 20,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 30,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 2565857120848986,
+            "definition": {
+              "title": "Broadcast Subjects",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_pattern_stream",
+                    "query_string": "source:resend service:events @type:email.sent @data.broadcast_id:* $template_id $domain $broadcast_id",
+                    "indexes": [],
+                    "clustering_pattern_field_path": "@data.subject",
+                    "group_by": [
+                      {
+                        "facet": "@data.broadcast_id"
+                      }
+                    ],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@data.broadcast_id",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@data.subject",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "matches",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "volume",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 33,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 3818383290217704,
+            "definition": {
+              "title": "Broadcast Events List",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:resend service:events @type:email* @data.broadcast_id:* $template_id $domain $broadcast_id",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@type",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@data.from",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@data.subject",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 36,
+              "width": 12,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 11,
+        "width": 12,
+        "height": 42
+      }
+    },
+    {
+      "id": 6646970637621948,
+      "definition": {
+        "title": "Transactional Email",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1021217632790067,
+            "definition": {
+              "type": "note",
+              "content": "Email events describe states and final disposition of each email as well as click activity within the opened email. See the [description of email deliverability](https://resend.com/docs/dashboard/emails/introduction#understand-email-events).",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "bottom",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 2782162662925086,
+            "definition": {
+              "title": "Email Performance Summary",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.sent -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivered -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.opened -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query4",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.clicked -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query5",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced -@data.broadcast_id:* @data.bounce.type:Permanent $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query6",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced -@data.broadcast_id:* @data.bounce.type:Undetermined $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query7",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced -@data.broadcast_id:* @data.bounce.type:Transient $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query8",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.failed -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query9",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.complained -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 90,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Sent",
+                      "formula": "query1"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Delivered",
+                      "formula": "query2"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Opened",
+                      "formula": "query3"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Clicked",
+                      "formula": "query4"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Hard Bounce",
+                      "formula": "query5"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Undetermined Bounce",
+                      "formula": "query6"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Soft Bounce",
+                      "formula": "query7"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Failed",
+                      "formula": "query8"
+                    },
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Complained",
+                      "formula": "query9"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 4717108640827071,
+            "definition": {
+              "title": "Opened Email Percentage",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "min(100, (query1 / query2) * 100)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.opened -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivered -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "value": 10,
+                      "palette": "white_on_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 2661506585196623,
+            "definition": {
+              "type": "note",
+              "content": "Opened and Clicked Email percentages are calculated by comparing the volume of Opened and Clicked Email compared to Delivered Email **within the same time span of the dashboard view**.\n\nResend [cautions on using open rates](https://resend.com/docs/knowledge-base/why-are-my-open-rates-not-accurate) as a measure and advises focusing on click rate metrics.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 4896587204686090,
+            "definition": {
+              "title": "Clicked Email Percentage",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "min(100, (query1 / query2) * 100)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.clicked -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivered -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "value": 10,
+                      "palette": "white_on_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 4317980403052386,
+            "definition": {
+              "title": "Clicked Email Locations",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "geomap",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.clicked -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@network.client.geoip.subdivision.iso_code",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "palette": "yellow_to_green",
+                "palette_flip": false
+              },
+              "view": {
+                "focus": "US"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 6
+            }
+          },
+          {
+            "id": 1503360864795850,
+            "definition": {
+              "title": "Most Clicked URLs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.clicked -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@data.click.link",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "count",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 13,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 8343940607455926,
+            "definition": {
+              "title": "Most Clicked Domains",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.clicked -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivered -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "min(100, (query1 / query2) * 100)"
+                    }
+                  ],
+                  "sort": {
+                    "count": 20,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 13,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 2476569856642485,
+            "definition": {
+              "title": "Email Open and Clicked Activity ",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    },
+                    {
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.opened -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.clicked -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 16,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 6063417669844463,
+            "definition": {
+              "title": "Email Event Breakdown",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.* -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@type",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query2"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 16,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 5709499497416300,
+            "definition": {
+              "type": "note",
+              "content": "Bounces are often categorized as _hard_ and _soft_, where _hard_ bounces signify a later delivery attempt will not work and _soft_ implies a retry should be performed later.\n\nSee the [description of bounce types and subtypes](https://resend.com/docs/dashboard/emails/email-bounces#bounce-types-and-subtypes).",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 19,
+              "width": 12,
+              "height": 2
+            }
+          },
+          {
+            "id": 519572749077279,
+            "definition": {
+              "title": "Email Event Trends: Spam, Bounces, and Failures",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "style": {
+                        "palette": "warm",
+                        "palette_index": 3
+                      },
+                      "alias": "Hard Bounced",
+                      "formula": "query1"
+                    },
+                    {
+                      "style": {
+                        "palette": "orange",
+                        "palette_index": 4
+                      },
+                      "alias": "Soft Bounced",
+                      "formula": "query2"
+                    },
+                    {
+                      "style": {
+                        "palette": "warm",
+                        "palette_index": 0
+                      },
+                      "alias": "Marked as Spam",
+                      "formula": "query3"
+                    },
+                    {
+                      "style": {
+                        "palette": "warm",
+                        "palette_index": 4
+                      },
+                      "alias": "Failed",
+                      "formula": "query4"
+                    },
+                    {
+                      "style": {
+                        "palette": "warm",
+                        "palette_index": 4
+                      },
+                      "alias": "Undetermined",
+                      "formula": "query5"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced -@data.broadcast_id:* @data.bounce.type:Permanent $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced -@data.broadcast_id:* @data.bounce.type:Transient $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.complained -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query4",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.Failed -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query5",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced -@data.broadcast_id:* @data.bounce.type:Undetermined $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 21,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 6345616638709925,
+            "definition": {
+              "title": "Most Complained Domains",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.complained -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.delivered -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 10,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 5,
+                      "palette": "white_on_yellow"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "min(100, (query1 / query2) * 100)"
+                    }
+                  ],
+                  "sort": {
+                    "count": 20,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 21,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7009600542734727,
+            "definition": {
+              "title": "Top Domains for Soft Bounced Email Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced -@data.broadcast_id:* @data.bounce.type:Transient $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.sent -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 10,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 5,
+                      "palette": "white_on_yellow"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "min(100, (query1 / query2) * 100)"
+                    }
+                  ],
+                  "sort": {
+                    "count": 20,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "scaling": "absolute"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 24,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7953938100940184,
+            "definition": {
+              "title": "Top Domains for Hard Bounced Email Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.bounced -@data.broadcast_id:* @data.bounce.type:(Permanent OR Undetermined) $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:email.sent -@data.broadcast_id:* $domain $priority $template_id"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@resend.domain",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 10,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 5,
+                      "palette": "white_on_yellow"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "min(100, (query1 / query2) * 100)"
+                    }
+                  ],
+                  "sort": {
+                    "count": 20,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "scaling": "absolute"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 24,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 3725343105146853,
+            "definition": {
+              "title": "Email Events List",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:resend service:events @type:email* -@data.broadcast_id:* $domain $priority $template_id",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@type",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@data.from",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@data.subject",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 27,
+              "width": 12,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 33,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 3657744283017699,
+      "definition": {
+        "title": "Contact and Domain Activity",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1101349622865755,
+            "definition": {
+              "type": "note",
+              "content": "Shown here are events associated with creation, update, and deletion of contacts and domains. An update of a contact can imply an unsubscribe event.",
+              "background_color": "pink",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "bottom",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 2
+            }
+          },
+          {
+            "id": 3279270655394946,
+            "definition": {
+              "title": "Contact Event Types and Audiences",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:contact*"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@type",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@data.audience_id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "markers": [
+                {
+                  "value": "y = 0",
+                  "display_type": "error dashed"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 1305627879238495,
+            "definition": {
+              "title": "Contact Event Log",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:resend service:events @type:contact.*",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@type",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@data.audience_id",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@data.email",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 2663004809225100,
+            "definition": {
+              "title": "Domain Events",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:resend service:events @type:domain*"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@type",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@data.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "markers": [
+                {
+                  "value": "y = 0",
+                  "display_type": "error dashed"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 1895571519265825,
+            "definition": {
+              "title": "Domain Event Log",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:resend service:events @type:domain.* $domain",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@type",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@data.name",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 14,
+              "width": 12,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 33,
+        "width": 12,
+        "height": 18
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "domain",
+      "prefix": "@resend.domain",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "broadcast_id",
+      "prefix": "@data.broadcast_id",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "template_id",
+      "prefix": "@data.template_id",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "priority",
+      "prefix": "@data.tags.priority",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

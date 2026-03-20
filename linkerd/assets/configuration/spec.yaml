@@ -1,4 +1,5 @@
 name: Linkerd
+fleet_configurable: true
 files:
 - name: linkerd.yaml
   options:

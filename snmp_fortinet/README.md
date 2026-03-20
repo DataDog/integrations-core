@@ -37,4 +37,3 @@ Additional helpful documentation, links, and articles:
 [4]: https://docs.datadoghq.com/help/
 [5]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
 [6]: https://docs.datadoghq.com/network_monitoring/devices/supported_devices/
-

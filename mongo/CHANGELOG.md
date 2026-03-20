@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 10.6.0 / 2025-11-26
+## 10.8.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+***Fixed***:
+
+* Fix ``FailedToParse`` errors in DBM explain plans for aggregate queries by adding the required ``cursor`` option to the explain command. ([#22822](https://github.com/DataDog/integrations-core/pull/22822))
+* Fix ``IllegalOperation`` errors in DBM explain plans caused by attempting to explain ``listIndexes`` commands. ([#22825](https://github.com/DataDog/integrations-core/pull/22825))
+
+## 10.7.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Add query metrics collection using $queryStats aggregation pipeline (MongoDB 7.0+ for Atlas deployments or 8.0+ for self-hosted) ([#22344](https://github.com/DataDog/integrations-core/pull/22344))
+
+## 10.6.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 

@@ -1,4 +1,5 @@
 [env.collectors.datadog-checks]
+base-package-features = ["deps", "db"]
 
 # https://clickhouse.com/docs/faq/operations/production#how-to-choose-between-clickhouse-releases
 # https://github.com/ClickHouse/ClickHouse/blob/master/SECURITY.md

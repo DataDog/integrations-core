@@ -5,6 +5,8 @@ mypy-args = [
   "--check-untyped-defs",
   "--follow-imports",
   "silent",
+]
+mypy-files = [
   "datadog_checks/mysql/statements.py",
 ]
 mypy-deps = [
@@ -17,6 +19,7 @@ mypy-deps = [
 python = ["3.13"]
 version = [
   "5.7",  # EOL October 21, 2023
+  "8.0.18", # Test for pre-json aggregation version
   "8.0.36",  # EOL April, 2026
   "8.4.0",
 ]
@@ -25,6 +28,11 @@ version = [
 python = ["3.13"]
 version = ["8.0"]
 replication = ["group"]
+
+[[envs.default.matrix]]
+python = ["3.13"]
+version = ["8.0"]
+replication = ["hybrid"]
 
 [[envs.default.matrix]]
 python = ["3.13"]
@@ -46,11 +54,14 @@ version = [
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.0.36"] },
+  { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.0.18", "8.0.36"] },
   { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.4.0"] },
 ]
 name."8.0-group".env-vars = [
   { key = "COMPOSE_FILE", value = "mysql8-group.yaml" },
+]
+name."8.0-hybrid".env-vars = [
+  { key = "COMPOSE_FILE", value = "mysql8-hybrid.yaml" },
 ]
 
 

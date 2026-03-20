@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, mock_open, patch
 import pytest
 
 from ddev.cli.size.utils.common_funcs import (
+    _matches_gitignore,
     check_python_version,
     compress,
     convert_to_human_readable_size,
@@ -115,12 +116,32 @@ def test_convert_to_human_readable_size(size_bytes, expected_string):
         pytest.param("__pycache__/file.py", False, id="pycache"),
         pytest.param("datadog_checks_dev/example.py", False, id="checks_dev"),
         pytest.param(".git/config", False, id="git"),
+        pytest.param("datadog_checks/module/cache.pyc", False, id="gitignore_glob_ext"),
+        pytest.param("datadog_checks/module/__pycache__/foo.py", False, id="gitignore_glob_dir"),
     ],
 )
 def test_is_valid_integration_file(file_path, expected):
     repo_path = "fake_repo"
-    with patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()):
+    gitignore_patterns = ["*.pyc", "__pycache__"]
+    with patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=gitignore_patterns):
         assert is_valid_integration_file(to_native_path(file_path), repo_path) is expected
+
+
+@pytest.mark.parametrize(
+    "path, patterns, expected",
+    [
+        pytest.param("foo/bar/baz.pyc", ["*.pyc"], True, id="glob_extension_match"),
+        pytest.param("foo/bar/baz.py", ["*.pyc"], False, id="glob_extension_no_match"),
+        pytest.param("foo/__pycache__/module.py", ["__pycache__"], True, id="dir_segment_match"),
+        pytest.param("foo/bar/module.py", ["__pycache__"], False, id="dir_segment_no_match"),
+        pytest.param("foo/bar/notes.log", ["*.log"], True, id="glob_log_match"),
+        pytest.param("foo/bar/notes.txt", ["*.log"], False, id="glob_log_no_match"),
+        pytest.param("foo/bar/baz.py", ["*.pyc", "__pycache__", "*.log"], False, id="no_pattern_matches"),
+        pytest.param("foo/__pycache__/baz.pyc", ["*.pyc", "__pycache__"], True, id="multiple_patterns_first_matches"),
+    ],
+)
+def test_matches_gitignore(path, patterns, expected):
+    assert _matches_gitignore(to_native_path(path), patterns) is expected
 
 
 def test_get_dependencies_list():
@@ -267,13 +288,10 @@ def test_check_version(py_version, expected):
         assert check_python_version("fake_repo", "integration1", py_version) is expected
 
 
-def test_get_gitignore_files():
-    mock_gitignore = f"__pycache__{os.sep}\n*.log\n"  # Sample .gitignore file
-    repo_path = "fake_repo"
-    with patch("builtins.open", mock_open(read_data=mock_gitignore)):
-        with patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True):
-            ignored_patterns = get_gitignore_files(repo_path)
-    assert ignored_patterns == ["__pycache__" + os.sep, "*.log"]
+def test_get_gitignore_files(tmp_path):
+    gitignore = tmp_path / ".gitignore"
+    gitignore.write_text(f"__pycache__{os.sep}\n*.log\n")
+    assert get_gitignore_files(tmp_path) == ["__pycache__" + os.sep, "*.log"]
 
 
 def test_compress():

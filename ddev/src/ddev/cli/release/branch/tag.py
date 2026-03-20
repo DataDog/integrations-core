@@ -26,6 +26,15 @@ def tag(app, final):
         )
     click.echo(app.repo.git.pull(branch_name))
     click.echo(app.repo.git.fetch_tags())
+
+    if _build_agent_yaml_points_to_main():
+        app.abort(
+            "`.gitlab/build_agent.yaml` still points to `main`.\n"
+            "The agent branch may not exist yet in datadog-agent, or the update PR hasn't been merged.\n"
+            f"To trigger the workflow manually: gh workflow run update-build-agent-yaml.yml -f branch={branch_name}\n"
+            "Once the PR is merged, re-run this command."
+        )
+
     major_minor_version = branch_name.replace('.x', '')
     this_release_tags = sorted(
         (
@@ -62,6 +71,13 @@ def tag(app, final):
         app.abort('Did not get confirmation, aborting. Did not create or push the tag.')
     click.echo(app.repo.git.tag(new_tag, message=new_tag))
     click.echo(app.repo.git.push(new_tag))
+
+
+def _build_agent_yaml_points_to_main() -> bool:
+    from ddev.utils.fs import Path
+
+    path = Path('.gitlab/build_agent.yaml')
+    return path.exists() and bool(re.search(r'\s+branch:\s+main$', path.read_text(), re.MULTILINE))
 
 
 def _extract_patch_and_rc(version_tags):

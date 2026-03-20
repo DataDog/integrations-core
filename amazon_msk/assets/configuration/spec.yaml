@@ -1,4 +1,5 @@
 name: Amazon Kafka
+fleet_configurable: true
 files:
 - name: amazon_msk.yaml
   options:
@@ -11,6 +12,7 @@ files:
       description: |
         Use the latest OpenMetrics implementation for more features and better performance.
         If running on Agent v6, you must set the `python_version` option in `datadog.yaml` to `"3"`.
+      fleet_configurable: true
       value:
         example: true
         display_default: false
@@ -18,6 +20,7 @@ files:
       enabled: true
     - name: cluster_arn
       description: The Amazon Resource Name (ARN) that uniquely identifies the cluster.
+      fleet_configurable: true
       required: true
       value:
         type: string
@@ -26,6 +29,7 @@ files:
         The name of the region to associate with the API client. By default, the region will be derived
         from the `cluster_arn`. Set explicitly to `null` to use additional fallback mechanisms, see:
         https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuration
+      fleet_configurable: true
       value:
         type: string
     - name: assume_role
@@ -33,12 +37,14 @@ files:
         The ARN of the role to assume when retrieving MSK cluster metadata. If this is not set,
         the default permissions used by boto3 will follow the rules according to:
         https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuration
+      fleet_configurable: true
       value:
         type: string
     - name: jmx_exporter_port
       description: |
         The port on which the JMX Exporter serves metrics.
         Set the port to 0 to disable.
+      fleet_configurable: true
       value:
         type: integer
         example: 11001
@@ -46,12 +52,14 @@ files:
       description: |
         The port on which the Node Exporter serves metrics.
         Set the port to 0 to disable.
+      fleet_configurable: true
       value:
         type: integer
         example: 11002
     - name: prometheus_metrics_path
       description: |
         The path where Prometheus serves metrics.
+      fleet_configurable: true
       value:
         type: string
         example: /metrics
@@ -62,6 +70,7 @@ files:
         Note: Configuration values set in your AWS config file can be singularly overwritten
         through the use of a Config object.
         https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html
+      fleet_configurable: true
       value:
         example:
           proxies_config:

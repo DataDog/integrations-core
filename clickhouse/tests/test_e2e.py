@@ -14,9 +14,11 @@ def test_check(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
     server_tag = 'server:{}'.format(instance['server'])
     port_tag = 'port:{}'.format(instance['port'])
+    db_hostname_tag = 'database_hostname:{}'.format(instance['server'])
+    db_instance_tag = 'database_instance:{}:{}:default'.format(instance['server'], instance['port'])
 
     for metric in common.get_metrics(CLICKHOUSE_VERSION):
-        aggregator.assert_metric_has_tags(metric, [port_tag, server_tag, 'db:default', 'foo:bar'], at_least=1)
+        aggregator.assert_metric_has_tags(metric, [port_tag, server_tag, 'db:default', 'foo:bar', db_hostname_tag, db_instance_tag], at_least=1)
 
     for metric in common.get_optional_metrics(CLICKHOUSE_VERSION):
         aggregator.assert_metric(metric, at_least=0)

@@ -1,0 +1,80 @@
+
+Job <2226[1]>, Job Name <myArray[1]>, User <test-user>, Project <default>, Comma
+                     nd <sleep 5>
+Tue Dec  2 21:39:11: Submitted from host <ip-11-21-111-198.ec2.internal>, to Qu
+                     eue <normal>, CWD <$HOME>;
+Tue Dec  2 21:39:12: Dispatched 1 Task(s) on Host(s) <ip-11-21-111-198.ec2.inte
+                     rnal>, Allocated 1 Slot(s) on Host(s) <ip-11-21-111-198.ec
+                     2.internal>, Effective RES_REQ <select[type == local] orde
+                     r[r15s:pg] >;
+Tue Dec  2 21:39:12: Starting (Pid 10428);
+Tue Dec  2 21:39:12: Running with execution home </home/test-user>, Execution CW
+                     D </home/test-user>, Execution Pid <10428>;
+Tue Dec  2 21:39:17: Done successfully. The CPU time used is 0.0 seconds;
+Tue Dec  2 21:39:18: Post job process done successfully;
+
+
+MEMORY USAGE:
+MAX MEM: 6 Mbytes;  AVG MEM: 4 Mbytes; MEM Efficiency: 0.00%
+
+CPU USAGE:
+CPU PEAK: 0.00 ;  CPU PEAK DURATION: 0 second(s)
+CPU AVERAGE EFFICIENCY: 0.00% ;  CPU PEAK EFFICIENCY: 0.00%
+
+Summary of time in seconds spent in various states by  Tue Dec  2 21:39:18
+  PEND     PSUSP    RUN      USUSP    SSUSP    UNKWN    TOTAL
+  1        0        5        0        0        0        6
+------------------------------------------------------------------------------
+
+Job <2226[2]>, Job Name <myArray[2]>, User <test-user>, Project <default>, Comma
+                     nd <sleep 5>
+Tue Dec  2 21:39:11: Submitted from host <ip-11-21-111-198.ec2.internal>, to Qu
+                     eue <normal>, CWD <$HOME>;
+Tue Dec  2 21:39:12: Dispatched 1 Task(s) on Host(s) <ip-11-21-111-198.ec2.inte
+                     rnal>, Allocated 1 Slot(s) on Host(s) <ip-11-21-111-198.ec
+                     2.internal>, Effective RES_REQ <select[type == local] orde
+                     r[r15s:pg] >;
+Tue Dec  2 21:39:12: Starting (Pid 10429);
+Tue Dec  2 21:39:12: Running with execution home </home/test-user>, Execution CW
+                     D </home/test-user>, Execution Pid <10429>;
+Tue Dec  2 21:39:17: Done successfully. The CPU time used is 0.0 seconds;
+Tue Dec  2 21:39:18: Post job process done successfully;
+
+
+MEMORY USAGE:
+MAX MEM: 6 Mbytes;  AVG MEM: 4 Mbytes; MEM Efficiency: 0.00%
+
+CPU USAGE:
+CPU PEAK: 0.00 ;  CPU PEAK DURATION: 0 second(s)
+CPU AVERAGE EFFICIENCY: 0.00% ;  CPU PEAK EFFICIENCY: 0.00%
+
+Summary of time in seconds spent in various states by  Tue Dec  2 21:39:18
+  PEND     PSUSP    RUN      USUSP    SSUSP    UNKWN    TOTAL
+  1        0        5        0        0        0        6
+------------------------------------------------------------------------------
+
+Job <2226[3]>, Job Name <myArray[3]>, User <test-user>, Project <default>, Comma
+                     nd <sleep 5>
+Tue Dec  2 21:39:11: Submitted from host <ip-11-21-111-198.ec2.internal>, to Qu
+                     eue <normal>, CWD <$HOME>;
+Tue Dec  2 21:39:17: Dispatched 1 Task(s) on Host(s) <ip-11-21-111-198.ec2.inte
+                     rnal>, Allocated 1 Slot(s) on Host(s) <ip-11-21-111-198.ec
+                     2.internal>, Effective RES_REQ <select[type == local] orde
+                     r[r15s:pg] >;
+Tue Dec  2 21:39:17: Starting (Pid 10466);
+Tue Dec  2 21:39:17: Running with execution home </home/test-user>, Execution CW
+                     D </home/test-user>, Execution Pid <10466>;
+Tue Dec  2 21:39:22: Done successfully. The CPU time used is 0.0 seconds;
+Tue Dec  2 21:39:23: Post job process done successfully;
+
+
+MEMORY USAGE:
+MAX MEM: 6 Mbytes;  AVG MEM: 4 Mbytes; MEM Efficiency: 0.00%
+
+CPU USAGE:
+CPU PEAK: 0.00 ;  CPU PEAK DURATION: 0 second(s)
+CPU AVERAGE EFFICIENCY: 0.00% ;  CPU PEAK EFFICIENCY: 0.00%
+
+Summary of time in seconds spent in various states by  Tue Dec  2 21:39:23
+  PEND     PSUSP    RUN      USUSP    SSUSP    UNKWN    TOTAL
+  6        0        5        0        0        0        11

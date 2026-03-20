@@ -50,7 +50,7 @@ instances:
     #
   - avi_controller_url: https://<AVI_CONTROLLER_HOSTNAME>/
 
-    ## @param entities - list of strings - optional
+    ## @param entities - list of strings - optional - default: ['controller', 'pool', 'serviceengine', 'virtualservice']
     ## List of entity types to collect metrics from. Valid options are
     ## `controller`, `pool`, `serviceengine` and `virtualservice`. By default all types
     ## are monitored.

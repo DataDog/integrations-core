@@ -1,4 +1,5 @@
 name: Tomcat
+fleet_configurable: true
 files:
 - name: tomcat.yaml
   options:

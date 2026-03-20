@@ -2,14 +2,20 @@
 
 <!-- towncrier release notes start -->
 
-## 3.2.0 / 2025-11-26
+## 3.3.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+## 3.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
 
 * Add support for Karpenter v1.8 metrics ([#21819](https://github.com/DataDog/integrations-core/pull/21819))
 * Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
 
-## 3.1.1 / 2025-10-31
+## 3.1.1 / 2025-10-31 / Agent 7.73.0
 
 ***Fixed***:
 

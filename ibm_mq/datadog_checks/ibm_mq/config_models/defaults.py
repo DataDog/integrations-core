@@ -12,6 +12,10 @@ def shared_queue_manager_process_limit():
     return 1
 
 
+def instance_add_description_tags():
+    return False
+
+
 def instance_auto_discover_channels():
     return True
 
@@ -48,6 +52,10 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_enable_legacy_tags_normalization():
+    return True
+
+
 def instance_host():
     return 'localhost'
 
@@ -58,6 +66,10 @@ def instance_min_collection_interval():
 
 def instance_mqcd_version():
     return 6
+
+
+def instance_normalize_description_tags():
+    return True
 
 
 def instance_override_hostname():
