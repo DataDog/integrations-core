@@ -367,7 +367,7 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         responses_by_endpoint: Dict[str, list[MockHTTPResponse]],
         mode: Literal['cycle', 'exhaust', 'default'] = 'cycle',
         default_response: MockHTTPResponse | None = None,
-        method: str = 'requests.Session.get',
+        method: str = 'requests.Session.get',  # TODO(httpx-migration): update default when backend changes
         url_arg_index: int = 1,
         url_kwarg_name: str = "url",
         strict: bool = True,
