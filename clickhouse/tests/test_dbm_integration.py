@@ -158,8 +158,7 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
 
     matching_fqt = [e for e in fqt_events if query in e['db'].get('statement', '')]
     assert len(matching_fqt) >= 1, (
-        f"Expected at least 1 FQT event containing query: {query!r}.\n"
-        f"Found {len(matching_fqt)}."
+        f"Expected at least 1 FQT event containing query: {query!r}.\nFound {len(matching_fqt)}."
     )
 
     fqt_event = matching_fqt[0]
