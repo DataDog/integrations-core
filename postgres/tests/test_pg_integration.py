@@ -425,10 +425,10 @@ def test_connections_metrics(aggregator, integration_check, pg_instance):
     check.run()
 
     expected_tags = _get_expected_tags(check, pg_instance)
+    expected_tags_with_db = expected_tags + ['db:datadog_test']
     for name in CONNECTION_METRICS:
-        aggregator.assert_metric(name, count=1, tags=expected_tags)
-    expected_tags += ['db:datadog_test']
-    aggregator.assert_metric('postgresql.connections', count=1, tags=expected_tags)
+        aggregator.assert_metric(name, count=1, tags=expected_tags_with_db)
+    aggregator.assert_metric('postgresql.connections', count=1, tags=expected_tags_with_db)
 
 
 @requires_over_10
@@ -809,7 +809,7 @@ def test_correct_hostname(
     check_activity_metrics(aggregator, tags=expected_activity_tags, hostname=expected_hostname)
 
     for name in CONNECTION_METRICS:
-        aggregator.assert_metric(name, count=1, tags=expected_tags_no_db, hostname=expected_hostname)
+        aggregator.assert_metric(name, count=1, tags=expected_tags_with_db, hostname=expected_hostname)
 
     aggregator.assert_service_check(
         'postgres.can_connect',
