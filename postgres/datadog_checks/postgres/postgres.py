@@ -352,14 +352,14 @@ class PostgreSql(DatabaseCheck):
 
         queries = []
 
-        connection_metrics = copy.deepcopy(CONNECTION_METRICS)
-        databases_to_ignore = ""
-        if len(self._config.ignore_databases) > 0:
-            escaped_databases = ["'{}'".format(db.replace("'", "''")) for db in self._config.ignore_databases]
-            databases_to_ignore = "AND datname NOT IN ({})".format(", ".join(escaped_databases))
+        # connection_metrics = copy.deepcopy(CONNECTION_METRICS)
+        # databases_to_ignore = ""
+        # if len(self._config.ignore_databases) > 0:
+        #     escaped_databases = ["'{}'".format(db.replace("'", "''")) for db in self._config.ignore_databases]
+        #     databases_to_ignore = "AND datname NOT IN ({})".format(", ".join(escaped_databases))
 
-        connection_metrics["query"] = connection_metrics["query"].format(ignore_database_filter=databases_to_ignore)
-        queries.append(connection_metrics)
+        # connection_metrics["query"] = connection_metrics["query"].format(ignore_database_filter=databases_to_ignore)
+        # queries.append(connection_metrics)
 
         per_database_queries = []  # queries that need to be run per database, used for autodiscovery
         if self.version >= V9_2:
@@ -868,7 +868,11 @@ class PostgreSql(DatabaseCheck):
         bgw_instance_metrics = self.metrics_cache.get_bgw_metrics(self.version)
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
+        # Previous
+        # metric_scope = [CONNECTION_METRICS]
+        # Change
         metric_scope = []
+        self._query_scope(CONNECTION_METRICS, instance_tags, False)
 
         per_database_metric_scope = []
 
