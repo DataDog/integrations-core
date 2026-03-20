@@ -296,18 +296,6 @@ pipeline:
           target: ocsf.query.hostname
           replaceMissing: false
         - type: string-builder-processor
-          name: Add query opcode id for responseData
-          enabled: true
-          template: "%{response_op_code_value}"
-          target: ocsf.query.opcode_id
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Add query opcode id for requestData
-          enabled: true
-          template: "%{request_op_code_value}"
-          target: ocsf.query.opcode_id
-          replaceMissing: false
-        - type: string-builder-processor
           name: Add query type for responseData
           enabled: true
           template: "%{responseData.question.questionType}"
@@ -429,10 +417,6 @@ pipeline:
                   name: DSOTYPENI
                   id: 11
                 - filter:
-                    query: "@responseData.fullRcode:[12 TO 15] OR @requestData.fullRcode:[12 TO 15]"
-                  name: Unassigned
-                  id: 24
-                - filter:
                     query: "@responseData.fullRcode:16 OR @requestData.fullRcode:16"
                   name: BADSIG_VERS
                   id: 16
@@ -465,20 +449,16 @@ pipeline:
                   name: BADCOOKIE
                   id: 23
                 - filter:
-                    query: "@responseData.fullRcode:[24 TO 3840] OR @requestData.fullRcode:[24 TO
-                      3840]"
+                    query: "@responseData.fullRcode:([12 TO 15] OR [24 TO 3840] OR [4096 TO 65534])
+                      OR @requestData.fullRcode:([12 TO 15] OR [24 TO 3840] OR
+                      [4096 TO 65534])"
                   name: Unassigned
                   id: 24
                 - filter:
-                    query: "@responseData.fullRcode:[3841 TO 4095] OR @requestData.fullRcode:[3841
-                      TO 4095]"
+                    query: "@responseData.fullRcode:([3841 TO 4095] OR 65535) OR
+                      @requestData.fullRcode:([3841 TO 4095] OR 65535)"
                   name: Reserved
                   id: 25
-                - filter:
-                    query: "@responseData.fullRcode:[4096 TO 65534] OR @requestData.fullRcode:[4096
-                      TO 65534]"
-                  name: Unassigned
-                  id: 24
               targets:
                 name: ocsf.rcode
                 id: ocsf.rcode_id
@@ -623,27 +603,32 @@ pipeline:
             - name: ocsf.query.opcode_id
               categories:
                 - filter:
-                    query: "@request_op_code_value:Query"
+                    query: "@request_op_code_value:Query OR @response_op_code_value:Query"
                   name: Query
                   id: 0
                 - filter:
-                    query: "@request_op_code_value:IQuery"
+                    query: "@request_op_code_value:IQuery OR @response_op_code_value:IQuery"
                   name: Inverse Query
                   id: 1
                 - filter:
-                    query: "@request_op_code_value:Status"
+                    query: "@request_op_code_value:Status OR @response_op_code_value:Status"
                   name: Status
                   id: 2
                 - filter:
-                    query: "@request_op_code_value:Notify"
+                    query: "@request_op_code_value:Notify OR @response_op_code_value:Notify"
                   name: Notify
                   id: 4
                 - filter:
-                    query: "@request_op_code_value:Update"
+                    query: "@request_op_code_value:Update OR @response_op_code_value:Update"
                   name: Update
                   id: 5
                 - filter:
-                    query: "@request_op_code_value:Unassigned"
+                    query: '@request_op_code_value:"DSO Message" OR @response_op_code_value:"DSO
+                      Message"'
+                  name: DSO Message
+                  id: 6
+                - filter:
+                    query: "@request_op_code_value:Unassigned OR @response_op_code_value:Unassigned"
                   name: Other
                   id: 99
               targets:
@@ -712,22 +697,6 @@ pipeline:
             extensions: []
             profiles: []
           mappers:
-            - name: Map `ocsf.metadata` to `ocsf.metadata`
-              sources:
-                - ocsf.metadata
-              sourceType: attribute
-              target: ocsf.metadata
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product` to `ocsf.metadata.product`
-              sources:
-                - ocsf.metadata.product
-              sourceType: attribute
-              target: ocsf.metadata.product
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
             - name: Map `ocsf.time` to `ocsf.time`
               sources:
                 - ocsf.time
@@ -740,98 +709,17 @@ pipeline:
             - name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@data.dhcpv6Message.messageType:SOLICIT"
-                  name: Discover
-                  id: 1
-                - filter:
-                    query: "@data.dhcpv6Message.messageType:ADVERTISE"
-                  name: Offer
-                  id: 2
-                - filter:
-                    query: "@data.dhcpv6Message.messageType:REQUEST"
-                  name: Request
-                  id: 3
-                - filter:
-                    query: "@data.dhcpv6Message.messageType:DECLINE"
-                  name: Decline
-                  id: 4
-                - filter:
-                    query: "@data.dhcpv6Message.messageType:REPLY"
-                  name: Ack
-                  id: 5
-                - filter:
-                    query: "@data.dhcpv6Message.messageType:REPLY"
-                  name: Nak
-                  id: 6
-                - filter:
-                    query: "@data.dhcpv6Message.messageType:RELEASE"
-                  name: Release
-                  id: 7
-                - filter:
-                    query: "@data.dhcpv6Message.messageType:INFORMATION-REQUEST"
-                  name: Inform
-                  id: 8
-                - filter:
                     query: '@data.dhcpv6Message.messageType:SOLICIT OR
-                      @data.dhcpv6Message.messageType:"DHCP Discover"'
+                      @data.dhcpv4Message.messageType:"DHCP Discover"'
                   name: Discover
                   id: 1
                 - filter:
                     query: '@data.dhcpv6Message.messageType:ADVERTISE OR
-                      @data.dhcpv6Message.messageType:"DHCP Offer"'
+                      @data.dhcpv4Message.messageType:"DHCP Offer"'
                   name: Offer
                   id: 2
                 - filter:
-                    query: '@data.dhcpv6Message.messageType:REQUEST OR
-                      @data.dhcpv6Message.messageType:"DHCP Request"'
-                  name: Request
-                  id: 3
-                - filter:
-                    query: '@data.dhcpv6Message.messageType:DECLINE OR
-                      @data.dhcpv6Message.messageType:"DHCP Decline"'
-                  name: Decline
-                  id: 4
-                - filter:
-                    query: '@data.dhcpv6Message.messageType:REPLY OR
-                      @data.dhcpv6Message.messageType:"DHCP Ack"'
-                  name: Ack
-                  id: 5
-                - filter:
-                    query: '@data.dhcpv6Message.messageType:REPLY OR
-                      @data.dhcpv6Message.messageType:"DHCP Nak"'
-                  name: Nak
-                  id: 6
-                - filter:
-                    query: '@data.dhcpv6Message.messageType:RELEASE OR
-                      @data.dhcpv6Message.messageType:"DHCP Release"'
-                  name: Release
-                  id: 7
-                - filter:
-                    query: '@data.dhcpv6Message.messageType:INFORMATION-REQUEST OR
-                      @data.dhcpv6Message.messageType:"DHCP Inform"'
-                  name: Inform
-                  id: 8
-                - filter:
-                    query: '@data.dhcpv4Message.options.messageType:"DHCP Expire"'
-                  name: Expire
-                  id: 9
-                - filter:
-                    query: '@data.dhcpv6Message.messageType:SOLICIT OR
-                      @data.dhcpv4Message.options.messageType:"DHCP Discover"'
-                  name: Discover
-                  id: 1
-                - filter:
-                    query: '@data.dhcpv6Message.messageType:ADVERTISE OR
-                      @data.dhcpv4Message.options.messageType:"DHCP Offer"'
-                  name: Offer
-                  id: 2
-                - filter:
-                    query: '@data.dhcpv6Message.messageType:REQUEST OR
-                      @@data.dhcpv4Message.options.messageType:"DHCP Request"'
-                  name: Request
-                  id: 3
-                - filter:
-                    query: '@data.dhcpv6Message.messageType:REQUEST OR
+                    query: '@data.dhcpv6Message.messageType:(REQUEST OR RENEW OR REBIND) OR
                       @data.dhcpv4Message.options.messageType:"DHCP Request"'
                   name: Request
                   id: 3
@@ -841,13 +729,11 @@ pipeline:
                   name: Decline
                   id: 4
                 - filter:
-                    query: '@data.dhcpv6Message.messageType:REPLY OR
-                      @data.dhcpv4Message.options.messageType:"DHCP Ack"'
+                    query: '@data.dhcpv4Message.options.messageType:"DHCP Ack"'
                   name: Ack
                   id: 5
                 - filter:
-                    query: '@data.dhcpv6Message.messageType:REPLY OR
-                      @data.dhcpv4Message.options.messageType:"DHCP Nak"'
+                    query: '@data.dhcpv4Message.options.messageType:"DHCP Nak"'
                   name: Nak
                   id: 6
                 - filter:
@@ -861,36 +747,17 @@ pipeline:
                   name: Inform
                   id: 8
                 - filter:
-                    query: '@data.dhcpv6Message.messageType:(REQUEST OR RENEW OR REBIND) OR
-                      @data.dhcpv4Message.options.messageType:"DHCP Request"'
-                  name: Request
-                  id: 3
-                - filter:
-                    query: -(@data.dhcpv6Message.messageType:(SOLICIT OR ADVERTISE OR REQUEST OR
-                      RENEW OR REBIND OR DECLINE OR REPLY OR RELEASE OR
-                      INFORMATION-REQUEST) OR
-                      @data.dhcpv4Message.options.messageType:("DHCP Discover"
-                      OR "DHCP Offer" OR "DHCP Request" OR "DHCP Decline" OR
-                      "DHCP Ack" OR "DHCP Nak" OR "DHCP Release" OR "DHCP
-                      Inform" OR "DHCP Expire"))
-                  name: Other
-                  id: 99
-                - filter:
-                    query: '@data.dhcpv4Message.options.messageType:"DHCP Ack"'
-                  name: Ack
-                  id: 5
-                - filter:
-                    query: '@data.dhcpv4Message.options.messageType:"DHCP Nak"'
-                  name: Nak
-                  id: 6
+                    query: '@data.dhcpv4Message.options.messageType:"DHCP Expire"'
+                  name: Expire
+                  id: 9
                 - filter:
                     query: -(@data.dhcpv6Message.messageType:(SOLICIT OR ADVERTISE OR REQUEST OR
                       RENEW OR REBIND OR DECLINE OR RELEASE OR
                       INFORMATION-REQUEST) OR
                       @data.dhcpv4Message.options.messageType:("DHCP Discover"
                       OR "DHCP Offer" OR "DHCP Request" OR "DHCP Decline" OR
-                      "DHCP Ack" OR "DHCP Nak" OR "DHCP Release" OR "DHCP
-                      Inform" OR "DHCP Expire"))
+                      "DHCP Ack" OR "DHCP Nak" OR "DHCP Release" OR
+                      "DHCP Inform" OR "DHCP Expire"))
                   name: Other
                   id: 99
               targets:
@@ -955,14 +822,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.dst_endpoint` to `ocsf.dst_endpoint`
-              sources:
-                - ocsf.dst_endpoint
-              sourceType: attribute
-              target: ocsf.dst_endpoint
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
             - name: Map `key` to `ocsf.metadata.uid`
               sources:
                 - key
@@ -981,46 +840,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `data.dhcpv4Message.options.leaseTime` to `ocsf.lease_dur`
-              sources:
-                - data.dhcpv4Message.options.leaseTime
-              sourceType: attribute
-              target: ocsf.lease_dur
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
             - name: Map `timestamp` to `ocsf.metadata.original_time`
               sources:
                 - timestamp
               sourceType: attribute
               target: ocsf.metadata.original_time
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.src_endpoint` to `ocsf.src_endpoint`
-              sources:
-                - ocsf.src_endpoint
-              sourceType: attribute
-              target: ocsf.src_endpoint
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `data.dhcpv4Message.ciaddr` to `ocsf.src_endpoint.ip`
-              sources:
-                - data.dhcpv4Message.ciaddr
-              sourceType: attribute
-              target: ocsf.src_endpoint.ip
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `data.dhcpv4Message.chaddr` to `ocsf.src_endpoint.mac`
-              sources:
-                - data.dhcpv4Message.chaddr
-              sourceType: attribute
-              target: ocsf.src_endpoint.mac
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -1031,14 +855,6 @@ pipeline:
               sourceType: attribute
               target: ocsf.dst_endpoint.name
               targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.connection_info` to `ocsf.connection_info`
-              sources:
-                - ocsf.connection_info
-              sourceType: attribute
-              target: ocsf.connection_info
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
