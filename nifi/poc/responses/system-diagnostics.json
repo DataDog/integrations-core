@@ -1,0 +1,91 @@
+{
+  "systemDiagnostics": {
+    "aggregateSnapshot": {
+      "totalNonHeap": "177.38 MB",
+      "totalNonHeapBytes": 185991168,
+      "usedNonHeap": "173.67 MB",
+      "usedNonHeapBytes": 182110368,
+      "freeNonHeap": "3.7 MB",
+      "freeNonHeapBytes": 3880800,
+      "maxNonHeap": "-1 bytes",
+      "maxNonHeapBytes": -1,
+      "totalHeap": "1,024 MB",
+      "totalHeapBytes": 1073741824,
+      "usedHeap": "239.44 MB",
+      "usedHeapBytes": 251072000,
+      "freeHeap": "784.56 MB",
+      "freeHeapBytes": 822669824,
+      "maxHeap": "1,024 MB",
+      "maxHeapBytes": 1073741824,
+      "heapUtilization": "23.0%",
+      "availableProcessors": 16,
+      "processorLoadAverage": 2.43212890625,
+      "totalThreads": 88,
+      "daemonThreads": 48,
+      "uptime": "00:11:25.117",
+      "flowFileRepositoryStorageUsage": {
+        "freeSpace": "830.57 GB",
+        "totalSpace": "910.74 GB",
+        "usedSpace": "80.16 GB",
+        "freeSpaceBytes": 891819769856,
+        "totalSpaceBytes": 977896124416,
+        "usedSpaceBytes": 86076354560,
+        "utilization": "9.0%"
+      },
+      "contentRepositoryStorageUsage": [
+        {
+          "identifier": "default",
+          "freeSpace": "830.57 GB",
+          "totalSpace": "910.74 GB",
+          "usedSpace": "80.16 GB",
+          "freeSpaceBytes": 891819769856,
+          "totalSpaceBytes": 977896124416,
+          "usedSpaceBytes": 86076354560,
+          "utilization": "9.0%"
+        }
+      ],
+      "provenanceRepositoryStorageUsage": [
+        {
+          "identifier": "default",
+          "freeSpace": "830.57 GB",
+          "totalSpace": "910.74 GB",
+          "usedSpace": "80.16 GB",
+          "freeSpaceBytes": 891819769856,
+          "totalSpaceBytes": 977896124416,
+          "usedSpaceBytes": 86076354560,
+          "utilization": "9.0%"
+        }
+      ],
+      "garbageCollection": [
+        {
+          "name": "G1 Young Generation",
+          "collectionCount": 12,
+          "collectionTime": "00:00:00.063",
+          "collectionMillis": 63
+        },
+        {
+          "name": "G1 Concurrent GC",
+          "collectionCount": 8,
+          "collectionTime": "00:00:00.010",
+          "collectionMillis": 10
+        },
+        {
+          "name": "G1 Old Generation",
+          "collectionCount": 0,
+          "collectionTime": "00:00:00.000",
+          "collectionMillis": 0
+        }
+      ],
+      "statsLastRefreshed": "18:00:26 UTC",
+      "versionInfo": {
+        "niFiVersion": "2.8.0",
+        "javaVendor": "BellSoft",
+        "javaVersion": "21.0.10",
+        "osName": "Linux",
+        "osVersion": "6.12.65-linuxkit",
+        "osArchitecture": "aarch64",
+        "buildTag": "rel/nifi-2.8.0"
+      }
+    }
+  }
+}

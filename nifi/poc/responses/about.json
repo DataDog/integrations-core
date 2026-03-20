@@ -1,0 +1,10 @@
+{
+  "about": {
+    "title": "NiFi",
+    "version": "2.8.0",
+    "uri": "https://localhost:8443/nifi-api/",
+    "contentViewerUrl": "https://localhost:8443/nifi/#/content-viewer",
+    "timezone": "UTC",
+    "buildTag": "rel/nifi-2.8.0"
+  }
+}
