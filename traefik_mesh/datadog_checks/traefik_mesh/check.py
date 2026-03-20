@@ -8,6 +8,9 @@ from urllib.parse import urljoin
 import requests
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError as _HTTPConnectionError
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError as _HTTPTimeoutError
 from datadog_checks.traefik_mesh.config_models import ConfigMixin
 from datadog_checks.traefik_mesh.metrics import METRIC_MAP, RENAME_LABELS
 
@@ -112,10 +115,15 @@ class TraefikMeshCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             resp = self.http.get(url)
             resp.raise_for_status()
             return resp.json()
-        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
+        except (
+            requests.exceptions.HTTPError,
+            requests.exceptions.ConnectionError,
+            HTTPStatusError,
+            _HTTPConnectionError,
+        ) as e:
             self.warning(
                 "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", url, e
             )
-        except requests.exceptions.Timeout as e:
+        except (requests.exceptions.Timeout, _HTTPTimeoutError) as e:
             self.warning("Connection timeout when connecting to %s: %s", url, e)
         return None
