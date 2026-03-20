@@ -1,0 +1,20 @@
+{
+  "controllerStatus": {
+    "activeThreadCount": 0,
+    "terminatedThreadCount": 0,
+    "queued": "0 / 0 bytes",
+    "flowFilesQueued": 0,
+    "bytesQueued": 0,
+    "runningCount": 4,
+    "stoppedCount": 0,
+    "invalidCount": 0,
+    "disabledCount": 0,
+    "activeRemotePortCount": 0,
+    "inactiveRemotePortCount": 0,
+    "upToDateCount": 0,
+    "locallyModifiedCount": 0,
+    "staleCount": 0,
+    "locallyModifiedAndStaleCount": 0,
+    "syncFailureCount": 0
+  }
+}

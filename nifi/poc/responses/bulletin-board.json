@@ -1,0 +1,70 @@
+{
+  "bulletinBoard": {
+    "bulletins": [
+      {
+        "id": 0,
+        "groupId": "0c6f3d7b-019d-1000-5edf-dc0f4c54ff63",
+        "sourceId": "0c6f483e-019d-1000-0127-4e7850192d3e",
+        "timestamp": "18:08:33 UTC",
+        "timestampIso": "2026-03-20T18:08:33.065Z",
+        "canRead": true,
+        "bulletin": {
+          "id": 0,
+          "category": "Log Message",
+          "groupId": "0c6f3d7b-019d-1000-5edf-dc0f4c54ff63",
+          "sourceId": "0c6f483e-019d-1000-0127-4e7850192d3e",
+          "sourceName": "Fail Writer",
+          "level": "ERROR",
+          "message": "PutFile[id=0c6f483e-019d-1000-0127-4e7850192d3e] Penalizing FlowFile[filename=9c43fd5b-1fc5-4937-8759-48bad37b5364] and transferring to failure: java.nio.file.AccessDeniedException: /nonexistent",
+          "timestamp": "18:08:33 UTC",
+          "timestampIso": "2026-03-20T18:08:33.065Z",
+          "sourceType": "PROCESSOR",
+          "stackTrace": "java.nio.file.AccessDeniedException: /nonexistent\n\tat java.base/sun.nio.fs.UnixException.translateToIOException(UnixException.java:90)\n\tat java.base/sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:106)\n\tat java.base/sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:111)\n\tat java.base/sun.nio.fs.UnixFileSystemProvider.createDirectory(UnixFileSystemProvider.java:462)\n\tat java.base/java.nio.file.Files.createDirectory(Files.java:700)\n\tat java.base/java.nio.file.Files.createAndCheckIsDirectory(Files.java:808)\n\tat java.base/java.nio.file.Files.createDirectories(Files.java:794)\n\tat org.apache.nifi.processors.standard.PutFile.onTrigger(PutFile.java:242)\n\tat org.apache.nifi.processor.AbstractProcessor.onTrigger(AbstractProcessor.java:27)\n\tat org.apache.nifi.controller.StandardProcessorNode.onTrigger(StandardProcessorNode.java:1285)\n\tat org.apache.nifi.controller.tasks.ConnectableTask.invoke(ConnectableTask.java:229)\n\tat org.apache.nifi.controller.scheduling.TimerDrivenSchedulingAgent$1.run(TimerDrivenSchedulingAgent.java:102)\n\tat org.apache.nifi.engine.FlowEngine.lambda$wrap$1(FlowEngine.java:105)\n\tat java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)\n\tat java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java:358)\n\tat java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)\n\tat java.base/java.lang.Thread.run(Thread.java:1583)\n"
+        }
+      },
+      {
+        "id": 1,
+        "groupId": "0c6f3d7b-019d-1000-5edf-dc0f4c54ff63",
+        "sourceId": "0c6f483e-019d-1000-0127-4e7850192d3e",
+        "timestamp": "18:08:43 UTC",
+        "timestampIso": "2026-03-20T18:08:43.031Z",
+        "canRead": true,
+        "bulletin": {
+          "id": 1,
+          "category": "Log Message",
+          "groupId": "0c6f3d7b-019d-1000-5edf-dc0f4c54ff63",
+          "sourceId": "0c6f483e-019d-1000-0127-4e7850192d3e",
+          "sourceName": "Fail Writer",
+          "level": "ERROR",
+          "message": "PutFile[id=0c6f483e-019d-1000-0127-4e7850192d3e] Penalizing FlowFile[filename=9ab0f226-d548-4b5a-b1ff-7b7b0802b7c1] and transferring to failure: java.nio.file.AccessDeniedException: /nonexistent",
+          "timestamp": "18:08:43 UTC",
+          "timestampIso": "2026-03-20T18:08:43.031Z",
+          "sourceType": "PROCESSOR",
+          "stackTrace": "java.nio.file.AccessDeniedException: /nonexistent\n\tat java.base/sun.nio.fs.UnixException.translateToIOException(UnixException.java:90)\n\tat java.base/sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:106)\n\tat java.base/sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:111)\n\tat java.base/sun.nio.fs.UnixFileSystemProvider.createDirectory(UnixFileSystemProvider.java:462)\n\tat java.base/java.nio.file.Files.createDirectory(Files.java:700)\n\tat java.base/java.nio.file.Files.createAndCheckIsDirectory(Files.java:808)\n\tat java.base/java.nio.file.Files.createDirectories(Files.java:794)\n\tat org.apache.nifi.processors.standard.PutFile.onTrigger(PutFile.java:242)\n\tat org.apache.nifi.processor.AbstractProcessor.onTrigger(AbstractProcessor.java:27)\n\tat org.apache.nifi.controller.StandardProcessorNode.onTrigger(StandardProcessorNode.java:1285)\n\tat org.apache.nifi.controller.tasks.ConnectableTask.invoke(ConnectableTask.java:229)\n\tat org.apache.nifi.controller.scheduling.TimerDrivenSchedulingAgent$1.run(TimerDrivenSchedulingAgent.java:102)\n\tat org.apache.nifi.engine.FlowEngine.lambda$wrap$1(FlowEngine.java:105)\n\tat java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)\n\tat java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java:358)\n\tat java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)\n\tat java.base/java.lang.Thread.run(Thread.java:1583)\n"
+        }
+      },
+      {
+        "id": 2,
+        "groupId": "0c6f3d7b-019d-1000-5edf-dc0f4c54ff63",
+        "sourceId": "0c6f483e-019d-1000-0127-4e7850192d3e",
+        "timestamp": "18:08:53 UTC",
+        "timestampIso": "2026-03-20T18:08:53.032Z",
+        "canRead": true,
+        "bulletin": {
+          "id": 2,
+          "category": "Log Message",
+          "groupId": "0c6f3d7b-019d-1000-5edf-dc0f4c54ff63",
+          "sourceId": "0c6f483e-019d-1000-0127-4e7850192d3e",
+          "sourceName": "Fail Writer",
+          "level": "ERROR",
+          "message": "PutFile[id=0c6f483e-019d-1000-0127-4e7850192d3e] Penalizing FlowFile[filename=f9d78ec8-f4b7-460c-a9bd-51ca20041dfd] and transferring to failure: java.nio.file.AccessDeniedException: /nonexistent",
+          "timestamp": "18:08:53 UTC",
+          "timestampIso": "2026-03-20T18:08:53.032Z",
+          "sourceType": "PROCESSOR",
+          "stackTrace": "java.nio.file.AccessDeniedException: /nonexistent\n\tat java.base/sun.nio.fs.UnixException.translateToIOException(UnixException.java:90)\n\tat java.base/sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:106)\n\tat java.base/sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:111)\n\tat java.base/sun.nio.fs.UnixFileSystemProvider.createDirectory(UnixFileSystemProvider.java:462)\n\tat java.base/java.nio.file.Files.createDirectory(Files.java:700)\n\tat java.base/java.nio.file.Files.createAndCheckIsDirectory(Files.java:808)\n\tat java.base/java.nio.file.Files.createDirectories(Files.java:794)\n\tat org.apache.nifi.processors.standard.PutFile.onTrigger(PutFile.java:242)\n\tat org.apache.nifi.processor.AbstractProcessor.onTrigger(AbstractProcessor.java:27)\n\tat org.apache.nifi.controller.StandardProcessorNode.onTrigger(StandardProcessorNode.java:1285)\n\tat org.apache.nifi.controller.tasks.ConnectableTask.invoke(ConnectableTask.java:229)\n\tat org.apache.nifi.controller.scheduling.TimerDrivenSchedulingAgent$1.run(TimerDrivenSchedulingAgent.java:102)\n\tat org.apache.nifi.engine.FlowEngine.lambda$wrap$1(FlowEngine.java:105)\n\tat java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)\n\tat java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java:358)\n\tat java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)\n\tat java.base/java.lang.Thread.run(Thread.java:1583)\n"
+        }
+      }
+    ],
+    "generated": "18:08:58 UTC"
+  }
+}
