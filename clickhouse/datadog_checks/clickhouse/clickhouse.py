@@ -13,7 +13,7 @@ from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.base.utils.db.utils import TagManager, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
-from . import queries
+from . import advanced_queries, queries, utils
 from .__about__ import __version__
 from .config import build_config, sanitize
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
@@ -79,23 +79,6 @@ class ClickhouseCheck(DatabaseCheck):
         # This reduces connection overhead while maintaining client isolation
         # See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#customizing-the-http-connection-pool
         self._pool_manager = httputil.get_pool_manager(maxsize=8, num_pools=4)
-
-        self._query_manager = QueryManager(
-            self,
-            self.execute_query_raw,
-            queries=[
-                queries.SystemMetrics,
-                queries.SystemEventsToDeprecate,
-                queries.SystemEvents,
-                queries.SystemAsynchronousMetrics,
-                queries.SystemParts,
-                queries.SystemReplicas,
-                queries.SystemDictionaries,
-            ],
-            tags=self.tags,
-            error_handler=self._error_sanitizer.clean,
-        )
-        self.check_initializations.append(self._query_manager.compile_queries)
 
         # Initialize DBM components if enabled
         self._init_dbm_components()
@@ -226,8 +209,9 @@ class ClickhouseCheck(DatabaseCheck):
 
     def check(self, _):
         self.connect()
-        self._query_manager.execute()
-        self.collect_version()
+        self._server_version = self.select_version()
+        self._build_query_manager().execute()
+        self.set_version_metadata(self._server_version)
 
         # Send database instance metadata
         self._send_database_instance_metadata()
@@ -244,10 +228,52 @@ class ClickhouseCheck(DatabaseCheck):
         if self.query_completions:
             self.query_completions.run_job_loop(self.tags)
 
-    @AgentCheck.metadata_entrypoint
-    def collect_version(self):
-        version = list(self.execute_query_raw('SELECT version()'))[0][0]
+    def get_queries(self) -> list[dict]:
+        query_list = []
 
+        if self._config.use_legacy_queries:
+            query_list.extend(
+                [
+                    queries.SystemMetrics,
+                    queries.SystemEventsToDeprecate,
+                    queries.SystemEvents,
+                    queries.SystemAsynchronousMetrics,
+                    queries.SystemParts,
+                    queries.SystemReplicas,
+                    queries.SystemDictionaries,
+                ]
+            )
+
+        if self._config.use_advanced_queries:
+            query_list.extend(
+                [
+                    advanced_queries.SystemMetrics,
+                    advanced_queries.SystemEvents,
+                    advanced_queries.SystemAsynchronousMetrics,
+                ]
+            )
+            if self.version_ge('20.11'):
+                query_list.append(advanced_queries.SystemErrors)
+
+        return query_list
+
+    def _build_query_manager(self) -> QueryManager:
+        query_manager = QueryManager(
+            self,
+            self.execute_query_raw,
+            queries=self.get_queries(),
+            tags=self.tags,
+            error_handler=self._error_sanitizer.clean,
+        )
+        query_manager.compile_queries()
+
+        return query_manager
+
+    def select_version(self) -> str:
+        return self._client.command('SELECT version()', use_database=False)
+
+    @AgentCheck.metadata_entrypoint
+    def set_version_metadata(self, version: str):
         # The version comes in like `19.15.2.2` though sometimes there is no patch part
         version_parts = dict(zip(('year', 'major', 'minor', 'patch'), version.split('.')))
 
@@ -481,3 +507,23 @@ class ClickhouseCheck(DatabaseCheck):
         # Clear the shared pool manager
         # Note: urllib3 pool connections are automatically closed when idle
         self._pool_manager = None
+
+    def version_lt(self, version: str) -> bool:
+        """
+        Returns True if the current ClickHouse server version is less than the compared version, otherwise False.
+        """
+        # The `latest` version should always be greater than any other
+        if version == 'latest':
+            return True
+
+        return utils.parse_version(self._server_version) < utils.parse_version(version)
+
+    def version_ge(self, version: str) -> bool:
+        """
+        Returns True if the current ClickHouse server version is greater than the compared version, otherwise False.
+        """
+        # The `latest` version should always be less than any other
+        if version == 'latest':
+            return False
+
+        return utils.parse_version(self._server_version) >= utils.parse_version(version)
