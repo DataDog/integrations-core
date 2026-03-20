@@ -4,6 +4,7 @@
 import os
 import subprocess
 import sys
+import threading
 
 from datadog_checks.base.utils.common import ensure_bytes, to_native_string
 from datadog_checks.base.utils.format import json
@@ -20,6 +21,10 @@ def run_with_isolation(check, aggregator, datadog_agent):
     # Prevent fork bomb
     instance.pop('process_isolation', None)
     init_config.pop('process_isolation', None)
+
+    timeout = instance.pop('process_isolation_timeout', init_config.pop('process_isolation_timeout', None))
+    if timeout is not None:
+        timeout = float(timeout)
 
     env_vars = dict(os.environ)
     env_vars[EnvVars.MESSAGE_INDICATOR] = message_indicator
@@ -47,8 +52,20 @@ def run_with_isolation(check, aggregator, datadog_agent):
         stderr=subprocess.STDOUT,
         env=env_vars,
     )
+    timed_out = False
+
+    def _kill_on_timeout():
+        nonlocal timed_out
+        timed_out = True
+        # TODO: kill the entire process group to avoid orphaned child processes spawned by the check
+        process.kill()
+
+    timer = threading.Timer(timeout, _kill_on_timeout) if timeout is not None else None
+
     with process:
         check.log.info('Running check in a separate process')
+        if timer is not None:
+            timer.start()
 
         # To avoid blocking never use a pipe's file descriptor iterator. See https://bugs.python.org/issue3907
         for line in iter(process.stdout.readline, b''):
@@ -70,8 +87,11 @@ def run_with_isolation(check, aggregator, datadog_agent):
                 method = message['method']
                 value = getattr(datadog_agent, method)(*message['args'], **message['kwargs'])
                 if method not in KNOWN_DATADOG_AGENT_SETTER_METHODS:
-                    process.stdin.write(b'%s\n' % ensure_bytes(json.encode({'value': value})))
-                    process.stdin.flush()
+                    try:
+                        process.stdin.write(b'%s\n' % ensure_bytes(json.encode({'value': value})))
+                        process.stdin.flush()
+                    except BrokenPipeError:
+                        break
             elif message_type == 'error':
                 check.log.error(message[0]['traceback'])
                 break
@@ -81,3 +101,10 @@ def run_with_isolation(check, aggregator, datadog_agent):
                     message_type,
                 )
                 break
+
+        if timer is not None:
+            timer.cancel()
+
+    if timed_out:
+        check.log.error('Check timed out after %s seconds', timeout)
+        check.warning('Check timed out and possibly reported incomplete data.')
