@@ -26,7 +26,8 @@ class ReadFileTool(TextEdit[ReadFileInput]):
     """Reads contents of a text file from the host filesystem.
     Use to inspect config files, logs, source code. Do not use for binary files.
     The output is a numbered list of lines starting from 0.
-    Supports offset/limit for paging through large files."""
+    Supports offset/limit for paging through large files.
+    File does not need to be registered in the file registry."""
 
     @property
     def name(self) -> str:

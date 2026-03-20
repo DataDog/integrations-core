@@ -20,6 +20,7 @@ class CreateFileInput(BaseToolInput):
 class CreateFileTool(TextEdit[CreateFileInput]):
     """Creates a new file and writes content into it (default: empty content).
     Parent directories are created automatically if they do not exist (no need to call mkdir first).
+    Registers the file in the file registry.
     Fails if the file already exists.
     Use edit_file to modify existing files."""
 

@@ -16,7 +16,8 @@ class TextEdit[TInput: BaseToolInput](BaseTool[TInput]):
         self._registry = file_registry
 
     def _on_read(self, path: str, content: str) -> None:
-        self._registry.record(path, content)
+        if self._registry.is_known(path):
+            self._registry.record(path, content)
 
     def _on_write(self, path: str, content: str) -> None:
         self._registry.record(path, content)
@@ -24,7 +25,7 @@ class TextEdit[TInput: BaseToolInput](BaseTool[TInput]):
     def _read_verified(self, path: str) -> tuple[str, ToolResult | None]:
         """Read file content and verify it matches the last recorded hash."""
         if not self._registry.is_known(path):
-            return "", ToolResult(success=False, error=f"Not authorized to modify '{path}': read the file first.")
+            return "", ToolResult(success=False, error=f"Not authorized to modify '{path}'.")
         try:
             content = Path(path).read_text(encoding="utf-8")
         except OSError as e:

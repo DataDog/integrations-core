@@ -26,7 +26,8 @@ class EditFileInput(BaseToolInput):
 
 class EditFileTool(TextEdit[EditFileInput]):
     """Edits a file by replacing an exact string with a new one.
-    The file must have been read first. Fails if the file was modified since the last read.
+    Can only edit files registered in the file registry.
+    Fails if the file was modified since the last read.
     old_string must appear exactly once in the file — if it appears multiple times, the call fails."""
 
     @property

@@ -58,7 +58,7 @@ def test_read_verified_fails_if_not_known(tool: DummyTool, tmp_path) -> None:
     assert content == ""
     assert error is not None
     assert error.success is False
-    assert "read the file first" in error.error
+    assert "Not authorized" in error.error
 
 
 def test_read_verified_fails_if_file_changed_externally(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
@@ -104,23 +104,33 @@ def test_read_verified_handles_oserror(tool: DummyTool, registry: FileRegistry, 
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize(
-    "method,content",
-    [
-        ("_on_read", "content"),
-        ("_on_write", "written"),
-    ],
-)
-def test_on_read_and_on_write_register_path(tool: DummyTool, registry: FileRegistry, tmp_path, method, content) -> None:
+def test_on_write_registers_path(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
     path = str(tmp_path / "file.txt")
-    getattr(tool, method)(path, content)
+    tool._on_write(path, "written")
 
     assert registry.is_known(path) is True
-    assert registry.verify(path, content) is True
+    assert registry.verify(path, "written") is True
+
+
+def test_on_read_does_not_register_unknown_path(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
+    path = str(tmp_path / "file.txt")
+    tool._on_read(path, "content")
+
+    assert registry.is_known(path) is False
+
+
+def test_on_read_updates_hash_for_known_path(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
+    path = str(tmp_path / "file.txt")
+    registry.record(path, "old")
+    tool._on_read(path, "new")
+
+    assert registry.verify(path, "new") is True
+    assert registry.verify(path, "old") is False
 
 
 def test_on_write_updates_hash_after_on_read(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
     path = str(tmp_path / "file.txt")
+    registry.record(path, "old")
     tool._on_read(path, "old")
     tool._on_write(path, "new")
 

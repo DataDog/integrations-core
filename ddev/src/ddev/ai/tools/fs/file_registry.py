@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 class FileRegistry:
-    """Tracks files known to the agent and their last-seen content hash."""
+    """Tracks files created by the agent and their last-seen content hash."""
 
     def __init__(self) -> None:
         self._hashes: dict[str, str] = {}

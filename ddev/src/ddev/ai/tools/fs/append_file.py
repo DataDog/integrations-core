@@ -19,7 +19,8 @@ class AppendFileInput(BaseToolInput):
 
 class AppendFileTool(TextEdit[AppendFileInput]):
     """Appends content to the end of an existing file.
-    The file must have been read first. Fails if the file was modified since the last read."""
+    Can only append to files registered in the file registry.
+    Fails if the file was modified since the last read."""
 
     @property
     def name(self) -> str:
