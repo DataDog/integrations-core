@@ -68,35 +68,19 @@ jobs:
           ddev config set repos.${REPO_SHORT} .
           ddev config set repo ${REPO_SHORT}
 
-      - name: Tag releases
-        id: tag
+      - name: Prepare dispatch
+        id: prepare
         env:
           TARGET: ${{ inputs.target }}
           DRY_RUN: ${{ inputs.dry-run }}
           SELECTED_PACKAGES: ${{ inputs.packages }}
-        run: python .github/workflows/scripts/tag_releases.py
-
-      - name: Detect package list
-        if: steps.tag.outcome == 'success'
-        id: detect
-        env:
-          SELECTED_PACKAGES: ${{ inputs.packages }}
-        run: python .github/workflows/scripts/detect_packages.py
-
-      - name: Validate release readiness
-        if: steps.detect.outputs.has_packages == 'true'
-        env:
-          PACKAGES: ${{ steps.detect.outputs.packages }}
           SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
           REF: ${{ inputs.source-repo-ref || github.sha }}
-          TARGET: ${{ inputs.target }}
-          DRY_RUN: ${{ inputs.dry-run }}
-          MODE: ${{ steps.detect.outputs.mode }}
           IS_STABLE_RELEASE: ${{ inputs.is-stable-release }}
-        run: python .github/workflows/scripts/validate_release.py
+        run: python .github/workflows/scripts/release_prepare.py
 
       - name: Get GitHub token via dd-octo-sts
-        if: steps.detect.outputs.has_packages == 'true' && !inputs.dry-run
+        if: steps.prepare.outputs.has_packages == 'true' && !inputs.dry-run
         id: octo-sts
         uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
         with:
@@ -104,12 +88,12 @@ jobs:
           policy: integrations-core.dispatch-wheel-builds
 
       - name: Dispatch release
-        if: steps.detect.outputs.has_packages == 'true'
+        if: steps.prepare.outputs.has_packages == 'true'
         env:
           GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
-          PACKAGES: ${{ steps.detect.outputs.packages }}
+          PACKAGES: ${{ steps.prepare.outputs.packages }}
           SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
           REF: ${{ inputs.source-repo-ref || github.sha }}
           TARGET: ${{ inputs.target }}
           DRY_RUN: ${{ inputs.dry-run }}
-        run: python .github/workflows/scripts/dispatch_release.py
+        run: python .github/workflows/scripts/release_dispatch.py

@@ -1,9 +1,9 @@
-"""Tests for dispatch_release entry-point script."""
+"""Tests for release_dispatch entry-point script."""
 import json
 from pathlib import Path
 from unittest.mock import call, patch
 
-import dispatch_release
+import release_dispatch
 
 
 def _write_validation(path: Path, dry_run: bool = False) -> None:
@@ -21,18 +21,18 @@ class TestLoadValidation:
     def test_file_present_returns_dict(self, tmp_path):
         validation_file = tmp_path / "release_validation.json"
         _write_validation(validation_file)
-        result = dispatch_release._load_validation(str(tmp_path))
+        result = release_dispatch._load_validation(str(tmp_path))
         assert result["mode"] == "auto"
         assert result["dry_run"] is False
 
     def test_file_absent_returns_empty_dict(self, tmp_path, capsys):
-        result = dispatch_release._load_validation(str(tmp_path))
+        result = release_dispatch._load_validation(str(tmp_path))
         assert result == {}
         assert "Warning" in capsys.readouterr().err
 
     def test_invalid_json_returns_empty_dict(self, tmp_path, capsys):
         (tmp_path / "release_validation.json").write_text("not-valid-json{")
-        result = dispatch_release._load_validation(str(tmp_path))
+        result = release_dispatch._load_validation(str(tmp_path))
         assert result == {}
         assert "Warning" in capsys.readouterr().err
 
@@ -57,23 +57,23 @@ class TestMain:
 
     def test_dry_run_does_not_dispatch(self, monkeypatch, tmp_path):
         self._base_env(monkeypatch, tmp_path, dry_run=True)
-        with patch("dispatch_release.dispatch_in_batches") as mock_dispatch, \
-             patch("dispatch_release.write_summary"):
-            dispatch_release.main()
+        with patch("release_dispatch.dispatch_in_batches") as mock_dispatch, \
+             patch("release_dispatch.write_summary"):
+            release_dispatch.main()
         mock_dispatch.assert_not_called()
 
     def test_dry_run_writes_summary(self, monkeypatch, tmp_path):
         self._base_env(monkeypatch, tmp_path, dry_run=True)
-        with patch("dispatch_release.dispatch_in_batches"), \
-             patch("dispatch_release.write_summary") as mock_summary:
-            dispatch_release.main()
+        with patch("release_dispatch.dispatch_in_batches"), \
+             patch("release_dispatch.write_summary") as mock_summary:
+            release_dispatch.main()
         mock_summary.assert_called_once()
 
     def test_non_dry_run_calls_dispatch_in_batches(self, monkeypatch, tmp_path):
         self._base_env(monkeypatch, tmp_path, dry_run=False)
-        with patch("dispatch_release.dispatch_in_batches") as mock_dispatch, \
-             patch("dispatch_release.write_summary"):
-            dispatch_release.main()
+        with patch("release_dispatch.dispatch_in_batches") as mock_dispatch, \
+             patch("release_dispatch.write_summary"):
+            release_dispatch.main()
         assert mock_dispatch.mock_calls == [
             call(["postgres", "mysql"], "integrations-core", "abc123", "prod", "test-token"),
         ]
@@ -81,7 +81,7 @@ class TestMain:
     def test_missing_validation_file_still_runs(self, monkeypatch, tmp_path):
         self._base_env(monkeypatch, tmp_path, write_validation=False)
         monkeypatch.setenv("DRY_RUN", "false")
-        with patch("dispatch_release.dispatch_in_batches") as mock_dispatch, \
-             patch("dispatch_release.write_summary"):
-            dispatch_release.main()
+        with patch("release_dispatch.dispatch_in_batches") as mock_dispatch, \
+             patch("release_dispatch.write_summary"):
+            release_dispatch.main()
         mock_dispatch.assert_called_once()
