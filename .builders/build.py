@@ -78,6 +78,8 @@ def build_macos():
                         help='Path to a folder where things will be installed during builder setup.')
     parser.add_argument('--skip-setup', default=False, action='store_true',
                         help='Skip builder setup, assuming it has already been set up.')
+    parser.add_argument('--constraints',
+                        help='Path to a pip constraints file for pinning transitive dependency versions.')
     args = parser.parse_args()
 
     image: str = args.image
@@ -109,6 +111,11 @@ def build_macos():
         shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
         shutil.copytree(HERE / 'patches', mount_dir / 'patches')
 
+        if args.constraints:
+            constraints_path = Path(args.constraints)
+            if constraints_path.is_file():
+                shutil.copy(constraints_path, mount_dir / 'constraints.txt')
+
         prefix_path = builder_root / 'prefix'
         env = {
             **os.environ,
@@ -127,6 +134,9 @@ def build_macos():
             # Build command for extra platform-specific build steps
             'DD_BUILD_COMMAND': f'bash {build_context_dir}/extra_build.sh'
         }
+
+        if args.constraints and (mount_dir / 'constraints.txt').is_file():
+            env['PIP_CONSTRAINT'] = str(mount_dir / 'constraints.txt')
 
         if not args.skip_setup:
             check_process(
@@ -168,6 +178,8 @@ def build_image():
     parser.add_argument('--no-run', action='store_true')
     parser.add_argument('-a', '--build-arg', dest='build_args', nargs='+')
     parser.add_argument('-v', '--verbose', action='store_true')
+    parser.add_argument('--constraints',
+                        help='Path to a pip constraints file for pinning transitive dependency versions.')
     args = parser.parse_args()
 
     image: str = args.image
@@ -215,6 +227,11 @@ def build_image():
             shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
             shutil.copytree(HERE / 'patches', mount_dir / 'patches')
 
+            if args.constraints:
+                constraints_path = Path(args.constraints)
+                if constraints_path.is_file():
+                    shutil.copy(constraints_path, mount_dir / 'constraints.txt')
+
             # Create outputs on the host so they can be removed
             wheels_dir = mount_dir / 'wheels'
             wheels_dir.mkdir()
@@ -232,11 +249,16 @@ def build_image():
             if args.digest:
                 script_args.append('--use-built-index')
 
+            docker_env_args = ['-e', 'PYTHONDONTWRITEBYTECODE=1']
+            if args.constraints and (mount_dir / 'constraints.txt').is_file():
+                constraints_container_path = f'{internal_mount_dir}/constraints.txt'
+                docker_env_args.extend(['-e', f'PIP_CONSTRAINT={constraints_container_path}'])
+
             check_process([
                 'docker', 'run', '--rm',
                 '-v', f'{mount_dir}:{internal_mount_dir}',
                 # Anything created within directories mounted to the container cannot be removed by the host
-                '-e', 'PYTHONDONTWRITEBYTECODE=1',
+                *docker_env_args,
                 image_name, *script_args,
             ])
 
