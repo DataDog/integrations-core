@@ -43,4 +43,6 @@ class ReadFileTool(TextEdit[ReadFileInput]):
         limit = tool_input.limit
         lines = content.splitlines(keepends=True)
         slice_ = lines[offset : offset + limit] if limit is not None else lines[offset:]
-        return ToolResult(success=True, data="".join(slice_))
+        width = len(str(offset + len(slice_)))
+        numbered = "".join(f"{offset + i + 1:{width}}: {line}" for i, line in enumerate(slice_))
+        return ToolResult(success=True, data=numbered)
