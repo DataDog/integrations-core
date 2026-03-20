@@ -29,4 +29,8 @@ def parse_bool_env(name: str, default: bool = False) -> bool:
     val = os.environ.get(name, "").strip().lower()
     if not val:
         return default
-    return val not in ("false", "0", "no")
+    if val in ("true", "1", "yes"):
+        return True
+    if val in ("false", "0", "no"):
+        return False
+    return default

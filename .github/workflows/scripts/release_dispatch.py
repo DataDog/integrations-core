@@ -20,10 +20,11 @@ def _load_validation(runner_temp: str) -> dict:
         return json.loads(path.read_text())
     except FileNotFoundError:
         print(
-            f"Warning: validation results not found at {path}. Summary may be incomplete.",
+            f"Error: validation results not found at {path}. "
+            "The prepare step likely failed before writing the file.",
             file=sys.stderr,
         )
-        return {}
+        sys.exit(1)
     except json.JSONDecodeError as e:
         print(
             f"Warning: validation results at {path} are not valid JSON: {e}. Summary may be incomplete.",
@@ -41,6 +42,9 @@ def main() -> None:
     validation = _load_validation(os.environ.get("RUNNER_TEMP", "/tmp"))
     results = validation.get("results", [])
     mode = validation.get("mode", "")
+    # dry_run comes from the validation JSON (written by release_prepare.py) so it reflects
+    # the exact value used during tagging and validation. SOURCE_REPO, REF, and TARGET are
+    # read from env vars because they are passed directly by the workflow step, not persisted.
     dry_run = validation.get("dry_run", parse_bool_env("DRY_RUN", default=False))
 
     print(f"Releasing {len(packages)} package(s) from {source_repo}@{ref} → {target} S3:")

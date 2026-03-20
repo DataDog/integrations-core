@@ -1,11 +1,19 @@
 """Release readiness validation logic."""
 import re
 from pathlib import Path
+from typing import TypedDict
 
 _PRE_RELEASE_RE = re.compile(r"\d+\.\d+\.\d+(a|b|rc)\d+")
 # Changelog fragment files are named <PR_NUMBER>.<type> (e.g. "1234.fixed").
 # This pattern intentionally excludes .gitkeep, README.md, and other non-fragment files.
 _FRAGMENT_RE = re.compile(r"^\d+\.[a-z]+$")
+
+class PackageValidationResult(TypedDict):
+    package: str
+    version: str | None
+    type: str
+    dispatch: bool
+
 
 NO_VERSION = "no_version"
 UNRELEASED = "unreleased"
@@ -40,7 +48,7 @@ def has_changelog_fragments(package: str, root: Path = Path(".")) -> bool:
     return any(_FRAGMENT_RE.match(f.name) for f in changelog_dir.iterdir())
 
 
-def validate_package(package: str, root: Path = Path("."), is_stable_release: bool = True) -> dict:
+def validate_package(package: str, root: Path = Path("."), is_stable_release: bool = True) -> PackageValidationResult:
     """Validate a single package and return a result dict with ``type`` and ``dispatch`` keys.
 
     ``is_stable_release`` encodes the git ref context:
@@ -60,6 +68,6 @@ def validate_package(package: str, root: Path = Path("."), is_stable_release: bo
     return {"package": package, "version": version, "type": STABLE, "dispatch": is_stable_release}
 
 
-def validate_packages(packages: list[str], root: Path = Path("."), is_stable_release: bool = True) -> list[dict]:
+def validate_packages(packages: list[str], root: Path = Path("."), is_stable_release: bool = True) -> list[PackageValidationResult]:
     """Validate all packages and return a list of result dicts."""
     return [validate_package(p, root, is_stable_release) for p in packages]

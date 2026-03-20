@@ -1,8 +1,10 @@
 """Markdown summary builder for the wheel release pipeline."""
+from typing import Any
+
+from . import TARGET_REPO
 from . import validation as v
 
-_TARGET_REPO = "DataDog/agent-integration-wheels-release"
-ACTIONS_URL = f"https://github.com/{_TARGET_REPO}/actions"
+ACTIONS_URL = f"https://github.com/{TARGET_REPO}/actions"
 
 
 def _source_link(source_repo: str, ref: str) -> str:
@@ -27,7 +29,7 @@ def _ineligible_label(typ: str) -> str:
 
 def build_summary(
     packages: list[str],
-    results: list[dict],
+    results: list[Any],
     mode: str,
     source_repo: str,
     ref: str,

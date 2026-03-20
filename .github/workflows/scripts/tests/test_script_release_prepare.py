@@ -6,7 +6,11 @@ from unittest.mock import MagicMock, call, patch
 import pytest
 
 import release_prepare
-from _release.validation import HAS_FRAGMENTS
+from _release.validation import HAS_FRAGMENTS, STABLE
+
+
+def _stable_result(package: str = "postgres", dispatch: bool = True) -> list[dict]:
+    return [{"package": package, "version": "1.0.0", "type": STABLE, "dispatch": dispatch}]
 
 
 # ---------------------------------------------------------------------------
@@ -158,10 +162,6 @@ class TestDetect:
 # ---------------------------------------------------------------------------
 
 class TestValidate:
-    def _stable_result(self, package: str = "postgres", dispatch: bool = True):
-        from _release.validation import STABLE
-        return [{"package": package, "version": "1.0.0", "type": STABLE, "dispatch": dispatch}]
-
     def _setup(self, monkeypatch, tmp_path):
         runner_temp = tmp_path / "runner_temp"
         runner_temp.mkdir()
@@ -173,14 +173,14 @@ class TestValidate:
     def test_integrations_core_calls_ddev_validate_version(self, monkeypatch, tmp_path):
         _, _ = self._setup(monkeypatch, tmp_path)
         with patch("release_prepare.subprocess.run", return_value=MagicMock(returncode=0)) as mock_run, \
-             patch("release_prepare.validate_packages", return_value=self._stable_result()):
+             patch("release_prepare.validate_packages", return_value=_stable_result()):
             release_prepare._validate(["postgres"], "auto", "integrations-core", "abc123", "prod", False, True)
         assert mock_run.mock_calls == [call(["ddev", "validate", "version", "postgres"])]
 
     def test_integrations_extras_skips_ddev_validate_version(self, monkeypatch, tmp_path):
         self._setup(monkeypatch, tmp_path)
         with patch("release_prepare.subprocess.run") as mock_run, \
-             patch("release_prepare.validate_packages", return_value=self._stable_result()):
+             patch("release_prepare.validate_packages", return_value=_stable_result()):
             release_prepare._validate(["postgres"], "auto", "integrations-extras", "abc123", "prod", False, True)
         mock_run.assert_not_called()
 
@@ -193,7 +193,7 @@ class TestValidate:
 
     def test_stable_on_pre_release_branch_exits(self, monkeypatch, tmp_path):
         _, summary_file = self._setup(monkeypatch, tmp_path)
-        with patch("release_prepare.validate_packages", return_value=self._stable_result(dispatch=False)), \
+        with patch("release_prepare.validate_packages", return_value=_stable_result(dispatch=False)), \
              pytest.raises(SystemExit) as exc_info:
             release_prepare._validate(["postgres"], "auto", "integrations-extras", "abc123", "prod", False, False)
         assert exc_info.value.code == 1
@@ -210,7 +210,7 @@ class TestValidate:
 
     def test_successful_validation_writes_json(self, monkeypatch, tmp_path):
         runner_temp, _ = self._setup(monkeypatch, tmp_path)
-        with patch("release_prepare.validate_packages", return_value=self._stable_result()):
+        with patch("release_prepare.validate_packages", return_value=_stable_result()):
             release_prepare._validate(["postgres"], "auto", "integrations-extras", "abc123", "prod", False, True)
         data = json.loads((runner_temp / "release_validation.json").read_text())
         assert data["mode"] == "auto"
@@ -270,10 +270,6 @@ class TestMain:
             MagicMock(returncode=ddev_returncode),  # ddev release tag
         ]
 
-    def _stable_result(self):
-        from _release.validation import STABLE
-        return [{"package": "postgres", "version": "1.0.0", "type": STABLE, "dispatch": True}]
-
     def test_no_packages_writes_false_and_summary(self, monkeypatch, tmp_path):
         github_output, github_summary, _ = self._setup_env(monkeypatch, tmp_path)
         with patch("release_prepare.subprocess.run", side_effect=self._git_side_effects()), \
@@ -290,7 +286,7 @@ class TestMain:
         with patch("release_prepare.subprocess.run", side_effect=self._git_side_effects()), \
              patch("release_prepare.get_all_packages", return_value=pkgs), \
              patch("release_prepare.resolve_packages", return_value=(pkgs, "auto-detect from tags at HEAD")), \
-             patch("release_prepare.validate_packages", return_value=self._stable_result()):
+             patch("release_prepare.validate_packages", return_value=_stable_result()):
             release_prepare.main()
         outputs = self._read_outputs(github_output)
         assert outputs["has_packages"] == "true"
@@ -308,3 +304,26 @@ class TestMain:
              pytest.raises(SystemExit):
             release_prepare.main()
         mock_detect.assert_not_called()
+
+    def test_dry_run_propagates_to_validation_json(self, monkeypatch, tmp_path):
+        _, _, runner_temp = self._setup_env(monkeypatch, tmp_path, extra={"DRY_RUN": "true"})
+        pkgs = ["postgres"]
+        with patch("release_prepare.subprocess.run", side_effect=self._git_side_effects()), \
+             patch("release_prepare.get_all_packages", return_value=pkgs), \
+             patch("release_prepare.resolve_packages", return_value=(pkgs, "auto-detect from tags at HEAD")), \
+             patch("release_prepare.validate_packages", return_value=_stable_result()):
+            release_prepare.main()
+        data = json.loads((runner_temp / "release_validation.json").read_text())
+        assert data["dry_run"] is True
+
+    def test_validate_failure_exits_from_main(self, monkeypatch, tmp_path):
+        self._setup_env(monkeypatch, tmp_path)
+        pkgs = ["postgres"]
+        fragment_result = [{"package": "postgres", "version": "1.0.0", "type": HAS_FRAGMENTS, "dispatch": False}]
+        with patch("release_prepare.subprocess.run", side_effect=self._git_side_effects()), \
+             patch("release_prepare.get_all_packages", return_value=pkgs), \
+             patch("release_prepare.resolve_packages", return_value=(pkgs, "auto-detect from tags at HEAD")), \
+             patch("release_prepare.validate_packages", return_value=fragment_result), \
+             pytest.raises(SystemExit) as exc_info:
+            release_prepare.main()
+        assert exc_info.value.code == 1

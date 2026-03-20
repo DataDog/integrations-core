@@ -64,6 +64,7 @@ def _tag(target: str, dry_run: bool, selected: str) -> None:
 
     # exit 2 means nothing new to tag — not an error, tags may already exist on HEAD
     if result.returncode not in (0, 2):
+        print(f"ddev release tag failed with exit code {result.returncode}", file=sys.stderr)
         sys.exit(result.returncode)
 
 
@@ -197,6 +198,10 @@ def main() -> None:
     source_repo = os.environ.get("SOURCE_REPO", "integrations-core")
     ref = os.environ.get("REF", "")
     is_stable_release = _parse_is_stable_release()
+
+    # Normalise "[]" to empty string so both _tag and _detect treat it as auto-detect.
+    if selected.strip() == "[]":
+        selected = ""
 
     _tag(target, dry_run, selected)
 

@@ -3,6 +3,8 @@ import json
 from pathlib import Path
 from unittest.mock import call, patch
 
+import pytest
+
 import release_dispatch
 
 
@@ -25,10 +27,11 @@ class TestLoadValidation:
         assert result["mode"] == "auto"
         assert result["dry_run"] is False
 
-    def test_file_absent_returns_empty_dict(self, tmp_path, capsys):
-        result = release_dispatch._load_validation(str(tmp_path))
-        assert result == {}
-        assert "Warning" in capsys.readouterr().err
+    def test_file_absent_exits(self, tmp_path, capsys):
+        with pytest.raises(SystemExit) as exc_info:
+            release_dispatch._load_validation(str(tmp_path))
+        assert exc_info.value.code == 1
+        assert "Error" in capsys.readouterr().err
 
     def test_invalid_json_returns_empty_dict(self, tmp_path, capsys):
         (tmp_path / "release_validation.json").write_text("not-valid-json{")
@@ -78,10 +81,9 @@ class TestMain:
             call(["postgres", "mysql"], "integrations-core", "abc123", "prod", "test-token"),
         ]
 
-    def test_missing_validation_file_still_runs(self, monkeypatch, tmp_path):
+    def test_missing_validation_file_exits(self, monkeypatch, tmp_path, capsys):
         self._base_env(monkeypatch, tmp_path, write_validation=False)
-        monkeypatch.setenv("DRY_RUN", "false")
-        with patch("release_dispatch.dispatch_in_batches") as mock_dispatch, \
-             patch("release_dispatch.write_summary"):
+        with pytest.raises(SystemExit) as exc_info:
             release_dispatch.main()
-        mock_dispatch.assert_called_once()
+        assert exc_info.value.code == 1
+        assert "Error" in capsys.readouterr().err
