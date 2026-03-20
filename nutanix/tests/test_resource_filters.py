@@ -6,6 +6,7 @@
 import pytest
 
 from datadog_checks.nutanix import NutanixCheck
+from tests.constants import CLUSTER_TAGS
 
 pytestmark = [pytest.mark.unit]
 
@@ -15,14 +16,11 @@ HOST_ID = "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
 HOST_NAME = "10-0-0-103-aws-us-east-1a"
 VM_ID = "63e222ec-87ff-491b-b7ba-9247752d44a3"
 
-BASE_TAGS = ["nutanix", "prism_central:10.0.0.197"]
-
 
 def test_default_collects_only_on_vms_and_user_category_tags(dd_run_check, aggregator, mock_instance, mock_http_get):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
-    expected_tags = BASE_TAGS + ['Team:agent-integrations', 'ntnx_cluster_name:' + CLUSTER_NAME]
-    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=CLUSTER_TAGS)
     aggregator.assert_metric("nutanix.host.count", at_least=1)
 
     vm_metrics = aggregator.metrics("nutanix.vm.count")
@@ -49,8 +47,7 @@ def test_include_cluster_by_id(dd_run_check, aggregator, mock_instance, mock_htt
     ]
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
-    expected_tags = BASE_TAGS + ['Team:agent-integrations', 'ntnx_cluster_name:' + CLUSTER_NAME]
-    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=CLUSTER_TAGS)
 
 
 def test_include_host_by_name_regex(dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -102,8 +99,7 @@ def test_multiple_include_patterns(dd_run_check, aggregator, mock_instance, mock
     ]
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
-    expected_tags = BASE_TAGS + ['Team:agent-integrations', 'ntnx_cluster_name:' + CLUSTER_NAME]
-    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=CLUSTER_TAGS)
 
 
 def test_include_only_system_category_tags_when_filtered(dd_run_check, aggregator, mock_instance, mock_http_get):

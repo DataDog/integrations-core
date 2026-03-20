@@ -462,10 +462,13 @@
               "$fv": "v4.r1"
             },
             "$objectType": "vmm.v4.ahv.config.CategoryReference",
+            "extId": "66ae6983-5a95-3f0b-9e5d-b5b603b5f2c0"
+          },
+          {
             "extId": "ad7ff39b-267c-55db-bc97-5c3462c152a8"
           },
           {
-            "extId": "66ae6983-5a95-3f0b-9e5d-b5b603b5f2c0"
+            "extId": "d2b89652-50da-3902-97ff-9b13c4d070de"
           }
         ],
         "project": {
@@ -755,7 +758,13 @@
             "extId": "ad7ff39b-267c-55db-bc97-5c3462c152a8"
           },
           {
+            "extId": "eb6afed6-8276-3e6a-8b46-033e1b7c5c36"
+          },
+          {
             "extId": "66ae6983-5a95-3f0b-9e5d-b5b603b5f2c0"
+          },
+          {
+            "extId": "fd10937c-88f8-3239-bde5-3ad3d0ffd8aa"
           }
         ],
         "project": {
@@ -1036,7 +1045,7 @@
         "$objectType": "vmm.v4.ahv.config.Vm",
         "extId": "2e59dd98-3bf9-4369-838f-3a589ee1d6df",
         "createTime": "2026-03-03T17:44:35.785089Z",
-        "updateTime": "2026-03-03T17:44:36.135087Z",
+        "updateTime": "2026-03-17T14:54:52.896842Z",
         "isLiveMigrateCapable": true,
         "isCrossClusterMigrationInProgress": false,
         "bootConfig": {
@@ -1093,6 +1102,9 @@
             },
             "$objectType": "vmm.v4.ahv.config.CategoryReference",
             "extId": "ad7ff39b-267c-55db-bc97-5c3462c152a8"
+          },
+          {
+            "extId": "dfb0ec88-9982-3611-8001-a0c6c66e4075"
           }
         ],
         "project": {
