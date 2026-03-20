@@ -588,21 +588,6 @@ GROUP BY application_name, datname, usename, backend_type, wait_event
 """.strip(),
 }
     
-CONNECTION_METRICS_OLD = {
-    'descriptors': [],
-    'metrics': {
-        'MAX(setting) AS max_connections': ('max_connections', AgentCheck.gauge),
-        'SUM(numbackends)/MAX(setting) AS pct_connections': ('percent_usage_connections', AgentCheck.gauge),
-    },
-    'relation': False,
-    'query': """
-WITH max_con AS (SELECT setting::float FROM pg_settings WHERE name = 'max_connections')
-SELECT {metrics_columns}
-  FROM pg_stat_database, max_con
-""",
-    'name': 'connections_metrics',
-}
-
 CONNECTION_METRICS = {
     'descriptors': [('database_name', 'db')],
     'metrics': {
@@ -624,29 +609,6 @@ GROUP BY datname, numbackends
 """,
     'name': 'connections_metrics',
 }
-
-# CONNECTION_METRICS = {
-#     'name': 'connections_metrics',
-#     'relation': False,
-#     'columns': [
-#         {'name': 'db', 'type': 'tag'},
-#         {'name': 'max_connections', 'type': 'gauge'},
-#         {'name': 'percent_usage_connections', 'type': 'gauge'},
-#     ],
-#     'query': """
-# WITH max_con AS (
-#     SELECT setting::float
-#     FROM pg_settings
-#     WHERE name = 'max_connections'
-# )
-# SELECT datname AS database_name
-#     , MAX(max_con.setting) AS max_connections
-#     , numbackends / MAX(max_con.setting) AS pct_connections
-# FROM pg_stat_database, max_con
-# WHERE datname IS NOT NULL {ignore_database_filter}
-# GROUP BY datname, numbackends
-# """,
-# }
 
 SLRU_METRICS = {
     'descriptors': [('name', 'slru_name')],

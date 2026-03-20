@@ -868,11 +868,7 @@ class PostgreSql(DatabaseCheck):
         bgw_instance_metrics = self.metrics_cache.get_bgw_metrics(self.version)
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
-        # Previous
-        # metric_scope = [CONNECTION_METRICS]
-        # Change
-        metric_scope = []
-        self._query_scope(CONNECTION_METRICS, instance_tags, False)
+        metric_scope = [CONNECTION_METRICS]
 
         per_database_metric_scope = []
 
