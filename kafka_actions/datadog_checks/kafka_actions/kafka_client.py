@@ -8,7 +8,7 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Any
 
-from confluent_kafka import Consumer, KafkaException, Producer, TopicPartition
+from confluent_kafka import Consumer, KafkaError, KafkaException, Producer, TopicPartition
 from confluent_kafka.admin import AdminClient, ConfigResource, NewTopic, OffsetSpec, ResourceType
 
 try:
@@ -134,6 +134,7 @@ class KafkaActionsClient:
                     'group.id': group_id,
                     'auto.offset.reset': 'earliest',
                     'enable.auto.commit': False,
+                    'enable.partition.eof': True,
                 }
             )
             self.consumer = Consumer(config)
@@ -259,6 +260,8 @@ class KafkaActionsClient:
             consumer.assign(partitions)
 
             consumed = 0
+            eof_partitions = set()
+            num_partitions = len(partition_ids)
 
             while consumed < max_messages:
                 elapsed = time.time() - start_time
@@ -272,15 +275,27 @@ class KafkaActionsClient:
                 msg = consumer.poll(timeout=poll_timeout)
 
                 if msg is None:
-                    continue
+                    self.log.debug("Poll returned None (no more messages available), stopping consumption")
+                    break
 
                 if msg.error():
-                    if msg.error().code() == KafkaException._PARTITION_EOF:
-                        self.log.debug("Reached end of partition")
+                    if msg.error().code() == KafkaError._PARTITION_EOF:
+                        eof_partitions.add(msg.partition())
+                        self.log.debug(
+                            "Reached end of partition %d (%d/%d partitions done)",
+                            msg.partition(),
+                            len(eof_partitions),
+                            num_partitions,
+                        )
+                        if len(eof_partitions) >= num_partitions:
+                            self.log.debug("All partitions reached EOF")
+                            break
                         continue
                     else:
                         raise KafkaException(msg.error())
 
+                # A new message on a partition means it's no longer at EOF
+                eof_partitions.discard(msg.partition())
                 yield msg
                 consumed += 1
 

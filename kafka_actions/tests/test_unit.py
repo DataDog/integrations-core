@@ -524,5 +524,177 @@ class TestConsumeMessagesStartTimestamp:
             assert call_kwargs['start_timestamp'] == 1700000000000
 
 
+class TestConsumeMessagesEarlyReturn:
+    """Test that consume_messages returns early on None poll or partition EOF."""
+
+    def test_none_poll_returns_early(self):
+        """Test that a None poll result breaks the loop immediately."""
+        from unittest.mock import MagicMock
+
+        consumer = MagicMock()
+        metadata = MagicMock()
+        metadata.topics = {'t': MagicMock(partitions={0: MagicMock()})}
+        consumer.list_topics.return_value = metadata
+
+        msg1 = MockKafkaMessage(key=b'k1', value=b'v1', partition=0, offset=0)
+        consumer.poll.side_effect = [msg1, None]
+
+        import logging
+
+        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
+
+        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
+
+        with patch.object(client, 'get_consumer', return_value=consumer):
+            result = list(client.consume_messages(topic='t', start_offset=0, max_messages=1000, timeout_ms=30000))
+
+        assert len(result) == 1
+        # Only 2 polls: one real message + one None, no further waiting
+        assert consumer.poll.call_count == 2
+
+    def test_single_partition_eof_returns_early(self):
+        from unittest.mock import MagicMock
+
+        from confluent_kafka import KafkaError
+
+        consumer = MagicMock()
+        metadata = MagicMock()
+        metadata.topics = {'t': MagicMock(partitions={0: MagicMock()})}
+        consumer.list_topics.return_value = metadata
+
+        eof_error = MagicMock()
+        eof_error.code.return_value = KafkaError._PARTITION_EOF
+
+        eof_msg = MagicMock()
+        eof_msg.error.return_value = eof_error
+        eof_msg.partition.return_value = 0
+
+        msg1 = MockKafkaMessage(key=b'k1', value=b'v1', partition=0, offset=0)
+        consumer.poll.side_effect = [msg1, eof_msg]
+
+        import logging
+
+        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
+
+        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
+
+        with patch.object(client, 'get_consumer', return_value=consumer):
+            result = list(client.consume_messages(topic='t', start_offset=0, max_messages=1000, timeout_ms=30000))
+
+        assert len(result) == 1
+        assert consumer.poll.call_count == 2
+
+    def test_multi_partition_waits_for_all_eof(self):
+        from unittest.mock import MagicMock
+
+        from confluent_kafka import KafkaError
+
+        consumer = MagicMock()
+        metadata = MagicMock()
+        metadata.topics = {'t': MagicMock(partitions={0: MagicMock(), 1: MagicMock()})}
+        consumer.list_topics.return_value = metadata
+
+        def make_eof_msg(partition):
+            eof_error = MagicMock()
+            eof_error.code.return_value = KafkaError._PARTITION_EOF
+            msg = MagicMock()
+            msg.error.return_value = eof_error
+            msg.partition.return_value = partition
+            return msg
+
+        msg_p1 = MockKafkaMessage(key=b'k2', value=b'v2', partition=1, offset=0)
+
+        # Partition 0 EOF, then partition 1 message, then partition 1 EOF
+        consumer.poll.side_effect = [make_eof_msg(0), msg_p1, make_eof_msg(1)]
+
+        import logging
+
+        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
+
+        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
+
+        with patch.object(client, 'get_consumer', return_value=consumer):
+            result = list(client.consume_messages(topic='t', start_offset=0, max_messages=1000, timeout_ms=30000))
+
+        assert len(result) == 1
+        assert consumer.poll.call_count == 3
+
+    def test_new_message_clears_eof_state(self):
+        """Test that a new message on a partition clears its EOF state."""
+        from unittest.mock import MagicMock
+
+        from confluent_kafka import KafkaError
+
+        consumer = MagicMock()
+        metadata = MagicMock()
+        metadata.topics = {'t': MagicMock(partitions={0: MagicMock(), 1: MagicMock()})}
+        consumer.list_topics.return_value = metadata
+
+        def make_eof_msg(partition):
+            eof_error = MagicMock()
+            eof_error.code.return_value = KafkaError._PARTITION_EOF
+            msg = MagicMock()
+            msg.error.return_value = eof_error
+            msg.partition.return_value = partition
+            return msg
+
+        consumer.poll.side_effect = [
+            make_eof_msg(0),  # p0 EOF -> eof_partitions={0}
+            make_eof_msg(1),  # p1 EOF -> eof_partitions={0,1} -> all EOF -> break
+        ]
+
+        import logging
+
+        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
+
+        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
+
+        with patch.object(client, 'get_consumer', return_value=consumer):
+            result = list(client.consume_messages(topic='t', start_offset=0, max_messages=1000, timeout_ms=30000))
+
+        assert len(result) == 0
+        assert consumer.poll.call_count == 2
+
+    def test_message_after_eof_continues(self):
+        """Test that receiving a message on an EOF partition allows continued consumption."""
+        from unittest.mock import MagicMock
+
+        from confluent_kafka import KafkaError
+
+        consumer = MagicMock()
+        metadata = MagicMock()
+        metadata.topics = {'t': MagicMock(partitions={0: MagicMock(), 1: MagicMock()})}
+        consumer.list_topics.return_value = metadata
+
+        def make_eof_msg(partition):
+            eof_error = MagicMock()
+            eof_error.code.return_value = KafkaError._PARTITION_EOF
+            msg = MagicMock()
+            msg.error.return_value = eof_error
+            msg.partition.return_value = partition
+            return msg
+
+        msg_p0 = MockKafkaMessage(key=b'k1', value=b'v1', partition=0, offset=0)
+
+        consumer.poll.side_effect = [
+            make_eof_msg(0),  # p0 EOF -> eof_partitions={0}
+            msg_p0,  # new msg on p0 -> clears p0 from eof_partitions -> {}, yields msg
+            make_eof_msg(0),  # p0 EOF again -> eof_partitions={0}
+            make_eof_msg(1),  # p1 EOF -> eof_partitions={0,1} -> all done -> break
+        ]
+
+        import logging
+
+        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
+
+        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
+
+        with patch.object(client, 'get_consumer', return_value=consumer):
+            result = list(client.consume_messages(topic='t', start_offset=0, max_messages=1000, timeout_ms=30000))
+
+        assert len(result) == 1
+        assert consumer.poll.call_count == 4
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-vv'])
