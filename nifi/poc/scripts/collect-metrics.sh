@@ -31,7 +31,7 @@ collect() {
     echo "  Collecting ${name}..."
     local http_code tmpfile
     tmpfile=$(mktemp)
-    http_code=$(curl "${AUTH[@]}" -o "$tmpfile" -w '%{http_code}' "${NIFI_API_URL}${path}")
+    http_code=$(curl "${AUTH[@]}" -o "$tmpfile" -w '%{http_code}' "${NIFI_API_URL}${path}" 2>/dev/null || echo "000")
     if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
         jq . "$tmpfile" > "${OUTPUT_DIR}/${name}.json" 2>/dev/null || mv "$tmpfile" "${OUTPUT_DIR}/${name}.json"
         rm -f "$tmpfile"

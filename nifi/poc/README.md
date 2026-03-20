@@ -33,6 +33,7 @@ This will:
 | `GET /flow/process-groups/root/status?recursive=true` | All component data in one call | Process group, processor, connection metrics |
 | `GET /flow/cluster/summary` | Cluster vs standalone detection | Cluster health metrics |
 | `GET /flow/bulletin-board` | Errors and warnings | Datadog events |
+| `GET /system-diagnostics/jmx-metrics` | JMX metrics via REST | Returns empty unless `nifi.web.jmx.metrics.allowed.filter.pattern` is configured; not used by integration |
 
 ## Authentication
 
