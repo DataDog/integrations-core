@@ -134,7 +134,6 @@ class KafkaActionsClient:
                     'group.id': group_id,
                     'auto.offset.reset': 'earliest',
                     'enable.auto.commit': False,
-                    'enable.partition.eof': True,
                 }
             )
             self.consumer = Consumer(config)
@@ -260,8 +259,6 @@ class KafkaActionsClient:
             consumer.assign(partitions)
 
             consumed = 0
-            eof_partitions = set()
-            num_partitions = len(partition_ids)
 
             while consumed < max_messages:
                 elapsed = time.time() - start_time
@@ -280,22 +277,11 @@ class KafkaActionsClient:
 
                 if msg.error():
                     if msg.error().code() == KafkaError._PARTITION_EOF:
-                        eof_partitions.add(msg.partition())
-                        self.log.debug(
-                            "Reached end of partition %d (%d/%d partitions done)",
-                            msg.partition(),
-                            len(eof_partitions),
-                            num_partitions,
-                        )
-                        if len(eof_partitions) >= num_partitions:
-                            self.log.debug("All partitions reached EOF")
-                            break
+                        self.log.debug("Reached end of partition")
                         continue
                     else:
                         raise KafkaException(msg.error())
 
-                # A new message on a partition means it's no longer at EOF
-                eof_partitions.discard(msg.partition())
                 yield msg
                 consumed += 1
 

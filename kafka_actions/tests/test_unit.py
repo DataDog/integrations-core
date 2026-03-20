@@ -547,37 +547,6 @@ class TestConsumeMessagesEarlyReturn:
         assert len(result) == 1
         assert consumer.poll.call_count == 2
 
-    def test_all_partitions_eof_breaks(self):
-        from unittest.mock import MagicMock
-
-        from confluent_kafka import KafkaError
-
-        def make_eof_msg(partition):
-            err = MagicMock()
-            err.code.return_value = KafkaError._PARTITION_EOF
-            msg = MagicMock()
-            msg.error.return_value = err
-            msg.partition.return_value = partition
-            return msg
-
-        consumer = MagicMock()
-        metadata = MagicMock()
-        metadata.topics = {'t': MagicMock(partitions={0: MagicMock(), 1: MagicMock()})}
-        consumer.list_topics.return_value = metadata
-        msg = MockKafkaMessage(key=b'k', value=b'v', partition=1, offset=0)
-        consumer.poll.side_effect = [make_eof_msg(0), msg, make_eof_msg(1)]
-
-        import logging
-
-        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
-
-        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
-        with patch.object(client, 'get_consumer', return_value=consumer):
-            result = list(client.consume_messages(topic='t', start_offset=0, max_messages=1000, timeout_ms=30000))
-
-        assert len(result) == 1
-        assert consumer.poll.call_count == 3
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-vv'])
