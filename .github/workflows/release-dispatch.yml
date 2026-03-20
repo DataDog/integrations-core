@@ -1,0 +1,99 @@
+name: Dispatch Release
+
+# Reusable workflow — intended to be called by a release-trigger workflow in an
+# integration repository (integrations-core, integrations-extras, marketplace).
+
+on:
+  workflow_call:
+    inputs:
+      source-repo:
+        description: "Source repository name (e.g. integrations-core, integrations-extras, marketplace)"
+        required: false
+        type: string
+      packages:
+        description: >-
+          Packages to release. Accepts a JSON array (e.g. '["postgres","datadog_checks_base"]'),
+          'all' to release every Python package in the repo, or omit to auto-detect from new tags.
+        required: false
+        type: string
+      source-repo-ref:
+        description: "Commit SHA or ref to build from"
+        required: false
+        type: string
+      target:
+        description: "Target environment (dev = no tag push, dev S3; prod = push tags, prod S3)"
+        required: false
+        type: string
+        default: prod  # callers (e.g. release-trigger.yml) typically override this
+      dry-run:
+        description: >-
+          When true, print what would be released and where without pushing tags
+          or triggering downstream wheel builds.
+        required: false
+        type: boolean
+        default: false
+      ddev-version:
+        description: "ddev version, pinned by default."
+        required: false
+        type: string
+      is-stable-release:
+        description: "'true' for master/X.X.x (blocks pre-releases), 'false' for alpha/beta/rc (blocks stable). Unset defaults to stable behavior."
+        required: false
+        type: string
+
+permissions:
+  id-token: write
+  contents: write # ddev needs to push tags
+
+jobs:
+  dispatch:
+    name: Tag releases and dispatch wheel builds
+    runs-on: ubuntu-latest
+    environment: release
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0 # ddev needs full tag history
+
+      - name: Install ddev
+        run: pip install "ddev${{ inputs.ddev-version && format('=={0}', inputs.ddev-version) || '==14.3.2' }}"
+
+      - name: Configure ddev
+        env:
+          SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
+        run: |
+          REPO_SHORT="${SOURCE_REPO#integrations-}"
+          ddev config set upgrade_check false
+          ddev config set repos.${REPO_SHORT} .
+          ddev config set repo ${REPO_SHORT}
+
+      - name: Prepare dispatch
+        id: prepare
+        env:
+          TARGET: ${{ inputs.target }}
+          DRY_RUN: ${{ inputs.dry-run }}
+          SELECTED_PACKAGES: ${{ inputs.packages }}
+          SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
+          REF: ${{ inputs.source-repo-ref || github.sha }}
+          IS_STABLE_RELEASE: ${{ inputs.is-stable-release }}
+        run: python .github/workflows/scripts/release_prepare.py
+
+      - name: Get GitHub token via dd-octo-sts
+        if: steps.prepare.outputs.has_packages == 'true' && !inputs.dry-run
+        id: octo-sts
+        uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
+        with:
+          scope: DataDog/agent-integration-wheels-release
+          policy: integrations-core.dispatch-wheel-builds
+
+      - name: Dispatch release
+        if: steps.prepare.outputs.has_packages == 'true'
+        env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          PACKAGES: ${{ steps.prepare.outputs.packages }}
+          SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
+          REF: ${{ inputs.source-repo-ref || github.sha }}
+          TARGET: ${{ inputs.target }}
+          DRY_RUN: ${{ inputs.dry-run }}
+        run: python .github/workflows/scripts/release_dispatch.py
