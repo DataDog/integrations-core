@@ -109,7 +109,7 @@ def _validate(
     # Persist results for the dispatch step.
     runner_temp = os.environ.get("RUNNER_TEMP", "/tmp")
     Path(runner_temp, "release_validation.json").write_text(
-        json.dumps({"results": results, "mode": mode, "ref": ref, "target": target, "dry_run": dry_run})
+        json.dumps({"results": results, "mode": mode, "ref": ref, "target": target})
     )
 
     by_type: dict[str, list] = {}

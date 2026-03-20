@@ -216,7 +216,6 @@ class TestValidate:
         assert data["mode"] == "auto"
         assert data["ref"] == "abc123"
         assert data["target"] == "prod"
-        assert data["dry_run"] is False
 
 
 # ---------------------------------------------------------------------------
@@ -305,16 +304,16 @@ class TestMain:
             release_prepare.main()
         mock_detect.assert_not_called()
 
-    def test_dry_run_propagates_to_validation_json(self, monkeypatch, tmp_path):
-        _, _, runner_temp = self._setup_env(monkeypatch, tmp_path, extra={"DRY_RUN": "true"})
+    def test_dry_run_uses_no_push_flag(self, monkeypatch, tmp_path):
+        self._setup_env(monkeypatch, tmp_path, extra={"DRY_RUN": "true", "TARGET": "prod"})
         pkgs = ["postgres"]
-        with patch("release_prepare.subprocess.run", side_effect=self._git_side_effects()), \
+        with patch("release_prepare.subprocess.run", side_effect=self._git_side_effects()) as mock_run, \
              patch("release_prepare.get_all_packages", return_value=pkgs), \
              patch("release_prepare.resolve_packages", return_value=(pkgs, "auto-detect from tags at HEAD")), \
              patch("release_prepare.validate_packages", return_value=_stable_result()):
             release_prepare.main()
-        data = json.loads((runner_temp / "release_validation.json").read_text())
-        assert data["dry_run"] is True
+        ddev_call = mock_run.mock_calls[2]
+        assert "--no-push" in ddev_call.args[0]
 
     def test_validate_failure_exits_from_main(self, monkeypatch, tmp_path):
         self._setup_env(monkeypatch, tmp_path)

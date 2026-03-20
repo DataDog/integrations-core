@@ -39,13 +39,11 @@ def main() -> None:
     ref = os.environ["REF"]
     target = os.environ["TARGET"]
 
+    dry_run = parse_bool_env("DRY_RUN", default=False)
+
     validation = _load_validation(os.environ.get("RUNNER_TEMP", "/tmp"))
     results = validation.get("results", [])
     mode = validation.get("mode", "")
-    # dry_run comes from the validation JSON (written by release_prepare.py) so it reflects
-    # the exact value used during tagging and validation. SOURCE_REPO, REF, and TARGET are
-    # read from env vars because they are passed directly by the workflow step, not persisted.
-    dry_run = validation.get("dry_run", parse_bool_env("DRY_RUN", default=False))
 
     print(f"Releasing {len(packages)} package(s) from {source_repo}@{ref} → {target} S3:")
 

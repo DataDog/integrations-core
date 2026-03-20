@@ -8,13 +8,12 @@ import pytest
 import release_dispatch
 
 
-def _write_validation(path: Path, dry_run: bool = False) -> None:
+def _write_validation(path: Path) -> None:
     data = {
         "results": [],
         "mode": "auto",
         "ref": "abc123",
         "target": "prod",
-        "dry_run": dry_run,
     }
     path.write_text(json.dumps(data))
 
@@ -25,7 +24,6 @@ class TestLoadValidation:
         _write_validation(validation_file)
         result = release_dispatch._load_validation(str(tmp_path))
         assert result["mode"] == "auto"
-        assert result["dry_run"] is False
 
     def test_file_absent_exits(self, tmp_path, capsys):
         with pytest.raises(SystemExit) as exc_info:
@@ -45,10 +43,11 @@ class TestMain:
         runner_temp = tmp_path / "runner_temp"
         runner_temp.mkdir()
         if write_validation:
-            _write_validation(runner_temp / "release_validation.json", dry_run=dry_run)
+            _write_validation(runner_temp / "release_validation.json")
 
         summary_file = tmp_path / "summary"
 
+        monkeypatch.setenv("DRY_RUN", "true" if dry_run else "false")
         monkeypatch.setenv("PACKAGES", '["postgres", "mysql"]')
         monkeypatch.setenv("SOURCE_REPO", "integrations-core")
         monkeypatch.setenv("REF", "abc123")
