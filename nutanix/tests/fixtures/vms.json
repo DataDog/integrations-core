@@ -1127,6 +1127,13 @@
             "extId": "773ffab1-a60b-52e7-bdab-a62c75151cb1"
           }
         },
+        "host": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "vmm.v4.ahv.config.HostReference",
+          "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
+        },
         "cluster": {
           "$reserved": {
             "$fv": "v4.r1"
@@ -1344,6 +1351,40 @@
           }
         ],
         "protectionType": "UNPROTECTED"
+      },
+      {
+        "$objectType": "vmm.v4.ahv.config.Vm",
+        "extId": "aaaa1111-bbbb-cccc-dddd-eeee11112222",
+        "name": "vm-on-second-cluster",
+        "numSockets": 4,
+        "numCoresPerSocket": 2,
+        "numThreadsPerCore": 1,
+        "memorySizeBytes": 17179869184,
+        "powerState": "ON",
+        "isAgentVm": false,
+        "host": {
+          "$objectType": "vmm.v4.ahv.config.HostReference",
+          "extId": "eeee1111-2222-3333-4444-555566667777"
+        },
+        "cluster": {
+          "$objectType": "vmm.v4.ahv.config.ClusterReference",
+          "extId": "aabbccdd-1111-2222-3333-444455556666"
+        }
+      },
+      {
+        "$objectType": "vmm.v4.ahv.config.Vm",
+        "extId": "aaaa2222-bbbb-cccc-dddd-eeee33334444",
+        "name": "hostless-vm-second-cluster",
+        "numSockets": 4,
+        "numCoresPerSocket": 1,
+        "numThreadsPerCore": 1,
+        "memorySizeBytes": 4294967296,
+        "powerState": "OFF",
+        "isAgentVm": false,
+        "cluster": {
+          "$objectType": "vmm.v4.ahv.config.ClusterReference",
+          "extId": "aabbccdd-1111-2222-3333-444455556666"
+        }
       }
     ],
     "$reserved": {
@@ -1399,7 +1440,7 @@
           "rel": "last"
         }
       ],
-      "totalAvailableResults": 4,
+      "totalAvailableResults": 6,
       "extraInfo": [
         {
           "$reserved": {

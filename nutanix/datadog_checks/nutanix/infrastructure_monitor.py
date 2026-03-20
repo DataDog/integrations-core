@@ -65,8 +65,7 @@ class InfrastructureMonitor:
         # Cluster capacity accumulator
         self._cluster_capacity = ClusterCapacity()
         self._vms_by_host: dict[str, list[dict]] = {}
-        self._hostless_vm_vcpus = 0
-        self._hostless_vm_memory_bytes = 0
+        self._hostless_vm_capacity_by_cluster: dict[str, tuple[int, int]] = {}  # cluster_id -> (vcpus, memory_bytes)
 
     def reset_state(self) -> None:
         """Reset all caches and counters for a new collection run."""
@@ -80,8 +79,7 @@ class InfrastructureMonitor:
         self.vm_count = 0
         self._cluster_capacity.reset()
         self._vms_by_host = {}
-        self._hostless_vm_vcpus = 0
-        self._hostless_vm_memory_bytes = 0
+        self._hostless_vm_capacity_by_cluster = {}
 
     def collect_cluster_metrics(self) -> None:
         """Collect metrics from all Nutanix clusters."""
@@ -162,7 +160,8 @@ class InfrastructureMonitor:
                 self._process_hosts(cluster, vm_stats, cluster_name, pc_label)
 
                 # Add capacity from VMs without a host assignment
-                self._cluster_capacity.add_vm(self._hostless_vm_vcpus, self._hostless_vm_memory_bytes)
+                hostless_vcpus, hostless_memory = self._hostless_vm_capacity_by_cluster.get(cluster_id, (0, 0))
+                self._cluster_capacity.add_vm(hostless_vcpus, hostless_memory)
 
                 # Report cluster capacity metrics (aggregated from hosts and VMs)
                 cluster_tags = self.check.base_tags + self._extract_cluster_tags(cluster)
@@ -520,10 +519,15 @@ class InfrastructureMonitor:
             if host_id:
                 self._vms_by_host.setdefault(host_id, []).append(vm)
             else:
+                cluster_id = get_nested(vm, "cluster/extId")
+                if not cluster_id:
+                    continue
                 num_sockets = int(vm.get("numSockets") or 0)
                 num_cores_per_socket = int(vm.get("numCoresPerSocket") or 0)
-                self._hostless_vm_vcpus += num_sockets * num_cores_per_socket
-                self._hostless_vm_memory_bytes += int(vm.get("memorySizeBytes") or 0)
+                vcpus = num_sockets * num_cores_per_socket
+                memory = int(vm.get("memorySizeBytes") or 0)
+                prev_vcpus, prev_mem = self._hostless_vm_capacity_by_cluster.get(cluster_id, (0, 0))
+                self._hostless_vm_capacity_by_cluster[cluster_id] = (prev_vcpus + vcpus, prev_mem + memory)
 
     def _list_clusters(self) -> list[dict]:
         """Fetch all clusters from Prism Central."""

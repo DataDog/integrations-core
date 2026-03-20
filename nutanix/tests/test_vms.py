@@ -35,7 +35,7 @@ def test_off_vms_skipped_by_default(dd_run_check, aggregator, mock_instance, moc
     dd_run_check(check)
 
     vm_metrics = aggregator.metrics("nutanix.vm.count")
-    assert len(vm_metrics) == 3
+    assert len(vm_metrics) == 4
     vm_names = {tag.split(":")[1] for m in vm_metrics for tag in m.tags if tag.startswith("ntnx_vm_name:")}
     assert "test-vm-that-should-remain-off" not in vm_names
 

@@ -12,7 +12,15 @@ These metrics report allocated resources (CPU, memory) rather than usage stats.
 import pytest
 
 from datadog_checks.nutanix import NutanixCheck
-from tests.constants import CLUSTER_TAGS, HOST_NAME, HOST_TAGS, PCVM_TAGS, RANDOM_VM_TAGS, UBUNTU_VM_TAGS
+from tests.constants import (
+    CLUSTER_TAGS,
+    HOST_NAME,
+    HOST_TAGS,
+    PCVM_TAGS,
+    RANDOM_VM_TAGS,
+    SECOND_CLUSTER_TAGS,
+    UBUNTU_VM_TAGS,
+)
 
 pytestmark = [pytest.mark.unit]
 
@@ -136,4 +144,34 @@ class TestClusterCapacityMetrics:
         dd_run_check(check)
 
         # All VMs contribute: PCVM + ubuntu + random + OFF (hostless VMs still accumulate)
+        aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=55834574848, tags=CLUSTER_TAGS)
+
+
+class TestMultiClusterHostlessVMCapacity:
+    """Test that hostless VM capacity is bucketed per-cluster, not summed globally."""
+
+    def test_hostless_vcpus_not_overcounted_across_clusters(
+        self, dd_run_check, aggregator, mock_instance, mock_http_get
+    ):
+        """Each cluster should only count hostless VMs that belong to it."""
+        check = NutanixCheck('nutanix', {}, [mock_instance])
+        dd_run_check(check)
+
+        # second-nutanix-cluster: vm-on-second-cluster(8 vcpus) + hostless-vm-second-cluster(4 vcpus) = 12
+        aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=12, tags=SECOND_CLUSTER_TAGS)
+
+        # datadog-nutanix-dev: PCVM(6) + ubuntu(2) + random(2) + OFF hostless(2) = 12
+        aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=12, tags=CLUSTER_TAGS)
+
+    def test_hostless_memory_not_overcounted_across_clusters(
+        self, dd_run_check, aggregator, mock_instance, mock_http_get
+    ):
+        """Each cluster should only count hostless VM memory that belongs to it."""
+        check = NutanixCheck('nutanix', {}, [mock_instance])
+        dd_run_check(check)
+
+        # second-nutanix-cluster: 17179869184 + 4294967296 = 21474836480
+        aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=21474836480, tags=SECOND_CLUSTER_TAGS)
+
+        # datadog-nutanix-dev: 30064771072 + 8589934592 + 8589934592 + 8589934592 = 55834574848
         aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=55834574848, tags=CLUSTER_TAGS)

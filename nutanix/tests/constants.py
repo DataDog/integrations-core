@@ -72,11 +72,17 @@ RANDOM_VM_TAGS = [
 
 OFF_VM_TAGS = [
     'ntnx_cluster_name:datadog-nutanix-dev',
-    # 'ntnx_host_name:None',
+    'ntnx_host_name:10-0-0-103-aws-us-east-1a',
     'ntnx_is_agent_vm:False',
     'ntnx_type:vm',
     'ntnx_vm_name:test-vm-that-should-remain-off',
     'nutanix',
     'prism_central:10.0.0.197',
     'vm_category:vm_value3',
+]
+
+SECOND_CLUSTER_TAGS = [
+    'ntnx_cluster_name:second-nutanix-cluster',
+    'nutanix',
+    'prism_central:10.0.0.197',
 ]

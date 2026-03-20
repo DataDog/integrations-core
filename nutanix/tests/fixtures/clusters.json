@@ -217,6 +217,35 @@
         ]
       },
       {
+        "$objectType": "clustermgmt.v4.config.Cluster",
+        "extId": "aabbccdd-1111-2222-3333-444455556666",
+        "vmCount": 2,
+        "name": "second-nutanix-cluster",
+        "nodes": {
+          "numberOfNodes": 1,
+          "$objectType": "clustermgmt.v4.config.NodeReference",
+          "nodeList": [
+            {
+              "$objectType": "clustermgmt.v4.config.NodeListItemReference",
+              "nodeUuid": "eeee1111-2222-3333-4444-555566667777"
+            }
+          ]
+        },
+        "config": {
+          "$objectType": "clustermgmt.v4.config.ClusterConfigReference",
+          "clusterFunction": [
+            "AOS"
+          ],
+          "clusterArch": "X86_64",
+          "operationMode": "NORMAL",
+          "redundancyFactor": 2
+        },
+        "network": {
+          "$objectType": "clustermgmt.v4.config.ClusterNetworkReference"
+        },
+        "upgradeStatus": "SUCCEEDED"
+      },
+      {
         "$reserved": {
           "$fv": "v4.r1"
         },
@@ -475,7 +504,7 @@
           "rel": "last"
         }
       ],
-      "totalAvailableResults": 2
+      "totalAvailableResults": 3
     }
   }
 ]
