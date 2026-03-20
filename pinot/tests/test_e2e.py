@@ -29,5 +29,5 @@ def test_check(dd_agent_check, e2e_instance):
     aggregator.assert_metrics_using_metadata(
         metadata_metrics,
         check_submission_type=True,
-        check_symmetric_inclusion=False,
+        check_symmetric_inclusion=True,
     )

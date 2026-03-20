@@ -17,4 +17,3 @@ pinot_broker_helix_connected_Value 1
 # HELP pinot_broker_queriesKilled_Count Queries killed count
 # TYPE pinot_broker_queriesKilled_Count gauge
 pinot_broker_queriesKilled_Count 5
-

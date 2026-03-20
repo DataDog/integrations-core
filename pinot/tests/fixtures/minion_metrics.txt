@@ -17,4 +17,3 @@ pinot_minion_connected_Value 1
 # HELP pinot_minion_numberOfTasks_Value Number of tasks
 # TYPE pinot_minion_numberOfTasks_Value gauge
 pinot_minion_numberOfTasks_Value 3
-
