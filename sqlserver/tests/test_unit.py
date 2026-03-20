@@ -1001,3 +1001,22 @@ def test_only_custom_queries_validation_warnings(caplog):
     warning_count = len([record for record in caplog.records if record.levelno >= logging.WARNING])
     warning_messages = [record.message for record in caplog.records if record.levelno >= logging.WARNING]
     assert warning_count == 0, f"Expected no warnings but found {warning_count} warnings: {warning_messages}"
+
+
+@pytest.mark.parametrize(
+    'exclude_hostname, expected_hostname',
+    [
+        (False, 'resolved.hostname'),
+        (True, None),
+    ],
+)
+def test_debug_stats_kwargs_respects_exclude_hostname(exclude_hostname, expected_hostname):
+    instance = {
+        'host': DOCKER_SERVER,
+        'username': 'sa',
+        'password': 'Password12!',
+        'exclude_hostname': exclude_hostname,
+    }
+    with mock.patch('datadog_checks.sqlserver.SQLServer.resolve_db_host', return_value='resolved.hostname'):
+        check = SQLServer(CHECK_NAME, {}, [instance])
+    assert check.debug_stats_kwargs()['hostname'] == expected_hostname
