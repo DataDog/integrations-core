@@ -1,0 +1,1 @@
+Validate and enforce allowed `formats` values in configuration spec validation, including nested object properties.

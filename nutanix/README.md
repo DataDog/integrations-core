@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check collects resource usage metrics from your Nutanix cluster, CPU, memory, storage, and I/O performance for clusters, hosts, and VMs. It also collects operational activity data from Prism Central, including events, tasks, audits, and alerts.
+This check collects CPU, memory, storage, and I/O performance metrics from your Nutanix clusters, hosts, and VMs. It also collects operational activity data from Prism Central, including events, tasks, audits, and alerts.
 
 ## Setup
 
@@ -12,18 +12,11 @@ The Nutanix check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-In Prism Central, create a user with the following roles:
+1. In Prism Central, create a user with the `Prism Viewer` role.
+2. Edit the `nutanix.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample nutanix.d/conf.yaml][3] for all available configuration options.
+3. [Restart the Agent][4] to start sending Nutanix metrics and activity data to Datadog.
 
-- Cluster Viewer
-- Virtual Machine Viewer
-- Prism Viewer
-- Monitoring Admin
-
-Then, edit the `nutanix.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample nutanix.d/conf.yaml][3] for all available configuration options.
-
-A single Agent instance connected to Prism Central is enough to monitor all clusters, hosts, and VMs managed by that Prism Central.
-
-[Restart the Agent][4] to start sending Nutanix metrics and activity data to Datadog.
+A single Agent instance connected to Prism Central monitors all clusters, hosts, and VMs managed by that Prism Central.
 
 **Note**: The default collection interval is 120 seconds. In practice, setting the interval to 60 seconds or higher results in more reliable and consistent metric collection.
 
@@ -39,9 +32,9 @@ See [metadata.csv][6] for a list of metrics provided by this check.
 
 The integration collects metrics across three resource types, each prefixed with its resource name:
 
-- **Cluster** (`nutanix.cluster.*`): storage capacity and usage, CPU and memory allocation, I/O performance, health score, VM counts.
-- **Host** (`nutanix.host.*`): per-host CPU, memory, storage, and controller I/O metrics.
-- **VM** (`nutanix.vm.*`): per-VM CPU, memory, disk, network, and storage tier metrics.
+- **Cluster** (`nutanix.cluster.*`): Storage capacity and usage, CPU and memory allocation, I/O performance, health score, VM counts
+- **Host** (`nutanix.host.*`): Per-host CPU, memory, storage, and controller I/O metrics
+- **VM** (`nutanix.vm.*`): Per-VM CPU, memory, disk, network, and storage tier metrics
 
 A `nutanix.health.up` metric reports Prism Central connectivity status (`1` for reachable, `0` otherwise).
 
@@ -50,19 +43,19 @@ A `nutanix.health.up` metric reports Prism Central connectivity status (`1` for 
 The integration collects operational activity data from Prism Central by default. Each activity type can be toggled independently in the `nutanix.d/conf.yaml` file:
 
 - `collect_events`: Prism Central events (default: `true`)
-- `collect_alerts`: alerts with severity information (default: `true`)
-- `collect_tasks`: infrastructure tasks, parent tasks only (default: `true`)
-  - `collect_subtasks`: include subtasks alongside parent tasks (default: `false`)
-- `collect_audits`: user audit logs (default: `true`)
+- `collect_alerts`: Alerts with severity information (default: `true`)
+- `collect_tasks`: Infrastructure tasks, parent tasks only (default: `true`)
+  - `collect_subtasks`: Include subtasks alongside parent tasks (default: `false`)
+- `collect_audits`: User audit logs (default: `true`)
 
 ### Events
 
-This check collects activity data from Prism Central and emits them as Datadog events. Each activity type is identified by the `ntnx_type` tag:
+This check collects activity data from Prism Central and emits it as Datadog events. Each activity type is identified by the `ntnx_type` tag:
 
-- `ntnx_type:event`: Prism Central Events
-- `ntnx_type:alert`: Prism Central Alerts
-- `ntnx_type:task`: Prism Central Tasks
-- `ntnx_type:audit`: Prism Central Audits
+- `ntnx_type:event`: Prism Central events
+- `ntnx_type:alert`: Prism Central alerts
+- `ntnx_type:task`: Prism Central tasks
+- `ntnx_type:audit`: Prism Central audits
 
 Use the `collect_events`, `collect_alerts`, `collect_tasks`, and `collect_audits` parameters in the [sample nutanix.d/conf.yaml][3] to toggle each activity type.
 
@@ -76,7 +69,7 @@ The integration does not emit any service checks.
 
 ### VM collection
 
-By default, only VMs with `powerState: ON` are collected. To collect VMs in other power states (OFF, PAUSED), add an explicit `powerState` VM filter in `resource_filters`:
+By default, the integration only collects VMs with `powerState: ON`. To collect VMs in other power states (`OFF`, `PAUSED`), add an explicit `powerState` VM filter in `resource_filters`:
 
 ```yaml
 resource_filters:
@@ -90,7 +83,7 @@ Other VM filters (e.g., by name) do not override this default. Only a `powerStat
 
 ### Category tags
 
-Nutanix categories are attached as tags to metrics. By default, only `USER` category tags are collected. To include `SYSTEM` or `INTERNAL` categories, add an explicit category filter in `resource_filters`.
+Nutanix categories are attached as tags to metrics. By default, the integration only collects `USER` category tags. To include `SYSTEM` or `INTERNAL` categories, add an explicit category filter in `resource_filters`.
 
 To collect `SYSTEM` and `INTERNAL` categories alongside `USER`:
 
@@ -114,7 +107,7 @@ The Nutanix API does not expose the real hostname of VMs. VM metrics use the VM 
 
 Use the `resource_filters` option to control which resources are collected. Each filter requires a `resource` type, a `property` (the API field name to match against), and a list of regex `patterns`. Optionally, set `type` (`include` or `exclude`, default: `include`). Exclude filters take precedence over include filters.
 
-Supported resource types: `cluster`, `host`, `vm`, `event`, `task`, `alert`, `audit`, `category`. Nested properties are supported using `/` as a separator (e.g., `userReference/name`). Note that hosts use `hostName` as the API field for the host name, not `name`.
+Supported resource types: `cluster`, `host`, `vm`, `event`, `task`, `alert`, `audit`, `category`. Nested properties are supported using `/` as a separator (e.g., `userReference/name`). **Note**: Hosts use `hostName` as the API field for the host name, not `name`.
 
 ```yaml
 resource_filters:

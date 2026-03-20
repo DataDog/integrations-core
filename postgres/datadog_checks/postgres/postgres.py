@@ -1089,7 +1089,7 @@ class PostgreSql(DatabaseCheck):
         tags = self.tags + self._get_debug_tags() + (tags or [])
         return {
             'tags': tags,
-            "hostname": self.resolved_hostname,
+            "hostname": self.reported_hostname,
         }
 
     def check(self, _):

@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 2.3.0 / 2026-02-19
+## 2.4.0 / 2026-03-18
+
+***Added***:
+
+* Add logs config to Celery integration ([#22881](https://github.com/DataDog/integrations-core/pull/22881))
+
+## 2.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 
