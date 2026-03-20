@@ -86,7 +86,7 @@ def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
             'mac_address:02:02:00:66:f5:7f',
             'network:L_NETWORK',
             'product:MR16-HW',
-            'status:online',
+            'device_status:online',
             'device_name:Gymnasium',
         ],
     ]
