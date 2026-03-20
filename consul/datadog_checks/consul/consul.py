@@ -109,6 +109,9 @@ class ConsulCheck(OpenMetricsBaseCheck):
             'service_whitelist', self.instance.get('services_include', default_services_include)
         )
         self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
+        self.allowed_service_tags = set(
+            self.instance.get("allowed_service_tags", self.init_config.get("allowed_service_tags", []))
+        )
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
         self.threads_count = self.instance.get('threads_count', self.init_config.get('threads_count', THREADS_COUNT))
         self.collect_health_checks = self.instance.get(
@@ -319,6 +322,18 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
         return services
 
+    def _cull_services_tags_list(self, services):
+        if self.allowed_service_tags:
+            # services is a dict of {service_name: [tags]} where tags is a list
+            # of string having the form of "tagkey=tagvalue"
+            for service in services:
+                tags = services[service]
+                # get the tagkey (the part before the "=") and check it against the include list
+                tags = [t for t in tags if t.split("=")[0].lower() in self.allowed_service_tags]
+                services[service] = tags
+
+        return services
+
     @staticmethod
     def _get_service_tags(service, tags):
         service_tags = ['consul_service_id:{}'.format(service)]
@@ -437,6 +452,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
             self.count_all_nodes(main_tags)
 
             services = self._cull_services_list(services)
+            tags = self._cull_services_tags_list(services)
 
             # {node_id: {"up: 0, "passing": 0, "warning": 0, "critical": 0}
             nodes_to_service_status = defaultdict(lambda: defaultdict(int))
