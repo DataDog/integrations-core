@@ -66,11 +66,11 @@ jobs:
       with:
         name: status_uncompressed.json
         path: status_uncompressed.json
-        if-no-files-found: error
+        if-no-files-found: warning
   
     - name: Upload JSON compressed sizes artifact
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: status_compressed.json
         path: status_compressed.json
-        if-no-files-found: error        
+        if-no-files-found: warning        

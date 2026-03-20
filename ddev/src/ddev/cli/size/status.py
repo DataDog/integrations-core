@@ -95,7 +95,7 @@ def status(
 
                 dependency_sizes = get_last_dependency_sizes_artifact(app, commit, plat, ver, compressed)
                 if not dependency_sizes:
-                    app.abort("Could not find dependency sizes in the artifacts")
+                    app.abort("Could not find dependency sizes in the artifacts. Declared sizes are not available.")
 
             parameters: CLIParameters = {
                 "app": app,
