@@ -47,7 +47,9 @@ SELECT
     is_initial_query,
     exception,
     exception_code,
-    stack_trace
+    stack_trace,
+    current_database,
+    address
 FROM {query_log_table}
 WHERE
   {checkpoint_filter}
@@ -173,6 +175,8 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
                     exception,
                     exception_code,
                     stack_trace,
+                    current_database,
+                    address,
                 ) = row
 
                 event_time_int = self.to_microseconds(event_time_microseconds)
@@ -187,7 +191,14 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
                     'query': str(query_text) if query_text else '',
                     'user': str(user) if user else '',
                     'query_type': str(query_type) if query_type else '',
-                    'databases': str(databases[0]) if databases and len(databases) > 0 else '',
+                    # For ExceptionBeforeStart errors, `databases` is empty because the query
+                    # failed before table resolution. Fall back to `current_database` (the
+                    # connection's default database) so the field is always populated.
+                    'databases': (
+                        str(databases[0])
+                        if databases and len(databases) > 0
+                        else (str(current_database) if current_database else '')
+                    ),
                     'tables': tables if tables else [],
                     'query_duration_ms': float(query_duration_ms) if query_duration_ms else 0.0,
                     'read_rows': int(read_rows) if read_rows else 0,
@@ -206,6 +217,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
                     'exception': str(exception) if exception else '',
                     'exception_code': int(exception_code) if exception_code else 0,
                     'stack_trace': str(stack_trace) if stack_trace else '',
+                    'client_ip': str(address) if address else '',
                 }
 
                 obfuscated_row = self._normalize_query(row_dict)
@@ -278,6 +290,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
                 'exception': row.get('exception', ''),
                 'exception_code': row.get('exception_code', 0),
                 'stack_trace': row.get('stack_trace', ''),
+                'client_ip': row.get('client_ip', ''),
                 'metadata': {
                     'tables': row.get('dd_tables'),
                     'commands': row.get('dd_commands'),
