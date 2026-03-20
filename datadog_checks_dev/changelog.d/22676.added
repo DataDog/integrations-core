@@ -1,0 +1,1 @@
+Add mock_http fixture for library-agnostic HTTP client mocking in integration tests.

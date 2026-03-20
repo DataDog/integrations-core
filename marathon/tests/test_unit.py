@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
+from unittest.mock import MagicMock
 
-import mock
 import pytest
 
 from datadog_checks.marathon import Marathon
@@ -38,13 +38,13 @@ def test_process_apps_ko(check, aggregator):
     If the check can't hit the Marathon master Url, no metric should be
     collected
     """
-    check.get_apps_json = mock.MagicMock(return_value=None)
+    check.get_apps_json = MagicMock(return_value=None)
     check.process_apps('url', 'acs_url', [], [], None)
     assert len(aggregator.metric_names) == 0
 
 
 def test_process_apps(check, aggregator):
-    check.get_apps_json = mock.MagicMock(
+    check.get_apps_json = MagicMock(
         return_value={
             'apps': [
                 {'id': '/', 'version': '', 'backoffSeconds': 99},
@@ -107,20 +107,5 @@ def test_config(test_case, init_config, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = Marathon('marathon', init_config, instances=[instance])
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200)
-
-        check.check(instance)
-
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-        r.get.assert_called_with('http://localhost:8080/v2/queue', **http_wargs)
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value

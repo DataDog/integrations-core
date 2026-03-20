@@ -302,6 +302,45 @@ def mock_http_response(mocker, mock_response):
 
 
 @pytest.fixture
+def mock_http(mocker):
+    from unittest.mock import PropertyMock, create_autospec
+
+    from datadog_checks.base.checks.base import AgentCheck
+    from datadog_checks.base.utils.http_protocol import HTTPClientProtocol
+
+    client = create_autospec(HTTPClientProtocol)
+    # Protocol annotations are not picked up by create_autospec, so set options explicitly.
+    client.options = {
+        'auth': None,
+        'cert': None,
+        'headers': {},
+        'proxies': None,
+        'timeout': (10.0, 10.0),
+        'verify': True,
+        'allow_redirects': True,
+    }
+
+    def _get_header(name, default=None):
+        for key, value in client.options['headers'].items():
+            if key.lower() == name.lower():
+                return value
+        return default
+
+    def _set_header(name, value):
+        for key in list(client.options['headers']):
+            if key.lower() == name.lower():
+                client.options['headers'][key] = value
+                return
+        client.options['headers'][name] = value
+
+    client.get_header.side_effect = _get_header
+    client.set_header.side_effect = _set_header
+    client.options_method.side_effect = NotImplementedError('HTTP OPTIONS not yet supported in mock_http')
+    mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
+    return client
+
+
+@pytest.fixture
 def mock_http_response_per_endpoint(mocker, mock_response):
     @overload
     def _mock(
