@@ -30,7 +30,4 @@
     <macros>
         <replica>clickhouse</replica>
     </macros>
-    <query_log>
-        <flush_interval_milliseconds>1000</flush_interval_milliseconds>
-    </query_log>
 </clickhouse>
