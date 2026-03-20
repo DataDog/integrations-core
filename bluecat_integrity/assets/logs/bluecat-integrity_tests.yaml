@@ -273,7 +273,8 @@ tests:
         query:
           class: "IN"
           hostname: "google.com"
-          opcode_id: "Query"
+          opcode: "Query"
+          opcode_id: 0
           type: "A"
         rcode: "Refused"
         rcode_id: 5
@@ -514,7 +515,8 @@ tests:
         query:
           class: "IN"
           hostname: "google.local."
-          opcode_id: "Query"
+          opcode: "Query"
+          opcode_id: 0
           type: "SOA"
         rcode: "NoError"
         rcode_id: 0
@@ -1016,9 +1018,6 @@ tests:
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
-        src_endpoint:
-          ip: "10.10.10.10"
-          mac: "::1"
         time: 1771457402663
       payloadType: "dhcpv4-packet"
       schemaVersion: "1.0.0"
@@ -1189,9 +1188,6 @@ tests:
           version: "1.5.0"
         severity: "Informational"
         severity_id: 1
-        src_endpoint:
-          ip: "10.10.10.10"
-          mac: "::1"
         time: 1771461166977
       payloadType: "dhcpv4-packet"
       schemaVersion: "1.0.0"
@@ -1314,8 +1310,8 @@ tests:
           transactionId: "0x353d6d"
       key: "d24f3877-7ae8-4794-aed2-123456789123"
       ocsf:
-        activity_id: 5
-        activity_name: "Ack"
+        activity_id: 99
+        activity_name: "REPLY"
         category_name: "Network Activity"
         category_uid: 4
         class_name: "DHCP Activity"

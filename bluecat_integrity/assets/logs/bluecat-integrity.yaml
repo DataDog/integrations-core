@@ -710,12 +710,12 @@ pipeline:
               categories:
                 - filter:
                     query: '@data.dhcpv6Message.messageType:SOLICIT OR
-                      @data.dhcpv4Message.messageType:"DHCP Discover"'
+                      @data.dhcpv4Message.options.messageType:"DHCP Discover"'
                   name: Discover
                   id: 1
                 - filter:
                     query: '@data.dhcpv6Message.messageType:ADVERTISE OR
-                      @data.dhcpv4Message.messageType:"DHCP Offer"'
+                      @data.dhcpv4Message.options.messageType:"DHCP Offer"'
                   name: Offer
                   id: 2
                 - filter:
