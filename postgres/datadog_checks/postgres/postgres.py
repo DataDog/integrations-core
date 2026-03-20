@@ -351,17 +351,8 @@ class PostgreSql(DatabaseCheck):
         self.log.debug("Generating dynamic queries")
 
         queries = []
-
-        # connection_metrics = copy.deepcopy(CONNECTION_METRICS)
-        # databases_to_ignore = ""
-        # if len(self._config.ignore_databases) > 0:
-        #     escaped_databases = ["'{}'".format(db.replace("'", "''")) for db in self._config.ignore_databases]
-        #     databases_to_ignore = "AND datname NOT IN ({})".format(", ".join(escaped_databases))
-
-        # connection_metrics["query"] = connection_metrics["query"].format(ignore_database_filter=databases_to_ignore)
-        # queries.append(connection_metrics)
-
         per_database_queries = []  # queries that need to be run per database, used for autodiscovery
+
         if self.version >= V9_2:
             q_pg_stat_database = copy.deepcopy(QUERY_PG_STAT_DATABASE)
             if len(self._config.ignore_databases) > 0:
@@ -869,7 +860,6 @@ class PostgreSql(DatabaseCheck):
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
         metric_scope = [CONNECTION_METRICS]
-
         per_database_metric_scope = []
 
         if self._config.collect_function_metrics:
