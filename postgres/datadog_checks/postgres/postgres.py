@@ -349,7 +349,18 @@ class PostgreSql(DatabaseCheck):
             return None
 
         self.log.debug("Generating dynamic queries")
+
         queries = []
+
+        connection_metrics = copy.deepcopy(CONNECTION_METRICS)
+        databases_to_ignore = ""
+        if len(self._config.ignore_databases) > 0:
+            escaped_databases = ["'{}'".format(db.replace("'", "''")) for db in self._config.ignore_databases]
+            databases_to_ignore = "AND datname NOT IN ({})".format(", ".join(escaped_databases))
+
+        connection_metrics["query"] = connection_metrics["query"].format(ignore_database_filter=databases_to_ignore)
+        queries.append(connection_metrics)
+
         per_database_queries = []  # queries that need to be run per database, used for autodiscovery
         if self.version >= V9_2:
             q_pg_stat_database = copy.deepcopy(QUERY_PG_STAT_DATABASE)
@@ -857,7 +868,8 @@ class PostgreSql(DatabaseCheck):
         bgw_instance_metrics = self.metrics_cache.get_bgw_metrics(self.version)
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
-        metric_scope = [CONNECTION_METRICS]
+        metric_scope = []
+
         per_database_metric_scope = []
 
         if self._config.collect_function_metrics:
@@ -1089,7 +1101,7 @@ class PostgreSql(DatabaseCheck):
         tags = self.tags + self._get_debug_tags() + (tags or [])
         return {
             'tags': tags,
-            "hostname": self.reported_hostname,
+            "hostname": self.resolved_hostname,
         }
 
     def check(self, _):
