@@ -14,7 +14,6 @@ from datadog_checks.base.utils.db.utils import TagManager, default_json_event_en
 from datadog_checks.base.utils.serialization import json
 
 from . import advanced_queries, queries, utils
-from . import queries
 from .__about__ import __version__
 from .config import build_config, sanitize
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
@@ -48,7 +47,6 @@ class ClickhouseCheck(DatabaseCheck):
         # Initialize health event handler for DBM
         self.health = ClickhouseHealth(self)
 
-        self._error_sanitizer = utils.ErrorSanitizer(self._password)
         # Log validation warnings (errors will be raised in validate_config)
         for warning in validation_result.warnings:
             self.log.warning(warning)
@@ -76,9 +74,6 @@ class ClickhouseCheck(DatabaseCheck):
 
         # We'll connect on the first check run
         self._client = None
-
-        # Should be build later based on the server version
-        self._query_manager = None
 
         # Shared HTTP connection pool for all ClickHouse clients (main + DBM jobs)
         # This reduces connection overhead while maintaining client isolation
@@ -236,7 +231,7 @@ class ClickhouseCheck(DatabaseCheck):
     def get_queries(self) -> list[dict]:
         query_list = []
 
-        if self._use_legacy_queries:
+        if self._config.use_legacy_queries:
             query_list.extend(
                 [
                     queries.SystemMetrics,
@@ -249,7 +244,7 @@ class ClickhouseCheck(DatabaseCheck):
                 ]
             )
 
-        if self._use_advanced_queries:
+        if self._config.use_advanced_queries:
             query_list.extend(
                 [
                     advanced_queries.SystemMetrics,

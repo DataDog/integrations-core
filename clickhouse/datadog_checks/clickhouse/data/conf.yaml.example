@@ -117,6 +117,16 @@ instances:
     #
     # single_endpoint_mode: false
 
+    ## @param use_legacy_queries - boolean - optional - default: true
+    ## Enable the legacy query set for collecting metrics. Set to `false` to disable.
+    #
+    # use_legacy_queries: true
+
+    ## @param use_advanced_queries - boolean - optional - default: true
+    ## Enable the advanced query set for collecting metrics. Set to `false` to disable.
+    #
+    # use_advanced_queries: true
+
     ## Configure collection of database samples snapshots from system.processes
     #
     # query_samples:
