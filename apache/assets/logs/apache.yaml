@@ -426,6 +426,7 @@ pipeline:
               name: Map `date_access` to `ocsf.time`
               sources:
                 - date_access
+                - custom.date
               target: ocsf.time
               preserveSource: true
               overrideOnConflict: true
