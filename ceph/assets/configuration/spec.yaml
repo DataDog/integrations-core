@@ -15,7 +15,7 @@ files:
               example: /usr/bin/ceph
               type: string
           - name: ceph_cluster
-            description: Cluster ceph to query.
+            description: Ceph cluster to query.
             fleet_configurable: true
             value:
               example: ceph
@@ -34,9 +34,9 @@ files:
           - name: collect_service_check_for
             description: |
               If you wish to customize the health checks sent as a service check, uncomment and edit the list below.
-              It collects by default the health check listed below.
+              It collects by default the health checks listed below.
               The list of health checks is available here: http://docs.ceph.com/docs/master/rados/operations/health-checks/
-              The health checks are only available if you're running ceph luminous or later
+              The health checks are only available if you're running Ceph Luminous or later
             fleet_configurable: true
             value:
               type: array

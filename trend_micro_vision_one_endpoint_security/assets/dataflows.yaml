@@ -1,0 +1,6 @@
+provides:
+  - id: trend-micro-vision-one-endpoint-security-logs
+    always_on: true
+    granular: true
+    data_type: logs
+    direction: inbound

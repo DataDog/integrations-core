@@ -114,7 +114,7 @@ RUN yum install -y flex && \
  VERSION="16.9" \
  SHA256="07c00fb824df0a0c295f249f44691b86e3266753b380c96f633c3311e10bd005" \
  RELATIVE_PATH="postgresql-{{version}}" \
- bash install-from-source.sh --without-readline --with-openssl --without-icu
+ bash install-from-source.sh --without-readline --with-openssl --without-icu --with-gssapi
 # Add paths to pg_config and to the library
 ENV PATH="/usr/local/pgsql/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/usr/local/pgsql/lib/:${LD_LIBRARY_PATH}"
@@ -158,8 +158,8 @@ RUN \
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
- VERSION="8.18.0" \
- SHA256="e9274a5f8ab5271c0e0e6762d2fce194d5f98acc568e4ce816845b2dcc0cf88f" \
+ VERSION="8.19.0" \
+ SHA256="2a2c11db4c122691aa23b4363befda1bfd801770bfebf41e1d21cee4f2ab0f71" \
  RELATIVE_PATH="curl-{{version}}" \
   bash install-from-source.sh \
     --disable-manual \

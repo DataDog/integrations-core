@@ -60,6 +60,12 @@ class MacAuditLogsCheck(AgentCheck):
             if file_name == "current":
                 continue
 
+            # Skip directories
+            file_path = os.path.join(self.audit_logs_dir_path, file_name)
+            if not os.path.isfile(file_path):
+                self.log.debug(constants.LOG_TEMPLATE.format(message=f"Skipping non-file entry: {file_name}"))
+                continue
+
             if file_name.count(".") == 1:
                 start_time_str, end_time_str = file_name.split(".")
 
@@ -83,8 +89,10 @@ class MacAuditLogsCheck(AgentCheck):
                 if start_time <= last_record_datetime <= end_time or last_record_datetime < start_time:
                     relevant_files.append((start_time, file_name))
             else:
-                err_message = f"File {file_name} does not have the expected file format."
-                self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
+                # Skip files that don't match the expected audit log format
+                self.log.debug(
+                    constants.LOG_TEMPLATE.format(message=f"Skipping file with unexpected format: {file_name}")
+                )
 
         relevant_files.sort(key=lambda x: (x[1].endswith('.not_terminated'), x[0]))
         return relevant_files

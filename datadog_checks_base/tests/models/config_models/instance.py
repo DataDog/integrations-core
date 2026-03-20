@@ -20,6 +20,15 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, deprecations, validators
 
 
+class AuthToken(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    reader: Optional[MappingProxyType[str, Any]] = None
+    writer: Optional[MappingProxyType[str, Any]] = None
+
+
 class Obj(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -36,6 +45,7 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     array: Optional[tuple[str, ...]] = None
+    auth_token: Optional[AuthToken] = None
     deprecated: Optional[str] = None
     flag: Optional[bool] = None
     hyphenated_name: Optional[str] = Field(None, alias='hyphenated-name')
@@ -45,6 +55,7 @@ class InstanceConfig(BaseModel):
     pid: Optional[int] = None
     text: Optional[str] = None
     timeout: Optional[float] = None
+    tls_cert: Optional[str] = None
 
     @model_validator(mode='before')
     def _handle_deprecations(cls, values, info):
