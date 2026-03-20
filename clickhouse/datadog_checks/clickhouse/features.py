@@ -22,6 +22,7 @@ class FeatureKey(Enum):
     QUERY_SAMPLES = "query_samples"
     QUERY_COMPLETIONS = "query_completions"
     SINGLE_ENDPOINT_MODE = "single_endpoint_mode"
+    CLUSTER_MODE = "cluster_mode"
 
 
 FeatureNames = {
@@ -30,6 +31,7 @@ FeatureNames = {
     FeatureKey.QUERY_SAMPLES: 'Query Samples',
     FeatureKey.QUERY_COMPLETIONS: 'Query Completions',
     FeatureKey.SINGLE_ENDPOINT_MODE: 'Single Endpoint Mode',
+    FeatureKey.CLUSTER_MODE: 'Cluster Mode',
 }
 
 

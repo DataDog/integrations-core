@@ -84,6 +84,11 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
         if f in instance:
             args[f] = instance[f]
 
+    # cluster_name has a spec example value ('my_cluster') that is not a real default —
+    # only use it when the user explicitly configures it.
+    if 'cluster_name' not in instance:
+        args['cluster_name'] = None
+
     # Handle deprecated 'user' option
     # If both 'user' and 'username' are present, 'username' takes precedence
     if 'user' in instance:
@@ -235,6 +240,7 @@ def _apply_features(config: InstanceConfig, validation_result: ValidationResult)
         None if config.dbm else "Requires `dbm: true`",
     )
     validation_result.add_feature(FeatureKey.SINGLE_ENDPOINT_MODE, config.single_endpoint_mode)
+    validation_result.add_feature(FeatureKey.CLUSTER_MODE, bool(config.cluster_name))
 
 
 def _safefloat(value) -> float:

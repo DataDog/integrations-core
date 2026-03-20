@@ -135,6 +135,8 @@ class ClickhouseCheck(DatabaseCheck):
         self.tag_manager.set_tag("db", self._config.db, replace=True)
         self.tag_manager.set_tag("database_hostname", self.reported_hostname, replace=True)
         self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
+        if self._config.cluster_name:
+            self.tag_manager.set_tag("clickhouse_cluster", self._config.cluster_name, replace=True)
 
     def validate_config(self):
         """
@@ -326,32 +328,18 @@ class ClickhouseCheck(DatabaseCheck):
         """
         return self._config.single_endpoint_mode
 
-    def get_system_table(self, table_name):
+    def get_system_table(self, table_name: str) -> str:
         """
         Get the appropriate system table reference based on deployment type.
 
-        For single endpoint mode: Returns clusterAllReplicas('default', system.<table>)
+        For cluster mode (cluster_name set): Returns clusterAllReplicas('<cluster>', system.<table>)
+        For single endpoint mode (ClickHouse Cloud): Returns clusterAllReplicas('default', system.<table>)
         For direct connection: Returns system.<table>
-
-        Args:
-            table_name: The system table name (e.g., 'query_log', 'processes')
-
-        Returns:
-            str: The table reference to use in SQL queries
-
-        Example:
-            >>> self.get_system_table('query_log')
-            "clusterAllReplicas('default', system.query_log)"  # Single endpoint mode
-            >>> self.get_system_table('query_log')
-            "system.query_log"  # Direct connection
         """
-        if self._config.single_endpoint_mode:
-            # Single endpoint mode: Use clusterAllReplicas to query all nodes
-            # The cluster name is 'default' for ClickHouse Cloud and most setups
-            return f"clusterAllReplicas('default', system.{table_name})"
-        else:
-            # Direct connection: Query the local system table directly
-            return f"system.{table_name}"
+        cluster = self._config.cluster_name or ('default' if self._config.single_endpoint_mode else None)
+        if cluster:
+            return f"clusterAllReplicas('{cluster}', system.{table_name})"
+        return f"system.{table_name}"
 
     def ping_clickhouse(self):
         return self._client.ping()
