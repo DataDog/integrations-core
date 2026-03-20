@@ -126,9 +126,12 @@ jobs:
 
       - name: Generate dependency constraints
         run: |
+          # We only resolve against PyPI here. The custom index
+          # (agent-int-packages.datadoghq.com) hosts direct dependencies that
+          # are already pinned in agent_requirements.in, so they don't need
+          # constraining. We only need to pin transitive deps, which all come
+          # from PyPI.
           uv pip compile ${{ env.DIRECT_DEPENDENCY_FILE }} \
-            --extra-index-url https://agent-int-packages.datadoghq.com/external \
-            --index-strategy unsafe-best-match \
             --exclude-newer "${{ steps.timestamp.outputs.cutoff }}" \
             --python-version ${{ env.PYTHON_VERSION }} \
             --output-file constraints.txt
