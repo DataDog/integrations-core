@@ -46,7 +46,7 @@ tests:
         class_name: "Device Config State Change"
         class_uid: 5019
         device:
-          hostname: "10.10.10.10"
+          name: "10.10.10.10"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -123,7 +123,7 @@ tests:
         class_name: "Authentication"
         class_uid: 3002
         device:
-          hostname: "10.10.10.10"
+          name: "10.10.10.10"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -177,7 +177,7 @@ tests:
       msg_raw: ""
       ocsf:
         activity_id: 99
-        activity_name: "Other"
+        activity_name: "MAC_STATUS"
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
@@ -222,7 +222,7 @@ tests:
       name: "/"
       ocsf:
         activity_id: 99
-        activity_name: "Other"
+        activity_name: "AVC"
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
@@ -274,7 +274,7 @@ tests:
           ip: "10.10.10.10"
       ocsf:
         activity_id: 99
-        activity_name: "Other"
+        activity_name: "USER_SELINUX_ERR"
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
@@ -326,7 +326,7 @@ tests:
           ip: "10.10.10.10"
       ocsf:
         activity_id: 99
-        activity_name: "Other"
+        activity_name: "USER_ROLE_CHANGE"
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
@@ -371,7 +371,7 @@ tests:
       msg_raw: ""
       ocsf:
         activity_id: 99
-        activity_name: "Other"
+        activity_name: "MAC_CONFIG_CHANGE"
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
@@ -441,7 +441,7 @@ tests:
         class_name: "Group Management"
         class_uid: 3006
         device:
-          hostname: "ub10-10-10-10"
+          name: "ub10-10-10-10"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -519,7 +519,7 @@ tests:
         class_name: "Group Management"
         class_uid: 3006
         device:
-          hostname: "localhost"
+          name: "localhost"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -596,7 +596,7 @@ tests:
         class_name: "Account Change"
         class_uid: 3001
         device:
-          hostname: "localhost"
+          name: "localhost"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -674,7 +674,7 @@ tests:
         class_name: "Account Change"
         class_uid: 3001
         device:
-          hostname: "localhost"
+          name: "localhost"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -755,7 +755,7 @@ tests:
         class_name: "Account Change"
         class_uid: 3001
         device:
-          hostname: "localhost"
+          name: "localhost"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -840,7 +840,7 @@ tests:
         class_name: "User Access Management"
         class_uid: 3005
         device:
-          hostname: "localhost"
+          name: "localhost"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -927,7 +927,7 @@ tests:
         class_name: "User Access Management"
         class_uid: 3005
         device:
-          hostname: "localhost"
+          name: "localhost"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -997,7 +997,7 @@ tests:
         class_name: "File System Activity"
         class_uid: 1001
         device:
-          hostname: "Unknown"
+          name: "Unknown"
           type: "Unknown"
           type_id: 0
           uid: "fd:03"
@@ -1061,7 +1061,7 @@ tests:
         class_name: "File System Activity"
         class_uid: 1001
         device:
-          hostname: "Unknown"
+          name: "Unknown"
           type: "Unknown"
           type_id: 0
           uid: "fd:03"
@@ -1126,7 +1126,7 @@ tests:
         class_name: "File System Activity"
         class_uid: 1001
         device:
-          hostname: "Unknown"
+          name: "Unknown"
           type: "Unknown"
           type_id: 0
           uid: "fd:03"
@@ -1190,7 +1190,7 @@ tests:
         class_name: "File System Activity"
         class_uid: 1001
         device:
-          hostname: "Unknown"
+          name: "Unknown"
           type: "Unknown"
           type_id: 0
           uid: "fd:03"
@@ -1236,7 +1236,7 @@ tests:
       msg_raw: ""
       ocsf:
         activity_id: 99
-        activity_name: "Other"
+        activity_name: "DAEMON_CONFIG"
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
@@ -1283,7 +1283,7 @@ tests:
       msg_raw: ""
       ocsf:
         activity_id: 99
-        activity_name: "Other"
+        activity_name: "DAEMON_ABORT"
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
@@ -1331,7 +1331,7 @@ tests:
       msg_raw: ""
       ocsf:
         activity_id: 99
-        activity_name: "Other"
+        activity_name: "MAC_POLICY_LOAD"
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
@@ -1376,7 +1376,7 @@ tests:
       msg_raw: ""
       ocsf:
         activity_id: 99
-        activity_name: "Other"
+        activity_name: "CONFIG_CHANGE"
         category_uid: 0
         class_name: "Base Event"
         class_uid: 0
@@ -1422,12 +1422,14 @@ tests:
       ocsf:
         activity_id: 1
         activity_name: "Launch"
+        actor:
+          app_name: "Unknown"
         category_name: "System Activity"
         category_uid: 1
         class_name: "Process Activity"
         class_uid: 1007
         device:
-          hostname: "Unknown"
+          name: "Unknown"
           type: "Unknown"
           type_id: 0
         metadata:
@@ -1441,6 +1443,7 @@ tests:
           cmd_line: "/bin/bash -c id"
           name: "bash"
           path: "/bin/bash"
+          uid: "Unknown"
         severity: "Informational"
         severity_id: 1
         time: 1740378302456
@@ -1506,7 +1509,7 @@ tests:
         class_name: "Process Activity"
         class_uid: 1007
         device:
-          hostname: "Unknown"
+          name: "Unknown"
           type: "Unknown"
           type_id: 0
         metadata:
@@ -1586,6 +1589,8 @@ tests:
         category_uid: 4
         class_name: "Network Activity"
         class_uid: 4001
+        dst_endpoint:
+          name: "Unknown"
         metadata:
           event_code: "SYSCALL"
           original_time: "1.770316388442E9"
@@ -1711,7 +1716,11 @@ tests:
         class_name: "File System Activity"
         class_uid: 1001
         device:
-          hostname: "Unknown"
+          name: "Unknown"
+          type: "Unknown"
+          type_id: 0
+        file:
+          name: "Unknown"
           type: "Unknown"
           type_id: 0
         metadata:
@@ -1802,7 +1811,11 @@ tests:
         class_name: "File System Activity"
         class_uid: 1001
         device:
-          hostname: "Unknown"
+          name: "Unknown"
+          type: "Unknown"
+          type_id: 0
+        file:
+          name: "Unknown"
           type: "Unknown"
           type_id: 0
         metadata:

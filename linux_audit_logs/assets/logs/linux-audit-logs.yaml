@@ -548,6 +548,15 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `type` to `ocsf.activity_name`
+              sources:
+                - type
+              sourceType: attribute
+              target: ocsf.activity_name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
     - type: pipeline
       name: OCSF sub pipeline for class File System Activity [1001]
       enabled: true
@@ -557,10 +566,10 @@ pipeline:
         query: "@type:PATH"
       processors:
         - type: string-builder-processor
-          name: Set `ocsf.device.hostname` to Unknown
+          name: Set `ocsf.device.name` to Unknown
           enabled: true
           template: Unknown
-          target: ocsf.device.hostname
+          target: ocsf.device.name
           replaceMissing: false
         - type: grok-parser
           name: Extracting file or folder name
@@ -803,10 +812,16 @@ pipeline:
           memfd_create)"
       processors:
         - type: string-builder-processor
-          name: Set `ocsf.device.hostname` to Unknown
+          name: Set `ocsf.device.name` to Unknown
           enabled: true
           template: Unknown
-          target: ocsf.device.hostname
+          target: ocsf.device.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set `ocsf.file.name` to Unknown
+          enabled: true
+          template: Unknown
+          target: ocsf.file.name
           replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 1001
@@ -822,11 +837,18 @@ pipeline:
             - name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@SYSCALL:(chmod OR fchmod OR fchmodat OR chown OR fchown\
-                      \ OR fchownat OR lchown OR setxattr OR fsetxattr OR lsetxattr\
-                      \ OR removexattr OR fremovexattr OR lremovexattr)"
-                  name: Set Attributes
-                  id: 6
+                    query: "@SYSCALL:(creat OR mkdir OR link OR symlink OR mknod OR\
+                      \ mknodat OR linkat OR symlinkat OR memfd_create)"
+                  name: Create
+                  id: 1
+                - filter:
+                    query: "@SYSCALL:(open OR openat OR open_by_handle_at)"
+                  name: Read
+                  id: 2
+                - filter:
+                    query: "@SYSCALL:(truncate OR ftruncate)"
+                  name: Update
+                  id: 3
                 - filter:
                     query: "@SYSCALL:(rmdir OR unlink OR unlinkat)"
                   name: Delete
@@ -836,18 +858,11 @@ pipeline:
                   name: Rename
                   id: 5
                 - filter:
-                    query: "@SYSCALL:(creat OR mkdir OR link OR symlink OR mknod OR\
-                      \ mknodat OR linkat OR symlinkat OR memfd_create)"
-                  name: Create
-                  id: 1
-                - filter:
-                    query: "@SYSCALL:(truncate OR ftruncate)"
-                  name: Update
-                  id: 3
-                - filter:
-                    query: "@SYSCALL:(open OR openat OR open_by_handle_at)"
-                  name: Read
-                  id: 2
+                    query: "@SYSCALL:(chmod OR fchmod OR fchmodat OR chown OR fchown\
+                      \ OR fchownat OR lchown OR setxattr OR fsetxattr OR lsetxattr\
+                      \ OR removexattr OR fremovexattr OR lremovexattr)"
+                  name: Set Attributes
+                  id: 6
                 - filter:
                     query: "@SYSCALL:mount"
                   name: Mount
@@ -887,6 +902,19 @@ pipeline:
               targets:
                 name: ocsf.device.type
                 id: ocsf.device.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: ocsf.file.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.file.type
+                id: ocsf.file.type_id
               fallback:
                 values: {}
                 sources: {}
@@ -1043,10 +1071,10 @@ pipeline:
         query: "@type:(ADD_USER OR DEL_USER OR USER_CHAUTHTOK)"
       processors:
         - type: string-builder-processor
-          name: Set `ocsf.device.hostname` to Unknown
+          name: Set `ocsf.device.name` to Unknown
           enabled: true
           template: Unknown
-          target: ocsf.device.hostname
+          target: ocsf.device.name
           replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3001
@@ -1245,11 +1273,11 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: Map `msg.hostname` to `ocsf.device.hostname`
+            - name: Map `msg.hostname` to `ocsf.device.name`
               sources:
                 - msg.hostname
               sourceType: attribute
-              target: ocsf.device.hostname
+              target: ocsf.device.name
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -1281,10 +1309,10 @@ pipeline:
         query: "@type:USER_AUTH"
       processors:
         - type: string-builder-processor
-          name: Set `ocsf.device.hostname` to Unknown
+          name: Set `ocsf.device.name` to Unknown
           enabled: true
           template: Unknown
-          target: ocsf.device.hostname
+          target: ocsf.device.name
           replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3002
@@ -1493,11 +1521,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `msg.hostname` to `ocsf.device.hostname`
+            - name: Map `msg.hostname` to `ocsf.device.name`
               sources:
                 - msg.hostname
               sourceType: attribute
-              target: ocsf.device.hostname
+              target: ocsf.device.name
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -1559,10 +1587,10 @@ pipeline:
         query: "@type:(ROLE_ASSIGN OR ROLE_REMOVE)"
       processors:
         - type: string-builder-processor
-          name: Set `ocsf.device.hostname` to Unknown
+          name: Set `ocsf.device.name` to Unknown
           enabled: true
           template: Unknown
-          target: ocsf.device.hostname
+          target: ocsf.device.name
           replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3005
@@ -1753,11 +1781,11 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: Map `msg.hostname` to `ocsf.device.hostname`
+            - name: Map `msg.hostname` to `ocsf.device.name`
               sources:
                 - msg.hostname
               sourceType: attribute
-              target: ocsf.device.hostname
+              target: ocsf.device.name
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -1807,10 +1835,10 @@ pipeline:
         query: "@type:(ADD_GROUP OR DEL_GROUP)"
       processors:
         - type: string-builder-processor
-          name: Set `ocsf.device.hostname` to Unknown
+          name: Set `ocsf.device.name` to Unknown
           enabled: true
           template: Unknown
-          target: ocsf.device.hostname
+          target: ocsf.device.name
           replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3006
@@ -2004,11 +2032,11 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: Map `msg.hostname` to `ocsf.device.hostname`
+            - name: Map `msg.hostname` to `ocsf.device.name`
               sources:
                 - msg.hostname
               sourceType: attribute
-              target: ocsf.device.hostname
+              target: ocsf.device.name
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -2040,10 +2068,10 @@ pipeline:
         query: "@type:USER_MAC_CONFIG_CHANGE"
       processors:
         - type: string-builder-processor
-          name: Set `ocsf.device.hostname` to Unknown
+          name: Set `ocsf.device.name` to Unknown
           enabled: true
           template: Unknown
-          target: ocsf.device.hostname
+          target: ocsf.device.name
           replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 5019
@@ -2139,11 +2167,11 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `msg.hostname` to `ocsf.device.hostname`
+            - name: Map `msg.hostname` to `ocsf.device.name`
               sources:
                 - msg.hostname
               sourceType: attribute
-              target: ocsf.device.hostname
+              target: ocsf.device.name
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -2239,8 +2267,10 @@ pipeline:
               overrideOnConflict: true
               type: schema-remapper
     - type: pipeline
-      name: OCSF pre-processing for EXECVE logs
+      name: OCSF sub pipeline for class Process Activity [1007] for EXECVE
       enabled: true
+      ocsf:
+        isOcsf: true
       filter:
         query: "@type:EXECVE"
       processors:
@@ -2275,19 +2305,23 @@ pipeline:
             supportRules: ""
             matchRules: >-
               trim_rule %{regex("[^\\s].*[^\\s]|[^\\s]"):ocsf.process.cmd_line}
-    - type: pipeline
-      name: OCSF sub pipeline for class Process Activity [1007]
-      enabled: true
-      ocsf:
-        isOcsf: true
-      filter:
-        query: "@type:EXECVE"
-      processors:
         - type: string-builder-processor
-          name: Set `ocsf.device.hostname` to Unknown
+          name: Set `ocsf.device.name` to Unknown
           enabled: true
           template: Unknown
-          target: ocsf.device.hostname
+          target: ocsf.device.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set `ocsf.actor.app_name` to Unknown
+          enabled: true
+          template: Unknown
+          target: ocsf.actor.app_name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Set `ocsf.process.uid` to Unknown
+          enabled: true
+          template: Unknown
+          target: ocsf.process.uid
           replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 1007
@@ -2420,10 +2454,10 @@ pipeline:
         query: "@type:SYSCALL AND @SYSCALL:execve"
       processors:
         - type: string-builder-processor
-          name: Set `ocsf.device.hostname` to Unknown
+          name: Set `ocsf.device.name` to Unknown
           enabled: true
           template: Unknown
-          target: ocsf.device.hostname
+          target: ocsf.device.name
           replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 1007
@@ -2637,8 +2671,10 @@ pipeline:
               overrideOnConflict: true
               type: schema-remapper
     - type: pipeline
-      name: OCSF pre-processing for SOCKADDR logs
+      name: OCSF sub pipeline for class Network Activity [4001] from SOCKADDR
       enabled: true
+      ocsf:
+        isOcsf: true
       filter:
         query: "@type:SOCKADDR AND @laddr:*"
       processors:
@@ -2653,14 +2689,6 @@ pipeline:
             supportRules: ""
             matchRules: >-
               saddr_inet %{data}laddr=%{notSpace:laddr} lport=%{integer:lport}%{data}
-    - type: pipeline
-      name: OCSF sub pipeline for class Network Activity [4001] from SOCKADDR
-      enabled: true
-      ocsf:
-        isOcsf: true
-      filter:
-        query: "@type:SOCKADDR AND @laddr:*"
-      processors:
         - type: schema-processor
           name: Apply OCSF schema for 4001
           enabled: true
@@ -2760,13 +2788,19 @@ pipeline:
               overrideOnConflict: true
               type: schema-remapper
     - type: pipeline
-      name: OCSF sub pipeline for class Network Activity [4001]
+      name: OCSF sub pipeline for class Network Activity [4001] from Syscall
       enabled: true
       ocsf:
         isOcsf: true
       filter:
         query: "@type:SYSCALL AND @SYSCALL:(connect OR bind OR listen OR accept OR accept4 OR sendto OR recvfrom)"
       processors:
+        - type: string-builder-processor
+          name: Set `ocsf.dst_endpoint.name` to Unknown
+          enabled: true
+          template: Unknown
+          target: ocsf.dst_endpoint.name
+          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 4001
           enabled: true
@@ -2785,13 +2819,13 @@ pipeline:
                   name: Open
                   id: 1
                 - filter:
-                    query: "@SYSCALL:listen"
-                  name: Listen
-                  id: 7
-                - filter:
                     query: "@SYSCALL:(sendto OR recvfrom)"
                   name: Traffic
                   id: 6
+                - filter:
+                    query: "@SYSCALL:listen"
+                  name: Listen
+                  id: 7
                 - filter:
                     query: "@SYSCALL:bind"
                   name: Other
