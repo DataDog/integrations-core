@@ -89,5 +89,4 @@ def check_field_trusted_provider(
 ) -> None:
     """Raise ValueError if the field value is not allowed from an untrusted provider."""
     if not validate_require_trusted_provider(field_name, value, security_config):
-        provider = security_config.provider
-        raise ValueError(f"Field '{field_name}' is not allowed from untrusted provider '{provider}'")
+        raise ValueError(f"Field '{field_name}' is not allowed from untrusted provider '{security_config.provider}'")

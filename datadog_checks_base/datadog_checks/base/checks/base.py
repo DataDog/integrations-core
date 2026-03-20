@@ -430,8 +430,7 @@ class AgentCheck(object):
         return self.__logs_enabled
 
     @property
-    def security_config(self):
-        # type: () -> SecurityConfig
+    def security_config(self) -> SecurityConfig:
         """
         Returns the integration security configuration, loaded once and cached.
 

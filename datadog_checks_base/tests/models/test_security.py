@@ -166,6 +166,43 @@ def test_auth_token_blocked_when_path_not_in_allowlist(dd_run_check):
         dd_run_check(check)
 
 
+def test_auth_token_private_key_path_blocked_from_untrusted_provider(dd_run_check):
+    """auth_token reader.private_key_path is also checked against the allowlist."""
+    instance = {
+        'auth_token': {
+            'reader': {'type': 'file', 'path': '/etc/secret', 'private_key_path': '/var/keys/key.pem'},
+            'writer': {'type': 'header', 'name': 'Authorization'},
+        }
+    }
+    security_config = SecurityConfig(
+        check_name='test', provider='kubernetes', ignore_untrusted_file_params=True, file_paths_allowlist=['/etc']
+    )
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    with pytest.raises(Exception, match="(?s)ConfigurationError.*auth_token.*not allowed from untrusted provider"):
+        dd_run_check(check)
+
+
+def test_auth_token_private_key_path_allowed_via_allowlist(dd_run_check):
+    """auth_token is allowed when both reader.path and reader.private_key_path are in the allowlist."""
+    instance = {
+        'auth_token': {
+            'reader': {'type': 'file', 'path': '/etc/secret', 'private_key_path': '/etc/keys/key.pem'},
+            'writer': {'type': 'header', 'name': 'Authorization'},
+        }
+    }
+    security_config = SecurityConfig(
+        check_name='test', provider='kubernetes', ignore_untrusted_file_params=True, file_paths_allowlist=['/etc']
+    )
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    dd_run_check(check)
+
+    assert check.config.auth_token.reader['private_key_path'] == '/etc/keys/key.pem'
+
+
 def test_auth_token_oauth_allowed_from_untrusted_provider(dd_run_check):
     """auth_token with a non-file reader type is allowed since it has no local file paths."""
     instance = {
