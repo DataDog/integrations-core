@@ -38,7 +38,7 @@ class HttpGetTool(BaseTool[HttpGetInput]):
         except httpx.TimeoutException:
             return ToolResult(success=False, error=f"Request timed out after {timeout}s")
         except httpx.RequestError as e:
-            return ToolResult(success=False, error=f"Request failed: {e}")
+            return ToolResult(success=False, error=f"Request failed for {url}: {e}")
 
         body = response.text
         result: TruncateResult = truncate(body)

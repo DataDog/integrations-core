@@ -8,7 +8,7 @@ from pydantic import Field
 
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
-from ddev.ai.tools.fs.base import TextEdit
+from ddev.ai.tools.fs.base import FileRegistryTool
 from ddev.ai.tools.fs.file_registry import FileRegistry
 
 # ---------------------------------------------------------------------------
@@ -20,7 +20,7 @@ class DummyInput(BaseToolInput):
     path: Annotated[str, Field(description="Path")]
 
 
-class DummyTool(TextEdit[DummyInput]):
+class DummyTool(FileRegistryTool[DummyInput]):
     """Dummy tool to test TextEdit base behavior."""
 
     @property
@@ -100,39 +100,39 @@ def test_read_verified_handles_oserror(tool: DummyTool, registry: FileRegistry, 
 
 
 # ---------------------------------------------------------------------------
-# _on_read / _on_write
+# _refresh_if_known / _record
 # ---------------------------------------------------------------------------
 
 
-def test_on_write_registers_path(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
+def test_record_registers_path(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
     path = str(tmp_path / "file.txt")
-    tool._on_write(path, "written")
+    tool._record(path, "written")
 
     assert registry.is_known(path) is True
     assert registry.verify(path, "written") is True
 
 
-def test_on_read_does_not_register_unknown_path(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
+def test_refresh_if_known_does_not_register_unknown_path(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
     path = str(tmp_path / "file.txt")
-    tool._on_read(path, "content")
+    tool._refresh_if_known(path, "content")
 
     assert registry.is_known(path) is False
 
 
-def test_on_read_updates_hash_for_known_path(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
+def test_refresh_if_known_updates_hash_for_known_path(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
     path = str(tmp_path / "file.txt")
     registry.record(path, "old")
-    tool._on_read(path, "new")
+    tool._refresh_if_known(path, "new")
 
     assert registry.verify(path, "new") is True
     assert registry.verify(path, "old") is False
 
 
-def test_on_write_updates_hash_after_on_read(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
+def test_record_updates_hash_after_refresh_if_known(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
     path = str(tmp_path / "file.txt")
     registry.record(path, "old")
-    tool._on_read(path, "old")
-    tool._on_write(path, "new")
+    tool._refresh_if_known(path, "old")
+    tool._record(path, "new")
 
     assert registry.verify(path, "new") is True
     assert registry.verify(path, "old") is False

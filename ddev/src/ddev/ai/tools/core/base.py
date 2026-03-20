@@ -101,7 +101,8 @@ class BaseTool[TInput: BaseToolInput](ABC):
         try:
             return await self(validated)
         except Exception as e:
-            return ToolResult(success=False, error=f"{type(e).__name__}: {str(e)}")
+            msg = str(e) or repr(e)
+            return ToolResult(success=False, error=f"{type(e).__name__}: {msg}")
 
     @abstractmethod
     async def __call__(self, tool_input: TInput) -> ToolResult:

@@ -9,17 +9,17 @@ from ddev.ai.tools.core.types import ToolResult
 from .file_registry import FileRegistry
 
 
-class TextEdit[TInput: BaseToolInput](BaseTool[TInput]):
+class FileRegistryTool[TInput: BaseToolInput](BaseTool[TInput]):
     """Abstract base for file system tools with hash-based consistency checks."""
 
     def __init__(self, file_registry: FileRegistry) -> None:
         self._registry = file_registry
 
-    def _on_read(self, path: str, content: str) -> None:
+    def _refresh_if_known(self, path: str, content: str) -> None:
         if self._registry.is_known(path):
             self._registry.record(path, content)
 
-    def _on_write(self, path: str, content: str) -> None:
+    def _record(self, path: str, content: str) -> None:
         self._registry.record(path, content)
 
     def _read_verified(self, path: str) -> tuple[str, ToolResult | None]:

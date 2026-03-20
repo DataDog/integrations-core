@@ -9,7 +9,7 @@ from pydantic import Field
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
-from .base import TextEdit
+from .base import FileRegistryTool
 
 
 class ReadFileInput(BaseToolInput):
@@ -22,12 +22,13 @@ class ReadFileInput(BaseToolInput):
     ] = None
 
 
-class ReadFileTool(TextEdit[ReadFileInput]):
+class ReadFileTool(FileRegistryTool[ReadFileInput]):
     """Reads contents of a text file from the host filesystem.
     Use to inspect config files, logs, source code. Do not use for binary files.
     The output is a numbered list of lines starting from 0.
     Supports offset/limit for paging through large files.
-    File does not need to be registered in the file registry."""
+    File does not need to be registered in the file registry.
+    Note: data="" is a valid result meaning no lines in range."""
 
     @property
     def name(self) -> str:
@@ -36,10 +37,10 @@ class ReadFileTool(TextEdit[ReadFileInput]):
     async def __call__(self, tool_input: ReadFileInput) -> ToolResult:
         try:
             content = Path(tool_input.path).read_text(encoding="utf-8")
-        except OSError as e:
-            return ToolResult(success=False, error=str(e))
+        except (OSError, UnicodeDecodeError) as e:
+            return ToolResult(success=False, error=f"{tool_input.path}: {e}")
 
-        self._on_read(tool_input.path, content)
+        self._refresh_if_known(tool_input.path, content)
 
         offset = tool_input.offset
         limit = tool_input.limit

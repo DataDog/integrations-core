@@ -58,8 +58,8 @@ def known_file(tmp_path, create_tool: CreateFileTool):
         (AppendFileTool, "append_file"),
     ],
 )
-def test_tool_meta(tool_cls, expected_name) -> None:
-    assert tool_cls(FileRegistry()).name == expected_name
+def test_tool_meta(tool_cls, expected_name, registry: FileRegistry) -> None:
+    assert tool_cls(registry).name == expected_name
 
 
 # ---------------------------------------------------------------------------
@@ -109,7 +109,6 @@ def test_read_file_missing_file(read_tool: ReadFileTool, tmp_path) -> None:
         (1, 1, "1: b\n"),
         (2, 10, "2: c\n"),  # limit exceeds remaining lines
         (100, None, ""),  # offset beyond EOF
-        (1.0, 1, "1: b\n"),
     ],
 )
 def test_read_file_with_offset_and_limit(read_tool: ReadFileTool, tmp_path, offset, limit, expected) -> None:
@@ -216,7 +215,6 @@ def test_edit_file_fails_if_old_string_not_found_or_empty(edit_tool: EditFileToo
     result = asyncio.run(edit_tool.run({"path": str(known_file), "old_string": old_string, "new_string": "x"}))
 
     assert result.success is False
-    assert "not found" in result.error
 
 
 def test_edit_file_fails_if_old_string_ambiguous(

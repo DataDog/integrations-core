@@ -9,7 +9,7 @@ from pydantic import Field
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
-from .base import TextEdit
+from .base import FileRegistryTool
 
 
 class AppendFileInput(BaseToolInput):
@@ -17,7 +17,7 @@ class AppendFileInput(BaseToolInput):
     content: Annotated[str, Field(description="Content to append to the file")]
 
 
-class AppendFileTool(TextEdit[AppendFileInput]):
+class AppendFileTool(FileRegistryTool[AppendFileInput]):
     """Appends content to the end of an existing file.
     Can only append to files registered in the file registry.
     Fails if the file was modified since the last read."""
@@ -29,7 +29,7 @@ class AppendFileTool(TextEdit[AppendFileInput]):
     async def __call__(self, tool_input: AppendFileInput) -> ToolResult:
         path = Path(tool_input.path)
 
-        async with self._registry.get_lock(str(path)):
+        async with self._registry.lock_for(str(path)):
             current_content, fail = self._read_verified(str(path))
             if fail:
                 return fail
@@ -39,5 +39,5 @@ class AppendFileTool(TextEdit[AppendFileInput]):
             new_content = current_content + separator + content_to_append
 
             path.write_text(new_content, encoding="utf-8")
-            self._on_write(str(path), new_content)
+            self._record(str(path), new_content)
         return ToolResult(success=True, data=f"Content appended to: {path}")

@@ -30,6 +30,11 @@ def test_is_known(registry: FileRegistry, tmp_path, record, expected) -> None:
     assert registry.is_known(path) is expected
 
 
+def test_is_known_different_path(registry: FileRegistry, tmp_path) -> None:
+    registry.record(str(tmp_path / "other.txt"), "hello")
+    assert registry.is_known(str(tmp_path / "file.txt")) is False
+
+
 # ---------------------------------------------------------------------------
 # verify
 # ---------------------------------------------------------------------------
@@ -82,23 +87,23 @@ def test_normalize_relative_and_absolute_are_same_key(registry: FileRegistry, tm
 
 
 # ---------------------------------------------------------------------------
-# get_lock
+# lock_for
 # ---------------------------------------------------------------------------
 
 
-def test_get_lock_same_path_returns_same_instance(registry: FileRegistry, tmp_path) -> None:
+def test_lock_for_same_path_returns_same_instance(registry: FileRegistry, tmp_path) -> None:
     path = str(tmp_path / "file.txt")
-    assert registry.get_lock(path) is registry.get_lock(path)
+    assert registry.lock_for(path) is registry.lock_for(path)
 
 
-def test_get_lock_different_paths_return_different_instances(registry: FileRegistry, tmp_path) -> None:
+def test_lock_for_different_paths_return_different_instances(registry: FileRegistry, tmp_path) -> None:
     path_a = str(tmp_path / "a.txt")
     path_b = str(tmp_path / "b.txt")
-    assert registry.get_lock(path_a) is not registry.get_lock(path_b)
+    assert registry.lock_for(path_a) is not registry.lock_for(path_b)
 
 
-def test_get_lock_normalizes_path(registry: FileRegistry, tmp_path, monkeypatch) -> None:
+def test_lock_for_normalizes_path(registry: FileRegistry, tmp_path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     abs_path = str(tmp_path / "file.txt")
     rel_path = "file.txt"
-    assert registry.get_lock(abs_path) is registry.get_lock(rel_path)
+    assert registry.lock_for(abs_path) is registry.lock_for(rel_path)

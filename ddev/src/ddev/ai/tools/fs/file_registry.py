@@ -25,11 +25,8 @@ class FileRegistry:
     def is_known(self, path: str) -> bool:
         return self._normalize(path) in self._hashes
 
-    def get_lock(self, path: str) -> asyncio.Lock:
-        normalized = self._normalize(path)
-        if normalized not in self._locks:
-            self._locks[normalized] = asyncio.Lock()
-        return self._locks[normalized]
+    def lock_for(self, path: str) -> asyncio.Lock:
+        return self._locks.setdefault(self._normalize(path), asyncio.Lock())
 
     def verify(self, path: str, content: str) -> bool:
         """Check whether content matches what was last recorded for path."""

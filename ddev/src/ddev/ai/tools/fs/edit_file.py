@@ -9,7 +9,7 @@ from pydantic import Field
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
-from .base import TextEdit
+from .base import FileRegistryTool
 
 
 class EditFileInput(BaseToolInput):
@@ -17,14 +17,14 @@ class EditFileInput(BaseToolInput):
     old_string: Annotated[
         str,
         Field(
-            description="Exact text to replace. Must appear exactly once in the file \
-        (hint: include surrounding context if needed)"
+            description="Exact non-empty text to replace. Must appear exactly once in the file \
+        (hint: include surrounding context if needed)."
         ),
     ]
     new_string: Annotated[str, Field(description="Text to replace old_string with")]
 
 
-class EditFileTool(TextEdit[EditFileInput]):
+class EditFileTool(FileRegistryTool[EditFileInput]):
     """Edits a file by replacing an exact string with a new one.
     Can only edit files registered in the file registry.
     Fails if the file was modified since the last read.
@@ -37,7 +37,7 @@ class EditFileTool(TextEdit[EditFileInput]):
     async def __call__(self, tool_input: EditFileInput) -> ToolResult:
         path = Path(tool_input.path)
 
-        async with self._registry.get_lock(str(path)):
+        async with self._registry.lock_for(str(path)):
             content, fail = self._read_verified(str(path))
             if fail:
                 return fail
@@ -46,7 +46,10 @@ class EditFileTool(TextEdit[EditFileInput]):
             old_string = tool_input.old_string.replace("\r\n", "\n")
             new_string = tool_input.new_string.replace("\r\n", "\n")
 
-            count = content.count(old_string) if old_string else 0
+            if not old_string:
+                return ToolResult(success=False, error="old_string must not be empty")
+
+            count = content.count(old_string)
             if count == 0:
                 return ToolResult(success=False, error="old_string not found in file")
             if count > 1:
@@ -58,5 +61,5 @@ class EditFileTool(TextEdit[EditFileInput]):
 
             new_content = content.replace(old_string, new_string, 1)
             path.write_text(new_content, encoding="utf-8")
-            self._on_write(str(path), new_content)
+            self._record(str(path), new_content)
         return ToolResult(success=True, data=f"File edited: {path}")
