@@ -781,7 +781,7 @@ pipeline:
                 - filter:
                     query: -(@data.dhcpv6Message.messageType:(SOLICIT OR ADVERTISE OR REQUEST OR
                       RENEW OR REBIND OR DECLINE OR RELEASE OR
-                      INFORMATION-REQUEST) OR @data.dhcpv4Message.options.messageType:("DHCP Discover"
+                      INFORMATION-REQUEST) OR  @data.dhcpv4Message.options.messageType:("DHCP Discover"
                       OR "DHCP Offer" OR "DHCP Request" OR "DHCP Decline" OR
                       "DHCP Ack" OR "DHCP Nak" OR "DHCP Release" OR
                       "DHCP Inform" OR "DHCP Expire"))
@@ -812,6 +812,24 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              sourceType: attribute
+              target: ocsf.metadata.product.vendor_name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              sourceType: attribute
+              target: ocsf.metadata.product.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `data.dhcpv6Message.messageType`, `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
               sources:
                 - data.dhcpv6Message.messageType
@@ -827,24 +845,6 @@ pipeline:
                 - payloadType
               sourceType: attribute
               target: ocsf.metadata.log_name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `data.dhcpv6Message.transactionId` to `ocsf.transaction_uid`
-              sources:
-                - data.dhcpv6Message.transactionId
-              sourceType: attribute
-              target: ocsf.transaction_uid
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `sourceId` to `ocsf.dst_endpoint.uid`
-              sources:
-                - sourceId
-              sourceType: attribute
-              target: ocsf.dst_endpoint.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -872,6 +872,24 @@ pipeline:
                 - timestamp
               sourceType: attribute
               target: ocsf.metadata.original_time
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `data.dhcpv6Message.transactionId` to `ocsf.transaction_uid`
+              sources:
+                - data.dhcpv6Message.transactionId
+              sourceType: attribute
+              target: ocsf.transaction_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `sourceId` to `ocsf.dst_endpoint.uid`
+              sources:
+                - sourceId
+              sourceType: attribute
+              target: ocsf.dst_endpoint.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
