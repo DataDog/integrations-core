@@ -33,7 +33,7 @@ from datadog_checks.dev._env import (
 
 __aggregator = None
 __datadog_agent = None
-MockResponse = None
+MockHTTPResponse = None
 
 
 @pytest.fixture
@@ -286,12 +286,11 @@ def dd_default_hostname():
 
 @pytest.fixture
 def mock_response():
-    # Lazily import `requests` as it may be costly under certain conditions
-    global MockResponse
-    if MockResponse is None:
-        from datadog_checks.dev.http import MockResponse
+    global MockHTTPResponse
+    if MockHTTPResponse is None:
+        from datadog_checks.base.utils.http_testing import MockHTTPResponse
 
-    yield MockResponse
+    yield MockHTTPResponse
 
 
 @pytest.fixture
@@ -344,10 +343,10 @@ def mock_http(mocker):
 def mock_http_response_per_endpoint(mocker, mock_response):
     @overload
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockResponse]],
+        responses_by_endpoint: Dict[str, list[MockHTTPResponse]],
         *,
         mode: Literal["default"],
-        default_response: MockResponse,
+        default_response: MockHTTPResponse,
         method: str = ...,
         url_arg_index: int = ...,
         url_kwarg_name: str = ...,
@@ -355,7 +354,7 @@ def mock_http_response_per_endpoint(mocker, mock_response):
     ): ...
     @overload
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockResponse]],
+        responses_by_endpoint: Dict[str, list[MockHTTPResponse]],
         *,
         mode: Literal["cycle", "exhaust"],
         default_response: None = None,
@@ -365,10 +364,10 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         strict: bool = ...,
     ): ...
     def _mock(
-        responses_by_endpoint: Dict[str, list[MockResponse]],
+        responses_by_endpoint: Dict[str, list[MockHTTPResponse]],
         mode: Literal['cycle', 'exhaust', 'default'] = 'cycle',
-        default_response: MockResponse | None = None,
-        method: str = 'requests.Session.get',
+        default_response: MockHTTPResponse | None = None,
+        method: str = 'requests.Session.get',  # TODO(httpx-migration): update default when backend changes
         url_arg_index: int = 1,
         url_kwarg_name: str = "url",
         strict: bool = True,
@@ -403,7 +402,7 @@ def mock_http_response_per_endpoint(mocker, mock_response):
                 if strict:
                     raise ValueError(f"Endpoint {url} not found in mocked responses")
                 else:
-                    return MockResponse(status_code=404)
+                    return mock_response(status_code=404)
             else:
                 try:
                     return next(queues[url])

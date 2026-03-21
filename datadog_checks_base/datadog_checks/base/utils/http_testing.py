@@ -14,9 +14,47 @@ from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 __all__ = ['MockHTTPResponse']
 
 
+class _CaseInsensitiveDict(dict):
+    """Case-insensitive dict for HTTP headers. Keys are stored lowercased."""
+
+    def __init__(self, data=None):
+        super().__init__()
+        if data:
+            for k, v in data.items():
+                self[k] = v
+
+    def __setitem__(self, key, value):
+        super().__setitem__(key.lower() if isinstance(key, str) else key, value)
+
+    def __getitem__(self, key):
+        return super().__getitem__(key.lower() if isinstance(key, str) else key)
+
+    def __contains__(self, key):
+        return super().__contains__(key.lower() if isinstance(key, str) else key)
+
+    def __delitem__(self, key):
+        super().__delitem__(key.lower() if isinstance(key, str) else key)
+
+    def get(self, key, default=None):
+        return super().get(key.lower() if isinstance(key, str) else key, default)
+
+    def pop(self, key, *args):
+        return super().pop(key.lower() if isinstance(key, str) else key, *args)
+
+    def update(self, other=(), **kwargs):
+        if isinstance(other, dict):
+            other = {(k.lower() if isinstance(k, str) else k): v for k, v in other.items()}
+        kwargs = {k.lower(): v for k, v in kwargs.items()}
+        super().update(other, **kwargs)
+
+    def setdefault(self, key, default=None):
+        return super().setdefault(key.lower() if isinstance(key, str) else key, default)
+
+
 class MockHTTPResponse:
     """Library-agnostic mock HTTP response implementing HTTPResponseProtocol."""
 
+    # Parameter order differs from MockResponse; not a compatibility concern since all callers use keyword args.
     def __init__(
         self,
         content: str | bytes = '',
@@ -27,7 +65,10 @@ class MockHTTPResponse:
         cookies: dict[str, str] | None = None,
         elapsed_seconds: float = 0.1,
         normalize_content: bool = True,
+        url: str = '',
     ):
+        self.url = url
+
         if json_data is not None:
             content = json.dumps(json_data)
             # Copy to avoid mutating the caller's dict
@@ -47,13 +88,14 @@ class MockHTTPResponse:
 
         self._content = content.encode('utf-8') if isinstance(content, str) else content
         self.status_code = status_code
-        self.headers = {k.lower(): v for k, v in (headers or {}).items()}
+        self.headers = _CaseInsensitiveDict(headers or {})
         self.cookies = cookies or {}
         self.encoding: str | None = None
         self.elapsed = timedelta(seconds=elapsed_seconds)
         self._stream = BytesIO(self._content)
 
         self.raw = MagicMock()
+        self.raw.read = self._stream.read
         self.raw.connection.sock.getpeercert.side_effect = lambda binary_form=False: b'mock-cert' if binary_form else {}
 
     @property
