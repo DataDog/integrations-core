@@ -1,0 +1,1516 @@
+id: "bluecat-integrity"
+tests:
+ -
+  sample: |-
+    {
+      "sourceId" : "4201fad9-b30e-1dc5-0833-123456789123",
+      "sourcePort" : 57895,
+      "schemaVersion" : "1.0",
+      "sourceAddress" : "10.10.10.10",
+      "responsePort" : 53,
+      "socketFamily" : "INET",
+      "source_type" : "dnstap",
+      "serverId" : "bdds2",
+      "socketProtocol" : "UDP",
+      "messageType" : "ClientQuery",
+      "payloadType" : "dnstap",
+      "responseAddress" : "10.1.1.1",
+      "messageTypeId" : 5,
+      "requestData" : {
+        "rcodeName" : "NoError",
+        "question" : [ {
+          "domainName" : "C-Lab-24.contoso.local.",
+          "questionTypeId" : 6,
+          "class" : "IN",
+          "questionType" : "SOA"
+        } ],
+        "header" : {
+          "aa" : false,
+          "cd" : false,
+          "qr" : 0,
+          "ad" : false,
+          "nsCount" : 0,
+          "rcode" : 0,
+          "opcode" : 0,
+          "ra" : false,
+          "tc" : false,
+          "rd" : true,
+          "qdCount" : 1,
+          "anCount" : 0,
+          "arCount" : 0,
+          "id" : 19267
+        },
+        "time" : 1772082903782342100,
+        "fullRcode" : 0
+      },
+      "key" : "3f87546e-54ad-4022-9dbc-123456789123",
+      "timestamp" : "2026-02-26T05:15:04.884701163Z"
+    }
+  result:
+    custom:
+      dns:
+        flags:
+          rcode: "NoError"
+      key: "3f87546e-54ad-4022-9dbc-123456789123"
+      messageType: "ClientQuery"
+      messageTypeId: 5
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 57895
+        destination:
+          geoip: {}
+          ip: "10.1.1.1"
+          port: 53
+      ocsf:
+        activity_id: 1
+        activity_name: "Query"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        dst_endpoint:
+          ip: "10.1.1.1"
+          name: "bdds2"
+          port: 53
+          uid: "4201fad9-b30e-1dc5-0833-123456789123"
+        metadata:
+          event_code: "ClientQuery"
+          log_name: "dnstap"
+          log_version: "1.0"
+          original_time: "2026-02-26T05:15:04.884701163Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "3f87546e-54ad-4022-9dbc-123456789123"
+          version: "1.5.0"
+        query:
+          class: "IN"
+          hostname: "C-Lab-24.contoso.local."
+          opcode: "Query"
+          opcode_id: 0
+          type: "SOA"
+        rcode: "NoError"
+        rcode_id: 0
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.10.10.10"
+          port: 57895
+        time: 1772082904884
+      payloadType: "dnstap"
+      requestData:
+        fullRcode: 0
+        header:
+          aa: false
+          ad: false
+          anCount: 0
+          arCount: 0
+          cd: false
+          id: 19267
+          nsCount: 0
+          opcode: 0
+          qdCount: 1
+          qr: 0
+          ra: false
+          rcode: 0
+          rd: true
+          tc: false
+        question:
+         -
+          domainName: "C-Lab-24.contoso.local."
+          questionTypeId: 6
+          class: "IN"
+          questionType: "SOA"
+        rcodeName: "NoError"
+        time: 1772082903782342100
+      request_op_code_value: "Query"
+      responseAddress: "10.1.1.1"
+      responsePort: 53
+      schemaVersion: "1.0"
+      serverId: "bdds2"
+      socketFamily: "INET"
+      socketProtocol: "UDP"
+      sourceAddress: "10.10.10.10"
+      sourceId: "4201fad9-b30e-1dc5-0833-123456789123"
+      sourcePort: 57895
+      source_type: "dnstap"
+      timestamp: "2026-02-26T05:15:04.884701163Z"
+    message: |-
+      {
+        "sourceId" : "4201fad9-b30e-1dc5-0833-123456789123",
+        "sourcePort" : 57895,
+        "schemaVersion" : "1.0",
+        "sourceAddress" : "10.10.10.10",
+        "responsePort" : 53,
+        "socketFamily" : "INET",
+        "source_type" : "dnstap",
+        "serverId" : "bdds2",
+        "socketProtocol" : "UDP",
+        "messageType" : "ClientQuery",
+        "payloadType" : "dnstap",
+        "responseAddress" : "10.1.1.1",
+        "messageTypeId" : 5,
+        "requestData" : {
+          "rcodeName" : "NoError",
+          "question" : [ {
+            "domainName" : "C-Lab-24.contoso.local.",
+            "questionTypeId" : 6,
+            "class" : "IN",
+            "questionType" : "SOA"
+          } ],
+          "header" : {
+            "aa" : false,
+            "cd" : false,
+            "qr" : 0,
+            "ad" : false,
+            "nsCount" : 0,
+            "rcode" : 0,
+            "opcode" : 0,
+            "ra" : false,
+            "tc" : false,
+            "rd" : true,
+            "qdCount" : 1,
+            "anCount" : 0,
+            "arCount" : 0,
+            "id" : 19267
+          },
+          "time" : 1772082903782342100,
+          "fullRcode" : 0
+        },
+        "key" : "3f87546e-54ad-4022-9dbc-123456789123",
+        "timestamp" : "2026-02-26T05:15:04.884701163Z"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1772082904884
+ -
+  sample: |-
+    {
+      "sourceId" : "42014a36-eed1-b7bd-5786-123456789123",
+      "sourcePort" : 39927,
+      "schemaVersion" : "1.0",
+      "sourceAddress" : "10.10.10.10",
+      "responsePort" : 53,
+      "socketFamily" : "INET",
+      "responseData" : {
+        "rcodeName" : "Refused",
+        "question" : [ {
+          "domainName" : "google.com",
+          "questionTypeId" : 1,
+          "class" : "IN",
+          "questionType" : "A"
+        } ],
+        "header" : {
+          "aa" : false,
+          "cd" : false,
+          "qr" : 1,
+          "ad" : false,
+          "nsCount" : 0,
+          "rcode" : 5,
+          "opcode" : 0,
+          "ra" : false,
+          "tc" : false,
+          "rd" : true,
+          "qdCount" : 1,
+          "anCount" : 0,
+          "arCount" : 0,
+          "id" : 45402
+        },
+        "time" : 1771522139229097200,
+        "fullRcode" : 5
+      },
+      "source_type" : "dnstap",
+      "serverId" : "bdds1",
+      "socketProtocol" : "UDP",
+      "messageType" : "ClientResponse",
+      "payloadType" : "dnstap",
+      "responseAddress" : "10.1.1.1",
+      "messageTypeId" : 6,
+      "key" : "2683dd13-0065-4985-b1a0-123456789123",
+      "timestamp" : "2026-02-19T17:29:00.526674843Z"
+    }
+  result:
+    custom:
+      dns:
+        flags:
+          rcode: "Refused"
+      key: "2683dd13-0065-4985-b1a0-123456789123"
+      messageType: "ClientResponse"
+      messageTypeId: 6
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 39927
+        destination:
+          geoip: {}
+          ip: "10.1.1.1"
+          port: 53
+      ocsf:
+        activity_id: 2
+        activity_name: "Response"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        dst_endpoint:
+          ip: "10.1.1.1"
+          name: "bdds1"
+          port: 53
+          uid: "42014a36-eed1-b7bd-5786-123456789123"
+        metadata:
+          event_code: "ClientResponse"
+          log_name: "dnstap"
+          log_version: "1.0"
+          original_time: "2026-02-19T17:29:00.526674843Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "2683dd13-0065-4985-b1a0-123456789123"
+          version: "1.5.0"
+        query:
+          class: "IN"
+          hostname: "google.com"
+          opcode: "Query"
+          opcode_id: 0
+          type: "A"
+        rcode: "Refused"
+        rcode_id: 5
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.10.10.10"
+          port: 39927
+        time: 1771522140526
+      payloadType: "dnstap"
+      responseAddress: "10.1.1.1"
+      responseData:
+        fullRcode: 5
+        header:
+          aa: false
+          ad: false
+          anCount: 0
+          arCount: 0
+          cd: false
+          id: 45402
+          nsCount: 0
+          opcode: 0
+          qdCount: 1
+          qr: 1
+          ra: false
+          rcode: 5
+          rd: true
+          tc: false
+        question:
+         -
+          domainName: "google.com"
+          questionTypeId: 1
+          class: "IN"
+          questionType: "A"
+        rcodeName: "Refused"
+        time: 1771522139229097200
+      responsePort: 53
+      response_op_code_value: "Query"
+      schemaVersion: "1.0"
+      serverId: "bdds1"
+      socketFamily: "INET"
+      socketProtocol: "UDP"
+      sourceAddress: "10.10.10.10"
+      sourceId: "42014a36-eed1-b7bd-5786-123456789123"
+      sourcePort: 39927
+      source_type: "dnstap"
+      timestamp: "2026-02-19T17:29:00.526674843Z"
+    message: |-
+      {
+        "sourceId" : "42014a36-eed1-b7bd-5786-123456789123",
+        "sourcePort" : 39927,
+        "schemaVersion" : "1.0",
+        "sourceAddress" : "10.10.10.10",
+        "responsePort" : 53,
+        "socketFamily" : "INET",
+        "responseData" : {
+          "rcodeName" : "Refused",
+          "question" : [ {
+            "domainName" : "google.com",
+            "questionTypeId" : 1,
+            "class" : "IN",
+            "questionType" : "A"
+          } ],
+          "header" : {
+            "aa" : false,
+            "cd" : false,
+            "qr" : 1,
+            "ad" : false,
+            "nsCount" : 0,
+            "rcode" : 5,
+            "opcode" : 0,
+            "ra" : false,
+            "tc" : false,
+            "rd" : true,
+            "qdCount" : 1,
+            "anCount" : 0,
+            "arCount" : 0,
+            "id" : 45402
+          },
+          "time" : 1771522139229097200,
+          "fullRcode" : 5
+        },
+        "source_type" : "dnstap",
+        "serverId" : "bdds1",
+        "socketProtocol" : "UDP",
+        "messageType" : "ClientResponse",
+        "payloadType" : "dnstap",
+        "responseAddress" : "10.1.1.1",
+        "messageTypeId" : 6,
+        "key" : "2683dd13-0065-4985-b1a0-123456789123",
+        "timestamp" : "2026-02-19T17:29:00.526674843Z"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1771522140526
+ -
+  sample: |-
+    {
+      "sourceId" : "42014a36-eed1-b7bd-5786-869e412e536f",
+      "sourcePort" : 18456,
+      "schemaVersion" : "1.0",
+      "sourceAddress" : "10.10.10.10",
+      "queryZone" : "google.local.",
+      "responsePort" : 53,
+      "socketFamily" : "INET",
+      "responseData" : {
+        "rcodeName" : "NoError",
+        "opt" : {
+          "ednsVersion" : 0,
+          "udpPayloadSize" : 1232,
+          "options" : [ {
+            "optName" : "Expire",
+            "optCode" : 9,
+            "optValue" : "ACeNAA=="
+          } ],
+          "do" : false,
+          "extendedRcode" : 0
+        },
+        "question" : [ {
+          "domainName" : "google.local.",
+          "questionTypeId" : 6,
+          "class" : "IN",
+          "questionType" : "SOA"
+        } ],
+        "additional" : [ {
+          "recordTypeId" : 1,
+          "recordType" : "A",
+          "domainName" : "bdds1.google.local.",
+          "rData" : "10.10.10.10",
+          "class" : "IN",
+          "ttl" : 3600
+        }, {
+          "recordTypeId" : 1,
+          "recordType" : "A",
+          "domainName" : "bdds2.google.local.",
+          "rData" : "10.10.10.10",
+          "class" : "IN",
+          "ttl" : 3600
+        }, {
+          "recordTypeId" : 28,
+          "recordType" : "AAAA",
+          "domainName" : "bdds1.google.local.",
+          "rData" : "::1",
+          "class" : "IN",
+          "ttl" : 86400
+        } ],
+        "authority" : [ {
+          "recordTypeId" : 2,
+          "recordType" : "NS",
+          "domainName" : "google.local.",
+          "rData" : "bdds1.google.local.",
+          "class" : "IN",
+          "ttl" : 86400
+        }, {
+          "recordTypeId" : 2,
+          "recordType" : "NS",
+          "domainName" : "google.local.",
+          "rData" : "bdds2.google.local.",
+          "class" : "IN",
+          "ttl" : 86400
+        } ],
+        "answers" : [ {
+          "recordTypeId" : 6,
+          "recordType" : "SOA",
+          "domainName" : "google.local.",
+          "rData" : "bdds1.google.local.postmaster.no.email.please.783096803360060025920003600",
+          "class" : "IN",
+          "ttl" : 3600
+        } ],
+        "header" : {
+          "aa" : true,
+          "cd" : false,
+          "qr" : 1,
+          "ad" : false,
+          "nsCount" : 2,
+          "rcode" : 0,
+          "opcode" : 0,
+          "ra" : false,
+          "tc" : false,
+          "rd" : false,
+          "qdCount" : 1,
+          "anCount" : 1,
+          "arCount" : 5,
+          "id" : 45925
+        },
+        "time" : 1772001593205088500,
+        "fullRcode" : 0
+      },
+      "source_type" : "dnstap",
+      "serverId" : "bdds1",
+      "socketProtocol" : "UDP",
+      "messageType" : "AuthResponse",
+      "payloadType" : "dnstap",
+      "responseAddress" : "10.1.1.1",
+      "messageTypeId" : 2,
+      "key" : "8ccd65b4-28f4-4681-a11e-ea12c4f42b25",
+      "timestamp" : "2026-02-25T06:39:54.423618065Z"
+    }
+  result:
+    custom:
+      dns:
+        flags:
+          rcode: "NoError"
+      key: "8ccd65b4-28f4-4681-a11e-ea12c4f42b25"
+      messageType: "AuthResponse"
+      messageTypeId: 2
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 18456
+        destination:
+          geoip: {}
+          ip: "10.1.1.1"
+          port: 53
+      ocsf:
+        activity_id: 2
+        activity_name: "Response"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        dst_endpoint:
+          ip: "10.1.1.1"
+          name: "bdds1"
+          port: 53
+          uid: "42014a36-eed1-b7bd-5786-869e412e536f"
+        metadata:
+          event_code: "AuthResponse"
+          log_name: "dnstap"
+          log_version: "1.0"
+          original_time: "2026-02-25T06:39:54.423618065Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "8ccd65b4-28f4-4681-a11e-ea12c4f42b25"
+          version: "1.5.0"
+        query:
+          class: "IN"
+          hostname: "google.local."
+          opcode: "Query"
+          opcode_id: 0
+          type: "SOA"
+        rcode: "NoError"
+        rcode_id: 0
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.10.10.10"
+          port: 18456
+        time: 1772001594423
+      payloadType: "dnstap"
+      queryZone: "google.local."
+      responseAddress: "10.1.1.1"
+      responseData:
+        additional:
+         -
+          recordTypeId: 1
+          recordType: "A"
+          domainName: "bdds1.google.local."
+          rData: "10.10.10.10"
+          class: "IN"
+          ttl: 3600
+         -
+          recordTypeId: 1
+          recordType: "A"
+          domainName: "bdds2.google.local."
+          rData: "10.10.10.10"
+          class: "IN"
+          ttl: 3600
+         -
+          recordTypeId: 28
+          recordType: "AAAA"
+          domainName: "bdds1.google.local."
+          rData: "::1"
+          class: "IN"
+          ttl: 86400
+        answers:
+         -
+          recordTypeId: 6
+          recordType: "SOA"
+          domainName: "google.local."
+          rData: "bdds1.google.local.postmaster.no.email.please.783096803360060025920003600"
+          class: "IN"
+          ttl: 3600
+        authority:
+         -
+          recordTypeId: 2
+          recordType: "NS"
+          domainName: "google.local."
+          rData: "bdds1.google.local."
+          class: "IN"
+          ttl: 86400
+         -
+          recordTypeId: 2
+          recordType: "NS"
+          domainName: "google.local."
+          rData: "bdds2.google.local."
+          class: "IN"
+          ttl: 86400
+        fullRcode: 0
+        header:
+          aa: true
+          ad: false
+          anCount: 1
+          arCount: 5
+          cd: false
+          id: 45925
+          nsCount: 2
+          opcode: 0
+          qdCount: 1
+          qr: 1
+          ra: false
+          rcode: 0
+          rd: false
+          tc: false
+        opt:
+          do: false
+          ednsVersion: 0
+          extendedRcode: 0
+          options:
+           -
+            optName: "Expire"
+            optCode: 9
+            optValue: "ACeNAA=="
+          udpPayloadSize: 1232
+        question:
+         -
+          domainName: "google.local."
+          questionTypeId: 6
+          class: "IN"
+          questionType: "SOA"
+        rcodeName: "NoError"
+        time: 1772001593205088500
+      responsePort: 53
+      response_op_code_value: "Query"
+      schemaVersion: "1.0"
+      serverId: "bdds1"
+      socketFamily: "INET"
+      socketProtocol: "UDP"
+      sourceAddress: "10.10.10.10"
+      sourceId: "42014a36-eed1-b7bd-5786-869e412e536f"
+      sourcePort: 18456
+      source_type: "dnstap"
+      timestamp: "2026-02-25T06:39:54.423618065Z"
+    message: |-
+      {
+        "sourceId" : "42014a36-eed1-b7bd-5786-869e412e536f",
+        "sourcePort" : 18456,
+        "schemaVersion" : "1.0",
+        "sourceAddress" : "10.10.10.10",
+        "queryZone" : "google.local.",
+        "responsePort" : 53,
+        "socketFamily" : "INET",
+        "responseData" : {
+          "rcodeName" : "NoError",
+          "opt" : {
+            "ednsVersion" : 0,
+            "udpPayloadSize" : 1232,
+            "options" : [ {
+              "optName" : "Expire",
+              "optCode" : 9,
+              "optValue" : "ACeNAA=="
+            } ],
+            "do" : false,
+            "extendedRcode" : 0
+          },
+          "question" : [ {
+            "domainName" : "google.local.",
+            "questionTypeId" : 6,
+            "class" : "IN",
+            "questionType" : "SOA"
+          } ],
+          "additional" : [ {
+            "recordTypeId" : 1,
+            "recordType" : "A",
+            "domainName" : "bdds1.google.local.",
+            "rData" : "10.10.10.10",
+            "class" : "IN",
+            "ttl" : 3600
+          }, {
+            "recordTypeId" : 1,
+            "recordType" : "A",
+            "domainName" : "bdds2.google.local.",
+            "rData" : "10.10.10.10",
+            "class" : "IN",
+            "ttl" : 3600
+          }, {
+            "recordTypeId" : 28,
+            "recordType" : "AAAA",
+            "domainName" : "bdds1.google.local.",
+            "rData" : "::1",
+            "class" : "IN",
+            "ttl" : 86400
+          } ],
+          "authority" : [ {
+            "recordTypeId" : 2,
+            "recordType" : "NS",
+            "domainName" : "google.local.",
+            "rData" : "bdds1.google.local.",
+            "class" : "IN",
+            "ttl" : 86400
+          }, {
+            "recordTypeId" : 2,
+            "recordType" : "NS",
+            "domainName" : "google.local.",
+            "rData" : "bdds2.google.local.",
+            "class" : "IN",
+            "ttl" : 86400
+          } ],
+          "answers" : [ {
+            "recordTypeId" : 6,
+            "recordType" : "SOA",
+            "domainName" : "google.local.",
+            "rData" : "bdds1.google.local.postmaster.no.email.please.783096803360060025920003600",
+            "class" : "IN",
+            "ttl" : 3600
+          } ],
+          "header" : {
+            "aa" : true,
+            "cd" : false,
+            "qr" : 1,
+            "ad" : false,
+            "nsCount" : 2,
+            "rcode" : 0,
+            "opcode" : 0,
+            "ra" : false,
+            "tc" : false,
+            "rd" : false,
+            "qdCount" : 1,
+            "anCount" : 1,
+            "arCount" : 5,
+            "id" : 45925
+          },
+          "time" : 1772001593205088500,
+          "fullRcode" : 0
+        },
+        "source_type" : "dnstap",
+        "serverId" : "bdds1",
+        "socketProtocol" : "UDP",
+        "messageType" : "AuthResponse",
+        "payloadType" : "dnstap",
+        "responseAddress" : "10.1.1.1",
+        "messageTypeId" : 2,
+        "key" : "8ccd65b4-28f4-4681-a11e-ea12c4f42b25",
+        "timestamp" : "2026-02-25T06:39:54.423618065Z"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1772001594423
+ -
+  sample: |-
+    {
+      "sourceId" : "42014a36-eed1-b7bd-5786-123456789123",
+      "sourcePort" : 39927,
+      "schemaVersion" : "1.0",
+      "sourceAddress" : "10.10.10.10",
+      "responsePort" : 53,
+      "socketFamily" : "INET",
+      "source_type" : "dnstap",
+      "serverId" : "bdds1",
+      "socketProtocol" : "UDP",
+      "messageType" : "AuthQuery",
+      "payloadType" : "dnstap",
+      "responseAddress" : "10.1.1.1",
+      "messageTypeId" : 1,
+      "requestData" : {
+        "rcodeName" : "NoError",
+        "question" : [ {
+          "domainName" : "google.com",
+          "questionTypeId" : 1,
+          "class" : "IN",
+          "questionType" : "A"
+        } ],
+        "header" : {
+          "aa" : false,
+          "cd" : false,
+          "qr" : 0,
+          "ad" : false,
+          "nsCount" : 0,
+          "rcode" : 0,
+          "opcode" : 0,
+          "ra" : false,
+          "tc" : false,
+          "rd" : true,
+          "qdCount" : 1,
+          "anCount" : 0,
+          "arCount" : 0,
+          "id" : 45402
+        },
+        "time" : 1771522139229097200,
+        "fullRcode" : 0
+      },
+      "key" : "3d047532-8644-474d-a58b-123456789123",
+      "timestamp" : "2026-02-19T17:29:00.526703911Z"
+    }
+  result:
+    custom:
+      dns:
+        flags:
+          rcode: "NoError"
+      key: "3d047532-8644-474d-a58b-123456789123"
+      messageType: "AuthQuery"
+      messageTypeId: 1
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 39927
+        destination:
+          geoip: {}
+          ip: "10.1.1.1"
+          port: 53
+      ocsf:
+        activity_id: 1
+        activity_name: "Query"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        dst_endpoint:
+          ip: "10.1.1.1"
+          name: "bdds1"
+          port: 53
+          uid: "42014a36-eed1-b7bd-5786-123456789123"
+        metadata:
+          event_code: "AuthQuery"
+          log_name: "dnstap"
+          log_version: "1.0"
+          original_time: "2026-02-19T17:29:00.526703911Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "3d047532-8644-474d-a58b-123456789123"
+          version: "1.5.0"
+        query:
+          class: "IN"
+          hostname: "google.com"
+          opcode: "Query"
+          opcode_id: 0
+          type: "A"
+        rcode: "NoError"
+        rcode_id: 0
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.10.10.10"
+          port: 39927
+        time: 1771522140526
+      payloadType: "dnstap"
+      requestData:
+        fullRcode: 0
+        header:
+          aa: false
+          ad: false
+          anCount: 0
+          arCount: 0
+          cd: false
+          id: 45402
+          nsCount: 0
+          opcode: 0
+          qdCount: 1
+          qr: 0
+          ra: false
+          rcode: 0
+          rd: true
+          tc: false
+        question:
+         -
+          domainName: "google.com"
+          questionTypeId: 1
+          class: "IN"
+          questionType: "A"
+        rcodeName: "NoError"
+        time: 1771522139229097200
+      request_op_code_value: "Query"
+      responseAddress: "10.1.1.1"
+      responsePort: 53
+      schemaVersion: "1.0"
+      serverId: "bdds1"
+      socketFamily: "INET"
+      socketProtocol: "UDP"
+      sourceAddress: "10.10.10.10"
+      sourceId: "42014a36-eed1-b7bd-5786-123456789123"
+      sourcePort: 39927
+      source_type: "dnstap"
+      timestamp: "2026-02-19T17:29:00.526703911Z"
+    message: |-
+      {
+        "sourceId" : "42014a36-eed1-b7bd-5786-123456789123",
+        "sourcePort" : 39927,
+        "schemaVersion" : "1.0",
+        "sourceAddress" : "10.10.10.10",
+        "responsePort" : 53,
+        "socketFamily" : "INET",
+        "source_type" : "dnstap",
+        "serverId" : "bdds1",
+        "socketProtocol" : "UDP",
+        "messageType" : "AuthQuery",
+        "payloadType" : "dnstap",
+        "responseAddress" : "10.1.1.1",
+        "messageTypeId" : 1,
+        "requestData" : {
+          "rcodeName" : "NoError",
+          "question" : [ {
+            "domainName" : "google.com",
+            "questionTypeId" : 1,
+            "class" : "IN",
+            "questionType" : "A"
+          } ],
+          "header" : {
+            "aa" : false,
+            "cd" : false,
+            "qr" : 0,
+            "ad" : false,
+            "nsCount" : 0,
+            "rcode" : 0,
+            "opcode" : 0,
+            "ra" : false,
+            "tc" : false,
+            "rd" : true,
+            "qdCount" : 1,
+            "anCount" : 0,
+            "arCount" : 0,
+            "id" : 45402
+          },
+          "time" : 1771522139229097200,
+          "fullRcode" : 0
+        },
+        "key" : "3d047532-8644-474d-a58b-123456789123",
+        "timestamp" : "2026-02-19T17:29:00.526703911Z"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1771522140526
+ -
+  sample: |-
+    {
+      "sourceId" : "4201fad9-b30e-1dc5-0833-123456789123",
+      "timePrecision" : "s",
+      "schemaVersion" : "1.0.0",
+      "data" : {
+        "dhcpv4Message" : {
+          "chaddr" : "::1",
+          "op" : 1,
+          "hType" : 1,
+          "flags" : "0x0000",
+          "giaddr" : "10.10.10.10",
+          "yiaddr" : "10.10.10.10",
+          "ciaddr" : "10.10.10.10",
+          "xId" : "0xcef7266d",
+          "hLength" : 6,
+          "siaddr" : "10.10.10.10",
+          "secs" : 0,
+          "options" : [ {
+            "messageType" : "DHCP Discover",
+            "messageTypeId" : 1,
+            "optionId" : 53
+          }, {
+            "clientId" : "00 50 56 81 89 9a",
+            "optionId" : 61,
+            "type" : 1
+          }, {
+            "hostName" : "C-Lab-18",
+            "optionId" : 12
+          }, {
+            "optionData" : "4d 53 46 54 20 35 2e 30",
+            "optionId" : 60
+          }, {
+            "parameterRequest" : [ 1 ],
+            "optionId" : 55
+          } ],
+          "hops" : 0
+        }
+      },
+      "payloadType" : "dhcpv4-packet",
+      "time" : 1771457402,
+      "serverId" : "bdds2",
+      "key" : "9644c2bc-2391-4176-a964-123456789123",
+      "timestamp" : "2026-02-18T23:30:02.663295550Z"
+    }
+  result:
+    custom:
+      data:
+        dhcpv4Message:
+          chaddr: "::1"
+          ciaddr: "10.10.10.10"
+          flags: "0x0000"
+          giaddr: "10.10.10.10"
+          hLength: 6
+          hType: 1
+          hops: 0
+          op: 1
+          options:
+           -
+            messageType: "DHCP Discover"
+            messageTypeId: 1
+            optionId: 53
+           -
+            clientId: "00 50 56 81 89 9a"
+            optionId: 61
+            type: 1
+           -
+            hostName: "C-Lab-18"
+            optionId: 12
+           -
+            optionData: "4d 53 46 54 20 35 2e 30"
+            optionId: 60
+           -
+            parameterRequest:
+             - 1
+            optionId: 55
+          secs: 0
+          siaddr: "10.10.10.10"
+          xId: "0xcef7266d"
+          yiaddr: "10.10.10.10"
+      key: "9644c2bc-2391-4176-a964-123456789123"
+      message_direction_value: "BOOTREQUEST"
+      ocsf:
+        activity_id: 1
+        activity_name: "Discover"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DHCP Activity"
+        class_uid: 4004
+        connection_info:
+          direction: "Outbound"
+          direction_id: 2
+        dst_endpoint:
+          name: "bdds2"
+          uid: "4201fad9-b30e-1dc5-0833-123456789123"
+        metadata:
+          event_code: "DHCP Discover"
+          log_name: "dhcpv4-packet"
+          log_version: "1.0.0"
+          original_time: "2026-02-18T23:30:02.663295550Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "9644c2bc-2391-4176-a964-123456789123"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1771457402663
+      payloadType: "dhcpv4-packet"
+      schemaVersion: "1.0.0"
+      serverId: "bdds2"
+      sourceId: "4201fad9-b30e-1dc5-0833-123456789123"
+      time: 1771457402
+      timePrecision: "s"
+      timestamp: "2026-02-18T23:30:02.663295550Z"
+    message: |-
+      {
+        "sourceId" : "4201fad9-b30e-1dc5-0833-123456789123",
+        "timePrecision" : "s",
+        "schemaVersion" : "1.0.0",
+        "data" : {
+          "dhcpv4Message" : {
+            "chaddr" : "::1",
+            "op" : 1,
+            "hType" : 1,
+            "flags" : "0x0000",
+            "giaddr" : "10.10.10.10",
+            "yiaddr" : "10.10.10.10",
+            "ciaddr" : "10.10.10.10",
+            "xId" : "0xcef7266d",
+            "hLength" : 6,
+            "siaddr" : "10.10.10.10",
+            "secs" : 0,
+            "options" : [ {
+              "messageType" : "DHCP Discover",
+              "messageTypeId" : 1,
+              "optionId" : 53
+            }, {
+              "clientId" : "00 50 56 81 89 9a",
+              "optionId" : 61,
+              "type" : 1
+            }, {
+              "hostName" : "C-Lab-18",
+              "optionId" : 12
+            }, {
+              "optionData" : "4d 53 46 54 20 35 2e 30",
+              "optionId" : 60
+            }, {
+              "parameterRequest" : [ 1 ],
+              "optionId" : 55
+            } ],
+            "hops" : 0
+          }
+        },
+        "payloadType" : "dhcpv4-packet",
+        "time" : 1771457402,
+        "serverId" : "bdds2",
+        "key" : "9644c2bc-2391-4176-a964-123456789123",
+        "timestamp" : "2026-02-18T23:30:02.663295550Z"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1771457402663
+ -
+  sample: |-
+    {
+      "sourceId" : "42014a36-eed1-b7bd-5786-123456789123",
+      "timePrecision" : "s",
+      "schemaVersion" : "1.0.0",
+      "data" : {
+        "dhcpv4Message" : {
+          "chaddr" : "::1",
+          "op" : 2,
+          "hType" : 1,
+          "flags" : "0x0000",
+          "giaddr" : "10.10.10.10",
+          "yiaddr" : "10.10.10.10",
+          "ciaddr" : "10.10.10.10",
+          "xId" : "0xbc7964fc",
+          "hLength" : 6,
+          "siaddr" : "10.10.10.10",
+          "secs" : 7168,
+          "options" : [ {
+            "messageType" : "DHCP Ack",
+            "messageTypeId" : 5,
+            "optionId" : 53
+          }, {
+            "optionId" : 54,
+            "serverId" : "10.10.10.10"
+          }, {
+            "leaseTime" : 53801,
+            "optionId" : 51
+          }, {
+            "optionId" : 1,
+            "subnetMask" : "10.10.10.10"
+          }, {
+            "router" : [ "10.10.10.10" ],
+            "optionId" : 3
+          }, {
+            "domainNameSever" : [ "10.10.10.10", "10.10.10.10" ],
+            "optionId" : 6
+          } ],
+          "hops" : 0
+        }
+      },
+      "payloadType" : "dhcpv4-packet",
+      "time" : 1771461166,
+      "serverId" : "bdds1",
+      "key" : "61f167bc-e954-4399-8ee2-123456789123",
+      "timestamp" : "2026-02-19T00:32:46.977179413Z"
+    }
+  result:
+    custom:
+      data:
+        dhcpv4Message:
+          chaddr: "::1"
+          ciaddr: "10.10.10.10"
+          flags: "0x0000"
+          giaddr: "10.10.10.10"
+          hLength: 6
+          hType: 1
+          hops: 0
+          op: 2
+          options:
+           -
+            messageType: "DHCP Ack"
+            messageTypeId: 5
+            optionId: 53
+           -
+            optionId: 54
+            serverId: "10.10.10.10"
+           -
+            leaseTime: 53801
+            optionId: 51
+           -
+            optionId: 1
+            subnetMask: "10.10.10.10"
+           -
+            router:
+             - "10.10.10.10"
+            optionId: 3
+           -
+            domainNameSever:
+             - "10.10.10.10"
+             - "10.10.10.10"
+            optionId: 6
+          secs: 7168
+          siaddr: "10.10.10.10"
+          xId: "0xbc7964fc"
+          yiaddr: "10.10.10.10"
+      key: "61f167bc-e954-4399-8ee2-123456789123"
+      message_direction_value: "BOOTREPLY"
+      ocsf:
+        activity_id: 5
+        activity_name: "Ack"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DHCP Activity"
+        class_uid: 4004
+        connection_info:
+          direction: "Inbound"
+          direction_id: 1
+        dst_endpoint:
+          name: "bdds1"
+          uid: "42014a36-eed1-b7bd-5786-123456789123"
+        metadata:
+          event_code: "DHCP Ack"
+          log_name: "dhcpv4-packet"
+          log_version: "1.0.0"
+          original_time: "2026-02-19T00:32:46.977179413Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "61f167bc-e954-4399-8ee2-123456789123"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1771461166977
+      payloadType: "dhcpv4-packet"
+      schemaVersion: "1.0.0"
+      serverId: "bdds1"
+      sourceId: "42014a36-eed1-b7bd-5786-123456789123"
+      time: 1771461166
+      timePrecision: "s"
+      timestamp: "2026-02-19T00:32:46.977179413Z"
+    message: |-
+      {
+        "sourceId" : "42014a36-eed1-b7bd-5786-123456789123",
+        "timePrecision" : "s",
+        "schemaVersion" : "1.0.0",
+        "data" : {
+          "dhcpv4Message" : {
+            "chaddr" : "::1",
+            "op" : 2,
+            "hType" : 1,
+            "flags" : "0x0000",
+            "giaddr" : "10.10.10.10",
+            "yiaddr" : "10.10.10.10",
+            "ciaddr" : "10.10.10.10",
+            "xId" : "0xbc7964fc",
+            "hLength" : 6,
+            "siaddr" : "10.10.10.10",
+            "secs" : 7168,
+            "options" : [ {
+              "messageType" : "DHCP Ack",
+              "messageTypeId" : 5,
+              "optionId" : 53
+            }, {
+              "optionId" : 54,
+              "serverId" : "10.10.10.10"
+            }, {
+              "leaseTime" : 53801,
+              "optionId" : 51
+            }, {
+              "optionId" : 1,
+              "subnetMask" : "10.10.10.10"
+            }, {
+              "router" : [ "10.10.10.10" ],
+              "optionId" : 3
+            }, {
+              "domainNameSever" : [ "10.10.10.10", "10.10.10.10" ],
+              "optionId" : 6
+            } ],
+            "hops" : 0
+          }
+        },
+        "payloadType" : "dhcpv4-packet",
+        "time" : 1771461166,
+        "serverId" : "bdds1",
+        "key" : "61f167bc-e954-4399-8ee2-123456789123",
+        "timestamp" : "2026-02-19T00:32:46.977179413Z"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1771461166977
+ -
+  sample: |-
+    {
+      "sourceId" : "42014a36-eed1-b7bd-5786-123456789123",
+      "timePrecision" : "s",
+      "schemaVersion" : "1.0.0",
+      "data" : {
+        "dhcpv6Message" : {
+          "messageType" : "REPLY",
+          "messageTypeId" : 7,
+          "options" : [ {
+            "iaid" : "14005056",
+            "optionId" : 3,
+            "t1" : 0,
+            "t2" : 0,
+            "iaNaOptions" : [ {
+              "preferredLifetime" : 54000,
+              "ipv6Addr" : "::1",
+              "validLifetime" : 86400,
+              "optionId" : 5
+            } ]
+          }, {
+            "duid" : "000100013125ebe8005056831e56",
+            "optionId" : 1
+          }, {
+            "duid" : "0001000131301668005056815d9e",
+            "optionId" : 2
+          } ],
+          "transactionId" : "0x353d6d"
+        }
+      },
+      "payloadType" : "dhcpv6-packet",
+      "time" : 1771461166,
+      "serverId" : "bdds1",
+      "key" : "d24f3877-7ae8-4794-aed2-123456789123",
+      "timestamp" : "2026-02-19T00:32:46.977179413Z"
+    }
+  result:
+    custom:
+      data:
+        dhcpv6Message:
+          messageType: "REPLY"
+          messageTypeId: 7
+          options:
+           -
+            iaid: "14005056"
+            optionId: 3
+            t1: 0
+            t2: 0
+            iaNaOptions:
+             -
+              preferredLifetime: 54000
+              ipv6Addr: "::1"
+              validLifetime: 86400
+              optionId: 5
+           -
+            duid: "000100013125ebe8005056831e56"
+            optionId: 1
+           -
+            duid: "0001000131301668005056815d9e"
+            optionId: 2
+          transactionId: "0x353d6d"
+      key: "d24f3877-7ae8-4794-aed2-123456789123"
+      ocsf:
+        activity_id: 99
+        activity_name: "REPLY"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DHCP Activity"
+        class_uid: 4004
+        dst_endpoint:
+          name: "bdds1"
+          uid: "42014a36-eed1-b7bd-5786-123456789123"
+        is_renewal: false
+        metadata:
+          event_code: "REPLY"
+          log_name: "dhcpv6-packet"
+          log_version: "1.0.0"
+          original_time: "2026-02-19T00:32:46.977179413Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "d24f3877-7ae8-4794-aed2-123456789123"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1771461166977
+        transaction_uid: "0x353d6d"
+      payloadType: "dhcpv6-packet"
+      schemaVersion: "1.0.0"
+      serverId: "bdds1"
+      sourceId: "42014a36-eed1-b7bd-5786-123456789123"
+      time: 1771461166
+      timePrecision: "s"
+      timestamp: "2026-02-19T00:32:46.977179413Z"
+    message: |-
+      {
+        "sourceId" : "42014a36-eed1-b7bd-5786-123456789123",
+        "timePrecision" : "s",
+        "schemaVersion" : "1.0.0",
+        "data" : {
+          "dhcpv6Message" : {
+            "messageType" : "REPLY",
+            "messageTypeId" : 7,
+            "options" : [ {
+              "iaid" : "14005056",
+              "optionId" : 3,
+              "t1" : 0,
+              "t2" : 0,
+              "iaNaOptions" : [ {
+                "preferredLifetime" : 54000,
+                "ipv6Addr" : "::1",
+                "validLifetime" : 86400,
+                "optionId" : 5
+              } ]
+            }, {
+              "duid" : "000100013125ebe8005056831e56",
+              "optionId" : 1
+            }, {
+              "duid" : "0001000131301668005056815d9e",
+              "optionId" : 2
+            } ],
+            "transactionId" : "0x353d6d"
+          }
+        },
+        "payloadType" : "dhcpv6-packet",
+        "time" : 1771461166,
+        "serverId" : "bdds1",
+        "key" : "d24f3877-7ae8-4794-aed2-123456789123",
+        "timestamp" : "2026-02-19T00:32:46.977179413Z"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1771461166977
+ -
+  sample: |-
+    {
+      "sourceId" : "42014a36-eed1-b7bd-5786-123456789123",
+      "timePrecision" : "s",
+      "schemaVersion" : "1.0.0",
+      "data" : {
+        "dhcpv6Message" : {
+          "messageType" : "ADVERTISE",
+          "messageTypeId" : 2,
+          "options" : [ {
+            "iaid" : "14005056",
+            "optionId" : 3,
+            "t1" : 0,
+            "t2" : 0,
+            "iaNaOptions" : [ {
+              "preferredLifetime" : 54000,
+              "ipv6Addr" : "::1",
+              "validLifetime" : 86400,
+              "optionId" : 5
+            } ]
+          }, {
+            "duid" : "000100013125ebe8005056831e56",
+            "optionId" : 1
+          }, {
+            "duid" : "0001000131301668005056815d9e",
+            "optionId" : 2
+          } ],
+          "transactionId" : "0x433b40"
+        }
+      },
+      "payloadType" : "dhcpv6-packet",
+      "time" : 1771461166,
+      "serverId" : "bdds1",
+      "key" : "f8ede4f0-1ac7-4d0e-acc2-123456789123",
+      "timestamp" : "2026-02-19T00:32:46.977179413Z"
+    }
+  result:
+    custom:
+      data:
+        dhcpv6Message:
+          messageType: "ADVERTISE"
+          messageTypeId: 2
+          options:
+           -
+            iaid: "14005056"
+            optionId: 3
+            t1: 0
+            t2: 0
+            iaNaOptions:
+             -
+              preferredLifetime: 54000
+              ipv6Addr: "::1"
+              validLifetime: 86400
+              optionId: 5
+           -
+            duid: "000100013125ebe8005056831e56"
+            optionId: 1
+           -
+            duid: "0001000131301668005056815d9e"
+            optionId: 2
+          transactionId: "0x433b40"
+      key: "f8ede4f0-1ac7-4d0e-acc2-123456789123"
+      ocsf:
+        activity_id: 2
+        activity_name: "Offer"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DHCP Activity"
+        class_uid: 4004
+        dst_endpoint:
+          name: "bdds1"
+          uid: "42014a36-eed1-b7bd-5786-123456789123"
+        is_renewal: false
+        metadata:
+          event_code: "ADVERTISE"
+          log_name: "dhcpv6-packet"
+          log_version: "1.0.0"
+          original_time: "2026-02-19T00:32:46.977179413Z"
+          product:
+            name: "BlueCat Integrity"
+            vendor_name: "BlueCat"
+          uid: "f8ede4f0-1ac7-4d0e-acc2-123456789123"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1771461166977
+        transaction_uid: "0x433b40"
+      payloadType: "dhcpv6-packet"
+      schemaVersion: "1.0.0"
+      serverId: "bdds1"
+      sourceId: "42014a36-eed1-b7bd-5786-123456789123"
+      time: 1771461166
+      timePrecision: "s"
+      timestamp: "2026-02-19T00:32:46.977179413Z"
+    message: |-
+      {
+        "sourceId" : "42014a36-eed1-b7bd-5786-123456789123",
+        "timePrecision" : "s",
+        "schemaVersion" : "1.0.0",
+        "data" : {
+          "dhcpv6Message" : {
+            "messageType" : "ADVERTISE",
+            "messageTypeId" : 2,
+            "options" : [ {
+              "iaid" : "14005056",
+              "optionId" : 3,
+              "t1" : 0,
+              "t2" : 0,
+              "iaNaOptions" : [ {
+                "preferredLifetime" : 54000,
+                "ipv6Addr" : "::1",
+                "validLifetime" : 86400,
+                "optionId" : 5
+              } ]
+            }, {
+              "duid" : "000100013125ebe8005056831e56",
+              "optionId" : 1
+            }, {
+              "duid" : "0001000131301668005056815d9e",
+              "optionId" : 2
+            } ],
+            "transactionId" : "0x433b40"
+          }
+        },
+        "payloadType" : "dhcpv6-packet",
+        "time" : 1771461166,
+        "serverId" : "bdds1",
+        "key" : "f8ede4f0-1ac7-4d0e-acc2-123456789123",
+        "timestamp" : "2026-02-19T00:32:46.977179413Z"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1771461166977
