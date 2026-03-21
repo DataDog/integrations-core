@@ -357,15 +357,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.query.hostname` to `ocsf.query.hostname`
-              sources:
-                - ocsf.query.hostname
-              sourceType: attribute
-              target: ocsf.query.hostname
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
             - name: ocsf.rcode_id
               categories:
                 - filter:
@@ -466,6 +457,24 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              sourceType: attribute
+              target: ocsf.metadata.product.vendor_name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              sourceType: attribute
+              target: ocsf.metadata.product.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `payloadType` to `ocsf.metadata.log_name`
               sources:
                 - payloadType
@@ -520,83 +529,21 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `ocsf.query.hostname` to `ocsf.query.hostname`
+              sources:
+                - ocsf.query.hostname
+              sourceType: attribute
+              target: ocsf.query.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `ocsf.query.type` to `ocsf.query.type`
               sources:
                 - ocsf.query.type
               sourceType: attribute
               target: ocsf.query.type
               targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `sourceAddress` to `ocsf.src_endpoint.ip`
-              sources:
-                - sourceAddress
-              sourceType: attribute
-              target: ocsf.src_endpoint.ip
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `sourcePort` to `ocsf.src_endpoint.port`
-              sources:
-                - sourcePort
-              sourceType: attribute
-              target: ocsf.src_endpoint.port
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `responseAddress` to `ocsf.dst_endpoint.ip`
-              sources:
-                - responseAddress
-              sourceType: attribute
-              target: ocsf.dst_endpoint.ip
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `responsePort` to `ocsf.dst_endpoint.port`
-              sources:
-                - responsePort
-              sourceType: attribute
-              target: ocsf.dst_endpoint.port
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `sourceId` to `ocsf.dst_endpoint.uid`
-              sources:
-                - sourceId
-              sourceType: attribute
-              target: ocsf.dst_endpoint.uid
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
-              sources:
-                - ocsf.metadata.product.vendor_name
-              sourceType: attribute
-              target: ocsf.metadata.product.vendor_name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
-              sources:
-                - ocsf.metadata.product.name
-              sourceType: attribute
-              target: ocsf.metadata.product.name
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `ocsf.query` to `ocsf.query`
-              sources:
-                - ocsf.query
-              sourceType: attribute
-              target: ocsf.query
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
@@ -642,12 +589,93 @@ pipeline:
                   ocsf.query.opcode:
                     - Unassigned
               type: schema-category-mapper
+            - name: Map `sourceAddress` to `ocsf.src_endpoint.ip`
+              sources:
+                - sourceAddress
+              sourceType: attribute
+              target: ocsf.src_endpoint.ip
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `sourcePort` to `ocsf.src_endpoint.port`
+              sources:
+                - sourcePort
+              sourceType: attribute
+              target: ocsf.src_endpoint.port
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `responseAddress` to `ocsf.dst_endpoint.ip`
+              sources:
+                - responseAddress
+              sourceType: attribute
+              target: ocsf.dst_endpoint.ip
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `responsePort` to `ocsf.dst_endpoint.port`
+              sources:
+                - responsePort
+              sourceType: attribute
+              target: ocsf.dst_endpoint.port
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `sourceId` to `ocsf.dst_endpoint.uid`
+              sources:
+                - sourceId
+              sourceType: attribute
+              target: ocsf.dst_endpoint.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `serverId` to `ocsf.dst_endpoint.name`
               sources:
                 - serverId
               sourceType: attribute
               target: ocsf.dst_endpoint.name
               targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `responseData.answers.recordType` to `ocsf.answers.type`
+              sources:
+                - responseData.answers.recordType
+              sourceType: attribute
+              target: ocsf.answers.type
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `responseData.answers.rData` to `ocsf.answers.rdata`
+              sources:
+                - responseData.answers.rData
+              sourceType: attribute
+              target: ocsf.answers.rdata
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `responseData.answers.class` to `ocsf.answers.class`
+              sources:
+                - responseData.answers.class
+              sourceType: attribute
+              target: ocsf.answers.class
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `responseData.answers.ttl` to `ocsf.answers.ttl`
+              sources:
+                - responseData.answers.ttl
+              sourceType: attribute
+              target: ocsf.answers.ttl
+              targetFormat: integer
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
@@ -753,8 +781,7 @@ pipeline:
                 - filter:
                     query: -(@data.dhcpv6Message.messageType:(SOLICIT OR ADVERTISE OR REQUEST OR
                       RENEW OR REBIND OR DECLINE OR RELEASE OR
-                      INFORMATION-REQUEST) OR
-                      @data.dhcpv4Message.options.messageType:("DHCP Discover"
+                      INFORMATION-REQUEST) OR @data.dhcpv4Message.options.messageType:("DHCP Discover"
                       OR "DHCP Offer" OR "DHCP Request" OR "DHCP Decline" OR
                       "DHCP Ack" OR "DHCP Nak" OR "DHCP Release" OR
                       "DHCP Inform" OR "DHCP Expire"))
