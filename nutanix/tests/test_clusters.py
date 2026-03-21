@@ -7,6 +7,7 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.nutanix import NutanixCheck
+from tests.constants import BASE_TAGS, CLUSTER_TAGS
 
 pytestmark = [pytest.mark.unit]
 
@@ -15,7 +16,7 @@ def test_health_check_success(dd_run_check, aggregator, mock_instance, mock_http
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    aggregator.assert_metric("nutanix.health.up", value=1, count=1, tags=['nutanix', 'prism_central:10.0.0.197'])
+    aggregator.assert_metric("nutanix.health.up", value=1, count=1, tags=BASE_TAGS)
 
 
 def test_health_check_failure(dd_run_check, aggregator, mock_instance, mocker):
@@ -28,24 +29,17 @@ def test_health_check_failure(dd_run_check, aggregator, mock_instance, mocker):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    aggregator.assert_metric("nutanix.health.up", value=0, count=1, tags=['nutanix', 'prism_central:10.0.0.197'])
+    aggregator.assert_metric("nutanix.health.up", value=0, count=1, tags=BASE_TAGS)
 
 
 def test_cluster_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    expected_tags = [
-        'Team:agent-integrations',
-        'ntnx_cluster_name:datadog-nutanix-dev',
-        'nutanix',
-        'prism_central:10.0.0.197',
-    ]
-
-    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=expected_tags)
-    aggregator.assert_metric("nutanix.cluster.nbr_nodes", value=1, tags=expected_tags)
-    aggregator.assert_metric("nutanix.cluster.vm.count", value=5, tags=expected_tags)
-    aggregator.assert_metric("nutanix.cluster.vm.inefficient_count", value=0, tags=expected_tags)
+    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=CLUSTER_TAGS)
+    aggregator.assert_metric("nutanix.cluster.nbr_nodes", value=1, tags=CLUSTER_TAGS)
+    aggregator.assert_metric("nutanix.cluster.vm.count", value=5, tags=CLUSTER_TAGS)
+    aggregator.assert_metric("nutanix.cluster.vm.inefficient_count", value=0, tags=CLUSTER_TAGS)
 
 
 def test_cluster_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -54,15 +48,8 @@ def test_cluster_stats_metrics(dd_run_check, aggregator, mock_instance, mock_htt
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    expected_tags = [
-        'Team:agent-integrations',
-        'ntnx_cluster_name:datadog-nutanix-dev',
-        'nutanix',
-        'prism_central:10.0.0.197',
-    ]
-
     for metric in CLUSTER_STATS_METRICS_REQUIRED:
-        aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
+        aggregator.assert_metric(metric, at_least=1, tags=CLUSTER_TAGS)
 
 
 def test_missing_pc_ip_raises_error():

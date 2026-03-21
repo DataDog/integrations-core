@@ -6,6 +6,7 @@
 import pytest
 
 from datadog_checks.nutanix import NutanixCheck
+from tests.constants import CLUSTER_TAGS
 
 pytestmark = [pytest.mark.unit]
 
@@ -15,18 +16,15 @@ HOST_ID = "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
 HOST_NAME = "10-0-0-103-aws-us-east-1a"
 VM_ID = "63e222ec-87ff-491b-b7ba-9247752d44a3"
 
-BASE_TAGS = ["nutanix", "prism_central:10.0.0.197"]
-
 
 def test_default_collects_only_on_vms_and_user_category_tags(dd_run_check, aggregator, mock_instance, mock_http_get):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
-    expected_tags = BASE_TAGS + ['Team:agent-integrations', 'ntnx_cluster_name:' + CLUSTER_NAME]
-    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=CLUSTER_TAGS)
     aggregator.assert_metric("nutanix.host.count", at_least=1)
 
     vm_metrics = aggregator.metrics("nutanix.vm.count")
-    assert len(vm_metrics) == 3
+    assert len(vm_metrics) == 4
     assert not any(any(tag == "ntnx_vm_name:test-vm-that-should-remain-off" for tag in m.tags) for m in vm_metrics)
 
     vms_with_category_tags = [
@@ -49,8 +47,7 @@ def test_include_cluster_by_id(dd_run_check, aggregator, mock_instance, mock_htt
     ]
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
-    expected_tags = BASE_TAGS + ['Team:agent-integrations', 'ntnx_cluster_name:' + CLUSTER_NAME]
-    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=CLUSTER_TAGS)
 
 
 def test_include_host_by_name_regex(dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -72,12 +69,12 @@ def test_exclude_vm_by_id(dd_run_check, aggregator, mock_instance, mock_http_get
     aggregator.assert_metric("nutanix.cluster.count", value=1)
     aggregator.assert_metric("nutanix.host.count", at_least=1)
     vm_counts = [m for m in aggregator.metrics("nutanix.vm.count") if m.value == 1]
-    assert len(vm_counts) == 2
+    assert len(vm_counts) == 3
 
 
 def test_exclude_cluster_by_name_regex(dd_run_check, aggregator, mock_instance, mock_http_get):
     mock_instance["resource_filters"] = [
-        {"resource": "cluster", "property": "name", "type": "exclude", "patterns": ["^datadog-"]},
+        {"resource": "cluster", "property": "name", "type": "exclude", "patterns": ["^datadog-", "^second-"]},
     ]
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
@@ -102,8 +99,7 @@ def test_multiple_include_patterns(dd_run_check, aggregator, mock_instance, mock
     ]
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
-    expected_tags = BASE_TAGS + ['Team:agent-integrations', 'ntnx_cluster_name:' + CLUSTER_NAME]
-    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=CLUSTER_TAGS)
 
 
 def test_include_only_system_category_tags_when_filtered(dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -266,7 +262,7 @@ def test_default_vm_power_state_filter_applies_with_vm_name_filter(
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    assert len(aggregator.metrics("nutanix.vm.count")) == 3
+    assert len(aggregator.metrics("nutanix.vm.count")) == 4
 
 
 def test_batch_vm_collection_applies_resource_filters(dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -277,7 +273,7 @@ def test_batch_vm_collection_applies_resource_filters(dd_run_check, aggregator, 
     dd_run_check(check)
 
     vm_metrics = aggregator.metrics("nutanix.vm.count")
-    assert len(vm_metrics) == 2
+    assert len(vm_metrics) == 3
     vm_names = {tag.split(":")[1] for m in vm_metrics for tag in m.tags if tag.startswith("ntnx_vm_name:")}
     assert "ubuntu-vm" not in vm_names
 
@@ -290,4 +286,5 @@ def test_explicit_vm_power_state_filter_overrides_default(dd_run_check, aggregat
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    assert len(aggregator.metrics("nutanix.vm.count")) == 4
+    # 5 VMs: 3 ON + 1 OFF on host 1, plus 1 ON on host 2
+    assert len(aggregator.metrics("nutanix.vm.count")) == 5

@@ -6,6 +6,7 @@
 import pytest
 
 from datadog_checks.nutanix import NutanixCheck
+from tests.constants import OFF_VM_NAME, OFF_VM_TAGS, PCVM_NAME, PCVM_TAGS
 from tests.metrics import VM_STATS_METRICS_REQUIRED
 
 pytestmark = [pytest.mark.unit]
@@ -15,35 +16,15 @@ def test_vm_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    expected_tags = [
-        'ntnx_type:vm',
-        'ntnx_cluster_name:datadog-nutanix-dev',
-        'ntnx_host_name:10-0-0-103-aws-us-east-1a',
-        'ntnx_is_agent_vm:False',
-        'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
-        'nutanix',
-        'prism_central:10.0.0.197',
-    ]
-
-    aggregator.assert_metric("nutanix.vm.count", value=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.vm.count", value=1, tags=PCVM_TAGS)
 
 
 def test_vm_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    expected_tags = [
-        'ntnx_type:vm',
-        'ntnx_cluster_name:datadog-nutanix-dev',
-        'ntnx_host_name:10-0-0-103-aws-us-east-1a',
-        'ntnx_is_agent_vm:False',
-        'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
-        'nutanix',
-        'prism_central:10.0.0.197',
-    ]
-
     for metric in VM_STATS_METRICS_REQUIRED:
-        aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
+        aggregator.assert_metric(metric, at_least=1, tags=PCVM_TAGS)
 
 
 @pytest.mark.parametrize("batch_vm_collection", [True, False])
@@ -54,7 +35,7 @@ def test_off_vms_skipped_by_default(dd_run_check, aggregator, mock_instance, moc
     dd_run_check(check)
 
     vm_metrics = aggregator.metrics("nutanix.vm.count")
-    assert len(vm_metrics) == 3
+    assert len(vm_metrics) == 4
     vm_names = {tag.split(":")[1] for m in vm_metrics for tag in m.tags if tag.startswith("ntnx_vm_name:")}
     assert "test-vm-that-should-remain-off" not in vm_names
 
@@ -68,18 +49,8 @@ def test_vm_status_off(dd_run_check, aggregator, mock_instance, mock_http_get):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    expected_tags = [
-        'ntnx_type:vm',
-        'ntnx_cluster_name:datadog-nutanix-dev',
-        'ntnx_is_agent_vm:False',
-        'ntnx_power_state:OFF',
-        'ntnx_vm_name:test-vm-that-should-remain-off',
-        'nutanix',
-        'prism_central:10.0.0.197',
-    ]
-
     aggregator.assert_metric(
-        "nutanix.vm.status", value=2, tags=expected_tags, hostname="test-vm-that-should-remain-off"
+        "nutanix.vm.status", value=2, tags=OFF_VM_TAGS + ['ntnx_power_state:OFF'], hostname=OFF_VM_NAME
     )
 
 
@@ -88,16 +59,6 @@ def test_external_tags_for_vm(dd_run_check, aggregator, mock_instance, mock_http
     dd_run_check(check)
 
     datadog_agent.assert_external_tags(
-        'NTNX-10-0-0-165-PCVM-1767014640',
-        {
-            'nutanix': [
-                'ntnx_type:vm',
-                'ntnx_cluster_name:datadog-nutanix-dev',
-                'ntnx_host_name:10-0-0-103-aws-us-east-1a',
-                'ntnx_is_agent_vm:False',
-                'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
-                'nutanix',
-                'prism_central:10.0.0.197',
-            ]
-        },
+        PCVM_NAME,
+        {'nutanix': PCVM_TAGS},
     )

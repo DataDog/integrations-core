@@ -210,8 +210,40 @@
         },
         "upgradeStatus": "SUCCEEDED",
         "categories": [
-          "66ae6983-5a95-3f0b-9e5d-b5b603b5f2c0"
+          "66ae6983-5a95-3f0b-9e5d-b5b603b5f2c0",
+          "9513da33-7dc1-3a69-beb4-d10c76a5546f",
+          "abae9b6a-e906-33e6-8236-a1620dc62658",
+          "d376dd80-4959-3e3e-8dc1-ebf21488dcf4"
         ]
+      },
+      {
+        "$objectType": "clustermgmt.v4.config.Cluster",
+        "extId": "aabbccdd-1111-2222-3333-444455556666",
+        "vmCount": 2,
+        "name": "second-nutanix-cluster",
+        "nodes": {
+          "numberOfNodes": 1,
+          "$objectType": "clustermgmt.v4.config.NodeReference",
+          "nodeList": [
+            {
+              "$objectType": "clustermgmt.v4.config.NodeListItemReference",
+              "nodeUuid": "eeee1111-2222-3333-4444-555566667777"
+            }
+          ]
+        },
+        "config": {
+          "$objectType": "clustermgmt.v4.config.ClusterConfigReference",
+          "clusterFunction": [
+            "AOS"
+          ],
+          "clusterArch": "X86_64",
+          "operationMode": "NORMAL",
+          "redundancyFactor": 2
+        },
+        "network": {
+          "$objectType": "clustermgmt.v4.config.ClusterNetworkReference"
+        },
+        "upgradeStatus": "SUCCEEDED"
       },
       {
         "$reserved": {
@@ -472,7 +504,7 @@
           "rel": "last"
         }
       ],
-      "totalAvailableResults": 2
+      "totalAvailableResults": 3
     }
   }
 ]

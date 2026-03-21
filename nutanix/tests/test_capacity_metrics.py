@@ -12,6 +12,15 @@ These metrics report allocated resources (CPU, memory) rather than usage stats.
 import pytest
 
 from datadog_checks.nutanix import NutanixCheck
+from tests.constants import (
+    CLUSTER_TAGS,
+    HOST_NAME,
+    HOST_TAGS,
+    PCVM_TAGS,
+    RANDOM_VM_TAGS,
+    SECOND_CLUSTER_TAGS,
+    UBUNTU_VM_TAGS,
+)
 
 pytestmark = [pytest.mark.unit]
 
@@ -24,90 +33,45 @@ class TestVMCapacityMetrics:
         check = NutanixCheck('nutanix', {}, [mock_instance])
         dd_run_check(check)
 
-        expected_tags = [
-            'ntnx_type:vm',
-            'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
-            'ntnx_is_agent_vm:False',
-            'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
-            'nutanix',
-            'prism_central:10.0.0.197',
-        ]
-
-        # VM "NTNX-10-0-0-165-PCVM-1767014640" has numSockets=6
-        aggregator.assert_metric("nutanix.vm.cpu.sockets", value=6, tags=expected_tags)
+        aggregator.assert_metric("nutanix.vm.cpu.sockets", value=6, tags=PCVM_TAGS)
+        aggregator.assert_metric("nutanix.vm.cpu.sockets", value=2, tags=UBUNTU_VM_TAGS)
+        aggregator.assert_metric("nutanix.vm.cpu.sockets", value=2, tags=RANDOM_VM_TAGS)
 
     def test_vm_cpu_cores_per_socket(self, dd_run_check, aggregator, mock_instance, mock_http_get):
         """VM should report cores per socket."""
         check = NutanixCheck('nutanix', {}, [mock_instance])
         dd_run_check(check)
 
-        expected_tags = [
-            'ntnx_type:vm',
-            'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
-            'ntnx_is_agent_vm:False',
-            'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
-            'nutanix',
-            'prism_central:10.0.0.197',
-        ]
-
-        # VM "NTNX-10-0-0-165-PCVM-1767014640" has numCoresPerSocket=1
-        aggregator.assert_metric("nutanix.vm.cpu.cores_per_socket", value=1, tags=expected_tags)
+        aggregator.assert_metric("nutanix.vm.cpu.cores_per_socket", value=1, tags=PCVM_TAGS)
+        aggregator.assert_metric("nutanix.vm.cpu.cores_per_socket", value=1, tags=UBUNTU_VM_TAGS)
+        aggregator.assert_metric("nutanix.vm.cpu.cores_per_socket", value=1, tags=RANDOM_VM_TAGS)
 
     def test_vm_cpu_vcpus_allocated(self, dd_run_check, aggregator, mock_instance, mock_http_get):
         """VM should report total vCPUs allocated (sockets * cores_per_socket)."""
         check = NutanixCheck('nutanix', {}, [mock_instance])
         dd_run_check(check)
 
-        expected_tags = [
-            'ntnx_type:vm',
-            'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
-            'ntnx_is_agent_vm:False',
-            'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
-            'nutanix',
-            'prism_central:10.0.0.197',
-        ]
-
-        # VM "NTNX-10-0-0-165-PCVM-1767014640": 6 sockets * 1 core = 6 vCPUs
-        aggregator.assert_metric("nutanix.vm.cpu.vcpus_allocated", value=6, tags=expected_tags)
+        aggregator.assert_metric("nutanix.vm.cpu.vcpus_allocated", value=6, tags=PCVM_TAGS)
+        aggregator.assert_metric("nutanix.vm.cpu.vcpus_allocated", value=2, tags=UBUNTU_VM_TAGS)
+        aggregator.assert_metric("nutanix.vm.cpu.vcpus_allocated", value=2, tags=RANDOM_VM_TAGS)
 
     def test_vm_cpu_threads_per_core(self, dd_run_check, aggregator, mock_instance, mock_http_get):
         """VM should report threads per core."""
         check = NutanixCheck('nutanix', {}, [mock_instance])
         dd_run_check(check)
 
-        expected_tags = [
-            'ntnx_type:vm',
-            'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
-            'ntnx_is_agent_vm:False',
-            'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
-            'nutanix',
-            'prism_central:10.0.0.197',
-        ]
-
-        # VM "NTNX-10-0-0-165-PCVM-1767014640" has numThreadsPerCore=1
-        aggregator.assert_metric("nutanix.vm.cpu.threads_per_core", value=1, tags=expected_tags)
+        aggregator.assert_metric("nutanix.vm.cpu.threads_per_core", value=1, tags=PCVM_TAGS)
+        aggregator.assert_metric("nutanix.vm.cpu.threads_per_core", value=1, tags=UBUNTU_VM_TAGS)
+        aggregator.assert_metric("nutanix.vm.cpu.threads_per_core", value=1, tags=RANDOM_VM_TAGS)
 
     def test_vm_memory_allocated(self, dd_run_check, aggregator, mock_instance, mock_http_get):
         """VM should report memory allocated in bytes."""
         check = NutanixCheck('nutanix', {}, [mock_instance])
         dd_run_check(check)
 
-        expected_tags = [
-            'ntnx_type:vm',
-            'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
-            'ntnx_is_agent_vm:False',
-            'ntnx_vm_name:NTNX-10-0-0-165-PCVM-1767014640',
-            'nutanix',
-            'prism_central:10.0.0.197',
-        ]
-
-        # VM "NTNX-10-0-0-165-PCVM-1767014640" has memorySizeBytes=30064771072
-        aggregator.assert_metric("nutanix.vm.memory.allocated_bytes", value=30064771072, tags=expected_tags)
+        aggregator.assert_metric("nutanix.vm.memory.allocated_bytes", value=30064771072, tags=PCVM_TAGS)
+        aggregator.assert_metric("nutanix.vm.memory.allocated_bytes", value=8589934592, tags=UBUNTU_VM_TAGS)
+        aggregator.assert_metric("nutanix.vm.memory.allocated_bytes", value=8589934592, tags=RANDOM_VM_TAGS)
 
 
 class TestHostCapacityMetrics:
@@ -118,88 +82,28 @@ class TestHostCapacityMetrics:
         check = NutanixCheck('nutanix', {}, [mock_instance])
         dd_run_check(check)
 
-        expected_tags = [
-            'Team:agent-integrations',
-            'ntnx_type:host',
-            'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
-            'ntnx_host_type:HYPER_CONVERGED',
-            'ntnx_hypervisor_name:AHV 10.3',
-            'ntnx_hypervisor_type:AHV',
-            'nutanix',
-            'prism_central:10.0.0.197',
-        ]
-
-        # Host has numberOfCpuSockets=2
-        aggregator.assert_metric(
-            "nutanix.host.cpu.sockets", value=2, tags=expected_tags, hostname="10-0-0-103-aws-us-east-1a"
-        )
+        aggregator.assert_metric("nutanix.host.cpu.sockets", value=2, tags=HOST_TAGS, hostname=HOST_NAME)
 
     def test_host_cpu_cores(self, dd_run_check, aggregator, mock_instance, mock_http_get):
         """Host should report total CPU cores."""
         check = NutanixCheck('nutanix', {}, [mock_instance])
         dd_run_check(check)
 
-        expected_tags = [
-            'Team:agent-integrations',
-            'ntnx_type:host',
-            'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
-            'ntnx_host_type:HYPER_CONVERGED',
-            'ntnx_hypervisor_name:AHV 10.3',
-            'ntnx_hypervisor_type:AHV',
-            'nutanix',
-            'prism_central:10.0.0.197',
-        ]
-
-        # Host has numberOfCpuCores=24
-        aggregator.assert_metric(
-            "nutanix.host.cpu.cores", value=24, tags=expected_tags, hostname="10-0-0-103-aws-us-east-1a"
-        )
+        aggregator.assert_metric("nutanix.host.cpu.cores", value=24, tags=HOST_TAGS, hostname=HOST_NAME)
 
     def test_host_cpu_threads(self, dd_run_check, aggregator, mock_instance, mock_http_get):
         """Host should report total CPU threads."""
         check = NutanixCheck('nutanix', {}, [mock_instance])
         dd_run_check(check)
 
-        expected_tags = [
-            'Team:agent-integrations',
-            'ntnx_type:host',
-            'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
-            'ntnx_host_type:HYPER_CONVERGED',
-            'ntnx_hypervisor_name:AHV 10.3',
-            'ntnx_hypervisor_type:AHV',
-            'nutanix',
-            'prism_central:10.0.0.197',
-        ]
-
-        # Host has numberOfCpuThreads=48
-        aggregator.assert_metric(
-            "nutanix.host.cpu.threads", value=48, tags=expected_tags, hostname="10-0-0-103-aws-us-east-1a"
-        )
+        aggregator.assert_metric("nutanix.host.cpu.threads", value=48, tags=HOST_TAGS, hostname=HOST_NAME)
 
     def test_host_memory_bytes(self, dd_run_check, aggregator, mock_instance, mock_http_get):
         """Host should report total memory in bytes."""
         check = NutanixCheck('nutanix', {}, [mock_instance])
         dd_run_check(check)
 
-        expected_tags = [
-            'Team:agent-integrations',
-            'ntnx_type:host',
-            'ntnx_cluster_name:datadog-nutanix-dev',
-            'ntnx_host_name:10-0-0-103-aws-us-east-1a',
-            'ntnx_host_type:HYPER_CONVERGED',
-            'ntnx_hypervisor_name:AHV 10.3',
-            'ntnx_hypervisor_type:AHV',
-            'nutanix',
-            'prism_central:10.0.0.197',
-        ]
-
-        # Host has memorySizeBytes=404834222080
-        aggregator.assert_metric(
-            "nutanix.host.memory.bytes", value=404834222080, tags=expected_tags, hostname="10-0-0-103-aws-us-east-1a"
-        )
+        aggregator.assert_metric("nutanix.host.memory.bytes", value=404834222080, tags=HOST_TAGS, hostname=HOST_NAME)
 
 
 class TestClusterCapacityMetrics:
@@ -210,72 +114,64 @@ class TestClusterCapacityMetrics:
         check = NutanixCheck('nutanix', {}, [mock_instance])
         dd_run_check(check)
 
-        expected_tags = [
-            'Team:agent-integrations',
-            'ntnx_cluster_name:datadog-nutanix-dev',
-            'nutanix',
-            'prism_central:10.0.0.197',
-        ]
-
-        # Cluster has 1 host with 24 cores
-        aggregator.assert_metric("nutanix.cluster.cpu.total_cores", value=24, tags=expected_tags)
+        aggregator.assert_metric("nutanix.cluster.cpu.total_cores", value=24, tags=CLUSTER_TAGS)
 
     def test_cluster_cpu_total_threads(self, dd_run_check, aggregator, mock_instance, mock_http_get):
         """Cluster should report total CPU threads (sum from all hosts)."""
         check = NutanixCheck('nutanix', {}, [mock_instance])
         dd_run_check(check)
 
-        expected_tags = [
-            'Team:agent-integrations',
-            'ntnx_cluster_name:datadog-nutanix-dev',
-            'nutanix',
-            'prism_central:10.0.0.197',
-        ]
-
-        # Cluster has 1 host with 48 threads
-        aggregator.assert_metric("nutanix.cluster.cpu.total_threads", value=48, tags=expected_tags)
+        aggregator.assert_metric("nutanix.cluster.cpu.total_threads", value=48, tags=CLUSTER_TAGS)
 
     def test_cluster_memory_total_bytes(self, dd_run_check, aggregator, mock_instance, mock_http_get):
         """Cluster should report total memory in bytes (sum from all hosts)."""
         check = NutanixCheck('nutanix', {}, [mock_instance])
         dd_run_check(check)
 
-        expected_tags = [
-            'Team:agent-integrations',
-            'ntnx_cluster_name:datadog-nutanix-dev',
-            'nutanix',
-            'prism_central:10.0.0.197',
-        ]
-
-        # Cluster has 1 host with 404834222080 bytes
-        aggregator.assert_metric("nutanix.cluster.memory.total_bytes", value=404834222080, tags=expected_tags)
+        aggregator.assert_metric("nutanix.cluster.memory.total_bytes", value=404834222080, tags=CLUSTER_TAGS)
 
     def test_cluster_vcpus_allocated(self, dd_run_check, aggregator, mock_instance, mock_http_get):
         """Cluster should report total vCPUs allocated to all VMs."""
         check = NutanixCheck('nutanix', {}, [mock_instance])
         dd_run_check(check)
 
-        expected_tags = [
-            'Team:agent-integrations',
-            'ntnx_cluster_name:datadog-nutanix-dev',
-            'nutanix',
-            'prism_central:10.0.0.197',
-        ]
-
-        # NTNX-10-0-0-165-PCVM: 6, ubuntu-vm: 2, random-vm: 2 (OFF VM excluded by default)
-        aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=10, tags=expected_tags)
+        # All VMs contribute: PCVM=6, ubuntu=2, random=2, OFF=2 (hostless VMs still accumulate)
+        aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=12, tags=CLUSTER_TAGS)
 
     def test_cluster_memory_allocated_bytes(self, dd_run_check, aggregator, mock_instance, mock_http_get):
         """Cluster should report total memory allocated to all VMs."""
         check = NutanixCheck('nutanix', {}, [mock_instance])
         dd_run_check(check)
 
-        expected_tags = [
-            'Team:agent-integrations',
-            'ntnx_cluster_name:datadog-nutanix-dev',
-            'nutanix',
-            'prism_central:10.0.0.197',
-        ]
+        # All VMs contribute: PCVM + ubuntu + random + OFF (hostless VMs still accumulate)
+        aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=55834574848, tags=CLUSTER_TAGS)
 
-        # NTNX-10-0-0-165-PCVM: 28GB, ubuntu-vm: 8GB, random-vm: 8GB (OFF VM excluded by default)
-        aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=47244640256, tags=expected_tags)
+
+class TestMultiClusterHostlessVMCapacity:
+    """Test that hostless VM capacity is bucketed per-cluster, not summed globally."""
+
+    def test_hostless_vcpus_not_overcounted_across_clusters(
+        self, dd_run_check, aggregator, mock_instance, mock_http_get
+    ):
+        """Each cluster should only count hostless VMs that belong to it."""
+        check = NutanixCheck('nutanix', {}, [mock_instance])
+        dd_run_check(check)
+
+        # second-nutanix-cluster: vm-on-second-cluster(8 vcpus) + hostless-vm-second-cluster(4 vcpus) = 12
+        aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=12, tags=SECOND_CLUSTER_TAGS)
+
+        # datadog-nutanix-dev: PCVM(6) + ubuntu(2) + random(2) + OFF hostless(2) = 12
+        aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=12, tags=CLUSTER_TAGS)
+
+    def test_hostless_memory_not_overcounted_across_clusters(
+        self, dd_run_check, aggregator, mock_instance, mock_http_get
+    ):
+        """Each cluster should only count hostless VM memory that belongs to it."""
+        check = NutanixCheck('nutanix', {}, [mock_instance])
+        dd_run_check(check)
+
+        # second-nutanix-cluster: 17179869184 + 4294967296 = 21474836480
+        aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=21474836480, tags=SECOND_CLUSTER_TAGS)
+
+        # datadog-nutanix-dev: 30064771072 + 8589934592 + 8589934592 + 8589934592 = 55834574848
+        aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=55834574848, tags=CLUSTER_TAGS)

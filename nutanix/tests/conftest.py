@@ -154,8 +154,21 @@ def mock_http_get(mocker):
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
+        if (
+            "/api/clustermgmt/v4.0/stats/clusters/aabbccdd-1111-2222-3333-444455556666/hosts/eeee1111-2222-3333-4444-555566667777"
+            in url
+        ):
+            response_data = load_fixture("host_stats_aabbccdd_eeee1111.json")
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
+
         if "/api/clustermgmt/v4.0/stats/clusters/00064715-c043-5d8f-ee4b-176ec875554d" in url:
             response_data = load_fixture("cluster_stats_00064715.json")
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
+
+        if "/api/clustermgmt/v4.0/stats/clusters/aabbccdd-1111-2222-3333-444455556666" in url:
+            response_data = load_fixture("cluster_stats_aabbccdd.json")
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
@@ -165,6 +178,11 @@ def mock_http_get(mocker):
 
         if '/api/clustermgmt/v4.0/config/clusters/00064715-c043-5d8f-ee4b-176ec875554d/hosts' in url:
             response_data = load_fixture_page("hosts_00064715.json", page)
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
+
+        if '/api/clustermgmt/v4.0/config/clusters/aabbccdd-1111-2222-3333-444455556666/hosts' in url:
+            response_data = load_fixture_page("hosts_aabbccdd.json", page)
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
@@ -185,6 +203,21 @@ def mock_http_get(mocker):
 
         if 'api/vmm/v4.0/ahv/config/vms' in url:
             response_data = load_fixture_page("vms.json", page)
+
+            # Filter by host/extId if present in params
+            filter_param = params.get('$filter', '') if params else ''
+            if "host/extId eq" in filter_param:
+                import re
+
+                host_match = re.search(r"host/extId eq '([^']+)'", filter_param)
+                if host_match:
+                    host_id = host_match.group(1)
+                    filtered = [
+                        vm for vm in response_data.get('data', []) if (vm.get('host') or {}).get('extId') == host_id
+                    ]
+                    response_data = dict(response_data)
+                    response_data['data'] = filtered
+
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
