@@ -65,7 +65,10 @@ class MockHTTPResponse:
         cookies: dict[str, str] | None = None,
         elapsed_seconds: float = 0.1,
         normalize_content: bool = True,
+        url: str = '',
     ):
+        self.url = url
+
         if json_data is not None:
             content = json.dumps(json_data)
             # Copy to avoid mutating the caller's dict
@@ -92,6 +95,7 @@ class MockHTTPResponse:
         self._stream = BytesIO(self._content)
 
         self.raw = MagicMock()
+        self.raw.read = self._stream.read
         self.raw.connection.sock.getpeercert.side_effect = lambda binary_form=False: b'mock-cert' if binary_form else {}
 
     @property

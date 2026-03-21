@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+
 import pytest
 
 from datadog_checks.base import AgentCheck
@@ -115,3 +117,8 @@ def test_mock_response_headers_update_and_setdefault():
 
     response.headers.setdefault('Content-Type', 'should-not-change')
     assert response.headers['content-type'] == 'text/plain'
+
+
+def test_mock_response_raw_readable():
+    response = MockHTTPResponse(json_data={'key': 'value'})
+    assert json.load(response.raw) == {'key': 'value'}
