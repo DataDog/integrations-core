@@ -107,8 +107,16 @@ COMMON_BGW_METRICS = [
 
 COMMON_BGW_METRICS_PG_ABOVE_94 = ['postgresql.archiver.archived_count', 'postgresql.archiver.failed_count']
 COMMON_BGW_METRICS_PG_BELOW_17 = ['postgresql.bgwriter.buffers_backend', 'postgresql.bgwriter.buffers_backend_fsync']
-CONNECTION_METRICS = []
-CONNECTION_METRICS_DB = ['postgresql.connections', 'postgresql.max_connections', 'postgresql.percent_usage_connections']
+
+CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
+CONNECTION_METRICS_DB = [
+    'postgresql.connections',
+    'postgresql.database_connections',
+    'postgresql.percent_database_usage_connections',
+]
+
+# CONNECTION_METRICS = []
+# CONNECTION_METRICS_DB = ['postgresql.connections', 'postgresql.max_connections', 'postgresql.percent_usage_connections']
 COMMON_DBS = ['dogs', 'postgres', 'dogs_nofunc', 'dogs_noschema', DB_NAME]
 
 CHECK_PERFORMANCE_METRICS = [

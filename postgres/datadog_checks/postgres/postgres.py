@@ -53,6 +53,7 @@ from .util import (
     BUFFERCACHE_METRICS,
     CLUSTER_VACUUM_PROGRESS_METRICS,
     CONNECTION_METRICS,
+    CONNECTION_METRICS_BY_DB,
     COUNT_METRICS,
     FUNCTION_METRICS,
     IDLE_TX_LOCK_AGE_METRICS,
@@ -858,6 +859,7 @@ class PostgreSql(DatabaseCheck):
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
         metric_scope = [CONNECTION_METRICS]
+        metric_scope.append(CONNECTION_METRICS_BY_DB)
         per_database_metric_scope = []
 
         if self._config.collect_function_metrics:
