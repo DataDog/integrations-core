@@ -115,8 +115,6 @@ CONNECTION_METRICS_DB = [
     'postgresql.percent_database_usage_connections',
 ]
 
-# CONNECTION_METRICS = []
-# CONNECTION_METRICS_DB = ['postgresql.connections', 'postgresql.max_connections', 'postgresql.percent_usage_connections']
 COMMON_DBS = ['dogs', 'postgres', 'dogs_nofunc', 'dogs_noschema', DB_NAME]
 
 CHECK_PERFORMANCE_METRICS = [

@@ -435,6 +435,7 @@ def test_connections_metrics(aggregator, integration_check, pg_instance):
     #     aggregator.assert_metric(name, count=1, tags=expected_tags_with_db)
     # aggregator.assert_metric('postgresql.connections', count=1, tags=expected_tags_with_db)
 
+
 @requires_over_10
 def test_buffercache_metrics(aggregator, integration_check, pg_instance):
     pg_instance['collect_buffercache_metrics'] = True
