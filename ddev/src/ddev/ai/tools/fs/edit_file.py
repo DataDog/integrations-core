@@ -29,7 +29,6 @@ class EditFileInput(BaseToolInput):
 
 class EditFileTool(FileRegistryTool[EditFileInput]):
     """Edits a file by replacing an exact string with a new one.
-    Can only edit files registered in the file registry.
     Fails if the file was modified since the last read.
     old_string must appear exactly once in the file — if it appears multiple times, the call fails."""
 

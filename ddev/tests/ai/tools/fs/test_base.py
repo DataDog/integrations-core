@@ -100,11 +100,11 @@ def test_read_verified_handles_oserror(tool: DummyTool, registry: FileRegistry, 
 
 
 # ---------------------------------------------------------------------------
-# _refresh_if_known / _record
+#  _register
 # ---------------------------------------------------------------------------
 
 
-def test_record_registers_path(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
+def test_register_registers_path(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
     path = str(tmp_path / "file.txt")
     tool._register(path, "written")
 
@@ -112,26 +112,9 @@ def test_record_registers_path(tool: DummyTool, registry: FileRegistry, tmp_path
     assert registry.verify(path, "written") is True
 
 
-def test_refresh_if_known_does_not_register_unknown_path(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
+def test_register_updates_hash_after_register(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
     path = str(tmp_path / "file.txt")
-    tool._refresh_if_known(path, "content")
-
-    assert registry.is_known(path) is False
-
-
-def test_refresh_if_known_updates_hash_for_known_path(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
-    path = str(tmp_path / "file.txt")
-    registry.record(path, "old")
-    tool._refresh_if_known(path, "new")
-
-    assert registry.verify(path, "new") is True
-    assert registry.verify(path, "old") is False
-
-
-def test_record_updates_hash_after_refresh_if_known(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
-    path = str(tmp_path / "file.txt")
-    registry.record(path, "old")
-    tool._refresh_if_known(path, "old")
+    tool._register(path, "old")
     tool._register(path, "new")
 
     assert registry.verify(path, "new") is True

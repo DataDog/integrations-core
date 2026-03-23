@@ -24,12 +24,12 @@ def test_read_file_success(read_tool: ReadFileTool, tmp_path) -> None:
     assert result.data == "0: hello\n1: world\n"
 
 
-def test_read_does_not_register_unknown_file(read_tool: ReadFileTool, registry: FileRegistry, tmp_path) -> None:
+def test_read_registers_unknown_file(read_tool: ReadFileTool, registry: FileRegistry, tmp_path) -> None:
     f = tmp_path / "file.txt"
     f.write_text("content", encoding="utf-8")
     asyncio.run(read_tool.run({"path": str(f)}))
 
-    assert registry.is_known(str(f)) is False
+    assert registry.is_known(str(f)) is True
 
 
 def test_read_file_missing_file(read_tool: ReadFileTool, tmp_path) -> None:

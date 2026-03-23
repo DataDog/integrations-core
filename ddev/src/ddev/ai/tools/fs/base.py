@@ -15,10 +15,6 @@ class FileRegistryTool[TInput: BaseToolInput](BaseTool[TInput]):
     def __init__(self, file_registry: FileRegistry) -> None:
         self._registry = file_registry
 
-    def _refresh_if_known(self, path: str, content: str) -> None:
-        if self._registry.is_known(path):
-            self._registry.record(path, content)
-
     def _register(self, path: str, content: str) -> None:
         self._registry.record(path, content)
 

@@ -19,7 +19,6 @@ class AppendFileInput(BaseToolInput):
 
 class AppendFileTool(FileRegistryTool[AppendFileInput]):
     """Appends content to the end of an existing file.
-    Can only append to files registered in the file registry.
     Fails if the file was modified since the last read."""
 
     @property

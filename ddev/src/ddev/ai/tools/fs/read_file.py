@@ -41,7 +41,7 @@ class ReadFileTool(FileRegistryTool[ReadFileInput]):
         except (OSError, UnicodeDecodeError) as e:
             return ToolResult(success=False, error=f"{tool_input.path}: {e}")
 
-        self._refresh_if_known(tool_input.path, content)
+        self._register(tool_input.path, content)
 
         offset = tool_input.offset
         limit = tool_input.limit
