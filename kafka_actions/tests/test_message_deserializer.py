@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Tests for message deserialization."""
 
+import base64
 import json
 from unittest.mock import MagicMock
 
@@ -414,6 +415,81 @@ class TestMessageDeserializer:
         assert isinstance(deserialized_msg_sr.value, dict)
         assert deserialized_msg_sr.value['title'] == 'The Go Programming Language'
         assert deserialized_msg_sr.value_schema_id == 350
+
+    def test_deserialize_raw_format(self):
+        """Test raw format returns base64-encoded bytes for both key and value."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        raw_bytes = b'\x00\x01\x02\xff\xfe\xde\xad\xbe\xef'
+        key_bytes = b'\xca\xfe\xba\xbe'
+
+        kafka_msg = MockKafkaMessage(key=key_bytes, value=raw_bytes)
+
+        config = {
+            'key_format': 'raw',
+            'key_uses_schema_registry': False,
+            'value_format': 'raw',
+            'value_uses_schema_registry': False,
+        }
+
+        deserialized_msg = DeserializedMessage(kafka_msg, deserializer, config)
+
+        expected_value = base64.b64encode(raw_bytes).decode('ascii')
+        expected_key = base64.b64encode(key_bytes).decode('ascii')
+
+        assert deserialized_msg.value == expected_value
+        assert deserialized_msg.key == expected_key
+        assert deserialized_msg.value_schema_id is None
+        assert deserialized_msg.key_schema_id is None
+
+    def test_deserialize_raw_value_with_json_key(self):
+        """Test raw value format with JSON key format."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        raw_bytes = b'\x00\x01\x02\xff\xfe'
+        key_bytes = b'{"name": "test"}'
+
+        kafka_msg = MockKafkaMessage(key=key_bytes, value=raw_bytes)
+
+        config = {
+            'key_format': 'json',
+            'key_uses_schema_registry': False,
+            'value_format': 'raw',
+            'value_uses_schema_registry': False,
+        }
+
+        deserialized_msg = DeserializedMessage(kafka_msg, deserializer, config)
+
+        assert deserialized_msg.value == base64.b64encode(raw_bytes).decode('ascii')
+        assert deserialized_msg.key == {'name': 'test'}
+
+    def test_deserialize_raw_empty_message(self):
+        """Test raw format with empty/None messages."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        # None value
+        result, schema_id = deserializer.deserialize_message(None, 'raw')
+        assert result is None
+        assert schema_id is None
+
+        # Empty bytes
+        result, schema_id = deserializer.deserialize_message(b'', 'raw')
+        assert result is None
+        assert schema_id is None
+
+    def test_deserialize_raw_via_deserialize_message(self):
+        """Test raw format directly through deserialize_message."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        raw_bytes = b'\xde\xad\xbe\xef'
+        result, schema_id = deserializer.deserialize_message(raw_bytes, 'raw')
+
+        assert result == base64.b64encode(raw_bytes).decode('ascii')
+        assert schema_id is None
 
 
 class TestSchemaRegistryIntegration:

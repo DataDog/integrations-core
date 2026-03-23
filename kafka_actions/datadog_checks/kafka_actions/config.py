@@ -178,15 +178,15 @@ class KafkaActionsConfig:
         # Note: n_messages_retrieved and max_scanned_messages are validated in the Datadog backend
 
         value_format = config.get('value_format', 'json')
-        if value_format not in ['json', 'bson', 'string', 'protobuf', 'avro']:
+        if value_format not in ['json', 'bson', 'string', 'protobuf', 'avro', 'raw']:
             raise ConfigurationError(
-                f"Invalid value_format: {value_format}. Supported formats: json, bson, string, protobuf, avro"
+                f"Invalid value_format: {value_format}. Supported formats: json, bson, string, protobuf, avro, raw"
             )
 
         key_format = config.get('key_format', 'json')
-        if key_format not in ['json', 'bson', 'string', 'protobuf', 'avro']:
+        if key_format not in ['json', 'bson', 'string', 'protobuf', 'avro', 'raw']:
             raise ConfigurationError(
-                f"Invalid key_format: {key_format}. Supported formats: json, bson, string, protobuf, avro"
+                f"Invalid key_format: {key_format}. Supported formats: json, bson, string, protobuf, avro, raw"
             )
 
         start_timestamp = config.get('start_timestamp')

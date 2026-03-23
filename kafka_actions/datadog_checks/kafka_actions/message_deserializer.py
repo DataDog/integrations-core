@@ -119,17 +119,20 @@ class MessageDeserializer:
 
         Args:
             raw_bytes: Raw message bytes
-            format_type: 'json', 'bson', 'protobuf', or 'avro'
+            format_type: 'json', 'bson', 'protobuf', 'avro', or 'raw'
             schema_str: Schema definition (for protobuf/avro)
             uses_schema_registry: Whether to expect Schema Registry format
 
         Returns:
             Tuple of (deserialized_string, schema_id)
-            - deserialized_string: JSON string representation of the message
+            - deserialized_string: JSON string representation of the message, or base64 for raw format
             - schema_id: Schema ID from Schema Registry (if used), or None
         """
         if not raw_bytes:
             return None, None
+
+        if format_type == 'raw':
+            return base64.b64encode(raw_bytes).decode('ascii'), None
 
         try:
             schema = None
