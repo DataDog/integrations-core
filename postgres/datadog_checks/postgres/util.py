@@ -591,8 +591,8 @@ GROUP BY application_name, datname, usename, backend_type, wait_event
 CONNECTION_METRICS_BY_DB = {
     'descriptors': [('database_name', 'db')],
     'metrics': {
-        'numbackends AS current_connections': ('database_connections', AgentCheck.gauge),
-        'SUM(numbackends)/MAX(setting) AS pct_connections': ('percent_database_usage_connections', AgentCheck.gauge),
+        'connections': ('database_connections', AgentCheck.gauge),
+        'pct_connections': ('percent_database_usage_connections', AgentCheck.gauge),
     },
     'relation': False,
     'query': """
@@ -601,9 +601,11 @@ WITH max_con AS (
     FROM pg_settings
     WHERE name = 'max_connections'
 )
-SELECT datname AS database_name, {metrics_columns}
-FROM pg_stat_database, max_con
-WHERE datname NOT NULL {ignore_database_filter}
+SELECT datname,
+    numbackends,
+    SUM(numbackends)/MAX(setting)
+    FROM pg_stat_database, max_con
+WHERE datname IS NOT NULL {ignore_database_filter}
 GROUP BY datname, numbackends
 """,
     'name': 'connections_by_database',

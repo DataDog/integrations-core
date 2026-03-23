@@ -860,7 +860,6 @@ class PostgreSql(DatabaseCheck):
 
         metric_scope = [CONNECTION_METRICS]
 
-        metric_scope.append(CONNECTION_METRICS_BY_DB)
         connection_metrics_by_db = copy.deepcopy(CONNECTION_METRICS_BY_DB)
         databases_to_ignore = ""
         if len(self._config.ignore_databases) > 0:
@@ -868,6 +867,7 @@ class PostgreSql(DatabaseCheck):
             databases_to_ignore = "AND datname NOT IN ({})".format(", ".join(escaped_databases))
         connection_metrics_by_db["query"] = connection_metrics_by_db["query"].format(ignore_database_filter=databases_to_ignore)
         metric_scope.append(connection_metrics_by_db)
+        self.log.debug("Connection Metrics by DB query [%s]", connection_metrics_by_db["query"])
 
         per_database_metric_scope = []
 
