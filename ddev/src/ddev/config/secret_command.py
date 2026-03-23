@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import os
 import shlex
 import subprocess
 
@@ -20,7 +19,7 @@ class SecretCommandError(Exception):
 def parse_secret_command(command: str) -> list[str]:
     """Parse a command string into argv using platform-appropriate shlex mode."""
     try:
-        argv = shlex.split(command, posix=os.name != 'nt')
+        argv = shlex.split(command, posix=True)
     except ValueError as e:
         raise SecretCommandError('command could not be parsed', reason='parse_error') from e
 

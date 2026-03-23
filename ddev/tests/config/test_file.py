@@ -534,9 +534,13 @@ def test_changed_local_file_after_trust_strips_command_fields(
     config_file: ConfigFileWithOverrides, helpers, overrides_config: Path, monkeypatch, tmp_path: PathLibPath
 ):
     monkeypatch.setenv("DDEV_DATA_DIR", str(tmp_path / "ddev-data"))
-    # This test expects no fallback token source once local command fields are stripped.
-    config_file.model.github.token = ""
+    # Clear token from raw_data directly and purge env sources before load() so that
+    # parse_fields() (called eagerly during load) cannot cache a token from CI environment.
+    config_file.model.raw_data.setdefault('github', {}).pop('token', None)
     config_file.save()
+    monkeypatch.delenv('DD_GITHUB_TOKEN', raising=False)
+    monkeypatch.delenv('GH_TOKEN', raising=False)
+    monkeypatch.delenv('GITHUB_TOKEN', raising=False)
 
     overrides_config.write_text(
         helpers.dedent(
@@ -576,10 +580,6 @@ def test_changed_local_file_after_trust_strips_command_fields(
 
     assert "token_command" not in config_file.overrides_model.raw_data["github"]
     assert "github.token_command" in config_file.combined_model.non_secret_metadata["trust_blocked_command_fields"]
-
-    monkeypatch.delenv("DD_GITHUB_TOKEN", raising=False)
-    monkeypatch.delenv("GH_TOKEN", raising=False)
-    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
 
     with pytest.raises(
         ConfigurationError,

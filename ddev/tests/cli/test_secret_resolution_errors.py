@@ -4,9 +4,13 @@
 from ddev.config.secret_command import SecretCommandError
 
 
-def test_startup_missing_required_secret_is_actionable_without_traceback(ddev, config_file):
+def test_startup_missing_required_secret_is_actionable_without_traceback(ddev, config_file, monkeypatch):
+    config_file.model.raw_data.setdefault('github', {}).pop('token', None)
     config_file.model.github.user = 'test-user'
     config_file.save()
+    monkeypatch.delenv('DD_GITHUB_TOKEN', raising=False)
+    monkeypatch.delenv('GH_TOKEN', raising=False)
+    monkeypatch.delenv('GITHUB_TOKEN', raising=False)
 
     result = ddev('status')
 
@@ -18,9 +22,15 @@ def test_startup_missing_required_secret_is_actionable_without_traceback(ddev, c
     assert 'Traceback' not in result.output
 
 
-def test_startup_trust_blocked_secret_points_to_allow_deny_workflow(ddev, config_file, helpers, overrides_config):
+def test_startup_trust_blocked_secret_points_to_allow_deny_workflow(
+    ddev, config_file, helpers, overrides_config, monkeypatch
+):
+    config_file.model.raw_data.setdefault('github', {}).pop('token', None)
     config_file.model.github.user = 'test-user'
     config_file.save()
+    monkeypatch.delenv('DD_GITHUB_TOKEN', raising=False)
+    monkeypatch.delenv('GH_TOKEN', raising=False)
+    monkeypatch.delenv('GITHUB_TOKEN', raising=False)
 
     local_secret = 'local-provider-secret-should-not-leak'
     overrides_config.write_text(
@@ -45,10 +55,14 @@ def test_startup_trust_blocked_secret_points_to_allow_deny_workflow(ddev, config
 
 
 def test_startup_command_failure_uses_stable_code_without_leaking_command(ddev, config_file, monkeypatch):
+    config_file.model.raw_data.setdefault('github', {}).pop('token', None)
     config_file.model.github.user = 'test-user'
     command_with_secret_marker = 'printf leaked-command-should-not-appear'
     config_file.model.github.token_command = command_with_secret_marker
     config_file.save()
+    monkeypatch.delenv('DD_GITHUB_TOKEN', raising=False)
+    monkeypatch.delenv('GH_TOKEN', raising=False)
+    monkeypatch.delenv('GITHUB_TOKEN', raising=False)
 
     def raise_non_zero(_command: str) -> str:
         raise SecretCommandError('command failed with exit code 7', reason='non_zero_exit')
