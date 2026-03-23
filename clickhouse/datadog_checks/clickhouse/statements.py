@@ -58,10 +58,6 @@ SELECT
     sum(result_bytes) as total_result_bytes,
     sum(memory_usage) as total_memory_usage,
     max(memory_usage) as peak_memory_usage,
-    quantile(0.50)(query_duration_ms) as p50_duration_ms,
-    quantile(0.90)(query_duration_ms) as p90_duration_ms,
-    quantile(0.95)(query_duration_ms) as p95_duration_ms,
-    quantile(0.99)(query_duration_ms) as p99_duration_ms,
     max(event_time_microseconds) as max_event_time_microseconds
 FROM {query_log_table}
 WHERE
@@ -262,10 +258,6 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                     total_result_bytes,
                     total_memory_usage,
                     peak_memory_usage,
-                    p50_duration_ms,
-                    p90_duration_ms,
-                    p95_duration_ms,
-                    p99_duration_ms,
                     max_event_time_microseconds,
                 ) = row
 
@@ -297,10 +289,6 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                     'result_bytes': int(total_result_bytes) if total_result_bytes else 0,
                     'memory_usage': int(total_memory_usage) if total_memory_usage else 0,
                     'peak_memory_usage': int(peak_memory_usage) if peak_memory_usage else 0,
-                    'p50_time': float(p50_duration_ms) if p50_duration_ms else 0.0,
-                    'p90_time': float(p90_duration_ms) if p90_duration_ms else 0.0,
-                    'p95_time': float(p95_duration_ms) if p95_duration_ms else 0.0,
-                    'p99_time': float(p99_duration_ms) if p99_duration_ms else 0.0,
                 }
                 result_rows.append(result_row)
 
