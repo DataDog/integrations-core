@@ -227,7 +227,7 @@ def test_connect_no_password_uses_empty_string():
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.check_id = 'test-no-password'
 
-    assert check._config.password == '', "password should default to '' not None — None causes auth error 194 in clickhouse_connect"
+    assert check._config.password == '', "password must default to '' — None causes auth error 194 in clickhouse_connect"
 
     with mock.patch('clickhouse_connect.get_client') as m:
         mock_client = mock.MagicMock()
