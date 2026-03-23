@@ -70,6 +70,9 @@ def test_exclude_vm_by_id(dd_run_check, aggregator, mock_instance, mock_http_get
     aggregator.assert_metric("nutanix.host.count", at_least=1)
     vm_counts = [m for m in aggregator.metrics("nutanix.vm.count") if m.value == 1]
     assert len(vm_counts) == 3
+    # Excluded VM (PCVM, 6 vCPUs) still contributes to cluster capacity
+    aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=12, tags=CLUSTER_TAGS)
+    aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=55834574848, tags=CLUSTER_TAGS)
 
 
 def test_exclude_cluster_by_name_regex(dd_run_check, aggregator, mock_instance, mock_http_get):
