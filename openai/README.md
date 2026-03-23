@@ -10,6 +10,8 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 
 ## Setup
 
+**Note**: The Supported OS requirements (Linux, Windows, macOS) apply to APM library installations (Python, Node.js, PHP) only. The API key-based setup has no OS requirements.
+
 <!-- xxx tabs xxx -->
 <!-- xxx tab "API Key" xxx -->
 
@@ -53,11 +55,11 @@ Datadog's OpenAI integration allows you to collect usage metrics, cost data, and
 
 ### 2. Configure Datadog's OpenAI integration
 
-1. Navigate Datadog's [OpenAI integration tile][11] and open the **Configuration** tab.
+1. Navigate to Datadog's [OpenAI integration tile][11] and open the **Configuration** tab.
 2. Click **Add Account**.
 3. Under **Account Name**, enter a name for your account. Under **API Key**, enter your OpenAI API key (**must be admin-scoped for CCM and usage metrics**). Optionally, add a comma-separated list of tags for metrics associated with this account.
-3. Under **Resources**, enable toggles depending on your use case:
-   - **Collect Cost Data**: If enabled, cost data is visible in [Cloud Cost Management][14] within 24 hours. **Requires an admin-scoped API key.** See ([collected data][15]).
+4. Under **Resources**, enable toggles depending on your use case:
+   - **Collect Cost Data**: If enabled, cost data is visible in [Cloud Cost Management][14] within 24 hours. **Requires an admin-scoped API key.** See [collected data][15].
    - **Use this API key to evaluate your LLM applications**: If enabled, evaluations are run through this API key in LLM Observability.
 
 ### Additional Notes
@@ -297,7 +299,7 @@ You can enable LLM Observability in different environments. Follow the appropria
      gcr.io/datadoghq/agent:latest
    ```
 
-2. Install the Datadog APM Python library.
+2. Install the Datadog APM Node.js library.
 
    ```shell
    npm install dd-trace
@@ -349,7 +351,7 @@ No additional setup is required to capture latency, input/output messages, and t
 
 ##### Debugging
 
-If you encounter issues during setup, enable debug logging by setting `DD_TRACE_DEBUG=1`
+If you encounter issues during setup, enable debug logging by setting `DD_TRACE_DEBUG=1`.
 
 This will display detailed information about any errors or issues with tracing.
 
@@ -429,7 +431,7 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 
 ### Installation
 
-#### APM: Get Usage Metrics for Php Applications
+#### APM: Get Usage Metrics for PHP Applications
 
 1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
 

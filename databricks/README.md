@@ -18,7 +18,8 @@ Datadog offers several Databricks monitoring capabilities.
 
 [Data Observability][36] helps data teams detect, resolve, and prevent issues affecting data quality, performance, and cost. It monitors anomalies in volume, freshness, null rates, and distributions, and integrates with pipelines to correlate issues with job runs, data streams, and infrastructure events.
 
-Model serving metrics provide insights into how your  Databricks model serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rate, high latency, are over/under provisioned, and more.
+Model serving metrics provide insights into how your Databricks model serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rates, high latency, are over/under provisioned, and more.
+
 ## Setup
 
 ### Installation
@@ -54,7 +55,7 @@ First, [connect a new Databricks workspace](#connect-to-a-new-databricks-workspa
    * Make sure you delete the default value in **Lifetime (days)** so that the token doesn't expire and the integration doesn't break.
    * Ensure the account generating the token has [CAN VIEW access][30] for the Databricks jobs and clusters you want to monitor.
 
-   As an alternative, follow the [official Databricks documentation][31] to generate an access token for a [service principal][31].
+   As an alternative, follow the [official Databricks documentation][37] to generate an access token for a [service principal][31].
 
 3. In Datadog, open the Databricks integration tile.
 4. On the **Configure** tab, click **Add Databricks Workspace**.
@@ -144,5 +145,6 @@ You can troubleshoot issues yourself by enabling the [Databricks web terminal][1
 [34]: https://docs.datadoghq.com/cloud_cost_management/
 [35]: https://docs.databricks.com/aws/en/admin/system-tables/
 [36]: https://docs.datadoghq.com/data_observability/
+[37]: https://docs.databricks.com/en/dev-tools/auth/pat.html
 [8]: https://docs.datadoghq.com/integrations/spark/#metrics
 [9]: https://docs.datadoghq.com/integrations/spark/#service-checks
