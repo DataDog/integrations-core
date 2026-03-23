@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import inspect
+import logging
 import typing
 from abc import ABC, abstractmethod
 from types import get_original_bases
@@ -12,6 +13,8 @@ from anthropic.types import ToolParam
 from pydantic import BaseModel, ConfigDict
 
 from .types import ToolResult
+
+logger = logging.getLogger(__name__)
 
 
 class BaseToolInput(BaseModel):
@@ -101,7 +104,9 @@ class BaseTool[TInput: BaseToolInput](ABC):
         try:
             return await self(validated)
         except Exception as e:
-            return ToolResult(success=False, error=f"{type(e).__name__}: {str(e)}")
+            msg = str(e) or repr(e)
+            logger.exception("Unhandled exception in tool %s: %s", type(self).__name__, msg)
+            return ToolResult(success=False, error=f"{type(e).__name__}: {msg}")
 
     @abstractmethod
     async def __call__(self, tool_input: TInput) -> ToolResult:

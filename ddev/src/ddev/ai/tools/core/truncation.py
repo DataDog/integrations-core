@@ -6,6 +6,8 @@ import re
 from dataclasses import dataclass
 from typing import Final
 
+from ddev.ai.tools.core.types import ToolResult
+
 MAX_CHARS: Final = 50_000
 HEAD_RATIO: Final = 0.6
 
@@ -91,3 +93,17 @@ def truncate(
         hint=hint,
     )
     return TruncateResult(output=result, truncated=True, meta=meta)
+
+
+def make_tool_result(success: bool, data: str, result: TruncateResult) -> ToolResult:
+    """Build a ToolResult, forwarding truncation metadata when present."""
+    if result.truncated and result.meta is not None:
+        return ToolResult(
+            success=success,
+            data=data,
+            truncated=True,
+            total_size=result.meta.total_size,
+            shown_size=result.meta.shown_size,
+            hint=result.meta.hint,
+        )
+    return ToolResult(success=success, data=data)
