@@ -1,0 +1,1 @@
+Add raw message format support for live messages, encoding key and value as base64

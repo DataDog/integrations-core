@@ -242,10 +242,10 @@ class KafkaConfig:
             if kafka.get('value_format', '') == '':
                 kafka['value_format'] = 'json'
             value_format = kafka['value_format']
-            if value_format not in ['json', 'avro', 'protobuf']:
+            if value_format not in ['json', 'avro', 'protobuf', 'raw']:
                 self.log.debug(
                     'Unsupported value format for Data Streams live messages, got %s. '
-                    'Supported formats: json, avro, protobuf',
+                    'Supported formats: json, avro, protobuf, raw',
                     value_format,
                 )
                 continue
@@ -254,10 +254,10 @@ class KafkaConfig:
             if kafka.get('key_format', '') == '':
                 kafka['key_format'] = 'json'
             key_format = kafka['key_format']
-            if key_format not in ['json', 'avro', 'protobuf']:
+            if key_format not in ['json', 'avro', 'protobuf', 'raw']:
                 self.log.debug(
                     'Unsupported key format for Data Streams live messages, got %s. '
-                    'Supported formats: json, avro, protobuf',
+                    'Supported formats: json, avro, protobuf, raw',
                     key_format,
                 )
                 continue

@@ -724,6 +724,40 @@ def test_deserialize_message():
     ) == (None, None, None, None)
 
 
+def test_deserialize_raw_message():
+    key = b'{"name": "Peter Parker"}'
+
+    # Raw value and raw key
+    raw_bytes = b'\x00\x01\x02\xff\xfe'
+    result = deserialize_message(MockedMessage(raw_bytes, key), 'raw', '', False, 'raw', '', False)
+    assert result == (base64.b64encode(raw_bytes).decode('ascii'), None, base64.b64encode(key).decode('ascii'), None)
+
+    # Raw value with JSON key
+    result = deserialize_message(MockedMessage(raw_bytes, key), 'raw', '', False, 'json', '', False)
+    assert result == (base64.b64encode(raw_bytes).decode('ascii'), None, '{"name": "Peter Parker"}', None)
+
+    # JSON value with raw key
+    json_value = b'{"age": 18}'
+    result = deserialize_message(MockedMessage(json_value, raw_bytes), 'json', '', False, 'raw', '', False)
+    assert result == ('{"age": 18}', None, base64.b64encode(raw_bytes).decode('ascii'), None)
+
+    # Empty raw value
+    result = deserialize_message(MockedMessage(b'', key), 'raw', '', False, 'json', '', False)
+    assert result == ('', None, '{"name": "Peter Parker"}', None)
+
+    # Empty raw key
+    result = deserialize_message(MockedMessage(raw_bytes, b''), 'raw', '', False, 'raw', '', False)
+    assert result == (base64.b64encode(raw_bytes).decode('ascii'), None, '', None)
+
+    # None raw value
+    result = deserialize_message(MockedMessage(None, key), 'raw', '', False, 'json', '', False)
+    assert result == ('', None, '{"name": "Peter Parker"}', None)
+
+    # None raw key
+    result = deserialize_message(MockedMessage(raw_bytes, None), 'raw', '', False, 'raw', '', False)
+    assert result == (base64.b64encode(raw_bytes).decode('ascii'), None, '', None)
+
+
 def test_strict_avro_validation():
     """Test that Avro deserialization fails when not all bytes are consumed."""
     key = b'{"name": "Peter Parker"}'
@@ -1221,6 +1255,45 @@ def mocked_time():
                 },
             ],
             id='Retrieves Avro messages from Kafka',
+        ),
+        pytest.param(
+            [
+                MockedMessage(
+                    b'\x00\x01\x02\xff\xfe',
+                    b'{"name": "Peter Parker"}',
+                    12,
+                ),
+                None,
+            ],
+            'raw',
+            '',
+            "",
+            ["config_1_id"],
+            [
+                {
+                    'timestamp': 400,
+                    'technology': 'kafka',
+                    'cluster': 'cluster_id',
+                    'config_id': 'config_1_id',
+                    'topic': 'topic1',
+                    'partition': '0',
+                    'offset': '12',
+                    'feature': 'data_streams_messages',
+                    'message_value': base64.b64encode(b'\x00\x01\x02\xff\xfe').decode('ascii'),
+                    'message_key': '{"name": "Peter Parker"}',
+                },
+                {
+                    'timestamp': 400,
+                    'technology': 'kafka',
+                    'cluster': 'cluster_id',
+                    'config_id': 'config_1_id',
+                    'topic': 'topic1',
+                    'message': 'No more messages to retrieve',
+                    'live_messages_error': 'No more messages to retrieve',
+                    'feature': 'data_streams_messages',
+                },
+            ],
+            id='Retrieves raw messages from Kafka with base64 encoding',
         ),
     ],
 )

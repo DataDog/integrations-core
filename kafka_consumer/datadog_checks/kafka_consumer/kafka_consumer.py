@@ -626,18 +626,30 @@ def deserialize_message(
     key_uses_schema_registry,
 ):
     try:
-        decoded_value, value_schema_id = _deserialize_bytes_maybe_schema_registry(
-            message.value(), value_format, value_schema, value_uses_schema_registry
-        )
+        if value_format == 'raw':
+            decoded_value, value_schema_id = _deserialize_raw(message.value()), None
+        else:
+            decoded_value, value_schema_id = _deserialize_bytes_maybe_schema_registry(
+                message.value(), value_format, value_schema, value_uses_schema_registry
+            )
     except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
         return None, None, None, None
     try:
-        decoded_key, key_schema_id = _deserialize_bytes_maybe_schema_registry(
-            message.key(), key_format, key_schema, key_uses_schema_registry
-        )
+        if key_format == 'raw':
+            decoded_key, key_schema_id = _deserialize_raw(message.key()), None
+        else:
+            decoded_key, key_schema_id = _deserialize_bytes_maybe_schema_registry(
+                message.key(), key_format, key_schema, key_uses_schema_registry
+            )
         return decoded_value, value_schema_id, decoded_key, key_schema_id
     except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
         return decoded_value, value_schema_id, None, None
+
+
+def _deserialize_raw(message):
+    if not message:
+        return ""
+    return base64.b64encode(message).decode('ascii')
 
 
 def _read_varint(data):
