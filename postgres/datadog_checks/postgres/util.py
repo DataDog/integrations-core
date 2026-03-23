@@ -603,6 +603,7 @@ WITH max_con AS (
 )
 SELECT datname AS database_name, {metrics_columns}
 FROM pg_stat_database, max_con
+WHERE datname NOT NULL {ignore_database_filter}
 GROUP BY datname, numbackends
 """,
     'name': 'connections_by_database',

@@ -859,7 +859,16 @@ class PostgreSql(DatabaseCheck):
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
         metric_scope = [CONNECTION_METRICS]
+
         metric_scope.append(CONNECTION_METRICS_BY_DB)
+        connection_metrics_by_db = copy.deepcopy(CONNECTION_METRICS_BY_DB)
+        databases_to_ignore = ""
+        if len(self._config.ignore_databases) > 0:
+            escaped_databases = ["'{}'".format(db.replace("'", "''")) for db in self._config.ignore_databases]
+            databases_to_ignore = "AND datname NOT IN ({})".format(", ".join(escaped_databases))
+        connection_metrics_by_db["query"] = connection_metrics_by_db["query"].format(ignore_database_filter=databases_to_ignore)
+        metric_scope.append(connection_metrics_by_db)
+
         per_database_metric_scope = []
 
         if self._config.collect_function_metrics:
