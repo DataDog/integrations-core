@@ -210,3 +210,79 @@ def test_missing_server_config():
     # The error should be in the validation result
     assert not check._validation_result.valid
     assert any('server' in str(error).lower() for error in check._validation_result.errors)
+
+
+def test_connect_no_password_uses_empty_string():
+    """
+    Regression test: when no password is configured, connect() must pass password=''
+    not password=None. clickhouse_connect encodes None as the literal string 'None'
+    in the Authorization header, causing ClickHouse error code 194 (auth failure).
+    """
+    instance = {
+        'server': 'localhost',
+        'port': 8123,
+        'username': 'default',
+        # 'password' intentionally omitted
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check.check_id = 'test-no-password'
+
+    assert check._config.password == '', (
+        "password should default to '' not None — None causes auth error 194 in clickhouse_connect"
+    )
+
+    with mock.patch('clickhouse_connect.get_client') as m:
+        mock_client = mock.MagicMock()
+        m.return_value = mock_client
+        check.connect()
+        _, kwargs = m.call_args
+        assert kwargs['password'] == '', (
+            "connect() must pass password='' not password=None to clickhouse_connect"
+        )
+
+
+def test_connect_explicit_null_password_uses_empty_string():
+    """
+    Regression test: explicit password: null (None) in config must also be coerced to ''
+    before being passed to clickhouse_connect, not forwarded as None.
+    """
+    instance = {
+        'server': 'localhost',
+        'port': 8123,
+        'username': 'default',
+        'password': None,
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check.check_id = 'test-null-password'
+
+    with mock.patch('clickhouse_connect.get_client') as m:
+        mock_client = mock.MagicMock()
+        m.return_value = mock_client
+        check.connect()
+        _, kwargs = m.call_args
+        assert kwargs['password'] == '', (
+            "connect() must coerce None password to '' before passing to clickhouse_connect"
+        )
+
+
+def test_create_dbm_client_no_password_uses_empty_string():
+    """
+    Regression test: create_dbm_client() must also pass password='' not password=None
+    when no password is configured.
+    """
+    instance = {
+        'server': 'localhost',
+        'port': 8123,
+        'username': 'default',
+        # 'password' intentionally omitted
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+
+    with mock.patch('clickhouse_connect.get_client') as m:
+        mock_client = mock.MagicMock()
+        m.return_value = mock_client
+        check.create_dbm_client()
+        _, kwargs = m.call_args
+        assert kwargs['password'] == '', (
+            "create_dbm_client() must pass password='' not password=None to clickhouse_connect"
+        )
