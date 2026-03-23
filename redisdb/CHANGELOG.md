@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 8.7.0-beta.1 / 2026-03-23
+
+***Added***:
+
+* Allow for ssl_check_hostname to be turned off ([#22972](https://github.com/DataDog/integrations-core/pull/22972))
+* Update dependencies ([#22996](https://github.com/DataDog/integrations-core/pull/22996))
+
+***Fixed***:
+
+* Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
+
 ## 8.6.0 / 2026-03-18
 
 ***Added***:
