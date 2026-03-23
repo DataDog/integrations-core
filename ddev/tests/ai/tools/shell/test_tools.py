@@ -9,7 +9,6 @@ import pytest
 from ddev.ai.tools.shell.grep import GrepInput, GrepTool
 from ddev.ai.tools.shell.list_files import ListFilesInput, ListFilesTool
 from ddev.ai.tools.shell.mkdir import MkdirInput, MkdirTool
-from ddev.ai.tools.shell.read_file import ReadFileInput, ReadFileTool
 
 # ---------------------------------------------------------------------------
 # Tool metadata
@@ -22,7 +21,6 @@ from ddev.ai.tools.shell.read_file import ReadFileInput, ReadFileTool
         (GrepTool, "grep", 30),
         (ListFilesTool, "list_files", 30),
         (MkdirTool, "mkdir", 5),
-        (ReadFileTool, "read_file", 10),
     ],
 )
 def test_tool_meta(tool_cls, expected_name, expected_timeout):
@@ -115,41 +113,3 @@ def mkdir_tool() -> MkdirTool:
 def test_mkdir_cmd(mkdir_tool: MkdirTool):
     assert mkdir_tool.cmd(MkdirInput(path="/a/b/c")) == ["mkdir", "-p", "/a/b/c"]
     assert mkdir_tool.cmd(MkdirInput(path="/my dir/sub dir")) == ["mkdir", "-p", "/my dir/sub dir"]
-
-
-# ---------------------------------------------------------------------------
-# ReadFileTool
-# ---------------------------------------------------------------------------
-
-
-@pytest.fixture
-def read_file_tool() -> ReadFileTool:
-    return ReadFileTool()
-
-
-@pytest.fixture
-def path() -> str:
-    return "/etc/config.conf"
-
-
-@pytest.mark.parametrize(
-    "offset,limit,expected_cmd",
-    [
-        (None, None, ["cat", "/etc/config.conf"]),
-        (0, None, ["cat", "/etc/config.conf"]),
-        (1, None, ["awk", "NR>=2", "/etc/config.conf"]),
-        (5, None, ["awk", "NR>=6", "/etc/config.conf"]),
-        (0, 10, ["awk", "NR>=1 && NR<=10", "/etc/config.conf"]),
-        (0, 1, ["awk", "NR>=1 && NR<=1", "/etc/config.conf"]),
-        (1, 10, ["awk", "NR>=2 && NR<=11", "/etc/config.conf"]),
-        (5, 1, ["awk", "NR>=6 && NR<=6", "/etc/config.conf"]),
-        (10, 5, ["awk", "NR>=11 && NR<=15", "/etc/config.conf"]),
-        (3, 5, ["awk", "NR>=4 && NR<=8", "/etc/config.conf"]),
-    ],
-)
-def test_read_file_cmd(read_file_tool: ReadFileTool, offset, limit, expected_cmd):
-    if offset is None and limit is None:
-        inp = ReadFileInput(path="/etc/config.conf")
-    else:
-        inp = ReadFileInput(path="/etc/config.conf", offset=offset or 0, limit=limit)
-    assert read_file_tool.cmd(inp) == expected_cmd
