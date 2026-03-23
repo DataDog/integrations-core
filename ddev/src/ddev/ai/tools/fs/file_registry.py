@@ -26,6 +26,7 @@ class FileRegistry:
         return self._normalize(path) in self._hashes
 
     def lock_for(self, path: str) -> asyncio.Lock:
+        # Safe under single-threaded asyncio; asyncio.Lock is not thread-safe
         return self._locks.setdefault(self._normalize(path), asyncio.Lock())
 
     def verify(self, path: str, content: str) -> bool:

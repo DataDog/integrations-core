@@ -115,14 +115,16 @@ def test_request_error(http_tool: HttpGetTool) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_response_truncated(http_tool: HttpGetTool) -> None:
+@pytest.mark.parametrize("status_code", [200, 500])
+def test_response_truncated(http_tool: HttpGetTool, status_code: int) -> None:
     from ddev.ai.tools.core.truncation import MAX_CHARS
 
     large_body = "x" * (MAX_CHARS + 1000)
-    with patch_httpx(fake_response(200, large_body)):
+    with patch_httpx(fake_response(status_code, large_body)):
         result = asyncio.run(http_tool.run({"url": "http://localhost:9090/metrics"}))
 
     assert result.success is True
     assert result.truncated is True
     assert result.total_size is not None
     assert result.hint is not None
+    assert f"Status: {status_code}" in result.data

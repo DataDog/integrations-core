@@ -15,23 +15,20 @@ def test_tool_name(registry: FileRegistry) -> None:
     assert EditFileTool(registry).name == "edit_file"
 
 
-@pytest.mark.parametrize(
-    "old_string,new_string,expected_in,expected_out",
-    [
-        ("line two", "line TWO", "line TWO", "line two"),
-        ("line two\n", "", None, "line two"),
-    ],
-)
-def test_edit_file_success(
-    edit_tool: EditFileTool, known_file, old_string, new_string, expected_in, expected_out
-) -> None:
-    result = asyncio.run(edit_tool.run({"path": str(known_file), "old_string": old_string, "new_string": new_string}))
+def test_edit_file_replaces_string(edit_tool: EditFileTool, known_file) -> None:
+    result = asyncio.run(edit_tool.run({"path": str(known_file), "old_string": "line two", "new_string": "line TWO"}))
 
     assert result.success is True
     content = known_file.read_text(encoding="utf-8")
-    if expected_in is not None:
-        assert expected_in in content
-    assert expected_out not in content
+    assert "line TWO" in content
+    assert "line two" not in content
+
+
+def test_edit_file_deletes_line(edit_tool: EditFileTool, known_file) -> None:
+    result = asyncio.run(edit_tool.run({"path": str(known_file), "old_string": "line two\n", "new_string": ""}))
+
+    assert result.success is True
+    assert "line two" not in known_file.read_text(encoding="utf-8")
 
 
 def test_edit_file_fails_for_unregistered_file(edit_tool: EditFileTool, tmp_path) -> None:
