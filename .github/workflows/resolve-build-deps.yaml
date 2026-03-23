@@ -102,11 +102,53 @@ jobs:
           cd .builders
           python -m mypy --config-file pyproject.toml .
 
+  # Pin transitive dependency versions before parallel builds to avoid race
+  # conditions with new package releases on PyPI during the build window.
+  pre-resolve:
+    name: Pre-resolve dependency versions
+    needs:
+      - check-should-run
+      - test
+    if: needs.check-should-run.outputs.should_run_build == 'true'
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Determine resolution cutoff timestamp
+        id: timestamp
+        run: |
+          # Use the checked-out commit timestamp for reproducibility on re-runs
+          echo "cutoff=$(git log -1 --format=%cI)" >> "${GITHUB_OUTPUT}"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+
+      - name: Generate dependency constraints
+        run: |
+          # We only resolve against PyPI here. The custom index
+          # (agent-int-packages.datadoghq.com) hosts direct dependencies that
+          # are already pinned in agent_requirements.in, so they don't need
+          # constraining. We only need to pin transitive deps, which all come
+          # from PyPI.
+          uv pip compile ${{ env.DIRECT_DEPENDENCY_FILE }} \
+            --exclude-newer "${{ steps.timestamp.outputs.cutoff }}" \
+            --python-version ${{ env.PYTHON_VERSION }} \
+            --output-file constraints.txt
+          echo "Generated constraints:"
+          cat constraints.txt
+
+      - name: Upload constraints
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: resolution-constraints
+          path: constraints.txt
+
   build:
     name: Target ${{ matrix.job.image }} on ${{ matrix.job.os }}
     needs:
       - check-should-run
-      - test
+      - pre-resolve
     if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ${{ matrix.job.os }}
     strategy:
@@ -140,6 +182,12 @@ jobs:
     - name: Install management dependencies
       run: pip install -r .builders/deps/host_dependencies.txt
 
+    - name: Download dependency constraints
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      with:
+        name: resolution-constraints
+        path: .constraints
+
     - name: Ensure Docker is running
       run: bash .github/actions/setup-test-target-scripts/src/ensure-docker.sh
 
@@ -152,13 +200,13 @@ jobs:
 
     - name: Build image and wheels
       if: needs.check-should-run.outputs.builder_changed == 'true'
-      run: python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
+      run: python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --constraints .constraints/constraints.txt
 
     - name: Pull image and build wheels
       if: needs.check-should-run.outputs.builder_changed == 'false'
       run: |
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
-        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
+        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest --constraints .constraints/constraints.txt
 
     - name: Publish image
       if: github.event_name == 'push' && needs.check-should-run.outputs.builder_changed == 'true'
@@ -187,7 +235,7 @@ jobs:
     name: Target macOS/${{ matrix.job.arch }} on ${{ matrix.job.os }}
     needs:
       - check-should-run
-      - test
+      - pre-resolve
     if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ${{ matrix.job.os }}
     strategy:
@@ -234,6 +282,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+    - name: Download dependency constraints
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      with:
+        name: resolution-constraints
+        path: .constraints
+
     - name: Install management dependencies
       run: |
         ${DD_PYTHON3} -m pip install -r .builders/deps/host_dependencies.txt
@@ -254,10 +308,10 @@ jobs:
       run: |
         # If we hit the cache, we can skip the builder setup
         if [[ ${CACHE_HIT} == "true" ]]; then
-          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup
+          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup --constraints .constraints/constraints.txt
         else
           mkdir ~/builder_root
-          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3
+          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --constraints .constraints/constraints.txt
         fi
 
     - name: Upload artifacts
