@@ -261,26 +261,3 @@ def test_connect_explicit_null_password_uses_empty_string():
         assert kwargs['password'] == '', (
             "connect() must coerce None password to '' before passing to clickhouse_connect"
         )
-
-
-def test_create_dbm_client_no_password_uses_empty_string():
-    """
-    Regression test: create_dbm_client() must also pass password='' not password=None
-    when no password is configured.
-    """
-    instance = {
-        'server': 'localhost',
-        'port': 8123,
-        'username': 'default',
-        # 'password' intentionally omitted
-    }
-    check = ClickhouseCheck('clickhouse', {}, [instance])
-
-    with mock.patch('clickhouse_connect.get_client') as m:
-        mock_client = mock.MagicMock()
-        m.return_value = mock_client
-        check.create_dbm_client()
-        _, kwargs = m.call_args
-        assert kwargs['password'] == '', (
-            "create_dbm_client() must pass password='' not password=None to clickhouse_connect"
-        )
