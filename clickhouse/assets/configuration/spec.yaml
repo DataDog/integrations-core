@@ -123,6 +123,7 @@ files:
         For ClickHouse Cloud managed service, use single_endpoint_mode instead.
       value:
         type: string
+        display_default: null
         example: my_cluster
     - name: single_endpoint_mode
       description: |

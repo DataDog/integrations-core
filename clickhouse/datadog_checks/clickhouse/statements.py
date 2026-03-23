@@ -314,13 +314,17 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
         """
         Merge per-(query, node) rows into per-query rows.
 
+        Rows are grouped by (normalized_query_hash, server_node) so that the same
+        query running on different nodes produces separate merged rows, preserving
+        per-node attribution in cluster mode.
+
         Summable metrics (count, total_time, …) are summed.
         peak_memory_usage takes the max.
         Non-metric fields are taken from the node with the highest execution count.
         """
         groups = {}
         for row in node_rows:
-            key = row['normalized_query_hash']
+            key = (row['normalized_query_hash'], row.get('server_node', ''))
             if key not in groups:
                 groups[key] = []
             groups[key].append(row)

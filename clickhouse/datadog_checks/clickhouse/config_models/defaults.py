@@ -8,10 +8,6 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
-def instance_cluster_name():
-    return 'my_cluster'
-
-
 def instance_connect_timeout():
     return 10
 
