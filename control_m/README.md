@@ -179,4 +179,4 @@ Need help? Contact [Datadog support][8].
 [7]: https://github.com/DataDog/integrations-core/blob/master/control_m/metadata.csv
 [8]: https://docs.datadoghq.com/help/
 [9]: https://docs.datadoghq.com/metrics/types/?tab=histogram
-[10]: [https://github.com/DataDog/datadog-agent/blob/main/pkg/config/config_template.yaml#L210-L227](https://github.com/DataDog/datadog-agent/blob/3697d3b93bde62e2c3bf039e170ce69e49ef5294/pkg/config/config_template.yaml#L225-L242)
+[10]: https://github.com/DataDog/datadog-agent/blob/3697d3b93bde62e2c3bf039e170ce69e49ef5294/pkg/config/config_template.yaml#L225-L242
