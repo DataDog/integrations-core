@@ -58,7 +58,7 @@ EXCLUDED_INTEGRATIONS = [
     "datadog-tokumx",  # excluding this since `tokumx` was dropped in py3
     "datadog-ntp",  # excluding this since `ntp` was Agent 5 only
     "datadog-kaspersky",  # excluding this since `kaspersky` check was removed and wheel is not available
-    "datadog-trend-micro-cloud-one",  # excluding this since `trend-micro-cloud-one` check was removed and wheel is not available
+    "datadog-trend-micro-cloud-one",  # excluding this since the check was removed and wheel is not available
 ]
 
 EXCLUDED_LOG_INTEGRATIONS = [
