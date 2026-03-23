@@ -6,7 +6,7 @@ from abc import abstractmethod
 from typing import ClassVar
 
 from ddev.ai.tools.core.base import BaseTool, BaseToolInput
-from ddev.ai.tools.core.truncation import TruncateResult, truncate
+from ddev.ai.tools.core.truncation import make_tool_result, truncate
 from ddev.ai.tools.core.types import ToolResult
 
 
@@ -52,16 +52,5 @@ async def run_command(cmd: list[str], timeout: int = 10) -> ToolResult:
     if not output.strip():
         return ToolResult(success=proc.returncode == 0, data="(no output)")
 
-    result: TruncateResult = truncate(output)
-
-    if result.truncated and result.meta is not None:
-        return ToolResult(
-            success=proc.returncode == 0,
-            data=result.output,
-            truncated=True,
-            total_size=result.meta.total_size,
-            shown_size=result.meta.shown_size,
-            hint=result.meta.hint,
-        )
-
-    return ToolResult(success=proc.returncode == 0, data=result.output)
+    result = truncate(output)
+    return make_tool_result(success=proc.returncode == 0, data=result.output, result=result)
