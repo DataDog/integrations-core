@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "created_at": "2026-03-23",
+  "last_updated_at": "2026-03-23",
+  "title": "ClickHouse query failure rate is high",
+  "tags": [
+    "integration:clickhouse"
+  ],
+  "description": "A high rate of failed queries in ClickHouse can indicate problematic queries, resource exhaustion, or misconfigured query limits. This monitor tracks the per-second rate of failed queries to catch degradation early.",
+  "definition": {
+    "message": "{{#is_alert}}\n\n## What's happening?\nClickHouse on {{host.name}} has a high query failure rate over the last 5 minutes.\n\n## How to investigate\nCheck the ClickHouse system log (`system.query_log`) for error details and identify the failing queries.\n\n{{/is_alert}}",
+    "name": "[ClickHouse] High query failure rate on {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 5,
+        "warning": 1
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_5m):avg:clickhouse.query.failed.count{*}.as_rate() > 5",
+    "tags": [
+      "integration:clickhouse"
+    ],
+    "type": "query alert"
+  }
+}
