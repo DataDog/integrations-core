@@ -124,7 +124,6 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     assert event['host'] is not None
     assert event['database_instance'] is not None
     assert event['ddagentversion'] == datadog_agent.get_version()
-    assert event['ddsource'] == 'clickhouse'
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] is not None
     assert 'tags' in event
@@ -158,7 +157,6 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     )
 
     fqt_event = matching_fqt[0]
-    assert fqt_event['ddsource'] == 'clickhouse'
     assert fqt_event['dbm_type'] == 'fqt'
     assert fqt_event['db']['statement'] is not None
     assert 'metadata' in fqt_event['db']

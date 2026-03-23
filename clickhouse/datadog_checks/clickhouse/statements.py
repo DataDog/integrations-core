@@ -144,7 +144,6 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                 'min_collection_interval': self._collection_interval,
                 'tags': self._tags_no_db,
                 'ddagentversion': datadog_agent.get_version(),
-                'ddsource': 'clickhouse',
                 'clickhouse_version': self._check.dbms_version,
             }
 
@@ -447,7 +446,6 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
                 "ddagentversion": datadog_agent.get_version(),
-                "ddsource": "clickhouse",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",
                 "db": {

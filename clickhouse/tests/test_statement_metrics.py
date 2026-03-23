@@ -262,7 +262,6 @@ def test_rows_to_fqt_events(check_with_dbm):
 
     # Verify event structure
     assert event['dbm_type'] == 'fqt'
-    assert event['ddsource'] == 'clickhouse'
     assert event['host'] == check_with_dbm.reported_hostname
     assert event['database_instance'] == check_with_dbm.database_identifier
 
