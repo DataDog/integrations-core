@@ -227,7 +227,9 @@ def test_connect_no_password_uses_empty_string():
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.check_id = 'test-no-password'
 
-    assert check._config.password == '', "password must default to '' — None causes auth error 194 in clickhouse_connect"
+    assert check._config.password == '', (
+        "password must default to '' — None causes auth error 194 in clickhouse_connect"
+    )
 
     with mock.patch('clickhouse_connect.get_client') as m:
         mock_client = mock.MagicMock()
@@ -256,7 +258,9 @@ def test_connect_explicit_null_password_uses_empty_string():
         m.return_value = mock_client
         check.connect()
         _, kwargs = m.call_args
-        assert kwargs['password'] == '', "connect() must coerce None password to '' before passing to clickhouse_connect"
+        assert kwargs['password'] == '', (
+            "connect() must coerce None password to '' before passing to clickhouse_connect"
+        )
 
 
 def test_create_dbm_client_no_password_uses_empty_string():
@@ -277,4 +281,6 @@ def test_create_dbm_client_no_password_uses_empty_string():
         m.return_value = mock_client
         check.create_dbm_client()
         _, kwargs = m.call_args
-        assert kwargs['password'] == '', "create_dbm_client() must pass password='' not password=None to clickhouse_connect"
+        assert kwargs['password'] == '', (
+            "create_dbm_client() must pass password='' not password=None to clickhouse_connect"
+        )
