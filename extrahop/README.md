@@ -24,6 +24,7 @@ This integration seamlessly collects all the above listed logs, channeling them 
     - NPM Module Access: The NPM module access permission assigned to the ID and Secret. Select **No Access**.
     - Packet And Session Key Access: The packet and session key access permission assigned to the ID and Secret. Select **No Access**.
 4. Click **Save**.
+5. Identify your Sub Domain by checking the hostname suffix of your ExtraHop Platform URL. For example, if `<example>.cloud.extrahop.com` is your platform URL, then `example` is your Sub Domain.
 
 ### Connect your ExtraHop Account to Datadog
 
