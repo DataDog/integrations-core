@@ -446,6 +446,7 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
                 "ddagentversion": datadog_agent.get_version(),
+                "ddsource": "clickhouse",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",
                 "db": {
