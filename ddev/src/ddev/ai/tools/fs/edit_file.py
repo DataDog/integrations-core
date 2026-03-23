@@ -60,6 +60,9 @@ class EditFileTool(FileRegistryTool[EditFileInput]):
                 )
 
             new_content = content.replace(old_string, new_string, 1)
-            path.write_text(new_content, encoding="utf-8")
+            try:
+                path.write_text(new_content, encoding="utf-8")
+            except OSError as e:
+                return ToolResult(success=False, error=str(e))
             self._record(str(path), new_content)
         return ToolResult(success=True, data=f"File edited: {path}")

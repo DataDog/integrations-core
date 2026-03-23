@@ -35,7 +35,10 @@ class CreateFileTool(FileRegistryTool[CreateFileInput]):
             if path.exists():
                 return ToolResult(success=False, error=f"File already exists: {path}")
 
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(tool_input.content, encoding="utf-8")
+            try:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(tool_input.content, encoding="utf-8")
+            except OSError as e:
+                return ToolResult(success=False, error=str(e))
             self._record(str(path), tool_input.content)
         return ToolResult(success=True, data=f"File created: {path}")

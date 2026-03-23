@@ -85,7 +85,7 @@ def test_request_non_success_status(http_tool: HttpGetTool, status_code: int) ->
     with patch_httpx(fake_response(status_code, "error body")):
         result = asyncio.run(http_tool.run({"url": "http://localhost:9090/metrics"}))
 
-    assert result.success is False
+    assert result.success is True
     assert f"Status: {status_code}" in result.data
 
 

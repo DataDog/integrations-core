@@ -7,6 +7,7 @@ from typing import Annotated
 from pydantic import Field
 
 from ddev.ai.tools.core.base import BaseToolInput
+from ddev.ai.tools.core.truncation import make_tool_result, truncate
 from ddev.ai.tools.core.types import ToolResult
 
 from .base import FileRegistryTool
@@ -48,4 +49,5 @@ class ReadFileTool(FileRegistryTool[ReadFileInput]):
         slice_ = lines[offset : offset + limit] if limit is not None else lines[offset:]
         width = len(str(offset + len(slice_)))
         numbered = "".join(f"{offset + i:{width}}: {line}" for i, line in enumerate(slice_))
-        return ToolResult(success=True, data=numbered)
+        truncate_result = truncate(numbered)
+        return make_tool_result(success=True, data=truncate_result.output, result=truncate_result)

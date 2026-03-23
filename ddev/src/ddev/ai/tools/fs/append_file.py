@@ -38,6 +38,9 @@ class AppendFileTool(FileRegistryTool[AppendFileInput]):
             separator = "" if not current_content or current_content.endswith("\n") else "\n"
             new_content = current_content + separator + content_to_append
 
-            path.write_text(new_content, encoding="utf-8")
+            try:
+                path.write_text(new_content, encoding="utf-8")
+            except OSError as e:
+                return ToolResult(success=False, error=str(e))
             self._record(str(path), new_content)
         return ToolResult(success=True, data=f"Content appended to: {path}")
