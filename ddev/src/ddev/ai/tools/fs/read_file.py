@@ -37,7 +37,7 @@ class ReadFileTool(FileRegistryTool[ReadFileInput]):
 
     async def __call__(self, tool_input: ReadFileInput) -> ToolResult:
         try:
-            content = Path(tool_input.path).read_text(encoding="utf-8")
+            content = Path(tool_input.path).resolve().read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError) as e:
             return ToolResult(success=False, error=f"{tool_input.path}: {e}")
 

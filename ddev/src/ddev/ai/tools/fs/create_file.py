@@ -29,7 +29,7 @@ class CreateFileTool(FileRegistryTool[CreateFileInput]):
         return "create_file"
 
     async def __call__(self, tool_input: CreateFileInput) -> ToolResult:
-        path = Path(tool_input.path)
+        path = Path(tool_input.path).resolve()
 
         async with self._registry.lock_for(str(path)):
             if path.exists():
@@ -40,5 +40,5 @@ class CreateFileTool(FileRegistryTool[CreateFileInput]):
                 path.write_text(tool_input.content, encoding="utf-8")
             except OSError as e:
                 return ToolResult(success=False, error=str(e))
-            self._record(str(path), tool_input.content)
+            self._register(str(path), tool_input.content)
         return ToolResult(success=True, data=f"File created: {path}")

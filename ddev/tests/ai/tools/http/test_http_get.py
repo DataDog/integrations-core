@@ -99,8 +99,7 @@ def test_request_timeout(http_tool: HttpGetTool) -> None:
         result = asyncio.run(http_tool.run({"url": "http://localhost:9090/metrics", "timeout": 1.0}))
 
     assert result.success is False
-    assert "timed out" in result.error
-    assert "1.0s" in result.error
+    assert "timed out after 1.0s" in result.error
 
 
 def test_request_error(http_tool: HttpGetTool) -> None:

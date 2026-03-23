@@ -27,7 +27,7 @@ class AppendFileTool(FileRegistryTool[AppendFileInput]):
         return "append_file"
 
     async def __call__(self, tool_input: AppendFileInput) -> ToolResult:
-        path = Path(tool_input.path)
+        path = Path(tool_input.path).resolve()
 
         async with self._registry.lock_for(str(path)):
             current_content, fail = self._read_verified(str(path))
@@ -42,5 +42,5 @@ class AppendFileTool(FileRegistryTool[AppendFileInput]):
                 path.write_text(new_content, encoding="utf-8")
             except OSError as e:
                 return ToolResult(success=False, error=str(e))
-            self._record(str(path), new_content)
+            self._register(str(path), new_content)
         return ToolResult(success=True, data=f"Content appended to: {path}")

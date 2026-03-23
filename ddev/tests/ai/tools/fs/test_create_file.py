@@ -40,7 +40,9 @@ def test_create_file_creates_missing_parent_dirs(create_tool: CreateFileTool, tm
     assert f.read_text(encoding="utf-8") == "nested"
 
 
-def test_create_file_fails_if_file_already_exists(create_tool: CreateFileTool, tmp_path) -> None:
+def test_create_file_fails_if_file_already_exists(
+    create_tool: CreateFileTool, registry: FileRegistry, tmp_path
+) -> None:
     f = tmp_path / "existing.txt"
     f.write_text("original", encoding="utf-8")
 
@@ -49,6 +51,7 @@ def test_create_file_fails_if_file_already_exists(create_tool: CreateFileTool, t
     assert result.success is False
     assert result.error is not None
     assert f.read_text(encoding="utf-8") == "original"
+    assert not registry.is_known(str(f))
 
 
 def test_create_tool_registers_in_registry(create_tool: CreateFileTool, registry: FileRegistry, tmp_path) -> None:

@@ -19,7 +19,7 @@ class FileRegistryTool[TInput: BaseToolInput](BaseTool[TInput]):
         if self._registry.is_known(path):
             self._registry.record(path, content)
 
-    def _record(self, path: str, content: str) -> None:
+    def _register(self, path: str, content: str) -> None:
         self._registry.record(path, content)
 
     def _read_verified(self, path: str) -> tuple[str, ToolResult | None]:

@@ -17,8 +17,11 @@ class EditFileInput(BaseToolInput):
     old_string: Annotated[
         str,
         Field(
-            description="Exact non-empty text to replace. Must appear exactly once in the file \
-        (hint: include surrounding context if needed)."
+            description=(
+                "Exact non-empty text to replace. Must appear exactly once in the file "
+                "(hint: include surrounding context if needed)."
+            ),
+            min_length=1,
         ),
     ]
     new_string: Annotated[str, Field(description="Text to replace old_string with")]
@@ -35,7 +38,7 @@ class EditFileTool(FileRegistryTool[EditFileInput]):
         return "edit_file"
 
     async def __call__(self, tool_input: EditFileInput) -> ToolResult:
-        path = Path(tool_input.path)
+        path = Path(tool_input.path).resolve()
 
         async with self._registry.lock_for(str(path)):
             content, fail = self._read_verified(str(path))
@@ -45,9 +48,6 @@ class EditFileTool(FileRegistryTool[EditFileInput]):
             # Normalize line endings to avoid issues with different OSs
             old_string = tool_input.old_string.replace("\r\n", "\n")
             new_string = tool_input.new_string.replace("\r\n", "\n")
-
-            if not old_string:
-                return ToolResult(success=False, error="old_string must not be empty")
 
             count = content.count(old_string)
             if count == 0:
@@ -64,5 +64,5 @@ class EditFileTool(FileRegistryTool[EditFileInput]):
                 path.write_text(new_content, encoding="utf-8")
             except OSError as e:
                 return ToolResult(success=False, error=str(e))
-            self._record(str(path), new_content)
+            self._register(str(path), new_content)
         return ToolResult(success=True, data=f"File edited: {path}")

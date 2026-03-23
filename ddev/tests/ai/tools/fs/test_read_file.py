@@ -36,7 +36,7 @@ def test_read_file_missing_file(read_tool: ReadFileTool, tmp_path) -> None:
     result = asyncio.run(read_tool.run({"path": str(tmp_path / "ghost.txt")}))
 
     assert result.success is False
-    assert result.error is not None
+    assert str(tmp_path / "ghost.txt") in result.error
 
 
 def test_read_file_permission_error(read_tool: ReadFileTool, tmp_path) -> None:
