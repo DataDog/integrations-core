@@ -132,7 +132,7 @@ class MessageDeserializer:
             return None, None
 
         if format_type == 'raw':
-            return base64.b64encode(raw_bytes).decode('ascii'), None
+            return json.dumps(base64.b64encode(raw_bytes).decode('ascii')), None
 
         try:
             schema = None

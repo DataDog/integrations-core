@@ -488,8 +488,36 @@ class TestMessageDeserializer:
         raw_bytes = b'\xde\xad\xbe\xef'
         result, schema_id = deserializer.deserialize_message(raw_bytes, 'raw')
 
-        assert result == base64.b64encode(raw_bytes).decode('ascii')
+        expected_b64 = base64.b64encode(raw_bytes).decode('ascii')
+        assert result == json.dumps(expected_b64)
+        assert json.loads(result) == expected_b64
         assert schema_id is None
+
+    def test_deserialize_raw_no_coercion_for_json_like_base64(self):
+        """Test that raw format is not coerced by _parse_deserialized for JSON-like base64 values."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        # b'\x9e\xe9\x65' base64-encodes to "null", which json.loads would coerce to None
+        null_bytes = b'\x9e\xe9\x65'
+        assert base64.b64encode(null_bytes).decode('ascii') == 'null'
+
+        kafka_msg = MockKafkaMessage(key=null_bytes, value=null_bytes)
+        config = {'key_format': 'raw', 'value_format': 'raw'}
+        msg = DeserializedMessage(kafka_msg, deserializer, config)
+
+        assert msg.value == 'null', "raw base64 'null' must stay as string, not become None"
+        assert msg.key == 'null', "raw base64 'null' must stay as string, not become None"
+
+        # b'\xd7\x6d\xf8' base64-encodes to "1234", which json.loads would coerce to int
+        int_bytes = b'\xd7\x6d\xf8'
+        assert base64.b64encode(int_bytes).decode('ascii') == '1234'
+
+        kafka_msg = MockKafkaMessage(key=int_bytes, value=int_bytes)
+        msg = DeserializedMessage(kafka_msg, deserializer, config)
+
+        assert msg.value == '1234', "raw base64 '1234' must stay as string, not become int"
+        assert isinstance(msg.value, str)
 
 
 class TestSchemaRegistryIntegration:
