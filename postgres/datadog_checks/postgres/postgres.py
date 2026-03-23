@@ -865,7 +865,9 @@ class PostgreSql(DatabaseCheck):
         if len(self._config.ignore_databases) > 0:
             escaped_databases = ["'{}'".format(db.replace("'", "''")) for db in self._config.ignore_databases]
             databases_to_ignore = "AND datname NOT IN ({})".format(", ".join(escaped_databases))
-        connection_metrics_by_db["query"] = connection_metrics_by_db["query"].format(ignore_database_filter=databases_to_ignore)
+        connection_metrics_by_db["query"] = connection_metrics_by_db["query"].format(
+            ignore_database_filter=databases_to_ignore
+        )
         metric_scope.append(connection_metrics_by_db)
         self.log.debug("Connection Metrics by DB query [%s]", connection_metrics_by_db["query"])
 
