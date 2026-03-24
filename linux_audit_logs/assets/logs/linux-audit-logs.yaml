@@ -61,6 +61,36 @@ facets:
     path: linux_audit_logs.bool
     source: log
     type: string
+  - groups:
+      - OCSF
+    name: Activity Name
+    path: ocsf.activity_name
+    source: log
+  - groups:
+      - OCSF
+    name: Severity
+    path: ocsf.severity
+    source: log
+  - groups:
+      - OCSF
+    name: Device Type
+    path: ocsf.device.type
+    source: log
+  - groups:
+      - OCSF
+    name: File Type
+    path: ocsf.file.type
+    source: log
+  - groups:
+      - OCSF
+    name: File Name
+    path: ocsf.file.name
+    source: log
+  - groups:
+      - OCSF
+    name: Process Name
+    path: ocsf.process.name
+    source: log
 pipeline:
   type: pipeline
   name: Linux Audit Logs
@@ -1070,12 +1100,6 @@ pipeline:
       filter:
         query: "@type:(ADD_USER OR DEL_USER OR USER_CHAUTHTOK)"
       processors:
-        - type: string-builder-processor
-          name: Set `ocsf.device.name` to Unknown
-          enabled: true
-          template: Unknown
-          target: ocsf.device.name
-          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3001
           enabled: true
@@ -1273,11 +1297,24 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: Map `msg.hostname` to `ocsf.device.name`
+            - name: Set `ocsf.device.name` to Unknown when hostname is absent
+              categories:
+                - filter:
+                    query: "-@msg.hostname:*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.name
+                id: ocsf.device.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: Map `msg.hostname` to `ocsf.device.hostname`
               sources:
                 - msg.hostname
               sourceType: attribute
-              target: ocsf.device.name
+              target: ocsf.device.hostname
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -1308,12 +1345,6 @@ pipeline:
       filter:
         query: "@type:USER_AUTH"
       processors:
-        - type: string-builder-processor
-          name: Set `ocsf.device.name` to Unknown
-          enabled: true
-          template: Unknown
-          target: ocsf.device.name
-          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3002
           enabled: true
@@ -1377,6 +1408,19 @@ pipeline:
                   id: 0
               targets:
                 name: ocsf.device.type
+                id: ocsf.device.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: Set `ocsf.device.name` to Unknown when hostname is absent
+              categories:
+                - filter:
+                    query: "-@msg.hostname:*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.name
                 id: ocsf.device.type_id
               fallback:
                 values: {}
@@ -1521,11 +1565,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `msg.hostname` to `ocsf.device.name`
+            - name: Map `msg.hostname` to `ocsf.device.hostname`
               sources:
                 - msg.hostname
               sourceType: attribute
-              target: ocsf.device.name
+              target: ocsf.device.hostname
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -1586,12 +1630,6 @@ pipeline:
       filter:
         query: "@type:(ROLE_ASSIGN OR ROLE_REMOVE)"
       processors:
-        - type: string-builder-processor
-          name: Set `ocsf.device.name` to Unknown
-          enabled: true
-          template: Unknown
-          target: ocsf.device.name
-          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3005
           enabled: true
@@ -1781,11 +1819,24 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: Map `msg.hostname` to `ocsf.device.name`
+            - name: Set `ocsf.device.name` to Unknown when hostname is absent
+              categories:
+                - filter:
+                    query: "-@msg.hostname:*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.name
+                id: ocsf.device.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: Map `msg.hostname` to `ocsf.device.hostname`
               sources:
                 - msg.hostname
               sourceType: attribute
-              target: ocsf.device.name
+              target: ocsf.device.hostname
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -1834,12 +1885,6 @@ pipeline:
       filter:
         query: "@type:(ADD_GROUP OR DEL_GROUP)"
       processors:
-        - type: string-builder-processor
-          name: Set `ocsf.device.name` to Unknown
-          enabled: true
-          template: Unknown
-          target: ocsf.device.name
-          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 3006
           enabled: true
@@ -2032,11 +2077,24 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
-            - name: Map `msg.hostname` to `ocsf.device.name`
+            - name: Set `ocsf.device.name` to Unknown when hostname is absent
+              categories:
+                - filter:
+                    query: "-@msg.hostname:*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.name
+                id: ocsf.device.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
+            - name: Map `msg.hostname` to `ocsf.device.hostname`
               sources:
                 - msg.hostname
               sourceType: attribute
-              target: ocsf.device.name
+              target: ocsf.device.hostname
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -2067,12 +2125,6 @@ pipeline:
       filter:
         query: "@type:USER_MAC_CONFIG_CHANGE"
       processors:
-        - type: string-builder-processor
-          name: Set `ocsf.device.name` to Unknown
-          enabled: true
-          template: Unknown
-          target: ocsf.device.name
-          replaceMissing: false
         - type: schema-processor
           name: Apply OCSF schema for 5019
           enabled: true
@@ -2123,6 +2175,19 @@ pipeline:
                 values: {}
                 sources: {}
               type: schema-category-mapper
+            - name: Set `ocsf.device.name` to Unknown when hostname is absent
+              categories:
+                - filter:
+                    query: "-@msg.hostname:*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.device.name
+                id: ocsf.device.type_id
+              fallback:
+                values: {}
+                sources: {}
+              type: schema-category-mapper
             - name: ocsf.status_id
               categories:
                 - filter:
@@ -2167,11 +2232,11 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `msg.hostname` to `ocsf.device.name`
+            - name: Map `msg.hostname` to `ocsf.device.hostname`
               sources:
                 - msg.hostname
               sourceType: attribute
-              target: ocsf.device.name
+              target: ocsf.device.hostname
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true

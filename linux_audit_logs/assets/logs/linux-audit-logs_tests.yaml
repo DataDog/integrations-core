@@ -46,7 +46,7 @@ tests:
         class_name: "Device Config State Change"
         class_uid: 5019
         device:
-          name: "10.10.10.10"
+          hostname: "10.10.10.10"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -123,7 +123,7 @@ tests:
         class_name: "Authentication"
         class_uid: 3002
         device:
-          name: "10.10.10.10"
+          hostname: "10.10.10.10"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -441,7 +441,7 @@ tests:
         class_name: "Group Management"
         class_uid: 3006
         device:
-          name: "ub10-10-10-10"
+          hostname: "ub10-10-10-10"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -519,7 +519,7 @@ tests:
         class_name: "Group Management"
         class_uid: 3006
         device:
-          name: "localhost"
+          hostname: "localhost"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -596,7 +596,7 @@ tests:
         class_name: "Account Change"
         class_uid: 3001
         device:
-          name: "localhost"
+          hostname: "localhost"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -674,7 +674,7 @@ tests:
         class_name: "Account Change"
         class_uid: 3001
         device:
-          name: "localhost"
+          hostname: "localhost"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -755,7 +755,7 @@ tests:
         class_name: "Account Change"
         class_uid: 3001
         device:
-          name: "localhost"
+          hostname: "localhost"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -840,7 +840,7 @@ tests:
         class_name: "User Access Management"
         class_uid: 3005
         device:
-          name: "localhost"
+          hostname: "localhost"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
@@ -927,7 +927,7 @@ tests:
         class_name: "User Access Management"
         class_uid: 3005
         device:
-          name: "localhost"
+          hostname: "localhost"
           ip: "10.10.10.10"
           type: "Unknown"
           type_id: 0
