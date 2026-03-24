@@ -84,6 +84,5 @@ def test_replay_skips_invalid_log_format(caplog, dd_run_check, aggregator, datad
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
-    messages = {record.getMessage() for record in caplog.records}
-    assert 'TypeError format' not in messages
-    assert 'OverflowError format' not in messages
+    assert 'TypeError format' not in caplog.text
+    assert 'OverflowError format' not in caplog.text
