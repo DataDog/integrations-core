@@ -42,7 +42,6 @@ def test_resource_statistics_subscription(instance, global_tags):
 
 
 def test_truncated_message_given_oversized_payload_skips_without_critical(instance, global_tags):
-    """Verify MQRC_TRUNCATED_MSG_FAILED is logged as a warning and does not trigger CRITICAL."""
     from unittest.mock import MagicMock, PropertyMock, patch
 
     import pymqi
