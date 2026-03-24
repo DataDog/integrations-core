@@ -49,17 +49,19 @@ def test_truncated_message_given_oversized_payload_skips_without_critical(instan
     from datadog_checks.ibm_ace.subscription import SNAPSHOT_UPDATE_INTERVAL
 
     check = IbmAceCheck('ibm_ace', {}, [instance])
+    check.config = MagicMock()
+    check.config.max_message_length = 65536
+    check.log = MagicMock()
+
     sub = ResourceStatisticsSubscription(check, global_tags)
 
     truncation_error = pymqi.MQMIError(pymqi.CMQC.MQCC_FAILED, pymqi.CMQC.MQRC_TRUNCATED_MSG_FAILED)
-    no_msg_error = pymqi.MQMIError(pymqi.CMQC.MQCC_FAILED, pymqi.CMQC.MQRC_NO_MSG_AVAILABLE)
 
     mock_sub = MagicMock()
-    mock_sub.get.side_effect = [truncation_error, no_msg_error]
+    mock_sub.get.side_effect = truncation_error
 
     with (
         patch.object(type(sub), 'sub', new_callable=PropertyMock, return_value=mock_sub),
-        patch.object(sub, '_get_elapsed_time', side_effect=[0, SNAPSHOT_UPDATE_INTERVAL]),
     ):
         messages = sub.get_latest_messages()
 
