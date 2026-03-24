@@ -75,6 +75,10 @@ class ClickhouseCheck(DatabaseCheck):
         # We'll connect on the first check run
         self._client = None
 
+        # Cache query manager per server version to avoid recompiling on every check run
+        self._query_manager: QueryManager | None = None
+        self._query_manager_version: str | None = None
+
         # Shared HTTP connection pool for all ClickHouse clients (main + DBM jobs)
         # This reduces connection overhead while maintaining client isolation
         # See: https://clickhouse.com/docs/integrations/language-clients/python/advanced-usage#customizing-the-http-connection-pool
@@ -210,7 +214,10 @@ class ClickhouseCheck(DatabaseCheck):
     def check(self, _):
         self.connect()
         self._server_version = self.select_version()
-        self._build_query_manager().execute()
+        if self._query_manager is None or self._query_manager_version != self._server_version:
+            self._query_manager = self._build_query_manager()
+            self._query_manager_version = self._server_version
+        self._query_manager.execute()
         self.set_version_metadata(self._server_version)
 
         # Send database instance metadata
