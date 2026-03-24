@@ -496,6 +496,36 @@ def test_untrusted_local_file_strips_command_fields(
     assert "dynamicd.llm_api_key_command" in blocked_fields
 
 
+def test_save_preserves_untrusted_override_content_after_load(
+    config_file: ConfigFileWithOverrides, helpers, overrides_config: Path
+):
+    overrides_content = helpers.dedent(
+        """
+        [github]
+        token = "safe_token"
+        token_command = "unsafe command"
+
+        [trello]
+        key_command = "unsafe trello key"
+        """
+    )
+    overrides_config.write_text(overrides_content)
+
+    config_file.load()
+
+    assert "token_command" not in config_file.overrides_model.raw_data["github"]
+    assert "key_command" not in config_file.overrides_model.raw_data["trello"]
+
+    config_file.save()
+
+    assert overrides_config.read_text() == overrides_content
+
+    config_file.load()
+
+    assert "token_command" not in config_file.overrides_model.raw_data["github"]
+    assert "key_command" not in config_file.overrides_model.raw_data["trello"]
+
+
 def test_trusted_local_file_preserves_command_fields(
     config_file: ConfigFileWithOverrides, helpers, overrides_config: Path, monkeypatch, tmp_path: PathLibPath
 ):
