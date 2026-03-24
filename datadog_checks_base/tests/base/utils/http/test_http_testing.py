@@ -127,6 +127,14 @@ def test_mock_response_headers_update_and_setdefault():
     response.headers.setdefault('Content-Type', 'should-not-change')
     assert response.headers['content-type'] == 'text/plain'
 
+    response.headers.update([('X-Iter', 'iter_val')])
+    assert response.headers['x-iter'] == 'iter_val'
+
+
+def test_mock_response_url():
+    assert MockHTTPResponse(url='http://example.com').url == 'http://example.com'
+    assert MockHTTPResponse().url == ''
+
 
 def test_mock_response_raw_readable():
     response = MockHTTPResponse(json_data={'key': 'value'})

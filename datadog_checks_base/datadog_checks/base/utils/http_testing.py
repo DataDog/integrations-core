@@ -44,6 +44,8 @@ class _CaseInsensitiveDict(dict):
     def update(self, other=(), **kwargs):
         if isinstance(other, dict):
             other = {(k.lower() if isinstance(k, str) else k): v for k, v in other.items()}
+        elif other:
+            other = [(k.lower() if isinstance(k, str) else k, v) for k, v in other]
         kwargs = {k.lower(): v for k, v in kwargs.items()}
         super().update(other, **kwargs)
 

@@ -87,7 +87,6 @@ def test_empty_instance(dd_run_check):
 
 def test_invalid_credentials(dd_run_check, mock_http_response):
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=401,
         json_data={"error": "Invalid credentials"},
     )
@@ -107,7 +106,6 @@ def test_invalid_credentials(dd_run_check, mock_http_response):
 
 def test_bad_request_error(dd_run_check, mock_http_response):
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=400,
         json_data={"error": "Bad request"},
     )
@@ -120,7 +118,6 @@ def test_bad_request_error(dd_run_check, mock_http_response):
 
 def test_license_expired_error(dd_run_check, mock_http_response):
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=402,
         json_data={"error": "License expired"},
     )
@@ -133,7 +130,6 @@ def test_license_expired_error(dd_run_check, mock_http_response):
 
 def test_insufficient_permission_error(dd_run_check, mock_http_response):
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=403,
         json_data={"error": "Insufficient permissions"},
     )
@@ -146,7 +142,6 @@ def test_insufficient_permission_error(dd_run_check, mock_http_response):
 
 def test_not_found_error(dd_run_check, mock_http_response):
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=404,
         json_data={"error": "Resource not found"},
     )
@@ -159,7 +154,6 @@ def test_not_found_error(dd_run_check, mock_http_response):
 
 def test_server_error(dd_run_check, mock_http_response):
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=500,
         json_data={"error": "Internal server error"},
     )
@@ -172,7 +166,6 @@ def test_server_error(dd_run_check, mock_http_response):
 
 def test_timeout_error(dd_run_check, mock_http_response):
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=408,
         json_data={"error": "TimeoutError"},
     )
