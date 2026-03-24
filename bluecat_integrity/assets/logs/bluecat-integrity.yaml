@@ -643,42 +643,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `responseData.answers.recordType` to `ocsf.answers.type`
-              sources:
-                - responseData.answers.recordType
-              sourceType: attribute
-              target: ocsf.answers.type
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `responseData.answers.rData` to `ocsf.answers.rdata`
-              sources:
-                - responseData.answers.rData
-              sourceType: attribute
-              target: ocsf.answers.rdata
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `responseData.answers.class` to `ocsf.answers.class`
-              sources:
-                - responseData.answers.class
-              sourceType: attribute
-              target: ocsf.answers.class
-              targetFormat: string
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
-            - name: Map `responseData.answers.ttl` to `ocsf.answers.ttl`
-              sources:
-                - responseData.answers.ttl
-              sourceType: attribute
-              target: ocsf.answers.ttl
-              targetFormat: integer
-              preserveSource: true
-              overrideOnConflict: true
-              type: schema-remapper
     - type: pipeline
       name: OCSF sub pipeline for class DHCP Activity [4004]
       enabled: true
