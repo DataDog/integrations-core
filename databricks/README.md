@@ -18,7 +18,7 @@ Datadog offers several Databricks monitoring capabilities.
 
 [Data Observability][36] helps data teams detect, resolve, and prevent issues affecting data quality, performance, and cost. It monitors anomalies in volume, freshness, null rates, and distributions, and integrates with pipelines to correlate issues with job runs, data streams, and infrastructure events.
 
-Model serving metrics provide insights into how your Databricks model serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rates, high latency, are over/under provisioned, and more.
+Model-serving metrics provide insights into how your Databricks model-serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rates, high latency, are over- or underprovisioned, and more.
 
 ## Setup
 
