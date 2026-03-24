@@ -24,6 +24,13 @@ except ImportError:
 # https://www.ibm.com/docs/en/app-connect/12.0?topic=data-message-flow-accounting-statistics-collection-options
 SNAPSHOT_UPDATE_INTERVAL = 20
 
+# pymqi defaults to a 4096-byte buffer when max_length is None and relies on an internal
+# retry to handle larger messages. That retry is unsafe for managed subscription queues
+# because new publications can arrive between the two MQGET calls, causing the retry to
+# read a different (potentially larger) message and fail with MQRC_TRUNCATED_MSG_FAILED.
+# A 64 KB buffer avoids truncation for all typical ACE statistics messages.
+DEFAULT_MSG_BUFFER_SIZE = 65536
+
 
 def get_unique_name(check_id, topic_string):
     # https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-crtmqmsub-create-mq-subscription#q084220___q084220SUBNAME
@@ -66,9 +73,15 @@ class Subscription(ABC):
 
         while True:
             try:
-                payload = self.sub.get(None, pymqi.md(), self._get_options())
+                payload = self.sub.get(DEFAULT_MSG_BUFFER_SIZE, pymqi.md(), self._get_options())
             except pymqi.MQMIError as e:
-                if not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
+                if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_TRUNCATED_MSG_FAILED:
+                    self.check.log.warning(
+                        'Message on subscription %s exceeded %d-byte buffer and was skipped.',
+                        self.TYPE,
+                        DEFAULT_MSG_BUFFER_SIZE,
+                    )
+                elif not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
                     unknown_errors[str(e)] = traceback.format_exc()
                     time.sleep(1)
             else:

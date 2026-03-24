@@ -39,3 +39,28 @@ def test_resource_statistics_subscription(instance, global_tags):
     }
 
     assert resource_statistics_subscription.get_message_id(mock_message) == ('integration_server', 'ACESERVER')
+
+
+def test_truncated_message_given_oversized_payload_skips_without_critical(instance, global_tags):
+    """Verify MQRC_TRUNCATED_MSG_FAILED is logged as a warning and does not trigger CRITICAL."""
+    from unittest.mock import MagicMock, PropertyMock, patch
+
+    import pymqi
+
+    from datadog_checks.ibm_ace.subscription import DEFAULT_MSG_BUFFER_SIZE
+
+    check = IbmAceCheck('ibm_ace', {}, [instance])
+    sub = ResourceStatisticsSubscription(check, global_tags)
+
+    truncation_error = pymqi.MQMIError(pymqi.CMQC.MQCC_FAILED, pymqi.CMQC.MQRC_TRUNCATED_MSG_FAILED)
+    no_msg_error = pymqi.MQMIError(pymqi.CMQC.MQCC_FAILED, pymqi.CMQC.MQRC_NO_MSG_AVAILABLE)
+
+    mock_sub = MagicMock()
+    mock_sub.get.side_effect = [truncation_error, no_msg_error]
+
+    with patch.object(type(sub), 'sub', new_callable=PropertyMock, return_value=mock_sub):
+        messages = sub.get_latest_messages()
+
+    assert messages == []
+    check.log.warning.assert_called_once()
+    assert DEFAULT_MSG_BUFFER_SIZE == 65536
