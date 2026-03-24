@@ -41,6 +41,7 @@ files:
       secret: true
       value:
         type: string
+        display_default: ''
     - name: db
       description: The database to connect to.
       fleet_configurable: true

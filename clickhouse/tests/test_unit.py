@@ -212,6 +212,33 @@ def test_missing_server_config():
     assert any('server' in str(error).lower() for error in check._validation_result.errors)
 
 
+def test_connect_no_password_uses_empty_string():
+    """
+    Regression test: when no password is configured, connect() must pass password=''
+    not password=None. clickhouse_connect encodes None as the literal string 'None'
+    in the Authorization header, causing ClickHouse error code 194 (auth failure).
+    """
+    instance = {
+        'server': 'localhost',
+        'port': 8123,
+        'username': 'default',
+        # 'password' intentionally omitted
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check.check_id = 'test-no-password'
+
+    assert check._config.password == '', (
+        "password must default to '' — None causes auth error 194 in clickhouse_connect"
+    )
+
+    with mock.patch('clickhouse_connect.get_client') as m:
+        mock_client = mock.MagicMock()
+        m.return_value = mock_client
+        check.connect()
+        _, kwargs = m.call_args
+        assert kwargs['password'] == '', "connect() must pass password='' not password=None to clickhouse_connect"
+
+
 @pytest.mark.parametrize(
     ['ch_version', 'comparable', 'expected'],
     [
