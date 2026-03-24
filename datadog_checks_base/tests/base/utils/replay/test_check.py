@@ -80,4 +80,4 @@ def test_replay_timeout(caplog, dd_run_check):
     with caplog.at_level(logging.ERROR):
         dd_run_check(check)
 
-    assert any('timed out' in message for _, _, message in caplog.record_tuples)
+    assert 'timed out' in caplog.text
