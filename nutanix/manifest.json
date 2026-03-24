@@ -11,7 +11,18 @@
     "changelog": "CHANGELOG.md",
     "description": "Monitor the health and performance of your Nutanix Cluster",
     "title": "Nutanix",
-    "media": [],
+    "media": [
+      {
+        "caption": "Nutanix - Overview (light)",
+        "image_url": "images/dashboard_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Nutanix - Overview (dark)",
+        "image_url": "images/dashboard_dark.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
