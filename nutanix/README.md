@@ -4,6 +4,8 @@
 
 This check collects CPU, memory, storage, and I/O performance metrics from your Nutanix clusters, hosts, and VMs. It also collects operational activity data from Prism Central, including events, tasks, audits, and alerts.
 
+**Note**: This integration requires Nutanix API v4.0 or later, available through Prism Central.
+
 ## Setup
 
 ### Installation
