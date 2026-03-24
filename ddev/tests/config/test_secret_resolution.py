@@ -1,6 +1,12 @@
 import pytest
 
-from ddev.config.secret_command import SecretCommandError, reset_secret_command_cache, run_secret_command
+from ddev.config import secret_command
+from ddev.config.secret_command import (
+    SecretCommandError,
+    parse_secret_command,
+    reset_secret_command_cache,
+    run_secret_command,
+)
 from ddev.config.secret_resolution import SecretResolutionError, resolve_required_secret
 
 
@@ -216,6 +222,42 @@ def test_run_secret_command_non_zero_includes_stderr_summary(monkeypatch):
 
     with pytest.raises(SecretCommandError, match='exit code 7; stderr: failed to fetch token'):
         run_secret_command('python token.py')
+
+
+def test_parse_secret_command_uses_posix_mode_off_windows(monkeypatch):
+    captured = {}
+
+    def fake_split(command, *, posix):
+        captured['command'] = command
+        captured['posix'] = posix
+        return ['python', '-c', 'print(1)']
+
+    monkeypatch.setattr(secret_command.sys, 'platform', 'linux')
+    monkeypatch.setattr(secret_command.shlex, 'split', fake_split)
+
+    assert parse_secret_command('python -c "print(1)"') == ['python', '-c', 'print(1)']
+    assert captured == {'command': 'python -c "print(1)"', 'posix': True}
+
+
+def test_parse_secret_command_uses_non_posix_mode_on_windows(monkeypatch):
+    captured = {}
+
+    def fake_split(command, *, posix):
+        captured['command'] = command
+        captured['posix'] = posix
+        return [r'C:\Users\me\get-token.exe', '--flag']
+
+    monkeypatch.setattr(secret_command.sys, 'platform', 'win32')
+    monkeypatch.setattr(secret_command.shlex, 'split', fake_split)
+
+    assert parse_secret_command(r'C:\Users\me\get-token.exe --flag') == [r'C:\Users\me\get-token.exe', '--flag']
+    assert captured == {'command': r'C:\Users\me\get-token.exe --flag', 'posix': False}
+
+
+def test_parse_secret_command_preserves_windows_backslashes(monkeypatch):
+    monkeypatch.setattr(secret_command.sys, 'platform', 'win32')
+
+    assert parse_secret_command(r'C:\Users\me\get-token.exe --flag') == [r'C:\Users\me\get-token.exe', '--flag']
 
 
 def _parse_error():

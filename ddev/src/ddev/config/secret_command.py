@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import shlex
 import subprocess
+import sys
 
 DEFAULT_SECRET_COMMAND_TIMEOUT = 5
 _SECRET_COMMAND_CACHE: dict[tuple[str, float], str] = {}
@@ -19,7 +20,7 @@ class SecretCommandError(Exception):
 def parse_secret_command(command: str) -> list[str]:
     """Parse a command string into argv using platform-appropriate shlex mode."""
     try:
-        argv = shlex.split(command, posix=True)
+        argv = shlex.split(command, posix=sys.platform != 'win32')
     except ValueError as e:
         raise SecretCommandError('command could not be parsed', reason='parse_error') from e
 
