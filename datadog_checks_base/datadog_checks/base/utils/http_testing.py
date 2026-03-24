@@ -66,6 +66,8 @@ class MockHTTPResponse:
 
     @property
     def ok(self) -> bool:
+        # Transitional: mirrors requests.Response.ok for current production code.
+        # httpx uses is_success/is_client_error/is_server_error instead.
         return self.status_code < 400
 
     @property

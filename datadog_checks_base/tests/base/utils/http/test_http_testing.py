@@ -72,6 +72,15 @@ def test_mock_response_normalize_leading_newline():
     assert response.text == 'Actual content'
 
 
+def test_mock_response_normalize_leading_newline_with_indent():
+    content = """
+        line one
+        line two
+    """
+    response = MockHTTPResponse(content=content)
+    assert response.text == "line one\nline two\n"
+
+
 def test_mock_response_ok_property():
     assert MockHTTPResponse(status_code=200).ok is True
     assert MockHTTPResponse(status_code=399).ok is True
