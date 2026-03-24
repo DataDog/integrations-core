@@ -59,12 +59,9 @@ def test_replay_all(caplog, dd_run_check, aggregator, datadog_agent, init_config
     aggregator.assert_service_check('replay.sc', ServiceCheck.OK, count=1, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
 
-    for expected_message in ('Initializing - replay - test:123', 'Metric count: 42'):
-        for _, level, message in caplog.record_tuples:
-            if level == logging.DEBUG and message == expected_message:
-                break
-        else:
-            raise AssertionError('Expected DEBUG log with message: {}'.format(expected_message))
+captured_logs = set((level, message) for _, level, message in caplog.record_tuples)
+assert (logging.DEBUG, 'Initializing - replay - test:123'), captured_logs
+assert (logging.DEBUG, 'Metric count: 42'), captured_logs
 
     datadog_agent.assert_external_tags('myhost', {'src': ['tag:val']})
     datadog_agent.assert_external_tags_count(1)
@@ -87,9 +84,6 @@ def test_replay_log_format_errors(caplog, dd_run_check, datadog_agent):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
-    for expected_message in ('TypeError format: %d', 'OverflowError format: %c'):
-        for _, level, message in caplog.record_tuples:
-            if level == logging.DEBUG and message == expected_message:
-                break
-        else:
-            raise AssertionError('Expected DEBUG log with raw format string: {}'.format(expected_message))
+captured_logs = set((level, message) for _, level, message in caplog.record_tuples)
+assert (logging.DEBUG, 'TypeError format: %d'), captured_logs
+assert (logging.DEBUG, 'OverflowError format: %c'), captured_logs
