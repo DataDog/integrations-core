@@ -75,6 +75,7 @@ class Subscription(ABC):
                         self.TYPE,
                         self.check.config.max_message_length,
                     )
+                    break
                 elif not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
                     unknown_errors[str(e)] = traceback.format_exc()
                     time.sleep(1)

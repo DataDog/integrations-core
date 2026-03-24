@@ -46,6 +46,8 @@ def test_truncated_message_given_oversized_payload_skips_without_critical(instan
 
     import pymqi
 
+    from datadog_checks.ibm_ace.subscription import SNAPSHOT_UPDATE_INTERVAL
+
     check = IbmAceCheck('ibm_ace', {}, [instance])
     sub = ResourceStatisticsSubscription(check, global_tags)
 
@@ -55,7 +57,10 @@ def test_truncated_message_given_oversized_payload_skips_without_critical(instan
     mock_sub = MagicMock()
     mock_sub.get.side_effect = [truncation_error, no_msg_error]
 
-    with patch.object(type(sub), 'sub', new_callable=PropertyMock, return_value=mock_sub):
+    with (
+        patch.object(type(sub), 'sub', new_callable=PropertyMock, return_value=mock_sub),
+        patch.object(sub, '_get_elapsed_time', side_effect=[0, SNAPSHOT_UPDATE_INTERVAL]),
+    ):
         messages = sub.get_latest_messages()
 
     assert messages == []
