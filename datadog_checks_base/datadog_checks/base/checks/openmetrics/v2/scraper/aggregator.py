@@ -17,20 +17,16 @@ _AGGREGABLE_TYPES = frozenset(('gauge', 'counter'))
 
 
 def should_aggregate(exclude_labels: set[str]) -> bool:
-    """Return True when pre-aggregation is needed to handle label-collision."""
     return bool(exclude_labels)
 
 
+# Pre-aggregate samples whose tags collide after label exclusion.
+# Only aggregates gauge and counter. Histogram and summary samples pass
+# through unchanged because their sub-metric structure makes aggregation ambiguous.
 def aggregate_sample_data(
     sample_data: Iterator[tuple[Sample, list[str], str]],
     metric_type: str,
 ) -> Iterator[tuple[Sample, list[str], str]]:
-    """Pre-aggregate samples whose tags collide after label exclusion.
-
-    Only aggregates gauge, counter, counter_gauge, and rate types. Histogram
-    and summary samples pass through unchanged because their sub-metric
-    structure makes aggregation ambiguous.
-    """
     if metric_type not in _AGGREGABLE_TYPES:
         yield from sample_data
         return
@@ -50,5 +46,4 @@ def aggregate_sample_data(
 
 
 def _grouping_key(tags: list[str], hostname: str) -> tuple:
-    """Build the grouping key from sorted tags and hostname."""
     return (tuple(sorted(tags)), hostname)

@@ -113,15 +113,10 @@ def test_counter_given_exclude_labels_submits_summed_value(aggregator, dd_run_ch
 def test_counter_given_exclude_labels_submits_monotonically_increasing_sums(
     aggregator, dd_run_check, mock_http_response
 ):
-    """Verify that summed counter values increase monotonically across scrapes,
-    enabling the agent aggregator to compute correct deltas.
-
-    Scrape t0: red=120, green=95, blue=88  → submitted sum=303
-    Scrape t1: red=130, green=100, blue=92 → submitted sum=322
-
-    The agent (Go side) computes 322 - 303 = 19, which equals the sum of
-    individual deltas: (130-120) + (100-95) + (92-88) = 10 + 5 + 4 = 19.
-    """
+    # Verify summed counter values increase monotonically across scrapes.
+    # t0: red=120, green=95, blue=88 → sum=303
+    # t1: red=130, green=100, blue=92 → sum=322
+    # Agent computes delta: 322 - 303 = 19 = (10 + 5 + 4)
     counter_t0 = """
     # HELP car_counter_total The number of cars seen coming into lot
     # TYPE car_counter_total counter
@@ -164,8 +159,8 @@ def test_counter_given_exclude_labels_submits_monotonically_increasing_sums(
 def test_gauge_given_exclude_labels_not_present_in_metric_returns_individual_values(
     aggregator, dd_run_check, mock_http_response
 ):
-    """When the excluded label doesn't exist on a metric, no collisions occur
-    and each sample is submitted individually — no aggregation."""
+    # When the excluded label doesn't exist on a metric, no collisions
+    # occur and each sample is submitted individually.
     payload = """
     # HELP temperature Current temperature reading
     # TYPE temperature gauge
