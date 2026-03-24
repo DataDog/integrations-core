@@ -10,9 +10,11 @@ from ddev.utils.fs import Path
 
 SCRUBBED_VALUE = '*****'
 SCRUBBED_GLOBS = (
+    'github.user_command',
     'github.token',
     'github.token_command',
     'pypi.auth',
+    'pypi.auth_command',
     'trello.key',
     'trello.key_command',
     'trello.token',
@@ -20,7 +22,9 @@ SCRUBBED_GLOBS = (
     'dynamicd.llm_api_key',
     'dynamicd.llm_api_key_command',
     'orgs.*.api_key',
+    'orgs.*.api_key_command',
     'orgs.*.app_key',
+    'orgs.*.app_key_command',
 )
 
 

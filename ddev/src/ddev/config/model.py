@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from collections.abc import Iterator, Mapping
 
-from ddev.config.secret_resolution import SecretResolutionError, resolve_required_secret
+from ddev.config.secret_resolution import SecretResolutionError, resolve_optional_secret, resolve_required_secret
 
 FIELD_TO_PARSE = object()
 
@@ -161,7 +162,11 @@ class RootConfig(LazilyParsedConfig):
                 self.raise_error(f'unknown Org: {org!r}')
 
             self.raw_data['org'] = org
-            self._field_org = OrgConfig({'name': org, 'config': self.orgs[org]}, ('org',))
+            self._field_org = OrgConfig(
+                {'name': org, 'config': self.raw_data['orgs'][org]},
+                ('org',),
+                trust_blocked_command_fields=self._trust_blocked_command_fields,
+            )
 
         return self._field_org
 
@@ -242,11 +247,18 @@ class RootConfig(LazilyParsedConfig):
                     if not isinstance(data, dict):
                         self.raise_error('must be a table', extra_steps=(name,))
 
-                self._field_orgs = orgs
+                self._field_orgs = {
+                    name: OrgSettingsConfig(
+                        data,
+                        ('orgs', name),
+                        trust_blocked_command_fields=self._trust_blocked_command_fields,
+                    )
+                    for name, data in orgs.items()
+                }
             else:
                 from ddev.e2e.agent.constants import AgentEnvVars
 
-                self._field_orgs = self.raw_data['orgs'] = {
+                self.raw_data['orgs'] = {
                     'default': {
                         'api_key': os.getenv(AgentEnvVars.API_KEY, ''),
                         'app_key': os.getenv(AgentEnvVars.APP_KEY, ''),
@@ -254,6 +266,14 @@ class RootConfig(LazilyParsedConfig):
                         'dd_url': os.getenv(AgentEnvVars.URL, 'https://app.datadoghq.com'),
                         'log_url': os.getenv(AgentEnvVars.LOGS_URL, ''),
                     },
+                }
+                self._field_orgs = {
+                    name: OrgSettingsConfig(
+                        data,
+                        ('orgs', name),
+                        trust_blocked_command_fields=self._trust_blocked_command_fields,
+                    )
+                    for name, data in self.raw_data['orgs'].items()
                 }
 
         return self._field_orgs
@@ -300,11 +320,19 @@ class RootConfig(LazilyParsedConfig):
                 if not isinstance(pypi, dict):
                     self.raise_error('must be a table')
 
-                self._field_pypi = PyPIConfig(pypi, ('pypi',))
+                self._field_pypi = PyPIConfig(
+                    pypi,
+                    ('pypi',),
+                    trust_blocked_command_fields=self._trust_blocked_command_fields,
+                )
             else:
                 pypi = {}
                 self.raw_data['pypi'] = pypi
-                self._field_pypi = PyPIConfig(pypi, ('pypi',))
+                self._field_pypi = PyPIConfig(
+                    pypi,
+                    ('pypi',),
+                    trust_blocked_command_fields=self._trust_blocked_command_fields,
+                )
 
         return self._field_pypi
 
@@ -492,9 +520,125 @@ class AgentConfig(LazilyParsedConfig):
         self._field_config = FIELD_TO_PARSE
 
 
-class OrgConfig(LazilyParsedConfig):
-    def __init__(self, *args, **kwargs):
+class OrgSettingsConfig(LazilyParsedConfig, Mapping):
+    def __init__(self, *args, trust_blocked_command_fields=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self._trust_blocked_command_fields = trust_blocked_command_fields or set()
+
+        self._field_api_key = FIELD_TO_PARSE
+        self._field_api_key_command = FIELD_TO_PARSE
+        self._field_app_key = FIELD_TO_PARSE
+        self._field_app_key_command = FIELD_TO_PARSE
+
+    def parse_fields(self):
+        parse_config(self.api_key_command)
+        parse_config(self.app_key_command)
+
+    @property
+    def api_key(self):
+        if self._field_api_key is FIELD_TO_PARSE:
+            literal_api_key = None
+            if 'api_key' in self.raw_data:
+                literal_api_key = self.raw_data['api_key']
+                if not isinstance(literal_api_key, str):
+                    self.raise_error('must be a string')
+
+            command = self.api_key_command
+
+            try:
+                self._field_api_key = resolve_optional_secret(
+                    field_path='.'.join((*self.steps, 'api_key')),
+                    command=command,
+                    literal=literal_api_key,
+                    env_var='DD_API_KEY',
+                    env_value=os.environ.get('DD_API_KEY', ''),
+                    env_label='DD_API_KEY',
+                    command_blocked_by_trust='.'.join((*self.steps, 'api_key_command'))
+                    in self._trust_blocked_command_fields,
+                )
+            except SecretResolutionError as e:
+                self.raise_error(str(e))
+
+        return self._field_api_key
+
+    @property
+    def api_key_command(self):
+        if self._field_api_key_command is FIELD_TO_PARSE:
+            if 'api_key_command' not in self.raw_data:
+                self._field_api_key_command = None
+            else:
+                api_key_command = self.raw_data['api_key_command']
+                if not isinstance(api_key_command, str):
+                    self.raise_error('must be a string')
+
+                self._field_api_key_command = api_key_command
+
+        return self._field_api_key_command
+
+    @property
+    def app_key(self):
+        if self._field_app_key is FIELD_TO_PARSE:
+            literal_app_key = None
+            if 'app_key' in self.raw_data:
+                literal_app_key = self.raw_data['app_key']
+                if not isinstance(literal_app_key, str):
+                    self.raise_error('must be a string')
+
+            command = self.app_key_command
+
+            try:
+                self._field_app_key = resolve_optional_secret(
+                    field_path='.'.join((*self.steps, 'app_key')),
+                    command=command,
+                    literal=literal_app_key,
+                    env_var='DD_APP_KEY',
+                    env_value=os.environ.get('DD_APP_KEY', ''),
+                    env_label='DD_APP_KEY',
+                    command_blocked_by_trust='.'.join((*self.steps, 'app_key_command'))
+                    in self._trust_blocked_command_fields,
+                )
+            except SecretResolutionError as e:
+                self.raise_error(str(e))
+
+        return self._field_app_key
+
+    @property
+    def app_key_command(self):
+        if self._field_app_key_command is FIELD_TO_PARSE:
+            if 'app_key_command' not in self.raw_data:
+                self._field_app_key_command = None
+            else:
+                app_key_command = self.raw_data['app_key_command']
+                if not isinstance(app_key_command, str):
+                    self.raise_error('must be a string')
+
+                self._field_app_key_command = app_key_command
+
+        return self._field_app_key_command
+
+    def __getitem__(self, key):
+        if key == 'api_key':
+            return self.api_key
+        if key == 'app_key':
+            return self.app_key
+        return self.raw_data[key]
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self.raw_data)
+
+    def __len__(self) -> int:
+        return len(self.raw_data)
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Mapping):
+            return False
+        return dict(self.items()) == dict(other.items())
+
+
+class OrgConfig(LazilyParsedConfig):
+    def __init__(self, *args, trust_blocked_command_fields=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._trust_blocked_command_fields = trust_blocked_command_fields or set()
 
         self._field_name = FIELD_TO_PARSE
         self._field_config = FIELD_TO_PARSE
@@ -526,7 +670,11 @@ class OrgConfig(LazilyParsedConfig):
                 if not isinstance(config, dict):
                     self.raise_error('must be a table')
 
-                self._field_config = config
+                self._field_config = OrgSettingsConfig(
+                    config,
+                    ('orgs', self.name),
+                    trust_blocked_command_fields=self._trust_blocked_command_fields,
+                )
             else:
                 self.raise_error('required field')
 
@@ -544,26 +692,44 @@ class GitHubConfig(LazilyParsedConfig):
         self._trust_blocked_command_fields = trust_blocked_command_fields or set()
 
         self._field_user = FIELD_TO_PARSE
+        self._field_user_command = FIELD_TO_PARSE
         self._field_token = FIELD_TO_PARSE
         self._field_token_command = FIELD_TO_PARSE
 
     def parse_fields(self):
         # Keep command-backed token resolution lazy. Parsing all fields (used by config reset and
         # non-auth paths) should validate structure without forcing required-secret evaluation.
-        parse_config(self.user)
+        if 'user_command' in self.raw_data:
+            if 'user' in self.raw_data and not isinstance(self.raw_data['user'], str):
+                raise ConfigurationError('must be a string', location=' -> '.join([*self.steps, 'user']))
+        else:
+            parse_config(self.user)
+        parse_config(self.user_command)
         parse_config(self.token_command)
 
     @property
     def user(self):
         if self._field_user is FIELD_TO_PARSE:
+            literal_user = None
             if 'user' in self.raw_data:
-                user = self.raw_data['user']
-                if not isinstance(user, str):
+                literal_user = self.raw_data['user']
+                if not isinstance(literal_user, str):
                     self.raise_error('must be a string')
 
-                self._field_user = user
-            else:
-                self._field_user = get_github_user()
+            command = self.user_command
+
+            try:
+                self._field_user = resolve_optional_secret(
+                    field_path='github.user',
+                    command=command,
+                    literal=literal_user,
+                    env_var='DD_GITHUB_USER',
+                    env_value=get_github_user(),
+                    env_label='DD_GITHUB_USER|GITHUB_USER|GITHUB_ACTOR',
+                    command_blocked_by_trust='github.user_command' in self._trust_blocked_command_fields,
+                )
+            except SecretResolutionError as e:
+                self.raise_error(str(e))
 
         return self._field_user
 
@@ -571,6 +737,25 @@ class GitHubConfig(LazilyParsedConfig):
     def user(self, value):
         self.raw_data['user'] = value
         self._field_user = FIELD_TO_PARSE
+
+    @property
+    def user_command(self):
+        if self._field_user_command is FIELD_TO_PARSE:
+            if 'user_command' not in self.raw_data:
+                self._field_user_command = None
+            else:
+                user_command = self.raw_data['user_command']
+                if not isinstance(user_command, str):
+                    self.raise_error('must be a string')
+
+                self._field_user_command = user_command
+
+        return self._field_user_command
+
+    @user_command.setter
+    def user_command(self, value):
+        self.raw_data['user_command'] = value
+        self._field_user_command = FIELD_TO_PARSE
 
     @property
     def token(self):
@@ -624,11 +809,22 @@ class GitHubConfig(LazilyParsedConfig):
 
 
 class PyPIConfig(LazilyParsedConfig):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, trust_blocked_command_fields=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self._trust_blocked_command_fields = trust_blocked_command_fields or set()
 
         self._field_user = FIELD_TO_PARSE
         self._field_auth = FIELD_TO_PARSE
+        self._field_auth_command = FIELD_TO_PARSE
+
+    def parse_fields(self):
+        parse_config(self.user)
+        if 'auth_command' in self.raw_data:
+            if 'auth' in self.raw_data and not isinstance(self.raw_data['auth'], str):
+                raise ConfigurationError('must be a string', location=' -> '.join([*self.steps, 'auth']))
+        else:
+            parse_config(self.auth)
+        parse_config(self.auth_command)
 
     @property
     def user(self):
@@ -652,14 +848,29 @@ class PyPIConfig(LazilyParsedConfig):
     @property
     def auth(self):
         if self._field_auth is FIELD_TO_PARSE:
+            literal_auth = None
             if 'auth' in self.raw_data:
-                auth = self.raw_data['auth']
-                if not isinstance(auth, str):
+                literal_auth = self.raw_data['auth']
+                if not isinstance(literal_auth, str):
                     self.raise_error('must be a string')
-
-                self._field_auth = auth
-            else:
+            elif 'auth_command' not in self.raw_data:
                 self._field_auth = self.raw_data['auth'] = ''
+                return self._field_auth
+
+            command = self.auth_command
+
+            try:
+                self._field_auth = resolve_optional_secret(
+                    field_path='pypi.auth',
+                    command=command,
+                    literal=literal_auth,
+                    env_var='PYPI_AUTH',
+                    env_value='',
+                    env_label='(none)',
+                    command_blocked_by_trust='pypi.auth_command' in self._trust_blocked_command_fields,
+                )
+            except SecretResolutionError as e:
+                self.raise_error(str(e))
 
         return self._field_auth
 
@@ -667,6 +878,25 @@ class PyPIConfig(LazilyParsedConfig):
     def auth(self, value):
         self.raw_data['auth'] = value
         self._field_auth = FIELD_TO_PARSE
+
+    @property
+    def auth_command(self):
+        if self._field_auth_command is FIELD_TO_PARSE:
+            if 'auth_command' not in self.raw_data:
+                self._field_auth_command = None
+            else:
+                auth_command = self.raw_data['auth_command']
+                if not isinstance(auth_command, str):
+                    self.raise_error('must be a string')
+
+                self._field_auth_command = auth_command
+
+        return self._field_auth_command
+
+    @auth_command.setter
+    def auth_command(self, value):
+        self.raw_data['auth_command'] = value
+        self._field_auth_command = FIELD_TO_PARSE
 
 
 class TrelloConfig(LazilyParsedConfig):

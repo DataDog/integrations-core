@@ -365,6 +365,43 @@ class TestOrg:
         assert config.org.config == config.org.config == org_config
         assert config.org.raw_data == {'name': 'foo', 'config': org_config}
 
+    def test_config_api_key_command_precedence_over_literal_and_env(self, tmp_path, monkeypatch):
+        monkeypatch.setenv('DD_API_KEY', 'env-api-key')
+        script_path = tmp_path / 'org_api_key.py'
+        script_path.write_text("print('api-key-from-command')")
+
+        config = RootConfig(
+            {
+                'orgs': {
+                    'default': {
+                        'api_key': 'literal-api-key',
+                        'api_key_command': f"{shlex.quote(sys.executable)} {shlex.quote(str(script_path))}",
+                    }
+                }
+            }
+        )
+
+        assert config.org.config.get('api_key') == 'api-key-from-command'
+        assert config.orgs['default'].get('api_key') == 'api-key-from-command'
+
+    def test_config_app_key_command_precedence_over_literal_and_env(self, tmp_path, monkeypatch):
+        monkeypatch.setenv('DD_APP_KEY', 'env-app-key')
+        script_path = tmp_path / 'org_app_key.py'
+        script_path.write_text("print('app-key-from-command')")
+
+        config = RootConfig(
+            {
+                'orgs': {
+                    'default': {
+                        'app_key': 'literal-app-key',
+                        'app_key_command': f"{shlex.quote(sys.executable)} {shlex.quote(str(script_path))}",
+                    }
+                }
+            }
+        )
+
+        assert config.org.config.get('app_key') == 'app-key-from-command'
+
     def test_unknown(self, helpers):
         config = RootConfig({'org': 'foo'})
 
@@ -667,6 +704,15 @@ class TestOrgs:
         assert config.orgs == orgs
         assert config.raw_data == {'orgs': orgs}
 
+    def test_command_blocked_by_trust_falls_back_to_environment(self, monkeypatch):
+        monkeypatch.setenv('DD_API_KEY', 'env-api-key')
+        config = RootConfig(
+            {'orgs': {'default': {'api_key_command': 'missing-executable-12345'}}},
+            non_secret_metadata={'trust_blocked_command_fields': {'orgs.default.api_key_command'}},
+        )
+
+        assert config.orgs['default'].get('api_key') == 'env-api-key'
+
     def test_empty(self, helpers):
         config = RootConfig({'orgs': {}})
 
@@ -739,6 +785,22 @@ class TestGitHub:
         )
 
         assert config.github.token == 'token_from_command'
+
+    def test_user_command_precedence_over_literal_and_env(self, tmp_path, monkeypatch):
+        monkeypatch.setenv('DD_GITHUB_USER', 'env-user')
+        script_path = tmp_path / 'github_user_precedence.py'
+        script_path.write_text("print('user_from_command')")
+
+        config = RootConfig(
+            {
+                'github': {
+                    'user': 'literal-user',
+                    'user_command': f"{shlex.quote(sys.executable)} {shlex.quote(str(script_path))}",
+                }
+            }
+        )
+
+        assert config.github.user == 'user_from_command'
 
     def test_blank_literal_falls_back_to_environment(self, monkeypatch):
         monkeypatch.setenv('DD_GITHUB_TOKEN', 'env-token')
@@ -830,6 +892,35 @@ class TestGitHub:
             ),
         ):
             _ = config.github.user
+
+    def test_user_command(self):
+        config = RootConfig({'github': {'user_command': 'python user.py'}})
+
+        assert config.github.user_command == 'python user.py'
+        assert config.raw_data == {'github': {'user_command': 'python user.py'}}
+
+    def test_user_command_not_string(self, helpers):
+        config = RootConfig({'github': {'user_command': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                github -> user_command
+                  must be a string"""
+            ),
+        ):
+            _ = config.github.user_command
+
+    def test_user_command_blocked_by_trust_falls_back_to_environment(self, monkeypatch):
+        monkeypatch.setenv('DD_GITHUB_USER', 'env-user')
+        config = RootConfig(
+            {'github': {'user_command': 'missing-executable-12345'}},
+            non_secret_metadata={'trust_blocked_command_fields': {'github.user_command'}},
+        )
+
+        assert config.github.user == 'env-user'
 
     def test_token(self):
         config = RootConfig({'github': {'token': 'foo'}})
@@ -1064,6 +1155,21 @@ class TestPyPI:
         assert config.pypi.auth == 'foo'
         assert config.raw_data == {'pypi': {'auth': 'foo'}}
 
+    def test_auth_command_precedence_over_literal(self, tmp_path):
+        script_path = tmp_path / 'pypi_auth.py'
+        script_path.write_text("print('auth-from-command')")
+
+        config = RootConfig(
+            {
+                'pypi': {
+                    'auth': 'literal-auth',
+                    'auth_command': f"{shlex.quote(sys.executable)} {shlex.quote(str(script_path))}",
+                }
+            }
+        )
+
+        assert config.pypi.auth == 'auth-from-command'
+
     def test_auth_not_string(self, helpers):
         config = RootConfig({'pypi': {'auth': 9000}})
 
@@ -1094,6 +1200,34 @@ class TestPyPI:
             ),
         ):
             _ = config.pypi.auth
+
+    def test_auth_command(self):
+        config = RootConfig({'pypi': {'auth_command': 'python auth.py'}})
+
+        assert config.pypi.auth_command == 'python auth.py'
+        assert config.raw_data == {'pypi': {'auth_command': 'python auth.py'}}
+
+    def test_auth_command_not_string(self, helpers):
+        config = RootConfig({'pypi': {'auth_command': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                pypi -> auth_command
+                  must be a string"""
+            ),
+        ):
+            _ = config.pypi.auth_command
+
+    def test_auth_command_blocked_by_trust_returns_literal(self):
+        config = RootConfig(
+            {'pypi': {'auth': 'literal-auth', 'auth_command': 'missing-executable-12345'}},
+            non_secret_metadata={'trust_blocked_command_fields': {'pypi.auth_command'}},
+        )
+
+        assert config.pypi.auth == 'literal-auth'
 
 
 class TestTrello:
