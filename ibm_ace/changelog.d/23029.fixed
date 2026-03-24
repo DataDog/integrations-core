@@ -1,0 +1,1 @@
+Fix intermittent `MQRC_TRUNCATED_MSG_FAILED` errors by increasing the MQ subscription message buffer
