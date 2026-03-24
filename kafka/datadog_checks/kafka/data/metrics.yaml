@@ -915,3 +915,20 @@ jmx_metrics:
         - tag_name: kafka_cluster_id
           bean_name: kafka.server:type=KafkaServer,name=ClusterId
           attribute: Value
+
+    #
+    # Log directory status
+    #
+    - include:
+        domain: 'kafka.log'
+        bean_regex: 'kafka\.log:type=LogManager,name=LogDirectoryOffline,logDirectory="(.*)"'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.log.directory.offline
+        tags:
+          log_directory: $1
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean_name: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value

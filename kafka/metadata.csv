@@ -1,5 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 kafka.broker.start_time,gauge,10,millisecond,,The start time of the Kafka broker in milliseconds since epoch.,0,kafka,broker start time,
+kafka.log.directory.offline,gauge,10,,,Whether a Kafka log directory is offline. 0 means healthy.,0,kafka,log dir offline,
 kafka.consumer.bytes_consumed,gauge,10,byte,second,The average number of bytes consumed per second for a specific topic.,1,kafka,con bytes consumed,
 kafka.consumer.bytes_in,gauge,10,byte,second,Consumer bytes in rate.,1,kafka,con bytes in,
 kafka.consumer.delayed_requests,gauge,10,request,,Number of delayed consumer requests.,-1,kafka,con delayed req,
