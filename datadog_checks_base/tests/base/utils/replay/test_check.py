@@ -59,9 +59,9 @@ def test_replay_all(caplog, dd_run_check, aggregator, datadog_agent, init_config
     aggregator.assert_service_check('replay.sc', ServiceCheck.OK, count=1, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
 
-captured_logs = set((level, message) for _, level, message in caplog.record_tuples)
-assert (logging.DEBUG, 'Initializing - replay - test:123'), captured_logs
-assert (logging.DEBUG, 'Metric count: 42'), captured_logs
+    captured_logs = {(level, message) for _, level, message in caplog.record_tuples}
+    assert (logging.DEBUG, 'Initializing - replay - test:123') in captured_logs
+    assert (logging.DEBUG, 'Metric count: 42') in captured_logs
 
     datadog_agent.assert_external_tags('myhost', {'src': ['tag:val']})
     datadog_agent.assert_external_tags_count(1)
@@ -75,7 +75,7 @@ class ReplayCheckBadLog(AgentCheck):
         self.log.debug('OverflowError format: %c', 2**32)
 
 
-def test_replay_log_format_errors(caplog, dd_run_check, datadog_agent):
+def test_replay_skips_invalid_log_format(caplog, dd_run_check, aggregator, datadog_agent):
     datadog_agent._config['log_level'] = 'debug'
 
     check = ReplayCheckBadLog('replay', {}, [{'process_isolation': True}])
@@ -84,6 +84,6 @@ def test_replay_log_format_errors(caplog, dd_run_check, datadog_agent):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
-captured_logs = set((level, message) for _, level, message in caplog.record_tuples)
-assert (logging.DEBUG, 'TypeError format: %d'), captured_logs
-assert (logging.DEBUG, 'OverflowError format: %c'), captured_logs
+    messages = {record.getMessage() for record in caplog.records}
+    assert 'TypeError format' not in messages
+    assert 'OverflowError format' not in messages

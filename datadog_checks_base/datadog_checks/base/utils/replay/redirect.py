@@ -64,7 +64,7 @@ class ReplayLogger(logging.Logger):
             try:
                 msg = msg % args
             except (TypeError, ValueError, OverflowError, KeyError):
-                pass
+                return
         print(
             '{}:log:{}'.format(
                 MESSAGE_INDICATOR,
