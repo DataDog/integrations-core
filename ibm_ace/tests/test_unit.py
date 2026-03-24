@@ -46,8 +46,6 @@ def test_truncated_message_given_oversized_payload_skips_without_critical(instan
 
     import pymqi
 
-    from datadog_checks.ibm_ace.subscription import DEFAULT_MSG_BUFFER_SIZE
-
     check = IbmAceCheck('ibm_ace', {}, [instance])
     sub = ResourceStatisticsSubscription(check, global_tags)
 
@@ -62,4 +60,3 @@ def test_truncated_message_given_oversized_payload_skips_without_critical(instan
 
     assert messages == []
     check.log.warning.assert_called_once()
-    assert DEFAULT_MSG_BUFFER_SIZE == 65536

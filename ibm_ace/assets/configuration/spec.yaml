@@ -69,6 +69,15 @@ files:
       value:
         example: true
         type: boolean
+    - name: max_message_length
+      description: |
+        Maximum buffer size in bytes for messages received from MQ subscriptions.
+        Increase this if you see MQRC_TRUNCATED_MSG_FAILED warnings in the logs.
+      fleet_configurable: true
+      value:
+        example: 65536
+        type: integer
+        minimum: 4096
     - name: persist_connections
       description: |
         Whether to keep connections open rather than disconnecting after every check run.
