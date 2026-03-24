@@ -448,7 +448,14 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
         file_content = json.load(f)
 
     if var_name not in file_content:
-        raise VariableNotDefinedException()
+        # pysmi 1.x normalizes hyphenated identifiers to underscores in JSON keys but
+        # still emits the original hyphenated name in trap objects lists — fall back to
+        # the normalized form so we don't silently drop these variables.
+        normalized = var_name.replace('-', '_')
+        if normalized in file_content:
+            var_name = normalized
+        else:
+            raise VariableNotDefinedException()
 
     # grab enum if it exists in-line
     enum = file_content[var_name].get('syntax', {}).get('constraints', {}).get('enumeration', {})

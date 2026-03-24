@@ -237,3 +237,20 @@ def test_database_identifier(pg_instance, template, expected, tags, integration_
 def test_trim_set_stmts(query, expected_trimmed_query):
     trimmed_query = util.trim_leading_set_stmts(query)
     assert trimmed_query == expected_trimmed_query
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'exclude_hostname, expected_hostname',
+    [
+        (False, 'resolved.hostname'),
+        (True, None),
+    ],
+)
+def test_debug_stats_kwargs_respects_exclude_hostname(
+    integration_check, pg_instance, exclude_hostname, expected_hostname
+):
+    pg_instance['exclude_hostname'] = exclude_hostname
+    with mock.patch('datadog_checks.postgres.PostgreSql.resolve_db_host', return_value='resolved.hostname'):
+        check = integration_check(pg_instance)
+    assert check.debug_stats_kwargs()['hostname'] == expected_hostname

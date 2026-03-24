@@ -113,7 +113,7 @@ files:
           - name: sock
             description: |
               Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
-              If you specify a socket you dont need to specify a host.
+              If you specify a socket you don't need to specify a host.
             fleet_configurable: true
             value:
               type: string
@@ -400,7 +400,7 @@ files:
           - name: dbm
             fleet_configurable: true
             description: |
-              Set to `true` enable Database Monitoring.
+              Set to `true` to enable Database Monitoring.
             enabled: false
             value:
               type: boolean
