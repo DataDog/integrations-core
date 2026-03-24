@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import click
 
 from ddev.config.file import DDEV_TOML
-from ddev.config.trust import deny_local_config
+from ddev.config.trust import TrustStorePersistenceError, deny_local_config
 from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
@@ -22,7 +22,10 @@ def deny(app: Application):
     local_config_path = (
         app.config_file.overrides_path if app.config_file.overrides_available() else Path.cwd() / DDEV_TOML
     )
-    removed = deny_local_config(local_config_path)
+    try:
+        removed = deny_local_config(local_config_path)
+    except TrustStorePersistenceError as e:
+        app.abort(str(e))
 
     if removed:
         app.display_success(f'Removed trust for local config: `{local_config_path}`')

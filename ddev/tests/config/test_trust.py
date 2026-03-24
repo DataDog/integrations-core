@@ -3,10 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import pytest
+
 from ddev.config.trust import (
+    TrustRecord,
+    TrustStorePersistenceError,
     deny_local_config,
     is_local_config_trusted,
     load_trust_records,
+    save_trust_records,
     trust_local_config,
 )
 from ddev.utils.fs import Path
@@ -93,3 +98,17 @@ def test_load_trust_records_returns_empty_for_invalid_toml(tmp_path):
     trust_store_path.write_text('records = [\n')
 
     assert load_trust_records(trust_store_path) == {}
+
+
+def test_save_trust_records_wraps_write_failures(tmp_path, mocker) -> None:
+    trust_store_path = Path(tmp_path) / 'ddev-data' / 'trusted-local-configs.toml'
+    mocker.patch('ddev.config.trust.Path.write_atomic', side_effect=OSError('simulated write failure'))
+
+    with pytest.raises(TrustStorePersistenceError, match='Unable to update the trust store at') as exc_info:
+        save_trust_records(
+            {'/tmp/project/.ddev.toml': TrustRecord(path='/tmp/project/.ddev.toml', sha256='abc123')},
+            trust_store_path,
+        )
+
+    assert str(trust_store_path) in str(exc_info.value)
+    assert 'Check that this path is writable and try again.' in str(exc_info.value)

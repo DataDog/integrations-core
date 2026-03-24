@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import click
 
 from ddev.config.file import DDEV_TOML
-from ddev.config.trust import trust_local_config
+from ddev.config.trust import TrustStorePersistenceError, trust_local_config
 from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
@@ -27,7 +27,10 @@ def allow(app: Application):
         app.display_info(f'No local config file found at `{local_config_path}`. Nothing to trust.')
         return
 
-    already_trusted = trust_local_config(local_config_path)
+    try:
+        already_trusted = trust_local_config(local_config_path)
+    except TrustStorePersistenceError as e:
+        app.abort(str(e))
 
     if already_trusted:
         app.display_success(f'Local config is already trusted: `{local_config_path}`')

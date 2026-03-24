@@ -3,8 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import pytest
+
 from ddev.config.file import ConfigFileWithOverrides
-from ddev.config.trust import deny_local_config, is_local_config_trusted, trust_local_config
+from ddev.config.trust import TrustStorePersistenceError, deny_local_config, is_local_config_trusted, trust_local_config
 from ddev.utils.fs import Path
 
 
@@ -127,3 +129,30 @@ def test_trust_lifecycle_untrusted_allow_edit_revokes_and_deny(
     assert deny_result.exit_code == 0, deny_result.output
 
     assert not deny_local_config(overrides_config)
+
+
+@pytest.mark.parametrize(
+    ('command', 'patch_target'),
+    [
+        ('allow', 'ddev.cli.config.allow.trust_local_config'),
+        ('deny', 'ddev.cli.config.deny.deny_local_config'),
+    ],
+)
+def test_allow_deny_surfaces_trust_store_write_failures(
+    ddev, monkeypatch, tmp_path, overrides_config: Path, mocker, command: str, patch_target: str
+) -> None:
+    monkeypatch.setenv('DDEV_DATA_DIR', str(tmp_path / 'ddev-data'))
+    mocker.patch(
+        patch_target,
+        side_effect=TrustStorePersistenceError(
+            'Unable to update the trust store at `/tmp/trusted-local-configs.toml`. '
+            'Check that this path is writable and try again.'
+        ),
+    )
+
+    result = ddev('config', command)
+
+    assert result.exit_code == 1, result.output
+    assert 'Unable to update the trust store at `/tmp/trusted-local-configs.toml`.' in result.output
+    assert 'Check that this path is writable and try again.' in result.output
+    assert 'Traceback' not in result.output

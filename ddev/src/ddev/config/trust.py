@@ -21,6 +21,10 @@ else:
 TRUST_STORE_FILENAME = 'trusted-local-configs.toml'
 
 
+class TrustStorePersistenceError(Exception):
+    """Trust records could not be persisted."""
+
+
 @dataclass(frozen=True)
 class TrustRecord:
     path: str
@@ -68,11 +72,17 @@ def load_trust_records(trust_store_path: Path | None = None) -> dict[str, TrustR
 def save_trust_records(records: dict[str, TrustRecord], trust_store_path: Path | None = None) -> None:
     """Persist trust records sorted by canonical path."""
     path = trust_store_path or get_trust_store_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    serialized_records = [
-        {'path': item.path, 'sha256': item.sha256} for item in sorted(records.values(), key=lambda record: record.path)
-    ]
-    path.write_atomic(dumps_toml_data({'records': serialized_records}), 'w', encoding='utf-8')
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        serialized_records = [
+            {'path': item.path, 'sha256': item.sha256}
+            for item in sorted(records.values(), key=lambda record: record.path)
+        ]
+        path.write_atomic(dumps_toml_data({'records': serialized_records}), 'w', encoding='utf-8')
+    except OSError as e:
+        raise TrustStorePersistenceError(
+            f'Unable to update the trust store at `{path}`. Check that this path is writable and try again.'
+        ) from e
 
 
 def trust_local_config(local_config_path: Path, trust_store_path: Path | None = None) -> bool:
