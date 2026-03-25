@@ -66,4 +66,10 @@ def test_truncated_message_given_oversized_payload_skips_without_critical(instan
         messages = sub.get_latest_messages()
 
     assert messages == []
-    check.log.warning.assert_called_once()
+    check.log.warning.assert_any_call(
+        'Message on subscription %s exceeded %d-byte buffer and was skipped. '
+        'Increase max_message_length in the integration configuration.',
+        'resource_statistics',
+        65536,
+    )
+    check.log.error.assert_not_called()
