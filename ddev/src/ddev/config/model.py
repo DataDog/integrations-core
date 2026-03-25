@@ -247,14 +247,17 @@ class RootConfig(LazilyParsedConfig):
                     if not isinstance(data, dict):
                         self.raise_error('must be a table', extra_steps=(name,))
 
-                self._field_orgs = {
-                    name: OrgSettingsConfig(
-                        data,
-                        ('orgs', name),
-                        trust_blocked_command_fields=self._trust_blocked_command_fields,
-                    )
-                    for name, data in orgs.items()
-                }
+                self._field_orgs = _OrgWriteThroughDict(
+                    self.raw_data['orgs'],
+                    {
+                        name: OrgSettingsConfig(
+                            data,
+                            ('orgs', name),
+                            trust_blocked_command_fields=self._trust_blocked_command_fields,
+                        )
+                        for name, data in orgs.items()
+                    },
+                )
             else:
                 from ddev.e2e.agent.constants import AgentEnvVars
 
@@ -267,14 +270,17 @@ class RootConfig(LazilyParsedConfig):
                         'log_url': os.getenv(AgentEnvVars.LOGS_URL, ''),
                     },
                 }
-                self._field_orgs = {
-                    name: OrgSettingsConfig(
-                        data,
-                        ('orgs', name),
-                        trust_blocked_command_fields=self._trust_blocked_command_fields,
-                    )
-                    for name, data in self.raw_data['orgs'].items()
-                }
+                self._field_orgs = _OrgWriteThroughDict(
+                    self.raw_data['orgs'],
+                    {
+                        name: OrgSettingsConfig(
+                            data,
+                            ('orgs', name),
+                            trust_blocked_command_fields=self._trust_blocked_command_fields,
+                        )
+                        for name, data in self.raw_data['orgs'].items()
+                    },
+                )
 
         return self._field_orgs
 
@@ -520,6 +526,25 @@ class AgentConfig(LazilyParsedConfig):
         self._field_config = FIELD_TO_PARSE
 
 
+class _OrgWriteThroughDict(dict):
+    """A dict of OrgSettingsConfig objects that writes new entries back to raw_data['orgs'].
+
+    This preserves the pre-secret-provider write-through behaviour so that
+    ``model.orgs['new_org'] = {}`` is reflected in ``model.raw_data['orgs']``
+    and therefore in the saved config file.
+    """
+
+    __slots__ = ('_raw_orgs',)
+
+    def __init__(self, raw_orgs: dict, items: dict):
+        super().__init__(items)
+        self._raw_orgs = raw_orgs
+
+    def __setitem__(self, key, value):
+        super().__setitem__(key, value)
+        self._raw_orgs[key] = value.raw_data if isinstance(value, OrgSettingsConfig) else value
+
+
 class OrgSettingsConfig(LazilyParsedConfig, Mapping):
     def __init__(self, *args, trust_blocked_command_fields=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -628,6 +653,12 @@ class OrgSettingsConfig(LazilyParsedConfig, Mapping):
 
     def __len__(self) -> int:
         return len(self.raw_data)
+
+    def __setitem__(self, key, value):
+        self.raw_data[key] = value
+        field_attr = f'_field_{key}'
+        if hasattr(self, field_attr):
+            setattr(self, field_attr, FIELD_TO_PARSE)
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Mapping):

@@ -7,9 +7,6 @@ These tests verify that dashboard parsing correctly extracts metrics, tags,
 and tag values from real integration dashboards.
 """
 
-import shlex
-import sys
-
 import pytest
 
 from ddev.config.model import RootConfig
@@ -187,16 +184,22 @@ class _StubApp:
 
 
 class TestGetApiKeys:
-    def test_uses_dynamicd_model_resolution_with_command_precedence(self, tmp_path):
+    def test_uses_dynamicd_model_resolution_with_command_precedence(self, monkeypatch):
         from ddev.cli.meta.scripts._dynamicd.cli import _get_api_keys
 
-        script_path = tmp_path / 'dynamicd_key.py'
-        script_path.write_text("print('from-command')")
+        captured: dict = {}
+
+        def fake_run_command(cmd: str, **kwargs) -> str:
+            captured['command'] = cmd
+            return 'from-command'
+
+        monkeypatch.setattr('ddev.config.secret_resolution.run_secret_command', fake_run_command)
+
         config = RootConfig(
             {
                 'dynamicd': {
                     'llm_api_key': 'literal',
-                    'llm_api_key_command': f"{shlex.quote(sys.executable)} {shlex.quote(str(script_path))}",
+                    'llm_api_key_command': 'fake-command',
                 },
                 'orgs': {'default': {'api_key': 'dd-api-key'}},
             }
@@ -207,6 +210,7 @@ class TestGetApiKeys:
 
         assert llm_api_key == 'from-command'
         assert dd_api_key == 'dd-api-key'
+        assert captured['command'] == 'fake-command'
 
     def test_missing_dynamicd_key_shows_actionable_message(self, monkeypatch):
         from ddev.cli.meta.scripts._dynamicd.cli import _get_api_keys
