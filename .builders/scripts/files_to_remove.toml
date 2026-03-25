@@ -44,10 +44,10 @@ excluded_paths = [
   "win32com/test/",
 
   # --- Botocore ---
-  # Remove all service-specific API model directories but keep top-level files
-  # (endpoints.json, partitions.json, sdk-default-configuration.json, _retry.json)
-  # that botocore needs to function. Use a pattern that only matches subdirectories.
-  "botocore/data/*/",
+  "botocore/data/*",
+  # Top-level JSON files (endpoints.json, partitions.json, _retry.json, etc.)
+  # are required by botocore to resolve AWS endpoints and handle retries.
+  "!botocore/data/*.json",
   # We use sts in several integrations for assuming roles:
   # - amazon_msk
   # - postres
