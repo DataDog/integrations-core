@@ -9,13 +9,12 @@ from unittest.mock import AsyncMock, MagicMock
 import anthropic
 import pytest
 
-from ddev.ai.agent.agent import AnthropicAgent
-from ddev.ai.agent.types import (
+from ddev.ai.agent.client import AnthropicAgent, StopReason
+from ddev.ai.agent.exceptions import (
     AgentAPIError,
     AgentConnectionError,
     AgentError,
     AgentRateLimitError,
-    StopReason,
 )
 from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
@@ -156,7 +155,7 @@ def test_multiple_text_blocks_are_concatenated() -> None:
 
     result = asyncio.run(agent.send("Hi"))
 
-    assert result.text == "Hello, world!"
+    assert result.text == "Hello, \nworld!"
 
 
 # ---------------------------------------------------------------------------

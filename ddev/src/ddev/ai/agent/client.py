@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from copy import deepcopy
+from dataclasses import dataclass
+from enum import StrEnum
 from typing import Final
 
 import anthropic
@@ -9,19 +12,55 @@ from anthropic.types import MessageParam, ToolParam, ToolResultBlockParam
 
 from ddev.ai.tools.core.registry import ToolRegistry
 
-from .types import (
+from .exceptions import (
     AgentAPIError,
     AgentConnectionError,
     AgentError,
     AgentRateLimitError,
-    AgentResponse,
-    StopReason,
-    TokenUsage,
-    ToolCall,
 )
 
-MODEL: Final[str] = "claude-opus-4-6"
+MODEL: Final[str] = "claude-sonnet-4-6"
 MAX_TOKENS: Final[int] = 8192
+
+
+class StopReason(StrEnum):
+    """Maps Anthropic API stop_reason strings to a typed enum."""
+
+    END_TURN = "end_turn"
+    MAX_TOKENS = "max_tokens"
+    STOP_SEQUENCE = "stop_sequence"
+    TOOL_USE = "tool_use"
+    PAUSE_TURN = "pause_turn"
+    REFUSAL = "refusal"
+
+
+@dataclass(frozen=True)
+class ToolCall:
+    """A single tool invocation requested by the model."""
+
+    id: str
+    name: str
+    input: dict[str, object]
+
+
+@dataclass(frozen=True)
+class TokenUsage:
+    """Token accounting from a single API call."""
+
+    input_tokens: int
+    output_tokens: int
+    cache_read_input_tokens: int
+    cache_creation_input_tokens: int
+
+
+@dataclass(frozen=True)
+class AgentResponse:
+    """The complete response from a single AnthropicAgent.send() call."""
+
+    stop_reason: StopReason
+    text: str
+    tool_calls: list[ToolCall]
+    usage: TokenUsage
 
 
 class AnthropicAgent:
@@ -45,7 +84,7 @@ class AnthropicAgent:
     @property
     def history(self) -> list[MessageParam]:
         """Read-only snapshot of the conversation history."""
-        return list(self._history)
+        return deepcopy(self._history)
 
     def reset(self) -> None:
         """Clear conversation history to start a new conversation."""
@@ -114,12 +153,12 @@ class AnthropicAgent:
 
         agent_response = AgentResponse(
             stop_reason=stop_reason,
-            text="".join(text_parts),
+            text="\n".join(text_parts),
             tool_calls=tool_calls,
             usage=usage,
         )
 
         # Save to history only after a successful response.
-        self._history = [*messages, {"role": "assistant", "content": response.content}]
+        self._history.extend([user_msg, {"role": "assistant", "content": response.content}])
 
         return agent_response
