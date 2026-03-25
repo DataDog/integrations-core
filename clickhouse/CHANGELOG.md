@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.4.1 / 2026-03-24
+
+***Fixed***:
+
+* Fix authentication regression where a missing `password` config option defaults to `None` instead of an empty string, causing ClickHouse to reject connections with error code 194. ([#23015](https://github.com/DataDog/integrations-core/pull/23015))
+
 ## 6.4.0 / 2026-03-18
 
 ***Added***:
