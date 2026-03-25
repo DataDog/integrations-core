@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.33.0 / 2026-03-20
+
+***Added***:
+
+* Add support for require_trusted_provider security validation ([#22226](https://github.com/DataDog/integrations-core/pull/22226))
+
 ## 37.32.0 / 2026-03-18
 
 ***Added***:
