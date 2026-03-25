@@ -22,10 +22,10 @@ from _release.summary import build_summary
 from _release.validation import HAS_FRAGMENTS, NO_VERSION, PRE_RELEASE, STABLE, UNRELEASED, validate_packages
 
 
-def _package_args(selected: str) -> list[str]:
+def _tag_package_args(selected: str) -> list[str]:
     """Return the package arguments for ``ddev release tag``."""
     selected = selected.strip()
-    if not selected or selected.lower() == "all":
+    if not selected:
         return ["all"]
     try:
         packages = json.loads(selected)
@@ -52,7 +52,7 @@ def _tag(dry_run: bool, selected: str) -> None:
     )
 
     push_flag = "--push" if not dry_run else "--no-push"
-    base_cmd = ["ddev", "release", "tag"] + _package_args(selected) + ["--skip-prerelease", push_flag]
+    base_cmd = ["ddev", "release", "tag"] + _tag_package_args(selected) + ["--skip-prerelease", push_flag]
 
     result = subprocess.run(base_cmd)
     if result.returncode == 3:
@@ -192,10 +192,6 @@ def main() -> None:
     source_repo = os.environ.get("SOURCE_REPO", "integrations-core")
     ref = os.environ.get("REF", "")
     is_stable_release = _parse_is_stable_release()
-
-    # Normalise "[]" to empty string so both _tag and _detect treat it as auto-detect.
-    if selected.strip() == "[]":
-        selected = ""
 
     _tag(dry_run, selected)
 

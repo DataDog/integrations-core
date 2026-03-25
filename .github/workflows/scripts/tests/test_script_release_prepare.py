@@ -14,23 +14,21 @@ def _stable_result(package: str = "postgres", dispatch: bool = True) -> list[dic
 
 
 # ---------------------------------------------------------------------------
-# _package_args
+# _tag_package_args
 # ---------------------------------------------------------------------------
 
 class TestPackageArgs:
     @pytest.mark.parametrize("selected, expected", [
         ("", ["all"]),
-        ("all", ["all"]),
-        ("ALL", ["all"]),
         ('["postgres","mysql"]', ["postgres", "mysql"]),
         ("[]", ["all"]),
     ])
     def test_returns_expected(self, selected, expected):
-        assert release_prepare._package_args(selected) == expected
+        assert release_prepare._tag_package_args(selected) == expected
 
     def test_invalid_json_exits(self):
         with pytest.raises(SystemExit):
-            release_prepare._package_args("invalid-json")
+            release_prepare._tag_package_args("invalid-json")
 
 
 # ---------------------------------------------------------------------------
