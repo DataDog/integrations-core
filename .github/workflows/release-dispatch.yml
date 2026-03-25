@@ -26,7 +26,7 @@ on:
           or triggering downstream wheel builds.
         required: false
         type: boolean
-        default: false
+        default: true
       ddev-version:
         description: "ddev version, pinned by default."
         required: false

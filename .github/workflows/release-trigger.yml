@@ -31,7 +31,7 @@ on:
         description: "Print what would be released without pushing tags or starting builds"
         required: false
         type: boolean
-        default: false
+        default: true
       ddev-version:
         description: "ddev version, pinned by default."
         required: false
@@ -62,7 +62,7 @@ jobs:
       source-repo: integrations-core
       packages: ${{ inputs.packages || '' }}
       source-repo-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.source-repo-ref || github.sha }}
-      dry-run: ${{ inputs.dry-run || false }}
+      dry-run: ${{ inputs.dry-run || true }}
       ddev-version: ${{ inputs.ddev-version || '' }}
       is-stable-release: ${{ needs.context.outputs.is-stable-release }}
     permissions:
