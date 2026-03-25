@@ -12,6 +12,8 @@ cars_in_lot{make="honda", model="civic", color="#4287f5"} 4
 cars_in_lot{make="toyota", model="corolla", color="#FFC300"} 2
 cars_in_lot{make="toyota", model="corolla", color="#900C3F"} 3
 cars_in_lot{make="toyota", model="corolla", color="#DAF7A6"} 1
+cars_in_lot{make="honda", model="civic", license="FF5733"} 5
+cars_in_lot{make="honda", model="civic", license="FF5734"} 6
 """.strip()
 
 COUNTER_PAYLOAD = """
@@ -54,11 +56,12 @@ request_duration_count{handler="api", color="blue"} 15
 """.strip()
 
 
-def test_gauge_given_exclude_labels_returns_summed_values(aggregator, dd_run_check, mock_http_response):
+def test_gauge_given_exclude_labels_returns_summed_values_if_present(aggregator, dd_run_check, mock_http_response):
     mock_http_response(GAUGE_PAYLOAD)
     check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
     dd_run_check(check)
 
+    # Samples with the excluded color label are summed
     aggregator.assert_metric(
         'test.cars_in_lot',
         12.0,
@@ -71,24 +74,21 @@ def test_gauge_given_exclude_labels_returns_summed_values(aggregator, dd_run_che
         metric_type=aggregator.GAUGE,
         tags=['endpoint:test', 'make:toyota', 'model:corolla'],
     )
-    aggregator.assert_all_metrics_covered()
 
-
-def test_gauge_given_no_exclude_labels_returns_individual_values(aggregator, dd_run_check, mock_http_response):
-    mock_http_response(GAUGE_PAYLOAD)
-    check = get_check({'metrics': ['.+']})
-    dd_run_check(check)
-
+    # Samples without the excluded label are collected individually
     aggregator.assert_metric(
         'test.cars_in_lot',
         5.0,
-        tags=['endpoint:test', 'make:honda', 'model:civic', 'color:#FF5733'],
+        metric_type=aggregator.GAUGE,
+        tags=['endpoint:test', 'make:honda', 'model:civic', 'license:FF5733'],
     )
     aggregator.assert_metric(
         'test.cars_in_lot',
-        3.0,
-        tags=['endpoint:test', 'make:honda', 'model:civic', 'color:#4CAF50'],
+        6.0,
+        metric_type=aggregator.GAUGE,
+        tags=['endpoint:test', 'make:honda', 'model:civic', 'license:FF5734'],
     )
+    aggregator.assert_all_metrics_covered()
 
 
 def test_counter_given_exclude_labels_submits_summed_value(aggregator, dd_run_check, mock_http_response):
@@ -154,29 +154,6 @@ def test_counter_given_exclude_labels_submits_monotonically_increasing_sums(
     # The agent computes the delta: 322 - 303 = 19
     # This equals sum of individual deltas: (10 + 5 + 4) = 19
     assert t1_metrics[0].value - t0_metrics[0].value == 19.0
-
-
-def test_gauge_given_exclude_labels_not_present_in_metric_returns_individual_values(
-    aggregator, dd_run_check, mock_http_response
-):
-    # When the excluded label doesn't exist on a metric, no collisions
-    # occur and each sample is submitted individually.
-    payload = """
-    # HELP temperature Current temperature reading
-    # TYPE temperature gauge
-    temperature{sensor="kitchen"} 22.5
-    temperature{sensor="bedroom"} 19.0
-    temperature{sensor="garage"} 15.0
-    """.strip()
-
-    mock_http_response(payload)
-    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
-    dd_run_check(check)
-
-    aggregator.assert_metric('test.temperature', 22.5, tags=['endpoint:test', 'sensor:kitchen'])
-    aggregator.assert_metric('test.temperature', 19.0, tags=['endpoint:test', 'sensor:bedroom'])
-    aggregator.assert_metric('test.temperature', 15.0, tags=['endpoint:test', 'sensor:garage'])
-    aggregator.assert_all_metrics_covered()
 
 
 def test_summary_given_exclude_labels_passes_through_unchanged(aggregator, dd_run_check, mock_http_response):
