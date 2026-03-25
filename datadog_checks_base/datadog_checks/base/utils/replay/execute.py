@@ -5,12 +5,23 @@ import os
 import subprocess
 import sys
 import threading
+from contextlib import contextmanager, nullcontext
 
 from datadog_checks.base.utils.common import ensure_bytes, to_native_string
 from datadog_checks.base.utils.format import json
 from datadog_checks.base.utils.platform import Platform
 
 from .constants import KNOWN_DATADOG_AGENT_SETTER_METHODS, EnvVars
+
+
+@contextmanager
+def _timer(timeout, callback):
+    timer = threading.Timer(timeout, callback)
+    timer.start()
+    try:
+        yield
+    finally:
+        timer.cancel()
 
 
 def run_with_isolation(check, aggregator, datadog_agent):
@@ -57,53 +68,48 @@ def run_with_isolation(check, aggregator, datadog_agent):
     def _kill_on_timeout():
         nonlocal timed_out
         timed_out = True
-        # TODO: kill the entire process group to avoid orphaned child processes spawned by the check
+        # currently this only kills the parent process; does not support checks that spawn sub-processes
         process.kill()
 
-    timer = threading.Timer(timeout, _kill_on_timeout) if timeout is not None else None
+    timer = _timer(timeout, _kill_on_timeout) if timeout is not None else nullcontext()
 
     with process:
         check.log.info('Running check in a separate process')
-        if timer is not None:
-            timer.start()
+        with timer:
+            # To avoid blocking never use a pipe's file descriptor iterator. See https://bugs.python.org/issue3907
+            for line in iter(process.stdout.readline, b''):
+                line = line.rstrip().decode('utf-8')
+                indicator, _, procedure = line.partition(':')
+                if indicator != message_indicator:
+                    check.log.debug(line)
+                    continue
 
-        # To avoid blocking never use a pipe's file descriptor iterator. See https://bugs.python.org/issue3907
-        for line in iter(process.stdout.readline, b''):
-            line = line.rstrip().decode('utf-8')
-            indicator, _, procedure = line.partition(':')
-            if indicator != message_indicator:
-                check.log.debug(line)
-                continue
+                check.log.trace(line)
 
-            check.log.trace(line)
-
-            message_type, _, message = procedure.partition(':')
-            message = json.decode(message)
-            if message_type == 'aggregator':
-                getattr(aggregator, message['method'])(check, *message['args'], **message['kwargs'])
-            elif message_type == 'log':
-                getattr(check.log, message['method'])(*message['args'])
-            elif message_type == 'datadog_agent':
-                method = message['method']
-                value = getattr(datadog_agent, method)(*message['args'], **message['kwargs'])
-                if method not in KNOWN_DATADOG_AGENT_SETTER_METHODS:
-                    try:
-                        process.stdin.write(b'%s\n' % ensure_bytes(json.encode({'value': value})))
-                        process.stdin.flush()
-                    except BrokenPipeError:
-                        break
-            elif message_type == 'error':
-                check.log.error(message[0]['traceback'])
-                break
-            else:
-                check.log.error(
-                    'Unknown message type encountered during communication with the isolated process: %s',
-                    message_type,
-                )
-                break
-
-        if timer is not None:
-            timer.cancel()
+                message_type, _, message = procedure.partition(':')
+                message = json.decode(message)
+                if message_type == 'aggregator':
+                    getattr(aggregator, message['method'])(check, *message['args'], **message['kwargs'])
+                elif message_type == 'log':
+                    getattr(check.log, message['method'])(*message['args'])
+                elif message_type == 'datadog_agent':
+                    method = message['method']
+                    value = getattr(datadog_agent, method)(*message['args'], **message['kwargs'])
+                    if method not in KNOWN_DATADOG_AGENT_SETTER_METHODS:
+                        try:
+                            process.stdin.write(b'%s\n' % ensure_bytes(json.encode({'value': value})))
+                            process.stdin.flush()
+                        except BrokenPipeError:
+                            break
+                elif message_type == 'error':
+                    check.log.error(message[0]['traceback'])
+                    break
+                else:
+                    check.log.error(
+                        'Unknown message type encountered during communication with the isolated process: %s',
+                        message_type,
+                    )
+                    break
 
     if timed_out:
         check.log.error('Check timed out after %s seconds', timeout)
