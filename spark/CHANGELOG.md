@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 7.3.1 / 2025-12-22
+## 7.6.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+## 7.5.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+## 7.4.0 / 2026-01-21 / Agent 7.76.0
+
+***Added***:
+
+* Add `startup_wait_retries` option to handle Spark driver startup messages gracefully. ([#22252](https://github.com/DataDog/integrations-core/pull/22252))
+
+## 7.3.1 / 2025-12-22 / Agent 7.75.0
 
 ***Fixed***:
 

@@ -1,0 +1,11 @@
+name: Cisco ASA
+fleet_configurable: true
+files:
+- name: cisco_asa.yaml
+  options:
+  - template: logs
+    example:
+    - type: tcp/udp
+      port: <PORT>
+      source: cisco-asa
+      service: cisco-asa

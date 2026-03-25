@@ -66,6 +66,10 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         return self.config.get('mypy-args', []) + ['--install-types', '--non-interactive']
 
     @cached_property
+    def mypy_files(self):
+        return self.config.get('mypy-files', ['.'])
+
+    @cached_property
     def mypy_deps(self):
         return self.config.get('mypy-deps', []) + ['mypy']
 
@@ -104,6 +108,13 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
     def finalize_config(self, config):
         for env_name, env_config in config.items():
+            if env_name == 'default':
+                # Always add ddtrace as a dependency for the default environment
+                # This ensures we have it available when running tests to emit CI visibility data
+                # For those integrations that already have ddtrace as a dependency, either directly
+                # or through datadog_checks_base, this will have no effect.
+                self.inject_ddtrace_dependency(env_config)
+
             is_template_env = env_name == 'default'
             is_test_env = env_config.setdefault('test-env', is_template_env)
             is_e2e_env = env_config.setdefault('e2e-env', is_template_env)
@@ -154,6 +165,19 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             f'ruff format {options} --config {settings_dir}/pyproject.toml .',
         )
 
+    def inject_ddtrace_dependency(self, env_config):
+        if not self.in_core_repo:
+            return
+
+        agent_requirements = self.root.parent / 'agent_requirements.in'
+        if not agent_requirements.exists():
+            return
+
+        for line in agent_requirements.read_text().splitlines():
+            if line.startswith('ddtrace=='):
+                env_config.setdefault('dependencies', []).append(line.strip())
+                return
+
     def ruff_settings_dir(self):
         # If the local pyproject.toml exists and has ruff configuration, use it
         local_pyproject = Path("./pyproject.toml")
@@ -198,7 +222,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
         if self.check_types:
             lint_env['scripts']['typing'] = [
-                f'mypy --config-file=../pyproject.toml {" ".join(self.mypy_args)}'.rstrip()
+                f'mypy --config-file=../pyproject.toml {" ".join(self.mypy_args)} {" ".join(self.mypy_files)}'.rstrip()
             ]
             lint_env['scripts']['all'].append('typing')
             lint_env['dependencies'].extend(self.mypy_deps)

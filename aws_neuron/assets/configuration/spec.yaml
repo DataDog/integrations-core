@@ -1,4 +1,5 @@
 name: AWS Neuron
+fleet_configurable: true
 files:
 - name: aws_neuron.yaml
   options:

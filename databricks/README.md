@@ -6,13 +6,13 @@
 
 Datadog offers several Databricks monitoring capabilities.
 
-[Data Jobs Monitoring][25] provides monitoring for your Databricks jobs and clusters. You can detect problematic Databricks jobs and workflows anywhere in your data pipelines, remediate failed and long-running-jobs faster, and optimize cluster resources to reduce costs.
+[Data Observability: Jobs Monitoring][25] provides monitoring for your Databricks jobs and clusters. You can detect problematic Databricks jobs and workflows anywhere in your data pipelines, remediate failed and long-running-jobs faster, and optimize cluster resources to reduce costs.
 
 [Cloud Cost Management][26] gives you a view to analyze all your Databricks DBU costs alongside the associated cloud spend.
 
-[Log Management][27] enables you to aggregate and analyze logs from your Databricks jobs & clusters. You can collect these logs as part of [Data Jobs Monitoring][25].
+[Log Management][27] enables you to aggregate and analyze logs from your Databricks jobs & clusters. You can collect these logs as part of [Data Observability: Jobs Monitoring][25].
 
-[Infrastructure Monitoring][28] gives you a limited subset of the Data Jobs Monitoring functionality - visibility into the resource utilization of your Databricks clusters and Apache Spark performance metrics.
+[Infrastructure Monitoring][28] gives you a limited subset of the Data Observability: Jobs Monitoring functionality - visibility into the resource utilization of your Databricks clusters and Apache Spark performance metrics.
 
 [Reference Tables][32] allow you to import metadata from your Databricks workspace into Datadog. These tables enrich your Datadog telemetry with critical context like workspace names, job definitions, cluster configurations, and user roles.
 
@@ -32,7 +32,9 @@ First, [connect a new Databricks workspace](#connect-to-a-new-databricks-workspa
 <!-- xxx tab "Use a Service Principal for OAuth" xxx -->
 <div class="alert alert-warning">New workspaces must authenticate using OAuth. Workspaces integrated with a Personal Access Token continue to function and can switch to OAuth at any time. After a workspace starts using OAuth, it cannot revert to a Personal Access Token.</div>
 
-1. In your Databricks account, click on **User Management** in the left menu. Then, under the **Service principals** tab, click **Add service principal**.
+<div class="alert alert-info">The following steps must be performed by a Databricks account admin. A workspace admin alone does not have sufficient permissions to create service principals at the account level.</div>
+
+1. In your Databricks account console, click **User Management** in the left menu. Then, under the **Service principals** tab, click **Add service principal**.
 2. Under the **Credentials & secrets** tab, click **Generate secret**. Set **Lifetime (days)** to the maximum value allowed (730), then click **Generate**. Take note of your client ID and client secret. Also take note of your account ID, which can be found by clicking on your profile in the upper-right corner. (You must be in the account console to retrieve the account ID. The ID will not display inside a workspace.)
 3. Click **Workspaces** in the left menu, then select the name of your workspace.
 4. Go to the **Permissions** tab and click **Add permissions**.

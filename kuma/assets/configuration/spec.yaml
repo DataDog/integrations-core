@@ -1,4 +1,5 @@
 name: Kuma
+fleet_configurable: true
 files:
 - name: kuma.yaml
   options:

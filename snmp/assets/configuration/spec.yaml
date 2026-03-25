@@ -21,6 +21,7 @@ files:
           example: core
           type: string
           display_default: python
+        fleet_configurable: true
       - name: use_device_id_as_hostname
         enabled: true
         description: |
@@ -32,6 +33,7 @@ files:
           example: true
           type: boolean
           display_default: false
+        fleet_configurable: true
       - name: oid_batch_size
         description: |
             The number of OIDs handled by each batch. Increasing this number improves performance but
@@ -89,6 +91,7 @@ files:
               definition_file: cisco-asr.yaml
         hidden: true
       - name: refresh_oids_cache_interval
+        legacy: true
         description: |
           Note: Beta feature, only available using python SNMP integration.
           Set this option to enable caching of OIDs. The value is the number of seconds before the
@@ -162,30 +165,36 @@ files:
               use_raw_socket: true    # send pings in a privileged fashion using a raw socket
         options:
         - name: enabled
+          fleet_configurable: true
           description: Enables/Disables pinging devices
           value:
             type: boolean
             example: true
             display_default: false
         - name: count
+          fleet_configurable: true
           description: Number of pings to send per check run
           value:
             type: integer
             example: 2
         - name: timeout
+          fleet_configurable: true
           description: Timeout for all pings to execute in milliseconds
           value:
             type: integer
             example: 3000
         - name: interval
+          fleet_configurable: true
           description: Interval between sending pings in milliseconds
           value:
             type: integer
             example: 20
         - name: linux
+          fleet_configurable: true
           description: Linux-specific configuration
           options:
           - name: use_raw_socket
+            fleet_configurable: true
             description: |
               This may be required if your system doesn't support
               sending pings in an unprivileged fashion (using a UDP socket)
@@ -207,7 +216,9 @@ files:
           Either `ip_address` or `network_address` must be provided.
         value:
           type: string
+        fleet_configurable: true
       - name: port
+        fleet_configurable: true
         description: |
           Default SNMP port.
         value:
@@ -221,6 +232,7 @@ files:
         secret: true
         value:
           type: string
+        fleet_configurable: true
       - name: snmp_version
         description: |
           If you are using SNMP v1 set snmp_version to 1
@@ -228,13 +240,16 @@ files:
         value:
           type: integer
           example: 2
+        fleet_configurable: true
       - name: timeout
+        fleet_configurable: true
         description: |
           Amount of second before timing out. Default of 5 for Python version of this check.
         value:
           type: integer
           example: 2
       - name: retries
+        fleet_configurable: true
         description: |
           Amount of retries before failure. Default of 5 for Python version of this check.
         value:
@@ -242,6 +257,7 @@ files:
           example: 3
       - name: loader
         enabled: true
+        fleet_configurable: true
         description: |
           Check loader to use. Available loaders:
           - core: (recommended) Uses new corecheck SNMP integration
@@ -252,6 +268,7 @@ files:
           display_default: python
       - name: use_device_id_as_hostname
         enabled: true
+        fleet_configurable: true
         description: |
             Use `device:<DEVICE_ID>` (device_id is composed of `<NAMESPACE>:<DEVICE_IP_ADDRESS>`) as `hostname`
             for metrics and service checks (meaning that metrics and services checks will have
@@ -262,6 +279,7 @@ files:
           type: boolean
           display_default: false
       - name: oid_batch_size
+        fleet_configurable: true
         description: |
           The number of OIDs handled by each batch. Increasing this number improves performance but
           uses more resources.
@@ -277,6 +295,7 @@ files:
         description: |
           Username to connect to your SNMP devices.
           SNMP v3 specific configuration
+        fleet_configurable: true
         value:
           type: string
           example: <USERNAME>
@@ -289,6 +308,7 @@ files:
         value:
           type: string
           example: <AUTHENTICATION_PROTOCOL>
+        fleet_configurable: true
       - name: authKey
         description: |
           Authentication key to use with your Authentication type.
@@ -297,6 +317,7 @@ files:
         value:
           type: string
           example: <AUTHENTICATION_TYPE_KEY>
+        fleet_configurable: true
       - name: privProtocol
         description: |
           Privacy type to use when connecting to your SNMP devices.
@@ -307,6 +328,7 @@ files:
         value:
           type: string
           example: <PRIVACY_TYPE>
+        fleet_configurable: true
       - name: privKey
         description: |
           Privacy type key to use with your Privacy type.
@@ -315,6 +337,7 @@ files:
         value:
           type: string
           example: <PRIVACY_TYPE_KEY>
+        fleet_configurable: true
       - name: context_engine_id
         description: |
           (Optional SNMP v3-only parameter)
@@ -341,6 +364,7 @@ files:
           type: string
           example: <PROFILE_NAME>
       - name: metrics
+        fleet_configurable: true
         description: |
           Specify metrics you want to monitor.
           Metrics set here will override `global_metrics` set in the `init_config` section
@@ -362,6 +386,7 @@ files:
               metric_tags:
                 - TCP
       - name: metric_tags
+        fleet_configurable: true
         description: |
           Specify tags that you want applied to all metrics. A tag can be applied from a symbol or an OID.
           Regular expressions can be used to separate the resulting value into several tags, or get a
@@ -382,11 +407,13 @@ files:
                   host: \2
                   device_type: \1
       - name: network_address
+        fleet_configurable: true
         description: |
           The network address of the devices to scan for monitor.
         value:
           type: string
       - name: ignored_ip_addresses
+        fleet_configurable: true
         description: |
           A list of IP addresses to ignore when scanning the network.
         value:
@@ -397,24 +424,28 @@ files:
             - <IP_ADDRESS_1>
             - <IP_ADDRESS_2>
       - name: discovery_interval
+        fleet_configurable: true
         description: |
           Interval between 2 discovery starts, in seconds.
         value:
           type: integer
           example: 3600
       - name: discovery_allowed_failures
+        fleet_configurable: true
         description: |
           Number of times a discovered host can fail before it is removed from the discovered list.
         value:
           type: integer
           example: 3
       - name: workers
+        fleet_configurable: true
         description: |
           Number of workers used for check collection (metrics, service checks, metadata, etc) when using discovery.
         value:
           type: integer
           example: 5
       - name: discovery_workers
+        fleet_configurable: true
         description: |
           Number of workers used to discover new devices.
           Only available using corecheck SNMP integration.
@@ -422,6 +453,8 @@ files:
           type: integer
           example: 5
       - name: enforce_mib_constraints
+        legacy: true
+        fleet_configurable: true
         description: |
           If set to false, the the values returned are not checked to ensure they meet the MIB constraints.
           Only available using python SNMP integration.
@@ -429,6 +462,8 @@ files:
           type: boolean
           example: true
       - name: bulk_threshold
+        legacy: true
+        fleet_configurable: true
         description: |
           The number of symbols in each table that triggers a BULK request.
           Only relevant for SNMP > 1.
@@ -437,6 +472,8 @@ files:
           type: integer
           example: 0
       - name: refresh_oids_cache_interval
+        legacy: true
+        fleet_configurable: true
         description: |
           Note: Beta feature, only available using python SNMP integration.
           Set this option to enable caching of OIDs. The value is the number of seconds before the
@@ -484,8 +521,8 @@ files:
           interface_configs:
             - match_field: "name"  # (required) the field to match, can be `name` (interface name) or `index` (ifIndex)
               match_value: "eth0"  # (required, case sensitive) the value to match
-              in_speed: 50         # (optional) inbound speed value in bytes per sec, no value or 0 means no override
-              out_speed: 25        # (optional) outbound speed value in bytes per sec, no value or 0 means no override
+              in_speed: 50         # (optional) inbound speed value in bits per sec, no value or 0 means no override
+              out_speed: 25        # (optional) outbound speed value in bits per sec, no value or 0 means no override
               tags:                # (optional) interface level tags
                 - "testTagKey:testTagValue"
                 - "tagKey2:tagValue2"
@@ -512,6 +549,7 @@ files:
               match_value: eth5
               disabled: true
       - name: ping
+        fleet_configurable: true
         description: |
           Configure ICMP pings for all hosts in SNMP autodiscovery
           Each device is pinged with these settings each time the SNMP
@@ -535,17 +573,20 @@ files:
         options:
         - name: enabled
           description: Enables/Disables pinging devices
+          fleet_configurable: true
           value:
             type: boolean
             example: true
             display_default: false
         - name: count
           description: Number of pings to send per check run
+          fleet_configurable: true
           value:
             type: integer
             example: 2
         - name: timeout
           description: Timeout for all pings to execute in milliseconds
+          fleet_configurable: true
           value:
             type: integer
             example: 3000
@@ -564,11 +605,13 @@ files:
               If `use_raw_socket` is set to true, you MUST also enable the
               system-probe which has elevated privileges, see system-probe.yaml.example
               to enable it.
+            fleet_configurable: true
             value:
               type: boolean
               example: true
               display_default: false
 
+          fleet_configurable: true
       - template: instances/default
         overrides:
           service.hidden: true

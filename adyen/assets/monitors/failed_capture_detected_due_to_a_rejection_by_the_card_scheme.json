@@ -8,11 +8,10 @@
 		"id": 154282075,
 		"name": "Failed capture detected due to a rejection by the card scheme",
 		"type": "log alert",
-		"query": "logs(\"source:adyen service:transaction @evt.name:CAPTURE_FAILED\").index(\"*\").rollup(\"count\").by(\"@pspReference\").last(\"5m\") > 0",
+		"query": "logs(\"source:adyen @evt.name:CAPTURE_FAILED\").index(\"*\").rollup(\"count\").by(\"@pspReference\").last(\"5m\") > 0",
 		"message": "{{#is_alert}}\nFailed capture due to card scheme refers to a failure in the transaction capture process, where the payment from the customer's card could not be secured, typically due to problems with the card issuer or network.\n\nThis requires prompt investigation (pspReference:{{log.attributes.pspReference}}) to avoid disruption in payment processing.\n{{/is_alert}}",
 		"tags": [
-			"source:adyen",
-			"service:transaction"
+			"source:adyen"
 		],
 		"options": {
 			"thresholds": {

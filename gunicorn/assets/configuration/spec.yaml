@@ -24,6 +24,7 @@ files:
         the name is `<WEB_APP_NAME>`
       value:
         type: string
+      fleet_configurable: true
     - name: gunicorn
       description: Command or path to gunicorn (e.g. `/usr/local/bin/gunicorn` or `docker exec container gunicorn`)
       value:

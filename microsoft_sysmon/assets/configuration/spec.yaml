@@ -1,4 +1,5 @@
 name: Microsoft Sysmon
+fleet_configurable: true
 files:
 - name: microsoft_sysmon.yaml
   options:

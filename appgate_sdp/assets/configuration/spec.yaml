@@ -1,4 +1,5 @@
 name: Appgate SDP
+fleet_configurable: true
 files:
 - name: appgate_sdp.yaml
   options:

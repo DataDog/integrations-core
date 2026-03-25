@@ -2,7 +2,57 @@
 
 <!-- towncrier release notes start -->
 
-## 6.10.2 / 2026-01-06
+## 7.0.0 / 2026-03-18
+
+***Changed***:
+
+* Broker configurations, topic configurations, and schema registry version checks are now collected in batches across multiple agent runs instead of all at once. This reduces load on large clusters but means that not all metrics are emitted in every check run. The batch sizes and refresh interval are controlled by the `kafka_configs_refresh_interval` configuration option. ([#22721](https://github.com/DataDog/integrations-core/pull/22721))
+
+***Added***:
+
+* Support IAM authentication for MSK clusters ([#22660](https://github.com/DataDog/integrations-core/pull/22660))
+* Support oauth for schema registry ([#22665](https://github.com/DataDog/integrations-core/pull/22665))
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+* Add kafka_cluster_id_override parameter to allow overriding the auto-detected cluster ID. ([#22768](https://github.com/DataDog/integrations-core/pull/22768))
+* Bump `confluent-kafka` to 2.13.2 ([#22829](https://github.com/DataDog/integrations-core/pull/22829))
+
+***Fixed***:
+
+* Don't report negative lag when data is dropped (broker offset goes down). ([#22679](https://github.com/DataDog/integrations-core/pull/22679))
+* URL-encode subject names in Schema Registry API calls to fix 404 errors for Protobuf reference subjects containing slashes. ([#22924](https://github.com/DataDog/integrations-core/pull/22924))
+
+## 6.14.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Support oauth scope and extensions ([#22560](https://github.com/DataDog/integrations-core/pull/22560))
+* Kafka consumer connects to oauth provider with ca certificate in custom path ([#22602](https://github.com/DataDog/integrations-core/pull/22602))
+* Bump confluent-kafka to 2.13.0 ([#22630](https://github.com/DataDog/integrations-core/pull/22630))
+
+## 6.13.0 / 2026-02-04 / Agent 7.76.0
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
+## 6.12.0 / 2026-02-04 / Agent 7.75.3
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
+## 6.11.0 / 2026-01-21
+
+***Added***:
+
+* Collect kafka configuration events. ([#22378](https://github.com/DataDog/integrations-core/pull/22378))
+
+***Fixed***:
+
+* Fix caching logic when collecting cluster monitoring events ([#22375](https://github.com/DataDog/integrations-core/pull/22375))
+
+## 6.10.2 / 2026-01-06 / Agent 7.75.0
 
 ***Fixed***:
 

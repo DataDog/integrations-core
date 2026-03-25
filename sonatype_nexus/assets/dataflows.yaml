@@ -1,0 +1,9 @@
+provides:
+  - id: sonatype-nexus-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: sonatype-nexus-events
+    always_on: true
+    data_type: events
+    direction: inbound

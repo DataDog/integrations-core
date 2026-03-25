@@ -33,15 +33,15 @@ on:
         type: boolean
       agent-image:
         required: false
-        default: "datadog/agent-dev:master-py3"
+        default: "registry.datadoghq.com/agent-dev:master-py3"
         type: string
       agent-image-py2:
         required: false
-        default: "datadog/agent-dev:master-py2"
+        default: "registry.datadoghq.com/agent:6-rc"
         type: string
       agent-image-windows:
         required: false
-        default: "datadog/agent-dev:master-py3-win-servercore"
+        default: "registry.datadoghq.com/agent:7-rc-servercore"
         type: string
       agent-image-windows-py2:
         required: false
@@ -823,6 +823,26 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+  j7c68dcb:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Control-M
+      target: control_m
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
   jb67436a:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1008,6 +1028,26 @@ jobs:
     with:
       job-name: DNS on Linux
       target: dns_check
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  j297b771:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: DO Query Actions
+      target: do_query_actions
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
@@ -2654,9 +2694,11 @@ jobs:
       matrix:
         target-env:
         - py3.13-5.7
+        - py3.13-8.0.18
         - py3.13-8.0.36
         - py3.13-8.4.0
         - py3.13-8.0-group
+        - py3.13-8.0-hybrid
         - py3.13-mariadb-10.5
         - py3.13-mariadb-10.6
         - py3.13-mariadb-10.11
@@ -2664,6 +2706,26 @@ jobs:
         - py3.13-percona-8.0.42
         - py3.13-percona-8.4
       fail-fast: false
+  j636396f:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: n8n
+      target: n8n
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
   j5df646e:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -2749,6 +2811,26 @@ jobs:
     with:
       job-name: NGINX Ingress Controller
       target: nginx_ingress_controller
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  jcc7e1d2:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Nutanix
+      target: nutanix
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
@@ -3013,6 +3095,26 @@ jobs:
     with:
       job-name: PowerDNS Recursor
       target: powerdns_recursor
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  j8f01991:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Prefect
+      target: prefect
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"

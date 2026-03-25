@@ -95,19 +95,51 @@ index 9671b8a6fb1c..69340c11d868 100644
 --- a/mysql/assets/monitors/replica_running.json
 +++ b/mysql/assets/monitors/replica_running.json
 @@ -2,11 +2,11 @@
-   "version": 2,
-   "created_at": "2021-02-16",
-   "last_updated_at": "2023-07-24",
+  "version": 2,
+  "created_at": "2021-02-16",
+  "last_updated_at": "2023-07-24",
 -  "title": "Replica {{host.name}} is not running properly",
 +  "title": "MySQL database replica is not running properly",
-   "tags": [
-     "integration:mysql"
-   ],
+  "tags": [
+    "integration:mysql"
+  ],
 -  "description": "Notify your team when a replica is not running properly.",
 +  "description": "A database replica is a copy of a database that is synchronized with the original database.",
-   "definition": {
-     "message": "Replica_IO_Running and/or Replica_SQL_Running is not running on replica {{host.name}}.",
-     "name": "[MySQL] Replica {{host.name}} is not running properly",
+  "definition": {
+    "message": "Replica_IO_Running and/or Replica_SQL_Running is not running on replica {{host.name}}.",
+    "name": "[MySQL] Replica {{host.name}} is not running properly",
+'''
+
+# Simulates removing a changelog fragment (e.g., during a release).
+# The PR number (321) does not match the current PR (123), but that's expected
+# since we're removing a changelog that was created in a different PR.
+EXAMPLE_DELETED_CHANGELOG = '''\
+diff --git a/snowflake/changelog.d/321.added b/snowflake/changelog.d/321.added
+deleted file mode 100644
+index dfad2dae7569..000000000000
+--- a/snowflake/changelog.d/321.added
++++ /dev/null
+@@ -1 +0,0 @@
+-Added `pipe_schema` and `pipe_catalog` tags to snowpipe metrics.
+\\ No newline at end of file
+'''
+
+# Simulates deleting a source file. Unlike deleted changelog fragments,
+# this should still require a changelog entry.
+EXAMPLE_DELETED_SOURCE_FILE = '''\
+diff --git a/snowflake/datadog_checks/snowflake/legacy_check.py b/snowflake/datadog_checks/snowflake/legacy_check.py
+deleted file mode 100644
+index 9e83ef8f4b0c..000000000000
+--- a/snowflake/datadog_checks/snowflake/legacy_check.py
++++ /dev/null
+@@ -1,10 +0,0 @@
+-# Legacy check implementation
+-class LegacySnowflakeCheck:
+-    def __init__(self):
+-        pass
+-
+-    def check(self):
+-        pass
 '''
 
 
@@ -116,6 +148,7 @@ index 9671b8a6fb1c..69340c11d868 100644
     [
         pytest.param(EXAMPLE_NEEDS_CHANGELOG + EXAMPLE_VALID_CHANGELOG, id='changelog entry needed and valid'),
         pytest.param(EXAMPLE_NO_CHANGELOG_NEEDED, id='no changelog needed'),
+        pytest.param(EXAMPLE_DELETED_CHANGELOG, id='deleted changelog should not error on PR number mismatch'),
     ],
 )
 def test_validation_passes(diff_content, testing_context, capsys):
@@ -173,6 +206,17 @@ def test_validation_passes(diff_content, testing_context, capsys):
                 "for this change. To fix this please run:%0Arm snowflake/changelog.d/123.added\n"
             ),
             id='changelog not needed',
+        ),
+        pytest.param(
+            EXAMPLE_DELETED_SOURCE_FILE,
+            (
+                'Package "snowflake" has changes that require a changelog. '
+                'Please run `ddev release changelog new` to add it.\n'
+                '::error file=snowflake/changelog.d/123.fixed,line=0::'
+                'Package "snowflake" has changes that require a changelog. '
+                'Please run `ddev release changelog new` to add it.\n'
+            ),
+            id='deleted source file requires changelog',
         ),
     ],
 )

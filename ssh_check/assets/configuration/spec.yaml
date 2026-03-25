@@ -1,4 +1,5 @@
 name: SSH
+fleet_configurable: true
 
 files:
   - name: ssh_check.yaml
@@ -11,6 +12,7 @@ files:
       - template: instances
         options:
           - name: host
+            fleet_configurable: true
             required: true
             description: Host to connect to.
             value:
@@ -18,6 +20,7 @@ files:
               type: string
 
           - name: username
+            fleet_configurable: true
             required: true
             description: Username to use for the SSH connection.
             value:
@@ -28,18 +31,21 @@ files:
               Password to use for the SSH connection.
               If an encrypted SSH private key is specified in `private_key_file`,
                 the given password will be used to decrypt the key.
+            fleet_configurable: true
             secret: true
             value:
               type: string
 
           - name: port
             description: Port used for SSH connection.
+            fleet_configurable: true
             value:
               example: 22
               type: integer
 
           - name: sftp_check
             description: Open SFTP session on the existing connection to check the status of SFTP.
+            fleet_configurable: true
             value:
               example: true
               type: boolean
@@ -49,17 +55,22 @@ files:
               File path to a SSH private key.
               If the SSH private key is encrypted, `password` will be used to decrypt the key.
               See: http://docs.paramiko.org/en/stable/api/keys.html#paramiko.pkey.PKey.from_private_key_file
+            fleet_configurable: true
             value:
               type: string
 
           - name: private_key_type
             description: Private key type to choose between `rsa` or `ecdsa`.
+            fleet_configurable: true
             value:
               example: rsa
               type: string
 
           - name: add_missing_keys
-            description: Automatically add host key to known hosts when it is missing.
+            description: |
+              Automatically add host key to known hosts when it is missing.
+              Warning: only enable this if you trust your host's key.
+            fleet_configurable: true
             value:
               example: false
               type: boolean
@@ -71,6 +82,7 @@ files:
               The SSH client assumes SHA2 encryption, so it crashes when connecting to such a server.
               While it's strongly recommended to upgrade the SSH server to support the more secure SHA2, you can force
               the client to use SHA1 encryption by setting this option to 'true'.
+            fleet_configurable: true
             value:
               example: false
               type: boolean

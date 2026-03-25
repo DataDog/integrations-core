@@ -1,4 +1,5 @@
 - name: only_custom_queries
+  fleet_configurable: true
   description: |
     Set this parameter to `true` if you want to skip the integration's default metrics collection.
     Only metrics specified in `custom_queries` will be collected.
@@ -6,6 +7,7 @@
     type: boolean
     example: false
 - name: use_global_custom_queries
+  fleet_configurable: true
   description: |
     How `global_custom_queries` should be used for this instance. There are 3 options:
 
@@ -16,6 +18,7 @@
     type: string
     example: "true"
 - name: custom_queries
+  fleet_configurable: true
   description: |
     Each query must have 2 fields, and can have a third optional field:
 

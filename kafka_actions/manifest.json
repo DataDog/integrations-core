@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "07b3b75f-f0b2-4e13-8ece-8db043f7b0e5",
   "app_id": "kafka-actions",
+  "owner": "data-streams-monitoring",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",

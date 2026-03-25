@@ -2,6 +2,64 @@
 
 <!-- towncrier release notes start -->
 
+## 37.33.0 / 2026-03-20
+
+***Added***:
+
+* Add support for require_trusted_provider security validation ([#22226](https://github.com/DataDog/integrations-core/pull/22226))
+
+## 37.32.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707)), ([#22777](https://github.com/DataDog/integrations-core/pull/22777))
+
+## 37.31.0 / 2026-02-19 / Agent 7.77.0
+
+***Security***:
+
+* Bump `orjson` to 3.11.7 to address CVE ([#22556](https://github.com/DataDog/integrations-core/pull/22556))
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Bump ddtrace to version 3.19.5 ([#22482](https://github.com/DataDog/integrations-core/pull/22482))
+
+## 37.30.0 / 2026-02-11 / Agent 7.76.0
+
+***Security***:
+
+* Bump `cryptography` to 46.0.5 ([#22607](https://github.com/DataDog/integrations-core/pull/22607))
+
+***Added***:
+
+* Bump `pyOpenSSL` to 25.3.0 ([#22607](https://github.com/DataDog/integrations-core/pull/22607))
+
+## 37.29.0 / 2026-02-04
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
+## 37.28.0 / 2026-02-04 / Agent 7.75.3
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
+## 37.27.1 / 2026-01-20
+
+***Fixed***:
+
+* Fix KeyError in statement metrics when available metric columns change between collection cycles. ([#22318](https://github.com/DataDog/integrations-core/pull/22318))
+* Optimize StatementMetrics cache to only store fields we need to compute statement metrics ([#22358](https://github.com/DataDog/integrations-core/pull/22358))
+
+## 37.27.0 / 2026-01-13 / Agent 7.75.0
+
+***Security***:
+
+* Bump urllib3 version to 2.6.3 ([#22308](https://github.com/DataDog/integrations-core/pull/22308))
+
 ## 37.26.1 / 2025-12-22
 
 ***Fixed***:

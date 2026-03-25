@@ -328,14 +328,13 @@ instances:
     #
     # db_fragmentation_object_names: []
 
-    ## @param adoprovider - string - optional - default: SQLOLEDB
-    ## Choose the ADO provider.  Note that the (default) provider
-    ## SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
+    ## @param adoprovider - string - optional - default: MSOLEDBSQL
+    ## Choose the ADO provider.  Note that SQLOLEDB is deprecated.  To use the MSOLEDBSQL
     ## provider, set the adoprovider to "MSOLEDBSQL" below or "MSOLEDBSQL19" for version 19 of the driver.
     ## You will also need to download the new provider from
     ## https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
     #
-    # adoprovider: SQLOLEDB
+    # adoprovider: MSOLEDBSQL
 
     ## @param connector - string - optional - default: adodbapi
     ## Change the connection method from adodbapi (the default) to
@@ -672,7 +671,6 @@ instances:
     ## into Datadog, which can then become viewable in query samples.
     ## This option is disabled by default.
     ## Note: Collection of raw query statements is currently in preview.
-    ## If you are interested in participating, please reach out to your Datadog Customer Success Manager.
     ## This option only applies when dbm is enabled.
     #
     # collect_raw_query_statement:
