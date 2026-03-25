@@ -27,14 +27,6 @@ on:
         description: "Commit SHA or ref to build from"
         required: true
         type: string
-      target:
-        description: "Target environment (dev or prod)"
-        required: false
-        type: choice
-        options:
-          - dev
-          - prod
-        default: dev
       dry-run:
         description: "Print what would be released without pushing tags or starting builds"
         required: false
@@ -70,7 +62,6 @@ jobs:
       source-repo: integrations-core
       packages: ${{ inputs.packages || '' }}
       source-repo-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.source-repo-ref || github.sha }}
-      target: ${{ inputs.target || 'dev' }}
       dry-run: ${{ inputs.dry-run || false }}
       ddev-version: ${{ inputs.ddev-version || '' }}
       is-stable-release: ${{ needs.context.outputs.is-stable-release }}

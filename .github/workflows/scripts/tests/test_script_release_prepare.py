@@ -63,9 +63,9 @@ class TestTag:
         check=True,
     )
 
-    def _run_tag(self, target: str, dry_run: bool, selected: str, side_effects):
+    def _run_tag(self, dry_run: bool, selected: str, side_effects):
         with patch("release_prepare.subprocess.run", side_effect=side_effects) as mock_run:
-            release_prepare._tag(target, dry_run, selected)
+            release_prepare._tag(dry_run, selected)
         return mock_run
 
     def _side_effects(self, ddev_returncode: int = 0):
@@ -75,13 +75,12 @@ class TestTag:
             MagicMock(returncode=ddev_returncode),  # ddev release tag
         ]
 
-    @pytest.mark.parametrize("target, dry_run, expected_flag", [
-        ("prod", False, "--push"),
-        ("dev", False, "--no-push"),
-        ("prod", True, "--no-push"),
+    @pytest.mark.parametrize("dry_run, expected_flag", [
+        (False, "--push"),
+        (True, "--no-push"),
     ])
-    def test_push_flag(self, target, dry_run, expected_flag):
-        mock_run = self._run_tag(target, dry_run, "", self._side_effects(0))
+    def test_push_flag(self, dry_run, expected_flag):
+        mock_run = self._run_tag(dry_run, "", self._side_effects(0))
         assert mock_run.mock_calls == [
             self._GIT_NAME,
             self._GIT_EMAIL,
@@ -95,21 +94,21 @@ class TestTag:
             MagicMock(returncode=3),  # first ddev run → fetch failure
             MagicMock(returncode=0),  # retry with --no-fetch
         ]
-        mock_run = self._run_tag("dev", False, "", side_effects)
+        mock_run = self._run_tag(False, "", side_effects)
         assert mock_run.mock_calls == [
             self._GIT_NAME,
             self._GIT_EMAIL,
-            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--no-push"]),
-            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--no-push", "--no-fetch"]),
+            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--push"]),
+            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--push", "--no-fetch"]),
         ]
 
     @pytest.mark.parametrize("returncode", [0, 2])
     def test_success_exit_codes_do_not_exit(self, returncode):
-        self._run_tag("dev", False, "", self._side_effects(returncode))
+        self._run_tag(False, "", self._side_effects(returncode))
 
     def test_exit_code_1_raises_system_exit(self):
         with pytest.raises(SystemExit) as exc_info:
-            self._run_tag("dev", False, "", self._side_effects(1))
+            self._run_tag(False, "", self._side_effects(1))
         assert exc_info.value.code == 1
 
     def test_retry_also_fails_raises_system_exit(self):
@@ -121,13 +120,13 @@ class TestTag:
         ]
         with patch("release_prepare.subprocess.run", side_effect=side_effects) as mock_run, \
              pytest.raises(SystemExit) as exc_info:
-            release_prepare._tag("dev", False, "")
+            release_prepare._tag(False, "")
         assert exc_info.value.code == 1
         assert mock_run.mock_calls == [
             self._GIT_NAME,
             self._GIT_EMAIL,
-            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--no-push"]),
-            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--no-push", "--no-fetch"]),
+            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--push"]),
+            call(["ddev", "release", "tag", "all", "--skip-prerelease", "--push", "--no-fetch"]),
         ]
 
 
@@ -174,28 +173,28 @@ class TestValidate:
         _, _ = self._setup(monkeypatch, tmp_path)
         with patch("release_prepare.subprocess.run", return_value=MagicMock(returncode=0)) as mock_run, \
              patch("release_prepare.validate_packages", return_value=_stable_result()):
-            release_prepare._validate(["postgres"], "auto", "integrations-core", "abc123", "prod", False, True)
+            release_prepare._validate(["postgres"], "auto", "integrations-core", "abc123", False, True)
         assert mock_run.mock_calls == [call(["ddev", "validate", "version", "postgres"])]
 
     def test_integrations_extras_skips_ddev_validate_version(self, monkeypatch, tmp_path):
         self._setup(monkeypatch, tmp_path)
         with patch("release_prepare.subprocess.run") as mock_run, \
              patch("release_prepare.validate_packages", return_value=_stable_result()):
-            release_prepare._validate(["postgres"], "auto", "integrations-extras", "abc123", "prod", False, True)
+            release_prepare._validate(["postgres"], "auto", "integrations-extras", "abc123", False, True)
         mock_run.assert_not_called()
 
     def test_ddev_nonzero_exits(self, monkeypatch, tmp_path):
         self._setup(monkeypatch, tmp_path)
         with patch("release_prepare.subprocess.run", return_value=MagicMock(returncode=2)), \
              pytest.raises(SystemExit) as exc_info:
-            release_prepare._validate(["postgres"], "auto", "integrations-core", "abc123", "prod", False, True)
+            release_prepare._validate(["postgres"], "auto", "integrations-core", "abc123", False, True)
         assert exc_info.value.code == 2
 
     def test_stable_on_pre_release_branch_exits(self, monkeypatch, tmp_path):
         _, summary_file = self._setup(monkeypatch, tmp_path)
         with patch("release_prepare.validate_packages", return_value=_stable_result(dispatch=False)), \
              pytest.raises(SystemExit) as exc_info:
-            release_prepare._validate(["postgres"], "auto", "integrations-extras", "abc123", "prod", False, False)
+            release_prepare._validate(["postgres"], "auto", "integrations-extras", "abc123", False, False)
         assert exc_info.value.code == 1
         assert len(summary_file.read_text()) > 0
 
@@ -204,18 +203,18 @@ class TestValidate:
         fragment_result = [{"package": "postgres", "version": "1.0.0", "type": HAS_FRAGMENTS, "dispatch": False}]
         with patch("release_prepare.validate_packages", return_value=fragment_result), \
              pytest.raises(SystemExit) as exc_info:
-            release_prepare._validate(["postgres"], "auto", "integrations-extras", "abc123", "prod", False, True)
+            release_prepare._validate(["postgres"], "auto", "integrations-extras", "abc123", False, True)
         assert exc_info.value.code == 1
         assert len(summary_file.read_text()) > 0
 
     def test_successful_validation_writes_json(self, monkeypatch, tmp_path):
         runner_temp, _ = self._setup(monkeypatch, tmp_path)
         with patch("release_prepare.validate_packages", return_value=_stable_result()):
-            release_prepare._validate(["postgres"], "auto", "integrations-extras", "abc123", "prod", False, True)
+            release_prepare._validate(["postgres"], "auto", "integrations-extras", "abc123", False, True)
         data = json.loads((runner_temp / "release_validation.json").read_text())
         assert data["mode"] == "auto"
         assert data["ref"] == "abc123"
-        assert data["target"] == "prod"
+        assert "target" not in data
 
 
 # ---------------------------------------------------------------------------
@@ -238,7 +237,6 @@ class TestMain:
         runner_temp.mkdir()
 
         env = {
-            "TARGET": "dev",
             "DRY_RUN": "false",
             "SELECTED_PACKAGES": "",
             "SOURCE_REPO": "integrations-extras",
@@ -305,7 +303,7 @@ class TestMain:
         mock_detect.assert_not_called()
 
     def test_dry_run_uses_no_push_flag(self, monkeypatch, tmp_path):
-        self._setup_env(monkeypatch, tmp_path, extra={"DRY_RUN": "true", "TARGET": "prod"})
+        self._setup_env(monkeypatch, tmp_path, extra={"DRY_RUN": "true"})
         pkgs = ["postgres"]
         with patch("release_prepare.subprocess.run", side_effect=self._git_side_effects()) as mock_run, \
              patch("release_prepare.get_all_packages", return_value=pkgs), \
