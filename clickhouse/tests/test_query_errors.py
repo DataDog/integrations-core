@@ -184,7 +184,7 @@ def test_create_batched_payload_structure(check_with_dbm):
         payload = query_errors._create_batched_payload(rows)
 
     assert payload['ddsource'] == 'clickhouse'
-    assert payload['dbm_type'] == 'query_errors'
+    assert payload['dbm_type'] == 'query_error'
     assert 'clickhouse_query_errors' in payload
     assert 'timestamp' in payload
     assert 'host' in payload

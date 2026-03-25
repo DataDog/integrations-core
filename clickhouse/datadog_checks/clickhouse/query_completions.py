@@ -115,7 +115,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             # Step 3: Submit payload
             payload_data = json.dumps(payload, default=default_json_event_encoding)
             num_completions = len(payload.get('clickhouse_query_completions', []))
-            self._log.info(
+            self._log.debug(
                 "Submitting query completions payload: %d bytes, %d completions",
                 len(payload_data),
                 num_completions,
@@ -123,7 +123,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             self._check.database_monitoring_query_activity(payload_data)
 
             if self._current_checkpoint_microseconds is not None:
-                self._log.info(
+                self._log.debug(
                     "Successfully submitted. Checkpoint: %d microseconds", self._current_checkpoint_microseconds
                 )
 
@@ -162,7 +162,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
 
             rows = self._execute_query(query, parameters=params)
 
-            self._log.info(
+            self._log.debug(
                 "Loaded %d completed queries from %s [%s]",
                 len(rows),
                 query_log_table,

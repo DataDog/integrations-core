@@ -86,7 +86,11 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_and_submit(self):
-        """Collect and submit failed query samples."""
+        """
+        Collect and submit failed query samples.
+
+        Checkpoint is always advanced after collection to prefer dropped data over duplicates.
+        """
         try:
             self._current_checkpoint_microseconds = None
             self._pending_node_checkpoints = {}
@@ -105,7 +109,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
 
             payload_data = json.dumps(payload, default=default_json_event_encoding)
             num_errors = len(payload.get('clickhouse_query_errors', []))
-            self._log.info(
+            self._log.debug(
                 "Submitting query errors payload: %d bytes, %d errors",
                 len(payload_data),
                 num_errors,
@@ -113,7 +117,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
             self._check.database_monitoring_query_activity(payload_data)
 
             if self._current_checkpoint_microseconds is not None:
-                self._log.info(
+                self._log.debug(
                     "Successfully submitted. Checkpoint: %d microseconds", self._current_checkpoint_microseconds
                 )
 
@@ -139,7 +143,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
 
             rows = self._execute_query(query, parameters=params)
 
-            self._log.info(
+            self._log.debug(
                 "Loaded %d query errors from %s [%s]",
                 len(rows),
                 query_log_table,
@@ -308,7 +312,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
             'database_instance': self._check.database_identifier,
             'ddagentversion': datadog_agent.get_version(),
             'ddsource': 'clickhouse',
-            'dbm_type': 'query_errors',
+            'dbm_type': 'query_error',
             'collection_interval': self._collection_interval,
             'ddtags': self._tags_no_db,
             'timestamp': time.time() * 1000,
