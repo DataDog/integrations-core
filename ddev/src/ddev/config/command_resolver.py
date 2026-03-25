@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Per-process command resolver with deterministic caching for `*_fetch_command` secret fields."""
+
 from __future__ import annotations
 
 import subprocess

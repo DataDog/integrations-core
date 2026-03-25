@@ -83,4 +83,3 @@ def upsert_trust_entry(overrides_path: Path, global_config_dir: Path, state: str
     store = _load_trust_store(global_config_dir)
     store[str(overrides_path)] = {'hash': current_hash, 'state': state}
     _save_trust_store(global_config_dir, store)
-

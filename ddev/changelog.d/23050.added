@@ -1,0 +1,1 @@
+Add `*_fetch_command` secret resolution to ddev config fields, with trust-gating for `.ddev.toml` overrides and secret scrubbing in `config show`.

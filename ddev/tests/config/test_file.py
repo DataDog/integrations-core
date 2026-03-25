@@ -418,6 +418,7 @@ def test_overrides_path_permission_error(tmp_path: PathLibPath, monkeypatch):
 # Tests for _strip_fetch_command_fields
 # ---------------------------------------------------------------------------
 
+
 class TestStripFetchCommandFields:
     def test_strips_top_level_fetch_command_key(self):
         data = {'token_fetch_command': 'secret-tool', 'token': 'plain'}
@@ -456,6 +457,7 @@ class TestStripFetchCommandFields:
 # ---------------------------------------------------------------------------
 # Tests for trust store helpers
 # ---------------------------------------------------------------------------
+
 
 class TestTrustStore:
     def test_unknown_when_no_store(self, tmp_path):
@@ -520,6 +522,7 @@ class TestTrustStore:
 # ---------------------------------------------------------------------------
 # Tests for load() trust-aware stripping
 # ---------------------------------------------------------------------------
+
 
 class TestLoadTrustAwareStripping:
     def _make_config_file(self, tmp_path: Path) -> ConfigFileWithOverrides:

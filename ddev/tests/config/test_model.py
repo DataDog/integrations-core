@@ -1113,9 +1113,7 @@ class TestDynamicD:
 
     def test_resolve_llm_api_key_fetch_command_takes_precedence(self, monkeypatch):
         monkeypatch.setenv('ANTHROPIC_API_KEY', 'env-key')
-        config = RootConfig(
-            {'dynamicd': {'llm_api_key': 'plain-key', 'llm_api_key_fetch_command': 'echo command-key'}}
-        )
+        config = RootConfig({'dynamicd': {'llm_api_key': 'plain-key', 'llm_api_key_fetch_command': 'echo command-key'}})
 
         assert config.dynamicd.resolve_llm_api_key() == 'command-key'
 
@@ -1715,36 +1713,46 @@ class TestCommandFieldsTrello:
 
 class TestCommandFieldsOrg:
     def test_api_key_fetch_command_takes_precedence(self):
-        config = RootConfig({
-            'orgs': {'myorg': {'api_key': 'plain', 'api_key_fetch_command': 'echo cmd_api', 'app_key': ''}},
-            'org': 'myorg',
-        })
+        config = RootConfig(
+            {
+                'orgs': {'myorg': {'api_key': 'plain', 'api_key_fetch_command': 'echo cmd_api', 'app_key': ''}},
+                'org': 'myorg',
+            }
+        )
         assert config.org.config.get('api_key') == 'cmd_api'
 
     def test_api_key_plain_fallback(self):
-        config = RootConfig({
-            'orgs': {'myorg': {'api_key': 'plain', 'app_key': ''}},
-            'org': 'myorg',
-        })
+        config = RootConfig(
+            {
+                'orgs': {'myorg': {'api_key': 'plain', 'app_key': ''}},
+                'org': 'myorg',
+            }
+        )
         assert config.org.config.get('api_key') == 'plain'
 
     def test_app_key_fetch_command_takes_precedence(self):
-        config = RootConfig({
-            'orgs': {'myorg': {'api_key': '', 'app_key': 'plain', 'app_key_fetch_command': 'echo cmd_app'}},
-            'org': 'myorg',
-        })
+        config = RootConfig(
+            {
+                'orgs': {'myorg': {'api_key': '', 'app_key': 'plain', 'app_key_fetch_command': 'echo cmd_app'}},
+                'org': 'myorg',
+            }
+        )
         assert config.org.config.get('app_key') == 'cmd_app'
 
     def test_app_key_plain_fallback(self):
-        config = RootConfig({
-            'orgs': {'myorg': {'api_key': '', 'app_key': 'plain'}},
-            'org': 'myorg',
-        })
+        config = RootConfig(
+            {
+                'orgs': {'myorg': {'api_key': '', 'app_key': 'plain'}},
+                'org': 'myorg',
+            }
+        )
         assert config.org.config.get('app_key') == 'plain'
 
     def test_non_command_keys_unaffected(self):
-        config = RootConfig({
-            'orgs': {'myorg': {'api_key': '', 'app_key': '', 'site': 'mysite.com'}},
-            'org': 'myorg',
-        })
+        config = RootConfig(
+            {
+                'orgs': {'myorg': {'api_key': '', 'app_key': '', 'site': 'mysite.com'}},
+                'org': 'myorg',
+            }
+        )
         assert config.org.config.get('site') == 'mysite.com'
