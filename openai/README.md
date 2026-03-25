@@ -10,7 +10,7 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 
 ## Setup
 
-**Note**: The supported OS requirements (Linux, Windows, macOS) apply to APM library installations (Python, Node.js, PHP) only. The API key-based setup has no OS requirements.
+**Note**: The **Supported OS** requirements for this integration apply to APM library installations (Python, Node.js, PHP) only. The API key-based setup has no OS requirements.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "API Key" xxx -->
