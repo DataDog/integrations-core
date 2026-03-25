@@ -111,9 +111,7 @@ class OpenMetricsScraper:
 
             self.exclude_labels.add(entry)
 
-        self._aggregate_on_label_exclusion = is_affirmative(
-            config.get('aggregate_metrics_on_label_exclusion', False)
-        )
+        self._aggregate_on_label_exclusion = is_affirmative(config.get('aggregate_metrics_on_label_exclusion', False))
         self._should_aggregate = self._aggregate_on_label_exclusion and should_aggregate(self.exclude_labels)
 
         include_labels = config.get('include_labels', [])
