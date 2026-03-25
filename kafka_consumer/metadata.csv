@@ -32,3 +32,4 @@ kafka.topic.count,gauge,,item,,Total number of topics in the cluster.,0,kafka_co
 kafka.topic.message_rate,gauge,,message,second,Message production rate for this topic.,0,kafka_consumer,message rate,,
 kafka.topic.partitions,gauge,,item,,Number of partitions for this topic.,0,kafka_consumer,topic partitions,,
 kafka.topic.size,gauge,,message,,Total number of messages in the topic.,0,kafka_consumer,topic size,,
+datadog.kafka_consumer.context_limit_budget,gauge,,,,Number of metric contexts remaining before the context limit is hit. Negative when the limit is exceeded.,1,kafka_consumer,context limit budget,,

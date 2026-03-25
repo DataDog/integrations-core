@@ -118,6 +118,13 @@ class KafkaCheck(AgentCheck):
         if self.config._kafka_cluster_id_override:
             cluster_id = self.config._kafka_cluster_id_override
 
+        self.gauge(
+            'datadog.kafka_consumer.context_limit_budget',
+            self._context_limit - total_contexts,
+            tags=['kafka_cluster_id:{}'.format(cluster_id)],
+            raw=True,
+        )
+
         self.report_highwater_offsets(highwater_offsets, self._context_limit, cluster_id)
         self.report_consumer_offsets_and_lag(
             consumer_offsets,

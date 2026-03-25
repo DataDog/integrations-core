@@ -405,6 +405,11 @@ def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_me
     aggregator.assert_metric("kafka.broker_offset", count=1)
     aggregator.assert_metric("kafka.consumer_offset", count=1)
     aggregator.assert_metric("kafka.consumer_lag", count=0)
+    aggregator.assert_metric(
+        "datadog.kafka_consumer.context_limit_budget",
+        value=0,
+        tags=["kafka_cluster_id:cluster_id"],
+    )
 
     expected_warning = "Discovered 2 metric contexts"
 
@@ -432,6 +437,11 @@ def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metr
     aggregator.assert_metric("kafka.broker_offset", count=2)
     aggregator.assert_metric("kafka.consumer_offset", count=1)
     aggregator.assert_metric("kafka.consumer_lag", count=0)
+    aggregator.assert_metric(
+        "datadog.kafka_consumer.context_limit_budget",
+        value=-1,
+        tags=["kafka_cluster_id:cluster_id"],
+    )
 
     expected_warning = "Discovered 4 metric contexts"
     assert expected_warning in caplog.text
