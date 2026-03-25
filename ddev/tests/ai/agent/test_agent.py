@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import asyncio
-from collections.abc import Callable
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
@@ -19,6 +18,7 @@ from ddev.ai.agent.types import (
     StopReason,
 )
 from ddev.ai.tools.core.registry import ToolRegistry
+from ddev.ai.tools.core.types import ToolResult
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -195,30 +195,30 @@ class FakeTool:
     def definition(self) -> dict:
         return {"name": self._name, "description": "", "input_schema": {}}
 
-    async def run(self, raw: dict) -> None:
+    async def run(self, raw: dict) -> ToolResult:
         pass
 
 
-@pytest.mark.parametrize(
-    ("tool_names", "allowed_tools", "expected_names"),
-    [
-        (["read_file", "grep", "mkdir"], ["read_file"], ["read_file"]),
-        (["a", "b"], None, ["a", "b"]),
-    ],
-)
-def test_allowed_tools(
-    tool_names: list[str],
-    allowed_tools: list[str] | None,
-    expected_names: list[str],
-) -> None:
-    registry = ToolRegistry([FakeTool(n) for n in tool_names])
+def test_allowed_tools_filters_to_subset() -> None:
+    registry = ToolRegistry([FakeTool(n) for n in ["read_file", "grep", "mkdir"]])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
-    asyncio.run(agent.send("Hi", allowed_tools=allowed_tools))
+    asyncio.run(agent.send("Hi", allowed_tools=["read_file"]))
 
     sent_names = [t["name"] for t in create_mock.call_args.kwargs["tools"]]
-    assert sent_names == expected_names
+    assert sent_names == ["read_file"]
+
+
+def test_allowed_tools_none_passes_all() -> None:
+    registry = ToolRegistry([FakeTool(n) for n in ["a", "b"]])
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(tools=registry, mock_response=resp)
+
+    asyncio.run(agent.send("Hi", allowed_tools=None))
+
+    sent_names = [t["name"] for t in create_mock.call_args.kwargs["tools"]]
+    assert sent_names == ["a", "b"]
 
 
 @pytest.mark.parametrize("allowed_tools", [[], ["nonexistent_tool"]])
@@ -235,60 +235,63 @@ def test_allowed_tools_passes_not_given(allowed_tools: list[str]) -> None:
 # API errors map to the correct AgentError subclass
 # ---------------------------------------------------------------------------
 
-_mock_500 = MagicMock()
-_mock_500.status_code = 500
 
-
-@pytest.mark.parametrize(
-    "side_effect,expected_exc,extra_check",
-    [
-        (
-            anthropic.APIConnectionError(request=MagicMock()),
-            AgentConnectionError,
-            lambda e: "Connection failed" in str(e),
-        ),
-        (
-            anthropic.RateLimitError(
-                message="rate limit",
-                response=MagicMock(status_code=429, headers={}),
-                body=None,
-            ),
-            AgentRateLimitError,
-            lambda e: "Rate limit exceeded" in str(e),
-        ),
-        (
-            anthropic.APIStatusError(
-                message="internal server error",
-                response=_mock_500,
-                body=None,
-            ),
-            AgentAPIError,
-            lambda e: e.status_code == 500,
-        ),
-        (
-            anthropic.APIResponseValidationError(
-                response=MagicMock(),
-                body=None,
-            ),
-            AgentError,
-            lambda e: "Response validation failed" in str(e),
-        ),
-    ],
-)
-def test_api_errors_map_correctly(
-    side_effect: Exception,
-    expected_exc: type[AgentError],
-    extra_check: Callable[[AgentError], bool],
-) -> None:
+def _make_error_agent(side_effect: Exception) -> AnthropicAgent:
     client = MagicMock(spec=anthropic.AsyncAnthropic)
     client.messages = MagicMock()
     client.messages.create = AsyncMock(side_effect=side_effect)
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+    return AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
 
-    with pytest.raises(expected_exc) as exc_info:
+
+def test_connection_error_maps_to_agent_connection_error() -> None:
+    agent = _make_error_agent(anthropic.APIConnectionError(request=MagicMock()))
+
+    with pytest.raises(AgentConnectionError) as exc_info:
         asyncio.run(agent.send("Hi"))
 
-    assert extra_check(exc_info.value)
+    assert "Connection failed" in str(exc_info.value)
+    assert agent.history == []
+
+
+def test_rate_limit_error_maps_to_agent_rate_limit_error() -> None:
+    agent = _make_error_agent(
+        anthropic.RateLimitError(
+            message="rate limit",
+            response=MagicMock(status_code=429, headers={}),
+            body=None,
+        )
+    )
+
+    with pytest.raises(AgentRateLimitError) as exc_info:
+        asyncio.run(agent.send("Hi"))
+
+    assert "Rate limit exceeded" in str(exc_info.value)
+    assert agent.history == []
+
+
+def test_api_status_error_maps_to_agent_api_error() -> None:
+    agent = _make_error_agent(
+        anthropic.APIStatusError(
+            message="internal server error",
+            response=MagicMock(status_code=500),
+            body=None,
+        )
+    )
+
+    with pytest.raises(AgentAPIError) as exc_info:
+        asyncio.run(agent.send("Hi"))
+
+    assert exc_info.value.status_code == 500
+    assert agent.history == []
+
+
+def test_response_validation_error_maps_to_agent_error() -> None:
+    agent = _make_error_agent(anthropic.APIResponseValidationError(response=MagicMock(), body=None))
+
+    with pytest.raises(AgentError) as exc_info:
+        asyncio.run(agent.send("Hi"))
+
+    assert "Response validation failed" in str(exc_info.value)
     assert agent.history == []
 
 

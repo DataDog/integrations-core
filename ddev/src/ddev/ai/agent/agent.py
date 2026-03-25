@@ -5,7 +5,7 @@
 from typing import Final
 
 import anthropic
-from anthropic.types import MessageParam, ToolResultBlockParam
+from anthropic.types import MessageParam, ToolParam, ToolResultBlockParam
 
 from ddev.ai.tools.core.registry import ToolRegistry
 
@@ -51,7 +51,7 @@ class AnthropicAgent:
         """Clear conversation history to start a new conversation."""
         self._history = []
 
-    def _get_tool_definitions(self, allowed_tools: list[str] | None) -> list:
+    def _get_tool_definitions(self, allowed_tools: list[str] | None) -> list[ToolParam]:
         """Filter tool definitions by allowlist. None means all tools."""
         if allowed_tools is None:
             return self._tools.definitions
@@ -91,8 +91,8 @@ class AnthropicAgent:
 
         try:
             stop_reason = StopReason(response.stop_reason)
-        except ValueError:
-            raise AgentError(f"Unknown stop_reason: {response.stop_reason!r}") from None
+        except ValueError as e:
+            raise AgentError(f"Unknown stop_reason: {response.stop_reason!r}") from e
 
         text_parts: list[str] = []
         tool_calls: list[ToolCall] = []

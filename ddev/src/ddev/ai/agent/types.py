@@ -5,8 +5,6 @@
 from dataclasses import dataclass
 from enum import StrEnum
 
-from pydantic import BaseModel
-
 
 class StopReason(StrEnum):
     """Maps Anthropic API stop_reason strings to a typed enum."""
@@ -38,7 +36,8 @@ class TokenUsage:
     cache_creation_input_tokens: int
 
 
-class AgentResponse(BaseModel):
+@dataclass(frozen=True)
+class AgentResponse:
     """The complete response from a single AnthropicAgent.send() call."""
 
     stop_reason: StopReason
