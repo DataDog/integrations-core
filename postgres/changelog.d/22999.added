@@ -1,1 +1,1 @@
-Adds logical database breakdown for connection metrics
+Adds metrics `postgresql.database_connections` and `postgresql.percent_database_usage_connections` to support per logical database connection monitoring
