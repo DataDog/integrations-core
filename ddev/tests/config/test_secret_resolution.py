@@ -260,6 +260,22 @@ def test_parse_secret_command_preserves_windows_backslashes(monkeypatch):
     assert parse_secret_command(r'C:\Users\me\get-token.exe --flag') == [r'C:\Users\me\get-token.exe', '--flag']
 
 
+def test_parse_secret_command_strips_posix_single_quotes_on_windows(monkeypatch):
+    monkeypatch.setattr(secret_command.sys, 'platform', 'win32')
+
+    # shlex.quote() wraps Windows paths in POSIX-style single quotes; they must be stripped.
+    result = parse_secret_command(r"'C:\Users\me\get-token.exe' --flag")
+    assert result == [r'C:\Users\me\get-token.exe', '--flag']
+
+
+def test_parse_secret_command_strips_double_quotes_on_windows(monkeypatch):
+    monkeypatch.setattr(secret_command.sys, 'platform', 'win32')
+
+    # Double-quoted tokens (e.g. "-c" args) must also be unwrapped on Windows.
+    result = parse_secret_command(r'"C:\Users\me\get-token.exe" --flag')
+    assert result == [r'C:\Users\me\get-token.exe', '--flag']
+
+
 def _parse_error():
     from ddev.config.secret_command import SecretCommandError
 

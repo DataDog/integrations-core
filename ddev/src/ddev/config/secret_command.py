@@ -24,10 +24,29 @@ def parse_secret_command(command: str) -> list[str]:
     except ValueError as e:
         raise SecretCommandError('command could not be parsed', reason='parse_error') from e
 
+    if sys.platform == 'win32':
+        # non-POSIX shlex preserves quote characters literally in each token.
+        # Strip outer single/double quote wrappers so that paths produced by
+        # shlex.quote() (e.g. 'C:\foo\bar.exe') are correctly unwrapped, while
+        # backslashes in bare unquoted Windows paths are still preserved.
+        argv = [_unwrap_quotes(a) for a in argv]
+
     if not argv:
         raise SecretCommandError('command is empty', reason='empty_command')
 
     return argv
+
+
+def _unwrap_quotes(token: str) -> str:
+    """Strip matching outer single or double quotes from a token.
+
+    non-POSIX shlex preserves quote characters literally; this restores the
+    behaviour users expect (quotes group/protect content but are not included
+    in the final value).
+    """
+    if len(token) >= 2 and token[0] in ("'", '"') and token[-1] == token[0]:
+        return token[1:-1]
+    return token
 
 
 def run_secret_command(command: str, *, timeout: float | None = None) -> str:
