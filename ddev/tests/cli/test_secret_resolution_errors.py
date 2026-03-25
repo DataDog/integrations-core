@@ -4,7 +4,7 @@
 from ddev.config.secret_command import SecretCommandError
 
 
-def test_startup_missing_required_secret_is_actionable_without_traceback(ddev, config_file, monkeypatch):
+def test_missing_required_secret_is_actionable_without_traceback(ddev, config_file, monkeypatch):
     config_file.model.raw_data.setdefault('github', {}).pop('token', None)
     config_file.model.github.user = 'test-user'
     config_file.save()
@@ -12,7 +12,7 @@ def test_startup_missing_required_secret_is_actionable_without_traceback(ddev, c
     monkeypatch.delenv('GH_TOKEN', raising=False)
     monkeypatch.delenv('GITHUB_TOKEN', raising=False)
 
-    result = ddev('status')
+    result = ddev('ci', 'codeowners', '--pr', '1')
 
     assert result.exit_code == 1, result.output
     assert 'Missing required secret: github.token' in result.output
@@ -22,9 +22,7 @@ def test_startup_missing_required_secret_is_actionable_without_traceback(ddev, c
     assert 'Traceback' not in result.output
 
 
-def test_startup_trust_blocked_secret_points_to_allow_deny_workflow(
-    ddev, config_file, helpers, overrides_config, monkeypatch
-):
+def test_trust_blocked_secret_points_to_allow_deny_workflow(ddev, config_file, helpers, overrides_config, monkeypatch):
     config_file.model.raw_data.setdefault('github', {}).pop('token', None)
     config_file.model.github.user = 'test-user'
     config_file.save()
@@ -42,7 +40,7 @@ def test_startup_trust_blocked_secret_points_to_allow_deny_workflow(
         )
     )
 
-    result = ddev('status')
+    result = ddev('ci', 'codeowners', '--pr', '1')
 
     assert result.exit_code == 1, result.output
     assert 'Missing required secret: github.token' in result.output
@@ -54,7 +52,7 @@ def test_startup_trust_blocked_secret_points_to_allow_deny_workflow(
     assert 'Traceback' not in result.output
 
 
-def test_startup_command_failure_uses_stable_code_without_leaking_command(ddev, config_file, monkeypatch):
+def test_command_failure_uses_stable_code_without_leaking_command(ddev, config_file, monkeypatch):
     config_file.model.raw_data.setdefault('github', {}).pop('token', None)
     config_file.model.github.user = 'test-user'
     command_with_secret_marker = 'printf leaked-command-should-not-appear'
@@ -69,7 +67,7 @@ def test_startup_command_failure_uses_stable_code_without_leaking_command(ddev, 
 
     monkeypatch.setattr('ddev.config.secret_resolution.run_secret_command', raise_non_zero)
 
-    result = ddev('status')
+    result = ddev('ci', 'codeowners', '--pr', '1')
 
     assert result.exit_code == 1, result.output
     assert 'Failed to resolve required secret: github.token' in result.output
@@ -80,3 +78,16 @@ def test_startup_command_failure_uses_stable_code_without_leaking_command(ddev, 
     assert 'Run the configured *_command directly and fix its failing exit code.' in result.output
     assert command_with_secret_marker not in result.output
     assert 'Traceback' not in result.output
+
+
+def test_non_github_commands_succeed_without_token(ddev, config_file, monkeypatch):
+    """Commands that don't access app.github must not fail when github.token is absent."""
+    config_file.model.raw_data.setdefault('github', {}).pop('token', None)
+    config_file.save()
+    monkeypatch.delenv('DD_GITHUB_TOKEN', raising=False)
+    monkeypatch.delenv('GH_TOKEN', raising=False)
+    monkeypatch.delenv('GITHUB_TOKEN', raising=False)
+
+    result = ddev('status')
+
+    assert result.exit_code == 0, result.output

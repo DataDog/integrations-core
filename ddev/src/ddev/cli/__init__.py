@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import re
 
 import click
 import pluggy
@@ -11,7 +10,7 @@ from datadog_checks.dev.tooling.commands.run import run
 
 from ddev._version import __version__
 from ddev.cli import upgrade_check
-from ddev.cli.application import Application
+from ddev.cli.application import Application, format_secret_resolution_error
 from ddev.cli.ci import ci
 from ddev.cli.clean import clean
 from ddev.cli.config import config
@@ -29,48 +28,6 @@ from ddev.config.model import ConfigurationError
 from ddev.plugin import specs
 from ddev.utils.ci import running_in_ci
 from ddev.utils.fs import Path
-
-SECRET_RESOLUTION_ERROR_PATTERN = re.compile(
-    r'\[(?P<code>[^\]]+)\]\s+could not resolve required secret for (?P<field_path>[^;]+);\s+'
-    r'sources\(command=(?P<command>[^,]+),\s*literal=(?P<literal>[^,]+),\s*env=(?P<environment>[^)]+)\);\s*'
-    r'(?P<remediation>.+)$'
-)
-
-
-def format_secret_resolution_error(error: ConfigurationError) -> str | None:
-    """Return an actionable secret error summary, or None if the error is unrelated."""
-    match = SECRET_RESOLUTION_ERROR_PATTERN.search(str(error))
-    if match is None:
-        return None
-
-    details = match.groupdict()
-    code = details['code']
-    field_path = details['field_path']
-    command = details['command']
-    literal = details['literal']
-    environment = details['environment']
-    remediation = details['remediation']
-
-    if code == 'missing-required-secret':
-        message_lines = [f'Missing required secret: {field_path}']
-    else:
-        message_lines = [f'Failed to resolve required secret: {field_path}']
-
-    message_lines.extend(
-        [
-            f'Code: {code}',
-            f'Sources: command={command}, literal={literal}, env={environment}',
-            f'Remediation: {remediation}',
-        ]
-    )
-
-    if command == 'blocked-untrusted-local-config':
-        message_lines.append(
-            'Trust workflow: run `ddev config allow` to trust the current local config content, '
-            'or run `ddev config deny` to clear trust records.'
-        )
-
-    return '\n'.join(message_lines)
 
 
 @click.group(context_settings={'help_option_names': ['-h', '--help']}, invoke_without_command=True)
