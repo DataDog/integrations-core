@@ -58,7 +58,7 @@ request_duration_count{handler="api", color="blue"} 15
 
 def test_gauge_given_exclude_labels_returns_summed_values_if_present(aggregator, dd_run_check, mock_http_response):
     mock_http_response(GAUGE_PAYLOAD)
-    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
+    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color'], 'aggregate_metrics_on_label_exclusion': True})
     dd_run_check(check)
 
     all_metrics = aggregator.metrics('test.cars_in_lot')
@@ -101,7 +101,7 @@ def test_gauge_given_exclude_labels_returns_summed_values_if_present(aggregator,
 
 def test_counter_given_exclude_labels_submits_summed_value(aggregator, dd_run_check, mock_http_response):
     mock_http_response(COUNTER_PAYLOAD)
-    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
+    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color'], 'aggregate_metrics_on_label_exclusion': True})
     dd_run_check(check)
 
     aggregator.assert_metric(
@@ -144,7 +144,7 @@ def test_counter_given_exclude_labels_submits_monotonically_increasing_sums(
     car_counter_total{make="honda", color="blue"} 92
     """.strip()
 
-    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
+    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color'], 'aggregate_metrics_on_label_exclusion': True})
 
     mock_http_response(counter_t0)
     dd_run_check(check)
@@ -170,7 +170,7 @@ def test_counter_given_exclude_labels_submits_monotonically_increasing_sums(
 def test_summary_given_exclude_labels_ignores_exclusion(aggregator, dd_run_check, mock_http_response):
     # Summary metrics skip label exclusion entirely to preserve unique contexts
     mock_http_response(SUMMARY_PAYLOAD)
-    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
+    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color'], 'aggregate_metrics_on_label_exclusion': True})
     dd_run_check(check)
 
     # color tag is preserved — each color variant remains a separate context
@@ -202,7 +202,7 @@ def test_summary_given_exclude_labels_ignores_exclusion(aggregator, dd_run_check
 def test_histogram_given_exclude_labels_ignores_exclusion(aggregator, dd_run_check, mock_http_response):
     # Histogram metrics skip label exclusion entirely to preserve unique contexts
     mock_http_response(HISTOGRAM_PAYLOAD)
-    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
+    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color'], 'aggregate_metrics_on_label_exclusion': True})
     dd_run_check(check)
 
     # color tag is preserved — each color variant remains a separate context

@@ -111,7 +111,10 @@ class OpenMetricsScraper:
 
             self.exclude_labels.add(entry)
 
-        self._should_aggregate = should_aggregate(self.exclude_labels)
+        self._aggregate_on_label_exclusion = is_affirmative(
+            config.get('aggregate_metrics_on_label_exclusion', False)
+        )
+        self._should_aggregate = self._aggregate_on_label_exclusion and should_aggregate(self.exclude_labels)
 
         include_labels = config.get('include_labels', [])
         if not isinstance(include_labels, list):
@@ -372,10 +375,11 @@ class OpenMetricsScraper:
         """
         label_normalizer = get_label_normalizer(metric.type)
 
-        # Histogram and summary metrics skip label exclusion to preserve
-        # unique contexts — excluding labels without aggregation would cause
-        # the agent aggregator to combine distinct series incorrectly.
-        skip_label_exclusion = metric.type in ('histogram', 'summary')
+        # When aggregate_metrics_on_label_exclusion is enabled, histogram and
+        # summary metrics skip label exclusion to preserve unique contexts —
+        # excluding labels without aggregation would cause the agent aggregator
+        # to combine distinct series incorrectly.
+        skip_label_exclusion = self._aggregate_on_label_exclusion and metric.type in ('histogram', 'summary')
 
         for sample in metric.samples:
             value = sample.value
