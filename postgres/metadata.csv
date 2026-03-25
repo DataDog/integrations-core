@@ -62,6 +62,7 @@ postgresql.create_index.partitions_done,gauge,,,,"When creating an index on a pa
 postgresql.create_index.partitions_total,gauge,,,,"When creating an index on a partitioned table, this column is set to the total number of partitions on which the index is to be created. This field is 0 during a REINDEX. Only available with PostgreSQL 12 and newer. This metric is tagged with db, table, index, command, phase.",0,postgres,postgres index partitions total,,
 postgresql.create_index.tuples_done,gauge,,,,"Number of tuples already processed in the current phase. Only available with PostgreSQL 12 and newer. This metric is tagged with db, table, index, command, phase.",0,postgres,postgres index tuples done,,
 postgresql.create_index.tuples_total,gauge,,,,"Total number of tuples to be processed in the current phase. Only available with PostgreSQL 12 and newer. This metric is tagged with db, table, index, command, phase.",0,postgres,postgres index tuples total,,
+postgresql.database_connections,gauge,,connection,,The number of connections being made to this database instance as a fraction of the maximum number of allowed connections per logical database.,0,postgres,db conns,,
 postgresql.database_size,gauge,,byte,,The disk space used by this database. This metric is tagged with db.,0,postgres,db size,,
 postgresql.db.count,gauge,,item,,The number of available databases.,0,postgres,db cnt,,
 postgresql.dead_rows,gauge,,row,,"Enabled with `relations`. The estimated number of dead rows. This metric is tagged with db, schema, table.",0,postgres,dead rows,,
@@ -103,6 +104,7 @@ postgresql.live_rows,gauge,,row,,"Enabled with `relations`. The estimated number
 postgresql.locks,gauge,,lock,,"Enabled with `relations`. The number of locks active for this database. This metric is tagged with db, lock_mode, lock_type, schema, table, granted.",0,postgres,locks,,
 postgresql.locks.idle_in_transaction_age,gauge,,second,,Transaction age of idle in transaction sessions holding exclusive relation locks.,0,postgres,idle tx age with locks,,"pid,db,session_user,app,client_hostname,lock_mode,relation,relation_owner"
 postgresql.max_connections,gauge,,connection,, The maximum number of client connections allowed to this database.,0,postgres,max conns,,
+postgresql.percent_database_usage_connections,gauge,,fraction,,The number of connections being made to this database as a fraction of the maximum number of allowed connections per logical database,0,postgres,pct db usg conns,,
 postgresql.percent_usage_connections,gauge,,fraction,,The number of connections to this database as a fraction of the maximum number of allowed connections.,0,postgres,pct usg conns,,
 postgresql.pg_stat_statements.dealloc,count,,,,The number of times pg_stat_statements had to evict least executed queries because pg_stat_statements.max was reached.,-1,postgres,pgss dealloc,,
 postgresql.queries.blk_read_time,count,,nanosecond,,"Total time spent reading blocks per query_signature, db, and user. (DBM only)",0,postgres, postgres queries block read time,,
