@@ -61,7 +61,9 @@ def test_gauge_given_exclude_labels_returns_summed_values_if_present(aggregator,
     check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
     dd_run_check(check)
 
-    # Samples with the excluded color label are summed
+    all_metrics = aggregator.metrics('test.cars_in_lot')
+
+    # Samples with the excluded color label are summed and color tag is absent
     aggregator.assert_metric(
         'test.cars_in_lot',
         12.0,
@@ -74,6 +76,8 @@ def test_gauge_given_exclude_labels_returns_summed_values_if_present(aggregator,
         metric_type=aggregator.GAUGE,
         tags=['endpoint:test', 'make:toyota', 'model:corolla'],
     )
+    for m in all_metrics:
+        assert not any(t.startswith('color:') for t in m.tags), f"Excluded tag 'color' found in {m.tags}"
 
     # Samples without the excluded label are collected individually
     aggregator.assert_metric(
@@ -88,6 +92,10 @@ def test_gauge_given_exclude_labels_returns_summed_values_if_present(aggregator,
         metric_type=aggregator.GAUGE,
         tags=['endpoint:test', 'make:honda', 'model:civic', 'license:FF5734'],
     )
+    # license tag is preserved since it was not excluded
+    license_metrics = [m for m in all_metrics if any(t.startswith('license:') for t in m.tags)]
+    assert len(license_metrics) == 2
+
     aggregator.assert_all_metrics_covered()
 
 
@@ -108,6 +116,9 @@ def test_counter_given_exclude_labels_submits_summed_value(aggregator, dd_run_ch
         metric_type=aggregator.MONOTONIC_COUNT,
         tags=['endpoint:test', 'make:toyota', 'model:corolla'],
     )
+
+    for m in aggregator.metrics('test.car_counter.count'):
+        assert not any(t.startswith('color:') for t in m.tags), f"Excluded tag 'color' found in {m.tags}"
 
 
 def test_counter_given_exclude_labels_submits_monotonically_increasing_sums(
@@ -156,46 +167,61 @@ def test_counter_given_exclude_labels_submits_monotonically_increasing_sums(
     assert t1_metrics[0].value - t0_metrics[0].value == 19.0
 
 
-def test_summary_given_exclude_labels_passes_through_unchanged(aggregator, dd_run_check, mock_http_response):
+def test_summary_given_exclude_labels_ignores_exclusion(aggregator, dd_run_check, mock_http_response):
+    # Summary metrics skip label exclusion entirely to preserve unique contexts
     mock_http_response(SUMMARY_PAYLOAD)
     check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
     dd_run_check(check)
 
+    # color tag is preserved — each color variant remains a separate context
     aggregator.assert_metric(
         'test.rpc_duration.sum',
         metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api'],
+        tags=['endpoint:test', 'handler:api', 'color:red'],
     )
     aggregator.assert_metric(
-        'test.rpc_duration.count',
+        'test.rpc_duration.sum',
         metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api'],
+        tags=['endpoint:test', 'handler:api', 'color:blue'],
     )
     aggregator.assert_metric(
         'test.rpc_duration.quantile',
         metric_type=aggregator.GAUGE,
-        tags=['endpoint:test', 'handler:api', 'quantile:0.5'],
+        tags=['endpoint:test', 'handler:api', 'color:red', 'quantile:0.5'],
     )
     aggregator.assert_metric(
         'test.rpc_duration.quantile',
         metric_type=aggregator.GAUGE,
-        tags=['endpoint:test', 'handler:api', 'quantile:0.99'],
+        tags=['endpoint:test', 'handler:api', 'color:blue', 'quantile:0.99'],
     )
 
+    for m in aggregator.metrics('test.rpc_duration.sum'):
+        assert any(t.startswith('color:') for t in m.tags), f"Expected 'color' tag preserved in {m.tags}"
 
-def test_histogram_given_exclude_labels_passes_through_unchanged(aggregator, dd_run_check, mock_http_response):
+
+def test_histogram_given_exclude_labels_ignores_exclusion(aggregator, dd_run_check, mock_http_response):
+    # Histogram metrics skip label exclusion entirely to preserve unique contexts
     mock_http_response(HISTOGRAM_PAYLOAD)
     check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
     dd_run_check(check)
-    dd_run_check(check)
 
+    # color tag is preserved — each color variant remains a separate context
     aggregator.assert_metric(
         'test.request_duration.count',
         metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api'],
+        tags=['endpoint:test', 'handler:api', 'color:red'],
+    )
+    aggregator.assert_metric(
+        'test.request_duration.count',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=['endpoint:test', 'handler:api', 'color:blue'],
     )
     aggregator.assert_metric(
         'test.request_duration.sum',
         metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api'],
+        tags=['endpoint:test', 'handler:api', 'color:red'],
     )
+
+    for name in ('test.request_duration.count', 'test.request_duration.sum', 'test.request_duration.bucket'):
+        for m in aggregator.metrics(name):
+            assert any(t.startswith('color:') for t in m.tags), f"Expected 'color' tag preserved in {m.tags}"

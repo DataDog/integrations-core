@@ -372,6 +372,11 @@ class OpenMetricsScraper:
         """
         label_normalizer = get_label_normalizer(metric.type)
 
+        # Histogram and summary metrics skip label exclusion to preserve
+        # unique contexts — excluding labels without aggregation would cause
+        # the agent aggregator to combine distinct series incorrectly.
+        skip_label_exclusion = metric.type in ('histogram', 'summary')
+
         for sample in metric.samples:
             value = sample.value
             if isnan(value) or isinf(value):
@@ -389,7 +394,7 @@ class OpenMetricsScraper:
                 if sample_excluder is not None and sample_excluder(label_value):
                     skip_sample = True
                     break
-                elif label_name in self.exclude_labels:
+                elif not skip_label_exclusion and label_name in self.exclude_labels:
                     continue
                 elif self.include_labels and label_name not in self.include_labels:
                     continue
