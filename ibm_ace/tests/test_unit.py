@@ -46,9 +46,10 @@ def test_truncated_message_given_oversized_payload_skips_without_critical(instan
 
     import pymqi
 
+    mock_config = MagicMock()
+    mock_config.max_message_length = 65536
+
     check = IbmAceCheck('ibm_ace', {}, [instance])
-    check.config = MagicMock()
-    check.config.max_message_length = 65536
     check.log = MagicMock()
 
     sub = ResourceStatisticsSubscription(check, global_tags)
@@ -58,7 +59,10 @@ def test_truncated_message_given_oversized_payload_skips_without_critical(instan
     mock_sub = MagicMock()
     mock_sub.get.side_effect = truncation_error
 
-    with patch.object(type(sub), 'sub', new_callable=PropertyMock, return_value=mock_sub):
+    with (
+        patch.object(type(check), 'config', new_callable=PropertyMock, return_value=mock_config),
+        patch.object(type(sub), 'sub', new_callable=PropertyMock, return_value=mock_sub),
+    ):
         messages = sub.get_latest_messages()
 
     assert messages == []
