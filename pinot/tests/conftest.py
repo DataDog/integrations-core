@@ -16,22 +16,27 @@ from .common import (
     SERVER_INSTANCE,
 )
 
-# E2E test configuration
 HERE = get_here()
 HOST = get_docker_hostname()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
-# Port for JMX Prometheus exporter metrics endpoint
-# In QuickStart mode, all components share a single JVM and metrics endpoint
-# Using 18009 to avoid conflicts with common local ports
-E2E_METRICS_PORT = 18009
-E2E_METRICS_URL = f'http://{HOST}:{E2E_METRICS_PORT}/metrics'
+E2E_CONTROLLER_METRICS_URL = f'http://{HOST}:18009/metrics'
+E2E_SERVER_METRICS_URL = f'http://{HOST}:18008/metrics'
+E2E_BROKER_METRICS_URL = f'http://{HOST}:18007/metrics'
+E2E_MINION_METRICS_URL = f'http://{HOST}:18006/metrics'
+
+E2E_METRICS_URLS = [
+    E2E_CONTROLLER_METRICS_URL,
+    E2E_SERVER_METRICS_URL,
+    E2E_BROKER_METRICS_URL,
+    E2E_MINION_METRICS_URL,
+]
 
 E2E_INSTANCE = {
-    'controller_endpoint': E2E_METRICS_URL,
-    'server_endpoint': E2E_METRICS_URL,
-    'broker_endpoint': E2E_METRICS_URL,
-    'minion_endpoint': E2E_METRICS_URL,
+    'controller_endpoint': E2E_CONTROLLER_METRICS_URL,
+    'server_endpoint': E2E_SERVER_METRICS_URL,
+    'broker_endpoint': E2E_BROKER_METRICS_URL,
+    'minion_endpoint': E2E_MINION_METRICS_URL,
     'tags': ['test:e2e'],
 }
 
@@ -39,10 +44,13 @@ E2E_INSTANCE = {
 @pytest.fixture(scope='session')
 def dd_environment():
     conditions = [
-        # Wait for Pinot QuickStart tables to be created (indicates cluster is ready)
-        CheckDockerLogs('pinot', 'TableConfigs baseballStats successfully added', attempts=60),
-        # Wait for metrics endpoint to be available
-        CheckEndpoints([E2E_METRICS_URL]),
+        CheckDockerLogs(
+            COMPOSE_FILE,
+            'Bootstrap complete: baseballStats table and segments loaded',
+            attempts=180,
+            service='pinot-bootstrap',
+        ),
+        CheckEndpoints(E2E_METRICS_URLS),
     ]
 
     with docker_run(COMPOSE_FILE, conditions=conditions, sleep=5, attempts=2):

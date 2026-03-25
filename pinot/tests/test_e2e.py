@@ -12,12 +12,12 @@ pytestmark = pytest.mark.e2e
 
 def test_check(dd_agent_check, e2e_instance):
     """
-    Test that the Pinot check collects metrics from a real Pinot QuickStart cluster.
+    Test that the Pinot check collects metrics from a real multi-container Pinot cluster.
 
-    In QuickStart mode, all Pinot components (Controller, Server, Broker, Minion)
-    run in the same JVM, so all metrics are exposed on a single JMX endpoint.
-    All four component endpoints are configured to point at that shared endpoint,
-    each collecting its component-specific metrics under its own namespace.
+    ZooKeeper plus four JVMs (Controller, Server, Broker, Minion) each run the JMX Prometheus
+    exporter on a distinct port (host 18009–18006 → container 8009–8006). The check is
+    configured with one metrics URL per component so each namespace scrapes its own process.
+    A one-shot bootstrap service loads the batch baseballStats table before assertions run.
     """
     aggregator = dd_agent_check(e2e_instance, rate=True)
 

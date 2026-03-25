@@ -1,30 +1,130 @@
 services:
-  pinot:
-    image: apachepinot/pinot:${PINOT_VERSION:-1.4.0}
-    container_name: pinot
-    hostname: pinot
+  zookeeper:
+    image: zookeeper:3.9
+    hostname: zookeeper
+    # Ephemeral ZK data: anonymous volumes from the image can survive `compose down` and leak Helix state across runs.
+    tmpfs:
+      - /data
+      - /datalog
     ports:
-      # ZooKeeper
-      - "12123:2123"
-      # Controller
-      - "19000:9000"
-      # Broker
-      - "18000:8000"
-      # Server
-      - "17050:7050"
-      # Minion
-      - "16000:6000"
-      # JMX Prometheus exporter
-      - "18009:8009"
+      - "12123:2181"
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_PORT: 2181
+      ZOO_SERVERS: server.1=zookeeper:2888:3888;2181
+    healthcheck:
+      test: ["CMD-SHELL", "zkServer.sh status || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  pinot-controller:
+    image: apachepinot/pinot:${PINOT_VERSION:-1.4.0}
+    hostname: pinot-controller
+    command: ["StartController", "-zkAddress", "zookeeper:2181"]
     environment:
       JAVA_OPTS: >-
         -javaagent:/opt/pinot/etc/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=8009:/opt/pinot/etc/jmx_prometheus_javaagent/configs/pinot.yml
         -Xms512m
         -Xmx1g
-    command: ["QuickStart", "-type", "batch"]
+    ports:
+      - "18009:8009"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9000/health || exit 1"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 30
-      start_period: 60s
+      start_period: 90s
+
+  pinot-server:
+    image: apachepinot/pinot:${PINOT_VERSION:-1.4.0}
+    hostname: pinot-server
+    command: ["StartServer", "-zkAddress", "zookeeper:2181"]
+    environment:
+      JAVA_OPTS: >-
+        -javaagent:/opt/pinot/etc/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=8008:/opt/pinot/etc/jmx_prometheus_javaagent/configs/pinot.yml
+        -Xms512m
+        -Xmx1g
+    ports:
+      - "18008:8008"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+      pinot-controller:
+        condition: service_healthy
+    healthcheck:
+      # serverAdminPort defaults to 8097 (8098 is the query port)
+      test: ["CMD-SHELL", "curl -sf http://localhost:8097/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+
+  pinot-broker:
+    image: apachepinot/pinot:${PINOT_VERSION:-1.4.0}
+    hostname: pinot-broker
+    command: ["StartBroker", "-zkAddress", "zookeeper:2181"]
+    environment:
+      JAVA_OPTS: >-
+        -javaagent:/opt/pinot/etc/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=8007:/opt/pinot/etc/jmx_prometheus_javaagent/configs/pinot.yml
+        -Xms512m
+        -Xmx1g
+    ports:
+      - "18007:8007"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+      pinot-controller:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8099/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+
+  pinot-minion:
+    image: apachepinot/pinot:${PINOT_VERSION:-1.4.0}
+    hostname: pinot-minion
+    command: ["StartMinion", "-zkAddress", "zookeeper:2181"]
+    environment:
+      JAVA_OPTS: >-
+        -javaagent:/opt/pinot/etc/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=8006:/opt/pinot/etc/jmx_prometheus_javaagent/configs/pinot.yml
+        -Xms512m
+        -Xmx1g
+    ports:
+      - "18006:8006"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+      pinot-controller:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9514/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+
+  pinot-bootstrap:
+    image: apachepinot/pinot:${PINOT_VERSION:-1.4.0}
+    hostname: pinot-bootstrap
+    depends_on:
+      pinot-controller:
+        condition: service_healthy
+      pinot-server:
+        condition: service_healthy
+      pinot-broker:
+        condition: service_healthy
+      pinot-minion:
+        condition: service_healthy
+    volumes:
+      - ./bootstrap.sh:/bootstrap/bootstrap.sh:ro
+      - ./baseball_stats_e2e_ingestion.yaml:/bootstrap/baseball_stats_e2e_ingestion.yaml:ro
+    working_dir: /opt/pinot
+    entrypoint: ["/bin/bash", "/bootstrap/bootstrap.sh"]
+    restart: "no"

@@ -40,16 +40,11 @@ MINION_INSTANCE = {
     'tags': ['test:test'],
 }
 
-# Each component has its own namespace
 CONTROLLER_NAMESPACE = 'pinot.controller'
 SERVER_NAMESPACE = 'pinot.server'
 BROKER_NAMESPACE = 'pinot.broker'
 MINION_NAMESPACE = 'pinot.minion'
 
-# Metrics to assert for each component (unit tests)
-# Must include all metrics emitted by fixtures for assert_all_metrics_covered()
-# Note: counter metrics (process_cpu_seconds_total) are excluded because monotonic_count
-# requires 2+ data points and won't emit on a single check run.
 CONTROLLER_METRICS = [
     'pinot.controller.can_connect',
     'pinot.controller.jvm_buffer_pool_capacity_bytes',
@@ -63,6 +58,7 @@ CONTROLLER_METRICS = [
     'pinot.controller.pinot_controller_offlineTableCount_Value',
     'pinot.controller.pinot_controller_realtimeTableCount_Value',
     'pinot.controller.process_open_fds',
+    'pinot.controller.process_cpu_seconds.count',
 ]
 
 SERVER_METRICS = [
@@ -72,6 +68,7 @@ SERVER_METRICS = [
     'pinot.server.pinot_server_helix_connected_Value',
     'pinot.server.pinot_server_queries_Count',
     'pinot.server.process_open_fds',
+    'pinot.server.process_cpu_seconds.count',
 ]
 
 BROKER_METRICS = [
@@ -81,6 +78,7 @@ BROKER_METRICS = [
     'pinot.broker.pinot_broker_helix_connected_Value',
     'pinot.broker.pinot_broker_queriesKilled_Count',
     'pinot.broker.process_open_fds',
+    'pinot.broker.process_cpu_seconds.count',
 ]
 
 MINION_METRICS = [
@@ -90,4 +88,5 @@ MINION_METRICS = [
     'pinot.minion.pinot_minion_connected_Value',
     'pinot.minion.pinot_minion_numberOfTasks_Value',
     'pinot.minion.process_open_fds',
+    'pinot.minion.process_cpu_seconds.count',
 ]

@@ -1,0 +1,38 @@
+# E2E batch ingestion for distributed Pinot (controller hostname from Docker network).
+# Based on apachepinot/pinot image examples/batch/baseballStats/ingestionJobSpec.yaml
+executionFrameworkSpec:
+  name: 'standalone'
+  segmentGenerationJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentGenerationJobRunner'
+  segmentTarPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentTarPushJobRunner'
+  segmentUriPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentUriPushJobRunner'
+  segmentMetadataPushJobRunnerClassName: 'org.apache.pinot.plugin.ingestion.batch.standalone.SegmentMetadataPushJobRunner'
+
+jobType: SegmentCreationAndTarPush
+
+inputDirURI: 'examples/batch/baseballStats/rawdata'
+includeFileNamePattern: 'glob:**/*.csv'
+outputDirURI: 'examples/batch/baseballStats/segments'
+overwriteOutput: true
+
+pinotFSSpecs:
+  - scheme: file
+    className: org.apache.pinot.spi.filesystem.LocalPinotFS
+
+recordReaderSpec:
+  dataFormat: 'csv'
+  className: 'org.apache.pinot.plugin.inputformat.csv.CSVRecordReader'
+  configClassName: 'org.apache.pinot.plugin.inputformat.csv.CSVRecordReaderConfig'
+  configs:
+
+tableSpec:
+  tableName: 'baseballStats'
+  # Use file URIs so the job does not depend on controller GET /tables/{name} (wrapper JSON / 404 nuances).
+  schemaURI: 'file:///opt/pinot/examples/batch/baseballStats/baseballStats_schema.json'
+  tableConfigURI: 'file:///opt/pinot/examples/batch/baseballStats/baseballStats_offline_table_config.json'
+
+pinotClusterSpecs:
+  - controllerURI: 'http://pinot-controller:9000'
+
+pushJobSpec:
+  pushAttempts: 2
+  pushRetryIntervalMillis: 1000
