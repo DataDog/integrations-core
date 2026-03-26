@@ -40,7 +40,7 @@ def parse_lockfile_urls(lockfile: Path) -> list[str]:
 def url_to_blob_path(url: str) -> str | None:
     """Convert a wheel URL to its GCS blob path, or None if not a dev/ path.
 
-    Handles the templated ``\${PACKAGE_BASE_URL}/...`` format used in lockfiles.
+    Handles the templated ``${PACKAGE_BASE_URL}/...`` format used in lockfiles.
     """
     if url.startswith("${PACKAGE_BASE_URL}/"):
         return url[len("${PACKAGE_BASE_URL}/"):]
@@ -48,7 +48,7 @@ def url_to_blob_path(url: str) -> str | None:
 
 
 def collect_relative_paths() -> list[str]:
-    """Read all lockfiles and return relative wheel paths from \${PACKAGE_BASE_URL} entries."""
+    """Read all lockfiles and return relative wheel paths from ${PACKAGE_BASE_URL} entries."""
     if not LOCK_FILE_DIR.is_dir():
         print(f"No lockfile directory found at {LOCK_FILE_DIR}", file=sys.stderr)
         sys.exit(1)
