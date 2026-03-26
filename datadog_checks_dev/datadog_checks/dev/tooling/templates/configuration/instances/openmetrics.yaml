@@ -232,6 +232,15 @@
     metrics are left unchanged because their sub-metric structure makes
     aggregation ambiguous; when this option is active, those metric types also
     skip label exclusion entirely to preserve unique contexts.
+
+    Known limitations:
+
+    - If a counter series disappears between scrapes (for example, due to a pod
+      restart), the aggregated sum decreases and the Agent interprets this as a
+      counter reset.
+    - Metrics with explicit type overrides (for example, a gauge configured as
+      ``rate``) skip aggregation because summing values before the type
+      transformation would produce incorrect results.
   value:
     type: boolean
     example: false

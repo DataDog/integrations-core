@@ -131,9 +131,24 @@ class OpenMetricsScraper:
         if not isinstance(self.rename_labels, dict):
             raise ConfigurationError('Setting `rename_labels` must be a mapping')
 
+        rename_targets = {}
         for key, value in self.rename_labels.items():
             if not isinstance(value, str):
                 raise ConfigurationError(f'Value for label `{key}` of setting `rename_labels` must be a string')
+            if value in self.exclude_labels:
+                self.log.debug(
+                    'Label `%s` renamed to `%s` will be excluded, which may cause tag collisions',
+                    key,
+                    value,
+                )
+            if value in rename_targets:
+                self.log.warning(
+                    'Labels `%s` and `%s` both rename to `%s`, which creates tag collisions',
+                    rename_targets[value],
+                    key,
+                    value,
+                )
+            rename_targets[value] = key
 
         exclude_metrics = config.get('exclude_metrics', [])
         if not isinstance(exclude_metrics, list):
@@ -251,7 +266,14 @@ class OpenMetricsScraper:
 
             sample_data = self.generate_sample_data(metric)
             if self._should_aggregate:
-                sample_data = aggregate_sample_data(sample_data, metric.type)
+                transformer_data = self.metric_transformer.transformer_data.get(metric.name)
+                if transformer_data is not None:
+                    effective_type = transformer_data[0]
+                    if effective_type is None or effective_type in ('native', 'native_dynamic'):
+                        effective_type = metric.type
+                else:
+                    effective_type = metric.type
+                sample_data = aggregate_sample_data(sample_data, effective_type)
             transformer(metric, sample_data, runtime_data)
 
     def yield_metrics(self, runtime_data: dict) -> Generator[Metric]:
@@ -372,6 +394,12 @@ class OpenMetricsScraper:
         label_normalizer = get_label_normalizer(metric.type)
 
         skip_label_exclusion = self._aggregate_on_label_exclusion and metric.type in ('histogram', 'summary')
+        if skip_label_exclusion:
+            self.log.debug(
+                'Skipping label exclusion for metric `%s` (type: %s), aggregation not supported',
+                metric.name,
+                metric.type,
+            )
 
         for sample in metric.samples:
             value = sample.value
