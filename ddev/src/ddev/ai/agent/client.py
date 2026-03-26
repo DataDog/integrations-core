@@ -20,7 +20,8 @@ from .exceptions import (
 )
 
 MODEL: Final[str] = "claude-sonnet-4-6"
-MAX_TOKENS: Final[int] = 8192
+MAX_TOKENS: Final[int] = 8192  # max tokens per response
+ALLOWED_TOOL_CALLERS: Final = ["code_execution_20260120"]
 
 
 class StopReason(StrEnum):
@@ -44,13 +45,30 @@ class ToolCall:
 
 
 @dataclass(frozen=True)
+class ContextUsage:
+    """Context window accounting for a single API call."""
+
+    window_size: int
+    used_tokens: int
+
+    @property
+    def context_pct(self) -> float:
+        return self.used_tokens / self.window_size * 100
+
+    @property
+    def remaining_tokens(self) -> int:
+        return self.window_size - self.used_tokens
+
+
+@dataclass(frozen=True)
 class TokenUsage:
     """Token accounting from a single API call."""
 
-    input_tokens: int
-    output_tokens: int
-    cache_read_input_tokens: int
-    cache_creation_input_tokens: int
+    input_tokens: int  # tokens sent to the model (system_prompt + history)
+    output_tokens: int  # tokens the model generated
+    cache_read_input_tokens: int  # tokens read from prompt cache
+    cache_creation_input_tokens: int  # tokens written to prompt cache
+    context: ContextUsage
 
 
 @dataclass(frozen=True)
@@ -72,6 +90,7 @@ class AnthropicAgent:
         name: str,
         model: str = MODEL,
         max_tokens: int = MAX_TOKENS,
+        tool_execution: bool = False,
     ) -> None:
         self._client = client
         self._tools = tools
@@ -79,7 +98,9 @@ class AnthropicAgent:
         self.name = name
         self._model = model
         self._max_tokens = max_tokens
+        self._tool_execution = tool_execution
         self._history: list[MessageParam] = []
+        self._context_window: int | None = None
 
     @property
     def history(self) -> list[MessageParam]:
@@ -90,12 +111,21 @@ class AnthropicAgent:
         """Clear conversation history to start a new conversation."""
         self._history = []
 
+    async def _get_context_window(self) -> int:
+        if self._context_window is None:
+            info = await self._client.models.retrieve(self._model)
+            self._context_window = info.max_input_tokens
+        return self._context_window
+
     def _get_tool_definitions(self, allowed_tools: list[str] | None) -> list[ToolParam]:
         """Filter tool definitions by allowlist. None means all tools."""
-        if allowed_tools is None:
-            return self._tools.definitions
-        allowed = set(allowed_tools)
-        return [d for d in self._tools.definitions if d["name"] in allowed]
+        definitions = self._tools.definitions
+        if allowed_tools is not None:
+            allowed = set(allowed_tools)
+            definitions = [d for d in definitions if d["name"] in allowed]
+        if not self._tool_execution:
+            definitions = [{**d, "allowed_callers": ALLOWED_TOOL_CALLERS} for d in definitions]
+        return definitions
 
     async def send(
         self,
@@ -144,11 +174,15 @@ class AnthropicAgent:
         # ThinkingBlock and RedactedThinkingBlock are intentionally ignored.
         # Extended thinking support can add a `thinking: str` field to AgentResponse later.
 
+        cache_read = response.usage.cache_read_input_tokens or 0
+        cache_creation = response.usage.cache_creation_input_tokens or 0
+        used_tokens = response.usage.input_tokens + cache_read + cache_creation
         usage = TokenUsage(
             input_tokens=response.usage.input_tokens,
             output_tokens=response.usage.output_tokens,
-            cache_read_input_tokens=response.usage.cache_read_input_tokens or 0,
-            cache_creation_input_tokens=response.usage.cache_creation_input_tokens or 0,
+            cache_read_input_tokens=cache_read,
+            cache_creation_input_tokens=cache_creation,
+            context=ContextUsage(window_size=await self._get_context_window(), used_tokens=used_tokens),
         )
 
         agent_response = AgentResponse(

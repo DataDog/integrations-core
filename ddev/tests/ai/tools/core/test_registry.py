@@ -5,7 +5,7 @@ import asyncio
 
 import pytest
 
-from ddev.ai.tools.core.registry import ALLOWED_TOOL_CALLERS, ToolRegistry
+from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
 
 # ---------------------------------------------------------------------------
@@ -76,8 +76,6 @@ def test_empty_registry_returns_empty_list():
 def test_tool_registry_definitions_returns_all_tool_definitions():
     registry = ToolRegistry([FakeTool("a"), FakeTool("b")])
     assert len(registry.definitions) == 2
-    for defn in registry.definitions:
-        assert defn["allowed_callers"] == ALLOWED_TOOL_CALLERS
 
 
 def test_definition_contains_tool_name():

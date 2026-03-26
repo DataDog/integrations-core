@@ -67,6 +67,9 @@ def make_response(
     )
 
 
+FAKE_CONTEXT_WINDOW = 200_000
+
+
 def make_agent(
     tools: ToolRegistry | None = None,
     mock_response: SimpleNamespace | None = None,
@@ -74,6 +77,8 @@ def make_agent(
     client = MagicMock(spec=anthropic.AsyncAnthropic)
     client.messages = MagicMock()
     client.messages.create = AsyncMock(return_value=mock_response or make_response("end_turn", []))
+    client.models = MagicMock()
+    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
     registry = tools or ToolRegistry([])
     agent = AnthropicAgent(
         client=client,
@@ -328,6 +333,41 @@ def test_cache_tokens_none_defaults_to_zero() -> None:
 
 
 # ---------------------------------------------------------------------------
+# ContextUsage fields
+# ---------------------------------------------------------------------------
+
+
+def test_context_usage_fields() -> None:
+    usage = make_usage(input_tokens=1000, cache_read=500, cache_creation=200)
+    resp = make_response("end_turn", [make_text_block("ok")], usage=usage)
+    agent, _ = make_agent(mock_response=resp)
+
+    result = asyncio.run(agent.send("Hi"))
+
+    ctx = result.usage.context
+    assert ctx.window_size == FAKE_CONTEXT_WINDOW
+    assert ctx.used_tokens == 1700  # 1000 + 500 + 200
+    assert ctx.context_pct == pytest.approx(1700 / FAKE_CONTEXT_WINDOW * 100)
+    assert ctx.remaining_tokens == FAKE_CONTEXT_WINDOW - 1700
+
+
+# ---------------------------------------------------------------------------
+# context_window is fetched once and cached across multiple sends
+# ---------------------------------------------------------------------------
+
+
+def test_context_window_fetched_once() -> None:
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, _ = make_agent(mock_response=resp)
+    agent._client.messages.create = AsyncMock(return_value=resp)
+
+    asyncio.run(agent.send("First"))
+    asyncio.run(agent.send("Second"))
+
+    agent._client.models.retrieve.assert_awaited_once()
+
+
+# ---------------------------------------------------------------------------
 # Multi-turn — send str then send tool results → history has 4 entries
 # ---------------------------------------------------------------------------
 
@@ -339,6 +379,8 @@ def test_multi_turn_history_grows_correctly() -> None:
     client = MagicMock(spec=anthropic.AsyncAnthropic)
     client.messages = MagicMock()
     client.messages.create = AsyncMock(side_effect=[tool_resp, text_resp])
+    client.models = MagicMock()
+    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
     agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
 
     first = asyncio.run(agent.send("Do X"))
@@ -399,6 +441,8 @@ def test_error_mid_conversation_leaves_history_unchanged() -> None:
             anthropic.APIConnectionError(request=MagicMock()),
         ]
     )
+    client.models = MagicMock()
+    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
     agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
 
     asyncio.run(agent.send("First message"))
