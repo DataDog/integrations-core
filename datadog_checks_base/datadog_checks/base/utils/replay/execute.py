@@ -95,6 +95,10 @@ def run_with_isolation(check, aggregator, datadog_agent):
                 elif message_type == 'datadog_agent':
                     method = message['method']
                     value = getattr(datadog_agent, method)(*message['args'], **message['kwargs'])
+                    args = message['args']
+                    if method == 'set_external_tags':
+                        args = [[tuple(item) for item in args[0]]]
+                    value = getattr(datadog_agent, method)(*args, **message['kwargs'])
                     if method not in KNOWN_DATADOG_AGENT_SETTER_METHODS:
                         try:
                             process.stdin.write(b'%s\n' % ensure_bytes(json.encode({'value': value})))
@@ -110,7 +114,6 @@ def run_with_isolation(check, aggregator, datadog_agent):
                         message_type,
                     )
                     break
-
     if timed_out:
         check.log.error('Check timed out after %s seconds', timeout)
         check.warning('Check timed out and possibly reported incomplete data.')
