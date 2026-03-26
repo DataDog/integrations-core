@@ -54,6 +54,7 @@ def test_truncated_message_given_oversized_payload_skips_without_critical(instan
     check = IbmAceCheck('ibm_ace', {}, [instance])
     check.log = MagicMock()
     check.service_check = MagicMock()
+    check.gauge = MagicMock()
 
     sub = ResourceStatisticsSubscription(check, global_tags)
 
@@ -112,7 +113,7 @@ def test_non_truncation_error_given_connection_broken_returns_critical(instance,
         messages = sub.get_latest_messages()
 
     assert messages == []
-    check.log.error.assert_called()
+    check.log.error.assert_called_once()
 
     sc_calls = [c for c in check.service_check.call_args_list if c[0][0] == 'mq.subscription']
     assert len(sc_calls) == 1

@@ -77,6 +77,7 @@ class Subscription(ABC):
                         self.check.config.max_message_length,
                     )
                     truncated = True
+                    # The message stays on the queue after a failed MQGET; continue would re-read it in a hot loop.
                     break
                 elif not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
                     unknown_errors[str(e)] = traceback.format_exc()
@@ -85,7 +86,7 @@ class Subscription(ABC):
                 try:
                     message = self.parse_message(payload)
                     message_cache[self.get_message_id(message)] = message
-                except (ValueError, json.JSONDecodeError) as e:
+                except ValueError as e:
                     self.check.log.warning(
                         'Failed to parse message on subscription %s: %s',
                         self.TYPE,
