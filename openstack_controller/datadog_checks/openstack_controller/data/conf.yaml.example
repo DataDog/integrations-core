@@ -120,7 +120,9 @@ instances:
     # use_shortname: false
 
     ## @param endpoint_interface - string - optional - default: public
-    ## Indicates the visibility scope of the component's endpoints to use. The possible values are:
+    ## Indicates the visibility scope of the component's endpoints to use.
+    ##
+    ## The possible values are:
     ##   public: This endpoint is accessible from outside the cloud and typically denotes a public-facing URL or 
     ##       IP address.
     ##   internal: This endpoint is typically used for communication between services within the cloud 

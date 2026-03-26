@@ -146,7 +146,9 @@ files:
     - name: ssl
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
-        is negotiated with the server. There are six modes:
+        is negotiated with the server.
+
+        There are six modes:
         - `disable`: Only tries a non-SSL connection.
         - `allow`: First tries a non-SSL connection; if it fails, tries an SSL connection.
         - `prefer`: First tries an SSL connection; if it fails, tries a non-SSL connection.
@@ -1261,6 +1263,7 @@ files:
       fleet_configurable: true
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+
         When set to `true`, the tags from the agent host are added to the check's tags for all instances.
         This option takes precedence over the `propagate_agent_tags` option in `init_config`.
       value:
