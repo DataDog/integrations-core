@@ -107,11 +107,11 @@ def process_wheel_for_upload(wheel: Path, artifact_type: str, project_name: str,
     print(f'{padding}Version: {project_metadata["Version"]}')
 
     sha256_digest = hash_file(wheel)
-    index_url = f'{STORAGE_URL}/{artifact_type}/{project_name}'
+    index_url = f'${{PACKAGE_BASE_URL}}/{artifact_type}/{project_name}'
 
     if artifact_type == 'external':
         artifact_name = wheel.name
-        blob_path = f'{artifact_type}/{project_name}/{artifact_name}'
+        blob_path = f'dev/{artifact_type}/{project_name}/{artifact_name}'
 
         if bucket.blob_exists(blob_path):
             print(f'{prefix} {project_name}=={project_metadata["Version"]} already exists')
@@ -123,7 +123,7 @@ def process_wheel_for_upload(wheel: Path, artifact_type: str, project_name: str,
     else:
         name, version, *_build_tag, python_tag, abi_tag, platform_tag = wheel.stem.split('-')
         existing_wheels = bucket.find_matching_wheels(
-            match_glob=(f'{artifact_type}/{project_name}/'
+            match_glob=(f'dev/{artifact_type}/{project_name}/'
                         f'{name}-{version}*-{python_tag}-{abi_tag}-{platform_tag}.whl')
         )
 
@@ -143,7 +143,7 @@ def process_wheel_for_upload(wheel: Path, artifact_type: str, project_name: str,
 def upload_wheel_to_bucket(wheel: Path, artifact_type: str, project_name: str, artifact_name: str, project_metadata: email.message.Message, bucket: Bucket, padding: str):
     """Upload a wheel file to the bucket."""
     print(f'{padding}Artifact: {artifact_name}')
-    blob_path = f'{artifact_type}/{project_name}/{artifact_name}'
+    blob_path = f'dev/{artifact_type}/{project_name}/{artifact_name}'
     sha256_digest = hash_file(wheel)
     requires_python = project_metadata.get('Requires-Python', '').replace('<', '&lt;').replace('>', '&gt;')
     bucket.upload_file(str(wheel), blob_path, metadata={'requires-python': requires_python, 'sha256': sha256_digest})
@@ -161,7 +161,7 @@ def generate_artifact_listings(artifact_types: set[str], bucket: Bucket):
             '    <h1>Agent integrations dependencies</h1>',
         ]
         project_artifacts: dict[str, list[dict]] = {}
-        for wheel_info in bucket.list_wheels_with_prefix(prefix=f'{artifact_type}/'):
+        for wheel_info in bucket.list_wheels_with_prefix(prefix=f'dev/{artifact_type}/'):
             project_artifacts.setdefault(wheel_info['project'], []).append(wheel_info)
 
         for project, artifacts in sorted(project_artifacts.items()):
@@ -179,7 +179,7 @@ def generate_artifact_listings(artifact_types: set[str], bucket: Bucket):
             for artifact in artifacts:
                 requires_python = artifact['metadata']['requires-python']
                 sha256_digest = artifact['metadata']['sha256']
-                artifact_name = artifact['name'].split('/')[2]
+                artifact_name = artifact['name'].split('/')[-1]
                 attribute = f' data-requires-python="{requires_python}"' if requires_python else ''
 
                 project_listing_lines.append(
@@ -189,7 +189,7 @@ def generate_artifact_listings(artifact_types: set[str], bucket: Bucket):
             project_listing_lines.extend(('  </body>', '</html>', ''))
             bucket.upload_string(
                 '\n'.join(project_listing_lines),
-                f'{artifact_type}/{project}/',
+                f'dev/{artifact_type}/{project}/',
                 content_type='text/html',
                 cache_control=CACHE_CONTROL
             )
@@ -197,7 +197,7 @@ def generate_artifact_listings(artifact_types: set[str], bucket: Bucket):
         root_listing_lines.extend(('  </body>', '</html>', ''))
         bucket.upload_string(
             '\n'.join(root_listing_lines),
-            f'{artifact_type}/',
+            f'dev/{artifact_type}/',
             content_type='text/html',
             cache_control=CACHE_CONTROL
         )
@@ -250,7 +250,7 @@ class Bucket:
         for blob in self._get_bucket().list_blobs(prefix=prefix):
             if blob.name.endswith('.whl'):
                 blob.reload()
-                project = blob.name.split('/')[1]
+                project = blob.name.split('/')[-2]
                 wheels.append({
                     'name': blob.name,
                     'project': project,
