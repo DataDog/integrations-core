@@ -86,3 +86,22 @@ def test_replay_skips_invalid_log_format(caplog, dd_run_check, aggregator, datad
 
     assert 'TypeError format' not in caplog.text
     assert 'OverflowError format' not in caplog.text
+
+
+class SlowReplayCheck(AgentCheck):
+    __NAMESPACE__ = 'slow_replay'
+
+    def check(self, _):
+        import time
+
+        time.sleep(9999)
+
+
+def test_replay_timeout(caplog, dd_run_check):
+    instance = {'process_isolation': True, 'process_isolation_timeout': 1}
+    check = SlowReplayCheck('slow_replay', {}, [instance])
+
+    with caplog.at_level(logging.ERROR):
+        dd_run_check(check)
+
+    assert 'Check timed out' in caplog.text

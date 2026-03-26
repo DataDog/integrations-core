@@ -5,6 +5,7 @@ init_config:
     ## @param postfix_user - string - optional - default: root
     ## The user running dd-agent must have passwordless sudo access for the find
     ## command to run the postfix check.
+    ##
     ## Example /etc/sudoers entry:
     ##   dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
     ##

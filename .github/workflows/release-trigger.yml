@@ -1,0 +1,79 @@
+name: Trigger Wheel Builds
+
+# Thin wrapper — all tagging and dispatch logic lives in release-dispatch.yml.
+# The pipeline can build wheels for any Python package in the repo.
+# Equivalent trigger workflows exist in integrations-extras and marketplace.
+
+on:
+  push:
+    branches:
+      - master
+      - "[0-9]+.[0-9]+.x"
+      - "alpha/*"
+      - "beta/*"
+      - "rc/*"
+    paths:
+      - "*/CHANGELOG.md"
+      - "*/datadog_checks/*/__about__.py"
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: >-
+          Packages to release. JSON array (e.g. '["postgres","datadog_checks_base"]'),
+          'all' to release every Python package in the repo, or omit to auto-detect from new tags.
+        required: false
+        type: string
+      source-repo-ref:
+        description: "Commit SHA or ref to build from"
+        required: true
+        type: string
+      target:
+        description: "Target environment (dev or prod)"
+        required: false
+        type: choice
+        options:
+          - dev
+          - prod
+        default: dev
+      dry-run:
+        description: "Print what would be released without pushing tags or starting builds"
+        required: false
+        type: boolean
+        default: false
+      ddev-version:
+        description: "ddev version, pinned by default."
+        required: false
+        type: string
+
+jobs:
+  context:
+    name: Detect release context
+    runs-on: ubuntu-latest
+    outputs:
+      is-stable-release: ${{ steps.detect.outputs.is-stable-release }}
+    steps:
+      - id: detect
+        # Sets is-stable-release based on the branch: true for master/X.Y.x, false otherwise.
+        # Manual runs on master get "true", which blocks pre-release packages — conservative and intentional.
+        run: |
+          if [[ "$GITHUB_REF" =~ ^refs/heads/(master|[0-9]+\.[0-9]+\.x)$ ]]; then
+            echo "is-stable-release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is-stable-release=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  dispatch:
+    name: Release
+    needs: context
+    uses: ./.github/workflows/release-dispatch.yml
+    with:
+      source-repo: integrations-core
+      packages: ${{ inputs.packages || '' }}
+      source-repo-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.source-repo-ref || github.sha }}
+      target: ${{ inputs.target || 'dev' }}
+      dry-run: ${{ inputs.dry-run || false }}
+      ddev-version: ${{ inputs.ddev-version || '' }}
+      is-stable-release: ${{ needs.context.outputs.is-stable-release }}
+    permissions:
+      id-token: write
+      contents: write

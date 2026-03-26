@@ -1,0 +1,214 @@
+"""Tests for _release.dispatch and _release.summary."""
+import http.client
+import io
+import urllib.error
+from unittest.mock import call, create_autospec, patch
+
+import pytest
+
+from _release.dispatch import DispatchError, build_payload, dispatch_in_batches, send_dispatch
+from _release.summary import build_summary, _ineligible_label
+from _release import validation as v
+
+
+class TestSendDispatch:
+    _payload = {"event_type": "build-wheels", "client_payload": {}}
+    _url = "https://example.com/dispatch"
+
+    def _http_error(self, code: int) -> urllib.error.HTTPError:
+        return urllib.error.HTTPError(
+            "https://example.com", code, f"HTTP {code}", {}, io.BytesIO(b"error")
+        )
+
+    def test_exits_on_4xx(self):
+        with patch("_release.dispatch._urlopen", side_effect=self._http_error(422)), \
+             pytest.raises(DispatchError):
+            send_dispatch(self._payload, "token", dispatch_url=self._url, max_attempts=1)
+
+    def test_exits_after_5xx_exhausts_retries(self):
+        with patch("_release.dispatch._urlopen", side_effect=self._http_error(500)), \
+             pytest.raises(DispatchError):
+            send_dispatch(self._payload, "token", dispatch_url=self._url, max_attempts=1)
+
+    def test_succeeds_after_transient_5xx(self):
+        mock_ctx = create_autospec(http.client.HTTPResponse, instance=True)
+        mock_ctx.__enter__.return_value = mock_ctx
+        mock_ctx.status = 204
+        with patch("_release.dispatch.time.sleep") as mock_sleep, \
+             patch("_release.dispatch._urlopen", side_effect=[self._http_error(503), self._http_error(502), mock_ctx]):
+            send_dispatch(self._payload, "token", dispatch_url=self._url, max_attempts=3)
+        assert mock_sleep.call_args_list == [call(2), call(4)]  # 2**1, 2**2
+
+    def test_retries_on_url_error(self):
+        url_error = urllib.error.URLError("Connection refused")
+        mock_ctx = create_autospec(http.client.HTTPResponse, instance=True)
+        mock_ctx.__enter__.return_value = mock_ctx
+        mock_ctx.status = 204
+        with patch("_release.dispatch.time.sleep") as mock_sleep, \
+             patch("_release.dispatch._urlopen", side_effect=[url_error, mock_ctx]):
+            send_dispatch(self._payload, "token", dispatch_url=self._url, max_attempts=3)
+        assert mock_sleep.call_args_list == [call(2)]  # retried once
+
+    def test_raises_on_url_error_after_exhausting_retries(self):
+        url_error = urllib.error.URLError("Connection refused")
+        with patch("_release.dispatch._urlopen", side_effect=url_error), \
+             patch("_release.dispatch.time.sleep"), \
+             pytest.raises(DispatchError):
+            send_dispatch(self._payload, "token", dispatch_url=self._url, max_attempts=2)
+
+    def test_authorization_header_sent(self):
+        mock_ctx = create_autospec(http.client.HTTPResponse, instance=True)
+        mock_ctx.__enter__.return_value = mock_ctx
+        mock_ctx.status = 204
+        with patch("_release.dispatch._urlopen", return_value=mock_ctx) as mock_urlopen:
+            send_dispatch(self._payload, "my-token", dispatch_url=self._url)
+        req = mock_urlopen.mock_calls[0].args[0]
+        assert req.get_header("Authorization") == "Bearer my-token"
+
+
+class TestBuildPayload:
+    def test_structure(self):
+        payload = build_payload(["postgres", "mysql"], "integrations-core", "abc123", "prod")
+        assert payload["event_type"] == "build-wheels"
+        cp = payload["client_payload"]
+        assert cp["packages"] == ["postgres", "mysql"]
+        assert cp["source_repo"] == "integrations-core"
+        assert cp["source_repo_ref"] == "abc123"
+        assert cp["target"] == "prod"
+
+
+class TestDispatchInBatches:
+    def test_single_batch(self):
+        packages = ["a", "b", "c"]
+        with patch("_release.dispatch.send_dispatch") as mock_send:
+            dispatch_in_batches(packages, "integrations-core", "sha1", "dev", "tok")
+        assert mock_send.mock_calls == [
+            call(build_payload(packages, "integrations-core", "sha1", "dev"), "tok"),
+        ]
+
+    def test_splits_into_batches(self):
+        packages = [f"pkg{i}" for i in range(8)]
+        with patch("_release.dispatch.send_dispatch") as mock_send:
+            dispatch_in_batches(packages, "repo", "ref", "prod", "tok", batch_size=3)
+        assert mock_send.mock_calls == [
+            call(build_payload(packages[:3], "repo", "ref", "prod"), "tok"),
+            call(build_payload(packages[3:6], "repo", "ref", "prod"), "tok"),
+            call(build_payload(packages[6:], "repo", "ref", "prod"), "tok"),
+        ]
+
+    def test_passes_token(self):
+        with patch("_release.dispatch.send_dispatch") as mock_send:
+            dispatch_in_batches(["pkg"], "repo", "ref", "dev", "my-token")
+        assert mock_send.mock_calls == [
+            call(build_payload(["pkg"], "repo", "ref", "dev"), "my-token"),
+        ]
+
+    def test_empty_packages_does_not_dispatch(self):
+        with patch("_release.dispatch.send_dispatch") as mock_send:
+            dispatch_in_batches([], "repo", "ref", "dev", "tok")
+        mock_send.assert_not_called()
+
+    def test_invalid_batch_size_raises(self):
+        with pytest.raises(ValueError):
+            dispatch_in_batches(["pkg"], "repo", "ref", "dev", "tok", batch_size=0)
+
+
+class TestBuildSummary:
+    _results = [
+        {"package": "postgres", "version": "1.2.3", "type": v.STABLE, "dispatch": True},
+        {"package": "mysql", "version": "2.0.0b1", "type": v.PRE_RELEASE, "dispatch": True},
+        {"package": "redis", "version": None, "type": v.NO_VERSION, "dispatch": False},
+        {"package": "pg", "version": "1.0.0", "type": v.HAS_FRAGMENTS, "dispatch": False},
+        {"package": "new_pkg", "version": "0.0.1", "type": v.UNRELEASED, "dispatch": False},
+    ]
+
+    def _summary(self, packages=None, **kwargs):
+        defaults = dict(
+            mode="auto",
+            source_repo="integrations-core",
+            ref="abc1234567890",
+            target="prod",
+            dry_run=False,
+            was_dispatched=True,
+        )
+        return build_summary(packages or ["postgres"], self._results, **{**defaults, **kwargs})
+
+    def test_labels_when_dispatched(self):
+        out = build_summary(
+            ["postgres", "mysql", "redis", "pg", "new_pkg"],
+            self._results,
+            mode="auto",
+            source_repo="integrations-core",
+            ref="sha",
+            target="prod",
+            dry_run=False,
+            was_dispatched=True,
+        )
+        assert "✅ Dispatched" in out
+        assert "⏭️ Placeholder version" in out
+        assert "⚠️ No version" in out
+        assert "❌ Pending changelog" in out
+
+    def test_pre_release_dry_run_label(self):
+        out = self._summary(packages=["mysql"], dry_run=True, was_dispatched=False)
+        assert "🔄 Dry run" in out
+
+    def test_dry_run_label(self):
+        out = self._summary(dry_run=True, was_dispatched=False)
+        assert "🔄 Dry run" in out
+
+    def test_custom_footer(self):
+        out = self._summary(was_dispatched=False, footer="> Custom footer text")
+        assert "Custom footer text" in out
+
+    def test_ref_truncated_in_link(self):
+        full_sha = "a" * 40
+        out = self._summary(ref=full_sha)
+        assert full_sha[:12] in out
+        assert full_sha[12:] not in out.split("commit/")[0]
+
+    def test_stable_blocked_on_pre_release_branch(self):
+        results = [{"package": "postgres", "version": "1.2.3", "type": v.STABLE, "dispatch": False}]
+        out = build_summary(
+            ["postgres"],
+            results,
+            mode="auto",
+            source_repo="integrations-core",
+            ref="sha",
+            target="prod",
+            dry_run=False,
+            was_dispatched=False,
+        )
+        assert "❌ Stable release blocked (pre-release branch)" in out
+
+    def test_pre_release_skipped_on_stable_branch(self):
+        results = [{"package": "mysql", "version": "2.0.0b1", "type": v.PRE_RELEASE, "dispatch": False}]
+        out = build_summary(
+            ["mysql"],
+            results,
+            mode="auto",
+            source_repo="integrations-core",
+            ref="sha",
+            target="prod",
+            dry_run=False,
+            was_dispatched=False,
+        )
+        assert "⏭️ Pre-release skipped (stable branch)" in out
+
+    def test_eligible_not_dispatched(self):
+        results = [{"package": "postgres", "version": "1.2.3", "type": v.STABLE, "dispatch": True}]
+        out = build_summary(
+            ["postgres"],
+            results,
+            mode="auto",
+            source_repo="integrations-core",
+            ref="sha",
+            target="prod",
+            dry_run=False,
+            was_dispatched=False,
+        )
+        assert "✅ Validated" in out
+
+    def test_unknown_type_raises(self):
+        with pytest.raises(ValueError, match="unexpected validation type"):
+            _ineligible_label("bogus_type")

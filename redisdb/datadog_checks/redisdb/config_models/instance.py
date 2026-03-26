@@ -54,6 +54,7 @@ class InstanceConfig(BaseModel):
     ssl_ca_certs: Optional[str] = None
     ssl_cert_reqs: Optional[int] = None
     ssl_certfile: Optional[str] = None
+    ssl_check_hostname: Optional[bool] = None
     ssl_keyfile: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
     unix_socket_path: Optional[str] = None
