@@ -5,7 +5,7 @@
 from copy import deepcopy
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Final
+from typing import Any, Final
 
 import anthropic
 from anthropic.types import MessageParam, ToolParam, ToolResultBlockParam
@@ -19,8 +19,8 @@ from .exceptions import (
     AgentRateLimitError,
 )
 
-MODEL: Final[str] = "claude-sonnet-4-6"
-MAX_TOKENS: Final[int] = 8192  # max tokens per response
+DEFAULT_MODEL: Final[str] = "claude-sonnet-4-6"
+DEFAULT_MAX_TOKENS: Final[int] = 8192  # max tokens per response
 ALLOWED_TOOL_CALLERS: Final = ["code_execution_20260120"]
 
 
@@ -41,7 +41,7 @@ class ToolCall:
 
     id: str
     name: str
-    input: dict[str, object]
+    input: dict[str, Any]
 
 
 @dataclass(frozen=True)
@@ -73,7 +73,8 @@ class TokenUsage:
 
 @dataclass(frozen=True)
 class AgentResponse:
-    """The complete response from a single AnthropicAgent.send() call."""
+    """The complete response from a single AnthropicAgent.send() call.
+    Adds useful metadata to the response of the Anthropic API."""
 
     stop_reason: StopReason
     text: str
@@ -82,23 +83,36 @@ class AgentResponse:
 
 
 class AnthropicAgent:
+    """A wrapper around the Anthropic API that provides a simple interface for interacting with agents."""
+
     def __init__(
         self,
         client: anthropic.AsyncAnthropic,
         tools: ToolRegistry,
         system_prompt: str,
         name: str,
-        model: str = MODEL,
-        max_tokens: int = MAX_TOKENS,
-        tool_execution: bool = False,
+        model: str = DEFAULT_MODEL,
+        max_tokens: int = DEFAULT_MAX_TOKENS,
+        programmatic_tool_calling: bool = False,
     ) -> None:
+        """Initialize an AnthropicAgent.
+        Args:
+            client: The Anthropic client to use.
+            tools: The ToolRegistry to use (might not be used in every call if allowed_tools in send() is provided)
+            system_prompt: The system prompt to use.
+            name: The name of the agent.
+            model: The model to use.
+            max_tokens: The max tokens per response.
+            programmatic_tool_calling: Whether to allow programmatic tool calling.
+        """
+
         self._client = client
         self._tools = tools
         self._system_prompt = system_prompt
         self.name = name
         self._model = model
         self._max_tokens = max_tokens
-        self._tool_execution = tool_execution
+        self._programmatic_tool_calling = programmatic_tool_calling
         self._history: list[MessageParam] = []
         self._context_window: int | None = None
 
@@ -123,7 +137,7 @@ class AnthropicAgent:
         if allowed_tools is not None:
             allowed = set(allowed_tools)
             definitions = [d for d in definitions if d["name"] in allowed]
-        if not self._tool_execution:
+        if not self._programmatic_tool_calling:
             definitions = [{**d, "allowed_callers": ALLOWED_TOOL_CALLERS} for d in definitions]
         return definitions
 
@@ -132,6 +146,13 @@ class AnthropicAgent:
         content: str | list[ToolResultBlockParam],
         allowed_tools: list[str] | None = None,
     ) -> AgentResponse:
+        """Send a message to the agent and return the response.
+        Args:
+            content: The content to send to the agent.
+            allowed_tools: The tools in the ToolRegistry to allow the agent to use.
+        Returns:
+            An AgentResponse object containing the response from the agent.
+        """
         tool_defs = self._get_tool_definitions(allowed_tools)
 
         user_msg: MessageParam = {"role": "user", "content": content}

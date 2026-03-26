@@ -136,3 +136,6 @@ ban-relative-imports = "parents"
 [tool.ruff.lint.per-file-ignores]
 #Tests can use assertions and relative imports
 "**/tests/**/*" = ["I252"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

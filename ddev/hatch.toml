@@ -9,6 +9,7 @@ python = "3.13"
 e2e-env = false
 dependencies = [
   "pyyaml",
+  "pytest-asyncio",
   "vcrpy",
 ]
 # TODO: remove this when the old CLI is gone

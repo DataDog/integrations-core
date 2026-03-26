@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
@@ -51,8 +50,8 @@ def test_tool_meta(http_tool: HttpGetTool) -> None:
 
 
 @pytest.mark.parametrize("url", ["ftp://example.com", "example.com", "", "//example.com"])
-def test_invalid_url(http_tool: HttpGetTool, url: str) -> None:
-    result = asyncio.run(http_tool.run({"url": url}))
+async def test_invalid_url(http_tool: HttpGetTool, url: str) -> None:
+    result = await http_tool.run({"url": url})
 
     assert result.success is False
     assert "http" in result.error and "https" in result.error
@@ -71,9 +70,9 @@ def test_invalid_url(http_tool: HttpGetTool, url: str) -> None:
         (204, ""),
     ],
 )
-def test_request_success(http_tool: HttpGetTool, status_code: int, body: str) -> None:
+async def test_request_success(http_tool: HttpGetTool, status_code: int, body: str) -> None:
     with patch_httpx(fake_response(status_code, body)):
-        result = asyncio.run(http_tool.run({"url": "http://localhost:9090/metrics"}))
+        result = await http_tool.run({"url": "http://localhost:9090/metrics"})
 
     assert result.success is True
     assert f"Status: {status_code}" in result.data
@@ -81,9 +80,9 @@ def test_request_success(http_tool: HttpGetTool, status_code: int, body: str) ->
 
 
 @pytest.mark.parametrize("status_code", [400, 404, 500, 503])
-def test_request_non_success_status(http_tool: HttpGetTool, status_code: int) -> None:
+async def test_request_non_success_status(http_tool: HttpGetTool, status_code: int) -> None:
     with patch_httpx(fake_response(status_code, "error body")):
-        result = asyncio.run(http_tool.run({"url": "http://localhost:9090/metrics"}))
+        result = await http_tool.run({"url": "http://localhost:9090/metrics"})
 
     assert result.success is True
     assert f"Status: {status_code}" in result.data
@@ -94,17 +93,17 @@ def test_request_non_success_status(http_tool: HttpGetTool, status_code: int) ->
 # ---------------------------------------------------------------------------
 
 
-def test_request_timeout(http_tool: HttpGetTool) -> None:
+async def test_request_timeout(http_tool: HttpGetTool) -> None:
     with patch_httpx(side_effect=httpx.TimeoutException("timed out")):
-        result = asyncio.run(http_tool.run({"url": "http://localhost:9090/metrics", "timeout": 1.0}))
+        result = await http_tool.run({"url": "http://localhost:9090/metrics", "timeout": 1.0})
 
     assert result.success is False
     assert "timed out after 1.0s" in result.error
 
 
-def test_request_error(http_tool: HttpGetTool) -> None:
+async def test_request_error(http_tool: HttpGetTool) -> None:
     with patch_httpx(side_effect=httpx.RequestError("connection refused")):
-        result = asyncio.run(http_tool.run({"url": "http://localhost:9090/metrics"}))
+        result = await http_tool.run({"url": "http://localhost:9090/metrics"})
 
     assert result.success is False
     assert "Request failed" in result.error
@@ -116,12 +115,12 @@ def test_request_error(http_tool: HttpGetTool) -> None:
 
 
 @pytest.mark.parametrize("status_code", [200, 500])
-def test_response_truncated(http_tool: HttpGetTool, status_code: int) -> None:
+async def test_response_truncated(http_tool: HttpGetTool, status_code: int) -> None:
     from ddev.ai.tools.core.truncation import MAX_CHARS
 
     large_body = "x" * (MAX_CHARS + 1000)
     with patch_httpx(fake_response(status_code, large_body)):
-        result = asyncio.run(http_tool.run({"url": "http://localhost:9090/metrics"}))
+        result = await http_tool.run({"url": "http://localhost:9090/metrics"})
 
     assert result.success is True
     assert result.truncated is True

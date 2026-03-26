@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
@@ -94,12 +93,12 @@ def make_agent(
 # ---------------------------------------------------------------------------
 
 
-def test_end_turn_single_text_block() -> None:
+async def test_end_turn_single_text_block() -> None:
     content = [make_text_block("Hello!")]
     resp = make_response("end_turn", content)
     agent, _ = make_agent(mock_response=resp)
 
-    result = asyncio.run(agent.send("Hi"))
+    result = await agent.send("Hi")
 
     assert result.stop_reason is StopReason.END_TURN
     assert result.text == "Hello!"
@@ -114,12 +113,12 @@ def test_end_turn_single_text_block() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_tool_use_single_block() -> None:
+async def test_tool_use_single_block() -> None:
     block = make_tool_use_block(id="toolu_42", name="read_file", input={"path": "/etc/hosts"})
     resp = make_response("tool_use", [block])
     agent, _ = make_agent(mock_response=resp)
 
-    result = asyncio.run(agent.send("Read hosts"))
+    result = await agent.send("Read hosts")
 
     assert result.stop_reason is StopReason.TOOL_USE
     assert len(result.tool_calls) == 1
@@ -134,7 +133,7 @@ def test_tool_use_single_block() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_mixed_text_and_tool_use() -> None:
+async def test_mixed_text_and_tool_use() -> None:
     content = [
         make_text_block("I'll read the file for you."),
         make_tool_use_block(id="toolu_01", name="read_file"),
@@ -142,7 +141,7 @@ def test_mixed_text_and_tool_use() -> None:
     resp = make_response("tool_use", content)
     agent, _ = make_agent(mock_response=resp)
 
-    result = asyncio.run(agent.send("Read a file"))
+    result = await agent.send("Read a file")
 
     assert result.text == "I'll read the file for you."
     assert len(result.tool_calls) == 1
@@ -153,12 +152,12 @@ def test_mixed_text_and_tool_use() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_multiple_text_blocks_are_concatenated() -> None:
+async def test_multiple_text_blocks_are_concatenated() -> None:
     content = [make_text_block("Hello, "), make_text_block("world!")]
     resp = make_response("end_turn", content)
     agent, _ = make_agent(mock_response=resp)
 
-    result = asyncio.run(agent.send("Hi"))
+    result = await agent.send("Hi")
 
     assert result.text == "Hello, \nworld!"
 
@@ -168,11 +167,11 @@ def test_multiple_text_blocks_are_concatenated() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_max_tokens_is_not_an_error() -> None:
+async def test_max_tokens_is_not_an_error() -> None:
     resp = make_response("max_tokens", [make_text_block("Truncated...")])
     agent, _ = make_agent(mock_response=resp)
 
-    result = asyncio.run(agent.send("Tell me everything"))
+    result = await agent.send("Tell me everything")
 
     assert result.stop_reason is StopReason.MAX_TOKENS
     assert len(agent.history) == 2
@@ -203,34 +202,34 @@ class FakeTool:
         pass
 
 
-def test_allowed_tools_filters_to_subset() -> None:
+async def test_allowed_tools_filters_to_subset() -> None:
     registry = ToolRegistry([FakeTool(n) for n in ["read_file", "grep", "mkdir"]])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
-    asyncio.run(agent.send("Hi", allowed_tools=["read_file"]))
+    await agent.send("Hi", allowed_tools=["read_file"])
 
     sent_names = [t["name"] for t in create_mock.call_args.kwargs["tools"]]
     assert sent_names == ["read_file"]
 
 
-def test_allowed_tools_none_passes_all() -> None:
+async def test_allowed_tools_none_passes_all() -> None:
     registry = ToolRegistry([FakeTool(n) for n in ["a", "b"]])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
-    asyncio.run(agent.send("Hi", allowed_tools=None))
+    await agent.send("Hi", allowed_tools=None)
 
     sent_names = [t["name"] for t in create_mock.call_args.kwargs["tools"]]
     assert sent_names == ["a", "b"]
 
 
 @pytest.mark.parametrize("allowed_tools", [[], ["nonexistent_tool"]])
-def test_allowed_tools_passes_not_given(allowed_tools: list[str]) -> None:
+async def test_allowed_tools_passes_not_given(allowed_tools: list[str]) -> None:
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(mock_response=resp)
 
-    asyncio.run(agent.send("Hi", allowed_tools=allowed_tools))
+    await agent.send("Hi", allowed_tools=allowed_tools)
 
     assert create_mock.call_args.kwargs["tools"] is anthropic.NOT_GIVEN
 
@@ -247,17 +246,17 @@ def _make_error_agent(side_effect: Exception) -> AnthropicAgent:
     return AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
 
 
-def test_connection_error_maps_to_agent_connection_error() -> None:
+async def test_connection_error_maps_to_agent_connection_error() -> None:
     agent = _make_error_agent(anthropic.APIConnectionError(request=MagicMock()))
 
     with pytest.raises(AgentConnectionError) as exc_info:
-        asyncio.run(agent.send("Hi"))
+        await agent.send("Hi")
 
     assert "Connection failed" in str(exc_info.value)
     assert agent.history == []
 
 
-def test_rate_limit_error_maps_to_agent_rate_limit_error() -> None:
+async def test_rate_limit_error_maps_to_agent_rate_limit_error() -> None:
     agent = _make_error_agent(
         anthropic.RateLimitError(
             message="rate limit",
@@ -267,13 +266,13 @@ def test_rate_limit_error_maps_to_agent_rate_limit_error() -> None:
     )
 
     with pytest.raises(AgentRateLimitError) as exc_info:
-        asyncio.run(agent.send("Hi"))
+        await agent.send("Hi")
 
     assert "Rate limit exceeded" in str(exc_info.value)
     assert agent.history == []
 
 
-def test_api_status_error_maps_to_agent_api_error() -> None:
+async def test_api_status_error_maps_to_agent_api_error() -> None:
     agent = _make_error_agent(
         anthropic.APIStatusError(
             message="internal server error",
@@ -283,17 +282,17 @@ def test_api_status_error_maps_to_agent_api_error() -> None:
     )
 
     with pytest.raises(AgentAPIError) as exc_info:
-        asyncio.run(agent.send("Hi"))
+        await agent.send("Hi")
 
     assert exc_info.value.status_code == 500
     assert agent.history == []
 
 
-def test_response_validation_error_maps_to_agent_error() -> None:
+async def test_response_validation_error_maps_to_agent_error() -> None:
     agent = _make_error_agent(anthropic.APIResponseValidationError(response=MagicMock(), body=None))
 
     with pytest.raises(AgentError) as exc_info:
-        asyncio.run(agent.send("Hi"))
+        await agent.send("Hi")
 
     assert "Response validation failed" in str(exc_info.value)
     assert agent.history == []
@@ -304,12 +303,12 @@ def test_response_validation_error_maps_to_agent_error() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_unknown_stop_reason_raises_agent_error() -> None:
+async def test_unknown_stop_reason_raises_agent_error() -> None:
     resp = make_response("totally_unknown_reason", [])
     agent, _ = make_agent(mock_response=resp)
 
     with pytest.raises(AgentError) as exc_info:
-        asyncio.run(agent.send("Hi"))
+        await agent.send("Hi")
 
     assert agent.history == []
     assert "Unknown stop_reason" in str(exc_info.value)
@@ -321,12 +320,12 @@ def test_unknown_stop_reason_raises_agent_error() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_cache_tokens_none_defaults_to_zero() -> None:
+async def test_cache_tokens_none_defaults_to_zero() -> None:
     usage = make_usage(cache_read=None, cache_creation=None)
     resp = make_response("end_turn", [make_text_block("ok")], usage=usage)
     agent, _ = make_agent(mock_response=resp)
 
-    result = asyncio.run(agent.send("Hi"))
+    result = await agent.send("Hi")
 
     assert result.usage.cache_read_input_tokens == 0
     assert result.usage.cache_creation_input_tokens == 0
@@ -337,12 +336,12 @@ def test_cache_tokens_none_defaults_to_zero() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_context_usage_fields() -> None:
+async def test_context_usage_fields() -> None:
     usage = make_usage(input_tokens=1000, cache_read=500, cache_creation=200)
     resp = make_response("end_turn", [make_text_block("ok")], usage=usage)
     agent, _ = make_agent(mock_response=resp)
 
-    result = asyncio.run(agent.send("Hi"))
+    result = await agent.send("Hi")
 
     ctx = result.usage.context
     assert ctx.window_size == FAKE_CONTEXT_WINDOW
@@ -356,13 +355,13 @@ def test_context_usage_fields() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_context_window_fetched_once() -> None:
+async def test_context_window_fetched_once() -> None:
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, _ = make_agent(mock_response=resp)
     agent._client.messages.create = AsyncMock(return_value=resp)
 
-    asyncio.run(agent.send("First"))
-    asyncio.run(agent.send("Second"))
+    await agent.send("First")
+    await agent.send("Second")
 
     agent._client.models.retrieve.assert_awaited_once()
 
@@ -372,7 +371,7 @@ def test_context_window_fetched_once() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_multi_turn_history_grows_correctly() -> None:
+async def test_multi_turn_history_grows_correctly() -> None:
     tool_resp = make_response("tool_use", [make_tool_use_block(id="toolu_01")])
     text_resp = make_response("end_turn", [make_text_block("Done.")])
 
@@ -383,12 +382,12 @@ def test_multi_turn_history_grows_correctly() -> None:
     client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
     agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
 
-    first = asyncio.run(agent.send("Do X"))
+    first = await agent.send("Do X")
     assert first.stop_reason is StopReason.TOOL_USE
     assert len(agent.history) == 2
 
     tool_results = [{"type": "tool_result", "tool_use_id": "toolu_01", "content": "result"}]
-    second = asyncio.run(agent.send(tool_results))
+    second = await agent.send(tool_results)
     assert second.stop_reason is StopReason.END_TURN
     assert len(agent.history) == 4
     assert agent.history[2]["role"] == "user"
@@ -400,10 +399,10 @@ def test_multi_turn_history_grows_correctly() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_history_property_returns_copy() -> None:
+async def test_history_property_returns_copy() -> None:
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, _ = make_agent(mock_response=resp)
-    asyncio.run(agent.send("Hi"))
+    await agent.send("Hi")
 
     snapshot = agent.history
     snapshot.clear()
@@ -416,10 +415,10 @@ def test_history_property_returns_copy() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_reset_clears_history() -> None:
+async def test_reset_clears_history() -> None:
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, _ = make_agent(mock_response=resp)
-    asyncio.run(agent.send("Hi"))
+    await agent.send("Hi")
     assert len(agent.history) == 2
 
     agent.reset()
@@ -431,7 +430,7 @@ def test_reset_clears_history() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_error_mid_conversation_leaves_history_unchanged() -> None:
+async def test_error_mid_conversation_leaves_history_unchanged() -> None:
     ok_resp = make_response("end_turn", [make_text_block("ok")])
     client = MagicMock(spec=anthropic.AsyncAnthropic)
     client.messages = MagicMock()
@@ -445,10 +444,10 @@ def test_error_mid_conversation_leaves_history_unchanged() -> None:
     client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
     agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
 
-    asyncio.run(agent.send("First message"))
+    await agent.send("First message")
     history_after_first = agent.history[:]
 
     with pytest.raises(AgentConnectionError):
-        asyncio.run(agent.send("Second message"))
+        await agent.send("Second message")
 
     assert agent.history == history_after_first
