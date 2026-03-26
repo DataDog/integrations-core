@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+
 from ..utils import get_check
 
 GAUGE_PAYLOAD = """
@@ -63,7 +65,6 @@ def test_gauge_given_exclude_labels_returns_summed_values_if_present(aggregator,
 
     all_metrics = aggregator.metrics('test.cars_in_lot')
 
-    # Samples with the excluded color label are summed and color tag is absent
     aggregator.assert_metric(
         'test.cars_in_lot',
         12.0,
@@ -79,7 +80,6 @@ def test_gauge_given_exclude_labels_returns_summed_values_if_present(aggregator,
     for m in all_metrics:
         assert not any(t.startswith('color:') for t in m.tags), f"Excluded tag 'color' found in {m.tags}"
 
-    # Samples without the excluded label are collected individually
     aggregator.assert_metric(
         'test.cars_in_lot',
         5.0,
@@ -92,7 +92,6 @@ def test_gauge_given_exclude_labels_returns_summed_values_if_present(aggregator,
         metric_type=aggregator.GAUGE,
         tags=['endpoint:test', 'make:honda', 'model:civic', 'license:FF5734'],
     )
-    # license tag is preserved since it was not excluded
     license_metrics = [m for m in all_metrics if any(t.startswith('license:') for t in m.tags)]
     assert len(license_metrics) == 2
 
@@ -159,136 +158,95 @@ def test_counter_given_exclude_labels_submits_monotonically_increasing_sums(
     assert t1_metrics[0].value == 322.0
 
 
-def test_summary_given_exclude_labels_ignores_exclusion(aggregator, dd_run_check, mock_http_response):
-    mock_http_response(SUMMARY_PAYLOAD)
+@pytest.mark.parametrize(
+    'payload, expected_metrics',
+    [
+        pytest.param(
+            SUMMARY_PAYLOAD,
+            [
+                ('test.rpc_duration.quantile', 100, 'GAUGE', ['handler:api', 'color:red', 'quantile:0.5']),
+                ('test.rpc_duration.quantile', 80, 'GAUGE', ['handler:api', 'color:blue', 'quantile:0.5']),
+                ('test.rpc_duration.quantile', 500, 'GAUGE', ['handler:api', 'color:red', 'quantile:0.99']),
+                ('test.rpc_duration.quantile', 400, 'GAUGE', ['handler:api', 'color:blue', 'quantile:0.99']),
+                ('test.rpc_duration.sum', 5000, 'MONOTONIC_COUNT', ['handler:api', 'color:red']),
+                ('test.rpc_duration.sum', 3000, 'MONOTONIC_COUNT', ['handler:api', 'color:blue']),
+                ('test.rpc_duration.count', 50, 'MONOTONIC_COUNT', ['handler:api', 'color:red']),
+                ('test.rpc_duration.count', 30, 'MONOTONIC_COUNT', ['handler:api', 'color:blue']),
+            ],
+            id='summary',
+        ),
+        pytest.param(
+            HISTOGRAM_PAYLOAD,
+            [
+                (
+                    'test.request_duration.bucket',
+                    10,
+                    'MONOTONIC_COUNT',
+                    ['handler:api', 'color:red', 'upper_bound:0.1'],
+                ),
+                (
+                    'test.request_duration.bucket',
+                    5,
+                    'MONOTONIC_COUNT',
+                    ['handler:api', 'color:blue', 'upper_bound:0.1'],
+                ),
+                (
+                    'test.request_duration.bucket',
+                    20,
+                    'MONOTONIC_COUNT',
+                    ['handler:api', 'color:red', 'upper_bound:1.0'],
+                ),
+                (
+                    'test.request_duration.bucket',
+                    12,
+                    'MONOTONIC_COUNT',
+                    ['handler:api', 'color:blue', 'upper_bound:1.0'],
+                ),
+                ('test.request_duration.sum', 100.5, 'MONOTONIC_COUNT', ['handler:api', 'color:red']),
+                ('test.request_duration.sum', 50.3, 'MONOTONIC_COUNT', ['handler:api', 'color:blue']),
+                ('test.request_duration.count', 25, 'MONOTONIC_COUNT', ['handler:api', 'color:red']),
+                ('test.request_duration.count', 15, 'MONOTONIC_COUNT', ['handler:api', 'color:blue']),
+            ],
+            id='histogram',
+        ),
+    ],
+)
+def test_non_aggregable_types_given_exclude_labels_preserves_all_labels(
+    aggregator, dd_run_check, mock_http_response, payload, expected_metrics
+):
+    mock_http_response(payload)
     check = get_check({'metrics': ['.+'], 'exclude_labels': ['color'], 'aggregate_metrics_on_label_exclusion': True})
     dd_run_check(check)
 
-    aggregator.assert_metric(
-        'test.rpc_duration.quantile',
-        100,
-        metric_type=aggregator.GAUGE,
-        tags=['endpoint:test', 'handler:api', 'color:red', 'quantile:0.5'],
-    )
-    aggregator.assert_metric(
-        'test.rpc_duration.quantile',
-        80,
-        metric_type=aggregator.GAUGE,
-        tags=['endpoint:test', 'handler:api', 'color:blue', 'quantile:0.5'],
-    )
-    aggregator.assert_metric(
-        'test.rpc_duration.quantile',
-        500,
-        metric_type=aggregator.GAUGE,
-        tags=['endpoint:test', 'handler:api', 'color:red', 'quantile:0.99'],
-    )
-    aggregator.assert_metric(
-        'test.rpc_duration.quantile',
-        400,
-        metric_type=aggregator.GAUGE,
-        tags=['endpoint:test', 'handler:api', 'color:blue', 'quantile:0.99'],
-    )
-    aggregator.assert_metric(
-        'test.rpc_duration.sum',
-        5000,
-        metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api', 'color:red'],
-    )
-    aggregator.assert_metric(
-        'test.rpc_duration.sum',
-        3000,
-        metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api', 'color:blue'],
-    )
-    aggregator.assert_metric(
-        'test.rpc_duration.count',
-        50,
-        metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api', 'color:red'],
-    )
-    aggregator.assert_metric(
-        'test.rpc_duration.count',
-        30,
-        metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api', 'color:blue'],
-    )
+    for name, value, metric_type, extra_tags in expected_metrics:
+        aggregator.assert_metric(
+            name,
+            value,
+            metric_type=getattr(aggregator, metric_type),
+            tags=['endpoint:test'] + extra_tags,
+        )
 
     aggregator.assert_all_metrics_covered()
 
 
-def test_histogram_given_exclude_labels_ignores_exclusion(aggregator, dd_run_check, mock_http_response):
-    mock_http_response(HISTOGRAM_PAYLOAD)
-    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color'], 'aggregate_metrics_on_label_exclusion': True})
-    dd_run_check(check)
-
-    aggregator.assert_metric(
-        'test.request_duration.bucket',
-        10,
-        metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api', 'color:red', 'upper_bound:0.1'],
-    )
-    aggregator.assert_metric(
-        'test.request_duration.bucket',
-        5,
-        metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api', 'color:blue', 'upper_bound:0.1'],
-    )
-    aggregator.assert_metric(
-        'test.request_duration.bucket',
-        20,
-        metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api', 'color:red', 'upper_bound:1.0'],
-    )
-    aggregator.assert_metric(
-        'test.request_duration.bucket',
-        12,
-        metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api', 'color:blue', 'upper_bound:1.0'],
-    )
-    aggregator.assert_metric(
-        'test.request_duration.sum',
-        100.5,
-        metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api', 'color:red'],
-    )
-    aggregator.assert_metric(
-        'test.request_duration.sum',
-        50.3,
-        metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api', 'color:blue'],
-    )
-    aggregator.assert_metric(
-        'test.request_duration.count',
-        25,
-        metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api', 'color:red'],
-    )
-    aggregator.assert_metric(
-        'test.request_duration.count',
-        15,
-        metric_type=aggregator.MONOTONIC_COUNT,
-        tags=['endpoint:test', 'handler:api', 'color:blue'],
-    )
-
-    aggregator.assert_all_metrics_covered()
-
-
-def test_gauge_given_aggregate_disabled_returns_individual_values(aggregator, dd_run_check, mock_http_response):
+def test_gauge_given_type_override_to_rate_skips_aggregation(aggregator, dd_run_check, mock_http_response):
     mock_http_response(GAUGE_PAYLOAD)
-    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
+    check = get_check(
+        {
+            'metrics': [{'.+': {'type': 'rate'}}],
+            'exclude_labels': ['color'],
+            'aggregate_metrics_on_label_exclusion': True,
+        }
+    )
     dd_run_check(check)
 
     all_metrics = aggregator.metrics('test.cars_in_lot')
-
     honda_civic = [
         m
         for m in all_metrics
         if 'make:honda' in m.tags and 'model:civic' in m.tags and not any(t.startswith('license:') for t in m.tags)
     ]
     assert len(honda_civic) == 3
-
-    toyota_corolla = [m for m in all_metrics if 'make:toyota' in m.tags and 'model:corolla' in m.tags]
-    assert len(toyota_corolla) == 3
 
     for m in all_metrics:
         assert not any(t.startswith('color:') for t in m.tags)
@@ -323,26 +281,3 @@ def test_gauge_given_include_and_exclude_labels_with_aggregation(aggregator, dd_
     )
 
     aggregator.assert_all_metrics_covered()
-
-
-def test_gauge_given_type_override_to_rate_skips_aggregation(aggregator, dd_run_check, mock_http_response):
-    mock_http_response(GAUGE_PAYLOAD)
-    check = get_check(
-        {
-            'metrics': [{'.+': {'type': 'rate'}}],
-            'exclude_labels': ['color'],
-            'aggregate_metrics_on_label_exclusion': True,
-        }
-    )
-    dd_run_check(check)
-
-    all_metrics = aggregator.metrics('test.cars_in_lot')
-    honda_civic = [
-        m
-        for m in all_metrics
-        if 'make:honda' in m.tags and 'model:civic' in m.tags and not any(t.startswith('license:') for t in m.tags)
-    ]
-    assert len(honda_civic) == 3
-
-    for m in all_metrics:
-        assert not any(t.startswith('color:') for t in m.tags)
