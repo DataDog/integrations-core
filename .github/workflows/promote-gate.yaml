@@ -1,0 +1,57 @@
+name: Promote Gate
+
+on:
+  pull_request:
+    branches:
+    - master
+    - 7.*.*
+
+jobs:
+  check:
+    name: Set promote-wheels status
+    runs-on: ubuntu-22.04
+    permissions:
+      statuses: write
+      contents: read
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Check if dependency files changed
+      id: deps-changed
+      run: |
+        CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.sha }} -- \
+          agent_requirements.in '.deps/resolved/')
+        if [ -n "$CHANGED" ]; then
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Set promote-wheels status to pending
+      if: steps.deps-changed.outputs.changed == 'true'
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      with:
+        script: |
+          await github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: context.payload.pull_request.head.sha,
+            state: 'pending',
+            context: 'promote-wheels',
+            description: 'Wheels must be promoted to stable before merge. Run: ddev promote <PR_URL>',
+          });
+
+    - name: Set promote-wheels status to success
+      if: steps.deps-changed.outputs.changed == 'false'
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      with:
+        script: |
+          await github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: context.payload.pull_request.head.sha,
+            state: 'success',
+            context: 'promote-wheels',
+            description: 'No dependency changes — promotion not required.',
+          });

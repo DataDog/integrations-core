@@ -1,0 +1,75 @@
+name: Promote Wheels
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: PR number to promote wheels for
+        required: true
+        type: number
+      head_sha:
+        description: Head SHA of the PR branch
+        required: true
+        type: string
+
+jobs:
+  promote:
+    name: Promote wheels from dev to stable
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+      statuses: write
+      pull-requests: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ inputs.head_sha }}
+
+    - name: Set up Python
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: "3.13"
+
+    - name: Install dependencies
+      run: pip install -r .builders/deps/host_dependencies.txt
+
+    - name: Get credentials
+      id: auth
+      uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+      with:
+        project_id: datadog-agent-int-build
+        workload_identity_provider: projects/574011472402/locations/global/workloadIdentityPools/github/providers/integrations-core
+
+    - name: Promote wheels
+      run: python .builders/promote.py
+
+    - name: Clean up credentials
+      if: always()
+      run: rm -f ${{ steps.auth.outputs.credentials_file_path }}
+
+    - name: Set promote-wheels status to success
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      with:
+        script: |
+          await github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: '${{ inputs.head_sha }}',
+            state: 'success',
+            context: 'promote-wheels',
+            description: 'Wheels promoted to stable storage.',
+          });
+
+    - name: Post success comment
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      with:
+        script: |
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: ${{ inputs.pr_number }},
+            body: `Wheels promoted to stable storage for commit ${{ inputs.head_sha }} by @${context.actor}.`,
+          });
