@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import sys
 
 import pytest
 
@@ -1683,7 +1684,7 @@ class TestCommandFieldsPyPI:
             _ = config.pypi.auth
 
     def test_auth_fetch_command_empty_output_message_is_actionable(self):
-        config = RootConfig({'pypi': {'auth_fetch_command': 'echo ""'}})
+        config = RootConfig({'pypi': {'auth_fetch_command': f'{sys.executable} -c "pass"'}})
         with pytest.raises(ConfigurationError) as exc_info:
             _ = config.pypi.auth
         message = str(exc_info.value)

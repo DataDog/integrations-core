@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import sys
+
 import pytest
 
 from ddev.config.command_resolver import (
@@ -46,7 +48,7 @@ class TestRunCommand:
 
     def test_empty_output_raises(self):
         with pytest.raises(CommandExecutionError) as exc_info:
-            run_command('echo ""')
+            run_command(f'{sys.executable} -c "pass"')
         assert exc_info.value.reason == EMPTY_OUTPUT
         assert 'empty output' in str(exc_info.value)
 
