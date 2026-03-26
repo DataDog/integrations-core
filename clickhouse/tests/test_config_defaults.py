@@ -171,6 +171,14 @@ def test_all_config_defaults(minimal_instance):
 
 def _compare_nested_object(actual_obj, expected_dict, field_path, failures):
     """Recursively compare a nested config object against an expected dict."""
+    actual_fields = set(type(actual_obj).model_fields.keys())
+    expected_fields = set(expected_dict.keys())
+    missing = actual_fields - expected_fields
+    if missing:
+        failures.append(
+            f"{field_path}: nested fields exist in model but are missing from EXPECTED_DEFAULTS: {sorted(missing)}"
+        )
+
     for key, expected_value in expected_dict.items():
         try:
             actual_value = getattr(actual_obj, key)
