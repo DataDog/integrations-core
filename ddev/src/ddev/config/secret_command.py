@@ -18,18 +18,19 @@ class SecretCommandError(Exception):
 
 
 def parse_secret_command(command: str) -> list[str]:
-    """Parse a command string into argv using platform-appropriate shlex mode."""
+    """Parse a command string into argv.
+
+    On Windows, bare backslash paths (e.g. ``C:\\path\\tool.exe``) are
+    supported without quoting, and both single-quoted and double-quoted paths
+    work too.  The implementation pre-escapes unquoted backslashes so that
+    POSIX shlex can be used uniformly on all platforms.
+    """
+    if sys.platform == 'win32':
+        command = _escape_unquoted_backslashes(command)
     try:
-        argv = shlex.split(command, posix=sys.platform != 'win32')
+        argv = shlex.split(command, posix=True)
     except ValueError as e:
         raise SecretCommandError('command could not be parsed', reason='parse_error') from e
-
-    if sys.platform == 'win32':
-        # non-POSIX shlex preserves quote characters literally in each token.
-        # Strip outer single/double quote wrappers so that paths produced by
-        # shlex.quote() (e.g. 'C:\foo\bar.exe') are correctly unwrapped, while
-        # backslashes in bare unquoted Windows paths are still preserved.
-        argv = [_unwrap_quotes(a) for a in argv]
 
     if not argv:
         raise SecretCommandError('command is empty', reason='empty_command')
@@ -37,16 +38,28 @@ def parse_secret_command(command: str) -> list[str]:
     return argv
 
 
-def _unwrap_quotes(token: str) -> str:
-    """Strip matching outer single or double quotes from a token.
+def _escape_unquoted_backslashes(command: str) -> str:
+    """Double backslashes that appear outside quoted regions.
 
-    non-POSIX shlex preserves quote characters literally; this restores the
-    behaviour users expect (quotes group/protect content but are not included
-    in the final value).
+    POSIX shlex treats a bare ``\\`` as an escape character, eating the
+    following character.  Doubling unquoted backslashes before POSIX parsing
+    ensures they survive as literal path separators.  Backslashes inside
+    single or double quotes are left untouched: POSIX shlex already handles
+    them correctly there (all chars literal inside single quotes; only special
+    chars escaped inside double quotes).
     """
-    if len(token) >= 2 and token[0] in ("'", '"') and token[-1] == token[0]:
-        return token[1:-1]
-    return token
+    result = []
+    in_single = False
+    in_double = False
+    for ch in command:
+        if ch == "'" and not in_double:
+            in_single = not in_single
+        elif ch == '"' and not in_single:
+            in_double = not in_double
+        elif ch == '\\' and not in_single and not in_double:
+            result.append('\\')  # prepend extra backslash so POSIX sees \\→\
+        result.append(ch)
+    return ''.join(result)
 
 
 def run_secret_command(command: str, *, timeout: float | None = None) -> str:

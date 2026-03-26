@@ -3,6 +3,7 @@ import pytest
 from ddev.config import secret_command
 from ddev.config.secret_command import (
     SecretCommandError,
+    _escape_unquoted_backslashes,
     parse_secret_command,
     reset_secret_command_cache,
     run_secret_command,
@@ -224,7 +225,7 @@ def test_run_secret_command_non_zero_includes_stderr_summary(monkeypatch):
         run_secret_command('python token.py')
 
 
-def test_parse_secret_command_uses_posix_mode_off_windows(monkeypatch):
+def test_parse_secret_command_uses_posix_mode(monkeypatch):
     captured = {}
 
     def fake_split(command, *, posix):
@@ -232,26 +233,12 @@ def test_parse_secret_command_uses_posix_mode_off_windows(monkeypatch):
         captured['posix'] = posix
         return ['python', '-c', 'print(1)']
 
-    monkeypatch.setattr(secret_command.sys, 'platform', 'linux')
-    monkeypatch.setattr(secret_command.shlex, 'split', fake_split)
-
-    assert parse_secret_command('python -c "print(1)"') == ['python', '-c', 'print(1)']
-    assert captured == {'command': 'python -c "print(1)"', 'posix': True}
-
-
-def test_parse_secret_command_uses_non_posix_mode_on_windows(monkeypatch):
-    captured = {}
-
-    def fake_split(command, *, posix):
-        captured['command'] = command
-        captured['posix'] = posix
-        return [r'C:\Users\me\get-token.exe', '--flag']
-
-    monkeypatch.setattr(secret_command.sys, 'platform', 'win32')
-    monkeypatch.setattr(secret_command.shlex, 'split', fake_split)
-
-    assert parse_secret_command(r'C:\Users\me\get-token.exe --flag') == [r'C:\Users\me\get-token.exe', '--flag']
-    assert captured == {'command': r'C:\Users\me\get-token.exe --flag', 'posix': False}
+    for platform in ('linux', 'win32'):
+        captured.clear()
+        monkeypatch.setattr(secret_command.sys, 'platform', platform)
+        monkeypatch.setattr(secret_command.shlex, 'split', fake_split)
+        parse_secret_command('python -c "print(1)"')
+        assert captured['posix'] is True, f'expected posix=True on {platform}'
 
 
 def test_parse_secret_command_preserves_windows_backslashes(monkeypatch):
@@ -260,20 +247,44 @@ def test_parse_secret_command_preserves_windows_backslashes(monkeypatch):
     assert parse_secret_command(r'C:\Users\me\get-token.exe --flag') == [r'C:\Users\me\get-token.exe', '--flag']
 
 
-def test_parse_secret_command_strips_posix_single_quotes_on_windows(monkeypatch):
+def test_parse_secret_command_handles_single_quoted_windows_path(monkeypatch):
+    # shlex.quote() wraps Windows paths in POSIX-style single quotes
     monkeypatch.setattr(secret_command.sys, 'platform', 'win32')
 
-    # shlex.quote() wraps Windows paths in POSIX-style single quotes; they must be stripped.
     result = parse_secret_command(r"'C:\Users\me\get-token.exe' --flag")
     assert result == [r'C:\Users\me\get-token.exe', '--flag']
 
 
-def test_parse_secret_command_strips_double_quotes_on_windows(monkeypatch):
+def test_parse_secret_command_handles_double_quoted_windows_path_with_spaces(monkeypatch):
+    # Paths with spaces must be double-quoted; POSIX mode handles this natively
     monkeypatch.setattr(secret_command.sys, 'platform', 'win32')
 
-    # Double-quoted tokens (e.g. "-c" args) must also be unwrapped on Windows.
-    result = parse_secret_command(r'"C:\Users\me\get-token.exe" --flag')
-    assert result == [r'C:\Users\me\get-token.exe', '--flag']
+    result = parse_secret_command(r'"C:\Program Files\tool.exe" --flag')
+    assert result == [r'C:\Program Files\tool.exe', '--flag']
+
+
+# --- _escape_unquoted_backslashes unit tests ---
+
+
+def test_escape_unquoted_backslashes_bare_path():
+    assert _escape_unquoted_backslashes(r'C:\Users\me\tool.exe') == r'C:\\Users\\me\\tool.exe'
+
+
+def test_escape_unquoted_backslashes_single_quoted_path_unchanged():
+    cmd = r"'C:\Users\me\tool.exe'"
+    assert _escape_unquoted_backslashes(cmd) == cmd
+
+
+def test_escape_unquoted_backslashes_double_quoted_path_unchanged():
+    cmd = r'"C:\Users\me\tool.exe"'
+    assert _escape_unquoted_backslashes(cmd) == cmd
+
+
+def test_escape_unquoted_backslashes_mixed():
+    # bare path followed by double-quoted argument containing backslash
+    cmd = r'C:\tool.exe "C:\data path\arg"'
+    result = _escape_unquoted_backslashes(cmd)
+    assert result == r'C:\\tool.exe "C:\data path\arg"'
 
 
 def _parse_error():
