@@ -35,7 +35,7 @@ psutil==6.0.0
 psycopg[c,pool]==3.3.3
 pyasn1==0.4.8
 pydantic==2.12.5
-pyjwt==2.11.0
+pyjwt==2.12.1
 pymongo[srv]==4.8.0; python_version >= '3.9'
 pymqi==1.12.13
 pymysql==1.1.2
