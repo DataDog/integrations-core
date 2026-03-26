@@ -63,6 +63,7 @@ class Subscription(ABC):
         message_cache = {}
         # Use as an ordered set
         unknown_errors = {}
+        truncated = False
 
         while True:
             try:
@@ -75,13 +76,21 @@ class Subscription(ABC):
                         self.TYPE,
                         self.check.config.max_message_length,
                     )
+                    truncated = True
                     break
                 elif not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
                     unknown_errors[str(e)] = traceback.format_exc()
                     time.sleep(1)
             else:
-                message = self.parse_message(payload)
-                message_cache[self.get_message_id(message)] = message
+                try:
+                    message = self.parse_message(payload)
+                    message_cache[self.get_message_id(message)] = message
+                except (ValueError, json.JSONDecodeError) as e:
+                    self.check.log.warning(
+                        'Failed to parse message on subscription %s: %s',
+                        self.TYPE,
+                        e,
+                    )
 
             if self._get_elapsed_time() >= SNAPSHOT_UPDATE_INTERVAL:
                 break
@@ -92,6 +101,12 @@ class Subscription(ABC):
             self._submit_health_status(ServiceCheck.CRITICAL, tags, status_message)
             for error in unknown_errors.values():
                 self.check.log.error('%s\n%s', status_message, error)
+        elif truncated:
+            status_message = (
+                'Subscription for {} received a message exceeding the buffer size. '
+                'Increase max_message_length in the integration configuration.'.format(self.TOPIC_STRING)
+            )
+            self._submit_health_status(ServiceCheck.WARNING, tags, status_message)
         elif not message_cache:
             status_message = 'Subscription found nothing for topic string: {}'.format(self.TOPIC_STRING)
             self._submit_health_status(ServiceCheck.WARNING, tags, status_message)

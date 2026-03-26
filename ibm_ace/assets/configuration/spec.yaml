@@ -78,6 +78,7 @@ files:
         example: 65536
         type: integer
         minimum: 4096
+        maximum: 67108864
     - name: persist_connections
       description: |
         Whether to keep connections open rather than disconnecting after every check run.

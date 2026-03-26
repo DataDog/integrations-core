@@ -46,11 +46,14 @@ def test_truncated_message_given_oversized_payload_skips_without_critical(instan
 
     import pymqi
 
+    from datadog_checks.base.constants import ServiceCheck
+
     mock_config = MagicMock()
     mock_config.max_message_length = 65536
 
     check = IbmAceCheck('ibm_ace', {}, [instance])
     check.log = MagicMock()
+    check.service_check = MagicMock()
 
     sub = ResourceStatisticsSubscription(check, global_tags)
 
@@ -73,3 +76,44 @@ def test_truncated_message_given_oversized_payload_skips_without_critical(instan
         65536,
     )
     check.log.error.assert_not_called()
+
+    sc_calls = [c for c in check.service_check.call_args_list if c[0][0] == 'mq.subscription']
+    assert len(sc_calls) == 1
+    assert sc_calls[0][0][1] == ServiceCheck.WARNING
+
+
+def test_non_truncation_error_given_connection_broken_returns_critical(instance, global_tags):
+    from unittest.mock import MagicMock, PropertyMock, patch
+
+    import pymqi
+
+    from datadog_checks.base.constants import ServiceCheck
+
+    mock_config = MagicMock()
+    mock_config.max_message_length = 65536
+
+    check = IbmAceCheck('ibm_ace', {}, [instance])
+    check.log = MagicMock()
+    check.service_check = MagicMock()
+    check.gauge = MagicMock()
+
+    sub = ResourceStatisticsSubscription(check, global_tags)
+
+    connection_error = pymqi.MQMIError(pymqi.CMQC.MQCC_FAILED, pymqi.CMQC.MQRC_CONNECTION_BROKEN)
+
+    mock_sub = MagicMock()
+    mock_sub.get.side_effect = connection_error
+
+    with (
+        patch.object(type(check), 'config', new_callable=PropertyMock, return_value=mock_config),
+        patch.object(type(sub), 'sub', new_callable=PropertyMock, return_value=mock_sub),
+        patch.object(sub, '_get_elapsed_time', return_value=25),
+    ):
+        messages = sub.get_latest_messages()
+
+    assert messages == []
+    check.log.error.assert_called()
+
+    sc_calls = [c for c in check.service_check.call_args_list if c[0][0] == 'mq.subscription']
+    assert len(sc_calls) == 1
+    assert sc_calls[0][0][1] == ServiceCheck.CRITICAL
