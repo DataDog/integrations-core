@@ -373,7 +373,6 @@ def apply_deprecation_warnings(instance: dict, validation_result: ValidationResu
         ['deep_database_monitoring', 'dbm'],
         ['managed_identity', 'azure.managed_authentication'],
         ['statement_samples', 'query_samples'],
-        ['collect_default_database', 'postgres'],
     ]
 
     for deprecation in deprecations:
