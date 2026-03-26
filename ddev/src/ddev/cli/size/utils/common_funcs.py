@@ -325,13 +325,15 @@ def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[st
     versions = []
     with open(file_path, "r", encoding="utf-8") as file:
         file_content = file.read()
-        pattern = re.compile(r"([\w\-\d\.]+) @ (https?://[^\s#]+)")
+        pattern = re.compile(r"([\w\-\d\.]+) @ (\$\{PACKAGE_BASE_URL\}/[^\s#]+|https?://[^\s#]+)")
         for line in file_content.splitlines():
             match = pattern.search(line)
             if not match:
                 raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
             name = match.group(1)
             url = match.group(2)
+            if url.startswith("${PACKAGE_BASE_URL}"):
+                url = url.replace("${PACKAGE_BASE_URL}", "https://agent-int-packages.datadoghq.com/stable", 1)
 
             deps.append(name)
             download_urls.append(url)

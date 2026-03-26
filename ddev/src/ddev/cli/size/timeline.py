@@ -540,11 +540,13 @@ def get_dependency_data(file_path: str, module: str) -> tuple[Optional[str], Opt
     with open(file_path, "r", encoding="utf-8") as file:
         file_content = file.read()
         for line in file_content.splitlines():
-            match = re.search(r"([\w\-\d\.]+) @ (https?://[^\s#]+)", line)
+            match = re.search(r"([\w\-\d\.]+) @ (\$\{PACKAGE_BASE_URL\}/[^\s#]+|https?://[^\s#]+)", line)
             if not match:
                 raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
             name, url = match.groups()
             if name == module:
+                if url.startswith("${PACKAGE_BASE_URL}"):
+                    url = url.replace("${PACKAGE_BASE_URL}", "https://agent-int-packages.datadoghq.com/stable", 1)
                 version_match = re.search(rf"{re.escape(name)}/[^/]+?-([0-9]+(?:\.[0-9]+)*)-", url)
                 version = version_match.group(1) if version_match else ""
                 return url, version
