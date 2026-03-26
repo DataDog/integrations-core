@@ -56,4 +56,7 @@ excluded_paths = [
   "!botocore/data/rds",
   # Riakcs integration monitors s3.
   "!botocore/data/s3",
+  # Top-level JSON files (endpoints.json, partitions.json, _retry.json, etc.)
+  # are required by botocore to resolve AWS endpoints and handle retries.
+  "!botocore/data/*.json",
 ]
