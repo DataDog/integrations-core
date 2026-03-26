@@ -210,9 +210,9 @@ files:
       description: |
         Set the reported database hostname for the connected MongoDB instance.
 
-        This value overrides the MongoDB hostname
-        detected by the Agent from MongoDB admin command serverStatus. It can be useful to set a custom hostname
-        when connecting to a remote database through a proxy.
+        This value overrides the MongoDB hostname detected by the Agent from MongoDB admin command
+        serverStatus. It can be useful to set a custom hostname when connecting to a remote database
+        through a proxy.
       fleet_configurable: true
       value:
         type: string
