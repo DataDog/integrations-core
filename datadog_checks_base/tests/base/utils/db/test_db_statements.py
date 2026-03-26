@@ -273,32 +273,29 @@ class TestStatementMetrics:
 
     def test_compute_derivative_rows_mem_usage(self):
         '''
-        Test that the memory usage of `compute_derivative_rows` is within acceptable limits
-        Make sure we minimize the temporary objects created when computing the derivative
-        This test is skipped if tracemalloc is not available
+        Test that _previous_statements only caches metric columns, not full rows.
+        This ensures we don't hold on to large non-metric fields (e.g. query text) between check runs.
         '''
-        # The memory usage threshold takes tracing overhead into account
-        MEMORY_USAGE_THRESHOLD = 10 * 1024 * 1024  # 10 MB
-
-        try:
-            import tracemalloc
-        except ImportError:
-            return
-
-        tracemalloc.start()
-
-        _, peak_before = tracemalloc.get_traced_memory()
         sm = StatementMetrics()
-        self.__run_compute_derivative_rows(sm)
+        metrics = ['count', 'time']
+        rows = [
+            {
+                'count': 100,
+                'time': 2005,
+                'errors': 1,
+                'query': 'x' * 3000,
+                'db': 'puppies',
+                'user': 'dog',
+                'query_signature': 'sig{}'.format(random.randint(0, 10000)),
+            }
+            for _ in range(10000)
+        ]
+        sm.compute_derivative_rows(rows, metrics, key=lambda x: x['query_signature'])
 
-        _, peak_after = tracemalloc.get_traced_memory()
-        tracemalloc.stop()
-
-        # Calculate the difference in memory usage
-        peak_diff = peak_after - peak_before
-        assert peak_diff < MEMORY_USAGE_THRESHOLD, "Memory usage difference {} is over the threshold {}".format(
-            peak_diff, MEMORY_USAGE_THRESHOLD
-        )
+        for cached_row in sm._previous_statements.values():
+            assert set(cached_row.keys()) <= set(metrics), (
+                "Cache should only contain metric columns, got: {}".format(set(cached_row.keys()))
+            )
 
     def test_compute_derivative_rows_benchmark(self, benchmark):
         sm = StatementMetrics()
