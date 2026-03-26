@@ -292,10 +292,12 @@ class TestStatementMetrics:
         ]
         sm.compute_derivative_rows(rows, metrics, key=lambda x: x['query_signature'])
 
-        for cached_row in sm._previous_statements.values():
-            assert set(cached_row.keys()) <= set(metrics), (
-                "Cache should only contain metric columns, got: {}".format(set(cached_row.keys()))
-            )
+        violations = {
+            key: set(cached_row.keys()) - set(metrics)
+            for key, cached_row in sm._previous_statements.items()
+            if not set(cached_row.keys()) <= set(metrics)
+        }
+        assert not violations, "Cache contains non-metric columns: {}".format(violations)
 
     def test_compute_derivative_rows_benchmark(self, benchmark):
         sm = StatementMetrics()
