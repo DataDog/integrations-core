@@ -366,6 +366,10 @@ integration/contentful:
 - changed-files:
   - any-glob-to-any-file:
     - contentful/**/*
+integration/control_m:
+- changed-files:
+  - any-glob-to-any-file:
+    - control_m/**/*
 integration/coredns:
 - changed-files:
   - any-glob-to-any-file:
@@ -390,14 +394,14 @@ integration/crio:
 - changed-files:
   - any-glob-to-any-file:
     - crio/**/*
-integration/cyberark_endpoint_privilege_manager:
-- changed-files:
-  - any-glob-to-any-file:
-    - cyberark_endpoint_privilege_manager/**/*
 integration/crowdstrike_fdr:
 - changed-files:
   - any-glob-to-any-file:
     - crowdstrike_fdr/**/*
+integration/cyberark_endpoint_privilege_manager:
+- changed-files:
+  - any-glob-to-any-file:
+    - cyberark_endpoint_privilege_manager/**/*
 integration/databricks:
 - changed-files:
   - any-glob-to-any-file:
@@ -446,6 +450,10 @@ integration/dnsfilter:
 - changed-files:
   - any-glob-to-any-file:
     - dnsfilter/**/*
+integration/do_query_actions:
+- changed-files:
+  - any-glob-to-any-file:
+    - do_query_actions/**/*
 integration/docker_daemon:
 - changed-files:
   - any-glob-to-any-file:
@@ -1154,6 +1162,10 @@ integration/powerdns_recursor:
 - changed-files:
   - any-glob-to-any-file:
     - powerdns_recursor/**/*
+integration/prefect:
+- changed-files:
+  - any-glob-to-any-file:
+    - prefect/**/*
 integration/presto:
 - changed-files:
   - any-glob-to-any-file:
@@ -1498,7 +1510,7 @@ integration/trend_micro_email_security:
 - changed-files:
   - any-glob-to-any-file:
     - trend_micro_email_security/**/*
-integration/trend_micro_vision_one_endpoint_security:
+integration/trend_micro_vision_one_eps:
 - changed-files:
   - any-glob-to-any-file:
     - trend_micro_vision_one_endpoint_security/**/*

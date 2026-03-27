@@ -189,7 +189,7 @@ files:
             display_default: 600
     - name: dbm
       description: |
-        Set to `true` enable Database Monitoring.
+        Set to `true` to enable Database Monitoring.
       fleet_configurable: true
       enabled: false
       value:
@@ -208,9 +208,11 @@ files:
         type: string
     - name: reported_database_hostname
       description: |
-        Set the reported database hostname for the connected mongodb instance. This value overrides the mongodb hostname
-        detected by the Agent from mongodb admin command serverStatus. It can be useful to set a custom hostname
-        when connecting to a remote database through a proxy.
+        Set the reported database hostname for the connected MongoDB instance.
+
+        This value overrides the MongoDB hostname detected by the Agent from MongoDB admin command
+        serverStatus. It can be useful to set a custom hostname when connecting to a remote database
+        through a proxy.
       fleet_configurable: true
       value:
         type: string
@@ -585,7 +587,7 @@ files:
         example: true
     - name: free_storage_metrics
       description: |
-        Enabled or disable the collection of free storage metrics.
+        Enable or disable the collection of free storage metrics.
         By default, this option is enabled (`true`), meaning free storage metrics are collected.
         Set to `false` to disable collection of free storage metrics.
 
@@ -599,7 +601,7 @@ files:
         display_default: true
     - name: add_node_tag_to_events
       description: |
-        Adds the Mongo node to events as a tag rather than creating a seperate host for the event.
+        Adds the Mongo node to events as a tag rather than creating a separate host for the event.
       fleet_configurable: true
       hidden: true
       value:
@@ -607,7 +609,7 @@ files:
         example: true
     - name: custom_queries
       description: |
-        Define custom queries to collect custom metrics on your Mongo
+        Define custom queries to collect custom metrics on your MongoDB instance.
         Note: Custom queries are ignored by default when the mongo node is a secondary of a replica set.
         You can add `run_on_secondary: true` for each query that you want to run on both primaries and secondaries.
         See https://docs.datadoghq.com/integrations/guide/mongo-custom-query-collection to learn more.

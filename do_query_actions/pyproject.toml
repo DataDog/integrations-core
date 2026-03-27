@@ -1,0 +1,64 @@
+[build-system]
+requires = [
+    "hatchling>=0.13.0",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "datadog-do-query-actions"
+description = "The DO Query Actions check"
+readme = "README.md"
+license = "BSD-3-Clause"
+requires-python = ">=3.13"
+keywords = [
+    "datadog",
+    "datadog agent",
+    "datadog check",
+    "do_query_actions",
+]
+authors = [
+    { name = "Datadog", email = "packages@datadoghq.com" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Private :: Do Not Upload",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Monitoring",
+]
+dependencies = [
+    "datadog-checks-base>=37.27.1",
+]
+dynamic = [
+    "version",
+]
+
+[project.optional-dependencies]
+deps = [
+    "azure-identity==1.25.3",
+    "boto3==1.42.72",
+    "psycopg[c,pool]==3.3.3",
+]
+
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
+
+[tool.hatch.version]
+path = "datadog_checks/do_query_actions/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/datadog_checks",
+    "/tests",
+    "/manifest.json",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/datadog_checks/do_query_actions",
+]
+dev-mode-dirs = [
+    ".",
+]

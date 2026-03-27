@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 37.31.0 / 2026-02-19
+## 37.33.0 / 2026-03-20
+
+***Added***:
+
+* Add support for require_trusted_provider security validation ([#22226](https://github.com/DataDog/integrations-core/pull/22226))
+
+## 37.32.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707)), ([#22777](https://github.com/DataDog/integrations-core/pull/22777))
+
+## 37.31.0 / 2026-02-19 / Agent 7.77.0
 
 ***Security***:
 
@@ -13,7 +25,7 @@
 * Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
 * Bump ddtrace to version 3.19.5 ([#22482](https://github.com/DataDog/integrations-core/pull/22482))
 
-## 37.30.0 / 2026-02-11
+## 37.30.0 / 2026-02-11 / Agent 7.76.0
 
 ***Security***:
 

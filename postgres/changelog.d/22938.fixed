@@ -1,0 +1,3 @@
+Respect exclude_hostname config parameter for debug metrics. If this setting is not respected, we can still submit metrics wi
+th a hostname tag, which can have undesirable effects throughout the platform. For example, a host can appear in the Host list wh
+ere it should not.

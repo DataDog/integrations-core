@@ -196,7 +196,9 @@ files:
           type: boolean
       - name: collect_statistics_metrics
         description: |
-          Collect metrics from Statistics Messages. Statistics collected are:
+          Collect metrics from Statistics Messages.
+
+          Statistics collected are:
             - channel statistics (MQCMD_STATISTICS_CHANNEL)
             - queue statistics (MQCMD_STATISTICS_Q)
         fleet_configurable: true

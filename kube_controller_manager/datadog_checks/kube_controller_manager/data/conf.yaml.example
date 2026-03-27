@@ -57,6 +57,7 @@ instances:
 
     ## @param leader_election_kind - string - optional - default: auto
     ## The kind of object to look at for the leader election.
+    ##
     ## Options:
     ##   * auto
     ##   * lease

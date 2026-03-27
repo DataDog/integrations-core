@@ -333,7 +333,6 @@ def test_apply_validated_defaults_ssl(mock_check, minimal_instance):
         ('deep_database_monitoring', 'dbm', True),
         ('managed_identity', 'azure.managed_authentication', {}),
         ('statement_samples', 'query_samples', {}),
-        ('collect_default_database', 'postgres', True),
     ],
 )
 def test_apply_deprecation_warnings(mock_check, minimal_instance, option, replacement, value):

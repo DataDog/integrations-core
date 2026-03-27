@@ -163,6 +163,7 @@ class SQLServer(DatabaseCheck):
         self.databases = set()
         self.autodiscovery_query = None
         self._ad_last_check = 0
+        self._ad_initial_discovery_done = False
         self._index_usage_last_check_ts = 0
         self._sql_counter_types = {}
         self.proc_type_mapping = {"gauge": self.gauge, "rate": self.rate, "histogram": self.histogram}
@@ -492,7 +493,7 @@ class SQLServer(DatabaseCheck):
         tags = tags if tags else []
         return {
             "tags": self.debug_tags() + tags,
-            "hostname": self.resolved_hostname,
+            "hostname": self.reported_hostname,
             "raw": True,
         }
 
@@ -593,6 +594,10 @@ class SQLServer(DatabaseCheck):
             self._ad_last_check = now
             if filtered_dbs != self.databases:
                 self.log.debug("Databases updated from previous autodiscovery check.")
+                if self._ad_initial_discovery_done and self._database_metrics is not None:
+                    self.log.info("Invalidating database metrics cache due to database list change.")
+                    self._database_metrics = None
+                self._ad_initial_discovery_done = True
                 self.databases = filtered_dbs
                 return True
         return False

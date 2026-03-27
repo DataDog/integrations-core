@@ -161,8 +161,8 @@ files:
     - name: tag_queries
       description: |
         The `tag_queries` parameter lets you specify a list of queries to tag metrics with a target class property.
-        Each item in the list is a set of :
 
+        Each item in the list is a set of :
         `[<LINK_SOURCE_PROPERTY>, <TARGET_CLASS>, <LINK_TARGET_CLASS_PROPERTY>, <TARGET_PROPERTY> AS <TAG_ALIAS>]`
 
           * `<LINK_SOURCE_PROPERTY>` contains the link value

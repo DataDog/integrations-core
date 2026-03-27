@@ -13,7 +13,7 @@ files:
       fleet_configurable: true
       required: true
       display_priority: 2
-      description: Status url of your Apache server.
+      description: Status URL of your Apache server.
       formats: ["url"]
       value:
         example: http://localhost/server-status?auto

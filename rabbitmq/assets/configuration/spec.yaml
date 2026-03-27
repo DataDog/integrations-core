@@ -72,8 +72,8 @@ files:
       options:
       - name: rabbitmq_api_url
         description: |
-          For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
-          url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
+          For every instance a 'rabbitmq_api_url' must be provided, pointing to the API
+          URL of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
         fleet_configurable: true
         formats: ["url"]
         value:
@@ -93,7 +93,7 @@ files:
           type: string
           example: guest
       - name: tag_families
-        description: To tag queue "families" based off of regex matching.
+        description: To tag queue "families" based on regex matching.
         fleet_configurable: true
         value:
           type: boolean
@@ -107,7 +107,7 @@ files:
       - name: nodes
         description: |
           Use the `nodes` parameters to specify the nodes you'd like to collect metrics on.
-          The default maximum number of nodes is 100. Exceeding this limit can cause 
+          The default maximum number of nodes is 100. Exceeding this limit can cause
           data loss. To increase the maximum, contact customer support.
         value:
           type: array
@@ -132,7 +132,7 @@ files:
       - name: queues
         description: |
           Use the `queues` parameters to specify the queues you'd like to collect metrics on.
-          The default maximum number of queues is 200. Exceeding this limit can cause 
+          The default maximum number of queues is 200. Exceeding this limit can cause
           data loss. To increase the maximum, contact customer support.
         fleet_configurable: true
         value:
@@ -145,8 +145,9 @@ files:
       - name: queues_regexes
         description: |
           Use the `queues_regexes` parameters to specify which queues you would like to
-          collect using one or multiple Python regular expressions. The same limit applies
-          as for the `queues` field.
+          collect using one or multiple Python regular expressions.
+
+          The same limit applies as for the `queues` field.
           If you have `tag_families` enabled, the first captured group in the pattern is used
           as the `queue_family` tag.
           Named groups in your pattern behave like in `nodes_regexes`.
@@ -166,7 +167,7 @@ files:
       - name: exchanges
         description: |
           Use the `exchanges` parameters to specify the exchanges you'd like to collect metrics on.
-          The default maximum number of exchanges is 50. Exceeding this limit can cause 
+          The default maximum number of exchanges is 50. Exceeding this limit can cause
           data loss. To increase the maximum, contact customer support.
         fleet_configurable: true
         value:
@@ -179,13 +180,15 @@ files:
       - name: exchanges_regexes
         description: |
           Use the `exchanges_regexes` parameters to specify which exchanges you would like to
-          collect using one or multiple Python regular expressions. The same limit applies
+          collect using one or multiple Python regular expressions.
+
+          The same limit applies
           as for the `exchanges` field.
           If you have `tag_families` enabled, the first captured group in the pattern is used
           as the `exchange_family` tag.
           Named groups in your pattern behave like in `nodes_regexes`.
           Your pattern is compared to exchange names and exchange names prefixed by vhost.
-          For example, if you have a vhost named "myvhost" and a exchange named "myexchange", your
+          For example, if you have a vhost named "myvhost" and an exchange named "myexchange", your
           pattern is compared to:
             - myexchange
             - myvhost/myexchange
@@ -212,6 +215,12 @@ files:
           example:
             - <VHOST_NAME_1>
             - <VHOST_NAME_2>
+      - template: instances/http
+        overrides:
+          use_legacy_auth_encoding.value.example: false
+          username.hidden: true
+          password.hidden: true
+      - template: instances/default
   - template: logs
     example:
     - type: file

@@ -117,7 +117,9 @@ files:
       - name: authenticator
         fleet_configurable: true
         description: |
-          Authenticator for Snowflake. Supported methods are:
+          Authenticator for Snowflake.
+
+          Supported methods are:
           * `snowflake`, the default value, uses the internal Snowflake authenticator. It needs `password` or 
             `private_key_path` option.
           * `snowflake_jwt`, uses key pair authentication. It needs `private_key_path` option.

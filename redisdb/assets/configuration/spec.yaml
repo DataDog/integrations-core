@@ -84,7 +84,7 @@ files:
         example: "<CERT_PEM_PATH>"
       fleet_configurable: true
     - name: ssl_ca_certs
-      description:  The path to the ca_certs file.
+      description:  The path to the CA certs file.
       value:
         type: string
         example: "<CERT_PATH>"
@@ -93,12 +93,22 @@ files:
       description: |
         Specifies whether a certificate is required from the
         other side of the connection, and whether it's validated if provided.
+
           * 0 for ssl.CERT_NONE (certificates ignored)
           * 1 for ssl.CERT_OPTIONAL (not required, but validated if provided)
           * 2 for ssl.CERT_REQUIRED (required and validated)
       value:
         type: integer
         example: 2
+      fleet_configurable: true
+    - name: ssl_check_hostname
+      description: |
+        Verify the server's SSL certificate hostname matches the connection target.
+        Redis-py 6.0+ defaults this to true. Set to false if your certificate
+        does not match the connection hostname (for example, if connecting by IP).
+      value:
+        type: boolean
+        example: true
       fleet_configurable: true
     - name: keys
       description: |
