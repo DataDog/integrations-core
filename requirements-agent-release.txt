@@ -34,7 +34,7 @@ datadog-ceph==4.4.0; sys_platform != 'win32'
 datadog-cert-manager==6.3.0
 datadog-checkpoint-harmony-endpoint==1.2.0
 datadog-checkpoint-quantum-firewall==1.3.0
-datadog-checks-base==37.33.0
+datadog-checks-base==37.33.1
 datadog-checks-dependency-provider==3.2.0
 datadog-checks-downloader==9.1.0
 datadog-cilium==6.3.0

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.33.1 / 2026-03-27
+
+***Fixed***:
+
+* Bump PyJWT to 2.12.1 to address CVE-2026-32597. ([#23065](https://github.com/DataDog/integrations-core/pull/23065))
+
 ## 37.33.0 / 2026-03-20
 
 ***Added***:
