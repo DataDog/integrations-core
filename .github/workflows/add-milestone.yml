@@ -16,15 +16,22 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
+      id-token: write  # Required for OIDC token federation with dd-octo-sts
+      contents: read
     env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GH_REPO: ${{ github.repository }}
     steps:
       - name: Checkout integrations-core repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+
+      - name: Get GitHub token via dd-octo-sts
+        uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80 # v1.0.3
+        id: octo-sts
+        with:
+          scope: DataDog/integrations-core
+          policy: self.add-milestone.pull-request
 
       - name: Get repo current milestone
         id: current-milestone
@@ -47,6 +54,7 @@ jobs:
           echo "Setting milestone $MILESTONE to PR $NUMBER."
           gh issue edit "$NUMBER" --milestone "$MILESTONE"
         env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
           NUMBER: ${{ github.event.number }}
           MILESTONE: ${{ steps.current-milestone.outputs.MILESTONE }}
 
