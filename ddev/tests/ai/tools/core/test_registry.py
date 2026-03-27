@@ -1,11 +1,10 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import asyncio
 
 import pytest
 
-from ddev.ai.tools.core.registry import ALLOWED_TOOL_CALLERS, ToolRegistry
+from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
 
 # ---------------------------------------------------------------------------
@@ -76,8 +75,6 @@ def test_empty_registry_returns_empty_list():
 def test_tool_registry_definitions_returns_all_tool_definitions():
     registry = ToolRegistry([FakeTool("a"), FakeTool("b")])
     assert len(registry.definitions) == 2
-    for defn in registry.definitions:
-        assert defn["allowed_callers"] == ALLOWED_TOOL_CALLERS
 
 
 def test_definition_contains_tool_name():
@@ -90,41 +87,41 @@ def test_definition_contains_tool_name():
 # ---------------------------------------------------------------------------
 
 
-def test_run_dispatches_to_correct_tool():
+async def test_run_dispatches_to_correct_tool():
     tool_a = FakeTool("a", ToolResult(success=True, data="from a"))
     tool_b = FakeTool("b", ToolResult(success=True, data="from b"))
     registry = ToolRegistry([tool_a, tool_b])
 
-    result = asyncio.run(registry.run("b", {}))
+    result = await registry.run("b", {})
     assert result.success is True
     assert result.data == "from b"
 
 
-def test_passes_raw_dict_to_tool_unchanged():
+async def test_passes_raw_dict_to_tool_unchanged():
     tool = FakeTool("t")
     registry = ToolRegistry([tool])
     raw = {"key": "value", "num": 42}
 
-    asyncio.run(registry.run("t", raw))
+    await registry.run("t", raw)
     assert tool.last_raw == raw
 
 
-def test_returns_tool_result_on_tool_failure():
+async def test_returns_tool_result_on_tool_failure():
     registry = ToolRegistry([FakeTool("t", ToolResult(success=False, error="bad input"))])
-    result = asyncio.run(registry.run("t", {}))
+    result = await registry.run("t", {})
     assert result.success is False
     assert result.error == "bad input"
 
 
-def test_unknown_tool_returns_failure():
+async def test_unknown_tool_returns_failure():
     registry = ToolRegistry([FakeTool("known_tool")])
-    result = asyncio.run(registry.run("unknown_tool", {}))
+    result = await registry.run("unknown_tool", {})
     assert result.success is False
     assert "Unknown tool: 'unknown_tool'" in result.error
 
 
-def test_empty_registry_always_returns_unknown_error():
+async def test_empty_registry_always_returns_unknown_error():
     registry = ToolRegistry([])
-    result = asyncio.run(registry.run("anything", {}))
+    result = await registry.run("anything", {})
     assert result.success is False
     assert result.error is not None

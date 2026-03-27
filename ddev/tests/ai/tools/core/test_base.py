@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import asyncio
 from typing import Annotated
 
 import pytest
@@ -194,8 +193,8 @@ def test_build_tool_no_docstring():
 # --- run(): happy path ---
 
 
-def test_run_valid_input_returns_success(echo_tool: EchoTool):
-    result = asyncio.run(echo_tool.run({"message": "hello"}))
+async def test_run_valid_input_returns_success(echo_tool: EchoTool):
+    result = await echo_tool.run({"message": "hello"})
     assert result.success is True
     assert result.data == "hello"
 
@@ -210,8 +209,8 @@ def test_run_valid_input_returns_success(echo_tool: EchoTool):
         {"message": "hi", "extra": "oops"},
     ],
 )
-def test_run_invalid_input_returns_failure(echo_tool: EchoTool, raw: dict):
-    result = asyncio.run(echo_tool.run(raw))
+async def test_run_invalid_input_returns_failure(echo_tool: EchoTool, raw: dict):
+    result = await echo_tool.run(raw)
     assert result.success is False
     assert result.error is not None
 
@@ -219,8 +218,8 @@ def test_run_invalid_input_returns_failure(echo_tool: EchoTool, raw: dict):
 # --- run(): __call__ exception handling ---
 
 
-def test_run_captures_exception_from_call(failing_tool: FailingTool):
-    result = asyncio.run(failing_tool.run({"message": "boom"}))
+async def test_run_captures_exception_from_call(failing_tool: FailingTool):
+    result = await failing_tool.run({"message": "boom"})
     assert isinstance(result, ToolResult)
     assert result.success is False
     assert "RuntimeError" in result.error

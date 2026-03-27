@@ -26,7 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-    "anthropic>=0.18.0",
+    "anthropic>=0.86.0",
     "click~=8.1.6",
     "coverage",
     "datadog-api-client==2.20.0",
@@ -136,3 +136,6 @@ ban-relative-imports = "parents"
 [tool.ruff.lint.per-file-ignores]
 #Tests can use assertions and relative imports
 "**/tests/**/*" = ["I252"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
