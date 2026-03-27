@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import asyncio
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -66,12 +65,12 @@ def test_grep_cmd_pattern_and_path_placement(grep_tool: GrepTool):
     assert cmd[-1] == "/my dir/sub dir"
 
 
-def test_grep_no_matches_returns_success(grep_tool: GrepTool):
+async def test_grep_no_matches_returns_success(grep_tool: GrepTool):
     from ddev.ai.tools.core.types import ToolResult
 
     no_match_result = ToolResult(success=False, data="(no output)", error=None)
     with patch("ddev.ai.tools.shell.grep.run_command", new=AsyncMock(return_value=no_match_result)):
-        result = asyncio.run(grep_tool(GrepInput(pattern="nomatch", path="/tmp")))
+        result = await grep_tool(GrepInput(pattern="nomatch", path="/tmp"))
     assert result.success is True
     assert result.data == "(no output)"
 
