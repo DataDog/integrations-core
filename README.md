@@ -15,6 +15,13 @@ repository, so to get started using them, you can simply [install the Agent][8]
 for your operating system. The [AGENT_CHANGELOG](AGENT_CHANGELOG.md) file shows
 which Integrations have been updated in each Agent version.
 
+## Getting Started
+
+To begin using these integrations:
+1. **Install the Datadog Agent**: Follow the [installation instructions][8] for your platform.
+2. **Configure an Integration**: Find the specific integration directory in this repo (e.g., `redis/`) and follow its `README.md` or use the [Datadog Documentation][11].
+3. **Restart the Agent**: After modifying configurations, restart your Agent to apply changes.
+
 ## Contributing
 
 Working with integrations is easy, the main page of the [development docs][6]
@@ -54,4 +61,3 @@ For more information on integrations, please reference our [documentation][11] a
 [28]: https://img.shields.io/badge/typing-Mypy-blue.svg
 [29]: https://github.com/python/mypy
 [30]: https://img.shields.io/badge/license-BSD--3--Clause-9400d3.svg
-[31]: https://spdx.org/licenses/BSD-3-Clause.html
