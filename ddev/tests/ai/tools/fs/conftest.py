@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import asyncio
 
 import pytest
 
@@ -38,8 +37,8 @@ def append_tool(registry: FileRegistry) -> AppendFileTool:
 
 
 @pytest.fixture
-def known_file(tmp_path, create_tool: CreateFileTool):
+async def known_file(tmp_path, create_tool: CreateFileTool):
     """A temp file registered in the registry via create."""
     f = tmp_path / "file.txt"
-    asyncio.run(create_tool.run({"path": str(f), "content": "line one\nline two\nline three\n"}))
+    await create_tool.run({"path": str(f), "content": "line one\nline two\nline three\n"})
     return f
