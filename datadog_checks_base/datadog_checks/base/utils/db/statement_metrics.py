@@ -60,58 +60,68 @@ class StatementMetrics:
                 'Some statement metrics are not available from the table: %s', ','.join(m for m in dropped_metrics)
             )
 
+        # Cache metric_columns across rows since rows almost always share the same schema.
+        # Recomputed only when a row's keys differ.
+        cached_metric_cols = None
+        cached_indicator_cols = None
+
         for row_key, row in merged_rows.items():
             prev = self._previous_statements.get(row_key)
             if prev is None:
                 continue
 
-            metric_columns = metrics & row.keys() & prev.keys()
+            if cached_metric_cols is not None and cached_metric_cols <= row.keys():
+                metric_columns = cached_metric_cols
+            else:
+                metric_columns = metrics & row.keys() & prev.keys()
+                cached_metric_cols = metric_columns
+                if execution_indicators:
+                    cached_indicator_cols = execution_indicators & metric_columns
 
-            # Take the diff of all metric values between the current row and the previous run's row.
-            # There are a couple of edge cases to be aware of:
-            #
-            # 1. Table truncation or stats reset: Because the table values are always increasing, a negative value
-            #    suggests truncation or a stats reset. In this case, the row difference is discarded and the row should.
-            #    be tracked from this run forward.
-            #
-            # 2. No changes since the previous run: There is no need to store metrics of 0, since that is implied by
-            #    the absence of metrics. On any given check run, most rows will have no difference so this optimization
-            #    avoids having to send a lot of unnecessary metrics.
-            #
-            # 3. Execution indicators: If execution_indicators is specified, only consider a query as changed if at
-            #    least one of the execution indicator metrics has changed. This helps filter out cases where an old or
-            #    less frequently executed normalized query was evicted due to the stats table being full, and then
-            #    re-inserted to the stats table with a small call count and slight duration change. In this case,
-            #    the new normalized query entry should be treated as the baseline for future diffs.
+            # Check diffs before allocating an output dict: skip rows with
+            # negative diffs (stats reset), zero change, or no execution indicator change.
+            has_negative = False
+            has_change = False
+            for k in metric_columns:
+                diff = row[k] - prev[k]
+                if diff < 0:
+                    has_negative = True
+                    break
+                if diff != 0:
+                    has_change = True
 
-            diffed_row = {k: row[k] - prev[k] if k in metric_columns else row[k] for k in row.keys()}
-
-            # Check for negative values, but only in the columns used for metrics
-            if any(diffed_row[k] < 0 for k in metric_columns):
-                # A "break" might be expected here instead of "continue," but there are cases where a subset of rows
-                # are removed. To avoid situations where all results are discarded every check run, we err on the side
-                # of potentially including truncated rows that exceed previous run counts.
+            if has_negative or not has_change:
                 continue
 
-            # If execution_indicators is specified, check if any of the execution indicator metrics have changed
-            if execution_indicators:
-                indicator_columns = execution_indicators & metric_columns
-                if not any(diffed_row[k] > 0 for k in indicator_columns):
+            if execution_indicators and cached_indicator_cols:
+                has_indicator_change = False
+                for k in cached_indicator_cols:
+                    if row[k] - prev[k] > 0:
+                        has_indicator_change = True
+                        break
+                if not has_indicator_change:
                     continue
 
-            # No changes to the query; no metric needed
-            if all(diffed_row[k] == 0 for k in metric_columns):
-                continue
+            result.append({k: row[k] - prev[k] if k in metric_columns else row[k] for k in row})
 
-            result.append(diffed_row)
+        # Update cache in-place: remove stale keys, update existing entries,
+        # and only allocate new dicts for rows seen for the first time.
+        new_keys = merged_rows.keys()
+        stale_keys = self._previous_statements.keys() - new_keys
+        for k in stale_keys:
+            del self._previous_statements[k]
 
-        # Only cache the metric columns needed for derivative computation.
-        # Non-metric columns (query text, metadata, etc.) are not needed for the diff calculation
-        # and would waste memory. The returned diffed_row already uses current row values for
-        # non-metric columns.
-        self._previous_statements = {
-            row_key: {col: row[col] for col in metrics if col in row} for row_key, row in merged_rows.items()
-        }
+        for row_key, row in merged_rows.items():
+            prev = self._previous_statements.get(row_key)
+            if prev is not None:
+                # Sync columns to handle schema changes (e.g. DB upgrade, plan timing toggled without restarting the check).
+                for col in metrics:
+                    if col in row:
+                        prev[col] = row[col]
+                    elif col in prev:
+                        del prev[col]
+            else:
+                self._previous_statements[row_key] = {col: row[col] for col in metrics if col in row}
 
         return result
 
