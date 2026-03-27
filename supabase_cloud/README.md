@@ -43,6 +43,10 @@ A Personal Access Token (PAT) is required to access the Supabase Management API 
 4. Enter a name for the token, select **Never** for **Expires in**, and click **Generate token**.
 5. Copy the token value displayed at the top of the page. Store it securely, as it won't be displayed again.
 
+### Enable Database Monitoring (optional)
+
+> **Note**: To enable Database Monitoring for query performance insights on your Supabase Cloud databases, see [Setting Up Database Monitoring for Supabase Cloud][9].
+
 ### Connect your Supabase Cloud project to Datadog
 
 1. In the Datadog app, navigate to the [Supabase Cloud integration tile][8] and add your Supabase hosted project ID and `service_role` API key:
@@ -89,3 +93,4 @@ Need help? Contact [Datadog support][1].
 [6]: https://supabase.com/docs/reference/api/introduction
 [7]: https://supabase.com/dashboard/account/tokens
 [8]: https://app.datadoghq.com/integrations/supabase-cloud
+[9]: https://docs.datadoghq.com/database_monitoring/setup_postgres/supabase/cloud

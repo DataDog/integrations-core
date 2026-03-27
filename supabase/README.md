@@ -99,6 +99,10 @@ The Supabase integration does not include any events.
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
+### Database Monitoring
+
+> **Note**: To enable Database Monitoring for deep query performance insights on your Supabase databases, see [Setting Up Database Monitoring for Supabase][12]. For Supabase Cloud projects, a fully managed setup is available with no Agent required.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
@@ -115,3 +119,4 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/integrations/postgres/?tab=host#prepare-postgres
 [11]: https://github.com/supabase/storage/tree/master
+[12]: https://docs.datadoghq.com/database_monitoring/setup_postgres/supabase/
