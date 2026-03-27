@@ -10,7 +10,7 @@
 #
 # Security model:
 #   - Workflow runs on pull_request (closed) events targeting protected branches
-#   - ref_protected ensures the target branch is master or a protected X.Y.x branch
+#   - ref restricts to master and protected X.Y.x release branches (protected by org rulesets)
 #   - job_workflow_ref is matched by pattern since PR events reference refs/pull/N/merge
 #
 # Permissions granted:
@@ -27,10 +27,10 @@ issuer: https://token.actions.githubusercontent.com
 subject: repo:DataDog/integrations-core:pull_request
 
 claim_pattern:
-  ref: refs/heads/(master|\d+\.\d+\.x)
-  ref_protected: "true"
-  job_workflow_ref: DataDog/integrations-core/.github/workflows/add-milestone\.yml@.*
   event_name: pull_request
+  job_workflow_ref: DataDog/integrations-core/\.github/workflows/add-milestone\.yml@.*
+  ref: refs/heads/(master|\d+\.\d+\.x)
+  repository: DataDog/integrations-core
 
 permissions:
   pull_requests: write
