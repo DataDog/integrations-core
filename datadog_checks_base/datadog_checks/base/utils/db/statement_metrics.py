@@ -111,7 +111,7 @@ class StatementMetrics:
         for row_key, row in merged_rows.items():
             prev = self._previous_statements.get(row_key)
             if prev is not None:
-                # Sync columns to handle schema changes (e.g. DB upgrade, plan timing toggled without restarting the check).
+                # Sync columns to handle schema changes between calls.
                 for col in metrics:
                     if col in row:
                         prev[col] = row[col]
