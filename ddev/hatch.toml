@@ -9,6 +9,7 @@ python = "3.13"
 e2e-env = false
 dependencies = [
   "pyyaml",
+  "pytest-asyncio",
   "vcrpy",
   # vcrpy uses aiohttp.streams.AsyncStreamReaderMixin, removed in aiohttp 3.14
   "aiohttp<3.14",
