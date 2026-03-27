@@ -60,23 +60,20 @@ class StatementMetrics:
                 'Some statement metrics are not available from the table: %s', ','.join(m for m in dropped_metrics)
             )
 
-        # Cache metric_columns across rows since rows almost always share the same schema.
-        # Recomputed only when a row's keys differ.
-        cached_metric_cols = None
-        cached_indicator_cols = None
+        # All rows within a call share the same schema, so metric_columns only
+        # needs to be computed once from the first (row, prev) pair.
+        metric_columns = None
+        indicator_cols = None
 
         for row_key, row in merged_rows.items():
             prev = self._previous_statements.get(row_key)
             if prev is None:
                 continue
 
-            if cached_metric_cols is not None and cached_metric_cols <= row.keys():
-                metric_columns = cached_metric_cols
-            else:
+            if metric_columns is None:
                 metric_columns = metrics & row.keys() & prev.keys()
-                cached_metric_cols = metric_columns
                 if execution_indicators:
-                    cached_indicator_cols = execution_indicators & metric_columns
+                    indicator_cols = execution_indicators & metric_columns
 
             # Check diffs before allocating an output dict: skip rows with
             # negative diffs (stats reset), zero change, or no execution indicator change.
@@ -93,9 +90,9 @@ class StatementMetrics:
             if has_negative or not has_change:
                 continue
 
-            if execution_indicators and cached_indicator_cols:
+            if execution_indicators and indicator_cols:
                 has_indicator_change = False
-                for k in cached_indicator_cols:
+                for k in indicator_cols:
                     if row[k] - prev[k] > 0:
                         has_indicator_change = True
                         break
