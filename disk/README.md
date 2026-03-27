@@ -17,7 +17,7 @@ The disk check is included in the [Datadog Agent][1] package, so you don't need 
 The Disk check is enabled by default, and the Agent collects metrics on all local partitions. To configure the check with custom options, edit the `disk.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample disk.d/conf.yaml][3] for all available configuration options.
 
 #### Note for Windows hosts
-There are three scenarios where the Disk check can be used:
+There are four scenarios where the Disk check can be used:
 
 1. Monitoring physical drives
 
