@@ -1,6 +1,26 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
+  "enabledManagers": [
+    "github-actions"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchFileNames": [
+        ".github/workflows/**",
+        ".github/actions/tag-job/**"
+      ],
+      "groupName": "actions",
+      "schedule": [
+        "before 6am on Monday"
+      ],
+      "labels": [
+        "dependabot/actions",
+        "qa/skip-qa"
+      ],
+      "minimumReleaseAge": "7 days"
+    }
   ]
 }
