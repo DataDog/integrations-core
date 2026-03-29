@@ -2,12 +2,6 @@
 
 <!-- towncrier release notes start -->
 
-## 14.3.2 / 2026-03-03
-
-***Fixed***:
-
-* Changelog check ignores the builders folder. We don't need a changelog for it. ([#22737](https://github.com/DataDog/integrations-core/pull/22737))
-
 ## 14.3.1 / 2026-02-20
 
 ***Fixed***:

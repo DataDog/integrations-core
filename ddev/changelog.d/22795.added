@@ -1,0 +1,1 @@
+Add secret provider for ddev config value resolution, enabling EXP: prefix syntax with trust management via ddev config allow / ddev config deny.

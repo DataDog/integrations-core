@@ -3,12 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import copy
 import os
-from collections import Counter
 from dataclasses import dataclass
 from typing import cast
 
 from ddev.config.model import RootConfig
+from ddev.config.trust import is_local_config_trusted, sanitize_command_fields
 from ddev.config.utils import scrub_config
 from ddev.utils.fs import Path
 from ddev.utils.toml import dumps_toml_data, load_toml_data
@@ -63,11 +64,35 @@ def deep_merge_with_list_handling(left: dict, right: dict) -> dict:
 
 
 def build_line_index_with_multiple_entries(content: str) -> dict[str, list[int]]:
+    """Index stripped line text to every 1-based line number where it appears."""
     index: dict[str, list[int]] = {}
     for line_number, line in enumerate(content.splitlines(), start=1):
         stripped_line = line.strip()
         index.setdefault(stripped_line, []).append(line_number)
     return index
+
+
+def find_command_field_paths(value, path: tuple[str, ...] = ()) -> set[str]:
+    """Return dotted paths for every nested `*_command` field in the value tree."""
+    if isinstance(value, dict):
+        command_paths: set[str] = set()
+        for key, item in value.items():
+            if isinstance(key, str):
+                next_path = (*path, key)
+                if key.endswith('_command'):
+                    command_paths.add('.'.join(next_path))
+                command_paths.update(find_command_field_paths(item, next_path))
+            else:
+                command_paths.update(find_command_field_paths(item, path))
+        return command_paths
+
+    if isinstance(value, list):
+        list_command_paths: set[str] = set()
+        for item in value:
+            list_command_paths.update(find_command_field_paths(item, path))
+        return list_command_paths
+
+    return set()
 
 
 @dataclass
@@ -94,6 +119,9 @@ class ConfigFileWithOverrides:
         self.combined_model: RootConfig = cast(RootConfig, UNINITIALIZED)
         self.combined_content: str = ""
         self._overrides_path: Path | None = None
+        self._loaded_untrusted_overrides_model: RootConfig | None = None
+        self._loaded_untrusted_overrides_raw_data: dict | None = None
+        self._loaded_untrusted_overrides_content: str | None = None
 
     @property
     def overrides_path(self) -> Path:
@@ -137,19 +165,27 @@ class ConfigFileWithOverrides:
     def pretty_overrides_path(self) -> Path:
         """Overrides path shown either as relative or absolute path, depending on the length."""
         relative_overrides_path = os.path.relpath(self.overrides_path, Path.cwd())
-        parents_apart = Counter(relative_overrides_path.split(os.path.sep))
-        if parents_apart[".."] > 1:
+        if relative_overrides_path.split(os.path.sep).count('..') > 1:
             # Show the absolute path if the relative path is too long
             return self.overrides_path
-        else:
-            # Show relative path when it is easier to understand
-            return Path(relative_overrides_path)
+        # Show relative path when it is easier to understand
+        return Path(relative_overrides_path)
 
-    def load(self):
+    def load(self) -> None:
         self.global_content = self.global_path.read_text()
         self.global_model = RootConfig(load_toml_data(self.global_content))
+        self._loaded_untrusted_overrides_model = None
+        self._loaded_untrusted_overrides_raw_data = None
+        self._loaded_untrusted_overrides_content = None
 
-        if not self.overrides_available() or (overrides_content := self.overrides_path.read_text()).strip() == "":
+        overrides_content = ''
+        if self.overrides_available():
+            try:
+                overrides_content = self.overrides_path.read_text()
+            except OSError:
+                overrides_content = ''
+
+        if overrides_content.strip() == "":
             self.combined_model = self.global_model
             self.combined_content = dumps_toml_data(self.combined_model.raw_data)
             self.overrides_content = ""
@@ -157,13 +193,25 @@ class ConfigFileWithOverrides:
             return
 
         self.overrides_content = overrides_content
-        self.overrides_model = RootConfig(load_toml_data(self.overrides_content))
+        overrides_data = load_toml_data(self.overrides_content)
+        trust_blocked_command_fields: set[str] = set()
+        untrusted_overrides = not is_local_config_trusted(self.overrides_path)
+        if untrusted_overrides:
+            trust_blocked_command_fields = find_command_field_paths(overrides_data)
+            overrides_data = sanitize_command_fields(overrides_data)
+        non_secret_metadata = {'trust_blocked_command_fields': trust_blocked_command_fields}
+        self.overrides_model = RootConfig(overrides_data, non_secret_metadata=non_secret_metadata)
+        if untrusted_overrides:
+            self._loaded_untrusted_overrides_model = self.overrides_model
+            self._loaded_untrusted_overrides_raw_data = copy.deepcopy(self.overrides_model.raw_data)
+            self._loaded_untrusted_overrides_content = self.overrides_content
 
         self.combined_model = RootConfig(
             deep_merge_with_list_handling(
                 cast(RootConfig, self.global_model).raw_data,
                 self.overrides_model.raw_data,
-            )
+            ),
+            non_secret_metadata=non_secret_metadata,
         )
         self.combined_content = dumps_toml_data(self.combined_model.raw_data)
 
@@ -172,13 +220,16 @@ class ConfigFileWithOverrides:
             raise ConfigFileError("Config file not loaded")
 
         if scrubbed:
-            scrub_config(cast(RootConfig, self.combined_model).raw_data)
-            combined_content = dumps_toml_data(cast(RootConfig, self.combined_model).raw_data)
+            combined_raw = copy.deepcopy(cast(RootConfig, self.combined_model).raw_data)
+            scrub_config(combined_raw)
+            combined_content = dumps_toml_data(combined_raw)
             combined_lines = combined_content.splitlines()
-            scrub_config(cast(RootConfig, self.global_model).raw_data)
-            global_content = dumps_toml_data(cast(RootConfig, self.global_model).raw_data)
-            scrub_config(cast(RootConfig, self.overrides_model).raw_data)
-            overrides_content = dumps_toml_data(cast(RootConfig, self.overrides_model).raw_data)
+            global_raw = copy.deepcopy(cast(RootConfig, self.global_model).raw_data)
+            scrub_config(global_raw)
+            global_content = dumps_toml_data(global_raw)
+            overrides_raw = copy.deepcopy(cast(RootConfig, self.overrides_model).raw_data)
+            scrub_config(overrides_raw)
+            overrides_content = dumps_toml_data(overrides_raw)
         else:
             combined_lines = self.combined_content.splitlines()
             combined_content = self.combined_content
@@ -222,8 +273,8 @@ class ConfigFileWithOverrides:
                         global_content=global_content,
                         overrides_content=overrides_content,
                     )
-            except KeyError:
-                # Pop will throw key error if there are no more elements in the list
+            except IndexError:
+                # Pop will throw when there are no more elements in the list.
                 return ProcessedConfigs(
                     combined_lines=combined_lines,
                     line_sources=None,
@@ -283,19 +334,31 @@ class ConfigFileWithOverrides:
     def model(self) -> RootConfig:
         return self.global_model
 
+    def _preserved_overrides_content(self) -> str | None:
+        if self._loaded_untrusted_overrides_model is not self.overrides_model:
+            return None
+
+        if self._loaded_untrusted_overrides_raw_data != self.overrides_model.raw_data:
+            return None
+
+        return self._loaded_untrusted_overrides_content
+
     def save(self, content=None):
         import tomli_w
 
-        if not content:
+        if content is None:
             content = tomli_w.dumps(self.global_model.raw_data)
 
         self.global_path.ensure_parent_dir_exists()
         self.global_path.write_atomic(content, "w", encoding="utf-8")
 
         if self.overrides_model is not UNINITIALIZED:
-            self.overrides_path.write_atomic(tomli_w.dumps(self.overrides_model.raw_data), "w", encoding="utf-8")
+            overrides_content = self._preserved_overrides_content()
+            if overrides_content is None:
+                overrides_content = tomli_w.dumps(self.overrides_model.raw_data)
+            self.overrides_path.write_atomic(overrides_content, "w", encoding="utf-8")
 
-    def reset(self):
+    def reset(self) -> None:
         global_config = RootConfig({})
         global_config.parse_fields()
         combined_config = RootConfig({})
@@ -304,8 +367,11 @@ class ConfigFileWithOverrides:
         self.combined_model = combined_config
         self.overrides_model = cast(RootConfig, UNINITIALIZED)
         self.overrides_content = ""
+        self._loaded_untrusted_overrides_model = None
+        self._loaded_untrusted_overrides_raw_data = None
+        self._loaded_untrusted_overrides_content = None
 
-    def restore(self):
+    def restore(self) -> None:
         import tomli_w
 
         self.reset()

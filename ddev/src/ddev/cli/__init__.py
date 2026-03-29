@@ -10,7 +10,7 @@ from datadog_checks.dev.tooling.commands.run import run
 
 from ddev._version import __version__
 from ddev.cli import upgrade_check
-from ddev.cli.application import Application
+from ddev.cli.application import Application, format_secret_resolution_error
 from ddev.cli.ci import ci
 from ddev.cli.clean import clean
 from ddev.cli.config import config
@@ -24,6 +24,7 @@ from ddev.cli.status import status
 from ddev.cli.test import test
 from ddev.cli.validate import validate
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
+from ddev.config.model import ConfigurationError
 from ddev.plugin import specs
 from ddev.utils.ci import running_in_ci
 from ddev.utils.fs import Path
@@ -144,7 +145,12 @@ def ddev(
             app.display_warning(error)
 
     # Do this last
-    app.set_repo(core, extras, marketplace, agent, here)
+    try:
+        app.set_repo(core, extras, marketplace, agent, here)
+    except ConfigurationError as e:
+        if formatted_error := format_secret_resolution_error(e):
+            app.abort(formatted_error)
+        raise
 
     # TODO: remove this when the old CLI is gone
     app.initialize_old_cli()
