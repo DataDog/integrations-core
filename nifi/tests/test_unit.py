@@ -150,6 +150,23 @@ class TestCanConnect:
 
         aggregator.assert_metric('nifi.can_connect', value=0)
 
+    def test_no_auth_mode(self, dd_run_check, aggregator):
+        """Check works without credentials when NiFi has no auth configured."""
+        instance = _make_instance(username=None, password=None)
+        check = NifiCheck('nifi', {}, [instance])
+
+        side_effect = _build_request_side_effect(
+            {
+                '/flow/about': _mock_response(200, json_data=ABOUT_RESPONSE),
+                '/flow/cluster/summary': _mock_response(200, json_data=CLUSTER_SUMMARY_STANDALONE),
+            }
+        )
+
+        with patch('requests.Session.request', side_effect=side_effect):
+            dd_run_check(check)
+
+        aggregator.assert_metric('nifi.can_connect', value=1, tags=['nifi_version:2.8.0'])
+
 
 class TestClusterHealth:
     def test_cluster_healthy(self, dd_run_check, aggregator):
