@@ -130,14 +130,13 @@ class ReActProcess:
                     await asyncio.gather(*[self._tool_registry.run(tc.name, tc.input) for tc in response.tool_calls])
                 )
 
+                tool_call_results = list(zip(response.tool_calls, tool_results, strict=True))
+
                 for cb in self._callbacks:
-                    for tc, result in zip(response.tool_calls, tool_results, strict=False):
+                    for tc, result in tool_call_results:
                         await cb.on_tool_call(tc, result, iterations)
 
-                messages = [
-                    ToolResultMessage(tool_call_id=tc.id, result=result)
-                    for tc, result in zip(response.tool_calls, tool_results, strict=False)
-                ]
+                messages = [ToolResultMessage(tool_call_id=tc.id, result=result) for tc, result in tool_call_results]
 
                 response = await self._agent.send(messages, allowed_tools)
                 iterations += 1

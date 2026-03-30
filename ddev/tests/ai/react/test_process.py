@@ -129,6 +129,7 @@ async def test_termination_reason_single_response(stop_reason, expected_terminat
     assert result.termination_reason == expected_termination
     assert result.iterations == 1
     assert len(agent.send_calls) == 1
+    assert agent.send_calls[0] == "Hi"
 
 
 # ---------------------------------------------------------------------------
@@ -152,6 +153,7 @@ async def test_single_tool_call_executes_tool_and_returns() -> None:
     assert len(registry.run_calls) == 1
     assert registry.run_calls[0][0] == "read_file"
     assert len(agent.send_calls) == 2
+    assert agent.send_calls[0] == "Do something"
     assert isinstance(agent.send_calls[1], list)
     assert agent.send_calls[1][0].tool_call_id == "tc_01"
 
