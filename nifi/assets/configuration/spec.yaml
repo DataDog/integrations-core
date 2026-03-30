@@ -80,9 +80,6 @@ files:
           Used with `password` to obtain a bearer token via POST /access/token.
         password.description: |
           Password for NiFi token-based authentication.
-        auth_token.description: |
-          A pre-obtained NiFi bearer token.
-          If provided, username and password are not used for token acquisition.
     - template: instances/default
   - template: logs
     example:
