@@ -8,13 +8,14 @@ from unittest.mock import AsyncMock, MagicMock
 import anthropic
 import pytest
 
-from ddev.ai.agent.client import AnthropicAgent, StopReason
+from ddev.ai.agent.client import AnthropicAgent
 from ddev.ai.agent.exceptions import (
     AgentAPIError,
     AgentConnectionError,
     AgentError,
     AgentRateLimitError,
 )
+from ddev.ai.agent.types import StopReason, ToolResultMessage
 from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
 
@@ -343,7 +344,7 @@ async def test_context_usage_fields() -> None:
 
     result = await agent.send("Hi")
 
-    ctx = result.usage.context
+    ctx = result.usage.context_usage
     assert ctx.window_size == FAKE_CONTEXT_WINDOW
     assert ctx.used_tokens == 1700  # 1000 + 500 + 200
     assert ctx.context_pct == pytest.approx(1700 / FAKE_CONTEXT_WINDOW * 100)
@@ -386,7 +387,7 @@ async def test_multi_turn_history_grows_correctly() -> None:
     assert first.stop_reason is StopReason.TOOL_USE
     assert len(agent.history) == 2
 
-    tool_results = [{"type": "tool_result", "tool_use_id": "toolu_01", "content": "result"}]
+    tool_results = [ToolResultMessage(tool_call_id="toolu_01", result=ToolResult(success=True, data="result"))]
     second = await agent.send(tool_results)
     assert second.stop_reason is StopReason.END_TURN
     assert len(agent.history) == 4
@@ -423,6 +424,44 @@ async def test_reset_clears_history() -> None:
 
     agent.reset()
     assert agent.history == []
+
+
+# ---------------------------------------------------------------------------
+# pause_turn raises AgentError
+# ---------------------------------------------------------------------------
+
+
+async def test_pause_turn_raises_agent_error() -> None:
+    resp = make_response("pause_turn", [])
+    agent, _ = make_agent(mock_response=resp)
+
+    with pytest.raises(AgentError):
+        await agent.send("Hi")
+
+    assert agent.history == []
+
+
+# ---------------------------------------------------------------------------
+# refusal and stop_sequence map to StopReason.OTHER
+# ---------------------------------------------------------------------------
+
+
+async def test_refusal_maps_to_other() -> None:
+    resp = make_response("refusal", [make_text_block("I can't do that")])
+    agent, _ = make_agent(mock_response=resp)
+
+    result = await agent.send("Do something bad")
+
+    assert result.stop_reason is StopReason.OTHER
+
+
+async def test_stop_sequence_maps_to_other() -> None:
+    resp = make_response("stop_sequence", [make_text_block("Stopped.")])
+    agent, _ = make_agent(mock_response=resp)
+
+    result = await agent.send("Hi")
+
+    assert result.stop_reason is StopReason.OTHER
 
 
 # ---------------------------------------------------------------------------
