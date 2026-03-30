@@ -123,18 +123,6 @@ class MessageFilter:
             path_parts = field_path.split('.')[1:]  # Remove 'value' prefix
         elif field_path == 'headers':
             return dict(message.headers() or [])
-        elif field_path.startswith('header.'):
-            headers = dict(message.headers() or [])
-            header_key = field_path[len('header.') :]
-            raw_value = headers.get(header_key)
-            if raw_value is None:
-                return None
-            if isinstance(raw_value, bytes):
-                try:
-                    return raw_value.decode('utf-8')
-                except UnicodeDecodeError:
-                    return raw_value
-            return raw_value
         else:
             # Try to parse as value field
             data = self._parse_message_part(message.value())
