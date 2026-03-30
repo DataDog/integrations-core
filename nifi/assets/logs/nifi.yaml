@@ -1,0 +1,51 @@
+id: nifi
+metric_id: nifi
+backend_only: false
+facets:
+  - groups:
+      - Source Code
+    name: Logger Name
+    path: logger.name
+    source: log
+  - groups:
+      - Source Code
+    name: Thread Name
+    path: logger.thread_name
+    source: log
+pipeline:
+  type: pipeline
+  name: NiFi
+  enabled: true
+  filter:
+    query: source:nifi
+  processors:
+    - type: grok-parser
+      name: Parsing NiFi application logs
+      enabled: true
+      source: message
+      samples:
+        - "2026-03-20 18:08:33,065 INFO [main] o.a.nifi.NiFi NiFi PID is 1"
+        - "2026-03-20 18:08:33,065 ERROR [Timer-Driven Process Thread-1] o.a.n.p.standard.PutFile PutFile[id=abc] Failed to write"
+      grok:
+        supportRules: |
+          _date %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp}
+          _level %{word:level}
+          _thread %{regex("[^]]*"):logger.thread_name}
+          _logger %{notSpace:logger.name}
+        matchRules: |
+          nifi_app %{_date} %{_level} \[%{_thread}\] %{_logger} %{data:message}
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: status-remapper
+      name: Define `level` as the official status of the log
+      enabled: true
+      sources:
+        - level
+    - type: message-remapper
+      name: Define `message` as the official message of the log
+      enabled: true
+      sources:
+        - message
