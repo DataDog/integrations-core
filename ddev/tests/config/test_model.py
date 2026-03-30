@@ -9,6 +9,7 @@ import pytest
 
 from ddev.config.model import ConfigurationError, RootConfig, get_github_user
 from ddev.config.secret_command import reset_secret_command_cache
+from ddev.config.secret_resolution import SecretResolutionError
 
 
 @pytest.fixture(autouse=True)
@@ -824,6 +825,19 @@ class TestGitHub:
             ),
         ):
             _ = config.github.token
+
+    def test_missing_token_preserves_secret_resolution_cause(self, monkeypatch):
+        monkeypatch.delenv('DD_GITHUB_TOKEN', raising=False)
+        monkeypatch.delenv('GH_TOKEN', raising=False)
+        monkeypatch.delenv('GITHUB_TOKEN', raising=False)
+        config = RootConfig({})
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            _ = config.github.token
+
+        assert isinstance(exc_info.value.__cause__, SecretResolutionError)
+        assert exc_info.value.__cause__.code == 'missing-required-secret'
+        assert exc_info.value.__cause__.field_path == 'github.token'
 
     def test_not_table(self, helpers):
         config = RootConfig({'github': 9000})

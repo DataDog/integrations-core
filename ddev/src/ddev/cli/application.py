@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import os
-import re
 from functools import cached_property
 from typing import cast
 
@@ -12,31 +11,35 @@ from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars, VerbosityLevels
 from ddev.config.file import ConfigFileWithOverrides, RootConfig
 from ddev.config.model import ConfigurationError
+from ddev.config.secret_resolution import SecretResolutionError
 from ddev.repo.core import Repository
 from ddev.utils.fs import Path
 from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
 
-_SECRET_RESOLUTION_ERROR_PATTERN = re.compile(
-    r'\[(?P<code>[^\]]+)\]\s+could not resolve required secret for (?P<field_path>[^;]+);\s+'
-    r'sources\(command=(?P<command>[^,]+),\s*literal=(?P<literal>[^,]+),\s*env=(?P<environment>[^)]+)\);\s*'
-    r'(?P<remediation>.+)$'
-)
-
 
 def format_secret_resolution_error(error: ConfigurationError) -> str | None:
     """Return an actionable secret error summary, or None if the error is unrelated."""
-    match = _SECRET_RESOLUTION_ERROR_PATTERN.search(str(error))
-    if match is None:
+    current: Exception = error
+    secret_error = None
+    while current.__cause__ is not None:
+        cause = current.__cause__
+        if isinstance(cause, SecretResolutionError):
+            secret_error = cause
+            break
+        if not isinstance(cause, Exception):
+            break
+        current = cause
+
+    if secret_error is None:
         return None
 
-    details = match.groupdict()
-    code = details['code']
-    field_path = details['field_path']
-    command = details['command']
-    literal = details['literal']
-    environment = details['environment']
-    remediation = details['remediation']
+    code = secret_error.code
+    field_path = secret_error.field_path
+    command = secret_error.source_summary.command
+    literal = secret_error.source_summary.literal
+    environment = secret_error.source_summary.environment
+    remediation = secret_error.remediation_hint
 
     if code == 'missing-required-secret':
         message_lines = [f'Missing required secret: {field_path}']

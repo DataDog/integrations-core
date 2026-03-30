@@ -65,11 +65,14 @@ class LazilyParsedConfig:
             if prefix:
                 parse_config(getattr(self, name))
 
-    def raise_error(self, message, *, extra_steps=()):
+    def raise_error(self, message, *, extra_steps=(), cause=None):
         import inspect
 
         field = inspect.currentframe().f_back.f_code.co_name
-        raise ConfigurationError(message, location=' -> '.join([*self.steps, field, *extra_steps]))
+        error = ConfigurationError(message, location=' -> '.join([*self.steps, field, *extra_steps]))
+        if cause is None:
+            raise error
+        raise error from cause
 
 
 class RootConfig(LazilyParsedConfig):
@@ -582,7 +585,7 @@ class OrgSettingsConfig(LazilyParsedConfig, Mapping):
                     in self._trust_blocked_command_fields,
                 )
             except SecretResolutionError as e:
-                self.raise_error(str(e))
+                self.raise_error(str(e), cause=e)
 
         return self._field_api_key
 
@@ -623,7 +626,7 @@ class OrgSettingsConfig(LazilyParsedConfig, Mapping):
                     in self._trust_blocked_command_fields,
                 )
             except SecretResolutionError as e:
-                self.raise_error(str(e))
+                self.raise_error(str(e), cause=e)
 
         return self._field_app_key
 
@@ -760,7 +763,7 @@ class GitHubConfig(LazilyParsedConfig):
                     command_blocked_by_trust='github.user_command' in self._trust_blocked_command_fields,
                 )
             except SecretResolutionError as e:
-                self.raise_error(str(e))
+                self.raise_error(str(e), cause=e)
 
         return self._field_user
 
@@ -810,7 +813,7 @@ class GitHubConfig(LazilyParsedConfig):
                     command_blocked_by_trust='github.token_command' in self._trust_blocked_command_fields,
                 )
             except SecretResolutionError as e:
-                self.raise_error(str(e))
+                self.raise_error(str(e), cause=e)
 
         return self._field_token
 
@@ -901,7 +904,7 @@ class PyPIConfig(LazilyParsedConfig):
                     command_blocked_by_trust='pypi.auth_command' in self._trust_blocked_command_fields,
                 )
             except SecretResolutionError as e:
-                self.raise_error(str(e))
+                self.raise_error(str(e), cause=e)
 
         return self._field_auth
 
@@ -967,7 +970,7 @@ class TrelloConfig(LazilyParsedConfig):
                     command_blocked_by_trust='trello.key_command' in self._trust_blocked_command_fields,
                 )
             except SecretResolutionError as e:
-                self.raise_error(str(e))
+                self.raise_error(str(e), cause=e)
 
         return self._field_key
 
@@ -998,7 +1001,7 @@ class TrelloConfig(LazilyParsedConfig):
                     command_blocked_by_trust='trello.token_command' in self._trust_blocked_command_fields,
                 )
             except SecretResolutionError as e:
-                self.raise_error(str(e))
+                self.raise_error(str(e), cause=e)
 
         return self._field_token
 
@@ -1080,7 +1083,7 @@ class DynamicDConfig(LazilyParsedConfig):
                     command_blocked_by_trust='dynamicd.llm_api_key_command' in self._trust_blocked_command_fields,
                 )
             except SecretResolutionError as e:
-                self.raise_error(str(e))
+                self.raise_error(str(e), cause=e)
 
         return self._field_llm_api_key
 
