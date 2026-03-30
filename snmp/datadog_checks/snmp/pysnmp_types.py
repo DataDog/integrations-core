@@ -5,9 +5,9 @@
 Re-export PyASN1/PySNMP types and classes that we use, so that we can access them from a single module.
 """
 
+import pysnmp.hlapi.v3arch.asyncio as hlapi
 from pyasn1.type.base import Asn1Type
 from pyasn1.type.univ import OctetString
-from pysnmp import hlapi
 from pysnmp.hlapi.transport import AbstractTransportTarget
 from pysnmp.hlapi.v3arch.asyncio import (
     CommunityData,
