@@ -314,6 +314,8 @@ class TestClusterHealth:
             dd_run_check(check)
 
         tags = ['nifi_version:2.8.0']
+        aggregator.assert_metric('nifi.cluster.connected_node_count', value=2, tags=tags)
+        aggregator.assert_metric('nifi.cluster.total_node_count', value=3, tags=tags)
         aggregator.assert_metric('nifi.cluster.is_healthy', value=0, tags=tags)
 
     def test_standalone_no_cluster_metrics(self, dd_run_check, aggregator):

@@ -78,7 +78,7 @@ class NifiCheck(AgentCheck):
         self.gauge('system.cpu.available_processors', snap.get('availableProcessors', 0), tags=base_tags)
 
         for gc in snap.get('garbageCollection', []):
-            gc_tags = base_tags + [f'gc_name:{gc["name"]}']
+            gc_tags = base_tags + [f'gc_name:{gc.get("name", "unknown")}']
             self.monotonic_count('system.gc.collection_count', gc.get('collectionCount', 0), tags=gc_tags)
             self.monotonic_count('system.gc.collection_time', gc.get('collectionMillis', 0), tags=gc_tags)
 
@@ -89,14 +89,14 @@ class NifiCheck(AgentCheck):
         self.gauge('system.flowfile_repo.utilization', self._parse_utilization(ff_util), tags=base_tags)
 
         for repo in snap.get('contentRepositoryStorageUsage', []):
-            repo_tags = base_tags + [f'repo_identifier:{repo["identifier"]}']
+            repo_tags = base_tags + [f'repo_identifier:{repo.get("identifier", "unknown")}']
             self.gauge('system.content_repo.used_space', repo.get('usedSpaceBytes', 0), tags=repo_tags)
             self.gauge('system.content_repo.free_space', repo.get('freeSpaceBytes', 0), tags=repo_tags)
             repo_util = repo.get('utilization', '0%')
             self.gauge('system.content_repo.utilization', self._parse_utilization(repo_util), tags=repo_tags)
 
         for repo in snap.get('provenanceRepositoryStorageUsage', []):
-            repo_tags = base_tags + [f'repo_identifier:{repo["identifier"]}']
+            repo_tags = base_tags + [f'repo_identifier:{repo.get("identifier", "unknown")}']
             self.gauge('system.provenance_repo.used_space', repo.get('usedSpaceBytes', 0), tags=repo_tags)
             self.gauge('system.provenance_repo.free_space', repo.get('freeSpaceBytes', 0), tags=repo_tags)
             repo_util = repo.get('utilization', '0%')
