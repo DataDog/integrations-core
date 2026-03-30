@@ -103,6 +103,15 @@ RELATIVE_PATH="postgresql-{{version}}" \
 # Add paths to pg_config and to the library
 echo PATH="${DD_PREFIX_PATH}/bin:${PATH:-}" >> "$DD_ENV_FILE"
 
+# zstd for librdkafka compression support
+DOWNLOAD_URL="https://github.com/facebook/zstd/releases/download/v{{version}}/zstd-{{version}}.tar.gz" \
+VERSION="1.5.7" \
+SHA256="eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3" \
+RELATIVE_PATH="zstd-{{version}}" \
+CONFIGURE_SCRIPT="true" \
+INSTALL_COMMAND="make prefix=${DD_PREFIX_PATH} install" \
+  install-from-source
+
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 DOWNLOAD_URL="https://github.com/LMDB/lmdb/archive/LMDB_{{version}}.tar.gz" \
 VERSION="0.9.29" \
