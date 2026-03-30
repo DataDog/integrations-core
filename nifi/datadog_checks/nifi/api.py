@@ -10,13 +10,13 @@ from .constants import ABOUT_ENDPOINT, ACCESS_TOKEN_ENDPOINT, CLUSTER_SUMMARY_EN
 
 
 class NiFiApi:
-    def __init__(self, api_url, http, log, username=None, password=None, auth_token=None):
+    def __init__(self, api_url, http, log, username=None, password=None):
         self._api_url = api_url.rstrip('/')
         self._http = http
         self._log = log
         self._username = username
         self._password = password
-        self._token = auth_token
+        self._token = None
         self._version = None
 
     def _authenticate(self):
@@ -24,7 +24,7 @@ class NiFiApi:
         resp = self._http.post(
             f'{self._api_url}{ACCESS_TOKEN_ENDPOINT}',
             data={'username': self._username, 'password': self._password},
-            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            extra_headers={'Content-Type': 'application/x-www-form-urlencoded'},
         )
         if resp.status_code != 201:
             resp.raise_for_status()
@@ -40,17 +40,17 @@ class NiFiApi:
     def _request(self, path):
         """GET a JSON endpoint with bearer token auth, retry once on 401."""
         url = f'{self._api_url}{path}'
-        headers = {}
+        extra = {}
         if self._token:
-            headers['Authorization'] = f'Bearer {self._token}'
+            extra['Authorization'] = f'Bearer {self._token}'
 
-        resp = self._http.get(url, headers=headers)
+        resp = self._http.get(url, extra_headers=extra)
 
         if resp.status_code == 401 and self._username and self._password:
             self._log.debug('Got 401, re-authenticating')
             self._authenticate()
-            headers['Authorization'] = f'Bearer {self._token}'
-            resp = self._http.get(url, headers=headers)
+            extra['Authorization'] = f'Bearer {self._token}'
+            resp = self._http.get(url, extra_headers=extra)
 
         resp.raise_for_status()
         return resp.json()

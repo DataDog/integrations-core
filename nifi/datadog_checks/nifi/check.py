@@ -24,7 +24,6 @@ class NifiCheck(AgentCheck):
                 log=self.log,
                 username=self.instance.get('username'),
                 password=self.instance.get('password'),
-                auth_token=self.instance.get('auth_token'),
             )
         return self._api
 
