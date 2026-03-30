@@ -9,13 +9,22 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
     # confluent-kafka and librdkafka need to be compiled from source to get kerberos support
     # The librdkafka version needs to stay in sync with the confluent-kafka version,
     # thus we extract the version from the requirements file.
+    # zstd for librdkafka compression support
+    DOWNLOAD_URL="https://github.com/facebook/zstd/releases/download/v{{version}}/zstd-{{version}}.tar.gz" \
+      VERSION="1.5.7" \
+      SHA256="eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3" \
+      RELATIVE_PATH="zstd-{{version}}" \
+      CONFIGURE_SCRIPT="true" \
+      INSTALL_COMMAND="make PREFIX=${DD_PREFIX_PATH} install" \
+      bash install-from-source.sh
+
     kafka_version=$(grep 'confluent-kafka==' "${DD_MOUNT_DIR}/requirements.in" | sed -E 's/^.*([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+).*$/\1/')
     LDFLAGS="${LDFLAGS} -L${DD_PREFIX_PATH}/lib -lgssapi_krb5 -llmdb" \
     DOWNLOAD_URL="https://github.com/confluentinc/librdkafka/archive/refs/tags/v{{version}}.tar.gz" \
       VERSION="${kafka_version}" \
       SHA256="14972092e4115f6e99f798a7cb420cbf6daa0c73502b3c52ae42fb5b418eea8f" \
       RELATIVE_PATH="librdkafka-{{version}}" \
-      bash install-from-source.sh --prefix="${DD_PREFIX_PATH}" --enable-sasl --enable-curl
+      bash install-from-source.sh --prefix="${DD_PREFIX_PATH}" --enable-sasl --enable-curl --enable-zstd
 
     # lmdb doesnt't get the actual full path in its install name which means delocate won't find it
     # Luckily we can patch it here so that it does.

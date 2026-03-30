@@ -129,6 +129,16 @@ RUN \
  # This is the folder where unixODBC searches for driver config and where we ask customers to copy their config to
  --sysconfdir=/opt/datadog-agent/embedded/etc
 
+# zstd for librdkafka compression support
+RUN \
+ CFLAGS="${CFLAGS} -fPIC" \
+ DOWNLOAD_URL="https://github.com/facebook/zstd/releases/download/v{{version}}/zstd-{{version}}.tar.gz" \
+ VERSION="1.5.7" \
+ SHA256="eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3" \
+ RELATIVE_PATH="zstd-{{version}}" \
+ CONFIGURE_SCRIPT="true" \
+ bash install-from-source.sh
+
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 RUN \
  DOWNLOAD_URL="https://github.com/LMDB/lmdb/archive/LMDB_{{version}}.tar.gz" \
