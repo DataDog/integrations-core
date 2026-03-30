@@ -1,5 +1,6 @@
 services:
   nifi:
+    container_name: nifi
     image: apache/nifi:${NIFI_VERSION:-2.8.0}
     ports:
       - "8443:8443"

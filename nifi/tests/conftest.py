@@ -53,7 +53,7 @@ def dd_environment():
         common.COMPOSE_FILE,
         conditions=[
             WaitFor(wait_for_nifi, attempts=60, wait=5),
-            WaitFor(setup_test_flows, attempts=10, wait=5),
+            WaitFor(setup_test_flows, attempts=1, wait=0),
         ],
     ):
         yield common.CHECK_CONFIG
