@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import os
 import sys
+import warnings
 from dataclasses import dataclass
 from typing import Any
 
@@ -53,7 +54,13 @@ def load_trust_records(trust_store_path: Path | None = None) -> dict[str, TrustR
 
     try:
         trust_data = load_toml_data(path.read_text())
-    except (OSError, tomllib.TOMLDecodeError):
+    except OSError:
+        return {}
+    except tomllib.TOMLDecodeError as e:
+        warnings.warn(
+            f'Trust store at `{path}` is corrupt: {e}. Run `ddev config allow` to rebuild.',
+            stacklevel=2,
+        )
         return {}
 
     records: dict[str, TrustRecord] = {}

@@ -97,7 +97,11 @@ def test_load_trust_records_returns_empty_for_invalid_toml(tmp_path):
     trust_store_path = Path(tmp_path) / 'trusted-local-configs.toml'
     trust_store_path.write_text('records = [\n')
 
-    assert load_trust_records(trust_store_path) == {}
+    with pytest.warns(
+        UserWarning,
+        match=r"Trust store at `.*trusted-local-configs\.toml` is corrupt: .*Run `ddev config allow` to rebuild\.",
+    ):
+        assert load_trust_records(trust_store_path) == {}
 
 
 def test_save_trust_records_wraps_write_failures(tmp_path, mocker) -> None:
