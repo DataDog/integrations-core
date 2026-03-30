@@ -163,10 +163,16 @@ class RateLimitingTTLCache(TTLCache):
 
 def resolve_db_host(db_host):
     if db_host and db_host.endswith('.local'):
+        logger.debug("resolve_db_host: db_host '%s' ends with '.local', returning db_host as-is", db_host)
         return db_host
 
     agent_hostname = datadog_agent.get_hostname()
     if not db_host or db_host in {'localhost', '127.0.0.1'} or db_host.startswith('/'):
+        logger.debug(
+            "resolve_db_host: db_host '%s' is localhost, loopback, or unix socket. returning agent_hostname: %s",
+            db_host,
+            agent_hostname,
+        )
         return agent_hostname
 
     try:
@@ -184,6 +190,14 @@ def resolve_db_host(db_host):
     try:
         agent_host_ip = socket.gethostbyname(agent_hostname)
         if agent_host_ip == host_ip:
+            logger.debug(
+                "resolve_db_host: agent_host_ip '%s' == host_ip '%s'. "
+                "returning agent_hostname '%s' instead of db_host '%s'",
+                agent_host_ip,
+                host_ip,
+                agent_hostname,
+                db_host,
+            )
             return agent_hostname
     except (socket.gaierror, UnicodeError) as e:
         logger.debug(
@@ -193,6 +207,12 @@ def resolve_db_host(db_host):
             db_host,
         )
 
+    logger.debug(
+        "resolve_db_host: no match conditions met. returning db_host '%s' (resolved ip: '%s', agent_hostname: '%s')",
+        db_host,
+        host_ip,
+        agent_hostname,
+    )
     return db_host
 
 
