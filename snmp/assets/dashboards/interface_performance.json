@@ -1,628 +1,1683 @@
 {
-  "title": "Interface Performance",
-  "description": "Use this dashboard to view the performance of all the interfaces on your network devices. This dashboard can be filtered across a specific interfaces to view the specific performance of one single interface, or across a device by name to see the entire device's performance. (cloned)",
-  "widgets": [
-    {
-      "id": 5803655382122172,
-      "definition": {
-        "title": "Utilization",
-        "reflow_type": "fixed",
-        "type": "group",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 3306437627726454,
+    "title": "Interface Performance",
+    "description": "Monitor SNMP network interfaces: utilization, traffic, errors, discards, admin and oper status, and packet mix. Use $snmp_host, $snmp_device, and $interface to focus on a host, device, or port.\n\n`datadog_demo_keep:true`",
+    "widgets": [
+        {
+            "id": 9100000000000100,
             "definition": {
-              "title": "Inbound Bandwidth (%)",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "type": "timeseries",
-              "requests": [
-                {
-                  "q": "avg:snmp.ifBandwidthInUsage.rate{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}",
-                  "on_right_yaxis": false,
-                  "style": {
-                    "palette": "cool",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
-          },
-          {
-            "id": 2898630490041394,
-            "definition": {
-              "title": "Outbound Bandwidth (%)",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "type": "timeseries",
-              "requests": [
-                {
-                  "q": "avg:snmp.ifBandwidthOutUsage.rate{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}",
-                  "on_right_yaxis": false,
-                  "style": {
-                    "palette": "purple",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
-          },
-          {
-            "id": 2923885312771994,
-            "definition": {
-              "title": "Bits Received by Interface",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "type": "timeseries",
-              "requests": [
-                {
-                  "q": "avg:snmp.ifHCInOctets{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}.as_count()*8",
-                  "on_right_yaxis": false,
-                  "metadata": [
+                "title": "Scope",
+                "title_align": "left",
+                "background_color": "yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                      "expression": "avg:snmp.ifHCInOctets{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}.as_count()*8",
-                      "alias_name": "bits in"
+                        "id": 9100000000000098,
+                        "definition": {
+                            "type": "note",
+                            "content": "**Filters:** `$snmp_host`, `$snmp_device`, and `$interface` control what appears on the board. Use `*` to include everything, or narrow to a specific device or interface.\n\n**What you\u2019ll see:** Summary tables highlight interfaces with high utilization or errors. The rest of the dashboard shows trends for utilization, throughput, errors and discards, admin and oper status, packet types, and a sortable list of all interfaces in scope.\n\n**Tip:** If a chart is crowded, tighten the filters or shorten the time range.",
+                            "background_color": "pink",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 2
+                        }
                     }
-                  ],
-                  "style": {
-                    "palette": "cool",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
+                ]
             },
-            "layout": { "x": 0, "y": 3, "width": 6, "height": 3 }
-          },
-          {
-            "id": 6773822003742794,
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 9100000000000002,
             "definition": {
-              "title": "Bits Sent by Interface",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "type": "timeseries",
-              "requests": [
-                {
-                  "q": "avg:snmp.ifHCOutOctets{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}.as_count()*8",
-                  "on_right_yaxis": false,
-                  "metadata": [
+                "title": "Utilization ",
+                "title_align": "left",
+                "background_color": "yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                      "expression": "avg:snmp.ifHCOutOctets{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}.as_count()*8",
-                      "alias_name": "bits out"
+                        "id": 9100000000000020,
+                        "definition": {
+                            "title": "Interface utilization",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifBandwidthInUsage.rate{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:snmp.ifBandwidthOutUsage.rate{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:snmp.ifHCInOctets.rate{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:snmp.ifHCOutOctets.rate{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "avg:snmp.ifHighSpeed{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}.as_count()",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "Utilization (%) in",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "query2",
+                                            "alias": "Utilization (%) out",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "query3 * 8",
+                                            "alias": "bits/s in",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "bit_in_bits_family",
+                                                    "per_unit_name": "second"
+                                                }
+                                            },
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "query4 * 8",
+                                            "alias": "bits/s out",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "bit_in_bits_family",
+                                                    "per_unit_name": "second"
+                                                }
+                                            },
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "query5",
+                                            "alias": "Nominal speed (Mbps)",
+                                            "number_format": {
+                                                "precision": "integer",
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "Mbps"
+                                                }
+                                            },
+                                            "cell_display_mode": "bar"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 7
+                        }
                     }
-                  ],
-                  "style": {
-                    "palette": "purple",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
+                ]
             },
-            "layout": { "x": 6, "y": 3, "width": 6, "height": 3 }
-          },
-          {
-            "id": 7393572788857220,
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 8
+            }
+        },
+        {
+            "id": 9100000000000088,
             "definition": {
-              "title": "In/Out Bytes & Max Speed",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_table",
-              "requests": [
-                {
-                  "aggregator": "avg",
-                  "cell_display_mode": ["bar"],
-                  "q": "avg:snmp.ifHCInOctets.rate{$snmp_host,$interface,$snmp_device} by {snmp_host,interface}.as_count()",
-                  "alias": "Bytes In",
-                  "limit": 50,
-                  "order": "desc"
-                },
-                {
-                  "q": "avg:snmp.ifHCOutOctets.rate{$snmp_host,$interface,$snmp_device} by {snmp_host,interface}",
-                  "aggregator": "avg",
-                  "cell_display_mode": ["bar"],
-                  "alias": "Bytes Out"
-                },
-                {
-                  "q": "avg:snmp.ifHighSpeed{$snmp_host,$interface,$snmp_device} by {snmp_host,interface}.as_count()",
-                  "aggregator": "avg",
-                  "cell_display_mode": ["bar"],
-                  "alias": "Speed"
-                }
-              ],
-              "has_search_bar": "auto"
-            },
-            "layout": { "x": 0, "y": 6, "width": 12, "height": 6 }
-          },
-          {
-            "id": 6062104962740908,
-            "definition": {
-              "type": "note",
-              "content": "**Tip:** Bandwidth is calculation measured as the rate at which traffic is sent or received on a specific port over the max speed that traffic can be sent. \n\nWe use the following formula: \n\n![bandwidth usage formula](https://github.com/DataDog/integrations-core/blob/5c17b0323172687c4ae0fdd75c56b5f8dd1c2dec/snmp/assets/images/bandwidth-usage-formula-small.png?raw=true)\n\nDatadog Agent version 7.25+ includes a packaged metric that calculates bandwidth automatically:\n\n`snmp.ifBandwidthInUsage.rate` & `snmp.ifBandwidthOutUsage.rate`",
-              "background_color": "pink",
-              "font_size": "14",
-              "text_align": "left",
-              "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "left"
-            },
-            "layout": { "x": 0, "y": 12, "width": 12, "height": 3 }
-          }
-        ]
-      }
-    },
-    {
-      "id": 1483901448268600,
-      "definition": {
-        "title": "Errors & Discards",
-        "reflow_type": "fixed",
-        "type": "group",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 1700626972109850,
-            "definition": {
-              "title": "Inbound Errors by Interface",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "type": "timeseries",
-              "requests": [
-                {
-                  "q": "avg:snmp.ifInErrors{$snmp_host,$snmp_device,$interface} by {snmp_host,snmp_device,interface}",
-                  "on_right_yaxis": false,
-                  "style": {
-                    "palette": "cool",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
-          },
-          {
-            "id": 8896998123028100,
-            "definition": {
-              "title": "Outbound Errors by Interface",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "type": "timeseries",
-              "requests": [
-                {
-                  "q": "avg:snmp.ifOutErrors{$snmp_host,$snmp_device,$interface} by {snmp_host,snmp_device,interface}",
-                  "on_right_yaxis": false,
-                  "style": {
-                    "palette": "purple",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
-          },
-          {
-            "id": 169728333312990,
-            "definition": {
-              "title": "Inbound Discarded Packets by Interface",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "type": "timeseries",
-              "requests": [
-                {
-                  "q": "avg:snmp.ifInDiscards{$snmp_host,$snmp_device,$interface} by {snmp_host,snmp_device,interface}",
-                  "on_right_yaxis": false,
-                  "style": {
-                    "palette": "cool",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 0, "y": 3, "width": 6, "height": 3 }
-          },
-          {
-            "id": 4219009026623818,
-            "definition": {
-              "title": "Outbound Discarded Packets by Interface",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "type": "timeseries",
-              "requests": [
-                {
-                  "q": "avg:snmp.ifOutDiscards{$snmp_host,$snmp_device,$interface} by {snmp_host,snmp_device,interface}",
-                  "on_right_yaxis": false,
-                  "style": {
-                    "palette": "purple",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 6, "y": 3, "width": 6, "height": 3 }
-          }
-        ]
-      }
-    },
-    {
-      "id": 228168866067746,
-      "definition": {
-        "title": "Packets",
-        "reflow_type": "fixed",
-        "type": "group",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 5588540879200634,
-            "definition": {
-              "title": "Packets In (uni, multi & broadcast)",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "type": "timeseries",
-              "requests": [
-                {
-                  "q": "avg:snmp.ifHCInUcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-                  "on_right_yaxis": false,
-                  "metadata": [
+                "title": "Errors & discards ",
+                "title_align": "left",
+                "background_color": "yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                      "expression": "avg:snmp.ifHCInUcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-                      "alias_name": "unicast"
+                        "id": 6151406310977416,
+                        "definition": {
+                            "title": "Interface errors & discards",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifInErrors{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:snmp.ifOutErrors{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:snmp.ifInDiscards{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:snmp.ifOutDiscards{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "avg:snmp.ifOperStatus{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "Errors/s in",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "errors/s"
+                                                }
+                                            },
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "query2",
+                                            "alias": "Errors/s out",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "errors/s"
+                                                }
+                                            },
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "query3",
+                                            "alias": "Discards/s in",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "discards/s"
+                                                }
+                                            },
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "query4",
+                                            "alias": "Discards/s out",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "discards/s"
+                                                }
+                                            },
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "query5",
+                                            "alias": "Oper status (code)",
+                                            "number_format": {
+                                                "precision": "integer",
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "code"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "white_on_green",
+                                                    "value": 2
+                                                },
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_red",
+                                                    "value": 2
+                                                },
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_yellow",
+                                                    "value": 3
+                                                },
+                                                {
+                                                    "custom_bg_color": "#cfcdcd",
+                                                    "comparator": ">",
+                                                    "palette": "custom_bg",
+                                                    "value": 3
+                                                }
+                                            ],
+                                            "cell_display_mode": "bar"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 7
+                        }
                     }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                },
-                {
-                  "q": "avg:snmp.ifHCInBroadcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-                  "on_right_yaxis": false,
-                  "metadata": [
-                    {
-                      "expression": "avg:snmp.ifHCInBroadcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-                      "alias_name": "broadcast"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "dotted",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                },
-                {
-                  "q": "avg:snmp.ifHCInMulticastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-                  "on_right_yaxis": false,
-                  "metadata": [
-                    {
-                      "expression": "avg:snmp.ifHCInMulticastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-                      "alias_name": "multicast"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "dashed",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
+                ]
             },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
-          },
-          {
-            "id": 1878660176861228,
+            "layout": {
+                "x": 0,
+                "y": 11,
+                "width": 12,
+                "height": 8
+            }
+        },
+        {
+            "id": 9100000000000000,
             "definition": {
-              "title": "Packets Out (uni, multi & broadcast)",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "type": "timeseries",
-              "requests": [
-                {
-                  "q": "avg:snmp.ifHCOutUcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-                  "on_right_yaxis": false,
-                  "metadata": [
+                "title": "Oper & admin status",
+                "title_align": "left",
+                "background_color": "yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                      "expression": "avg:snmp.ifHCOutUcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-                      "alias_name": "unicast"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                },
-                {
-                  "q": "avg:snmp.ifHCOutBroadcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-                  "on_right_yaxis": false,
-                  "metadata": [
-                    {
-                      "expression": "avg:snmp.ifHCOutBroadcastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-                      "alias_name": "broadcast"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "dotted",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                },
-                {
-                  "q": "avg:snmp.ifHCOutMulticastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-                  "on_right_yaxis": false,
-                  "metadata": [
-                    {
-                      "expression": "avg:snmp.ifHCOutMulticastPkts{$snmp_host,$interface,$snmp_device} by {interface,snmp_host}.as_count()",
-                      "alias_name": "multicast"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "dashed",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
-          }
-        ]
-      }
-    },
-    {
-      "id": 2411712431918596,
-      "definition": {
-        "title": "Interface State",
-        "reflow_type": "fixed",
-        "type": "group",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 7158881371559176,
-            "definition": {
-              "type": "note",
-              "content": "**Tip:** To fully understand the current state of an interface, we compare two different metrics, `snmp.AdminStatus` and `snmp.OperStatus`.\n\n**Admin Status** is defined by the owner of the device. This is the state a port is supposed to be at configuration time.\n\nMeanwhile, the actual current state of the interface is known as the **Operational Status**.\n\nWe can infer a healthy interface when the interface is operationally the same as its administratively defined states. ",
-              "background_color": "pink",
-              "font_size": "14",
-              "text_align": "left",
-              "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "left"
-            },
-            "layout": { "x": 0, "y": 0, "width": 8, "height": 3 }
-          },
-          {
-            "id": 5324644455644750,
-            "definition": {
-              "type": "note",
-              "content": "**Oper Status** \n```\n1 - up\n2 - down\n3 - testing\n4 - unknown\n5 - dormant\n6 - notPresent\n7 - lowerLayerDown\n```",
-              "background_color": "pink",
-              "font_size": "14",
-              "text_align": "left",
-              "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "left"
-            },
-            "layout": { "x": 8, "y": 0, "width": 2, "height": 3 }
-          },
-          {
-            "id": 6121921241158846,
-            "definition": {
-              "type": "note",
-              "content": "**Admin Status**\n```\n1 - up \n2 - down\n3 - testing\n```",
-              "background_color": "pink",
-              "font_size": "14",
-              "text_align": "left",
-              "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "left"
-            },
-            "layout": { "x": 10, "y": 0, "width": 2, "height": 3 }
-          },
-          {
-            "id": 6490840222049614,
-            "definition": {
-              "title": "Current State",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_table",
-              "requests": [
-                {
-                  "aggregator": "last",
-                  "cell_display_mode": ["bar"],
-                  "conditional_formats": [
-                    {
-                      "comparator": "<",
-                      "palette": "white_on_green",
-                      "value": 2
+                        "id": 3763492863117901,
+                        "definition": {
+                            "type": "note",
+                            "content": "**Tip:** To fully understand the current state of an interface, we compare two different metrics, `snmp.AdminStatus` and `snmp.OperStatus`.\n\n**Admin Status** is defined by the owner of the device. This is the state a port is supposed to be at configuration time.\n\nMeanwhile, the actual current state of the interface is known as the **Operational Status**.\n\nWe can infer a healthy interface when the interface is operationally the same as its administratively defined states. ",
+                            "background_color": "pink",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 8,
+                            "height": 3
+                        }
                     },
                     {
-                      "comparator": "<=",
-                      "palette": "white_on_red",
-                      "value": 2
+                        "id": 6197778322888030,
+                        "definition": {
+                            "type": "note",
+                            "content": "**Admin Status**\n```\n1 - up \n2 - down\n3 - testing\n```",
+                            "background_color": "pink",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left"
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 2,
+                            "height": 3
+                        }
                     },
                     {
-                      "comparator": "<=",
-                      "palette": "white_on_yellow",
-                      "value": 3
+                        "id": 5759135064811185,
+                        "definition": {
+                            "type": "note",
+                            "content": "**Oper Status** \n```\n1 - up\n2 - down\n3 - testing\n4 - unknown\n5 - dormant\n6 - notPresent\n7 - lowerLayerDown\n```",
+                            "background_color": "pink",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left"
+                        },
+                        "layout": {
+                            "x": 10,
+                            "y": 0,
+                            "width": 2,
+                            "height": 3
+                        }
                     },
                     {
-                      "custom_bg_color": "#cfcdcd",
-                      "comparator": ">",
-                      "palette": "custom_bg",
-                      "value": 3
+                        "id": 2178287991840208,
+                        "definition": {
+                            "title": "Oper & admin by interface",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifOperStatus{$snmp_host,$interface,$snmp_device} by {snmp_device,snmp_host,interface}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:snmp.ifAdminStatus{$snmp_host,$interface,$snmp_device} by {snmp_device,snmp_host,interface}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 50,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "alias": "Oper (MIB)",
+                                            "number_format": {
+                                                "precision": "integer",
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "code"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "white_on_green",
+                                                    "value": 2
+                                                },
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_red",
+                                                    "value": 2
+                                                },
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_yellow",
+                                                    "value": 3
+                                                },
+                                                {
+                                                    "custom_bg_color": "#cfcdcd",
+                                                    "comparator": ">",
+                                                    "palette": "custom_bg",
+                                                    "value": 3
+                                                }
+                                            ],
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "query2",
+                                            "alias": "Admin (MIB)",
+                                            "number_format": {
+                                                "precision": "integer",
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "code"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_green",
+                                                    "value": 1
+                                                },
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_red",
+                                                    "value": 2
+                                                },
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_yellow",
+                                                    "value": 3
+                                                }
+                                            ],
+                                            "cell_display_mode": "bar"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 12,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 7371043321634065,
+                        "definition": {
+                            "title": "ifOperStatus over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "on_right_yaxis": false,
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifOperStatus{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "precision": "integer",
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "ifOperStatus"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "MIB value (1=up, 2=down, \u2026)",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 9100000000000014,
+                        "definition": {
+                            "title": "ifAdminStatus over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "on_right_yaxis": false,
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifAdminStatus{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "precision": "integer",
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "ifAdminStatus"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "MIB value (1=up, 2=down, 3=testing)",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 12,
+                            "height": 4
+                        }
                     }
-                  ],
-                  "q": "avg:snmp.ifOperStatus{$snmp_host,$interface,$snmp_device} by {snmp_device,snmp_host,interface}",
-                  "alias": "oper status",
-                  "limit": 50,
-                  "order": "desc"
-                }
-              ],
-              "has_search_bar": "auto"
+                ]
             },
-            "layout": { "x": 0, "y": 3, "width": 6, "height": 6 }
-          },
-          {
-            "id": 6987392975637046,
+            "layout": {
+                "x": 0,
+                "y": 19,
+                "width": 12,
+                "height": 17
+            }
+        },
+        {
+            "id": 9100000000000004,
             "definition": {
-              "title": "User/Pre-Defined State",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_table",
-              "requests": [
-                {
-                  "aggregator": "last",
-                  "cell_display_mode": ["bar"],
-                  "conditional_formats": [
+                "title": "Throughput & utilization",
+                "title_align": "left",
+                "background_color": "yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                      "comparator": "<=",
-                      "palette": "white_on_green",
-                      "value": 1
+                        "id": 9100000000000040,
+                        "definition": {
+                            "type": "note",
+                            "content": "**Throughput and utilization:** Interface utilization (%) and traffic rates (bits/s). Narrow **$snmp_device** or **$interface** when you want to focus on particular ports.",
+                            "background_color": "pink",
+                            "font_size": "13",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
                     },
                     {
-                      "comparator": "<=",
-                      "palette": "white_on_red",
-                      "value": 2
+                        "id": 9100000000000044,
+                        "definition": {
+                            "title": "Inbound utilization (%)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "on_right_yaxis": false,
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifBandwidthInUsage.rate{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, 'max', 'desc')",
+                                            "alias": "Utilization (%) in",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "Percent",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "100"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 6,
+                            "height": 4
+                        }
                     },
                     {
-                      "comparator": "<=",
-                      "palette": "white_on_yellow",
-                      "value": 3
+                        "id": 1071517627673985,
+                        "definition": {
+                            "title": "Outbound utilization (%)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "on_right_yaxis": false,
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifBandwidthOutUsage.rate{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, 'max', 'desc')",
+                                            "alias": "Utilization (%) out",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "Percent",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "100"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 1,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 9100000000000046,
+                        "definition": {
+                            "title": "Bits/s in (HC octets \u00d7 8)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "on_right_yaxis": false,
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifHCInOctets.rate{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, 'max', 'desc') * 8",
+                                            "alias": "bits/s in",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "bit_in_bits_family",
+                                                    "per_unit_name": "second"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "bits/s",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 9100000000000048,
+                        "definition": {
+                            "title": "Bits/s out (HC octets \u00d7 8)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "on_right_yaxis": false,
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifHCOutOctets.rate{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, 'max', 'desc') * 8",
+                                            "alias": "bits/s out",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "bit_in_bits_family",
+                                                    "per_unit_name": "second"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "bits/s",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 5,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6606416482556952,
+                        "definition": {
+                            "title": "Throughput (bits/s) & inbound utilization (%) \u2014 dual axis",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "on_right_yaxis": false,
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifHCInOctets.rate{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:snmp.ifHCOutOctets.rate{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, 'max', 'desc') * 8",
+                                            "alias": "bits/s in",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "bit_in_bits_family",
+                                                    "per_unit_name": "second"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "formula": "top(query2, 25, 'max', 'desc') * 8",
+                                            "alias": "bits/s out",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "bit_in_bits_family",
+                                                    "per_unit_name": "second"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                },
+                                {
+                                    "on_right_yaxis": true,
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifBandwidthInUsage.rate{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, 'max', 'desc')",
+                                            "alias": "Utilization (%) in",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "bits/s",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "right_yaxis": {
+                                "scale": "linear",
+                                "label": "Utilization (%)",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "100"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1888575667818755,
+                        "definition": {
+                            "type": "note",
+                            "content": "**Tip:** Bandwidth is calculation measured as the rate at which traffic is sent or received on a specific port over the max speed that traffic can be sent. \n\nWe use the following formula: \n\n![bandwidth usage formula](https://github.com/DataDog/integrations-core/blob/5c17b0323172687c4ae0fdd75c56b5f8dd1c2dec/snmp/assets/images/bandwidth-usage-formula-small.png?raw=true)\n\nDatadog Agent version 7.25+ includes a packaged metric that calculates bandwidth automatically:\n\n`snmp.ifBandwidthInUsage.rate` & `snmp.ifBandwidthOutUsage.rate`",
+                            "background_color": "pink",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 13,
+                            "width": 12,
+                            "height": 3
+                        }
                     }
-                  ],
-                  "q": "avg:snmp.ifAdminStatus{$snmp_host,$interface,$snmp_device} by {snmp_device,snmp_host,interface}",
-                  "alias": "admin status",
-                  "limit": 50,
-                  "order": "desc"
-                }
-              ],
-              "has_search_bar": "auto"
+                ]
             },
-            "layout": { "x": 6, "y": 3, "width": 6, "height": 6 }
-          }
-        ]
-      }
-    }
-  ],
-  "template_variables": [
-    { "name": "snmp_host", "default": "*", "prefix": "snmp_host" },
-    { "name": "snmp_device", "default": "*", "prefix": "snmp_device" },
-    { "name": "interface", "default": "*", "prefix": "interface" }
-  ],
-  "layout_type": "ordered",
-  "is_read_only": true,
-  "notify_list": [],
-  "reflow_type": "fixed"
+            "layout": {
+                "x": 0,
+                "y": 36,
+                "width": 12,
+                "height": 17,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 7496199602009546,
+            "definition": {
+                "title": "Errors & discards",
+                "title_align": "left",
+                "background_color": "yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 9100000000000032,
+                        "definition": {
+                            "title": "Errors \u2014 inbound",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "on_right_yaxis": false,
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifInErrors{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, 'max', 'desc')",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "errors/s"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "errors/s",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8176929307200002,
+                        "definition": {
+                            "title": "Errors \u2014 outbound",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "on_right_yaxis": false,
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifOutErrors{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, 'max', 'desc')",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "errors/s"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "errors/s",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 9100000000000036,
+                        "definition": {
+                            "title": "Discards \u2014 inbound",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "on_right_yaxis": false,
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifInDiscards{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, 'max', 'desc')",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "discards/s"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "discards/s",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 9100000000000034,
+                        "definition": {
+                            "title": "Discards \u2014 outbound",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "on_right_yaxis": false,
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifOutDiscards{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, 'max', 'desc')",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "discards/s"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "discards/s",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 53,
+                "width": 12,
+                "height": 9
+            }
+        },
+        {
+            "id": 7767139202770638,
+            "definition": {
+                "title": "Packet mix (pkts/s)",
+                "title_align": "left",
+                "background_color": "yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 9100000000000050,
+                        "definition": {
+                            "title": "Packet mix \u2014 inbound (pkts/s)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "on_right_yaxis": false,
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifHCInUcastPkts{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:snmp.ifHCInMulticastPkts{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:snmp.ifHCInBroadcastPkts{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 20, 'max', 'desc')",
+                                            "alias": "Unicast in",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "pkts/s"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "formula": "top(query2, 20, 'max', 'desc')",
+                                            "alias": "Multicast in",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "pkts/s"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "formula": "top(query3, 20, 'max', 'desc')",
+                                            "alias": "Broadcast in",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "pkts/s"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "pkts/s",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 9100000000000052,
+                        "definition": {
+                            "title": "Packet mix \u2014 outbound (pkts/s)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "on_right_yaxis": false,
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifHCOutUcastPkts{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:snmp.ifHCOutMulticastPkts{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:snmp.ifHCOutBroadcastPkts{$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_host,interface}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 20, 'max', 'desc')",
+                                            "alias": "Unicast out",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "pkts/s"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "formula": "top(query2, 20, 'max', 'desc')",
+                                            "alias": "Multicast out",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "pkts/s"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "formula": "top(query3, 20, 'max', 'desc')",
+                                            "alias": "Broadcast out",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "pkts/s"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "scale": "linear",
+                                "label": "pkts/s",
+                                "include_zero": true,
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 62,
+                "width": 12,
+                "height": 9
+            }
+        },
+        {
+            "id": 9100000000000006,
+            "definition": {
+                "title": "All interfaces ",
+                "title_align": "left",
+                "background_color": "yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2833473954669631,
+                        "definition": {
+                            "title": "All interfaces \u2014 throughput, speed & state",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:snmp.ifHCInOctets.rate{$snmp_host,$interface,$snmp_device} by {snmp_device,snmp_host,interface}.as_count()",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:snmp.ifHCOutOctets.rate{$snmp_host,$interface,$snmp_device} by {snmp_device,snmp_host,interface}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:snmp.ifHighSpeed{$snmp_host,$interface,$snmp_device} by {snmp_device,snmp_host,interface}.as_count()",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:snmp.ifOperStatus{$snmp_host,$interface,$snmp_device} by {snmp_device,snmp_host,interface}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "avg:snmp.ifAdminStatus{$snmp_host,$interface,$snmp_device} by {snmp_device,snmp_host,interface}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 50,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 * 8",
+                                            "alias": "b/s in",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "bit_in_bits_family",
+                                                    "per_unit_name": "second"
+                                                }
+                                            },
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "query2 * 8",
+                                            "alias": "b/s out",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "bit_in_bits_family",
+                                                    "per_unit_name": "second"
+                                                }
+                                            },
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "query3",
+                                            "alias": "Nominal speed (ifHighSpeed)",
+                                            "number_format": {
+                                                "precision": "integer",
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "Mbps"
+                                                }
+                                            },
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "query4",
+                                            "alias": "Oper (MIB)",
+                                            "number_format": {
+                                                "precision": "integer",
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "code"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "white_on_green",
+                                                    "value": 2
+                                                },
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_red",
+                                                    "value": 2
+                                                },
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_yellow",
+                                                    "value": 3
+                                                },
+                                                {
+                                                    "custom_bg_color": "#cfcdcd",
+                                                    "comparator": ">",
+                                                    "palette": "custom_bg",
+                                                    "value": 3
+                                                }
+                                            ],
+                                            "cell_display_mode": "bar"
+                                        },
+                                        {
+                                            "formula": "query5",
+                                            "alias": "Admin (MIB)",
+                                            "number_format": {
+                                                "precision": "integer",
+                                                "unit": {
+                                                    "type": "custom_unit_label",
+                                                    "label": "code"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_green",
+                                                    "value": 1
+                                                },
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_red",
+                                                    "value": 2
+                                                },
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_yellow",
+                                                    "value": 3
+                                                }
+                                            ],
+                                            "cell_display_mode": "bar"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 6
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 71,
+                "width": 12,
+                "height": 7
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "snmp_host",
+            "prefix": "snmp_host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "snmp_device",
+            "prefix": "snmp_device",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "interface",
+            "prefix": "interface",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "pause_auto_refresh": false,
+    "reflow_type": "fixed"
 }
