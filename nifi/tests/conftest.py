@@ -5,14 +5,28 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import ssl
 from copy import deepcopy
+from urllib import error
+from urllib.request import urlopen
 
 import pytest
 
 from datadog_checks.dev import WaitFor, docker_run, run_command
-from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common
+
+
+def wait_for_nifi():
+    """Poll the NiFi API until it responds (any HTTP status means NiFi is up)."""
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    try:
+        urlopen(f'{common.NIFI_API_URL}/flow/about', context=ctx, timeout=5)
+    except error.HTTPError:
+        # NiFi returns 401 on all unauthenticated requests — that's fine, it means NiFi is up.
+        return
 
 
 def setup_test_flows():
@@ -21,6 +35,7 @@ def setup_test_flows():
     run_command(
         ['bash', script],
         check=True,
+        capture=True,
         env={
             **os.environ,
             'NIFI_API_URL': common.NIFI_API_URL,
@@ -35,8 +50,8 @@ def dd_environment():
     with docker_run(
         common.COMPOSE_FILE,
         conditions=[
-            CheckDockerLogs('nifi', ['Started Application Controller'], attempts=120, wait=5),
-            WaitFor(setup_test_flows, attempts=30, wait=5),
+            WaitFor(wait_for_nifi, attempts=60, wait=5),
+            WaitFor(setup_test_flows, attempts=10, wait=5),
         ],
     ):
         yield common.CHECK_CONFIG
