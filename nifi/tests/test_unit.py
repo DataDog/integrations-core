@@ -421,3 +421,136 @@ class TestProcessGroup:
         aggregator.assert_metric('nifi.process_group.flowfiles_queued', value=5, tags=child_tags)
         aggregator.assert_metric('nifi.process_group.bytes_read', value=512, tags=child_tags)
         aggregator.assert_metric('nifi.process_group.active_threads', value=1, tags=child_tags)
+
+
+PG_WITH_CONNECTIONS_AND_PROCESSORS = {
+    'processGroupStatus': {
+        'id': 'root-pg-id',
+        'name': 'NiFi Flow',
+        'aggregateSnapshot': {
+            'id': 'root-pg-id',
+            'name': 'NiFi Flow',
+            'flowFilesQueued': 0,
+            'bytesQueued': 0,
+            'bytesRead': 0,
+            'bytesWritten': 0,
+            'flowFilesReceived': 0,
+            'flowFilesSent': 0,
+            'flowFilesTransferred': 0,
+            'activeThreadCount': 0,
+            'processGroupStatusSnapshots': [],
+            'connectionStatusSnapshots': [
+                {
+                    'id': 'conn-1',
+                    'connectionStatusSnapshot': {
+                        'id': 'conn-1',
+                        'groupId': 'root-pg-id',
+                        'name': 'success',
+                        'sourceName': 'Generate Data',
+                        'destinationName': 'Log Output',
+                        'flowFilesQueued': 5,
+                        'bytesQueued': 2048,
+                        'percentUseCount': 10,
+                        'percentUseBytes': 5,
+                        'flowFilesIn': 10,
+                        'flowFilesOut': 5,
+                    },
+                    'canRead': True,
+                },
+            ],
+            'processorStatusSnapshots': [
+                {
+                    'id': 'proc-1',
+                    'processorStatusSnapshot': {
+                        'id': 'proc-1',
+                        'groupId': 'root-pg-id',
+                        'name': 'Generate Data',
+                        'type': 'GenerateFlowFile',
+                        'runStatus': 'Running',
+                        'bytesRead': 0,
+                        'bytesWritten': 1024,
+                        'flowFilesIn': 0,
+                        'flowFilesOut': 10,
+                        'taskCount': 10,
+                        'tasksDurationNanos': 5000000,
+                        'activeThreadCount': 1,
+                    },
+                    'canRead': True,
+                },
+            ],
+        },
+    }
+}
+
+
+class TestConnectionMetrics:
+    def test_disabled_by_default(self, dd_run_check, aggregator):
+        """Connection metrics are not emitted when collect_connection_metrics is false."""
+        responses = _standard_responses()
+        responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
+        check = NifiCheck('nifi', {}, [_make_instance()])
+
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
+            dd_run_check(check)
+
+        assert not aggregator.metrics('nifi.connection.queued_count')
+
+    def test_enabled(self, dd_run_check, aggregator):
+        """Connection metrics are emitted with correct tags when enabled."""
+        responses = _standard_responses()
+        responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
+        check = NifiCheck('nifi', {}, [_make_instance(collect_connection_metrics=True)])
+
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
+            dd_run_check(check)
+
+        conn_tags = [
+            'nifi_version:2.8.0',
+            'connection_name:success',
+            'source_name:Generate Data',
+            'destination_name:Log Output',
+            'process_group_id:root-pg-id',
+        ]
+        aggregator.assert_metric('nifi.connection.queued_count', value=5, tags=conn_tags)
+        aggregator.assert_metric('nifi.connection.queued_bytes', value=2048, tags=conn_tags)
+        aggregator.assert_metric('nifi.connection.percent_use_count', value=10, tags=conn_tags)
+        aggregator.assert_metric('nifi.connection.percent_use_bytes', value=5, tags=conn_tags)
+        aggregator.assert_metric('nifi.connection.flowfiles_in', value=10, tags=conn_tags)
+        aggregator.assert_metric('nifi.connection.flowfiles_out', value=5, tags=conn_tags)
+
+
+class TestProcessorMetrics:
+    def test_disabled_by_default(self, dd_run_check, aggregator):
+        """Processor metrics are not emitted when collect_processor_metrics is false."""
+        responses = _standard_responses()
+        responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
+        check = NifiCheck('nifi', {}, [_make_instance()])
+
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
+            dd_run_check(check)
+
+        assert not aggregator.metrics('nifi.processor.flowfiles_in')
+
+    def test_enabled(self, dd_run_check, aggregator):
+        """Processor metrics are emitted with correct tags when enabled."""
+        responses = _standard_responses()
+        responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
+        check = NifiCheck('nifi', {}, [_make_instance(collect_processor_metrics=True)])
+
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
+            dd_run_check(check)
+
+        proc_tags = [
+            'nifi_version:2.8.0',
+            'processor_name:Generate Data',
+            'processor_type:GenerateFlowFile',
+            'process_group_id:root-pg-id',
+        ]
+        aggregator.assert_metric('nifi.processor.flowfiles_in', value=0, tags=proc_tags)
+        aggregator.assert_metric('nifi.processor.flowfiles_out', value=10, tags=proc_tags)
+        aggregator.assert_metric('nifi.processor.bytes_read', value=0, tags=proc_tags)
+        aggregator.assert_metric('nifi.processor.bytes_written', value=1024, tags=proc_tags)
+        aggregator.assert_metric('nifi.processor.task_count', value=10, tags=proc_tags)
+        aggregator.assert_metric('nifi.processor.processing_nanos', value=5000000, tags=proc_tags)
+        aggregator.assert_metric('nifi.processor.active_threads', value=1, tags=proc_tags)
+        aggregator.assert_metric('nifi.processor.run_status', value=1, tags=proc_tags)
