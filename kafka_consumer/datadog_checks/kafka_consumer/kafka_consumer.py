@@ -13,13 +13,15 @@ from google.protobuf import descriptor_pb2, descriptor_pool, message_factory
 from google.protobuf.json_format import MessageToJson
 from google.protobuf.message import DecodeError, EncodeError
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.kafka_consumer.byte_position_store import BytePositionStore
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.cluster_metadata import ClusterMetadataCollector
 from datadog_checks.kafka_consumer.config import KafkaConfig
 from datadog_checks.kafka_consumer.constants import (
     HIGH_WATERMARK,
     KAFKA_INTERNAL_TOPICS,
+    LOW_WATERMARK,
     OFFSET_INVALID,
 )
 
@@ -43,6 +45,12 @@ class KafkaCheck(AgentCheck):
 
         # Initialize cluster metadata collector
         self.metadata_collector = ClusterMetadataCollector(self, self.client, self.config, self.log)
+
+        # Byte position store for consumer lag in bytes estimation
+        self._consumer_lag_bytes_enabled = is_affirmative(self.instance.get('collect_consumer_lag_bytes', False))
+        self._byte_store_max_points = int(self.instance.get('byte_position_max_points_per_level', 60))
+        self._byte_store_num_levels = int(self.instance.get('byte_position_num_levels', 10))
+        self._byte_position_store: BytePositionStore | None = None
 
     def check(self, _):
         """The main entrypoint of the check."""
@@ -117,6 +125,13 @@ class KafkaCheck(AgentCheck):
         self.config._auto_detected_cluster_id = cluster_id
         if self.config._kafka_cluster_id_override:
             cluster_id = self.config._kafka_cluster_id_override
+
+        # Update byte position store for consumer lag in bytes
+        if self._consumer_lag_bytes_enabled and highwater_offsets:
+            try:
+                self._update_byte_position_store(partitions, highwater_offsets)
+            except Exception:
+                self.log.exception("Error updating byte position store.")
 
         self.report_highwater_offsets(highwater_offsets, self._context_limit, cluster_id)
         self.report_consumer_offsets_and_lag(
@@ -342,6 +357,14 @@ class KafkaCheck(AgentCheck):
                         self.log.debug('%s consumer lag reported with %s tags', consumer_lag, consumer_group_tags)
                         reported_contexts += 1
 
+                    if self._consumer_lag_bytes_enabled and self._byte_position_store is not None:
+                        lag_bytes = self._byte_position_store.estimate_bytes(
+                            topic, partition, consumer_offset, producer_offset
+                        )
+                        if lag_bytes is not None and reported_contexts < contexts_limit:
+                            self.gauge('consumer_lag_bytes', lag_bytes, tags=consumer_group_tags)
+                            reported_contexts += 1
+
                     if not self._data_streams_enabled:
                         continue
 
@@ -426,6 +449,58 @@ class KafkaCheck(AgentCheck):
 
         self.log.debug('Got %s %s offsets', len(result), 'highwater' if mode == HIGH_WATERMARK else 'lowwater')
         return result, cluster_id
+
+    def _load_byte_position_store(self) -> BytePositionStore:
+        if self._byte_position_store is not None:
+            return self._byte_position_store
+        try:
+            cached = self.read_persistent_cache(BytePositionStore.PERSISTENT_CACHE_KEY)
+            self._byte_position_store = BytePositionStore.from_json(
+                cached, self._byte_store_max_points, self._byte_store_num_levels
+            )
+        except Exception:
+            self._byte_position_store = BytePositionStore(
+                self._byte_store_max_points, self._byte_store_num_levels
+            )
+        return self._byte_position_store
+
+    def _save_byte_position_store(self):
+        if self._byte_position_store is not None:
+            self.write_persistent_cache(
+                BytePositionStore.PERSISTENT_CACHE_KEY, self._byte_position_store.to_json()
+            )
+
+    def _update_byte_position_store(self, partitions, highwater_offsets):
+        store = self._load_byte_position_store()
+
+        # Fetch lowwater offsets
+        lowwater_offsets, _ = self.get_watermark_offsets(partitions, mode=LOW_WATERMARK)
+
+        # Fetch partition disk sizes from DescribeLogDirs
+        partition_sizes = self._get_partition_disk_sizes()
+
+        for (topic, partition), high in highwater_offsets.items():
+            low = lowwater_offsets.get((topic, partition))
+            size = partition_sizes.get((topic, partition))
+            if low is None or size is None:
+                continue
+            store.update(topic, partition, low, high, size)
+
+        self._save_byte_position_store()
+
+    def _get_partition_disk_sizes(self) -> dict[tuple[str, int], int]:
+        """Get partition sizes in bytes from DescribeLogDirs, taking the max across brokers."""
+        sizes: dict[tuple[str, int], int] = {}
+        broker_log_dirs = self.client.describe_log_dirs()
+        for _broker_id, log_dirs in broker_log_dirs.items():
+            for logdir in log_dirs:
+                if logdir.error is not None:
+                    continue
+                for topic_desc in logdir.topics:
+                    for part in topic_desc.partitions:
+                        key = (topic_desc.topic, part.partition)
+                        sizes[key] = max(sizes.get(key, 0), part.size)
+        return sizes
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""
