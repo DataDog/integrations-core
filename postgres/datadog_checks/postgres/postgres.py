@@ -30,6 +30,7 @@ from datadog_checks.postgres.connection_pool import (
     TokenAwareConnection,
     TokenProvider,
 )
+from datadog_checks.postgres.data_observability import PostgresDataObservability
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.health import PostgresHealth
 from datadog_checks.postgres.metadata import PostgresMetadata
@@ -90,7 +91,7 @@ from .util import (
     warning_with_tags,
 )
 from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, V17, V18, VersionUtils
-from .data_observability import PostgresDataObservability
+
 try:
     import datadog_agent
 except ImportError:
