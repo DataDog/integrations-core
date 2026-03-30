@@ -126,10 +126,82 @@ class NifiCheck(AgentCheck):
         self.gauge('process_group.flowfiles_transferred', snap.get('flowFilesTransferred', 0), tags=pg_tags)
         self.gauge('process_group.active_threads', snap.get('activeThreadCount', 0), tags=pg_tags)
 
+        if self.instance.get('collect_connection_metrics', False):
+            self._emit_connection_metrics(snap, base_tags)
+
+        if self.instance.get('collect_processor_metrics', False):
+            self._emit_processor_metrics(snap, base_tags)
+
         for child in snap.get('processGroupStatusSnapshots', []):
             child_status = child.get('processGroupStatusSnapshot', {})
             if child_status:
                 self._emit_process_group({'aggregateSnapshot': child_status}, base_tags)
+
+    def _emit_connection_metrics(self, pg_snap, base_tags):
+        max_connections = self.instance.get('max_connections', 200)
+        connections = pg_snap.get('connectionStatusSnapshots', [])
+        connections = sorted(
+            connections,
+            key=lambda c: c.get('connectionStatusSnapshot', {}).get('flowFilesQueued', 0),
+            reverse=True,
+        )[:max_connections]
+
+        if len(pg_snap.get('connectionStatusSnapshots', [])) > max_connections:
+            self.log.warning(
+                'Truncated connections from %d to %d (max_connections)',
+                len(pg_snap['connectionStatusSnapshots']),
+                max_connections,
+            )
+
+        for conn in connections:
+            snap = conn.get('connectionStatusSnapshot', {})
+            conn_tags = base_tags + [
+                f'connection_name:{snap.get("name", "unknown")}',
+                f'source_name:{snap.get("sourceName", "unknown")}',
+                f'destination_name:{snap.get("destinationName", "unknown")}',
+                f'process_group_id:{snap.get("groupId", "unknown")}',
+            ]
+            self.gauge('connection.queued_count', snap.get('flowFilesQueued', 0), tags=conn_tags)
+            self.gauge('connection.queued_bytes', snap.get('bytesQueued', 0), tags=conn_tags)
+            self.gauge('connection.percent_use_count', snap.get('percentUseCount', 0), tags=conn_tags)
+            self.gauge('connection.percent_use_bytes', snap.get('percentUseBytes', 0), tags=conn_tags)
+            self.gauge('connection.flowfiles_in', snap.get('flowFilesIn', 0), tags=conn_tags)
+            self.gauge('connection.flowfiles_out', snap.get('flowFilesOut', 0), tags=conn_tags)
+
+    RUN_STATUS_MAP = {'Running': 1, 'Stopped': 0, 'Invalid': -1, 'Disabled': -2}
+
+    def _emit_processor_metrics(self, pg_snap, base_tags):
+        max_processors = self.instance.get('max_processors', 200)
+        processors = pg_snap.get('processorStatusSnapshots', [])
+        processors = sorted(
+            processors,
+            key=lambda p: p.get('processorStatusSnapshot', {}).get('taskCount', 0),
+            reverse=True,
+        )[:max_processors]
+
+        if len(pg_snap.get('processorStatusSnapshots', [])) > max_processors:
+            self.log.warning(
+                'Truncated processors from %d to %d (max_processors)',
+                len(pg_snap['processorStatusSnapshots']),
+                max_processors,
+            )
+
+        for proc in processors:
+            snap = proc.get('processorStatusSnapshot', {})
+            proc_tags = base_tags + [
+                f'processor_name:{snap.get("name", "unknown")}',
+                f'processor_type:{snap.get("type", "unknown")}',
+                f'process_group_id:{snap.get("groupId", "unknown")}',
+            ]
+            self.gauge('processor.flowfiles_in', snap.get('flowFilesIn', 0), tags=proc_tags)
+            self.gauge('processor.flowfiles_out', snap.get('flowFilesOut', 0), tags=proc_tags)
+            self.gauge('processor.bytes_read', snap.get('bytesRead', 0), tags=proc_tags)
+            self.gauge('processor.bytes_written', snap.get('bytesWritten', 0), tags=proc_tags)
+            self.gauge('processor.task_count', snap.get('taskCount', 0), tags=proc_tags)
+            self.gauge('processor.processing_nanos', snap.get('tasksDurationNanos', 0), tags=proc_tags)
+            self.gauge('processor.active_threads', snap.get('activeThreadCount', 0), tags=proc_tags)
+            run_status = self.RUN_STATUS_MAP.get(snap.get('runStatus', ''), -1)
+            self.gauge('processor.run_status', run_status, tags=proc_tags)
 
     def _collect_cluster_health(self, api, base_tags):
         data = api.get_cluster_summary()
