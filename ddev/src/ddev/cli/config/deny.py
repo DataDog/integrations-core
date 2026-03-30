@@ -22,6 +22,11 @@ def deny(app: Application):
     local_config_path = (
         app.config_file.overrides_path if app.config_file.overrides_available() else Path.cwd() / DDEV_TOML
     )
+
+    if not local_config_path.is_file():
+        app.display_info(f'No local config file found at `{local_config_path}`. Nothing to untrust.')
+        return
+
     try:
         removed = deny_local_config(local_config_path)
     except TrustStorePersistenceError as e:

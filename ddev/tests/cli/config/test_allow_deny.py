@@ -57,6 +57,17 @@ def test_allow_without_local_file(ddev, monkeypatch, tmp_path, temp_dir: Path):
     assert 'No local config file found' in result.output
 
 
+def test_deny_without_local_file(ddev, monkeypatch, tmp_path, temp_dir: Path):
+    monkeypatch.setenv('DDEV_DATA_DIR', str(tmp_path / 'ddev-data'))
+
+    with temp_dir.as_cwd():
+        result = ddev('config', 'deny')
+
+    assert result.exit_code == 0, result.output
+    assert 'No local config file found' in result.output
+    assert 'Nothing to untrust' in result.output
+
+
 def test_deny_removes_trust(ddev, monkeypatch, tmp_path, helpers, overrides_config: Path):
     monkeypatch.setenv('DDEV_DATA_DIR', str(tmp_path / 'ddev-data'))
     overrides_config.write_text(
