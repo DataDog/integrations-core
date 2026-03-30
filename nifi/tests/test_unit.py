@@ -126,7 +126,63 @@ PROCESS_GROUP_STATUS_RESPONSE = {
 }
 
 
-def _standard_responses(cluster=CLUSTER_SUMMARY_STANDALONE, sysdiag=SYSTEM_DIAGNOSTICS_RESPONSE):
+EMPTY_BULLETIN_BOARD = {'bulletinBoard': {'bulletins': []}}
+
+BULLETIN_BOARD_RESPONSE = {
+    'bulletinBoard': {
+        'bulletins': [
+            {
+                'id': 0,
+                'groupId': 'pg-1',
+                'sourceId': 'proc-1',
+                'timestampIso': '2026-03-20T18:08:33.065Z',
+                'canRead': True,
+                'bulletin': {
+                    'id': 0,
+                    'sourceName': 'Fail Writer',
+                    'level': 'ERROR',
+                    'message': 'AccessDeniedException: /nonexistent',
+                    'sourceType': 'PROCESSOR',
+                    'timestampIso': '2026-03-20T18:08:33.065Z',
+                },
+            },
+            {
+                'id': 1,
+                'groupId': 'pg-1',
+                'sourceId': 'proc-1',
+                'timestampIso': '2026-03-20T18:08:43.031Z',
+                'canRead': True,
+                'bulletin': {
+                    'id': 1,
+                    'sourceName': 'Fail Writer',
+                    'level': 'WARNING',
+                    'message': 'Disk space low',
+                    'sourceType': 'PROCESSOR',
+                    'timestampIso': '2026-03-20T18:08:43.031Z',
+                },
+            },
+            {
+                'id': 2,
+                'groupId': 'pg-1',
+                'sourceId': 'proc-2',
+                'timestampIso': '2026-03-20T18:08:53.032Z',
+                'canRead': False,
+                'bulletin': {
+                    'id': 2,
+                    'sourceName': 'Secret Proc',
+                    'level': 'ERROR',
+                    'message': 'Should not see this',
+                    'sourceType': 'PROCESSOR',
+                },
+            },
+        ]
+    }
+}
+
+
+def _standard_responses(
+    cluster=CLUSTER_SUMMARY_STANDALONE, sysdiag=SYSTEM_DIAGNOSTICS_RESPONSE, bulletins=EMPTY_BULLETIN_BOARD
+):
     """Return the standard URL->response mapping for a full check run."""
     return {
         '/access/token': _mock_response(201, text='test-token'),
@@ -135,6 +191,7 @@ def _standard_responses(cluster=CLUSTER_SUMMARY_STANDALONE, sysdiag=SYSTEM_DIAGN
         '/flow/status': _mock_response(200, json_data=FLOW_STATUS_RESPONSE),
         '/flow/process-groups/': _mock_response(200, json_data=PROCESS_GROUP_STATUS_RESPONSE),
         '/flow/cluster/summary': _mock_response(200, json_data=cluster),
+        '/flow/bulletin-board': _mock_response(200, json_data=bulletins),
     }
 
 
@@ -221,6 +278,7 @@ class TestCanConnect:
             '/flow/status': _mock_response(200, json_data=FLOW_STATUS_RESPONSE),
             '/flow/process-groups/': _mock_response(200, json_data=PROCESS_GROUP_STATUS_RESPONSE),
             '/flow/cluster/summary': _mock_response(200, json_data=CLUSTER_SUMMARY_STANDALONE),
+            '/flow/bulletin-board': _mock_response(200, json_data=EMPTY_BULLETIN_BOARD),
         }
 
         with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
@@ -554,3 +612,69 @@ class TestProcessorMetrics:
         aggregator.assert_metric('nifi.processor.processing_nanos', value=5000000, tags=proc_tags)
         aggregator.assert_metric('nifi.processor.active_threads', value=1, tags=proc_tags)
         aggregator.assert_metric('nifi.processor.run_status', value=1, tags=proc_tags)
+
+
+class TestBulletins:
+    @staticmethod
+    def _run_bulletin_check(dd_run_check, responses, cache_state='', **instance_overrides):
+        """Run a check with mocked persistent cache for bulletin dedup isolation."""
+        check = NifiCheck('nifi', {}, [_make_instance(**instance_overrides)])
+        cache = {'last_bulletin_id': cache_state}
+
+        with (
+            patch('requests.Session.request', side_effect=_build_request_side_effect(responses)),
+            patch.object(check, 'read_persistent_cache', side_effect=lambda k: cache.get(k, '')),
+            patch.object(check, 'write_persistent_cache', side_effect=lambda k, v: cache.__setitem__(k, v)),
+        ):
+            dd_run_check(check)
+
+        return check, cache
+
+    def test_first_run_emits_events(self, dd_run_check, aggregator):
+        """First run with no cached ID emits all readable bulletins above min level."""
+        responses = _standard_responses(bulletins=BULLETIN_BOARD_RESPONSE)
+        _, cache = self._run_bulletin_check(dd_run_check, responses)
+
+        # Should emit 2 events: id=0 (ERROR, canRead=True) and id=1 (WARNING, canRead=True)
+        # id=2 is skipped because canRead=False
+        assert len(aggregator.events) == 2
+        assert aggregator.events[0]['msg_title'] == 'NiFi Bulletin: Fail Writer [ERROR]'
+        assert aggregator.events[0]['alert_type'] == 'error'
+        assert aggregator.events[1]['msg_title'] == 'NiFi Bulletin: Fail Writer [WARNING]'
+        assert aggregator.events[1]['alert_type'] == 'warning'
+        assert cache['last_bulletin_id'] == '1'
+
+    def test_dedup_by_cached_id(self, dd_run_check, aggregator):
+        """Bulletins with id <= cached last_bulletin_id are skipped."""
+        responses = _standard_responses(bulletins=BULLETIN_BOARD_RESPONSE)
+        self._run_bulletin_check(dd_run_check, responses, cache_state='0')
+
+        # Only id=1 should be emitted (id=0 is <= cached, id=2 is unreadable)
+        assert len(aggregator.events) == 1
+        assert aggregator.events[0]['msg_title'] == 'NiFi Bulletin: Fail Writer [WARNING]'
+
+    def test_min_level_filtering(self, dd_run_check, aggregator):
+        """Bulletins below min level are filtered out."""
+        responses = _standard_responses(bulletins=BULLETIN_BOARD_RESPONSE)
+        self._run_bulletin_check(dd_run_check, responses, bulletin_min_level='ERROR')
+
+        # Only id=0 (ERROR) should be emitted; id=1 (WARNING) is below ERROR level
+        assert len(aggregator.events) == 1
+        assert aggregator.events[0]['alert_type'] == 'error'
+
+    def test_empty_bulletin_board(self, dd_run_check, aggregator):
+        """No events emitted when bulletin board is empty."""
+        self._run_bulletin_check(dd_run_check, _standard_responses())
+        assert len(aggregator.events) == 0
+
+    def test_bulletins_disabled(self, dd_run_check, aggregator):
+        """No bulletin collection when collect_bulletins is false."""
+        responses = _standard_responses(bulletins=BULLETIN_BOARD_RESPONSE)
+        self._run_bulletin_check(dd_run_check, responses, collect_bulletins=False)
+        assert len(aggregator.events) == 0
+
+    def test_max_bulletins_per_cycle(self, dd_run_check, aggregator):
+        """Only max_bulletins_per_cycle events are emitted."""
+        responses = _standard_responses(bulletins=BULLETIN_BOARD_RESPONSE)
+        self._run_bulletin_check(dd_run_check, responses, max_bulletins_per_cycle=1)
+        assert len(aggregator.events) == 1

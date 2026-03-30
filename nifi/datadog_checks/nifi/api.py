@@ -9,6 +9,7 @@ from requests.exceptions import HTTPError
 from .constants import (
     ABOUT_ENDPOINT,
     ACCESS_TOKEN_ENDPOINT,
+    BULLETIN_BOARD_ENDPOINT,
     CLUSTER_SUMMARY_ENDPOINT,
     FLOW_STATUS_ENDPOINT,
     PROCESS_GROUP_STATUS_ENDPOINT,
@@ -87,3 +88,7 @@ class NiFiApi:
         if recursive:
             path += '?recursive=true'
         return self._request(path)
+
+    def get_bulletin_board(self):
+        """GET /flow/bulletin-board — returns recent bulletins."""
+        return self._request(BULLETIN_BOARD_ENDPOINT)
