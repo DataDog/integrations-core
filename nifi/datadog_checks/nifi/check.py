@@ -4,9 +4,12 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datetime import datetime, timezone
+
 from datadog_checks.base import AgentCheck
 
 from .api import NiFiApi
+from .constants import BULLETIN_LEVEL_ORDER
 
 
 class NifiCheck(AgentCheck):
@@ -37,6 +40,9 @@ class NifiCheck(AgentCheck):
             self._collect_flow_status(api, base_tags)
             self._collect_process_group_metrics(api, base_tags)
             self._collect_cluster_health(api, base_tags)
+
+            if self.instance.get('collect_bulletins', True):
+                self._collect_bulletins(api, base_tags)
 
             self.gauge('can_connect', 1, tags=base_tags)
         except Exception:
@@ -202,6 +208,65 @@ class NifiCheck(AgentCheck):
             self.gauge('processor.active_threads', snap.get('activeThreadCount', 0), tags=proc_tags)
             run_status = self.RUN_STATUS_MAP.get(snap.get('runStatus', ''), -1)
             self.gauge('processor.run_status', run_status, tags=proc_tags)
+
+    _CACHE_KEY_LAST_BULLETIN_ID = 'last_bulletin_id'
+
+    def _collect_bulletins(self, api, base_tags):
+        data = api.get_bulletin_board()
+        bulletins = data.get('bulletinBoard', {}).get('bulletins', [])
+
+        last_id_str = self.read_persistent_cache(self._CACHE_KEY_LAST_BULLETIN_ID)
+        last_id = int(last_id_str) if last_id_str else -1
+
+        min_level = self.instance.get('bulletin_min_level', 'WARNING')
+        min_level_order = BULLETIN_LEVEL_ORDER.get(min_level, 2)
+        max_per_cycle = self.instance.get('max_bulletins_per_cycle', 100)
+
+        new_bulletins = [
+            b
+            for b in bulletins
+            if b.get('id', 0) > last_id
+            and b.get('canRead', False)
+            and BULLETIN_LEVEL_ORDER.get(b.get('bulletin', {}).get('level', ''), 0) >= min_level_order
+        ]
+        new_bulletins.sort(key=lambda b: b.get('id', 0))
+        new_bulletins = new_bulletins[:max_per_cycle]
+
+        for entry in new_bulletins:
+            bulletin = entry.get('bulletin', {})
+            level = bulletin.get('level', 'WARNING')
+            source_name = bulletin.get('sourceName', 'unknown')
+
+            ts = None
+            ts_iso = bulletin.get('timestampIso') or entry.get('timestampIso')
+            if ts_iso:
+                try:
+                    dt = datetime.fromisoformat(ts_iso.replace('Z', '+00:00'))
+                    ts = int(dt.replace(tzinfo=timezone.utc if dt.tzinfo is None else dt.tzinfo).timestamp())
+                except (ValueError, OSError):
+                    pass
+
+            event_tags = base_tags + [
+                f'bulletin_level:{level}',
+                f'source_name:{source_name}',
+                f'source_type:{bulletin.get("sourceType", "unknown")}',
+            ]
+
+            self.event(
+                {
+                    'timestamp': ts,
+                    'event_type': 'nifi.bulletin',
+                    'msg_title': f'NiFi Bulletin: {source_name} [{level}]',
+                    'msg_text': bulletin.get('message', ''),
+                    'alert_type': 'error' if level == 'ERROR' else 'warning',
+                    'source_type_name': 'nifi',
+                    'tags': event_tags,
+                }
+            )
+
+        if new_bulletins:
+            max_id = max(b.get('id', 0) for b in new_bulletins)
+            self.write_persistent_cache(self._CACHE_KEY_LAST_BULLETIN_ID, str(max_id))
 
     def _collect_cluster_health(self, api, base_tags):
         data = api.get_cluster_summary()
