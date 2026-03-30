@@ -33,7 +33,7 @@ prometheus-client==0.24.1
 protobuf==7.34.0
 psutil==6.0.0
 psycopg[c,pool]==3.3.3
-pyasn1==0.4.8
+pyasn1==0.6.3
 pydantic==2.12.5
 pyjwt==2.12.1
 pymongo[srv]==4.8.0; python_version >= '3.9'
