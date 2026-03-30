@@ -38,22 +38,31 @@ class SecretResolutionError(Exception):
         super().__init__(message)
 
 
-_COMMAND_REASON_TO_CODE = {
-    'parse_error': 'secret-command-parse-error',
-    'empty_command': 'secret-command-empty',
-    'executable_not_found': 'secret-command-executable-not-found',
-    'timeout': 'secret-command-timeout',
-    'start_error': 'secret-command-start-error',
-    'non_zero_exit': 'secret-command-non-zero-exit',
-}
-
-_COMMAND_REASON_TO_HINT = {
-    'parse_error': 'Check the configured *_command syntax and quoting.',
-    'empty_command': 'Set a non-empty *_command value or remove it to use fallback sources.',
-    'executable_not_found': 'Install the command executable or fix the configured *_command path.',
-    'timeout': 'Ensure the command completes within the timeout or optimize the provider command.',
-    'start_error': 'Check command permissions and executable startup requirements.',
-    'non_zero_exit': 'Run the configured *_command directly and fix its failing exit code.',
+_COMMAND_REASON_DETAILS = {
+    'parse_error': (
+        'secret-command-parse-error',
+        'Check the configured *_command syntax and quoting.',
+    ),
+    'empty_command': (
+        'secret-command-empty',
+        'Set a non-empty *_command value or remove it to use fallback sources.',
+    ),
+    'executable_not_found': (
+        'secret-command-executable-not-found',
+        'Install the command executable or fix the configured *_command path.',
+    ),
+    'timeout': (
+        'secret-command-timeout',
+        'Ensure the command completes within the timeout or optimize the provider command.',
+    ),
+    'start_error': (
+        'secret-command-start-error',
+        'Check command permissions and executable startup requirements.',
+    ),
+    'non_zero_exit': (
+        'secret-command-non-zero-exit',
+        'Run the configured *_command directly and fix its failing exit code.',
+    ),
 }
 
 
@@ -100,8 +109,10 @@ def _resolve_command_secret(
             env_value,
             command_blocked_by_trust=command_blocked_by_trust,
         )
-        code = _COMMAND_REASON_TO_CODE.get(e.reason, 'secret-command-error')
-        hint = _COMMAND_REASON_TO_HINT.get(e.reason, 'Check the configured *_command value and try again.')
+        code, hint = _COMMAND_REASON_DETAILS.get(
+            e.reason,
+            ('secret-command-error', 'Check the configured *_command value and try again.'),
+        )
         raise SecretResolutionError(
             code=code,
             field_path=field_path,
