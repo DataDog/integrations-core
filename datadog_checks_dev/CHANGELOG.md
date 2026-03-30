@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 36.0.0 / 2026-03-28
+
+***Changed***:
+
+* Bump pysmi from 0.3.4 to 1.6.2 for the `generate-traps-db` command. ([#22648](https://github.com/DataDog/integrations-core/pull/22648))
+
+***Added***:
+
+* Speed up MIB compilation with IndexedFileReader ([#22953](https://github.com/DataDog/integrations-core/pull/22953))
+
+***Fixed***:
+
+* Migrate integrations-core tests to the new Datadog Docker registry ([#22202](https://github.com/DataDog/integrations-core/pull/22202))
+* Update config templates. ([#22619](https://github.com/DataDog/integrations-core/pull/22619))
+* Validate and enforce allowed `formats` values in configuration spec validation, including nested object properties. ([#22714](https://github.com/DataDog/integrations-core/pull/22714))
+* Fix generate-traps-db silently dropping MIB variables with hyphenated names when using pysmi 1.x ([#22989](https://github.com/DataDog/integrations-core/pull/22989))
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
 ## 35.6.0 / 2026-02-13
 
 ***Added***:
