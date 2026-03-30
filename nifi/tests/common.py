@@ -28,9 +28,3 @@ CHECK_CONFIG = {
     'init_config': {},
     'instances': [INSTANCE],
 }
-
-E2E_METADATA = {
-    'docker_volumes': [
-        '{}:/opt/nifi/nifi-current/logs'.format(os.path.join(HERE, 'docker', 'logs')),
-    ],
-}
