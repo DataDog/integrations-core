@@ -323,6 +323,16 @@ def test_run_secret_command_non_zero_includes_stderr_summary(monkeypatch):
         run_secret_command('python token.py')
 
 
+def test_run_secret_command_executable_not_found_includes_executable_name(monkeypatch):
+    def fake_run(*args, **kwargs):
+        raise FileNotFoundError('simulated executable-not-found')
+
+    monkeypatch.setattr('ddev.config.secret_command.subprocess.run', fake_run)
+
+    with pytest.raises(SecretCommandError, match=r"command executable was not found: 'missing-executable-12345'"):
+        run_secret_command('missing-executable-12345 --arg')
+
+
 def test_parse_secret_command_uses_posix_mode(monkeypatch):
     captured = {}
 

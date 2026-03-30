@@ -81,14 +81,14 @@ def run_secret_command(command: str, *, timeout: float | None = None) -> str:
             timeout=timeout,
         )
     except FileNotFoundError as e:
-        raise SecretCommandError('command executable was not found', reason='executable_not_found') from e
+        raise SecretCommandError(f'command executable was not found: {argv[0]!r}', reason='executable_not_found') from e
     except subprocess.TimeoutExpired as e:
         raise SecretCommandError(f'command timed out after {timeout:g}s', reason='timeout') from e
     except OSError as e:
         raise SecretCommandError('command could not be started', reason='start_error') from e
 
     if process.returncode != 0:
-        stderr_summary = _summarize_stderr(getattr(process, 'stderr', ''))
+        stderr_summary = _summarize_stderr(process.stderr or '')
         stderr_suffix = f'; stderr: {stderr_summary}' if stderr_summary else ''
         raise SecretCommandError(
             f'command failed with exit code {process.returncode}{stderr_suffix}', reason='non_zero_exit'
