@@ -1,1 +1,1 @@
-Remove incorrect `empty_default_hostname` warning. The Cluster Agent injects this option unconditionally on cluster checks, causing a confusing warning that customers cannot prevent.
+Remove `empty_default_hostname` warning. The Cluster Agent injects this option unconditionally on cluster checks, causing a confusing warning that customers cannot prevent.
