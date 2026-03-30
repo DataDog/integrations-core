@@ -132,3 +132,9 @@ def instance_locks_idle_in_transaction():
         collection_interval=300,
         max_rows=100,
     )
+
+def instance_data_observability():
+    return instance.DataObservability(
+        enabled=False,
+        collection_interval=600,
+    )
