@@ -117,7 +117,11 @@ class NifiCheck(AgentCheck):
     def _collect_process_group_metrics(self, api, base_tags):
         process_groups = self.instance.get('process_groups', ['root'])
         for pg_id in process_groups:
-            data = api.get_process_group_status(pg_id)
+            try:
+                data = api.get_process_group_status(pg_id)
+            except Exception:
+                self.log.warning('Failed to collect metrics for process group %s', pg_id, exc_info=True)
+                continue
             pg_status = data.get('processGroupStatus', {})
             self._emit_process_group(pg_status, base_tags)
 
@@ -151,17 +155,18 @@ class NifiCheck(AgentCheck):
 
     def _emit_connection_metrics(self, pg_snap, base_tags):
         max_connections = self.instance.get('max_connections', 200)
-        connections = pg_snap.get('connectionStatusSnapshots', [])
+        all_connections = pg_snap.get('connectionStatusSnapshots', [])
         connections = sorted(
-            connections,
+            all_connections,
             key=lambda c: c.get('connectionStatusSnapshot', {}).get('flowFilesQueued', 0),
             reverse=True,
         )[:max_connections]
 
-        if len(pg_snap.get('connectionStatusSnapshots', [])) > max_connections:
+        if len(all_connections) > max_connections:
             self.log.warning(
-                'Truncated connections from %d to %d (max_connections)',
-                len(pg_snap['connectionStatusSnapshots']),
+                'Process group %s: truncated connections from %d to %d (max_connections)',
+                pg_snap.get('name', 'unknown'),
+                len(all_connections),
                 max_connections,
             )
 
@@ -180,21 +185,22 @@ class NifiCheck(AgentCheck):
             self.gauge('connection.flowfiles_in', snap.get('flowFilesIn', 0), tags=conn_tags)
             self.gauge('connection.flowfiles_out', snap.get('flowFilesOut', 0), tags=conn_tags)
 
-    RUN_STATUS_MAP = {'Running': 1, 'Stopped': 0, 'Invalid': -1, 'Disabled': -2}
+    RUN_STATUS_MAP = {'Running': 1, 'Stopped': 0, 'Validating': 0, 'Invalid': -1, 'Disabled': -2}
 
     def _emit_processor_metrics(self, pg_snap, base_tags):
         max_processors = self.instance.get('max_processors', 200)
-        processors = pg_snap.get('processorStatusSnapshots', [])
+        all_processors = pg_snap.get('processorStatusSnapshots', [])
         processors = sorted(
-            processors,
+            all_processors,
             key=lambda p: p.get('processorStatusSnapshot', {}).get('taskCount', 0),
             reverse=True,
         )[:max_processors]
 
-        if len(pg_snap.get('processorStatusSnapshots', [])) > max_processors:
+        if len(all_processors) > max_processors:
             self.log.warning(
-                'Truncated processors from %d to %d (max_processors)',
-                len(pg_snap['processorStatusSnapshots']),
+                'Process group %s: truncated processors from %d to %d (max_processors)',
+                pg_snap.get('name', 'unknown'),
+                len(all_processors),
                 max_processors,
             )
 
@@ -264,7 +270,7 @@ class NifiCheck(AgentCheck):
                     'event_type': 'nifi.bulletin',
                     'msg_title': f'NiFi Bulletin: {source_name} [{level}]',
                     'msg_text': bulletin.get('message', ''),
-                    'alert_type': 'error' if level == 'ERROR' else 'warning',
+                    'alert_type': 'error' if level == 'ERROR' else 'warning' if level == 'WARNING' else 'info',
                     'source_type_name': 'nifi',
                     'tags': event_tags,
                 }
