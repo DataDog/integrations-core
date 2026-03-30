@@ -899,6 +899,13 @@ instances:
     #
     # min_collection_interval: 15
 
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
     ## @param disable_generic_tags - boolean - optional - default: false
     ## The integration will stop sending server tag as is reduntant with host tag
     #

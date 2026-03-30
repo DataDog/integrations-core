@@ -215,7 +215,7 @@ EXPECTED_DEFAULTS = {
     'metric_patterns': None,  # User-provided patterns
     # === Agent standard fields ===
     'min_collection_interval': 15.0,  # Standard Agent field
-    'empty_default_hostname': False,  # Hidden from example config; still parsed if injected by Cluster Agent
+    'empty_default_hostname': False,  # Deprecated field
 }
 
 

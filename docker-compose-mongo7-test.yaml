@@ -1,0 +1,10 @@
+# SDBM-2431: Test MongoDB 7 explain cursor fix.
+# Usage:
+#   docker compose -f docker-compose-mongo7-test.yaml up -d
+#   docker compose -f docker-compose-mongo7-test.yaml down -v
+services:
+  mongo7:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    command: mongod --port 27017 --bind_ip=0.0.0.0 --setParameter diagnosticDataCollectionEnabled=false
