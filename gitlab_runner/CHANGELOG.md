@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 7.3.0 / 2026-02-19
+## 7.4.0 / 2026-03-18
+
+***Added***:
+
+* Add default metrics list to automatically collect all standard GitLab Runner metrics. Add `gitlab_runner_job_queue_duration_seconds` and `gitlab_runner_api_request_duration_seconds` metrics. ([#22621](https://github.com/DataDog/integrations-core/pull/22621))
+
+## 7.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 

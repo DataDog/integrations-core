@@ -42,34 +42,152 @@ files:
     - name: security_protocol
       description: |
         Protocol used to communicate with brokers.
-        Valid values: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+        Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL.
+        Default: PLAINTEXT.
       fleet_configurable: true
       value:
         type: string
         example: PLAINTEXT
+        display_default: PLAINTEXT
     
     - name: sasl_mechanism
       description: |
-        SASL mechanism to use for authentication.
-        Valid values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512
+        String picking sasl mechanism when security_protocol is SASL_PLAINTEXT or SASL_SSL.
+        Valid values are: PLAIN, GSSAPI, OAUTHBEARER, SCRAM-SHA-256, SCRAM-SHA-512.
       fleet_configurable: true
       value:
         type: string
         example: PLAIN
-    
+        display_default: null
+
     - name: sasl_plain_username
-      description: Username for SASL PLAIN authentication
+      description: Username for sasl PLAIN or SCRAM authentication.
       fleet_configurable: true
       value:
         type: string
-    
+        example: <USERNAME>
+
     - name: sasl_plain_password
-      description: Password for SASL PLAIN authentication
+      description: Password for sasl PLAIN or SCRAM authentication.
       fleet_configurable: true
       secret: true
       value:
         type: string
-    
+        example: <PASSWORD>
+
+    - name: sasl_kerberos_keytab
+      description: |
+        Path to Kerberos keytab file.
+        Note: If this config option is not used, the check will attempt to find
+        the keytab file using the environment variable KRB5_CLIENT_KTNAME.
+        Using `sasl_kerberos_keytab` will eventually be required and using the
+        environment variable directly will be deprecated.
+      fleet_configurable: true
+      value:
+        type: string
+
+    - name: sasl_kerberos_principal
+      description: |
+        Kerberos principal to use.
+      fleet_configurable: true
+      value:
+        type: string
+        example: kafkaclient
+
+    - name: sasl_kerberos_service_name
+      description: Service name to include in GSSAPI sasl mechanism handshake.
+      fleet_configurable: true
+      value:
+        type: string
+        example: kafka
+
+    - name: sasl_kerberos_domain_name
+      description: Kerberos domain name to use in GSSAPI sasl mechanism handshake.
+      fleet_configurable: true
+      value:
+        type: string
+        example: localhost
+        display_default: null
+
+    - name: sasl_oauth_token_provider
+      description: |
+        Settings for when `sasl_mechanism` is set to `OAUTHBEARER`.
+      fleet_configurable: true
+      options:
+      - name: method
+        description: |
+          The OAuth method to use. Either `aws_msk_iam` for AWS MSK IAM authentication
+          or `oidc` for standard OIDC authentication. Defaults to `oidc` for backwards compatibility.
+        value:
+          type: string
+          example: aws_msk_iam
+          display_default: oidc
+      - name: aws_region
+        description: |
+          AWS region for MSK IAM authentication. Required when method is `aws_msk_iam` and the region
+          cannot be automatically detected from the environment
+          (for example, through `AWS_REGION` or instance metadata).
+          If not specified, attempts to detect the region automatically.
+        value:
+          type: string
+          example: us-west-2
+      - name: url
+        fleet_configurable: true
+        description: |
+          The token endpoint. Required when method is `oidc`.
+        value:
+          type: string
+      - name: client_id
+        fleet_configurable: true
+        description: |
+          The client identifier. Required when method is `oidc`.
+        value:
+          type: string
+      - name: client_secret
+        fleet_configurable: true
+        secret: true
+        description: |
+          The client secret. Required when method is `oidc`.
+        value:
+          type: string
+      - name: scope
+        enabled: false
+        description: |
+          The OAuth scope to request. Required by most identity providers.
+          For example, a custom scope like 'kafka' or 'api://default'.
+        value:
+          type: string
+      - name: extensions
+        enabled: false
+        description: |
+          SASL/OAUTHBEARER extensions to pass to the broker.
+          For Confluent Cloud, this typically includes the logical cluster ID
+          and optionally the identity pool ID.
+          Format: 'logicalCluster=lkc-xxxxx' or 'logicalCluster=lkc-xxxxx,identityPoolId=pool-xxxxx'
+        value:
+          type: string
+      - name: tls_ca_cert
+        enabled: false
+        description: |
+          Path to a CA certificate file used to verify the OIDC token endpoint's TLS certificate.
+          This maps to librdkafka's `https.ca.location` property, which is separate from
+          the broker connection's `ssl.ca.location` (configured through the top-level `tls_ca_cert`).
+        value:
+          type: string
+          example: /path/to/oauth_ca_cert.pem
+
+    - template: instances/tls
+
+    - name: tls_crlfile
+      description: |
+        Filename path containing the CRL to check for certificate expiration.
+        By default, no CRL check is done. When providing a file, only the leaf certificate
+        will be checked against this CRL.
+      fleet_configurable: true
+      value:
+        type: string
+        example: <SSL_FILE_PATH>
+
     # ========================================================================
     # ACTIONS
     # ========================================================================
@@ -117,9 +235,18 @@ files:
           example: -1
         - name: start_offset
           type: integer
-          description: Starting offset (-1 for latest, -2 for earliest, or specific offset)
+          description: |
+            Starting offset (-1 for latest, -2 for earliest, or specific offset).
+            Ignored when start_timestamp is set.
           default: -1
           example: -1
+        - name: start_timestamp
+          type: integer
+          description: |
+            Starting timestamp in milliseconds since epoch.
+            When set, the consumer seeks to the first message at or after this timestamp
+            in each partition. The start_offset parameter is ignored when this is set.
+          example: 1700000000000
         - name: n_messages_retrieved
           type: integer
           description: |
@@ -146,7 +273,9 @@ files:
         - name: value_format
           type: string
           description: |
-            Message value format:
+            Message value format.
+
+            Supported formats:
             - json: JSON data (strict validation, fails if not valid JSON)
             - bson: BSON (Binary JSON) data
             - string: Plain UTF-8 text (use for non-JSON text messages)
@@ -166,7 +295,9 @@ files:
         - name: key_format
           type: string
           description: |
-            Message key format:
+            Message key format.
+
+            Supported formats:
             - string: Plain UTF-8 text (most common for keys)
             - json: JSON data (strict validation, fails if not valid JSON)
             - bson: BSON (Binary JSON) data

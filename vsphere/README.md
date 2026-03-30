@@ -46,7 +46,7 @@ See [metadata.csv][10] for a list of metrics provided by this check.
 
 **Note**: The vSphere integration has the ability to collect both per-resource metrics (such as those related to CPUs), and per-instance metrics (such as those related to CPU cores). As such, there are metrics that are only per-resource, per-instance, or both. 
 A resource represents a physical or virtual representation of a machine. This can be represented by vm, host, datastore, cluster in vSphere.
-An instance represents individual entities found within a resource. More information on vSphere resources can be found in the [VMWare Infrastructure Architecture Overview white paper][11].
+An instance represents individual entities found within a resource. More information on vSphere resources can be found in the [vSphere Resource Management documentation][11].
 
 By default, the vSphere integration only collects per-resource metrics, which causes some metrics that are per-instance to be ignored. These can be configured using the `collect_per_instance_filters` option. See below for an example:
 
@@ -120,7 +120,7 @@ The Datadog vSphere integration collects metrics and events from your [TKG][13] 
 [8]: https://docs.datadoghq.com/integrations/faq/troubleshooting-duplicated-hosts-with-vsphere/
 [9]: https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vsphere-monitoring-and-performance/monitoring-inventory-objects/data-collection-levels.html
 [10]: https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
-[11]: https://www.vmware.com/pdf/vi_architecture_wp.pdf
+[11]: https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vsphere-resource-management.html
 [12]: https://github.com/DataDog/integrations-core/blob/master/vsphere/assets/service_checks.json
 [13]: https://tanzu.vmware.com/kubernetes-grid
 [14]: https://docs.datadoghq.com/containers/kubernetes/installation/?tab=operator

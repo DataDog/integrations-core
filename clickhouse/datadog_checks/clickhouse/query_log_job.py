@@ -34,6 +34,10 @@ from datadog_checks.base.utils.serialization import json
 # Used for first run or when no rows are returned (to advance checkpoint during idle periods)
 GET_CURRENT_TIME_QUERY = "SELECT toUnixTimestamp64Micro(now64(6))"
 
+# If a node's checkpoint is more than this far behind the most advanced node,
+# it is considered decommissioned
+_NODE_CHECKPOINT_STALENESS_THRESHOLD_US = 60 * 60 * 1_000_000  # 1 hour
+
 # List of internal Cloud users to exclude from query metrics/samples
 # These are Datadog Cloud internal service accounts
 INTERNAL_CLOUD_USERS = frozenset(
@@ -108,6 +112,11 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         self._last_checkpoint_microseconds = None
         self._current_checkpoint_microseconds = None
 
+        # Per-node checkpoint state for multi-node clusters (ClickHouse Cloud).
+        # Tracks the last seen event_time per server node
+        self._node_checkpoints = None  # {node_name: checkpoint_microseconds}
+        self._pending_node_checkpoints = {}  # accumulated during current collection
+
         # Obfuscator options (shared across all query log jobs)
         obfuscate_options = {
             'return_json_metadata': True,
@@ -131,12 +140,15 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
                 self._log.debug("Error closing DBM client: %s", e)
             self._db_client = None
 
-    def _execute_query(self, query: str):
+    def _execute_query(self, query: str, parameters: dict | None = None):
         """
         Execute a query using the dedicated client (with shared connection pool).
 
         Args:
             query: SQL query to execute
+            parameters: Optional dict of ClickHouse server-side bound parameters.
+                        Use ``{name:Type}`` placeholders in the query
+                        (e.g. ``{val:UInt64}``, ``{name:String}``).
 
         Returns:
             List of result rows
@@ -149,7 +161,7 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         try:
             if self._db_client is None:
                 self._db_client = self._check.create_dbm_client()
-            result = self._db_client.query(query)
+            result = self._db_client.query(query, parameters=parameters)
             return result.result_rows
         except OperationalError as e:
             # Connection-related error - reset client to force reconnect
@@ -305,17 +317,139 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         """
         return "cluster-wide (single endpoint)" if self._check.is_single_endpoint_mode else "local (direct)"
 
+    def _load_node_checkpoints(self) -> dict:
+        """Load per-node checkpoints from persistent cache."""
+        cache_key = self.CHECKPOINT_CACHE_KEY + "_node_checkpoints"
+        try:
+            cached = self._check.read_persistent_cache(cache_key)
+            if cached:
+                checkpoints = json.loads(cached)
+                self._log.debug("Loaded per-node checkpoints: %s", checkpoints)
+                return {k: int(v) for k, v in checkpoints.items()}
+        except Exception as e:
+            self._log.warning("Could not load node checkpoints: %s", e)
+        return {}
+
+    def _save_node_checkpoints(self):
+        """Merge pending per-node checkpoints into the stored set and persist."""
+        if not self._pending_node_checkpoints:
+            return
+        if self._node_checkpoints is None:
+            self._node_checkpoints = {}
+        for node, cp in self._pending_node_checkpoints.items():
+            self._node_checkpoints[node] = cp
+        cache_key = self.CHECKPOINT_CACHE_KEY + "_node_checkpoints"
+        try:
+            serialized = json.dumps(self._node_checkpoints)
+            if isinstance(serialized, bytes):
+                serialized = serialized.decode('utf-8')
+            self._check.write_persistent_cache(cache_key, serialized)
+            self._log.debug("Saved per-node checkpoints for %d nodes", len(self._node_checkpoints))
+        except Exception as e:
+            self._log.error("Failed to save node checkpoints: %s", e)
+        self._pending_node_checkpoints = {}
+
+    def _build_per_node_checkpoint_filter(self):
+        """
+        Build a SQL WHERE fragment with per-node checkpoint conditions.
+
+        Each known node gets its own ``event_time_microseconds > <checkpoint>``
+        bound so that a fast-flushing node cannot advance the checkpoint past
+        data that slower nodes have not yet flushed.
+
+        Unknown nodes (e.g. newly added to the cluster) fall back to the
+        minimum checkpoint across all known nodes.
+
+        Uses ClickHouse server-side parameter binding (``{name:Type}`` syntax)
+        for all data values to prevent SQL injection.
+
+        Returns:
+            (filter_sql, min_checkpoint_microseconds, parameters) tuple
+            where *parameters* is a dict for ClickHouse server-side binding.
+        """
+        if self._node_checkpoints is None:
+            self._node_checkpoints = self._load_node_checkpoints()
+
+        if not self._node_checkpoints:
+            if self._last_checkpoint_microseconds is None:
+                self._last_checkpoint_microseconds = self._get_last_checkpoint()
+            return (
+                "event_time_microseconds > fromUnixTimestamp64Micro({cp_fallback:UInt64})",
+                self._last_checkpoint_microseconds,
+                {"cp_fallback": self._last_checkpoint_microseconds},
+            )
+
+        max_checkpoint = max(self._node_checkpoints.values())
+        stale_cutoff = max_checkpoint - _NODE_CHECKPOINT_STALENESS_THRESHOLD_US
+        stale_nodes = [node for node, cp in self._node_checkpoints.items() if cp < stale_cutoff]
+        for node in stale_nodes:
+            self._log.info(
+                "Evicting stale node checkpoint: node=%s, checkpoint=%d (max=%d, threshold=%ds)",
+                node,
+                self._node_checkpoints[node],
+                max_checkpoint,
+                _NODE_CHECKPOINT_STALENESS_THRESHOLD_US // 1_000_000,
+            )
+            del self._node_checkpoints[node]
+
+        if not self._node_checkpoints:
+            if self._last_checkpoint_microseconds is None:
+                self._last_checkpoint_microseconds = self._get_last_checkpoint()
+            return (
+                "event_time_microseconds > fromUnixTimestamp64Micro({cp_fallback:UInt64})",
+                self._last_checkpoint_microseconds,
+                {"cp_fallback": self._last_checkpoint_microseconds},
+            )
+
+        min_checkpoint = min(self._node_checkpoints.values())
+
+        params = {}
+        conditions = []
+        node_param_names = []
+        for i, (node, cp) in enumerate(self._node_checkpoints.items()):
+            node_key = "cp_node_" + str(i)
+            cp_key = "cp_us_" + str(i)
+            conditions.append(
+                "(hostName() = {" + node_key + ":String}"
+                " AND event_time_microseconds > fromUnixTimestamp64Micro({" + cp_key + ":UInt64}))"
+            )
+            params[node_key] = node
+            params[cp_key] = cp
+            node_param_names.append(node_key)
+
+        # Fallback for nodes not yet tracked (cluster scale-out)
+        node_refs = ", ".join("{" + name + ":String}" for name in node_param_names)
+        conditions.append(
+            "(hostName() NOT IN (" + node_refs + ")"
+            " AND event_time_microseconds > fromUnixTimestamp64Micro({cp_fallback:UInt64}))"
+        )
+        params["cp_fallback"] = min_checkpoint
+
+        return "(" + " OR ".join(conditions) + ")", min_checkpoint, params
+
+    def _track_node_checkpoint(self, node_name: str, max_event_time_us: int):
+        """Accumulate the highest event_time seen so far for *node_name*."""
+        current = self._pending_node_checkpoints.get(node_name, 0)
+        if max_event_time_us > current:
+            self._pending_node_checkpoints[node_name] = max_event_time_us
+
     def _advance_checkpoint(self):
         """
         Save the current checkpoint and update the last checkpoint reference.
+        Also persists per-node checkpoints for multi-node clusters.
 
-        This should be called ONLY after successful submission to ensure
-        exactly-once semantics. If submission fails, don't call this method
-        so the same time window will be retried.
+        Per-node checkpoints are only saved when the global checkpoint is also
+        being advanced (i.e. _set_checkpoint_from_event_time completed).  This
+        prevents partial node checkpoints from being persisted when a collection
+        fails mid-way through row processing, which would cause the next run to
+        skip rows that were never actually submitted.
         """
-        if self._current_checkpoint_microseconds:
+        if self._current_checkpoint_microseconds is not None:
             self._save_checkpoint(self._current_checkpoint_microseconds)
             self._last_checkpoint_microseconds = self._current_checkpoint_microseconds
+            self._save_node_checkpoints()
+        else:
+            self._pending_node_checkpoints = {}
 
     def _set_checkpoint_from_event_time(self, max_event_time: int):
         """

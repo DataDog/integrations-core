@@ -898,3 +898,20 @@ jmx_metrics:
         - tag_name: kafka_cluster_id
           bean_name: kafka.server:type=KafkaServer,name=ClusterId
           attribute: Value
+
+    #
+    # Broker info
+    #
+    - include:
+        domain: 'kafka.server'
+        bean_regex: 'kafka\.server:type=app-info,id=(.*)'
+        attribute:
+          StartTimeMs:
+            metric_type: gauge
+            alias: kafka.broker.start_time
+        tags:
+          broker_id: $1
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean_name: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value

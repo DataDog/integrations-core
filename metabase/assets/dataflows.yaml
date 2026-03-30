@@ -1,0 +1,6 @@
+provides:
+  - id: metabase-logs
+    always_on: true
+    granular: false
+    data_type: logs
+    direction: inbound

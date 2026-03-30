@@ -1,0 +1,102 @@
+"""HTTP dispatch logic for repository_dispatch events."""
+import http.client
+import json
+import ssl
+import sys
+import time
+import urllib.error
+import urllib.request
+
+from . import TARGET_REPO
+
+BATCH_SIZE = 200
+DISPATCH_URL = f"https://api.github.com/repos/{TARGET_REPO}/dispatches"
+MAX_ATTEMPTS = 5
+
+
+class DispatchError(Exception):
+    """Raised when a dispatch request fails after all retry attempts."""
+
+
+def build_payload(batch: list[str], source_repo: str, ref: str, target: str) -> dict:
+    """Return the ``repository_dispatch`` payload for one batch."""
+    return {
+        "event_type": "build-wheels",
+        "client_payload": {
+            "packages": batch,
+            "source_repo": source_repo,
+            "source_repo_ref": ref,
+            "target": target,
+        },
+    }
+
+
+def _urlopen(req: urllib.request.Request) -> http.client.HTTPResponse:
+    """Thin urllib wrapper — exists so tests can patch it without touching stdlib."""
+    return urllib.request.urlopen(req)
+
+
+def send_dispatch(
+    payload: dict,
+    token: str,
+    *,
+    dispatch_url: str = DISPATCH_URL,
+    max_attempts: int = MAX_ATTEMPTS,
+) -> None:
+    """POST a single ``repository_dispatch`` event to the wheels-release repo.
+
+    Retries up to ``max_attempts`` times on 5xx errors with exponential backoff.
+    Raises ``DispatchError`` on 4xx errors or after exhausting retries.
+    """
+    req = urllib.request.Request(
+        dispatch_url,
+        data=json.dumps(payload).encode(),
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+        method="POST",
+    )
+    for attempt in range(1, max_attempts + 1):
+        try:
+            with _urlopen(req) as resp:
+                print(f"  Dispatched: HTTP {resp.status}")
+                return
+        except (urllib.error.HTTPError, urllib.error.URLError) as e:
+            if isinstance(e, urllib.error.URLError):
+                if isinstance(e.reason, ssl.SSLError):
+                    raise DispatchError(f"SSL error (non-retriable): {e}") from e
+                body = str(e)
+                code = 503
+            else:
+                body = e.read().decode()
+                code = e.code
+            if code < 500 or attempt == max_attempts:
+                print(f"HTTP {code}: {body}", file=sys.stderr)
+                raise DispatchError(f"HTTP {code}: {body}")
+            print(f"  HTTP {code} on attempt {attempt}/{max_attempts}, retrying...", file=sys.stderr)
+            time.sleep(2**attempt)
+
+
+def dispatch_in_batches(
+    packages: list[str],
+    source_repo: str,
+    ref: str,
+    target: str,
+    token: str,
+    batch_size: int = BATCH_SIZE,
+) -> None:
+    """Dispatch all packages to the wheels-release repo, batching if needed."""
+    if batch_size <= 0:
+        raise ValueError("batch_size must be > 0")
+    num_packages = len(packages)
+    if num_packages == 0:
+        return
+    total_batches = (num_packages + batch_size - 1) // batch_size
+    for batch_num, start in enumerate(range(0, num_packages, batch_size), 1):
+        end = min(start + batch_size, num_packages)
+        current_batch = packages[start:end]
+        print(f"\nBatch {batch_num}/{total_batches}:")
+        print("\n".join(f"  - {name}" for name in current_batch))
+        send_dispatch(build_payload(current_batch, source_repo, ref, target), token)

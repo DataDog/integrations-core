@@ -175,6 +175,11 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /clickhouse/*.md                                    @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /clickhouse/manifest.json                           @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 
+# Data Observability
+/do_query_actions/                                  @DataDog/data-observability @DataDog/agent-integrations
+/do_query_actions/*.md                              @DataDog/data-observability @DataDog/agent-integrations @DataDog/documentation
+/do_query_actions/manifest.json                     @DataDog/data-observability @DataDog/agent-integrations @DataDog/documentation
+
 # Data Streams Monitoring
 /kafka_actions/                                     @DataDog/data-streams-monitoring @DataDog/agent-integrations
 /kafka_actions/*.md                                 @DataDog/data-streams-monitoring @DataDog/agent-integrations @DataDog/documentation
@@ -762,6 +767,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /cato_networks/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
 /cato_networks/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /cato_networks/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/cyberark_endpoint_privilege_manager/                                @DataDog/saas-integrations
+/cyberark_endpoint_privilege_manager/*.md                            @DataDog/saas-integrations @DataDog/documentation
+/cyberark_endpoint_privilege_manager/manifest.json                   @DataDog/saas-integrations @DataDog/documentation
+/cyberark_endpoint_privilege_manager/assets/logs/                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /beyondtrust_privileged_remote_access/                               @DataDog/agent-integrations
 /beyondtrust_privileged_remote_access/*.md                           @DataDog/agent-integrations @DataDog/documentation

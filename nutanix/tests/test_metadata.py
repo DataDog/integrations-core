@@ -40,6 +40,46 @@ OPTIONAL_METRICS = CLUSTER_STATS_METRICS_OPTIONAL + HOST_STATS_METRICS_OPTIONAL 
 
 
 @pytest.mark.unit
+def test_version_metadata(dd_run_check, mock_instance, mock_http_get, datadog_agent):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    check.check_id = 'test:123'
+    dd_run_check(check)
+
+    datadog_agent.assert_metadata(
+        'test:123',
+        {'version.scheme': 'semver', 'version.major': '7', 'version.minor': '3', 'version.raw': '7.3'},
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'version, expected_major, expected_minor',
+    [
+        ('7.3', '7', '3'),
+        ('pc.7.3', '7', '3'),
+        ('pc.7.5', '7', '5'),
+        ('pc.2024.3', '2024', '3'),
+    ],
+)
+def test_version_metadata_formats(mock_instance, datadog_agent, version, expected_major, expected_minor):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    check.check_id = 'test:123'
+
+    pc_cluster = {'config': {'buildInfo': {'version': version}, 'clusterFunction': ['PRISM_CENTRAL']}}
+    check.infrastructure_monitor._collect_pc_version_metadata(pc_cluster)
+
+    datadog_agent.assert_metadata(
+        'test:123',
+        {
+            'version.scheme': 'semver',
+            'version.major': expected_major,
+            'version.minor': expected_minor,
+            'version.raw': version,
+        },
+    )
+
+
+@pytest.mark.unit
 def test_all_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)

@@ -53,6 +53,7 @@ from .util import (
     BUFFERCACHE_METRICS,
     CLUSTER_VACUUM_PROGRESS_METRICS,
     CONNECTION_METRICS,
+    CONNECTION_METRICS_BY_DB,
     COUNT_METRICS,
     FUNCTION_METRICS,
     IDLE_TX_LOCK_AGE_METRICS,
@@ -858,6 +859,18 @@ class PostgreSql(DatabaseCheck):
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
         metric_scope = [CONNECTION_METRICS]
+
+        connection_metrics_by_db = copy.deepcopy(CONNECTION_METRICS_BY_DB)
+        databases_to_ignore = ""
+        if len(self._config.ignore_databases) > 0:
+            escaped_databases = ["'{}'".format(db.replace("'", "''")) for db in self._config.ignore_databases]
+            databases_to_ignore = "AND datname NOT IN ({})".format(", ".join(escaped_databases))
+        connection_metrics_by_db["query"] = connection_metrics_by_db["query"].format(
+            ignore_database_filter=databases_to_ignore
+        )
+        metric_scope.append(connection_metrics_by_db)
+        self.log.debug("Connection Metrics by DB query [%s]", connection_metrics_by_db["query"])
+
         per_database_metric_scope = []
 
         if self._config.collect_function_metrics:
@@ -1089,7 +1102,7 @@ class PostgreSql(DatabaseCheck):
         tags = self.tags + self._get_debug_tags() + (tags or [])
         return {
             'tags': tags,
-            "hostname": self.resolved_hostname,
+            "hostname": self.reported_hostname,
         }
 
     def check(self, _):
