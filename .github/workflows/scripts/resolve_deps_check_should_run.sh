@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' ]; then
-  builder_changed="false"
+  builder_changed="true"
   should_run_build="true"
 else
 
