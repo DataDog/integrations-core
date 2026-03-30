@@ -45,7 +45,7 @@ files:
         example: false
     - name: process_groups
       description: |
-        List of process group IDs to monitor. Use "root" for the root group.
+        List of process group IDs to monitor. Use `root` for the root group.
         When omitted, only the root process group is monitored.
       value:
         type: array
