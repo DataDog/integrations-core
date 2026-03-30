@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import weakref
 from typing import Any, Dict, Generator  # noqa: F401
 
 import pysnmp.hlapi.v3arch.asyncio as hlapi  # noqa: F401
@@ -16,6 +17,16 @@ from datadog_checks.base.errors import CheckException
 from .config import InstanceConfig  # noqa: F401
 
 vbProcessor = CommandGeneratorVarBinds()
+
+# pysnmp 7.x make_varbinds/unmake_varbinds expect a Dict cache keyed by engine.
+_engine_caches: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
+
+
+def _engine_cache(engine):
+    # type: (Any) -> Dict[str, Any]
+    if engine not in _engine_caches:
+        _engine_caches[engine] = {}
+    return _engine_caches[engine]
 
 
 def _handle_error(ctx, config):
@@ -42,9 +53,9 @@ def snmp_get(config, oids, lookup_mib):
         cbCtx['var_binds'] = newVarBinds
 
     ctx = {}  # type: Dict[str, Any]
-    var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
+    var_binds = vbProcessor.make_varbinds(_engine_cache(config._snmp_engine), oids)
 
-    cmdgen.GetCommandGenerator().sendVarBinds(
+    cmdgen.GetCommandGenerator().send_varbinds(
         config._snmp_engine,
         config.device.target,
         config._context_data.contextEngineId,
@@ -71,7 +82,9 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
     def callback(  # type: ignore
         snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx
     ):
-        var_bind_table = [vbProcessor.unmakeVarBinds(snmpEngine, row, lookup_mib) for row in varBindTable]
+        var_bind_table = [
+            vbProcessor.unmake_varbinds(_engine_cache(snmpEngine), row, lookup_mib) for row in varBindTable
+        ]
         if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
             errorIndication = None
         cbCtx['error'] = errorIndication
@@ -79,14 +92,14 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
 
     ctx = {}  # type: Dict[str, Any]
 
-    initial_vars = [x[0] for x in vbProcessor.makeVarBinds(config._snmp_engine, oids)]
+    initial_vars = [x[0] for x in vbProcessor.make_varbinds(_engine_cache(config._snmp_engine), oids)]
 
     var_binds = oids
 
     gen = cmdgen.NextCommandGenerator()
 
     while True:
-        gen.sendVarBinds(
+        gen.send_varbinds(
             config._snmp_engine,
             config.device.target,
             config._context_data.contextEngineId,
@@ -124,7 +137,9 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
     def callback(  # type: ignore
         snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx
     ):
-        var_bind_table = [vbProcessor.unmakeVarBinds(snmpEngine, row, lookup_mib) for row in varBindTable]
+        var_bind_table = [
+            vbProcessor.unmake_varbinds(_engine_cache(snmpEngine), row, lookup_mib) for row in varBindTable
+        ]
         if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
             errorIndication = None
         cbCtx['error'] = errorIndication
@@ -133,19 +148,19 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
     ctx = {}  # type: Dict[str, Any]
 
     var_binds = [oid]
-    initial_var = vbProcessor.makeVarBinds(config._snmp_engine, var_binds)[0][0]
+    initial_var = vbProcessor.make_varbinds(_engine_cache(config._snmp_engine), var_binds)[0][0]
 
     gen = cmdgen.BulkCommandGenerator()
 
     while True:
-        gen.sendVarBinds(
+        gen.send_varbinds(
             config._snmp_engine,
             config.device.target,
             config._context_data.contextEngineId,
             config._context_data.contextName,
             non_repeaters,
             max_repetitions,
-            vbProcessor.makeVarBinds(config._snmp_engine, var_binds),
+            vbProcessor.make_varbinds(_engine_cache(config._snmp_engine), var_binds),
             callback,
             ctx,
         )
@@ -167,7 +182,7 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
 def unmakeVarbinds(snmpEngine, varBinds, lookupMib=True):
     """Taken from pysnmp's varbinds.py, amended to not ignore the errors that return when resolving the MIB."""
     if lookupMib:
-        mibViewController = vbProcessor.get_mib_view_controller(snmpEngine)
+        mibViewController = vbProcessor.get_mib_view_controller(_engine_cache(snmpEngine))
         varBinds = [
             ObjectType(ObjectIdentity(x[0]), x[1]).resolveWithMib(mibViewController, ignoreErrors=False)
             for x in varBinds
