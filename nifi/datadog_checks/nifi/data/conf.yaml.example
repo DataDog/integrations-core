@@ -76,6 +76,7 @@ instances:
 
     ## @param process_groups - list of strings - optional
     ## List of process group IDs to monitor. Use "root" for the root group.
+    ## When omitted, only the root process group is monitored.
     #
     # process_groups:
     #   - root
