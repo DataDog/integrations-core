@@ -555,6 +555,11 @@ files:
             type: number
             example: 600
             display_default: 600
+          - name: run_sync
+            hidden: true
+            type: boolean
+            example: false
+            display_default: false
     - name: pg_stat_statements_view
       description: |
         Set this value if you want to define a custom view or function to allow the datadog user to query the

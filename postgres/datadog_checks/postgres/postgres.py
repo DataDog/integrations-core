@@ -90,7 +90,7 @@ from .util import (
     warning_with_tags,
 )
 from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, V17, V18, VersionUtils
-
+from .data_observability import PostgresDataObservability
 try:
     import datadog_agent
 except ImportError:
@@ -166,6 +166,7 @@ class PostgreSql(DatabaseCheck):
         self.statement_metrics = PostgresStatementMetrics(self, self._config)
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self.metadata_samples = PostgresMetadata(self, self._config)
+        self.data_observability = PostgresDataObservability(self, self._config)
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
         self._query_manager = QueryManager(self, lambda _: None, queries=[])  # query executor is set later

@@ -115,6 +115,7 @@ class DataObservability(BaseModel):
     )
     collection_interval: Optional[float] = Field(None, examples=[600])
     enabled: Optional[bool] = Field(None, examples=[False])
+    run_sync: Optional[bool] = Field(None, examples=[False])
 
 
 class DatabaseAutodiscovery(BaseModel):
