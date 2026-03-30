@@ -1,0 +1,1 @@
+Hide `empty_default_hostname` from Postgres config and remove incorrect warning. The Postgres check uses `exclude_hostname` instead, and the Cluster Agent injects `empty_default_hostname` unconditionally on cluster checks, causing a confusing warning.
