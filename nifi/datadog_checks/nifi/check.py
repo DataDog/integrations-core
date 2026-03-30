@@ -18,8 +18,11 @@ class NifiCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
         # NiFi uses its own token-based auth (POST /access/token), not HTTP Basic Auth.
-        # Disable RequestsWrapper's automatic Basic Auth from username/password.
-        self.http.options['auth'] = None
+        # Disable only the automatic Basic Auth that RequestsWrapper adds from username/password.
+        # Preserve any explicitly configured auth (digest, kerberos, ntlm) for proxy scenarios.
+        auth = self.http.options.get('auth')
+        if auth is not None and type(auth) is tuple:
+            self.http.options['auth'] = None
         self._api = None
 
     def _get_api(self):
