@@ -39,8 +39,11 @@ def get_trust_store_path() -> Path:
     return data_dir / TRUST_STORE_FILENAME
 
 
-def local_config_sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+def local_config_sha256(path: Path) -> str | None:
+    try:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    except OSError:
+        return None
 
 
 def canonical_local_config_path(path: Path) -> str:
@@ -99,6 +102,8 @@ def trust_local_config(local_config_path: Path, trust_store_path: Path | None = 
 
     canonical_path = canonical_local_config_path(local_config_path)
     current_hash = local_config_sha256(local_config_path)
+    if current_hash is None:
+        return False
     records = load_trust_records(trust_store_path)
     existing_record = records.get(canonical_path)
     already_trusted = existing_record is not None and existing_record.sha256 == current_hash
@@ -131,6 +136,8 @@ def is_local_config_trusted(local_config_path: Path, trust_store_path: Path | No
         return False
 
     current_hash = local_config_sha256(local_config_path)
+    if current_hash is None:
+        return False
     return current_hash == trusted_record.sha256
 
 

@@ -53,6 +53,26 @@ def test_trust_local_config_returns_false_when_file_missing(monkeypatch, tmp_pat
     save_mock.assert_not_called()
 
 
+def test_trust_local_config_returns_false_when_hash_read_fails(monkeypatch, tmp_path, mocker):
+    monkeypatch.setenv('DDEV_DATA_DIR', str(tmp_path / 'ddev-data'))
+    local_config = Path(tmp_path) / '.ddev.toml'
+    local_config.write_text('[github]\ntoken_command = "python token.py"\n')
+    save_mock = mocker.patch('ddev.config.trust.save_trust_records')
+    original_read_bytes = Path.read_bytes
+
+    def flaky_read_bytes(path: Path, *args, **kwargs):
+        if path == local_config:
+            raise OSError('simulated hash read failure')
+        return original_read_bytes(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, 'read_bytes', flaky_read_bytes)
+
+    already_trusted = trust_local_config(local_config)
+
+    assert already_trusted is False
+    save_mock.assert_not_called()
+
+
 def test_deny_local_config_removes_record(monkeypatch, tmp_path):
     monkeypatch.setenv('DDEV_DATA_DIR', str(tmp_path / 'ddev-data'))
     local_config = Path(tmp_path) / '.ddev.toml'
@@ -88,6 +108,23 @@ def test_is_local_config_trusted_false_when_file_changes(monkeypatch, tmp_path):
 def test_is_local_config_trusted_false_when_file_missing(monkeypatch, tmp_path):
     monkeypatch.setenv('DDEV_DATA_DIR', str(tmp_path / 'ddev-data'))
     local_config = Path(tmp_path) / '.ddev.toml'
+
+    assert is_local_config_trusted(local_config) is False
+
+
+def test_is_local_config_trusted_false_when_hash_read_fails(monkeypatch, tmp_path):
+    monkeypatch.setenv('DDEV_DATA_DIR', str(tmp_path / 'ddev-data'))
+    local_config = Path(tmp_path) / '.ddev.toml'
+    local_config.write_text('[github]\ntoken_command = "python token.py"\n')
+    trust_local_config(local_config)
+    original_read_bytes = Path.read_bytes
+
+    def flaky_read_bytes(path: Path, *args, **kwargs):
+        if path == local_config:
+            raise OSError('simulated hash read failure')
+        return original_read_bytes(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, 'read_bytes', flaky_read_bytes)
 
     assert is_local_config_trusted(local_config) is False
 
