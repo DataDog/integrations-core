@@ -1,2 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 nifi.can_connect,gauge,,,,Whether the check can reach and authenticate with the NiFi API. 1 = OK 0 = unreachable.,1,nifi,,
+nifi.cluster.connected_node_count,gauge,,node,,Number of nodes currently connected to the cluster.,1,nifi,,
+nifi.cluster.total_node_count,gauge,,node,,Total number of nodes in the cluster.,0,nifi,,
+nifi.cluster.is_healthy,gauge,,,,Whether all cluster nodes are connected. 1 = all connected 0 = degraded.,1,nifi,,
