@@ -38,7 +38,7 @@ license = "BSD-3-Clause"
 deps = [
     "pyasn1==0.6.3",
     "pysnmp-mibs==0.1.6",
-    "pysnmp==5.1.0",
+    "pysnmp==7.1.22",
 ]
 
 [project.urls]
