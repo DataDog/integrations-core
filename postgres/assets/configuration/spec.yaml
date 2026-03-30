@@ -540,6 +540,21 @@ files:
         type: boolean
         example: false
         display_default: false
+    - name: data_observability
+      fleet_configurable: true
+      description: |
+        Set to `true` to enable Data Observability.
+      value:
+        type: object
+        properties:
+          - name: enabled
+            type: boolean
+            example: false
+            display_default: false
+          - name: collection_interval
+            type: number
+            example: 600
+            display_default: 600
     - name: pg_stat_statements_view
       description: |
         Set this value if you want to define a custom view or function to allow the datadog user to query the

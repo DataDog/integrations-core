@@ -121,6 +121,10 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
             "dbm": instance.get(
                 'dbm', instance.get('deep_database_monitoring', defaults.instance_dbm())
             ),  # Deprecated, use `dbm` instead
+            "data_observability": {
+                **dict_defaults.instance_data_observability().model_dump(),
+                **(instance.get('data_observability', {})),
+            },
             "custom_metrics": map_custom_metrics(
                 instance.get('custom_metrics', [])
             ),  # Deprecated, use `custom_queries` instead
