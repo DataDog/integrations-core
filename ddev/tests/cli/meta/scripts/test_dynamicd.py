@@ -225,3 +225,55 @@ class TestGetApiKeys:
             _get_api_keys(app)
 
         assert any('LLM API key not configured' in error for error in app.errors)
+
+
+class _StubResponse:
+    def __init__(self, *, json_data=None, json_error: Exception | None = None):
+        self._json_data = json_data
+        self._json_error = json_error
+
+    def raise_for_status(self):
+        return None
+
+    def json(self):
+        if self._json_error is not None:
+            raise self._json_error
+        return self._json_data
+
+
+class TestValidateOrg:
+    def test_reports_malformed_org_lookup_json(self, monkeypatch):
+        from ddev.cli.meta.scripts._dynamicd.cli import _validate_org
+
+        responses = iter(
+            [
+                _StubResponse(json_data={'valid': True}),
+                _StubResponse(json_error=ValueError('bad json payload')),
+            ]
+        )
+        monkeypatch.setattr('requests.get', lambda *args, **kwargs: next(responses))
+
+        is_internal, org_name, key_valid = _validate_org('api-key', 'app-key', 'datadoghq.com')
+
+        assert is_internal is False
+        assert key_valid is True
+        assert 'org lookup returned malformed JSON' in org_name
+        assert 'bad json payload' in org_name
+
+    def test_reports_unexpected_org_lookup_shape(self, monkeypatch):
+        from ddev.cli.meta.scripts._dynamicd.cli import _validate_org
+
+        responses = iter(
+            [
+                _StubResponse(json_data={'valid': True}),
+                _StubResponse(json_data={'org': 'not-a-table'}),
+            ]
+        )
+        monkeypatch.setattr('requests.get', lambda *args, **kwargs: next(responses))
+
+        is_internal, org_name, key_valid = _validate_org('api-key', 'app-key', 'datadoghq.com')
+
+        assert is_internal is False
+        assert key_valid is True
+        assert 'org lookup returned unexpected response shape' in org_name
+        assert 'expected org object' in org_name

@@ -46,30 +46,39 @@ def _validate_org(api_key: str, app_key: str | None, site: str) -> tuple[bool, s
             timeout=10,
         )
         org_resp.raise_for_status()
-        org_data = org_resp.json()
+        try:
+            org_data = org_resp.json()
+        except ValueError as e:
+            return False, f"(org lookup returned malformed JSON: {e})", True
 
         # The API can return either:
         # - {"org": {"name": "..."}} for single org
         # - {"orgs": [{"name": "..."}, ...]} for multi-org accounts
-        org_info = None
-        if "org" in org_data:
-            org_info = org_data["org"]
-        elif "orgs" in org_data and org_data["orgs"]:
-            # For multi-org, use the first (parent) org
-            org_info = org_data["orgs"][0]
+        try:
+            if not isinstance(org_data, dict):
+                raise TypeError(f"expected object, got {type(org_data).__name__}")
 
-        if org_info:
-            org_name = org_info.get("name", "Unknown")
-        else:
-            org_name = "Unknown"
+            org_info = None
+            if "org" in org_data:
+                org_info = org_data["org"]
+            elif "orgs" in org_data and org_data["orgs"]:
+                # For multi-org, use the first (parent) org
+                org_info = org_data["orgs"][0]
+
+            if org_info:
+                if not isinstance(org_info, dict):
+                    raise TypeError(f"expected org object, got {type(org_info).__name__}")
+                org_name = org_info.get("name", "Unknown")
+            else:
+                org_name = "Unknown"
+        except (TypeError, KeyError, IndexError, AttributeError) as e:
+            return False, f"(org lookup returned unexpected response shape: {e})", True
 
         is_internal = "datadog" in org_name.lower()
         return is_internal, org_name, True
     except requests.RequestException as e:
         # Org lookup failed but key is valid
         return False, f"(org lookup failed: {e})", True
-    except Exception as e:
-        return False, f"(unexpected error: {type(e).__name__}: {e})", True
 
 
 def _get_api_keys(app: Application) -> tuple[str, str]:
