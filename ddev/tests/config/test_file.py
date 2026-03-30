@@ -9,7 +9,7 @@ from ddev.config.file import (
     deep_merge_with_list_handling,
 )
 from ddev.config.model import ConfigurationError
-from ddev.config.trust import get_trust_store_path, local_config_sha256
+from ddev.config.trust import get_trust_store_path, is_local_config_trusted, local_config_sha256
 from ddev.utils.fs import Path
 from ddev.utils.toml import dumps_toml_data
 
@@ -558,6 +558,82 @@ def test_trusted_local_file_preserves_command_fields(
     config_file.load()
 
     assert config_file.overrides_model.raw_data["github"]["token_command"] == "safe command"
+
+
+def test_save_preserves_trusted_override_content_after_load(
+    config_file: ConfigFileWithOverrides, helpers, overrides_config: Path, monkeypatch, tmp_path: PathLibPath
+):
+    monkeypatch.setenv("DDEV_DATA_DIR", str(tmp_path / "ddev-data"))
+    overrides_content = helpers.dedent(
+        """
+        # keep this comment and ordering
+        [github]
+        token_command = "safe command"
+        user = "safe user"
+        """
+    )
+    overrides_config.write_text(overrides_content)
+
+    canonical_overrides_path = str(overrides_config.expand().resolve())
+    trust_store_path = get_trust_store_path()
+    trust_store_path.parent.mkdir(parents=True, exist_ok=True)
+    trust_store_path.write_text(
+        dumps_toml_data(
+            {
+                "records": [
+                    {
+                        "path": canonical_overrides_path,
+                        "sha256": local_config_sha256(overrides_config),
+                    }
+                ]
+            }
+        )
+    )
+
+    config_file.load()
+    config_file.save()
+
+    assert overrides_config.read_text() == overrides_content
+
+
+def test_unrelated_save_keeps_trust_for_unchanged_trusted_overrides(
+    config_file: ConfigFileWithOverrides, helpers, overrides_config: Path, monkeypatch, tmp_path: PathLibPath
+):
+    monkeypatch.setenv("DDEV_DATA_DIR", str(tmp_path / "ddev-data"))
+    overrides_content = helpers.dedent(
+        """
+        # keep this comment and ordering
+        [github]
+        token_command = "safe command"
+        user = "safe user"
+        """
+    )
+    overrides_config.write_text(overrides_content)
+
+    canonical_overrides_path = str(overrides_config.expand().resolve())
+    trust_store_path = get_trust_store_path()
+    trust_store_path.parent.mkdir(parents=True, exist_ok=True)
+    trust_store_path.write_text(
+        dumps_toml_data(
+            {
+                "records": [
+                    {
+                        "path": canonical_overrides_path,
+                        "sha256": local_config_sha256(overrides_config),
+                    }
+                ]
+            }
+        )
+    )
+
+    config_file.load()
+    assert is_local_config_trusted(overrides_config)
+
+    config_file.global_model.github.user = "new-global-user"
+    config_file.save()
+
+    assert overrides_config.read_text() == overrides_content
+    assert is_local_config_trusted(overrides_config)
 
 
 def test_changed_local_file_after_trust_strips_command_fields(

@@ -119,9 +119,9 @@ class ConfigFileWithOverrides:
         self.combined_model: RootConfig = cast(RootConfig, UNINITIALIZED)
         self.combined_content: str = ""
         self._overrides_path: Path | None = None
-        self._loaded_untrusted_overrides_model: RootConfig | None = None
-        self._loaded_untrusted_overrides_raw_data: dict | None = None
-        self._loaded_untrusted_overrides_content: str | None = None
+        self._loaded_overrides_model: RootConfig | None = None
+        self._loaded_overrides_raw_data: dict | None = None
+        self._loaded_overrides_content: str | None = None
 
     @property
     def overrides_path(self) -> Path:
@@ -174,9 +174,9 @@ class ConfigFileWithOverrides:
     def load(self) -> None:
         self.global_content = self.global_path.read_text()
         self.global_model = RootConfig(load_toml_data(self.global_content))
-        self._loaded_untrusted_overrides_model = None
-        self._loaded_untrusted_overrides_raw_data = None
-        self._loaded_untrusted_overrides_content = None
+        self._loaded_overrides_model = None
+        self._loaded_overrides_raw_data = None
+        self._loaded_overrides_content = None
 
         overrides_content = ''
         if self.overrides_available():
@@ -201,10 +201,9 @@ class ConfigFileWithOverrides:
             overrides_data = sanitize_command_fields(overrides_data)
         non_secret_metadata = {'trust_blocked_command_fields': trust_blocked_command_fields}
         self.overrides_model = RootConfig(overrides_data, non_secret_metadata=non_secret_metadata)
-        if untrusted_overrides:
-            self._loaded_untrusted_overrides_model = self.overrides_model
-            self._loaded_untrusted_overrides_raw_data = copy.deepcopy(self.overrides_model.raw_data)
-            self._loaded_untrusted_overrides_content = self.overrides_content
+        self._loaded_overrides_model = self.overrides_model
+        self._loaded_overrides_raw_data = copy.deepcopy(self.overrides_model.raw_data)
+        self._loaded_overrides_content = self.overrides_content
 
         self.combined_model = RootConfig(
             deep_merge_with_list_handling(
@@ -335,13 +334,13 @@ class ConfigFileWithOverrides:
         return self.global_model
 
     def _preserved_overrides_content(self) -> str | None:
-        if self._loaded_untrusted_overrides_model is not self.overrides_model:
+        if self._loaded_overrides_model is not self.overrides_model:
             return None
 
-        if self._loaded_untrusted_overrides_raw_data != self.overrides_model.raw_data:
+        if self._loaded_overrides_raw_data != self.overrides_model.raw_data:
             return None
 
-        return self._loaded_untrusted_overrides_content
+        return self._loaded_overrides_content
 
     def save(self, content=None):
         import tomli_w
@@ -367,9 +366,9 @@ class ConfigFileWithOverrides:
         self.combined_model = combined_config
         self.overrides_model = cast(RootConfig, UNINITIALIZED)
         self.overrides_content = ""
-        self._loaded_untrusted_overrides_model = None
-        self._loaded_untrusted_overrides_raw_data = None
-        self._loaded_untrusted_overrides_content = None
+        self._loaded_overrides_model = None
+        self._loaded_overrides_raw_data = None
+        self._loaded_overrides_content = None
 
     def restore(self) -> None:
         import tomli_w
