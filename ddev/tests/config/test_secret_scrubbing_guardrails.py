@@ -18,6 +18,10 @@ SECRET_FIELD_PATHS = {
     'orgs.default.api_key_command',
     'orgs.default.app_key',
     'orgs.default.app_key_command',
+    'orgs.staging.api_key',
+    'orgs.staging.api_key_command',
+    'orgs.staging.app_key',
+    'orgs.staging.app_key_command',
 }
 
 
@@ -53,7 +57,13 @@ def test_scrub_config_covers_registered_secret_paths():
                 'api_key_command': 'python dd_api_key.py',
                 'app_key': 'dd-app-key',
                 'app_key_command': 'python dd_app_key.py',
-            }
+            },
+            'staging': {
+                'api_key': 'dd-staging-api-key',
+                'api_key_command': 'python dd_staging_api_key.py',
+                'app_key': 'dd-staging-app-key',
+                'app_key_command': 'python dd_staging_app_key.py',
+            },
         },
         'repos': {'core': '/tmp/core'},
     }
@@ -75,5 +85,9 @@ def test_scrub_config_covers_registered_secret_paths():
     assert config['orgs']['default']['api_key_command'] == SCRUBBED_VALUE
     assert config['orgs']['default']['app_key'] == SCRUBBED_VALUE
     assert config['orgs']['default']['app_key_command'] == SCRUBBED_VALUE
+    assert config['orgs']['staging']['api_key'] == SCRUBBED_VALUE
+    assert config['orgs']['staging']['api_key_command'] == SCRUBBED_VALUE
+    assert config['orgs']['staging']['app_key'] == SCRUBBED_VALUE
+    assert config['orgs']['staging']['app_key_command'] == SCRUBBED_VALUE
 
     assert config['repos']['core'] == '/tmp/core'
