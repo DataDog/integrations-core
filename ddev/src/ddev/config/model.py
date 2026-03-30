@@ -74,6 +74,14 @@ class LazilyParsedConfig:
             raise error
         raise error from cause
 
+    def _read_optional_command_field(self, field_name: str) -> str | None:
+        if field_name not in self.raw_data:
+            return None
+        value = self.raw_data[field_name]
+        if not isinstance(value, str):
+            raise ConfigurationError('must be a string', location=' -> '.join([*self.steps, field_name]))
+        return value
+
 
 class RootConfig(LazilyParsedConfig):
     def __init__(self, *args, non_secret_metadata=None, **kwargs):
@@ -592,14 +600,7 @@ class OrgSettingsConfig(LazilyParsedConfig, Mapping):
     @property
     def api_key_command(self):
         if self._field_api_key_command is FIELD_TO_PARSE:
-            if 'api_key_command' not in self.raw_data:
-                self._field_api_key_command = None
-            else:
-                api_key_command = self.raw_data['api_key_command']
-                if not isinstance(api_key_command, str):
-                    self.raise_error('must be a string')
-
-                self._field_api_key_command = api_key_command
+            self._field_api_key_command = self._read_optional_command_field('api_key_command')
 
         return self._field_api_key_command
 
@@ -633,14 +634,7 @@ class OrgSettingsConfig(LazilyParsedConfig, Mapping):
     @property
     def app_key_command(self):
         if self._field_app_key_command is FIELD_TO_PARSE:
-            if 'app_key_command' not in self.raw_data:
-                self._field_app_key_command = None
-            else:
-                app_key_command = self.raw_data['app_key_command']
-                if not isinstance(app_key_command, str):
-                    self.raise_error('must be a string')
-
-                self._field_app_key_command = app_key_command
+            self._field_app_key_command = self._read_optional_command_field('app_key_command')
 
         return self._field_app_key_command
 
@@ -775,14 +769,7 @@ class GitHubConfig(LazilyParsedConfig):
     @property
     def user_command(self):
         if self._field_user_command is FIELD_TO_PARSE:
-            if 'user_command' not in self.raw_data:
-                self._field_user_command = None
-            else:
-                user_command = self.raw_data['user_command']
-                if not isinstance(user_command, str):
-                    self.raise_error('must be a string')
-
-                self._field_user_command = user_command
+            self._field_user_command = self._read_optional_command_field('user_command')
 
         return self._field_user_command
 
@@ -825,14 +812,7 @@ class GitHubConfig(LazilyParsedConfig):
     @property
     def token_command(self):
         if self._field_token_command is FIELD_TO_PARSE:
-            if 'token_command' not in self.raw_data:
-                self._field_token_command = None
-            else:
-                token_command = self.raw_data['token_command']
-                if not isinstance(token_command, str):
-                    self.raise_error('must be a string')
-
-                self._field_token_command = token_command
+            self._field_token_command = self._read_optional_command_field('token_command')
 
         return self._field_token_command
 
@@ -916,14 +896,7 @@ class PyPIConfig(LazilyParsedConfig):
     @property
     def auth_command(self):
         if self._field_auth_command is FIELD_TO_PARSE:
-            if 'auth_command' not in self.raw_data:
-                self._field_auth_command = None
-            else:
-                auth_command = self.raw_data['auth_command']
-                if not isinstance(auth_command, str):
-                    self.raise_error('must be a string')
-
-                self._field_auth_command = auth_command
+            self._field_auth_command = self._read_optional_command_field('auth_command')
 
         return self._field_auth_command
 
@@ -1013,14 +986,7 @@ class TrelloConfig(LazilyParsedConfig):
     @property
     def key_command(self):
         if self._field_key_command is FIELD_TO_PARSE:
-            if 'key_command' not in self.raw_data:
-                self._field_key_command = None
-            else:
-                key_command = self.raw_data['key_command']
-                if not isinstance(key_command, str):
-                    self.raise_error('must be a string')
-
-                self._field_key_command = key_command
+            self._field_key_command = self._read_optional_command_field('key_command')
 
         return self._field_key_command
 
@@ -1032,14 +998,7 @@ class TrelloConfig(LazilyParsedConfig):
     @property
     def token_command(self):
         if self._field_token_command is FIELD_TO_PARSE:
-            if 'token_command' not in self.raw_data:
-                self._field_token_command = None
-            else:
-                token_command = self.raw_data['token_command']
-                if not isinstance(token_command, str):
-                    self.raise_error('must be a string')
-
-                self._field_token_command = token_command
+            self._field_token_command = self._read_optional_command_field('token_command')
 
         return self._field_token_command
 
@@ -1095,14 +1054,7 @@ class DynamicDConfig(LazilyParsedConfig):
     @property
     def llm_api_key_command(self):
         if self._field_llm_api_key_command is FIELD_TO_PARSE:
-            if 'llm_api_key_command' not in self.raw_data:
-                self._field_llm_api_key_command = None
-            else:
-                llm_api_key_command = self.raw_data['llm_api_key_command']
-                if not isinstance(llm_api_key_command, str):
-                    self.raise_error('must be a string')
-
-                self._field_llm_api_key_command = llm_api_key_command
+            self._field_llm_api_key_command = self._read_optional_command_field('llm_api_key_command')
 
         return self._field_llm_api_key_command
 
