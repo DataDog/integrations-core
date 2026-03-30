@@ -111,6 +111,8 @@ RELATIVE_PATH="zstd-{{version}}" \
 CONFIGURE_SCRIPT="true" \
 INSTALL_COMMAND="make prefix=${DD_PREFIX_PATH} install" \
   install-from-source
+# Fix install name so delocate can bundle it from the correct path
+install_name_tool -id "${DD_PREFIX_PATH}/lib/libzstd.1.dylib" "${DD_PREFIX_PATH}/lib/libzstd.1.dylib"
 
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 DOWNLOAD_URL="https://github.com/LMDB/lmdb/archive/LMDB_{{version}}.tar.gz" \
