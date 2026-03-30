@@ -1,1 +1,113 @@
-Please build an out-of-the-box dashboard for your integration following our best practices here: https://datadoghq.dev/integrations-core/guidelines/dashboards/#best-practices
+{
+    "title": "NiFi Overview",
+    "description": "Overview of Apache NiFi health, flow throughput, and queue status.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "title": "Can Connect",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:nifi.can_connect{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "precision": 0
+            },
+            "layout": {"x": 0, "y": 0, "width": 2, "height": 2}
+        },
+        {
+            "id": 1,
+            "definition": {
+                "title": "JVM Heap Utilization",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:nifi.system.jvm.heap_utilization{*}",
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {"x": 2, "y": 0, "width": 5, "height": 2}
+        },
+        {
+            "id": 2,
+            "definition": {
+                "title": "Flow - Running Processors",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:nifi.flow.running_count{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "precision": 0
+            },
+            "layout": {"x": 7, "y": 0, "width": 2, "height": 2}
+        },
+        {
+            "id": 3,
+            "definition": {
+                "title": "FlowFiles Queued",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:nifi.flow.flowfiles_queued{*}",
+                        "display_type": "bars"
+                    }
+                ]
+            },
+            "layout": {"x": 0, "y": 2, "width": 4, "height": 2}
+        },
+        {
+            "id": 4,
+            "definition": {
+                "title": "GC Collection Rate",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:nifi.system.gc.collection_count{*} by {gc_name}",
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {"x": 4, "y": 2, "width": 5, "height": 2}
+        },
+        {
+            "id": 5,
+            "definition": {
+                "title": "Active Threads",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:nifi.flow.active_threads{*}",
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {"x": 0, "y": 4, "width": 4, "height": 2}
+        },
+        {
+            "id": 6,
+            "definition": {
+                "title": "Repository Utilization",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:nifi.system.flowfile_repo.utilization{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:nifi.system.content_repo.utilization{*}",
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {"x": 4, "y": 4, "width": 5, "height": 2}
+        }
+    ],
+    "template_variables": [],
+    "layout_type": "ordered",
+    "notify_list": []
+}
