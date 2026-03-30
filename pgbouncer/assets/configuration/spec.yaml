@@ -18,6 +18,16 @@ files:
         value:
           example: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
           type: string
+      - name: database_filter_regex
+        description: |
+          Collect metrics only for PgBouncer database names matching this regular expression.
+
+          The regex is applied to the PgBouncer database name exposed by the admin views.
+          Global metrics that are not tied to a specific database, such as configuration metrics,
+          are still collected.
+        value:
+          example: ^(datadog_test|dogs)$
+          type: string
       - name: host
         description: If `database_url` is not used, set up the host to connect to with the `host` parameter.
         value:
