@@ -6,7 +6,9 @@ from typing import Any, Dict, Generator  # noqa: F401
 from pyasn1.type.univ import Null
 from pysnmp import hlapi  # noqa: F401
 from pysnmp.entity.rfc3413 import cmdgen
-from pysnmp.hlapi.asyncore.cmdgen import vbProcessor
+from pysnmp.hlapi.varbinds import CommandGeneratorVarBinds
+
+vbProcessor = CommandGeneratorVarBinds()
 from pysnmp.proto import errind
 from pysnmp.proto.rfc1905 import endOfMibView
 from pysnmp.smi.rfc1902 import ObjectIdentity, ObjectType
