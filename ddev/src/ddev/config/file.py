@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import copy
 import os
+import warnings
 from dataclasses import dataclass
 from typing import cast
 
@@ -182,7 +183,12 @@ class ConfigFileWithOverrides:
         if self.overrides_available():
             try:
                 overrides_content = self.overrides_path.read_text()
-            except OSError:
+            except OSError as e:
+                warnings.warn(
+                    f'Unable to read local overrides file `{self.overrides_path}`: {e}. '
+                    'Ignoring local overrides for this run.',
+                    stacklevel=2,
+                )
                 overrides_content = ''
 
         if overrides_content.strip() == "":

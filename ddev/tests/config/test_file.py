@@ -416,7 +416,12 @@ def test_load_ignores_overrides_when_read_fails(tmp_path: PathLibPath, monkeypat
     with monkeypatch.context() as m:
         m.chdir(project_dir)
         m.setattr(Path, "read_text", flaky_read_text)
-        config_file.load()
+        with pytest.warns(
+            UserWarning,
+            match=r"Unable to read local overrides file `.*\.ddev\.toml`: simulated read failure\. "
+            r"Ignoring local overrides for this run\.",
+        ):
+            config_file.load()
 
     assert config_file.overrides_content == ""
     assert config_file.overrides_model.raw_data == {}
