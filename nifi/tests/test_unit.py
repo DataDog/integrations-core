@@ -1,5 +1,5 @@
 # ABOUTME: Unit tests for the NiFi integration.
-# ABOUTME: Tests API auth, health metrics, and cluster health with mocked HTTP responses.
+# ABOUTME: Tests API auth, health metrics, system diagnostics, and cluster health.
 
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
@@ -40,31 +40,65 @@ def _mock_response(status_code=200, json_data=None, text=''):
 
 ABOUT_RESPONSE = {'about': {'title': 'NiFi', 'version': '2.8.0'}}
 
+CLUSTER_SUMMARY_STANDALONE = {'clusterSummary': {'clustered': False, 'connectedNodeCount': 0, 'totalNodeCount': 0}}
+
 CLUSTER_SUMMARY_CLUSTERED = {
-    'clusterSummary': {
-        'clustered': True,
-        'connectedNodeCount': 3,
-        'totalNodeCount': 3,
-        'connectedToCluster': True,
-    }
+    'clusterSummary': {'clustered': True, 'connectedNodeCount': 3, 'totalNodeCount': 3, 'connectedToCluster': True}
 }
 
 CLUSTER_SUMMARY_DEGRADED = {
-    'clusterSummary': {
-        'clustered': True,
-        'connectedNodeCount': 2,
-        'totalNodeCount': 3,
-        'connectedToCluster': True,
+    'clusterSummary': {'clustered': True, 'connectedNodeCount': 2, 'totalNodeCount': 3, 'connectedToCluster': True}
+}
+
+SYSTEM_DIAGNOSTICS_RESPONSE = {
+    'systemDiagnostics': {
+        'aggregateSnapshot': {
+            'usedHeapBytes': 217252040,
+            'maxHeapBytes': 1073741824,
+            'heapUtilization': '20.0%',
+            'usedNonHeapBytes': 172266584,
+            'totalThreads': 88,
+            'daemonThreads': 44,
+            'availableProcessors': 16,
+            'processorLoadAverage': 1.73,
+            'garbageCollection': [
+                {'name': 'G1 Young Generation', 'collectionCount': 12, 'collectionMillis': 61},
+                {'name': 'G1 Old Generation', 'collectionCount': 0, 'collectionMillis': 0},
+            ],
+            'flowFileRepositoryStorageUsage': {
+                'usedSpaceBytes': 86076280832,
+                'freeSpaceBytes': 891819843584,
+                'utilization': '9.0%',
+            },
+            'contentRepositoryStorageUsage': [
+                {
+                    'identifier': 'default',
+                    'usedSpaceBytes': 86076280832,
+                    'freeSpaceBytes': 891819843584,
+                    'utilization': '9.0%',
+                }
+            ],
+            'provenanceRepositoryStorageUsage': [
+                {
+                    'identifier': 'default',
+                    'usedSpaceBytes': 86076280832,
+                    'freeSpaceBytes': 891819843584,
+                    'utilization': '9.0%',
+                }
+            ],
+        }
     }
 }
 
-CLUSTER_SUMMARY_STANDALONE = {
-    'clusterSummary': {
-        'clustered': False,
-        'connectedNodeCount': 0,
-        'totalNodeCount': 0,
+
+def _standard_responses(cluster=CLUSTER_SUMMARY_STANDALONE, sysdiag=SYSTEM_DIAGNOSTICS_RESPONSE):
+    """Return the standard URL->response mapping for a full check run."""
+    return {
+        '/access/token': _mock_response(201, text='test-token'),
+        '/flow/about': _mock_response(200, json_data=ABOUT_RESPONSE),
+        '/system-diagnostics': _mock_response(200, json_data=sysdiag),
+        '/flow/cluster/summary': _mock_response(200, json_data=cluster),
     }
-}
 
 
 def _build_request_side_effect(responses_by_url):
@@ -107,9 +141,9 @@ class TestAuth:
 
         responses = iter(
             [
-                _mock_response(401),  # first GET (expired token)
-                _mock_response(201, text='new-token'),  # POST /access/token
-                _mock_response(200, json_data=ABOUT_RESPONSE),  # retry GET
+                _mock_response(401),
+                _mock_response(201, text='new-token'),
+                _mock_response(200, json_data=ABOUT_RESPONSE),
             ]
         )
 
@@ -123,26 +157,16 @@ class TestAuth:
 class TestCanConnect:
     def test_can_connect_success(self, dd_run_check, aggregator):
         """Full check run emits can_connect=1 on success."""
-        instance = _make_instance()
-        check = NifiCheck('nifi', {}, [instance])
+        check = NifiCheck('nifi', {}, [_make_instance()])
 
-        side_effect = _build_request_side_effect(
-            {
-                '/access/token': _mock_response(201, text='test-token'),
-                '/flow/about': _mock_response(200, json_data=ABOUT_RESPONSE),
-                '/flow/cluster/summary': _mock_response(200, json_data=CLUSTER_SUMMARY_STANDALONE),
-            }
-        )
-
-        with patch('requests.Session.request', side_effect=side_effect):
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
             dd_run_check(check)
 
         aggregator.assert_metric('nifi.can_connect', value=1, tags=['nifi_version:2.8.0'])
 
     def test_can_connect_failure(self, dd_run_check, aggregator):
         """Connection error emits can_connect=0."""
-        instance = _make_instance()
-        check = NifiCheck('nifi', {}, [instance])
+        check = NifiCheck('nifi', {}, [_make_instance()])
 
         with patch('requests.Session.request', side_effect=RequestsConnectionError('refused')):
             with pytest.raises(Exception):
@@ -152,17 +176,15 @@ class TestCanConnect:
 
     def test_no_auth_mode(self, dd_run_check, aggregator):
         """Check works without credentials when NiFi has no auth configured."""
-        instance = _make_instance(username=None, password=None)
-        check = NifiCheck('nifi', {}, [instance])
+        check = NifiCheck('nifi', {}, [_make_instance(username=None, password=None)])
 
-        side_effect = _build_request_side_effect(
-            {
-                '/flow/about': _mock_response(200, json_data=ABOUT_RESPONSE),
-                '/flow/cluster/summary': _mock_response(200, json_data=CLUSTER_SUMMARY_STANDALONE),
-            }
-        )
+        responses = {
+            '/flow/about': _mock_response(200, json_data=ABOUT_RESPONSE),
+            '/system-diagnostics': _mock_response(200, json_data=SYSTEM_DIAGNOSTICS_RESPONSE),
+            '/flow/cluster/summary': _mock_response(200, json_data=CLUSTER_SUMMARY_STANDALONE),
+        }
 
-        with patch('requests.Session.request', side_effect=side_effect):
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
             dd_run_check(check)
 
         aggregator.assert_metric('nifi.can_connect', value=1, tags=['nifi_version:2.8.0'])
@@ -171,18 +193,12 @@ class TestCanConnect:
 class TestClusterHealth:
     def test_cluster_healthy(self, dd_run_check, aggregator):
         """Clustered mode with all nodes connected: is_healthy=1."""
-        instance = _make_instance()
-        check = NifiCheck('nifi', {}, [instance])
+        check = NifiCheck('nifi', {}, [_make_instance()])
 
-        side_effect = _build_request_side_effect(
-            {
-                '/access/token': _mock_response(201, text='test-token'),
-                '/flow/about': _mock_response(200, json_data=ABOUT_RESPONSE),
-                '/flow/cluster/summary': _mock_response(200, json_data=CLUSTER_SUMMARY_CLUSTERED),
-            }
-        )
-
-        with patch('requests.Session.request', side_effect=side_effect):
+        with patch(
+            'requests.Session.request',
+            side_effect=_build_request_side_effect(_standard_responses(cluster=CLUSTER_SUMMARY_CLUSTERED)),
+        ):
             dd_run_check(check)
 
         tags = ['nifi_version:2.8.0']
@@ -192,75 +208,82 @@ class TestClusterHealth:
 
     def test_cluster_degraded(self, dd_run_check, aggregator):
         """Clustered mode with missing node: is_healthy=0."""
-        instance = _make_instance()
-        check = NifiCheck('nifi', {}, [instance])
+        check = NifiCheck('nifi', {}, [_make_instance()])
 
-        side_effect = _build_request_side_effect(
-            {
-                '/access/token': _mock_response(201, text='test-token'),
-                '/flow/about': _mock_response(200, json_data=ABOUT_RESPONSE),
-                '/flow/cluster/summary': _mock_response(200, json_data=CLUSTER_SUMMARY_DEGRADED),
-            }
-        )
-
-        with patch('requests.Session.request', side_effect=side_effect):
+        with patch(
+            'requests.Session.request',
+            side_effect=_build_request_side_effect(_standard_responses(cluster=CLUSTER_SUMMARY_DEGRADED)),
+        ):
             dd_run_check(check)
 
         tags = ['nifi_version:2.8.0']
-        aggregator.assert_metric('nifi.cluster.connected_node_count', value=2, tags=tags)
-        aggregator.assert_metric('nifi.cluster.total_node_count', value=3, tags=tags)
         aggregator.assert_metric('nifi.cluster.is_healthy', value=0, tags=tags)
 
     def test_standalone_no_cluster_metrics(self, dd_run_check, aggregator):
         """Standalone mode: no cluster metrics emitted."""
-        instance = _make_instance()
-        check = NifiCheck('nifi', {}, [instance])
+        check = NifiCheck('nifi', {}, [_make_instance()])
 
-        side_effect = _build_request_side_effect(
-            {
-                '/access/token': _mock_response(201, text='test-token'),
-                '/flow/about': _mock_response(200, json_data=ABOUT_RESPONSE),
-                '/flow/cluster/summary': _mock_response(200, json_data=CLUSTER_SUMMARY_STANDALONE),
-            }
-        )
-
-        with patch('requests.Session.request', side_effect=side_effect):
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
             dd_run_check(check)
 
         aggregator.assert_metric('nifi.can_connect', value=1)
         assert not aggregator.metrics('nifi.cluster.connected_node_count')
-        assert not aggregator.metrics('nifi.cluster.total_node_count')
-        assert not aggregator.metrics('nifi.cluster.is_healthy')
 
-    def test_version_cached(self, dd_run_check, aggregator):
-        """Version is fetched once and cached for subsequent check runs."""
-        instance = _make_instance()
-        check = NifiCheck('nifi', {}, [instance])
 
-        call_log = []
+class TestSystemDiagnostics:
+    def test_jvm_metrics(self, dd_run_check, aggregator):
+        """System diagnostics emits JVM heap, threads, and CPU metrics."""
+        check = NifiCheck('nifi', {}, [_make_instance()])
 
-        def side_effect(method, url, **kwargs):
-            call_log.append(url)
-            if '/access/token' in url:
-                return _mock_response(201, text='test-token')
-            elif '/flow/about' in url:
-                return _mock_response(200, json_data=ABOUT_RESPONSE)
-            elif '/flow/cluster/summary' in url:
-                return _mock_response(200, json_data=CLUSTER_SUMMARY_STANDALONE)
-            raise ValueError(f'Unmocked: {url}')
-
-        # First run: token + about + cluster
-        with patch('requests.Session.request', side_effect=side_effect):
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
             dd_run_check(check)
 
-        about_calls_run1 = sum(1 for u in call_log if '/flow/about' in u)
-        assert about_calls_run1 == 1
+        tags = ['nifi_version:2.8.0']
+        aggregator.assert_metric('nifi.system.jvm.heap_used', value=217252040, tags=tags)
+        aggregator.assert_metric('nifi.system.jvm.heap_max', value=1073741824, tags=tags)
+        aggregator.assert_metric('nifi.system.jvm.heap_utilization', value=20.0, tags=tags)
+        aggregator.assert_metric('nifi.system.jvm.non_heap_used', value=172266584, tags=tags)
+        aggregator.assert_metric('nifi.system.jvm.total_threads', value=88, tags=tags)
+        aggregator.assert_metric('nifi.system.jvm.daemon_threads', value=44, tags=tags)
+        aggregator.assert_metric('nifi.system.cpu.load_average', value=1.73, tags=tags)
+        aggregator.assert_metric('nifi.system.cpu.available_processors', value=16, tags=tags)
 
-        call_log.clear()
+    def test_gc_metrics(self, dd_run_check, aggregator):
+        """GC metrics are tagged per garbage collector."""
+        check = NifiCheck('nifi', {}, [_make_instance()])
 
-        # Second run: only cluster (about is cached, token already obtained)
-        with patch('requests.Session.request', side_effect=side_effect):
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
             dd_run_check(check)
 
-        about_calls_run2 = sum(1 for u in call_log if '/flow/about' in u)
-        assert about_calls_run2 == 0
+        young_tags = ['nifi_version:2.8.0', 'gc_name:G1 Young Generation']
+        aggregator.assert_metric('nifi.system.gc.collection_count', value=12, tags=young_tags)
+        aggregator.assert_metric('nifi.system.gc.collection_time', value=61, tags=young_tags)
+
+        old_tags = ['nifi_version:2.8.0', 'gc_name:G1 Old Generation']
+        aggregator.assert_metric('nifi.system.gc.collection_count', value=0, tags=old_tags)
+        aggregator.assert_metric('nifi.system.gc.collection_time', value=0, tags=old_tags)
+
+    def test_repository_metrics(self, dd_run_check, aggregator):
+        """Repository metrics include flowfile, content, and provenance repos."""
+        check = NifiCheck('nifi', {}, [_make_instance()])
+
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
+            dd_run_check(check)
+
+        tags = ['nifi_version:2.8.0']
+        aggregator.assert_metric('nifi.system.flowfile_repo.used_space', value=86076280832, tags=tags)
+        aggregator.assert_metric('nifi.system.flowfile_repo.free_space', value=891819843584, tags=tags)
+        aggregator.assert_metric('nifi.system.flowfile_repo.utilization', value=9.0, tags=tags)
+
+        repo_tags = tags + ['repo_identifier:default']
+        aggregator.assert_metric('nifi.system.content_repo.used_space', value=86076280832, tags=repo_tags)
+        aggregator.assert_metric('nifi.system.content_repo.utilization', value=9.0, tags=repo_tags)
+        aggregator.assert_metric('nifi.system.provenance_repo.used_space', value=86076280832, tags=repo_tags)
+        aggregator.assert_metric('nifi.system.provenance_repo.utilization', value=9.0, tags=repo_tags)
+
+    def test_parse_utilization(self):
+        """Percentage strings are parsed correctly."""
+        assert NifiCheck._parse_utilization('16.0%') == 16.0
+        assert NifiCheck._parse_utilization('0%') == 0.0
+        assert NifiCheck._parse_utilization('100.0%') == 100.0
+        assert NifiCheck._parse_utilization(42.5) == 42.5

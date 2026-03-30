@@ -8,3 +8,4 @@
 ABOUT_ENDPOINT = '/flow/about'
 ACCESS_TOKEN_ENDPOINT = '/access/token'
 CLUSTER_SUMMARY_ENDPOINT = '/flow/cluster/summary'
+SYSTEM_DIAGNOSTICS_ENDPOINT = '/system-diagnostics'

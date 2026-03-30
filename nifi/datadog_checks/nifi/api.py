@@ -6,7 +6,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from requests.exceptions import HTTPError
 
-from .constants import ABOUT_ENDPOINT, ACCESS_TOKEN_ENDPOINT, CLUSTER_SUMMARY_ENDPOINT
+from .constants import (
+    ABOUT_ENDPOINT,
+    ACCESS_TOKEN_ENDPOINT,
+    CLUSTER_SUMMARY_ENDPOINT,
+    SYSTEM_DIAGNOSTICS_ENDPOINT,
+)
 
 
 class NiFiApi:
@@ -65,3 +70,7 @@ class NiFiApi:
     def get_cluster_summary(self):
         """GET /flow/cluster/summary — returns cluster health info."""
         return self._request(CLUSTER_SUMMARY_ENDPOINT)
+
+    def get_system_diagnostics(self):
+        """GET /system-diagnostics — returns JVM, GC, and repository metrics."""
+        return self._request(SYSTEM_DIAGNOSTICS_ENDPOINT)
