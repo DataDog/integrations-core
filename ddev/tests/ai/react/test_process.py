@@ -152,7 +152,7 @@ def make_process(
 async def test_stop_reason_single_response(stop_reason: StopReason) -> None:
     agent = MockAgent([make_response(stop_reason)])
 
-    result = await make_process(agent).start("Hi")
+    result = await make_process(agent, max_iterations=max_iterations).start("Hi")
 
     assert result.final_response.stop_reason == stop_reason
     assert result.iterations == 1
