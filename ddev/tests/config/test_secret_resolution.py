@@ -19,9 +19,7 @@ def reset_secret_command_cache_between_tests():
 
 
 def test_error_code_command_parse(monkeypatch):
-    monkeypatch.setattr(
-        'ddev.config.secret_resolution.run_secret_command', lambda _command: (_ for _ in ()).throw(_parse_error())
-    )
+    monkeypatch.setattr('ddev.config.secret_resolution.run_secret_command', _raise_parse_error)
 
     with pytest.raises(SecretResolutionError) as e:
         resolve_required_secret(
@@ -114,9 +112,7 @@ def test_precedence_command_empty_output_hard_stop(monkeypatch):
 
 def test_precedence_command_failure_hard_stop(monkeypatch):
     monkeypatch.setenv('GH_TOKEN', 'env-token')
-    monkeypatch.setattr(
-        'ddev.config.secret_resolution.run_secret_command', lambda _command: (_ for _ in ()).throw(_non_zero_error())
-    )
+    monkeypatch.setattr('ddev.config.secret_resolution.run_secret_command', _raise_non_zero_error)
 
     with pytest.raises(SecretResolutionError) as e:
         resolve_required_secret(
@@ -229,10 +225,7 @@ def test_optional_secret_command_empty_output_hard_stop(monkeypatch):
 
 
 def test_optional_secret_command_executable_not_found(monkeypatch):
-    monkeypatch.setattr(
-        'ddev.config.secret_resolution.run_secret_command',
-        lambda _command: (_ for _ in ()).throw(_executable_not_found_error()),
-    )
+    monkeypatch.setattr('ddev.config.secret_resolution.run_secret_command', _raise_executable_not_found_error)
 
     with pytest.raises(SecretResolutionError) as e:
         resolve_optional_secret(
@@ -290,7 +283,7 @@ def test_failed_command_is_not_cached(monkeypatch):
 
     def fake_run(*args, **kwargs):
         calls.append((args, kwargs))
-        return type('P', (), {'returncode': 7, 'stdout': ''})()
+        return type('P', (), {'returncode': 7, 'stdout': '', 'stderr': ''})()
 
     monkeypatch.setattr('ddev.config.secret_command.subprocess.run', fake_run)
 
@@ -331,6 +324,42 @@ def test_run_secret_command_executable_not_found_includes_executable_name(monkey
 
     with pytest.raises(SecretCommandError, match=r"command executable was not found: 'missing-executable-12345'"):
         run_secret_command('missing-executable-12345 --arg')
+
+
+def test_run_secret_command_start_error(monkeypatch):
+    def fake_run(*args, **kwargs):
+        raise OSError('simulated start failure')
+
+    monkeypatch.setattr('ddev.config.secret_command.subprocess.run', fake_run)
+
+    with pytest.raises(SecretCommandError, match='command could not be started'):
+        run_secret_command('python token.py')
+
+
+def test_resolve_required_secret_maps_start_error(monkeypatch):
+    monkeypatch.setattr('ddev.config.secret_command.subprocess.run', _raise_start_oserror)
+
+    with pytest.raises(SecretResolutionError) as e:
+        resolve_required_secret(
+            field_path='github.token',
+            command='python token.py',
+            literal='literal-token',
+            env_var='GH_TOKEN',
+        )
+
+    assert e.value.code == 'secret-command-start-error'
+
+
+def test_resolve_required_secret_maps_empty_command_reason():
+    with pytest.raises(SecretResolutionError) as e:
+        resolve_required_secret(
+            field_path='github.token',
+            command='   ',
+            literal='literal-token',
+            env_var='GH_TOKEN',
+        )
+
+    assert e.value.code == 'secret-command-empty'
 
 
 def test_parse_secret_command_uses_posix_mode(monkeypatch):
@@ -411,3 +440,19 @@ def _executable_not_found_error():
     from ddev.config.secret_command import SecretCommandError
 
     return SecretCommandError('command executable was not found', reason='executable_not_found')
+
+
+def _raise_parse_error(_command):
+    raise _parse_error()
+
+
+def _raise_non_zero_error(_command):
+    raise _non_zero_error()
+
+
+def _raise_executable_not_found_error(_command):
+    raise _executable_not_found_error()
+
+
+def _raise_start_oserror(*args, **kwargs):
+    raise OSError('simulated start failure')

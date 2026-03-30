@@ -1246,9 +1246,9 @@ class TestPyPI:
         ):
             _ = config.pypi.auth_command
 
-    def test_auth_command_blocked_by_trust_returns_literal(self):
+    def test_auth_command_blocked_by_trust_returns_literal_when_command_is_absent(self):
         config = RootConfig(
-            {'pypi': {'auth': 'literal-auth', 'auth_command': 'missing-executable-12345'}},
+            {'pypi': {'auth': 'literal-auth'}},
             non_secret_metadata={'trust_blocked_command_fields': {'pypi.auth_command'}},
         )
 
