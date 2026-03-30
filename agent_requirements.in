@@ -42,7 +42,7 @@ pymysql==1.1.2
 pyodbc==5.3.0
 pyopenssl==25.3.0
 pysnmp-mibs==0.1.6
-pysnmp==5.1.0
+pysnmp==7.1.22
 pysocks==1.7.1
 python-binary-memcached==0.31.4; sys_platform != 'win32'
 python-dateutil==2.9.0.post0
