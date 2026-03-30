@@ -75,7 +75,8 @@
       "auto_install": true
     },
     "dashboards": {
-      "kafka": "assets/dashboards/kafka_dashboard.json"
+      "kafka": "assets/dashboards/kafka_dashboard.json",
+      "kafka-kraft": "assets/dashboards/kafka_kraft_dashboard.json"
     },
     "monitors": {
       "Produce latency is high": "assets/monitors/broker_produce_latency.json",
