@@ -78,6 +78,55 @@ def _source_summary(
     )
 
 
+def _resolve_command_secret(
+    *,
+    field_path: str,
+    command: str | None,
+    literal: str | None,
+    env_label: str,
+    env_value: str,
+    command_blocked_by_trust: bool,
+) -> str | None:
+    if command is None:
+        return None
+
+    try:
+        command_value = run_secret_command(command)
+    except SecretCommandError as e:
+        summary = _source_summary(
+            command,
+            literal,
+            env_label,
+            env_value,
+            command_blocked_by_trust=command_blocked_by_trust,
+        )
+        code = _COMMAND_REASON_TO_CODE.get(e.reason, 'secret-command-error')
+        hint = _COMMAND_REASON_TO_HINT.get(e.reason, 'Check the configured *_command value and try again.')
+        raise SecretResolutionError(
+            code=code,
+            field_path=field_path,
+            source_summary=summary,
+            remediation_hint=hint,
+        ) from e
+
+    if not command_value.strip():
+        summary = _source_summary(
+            command,
+            literal,
+            env_label,
+            env_value,
+            command_blocked_by_trust=command_blocked_by_trust,
+        )
+        raise SecretResolutionError(
+            code='secret-command-empty-output',
+            field_path=field_path,
+            source_summary=summary,
+            remediation_hint='Ensure the configured *_command prints a non-empty secret value.',
+        )
+
+    return command_value
+
+
 def resolve_required_secret(
     *,
     field_path: str,
@@ -95,41 +144,15 @@ def resolve_required_secret(
     resolved_env_label = env_label or env_var
     resolved_env_value = env_value if env_value is not None else os.environ.get(env_var, '')
 
-    if command is not None:
-        try:
-            command_value = run_secret_command(command)
-        except SecretCommandError as e:
-            summary = _source_summary(
-                command,
-                literal,
-                resolved_env_label,
-                resolved_env_value,
-                command_blocked_by_trust=command_blocked_by_trust,
-            )
-            code = _COMMAND_REASON_TO_CODE.get(e.reason, 'secret-command-error')
-            hint = _COMMAND_REASON_TO_HINT.get(e.reason, 'Check the configured *_command value and try again.')
-            raise SecretResolutionError(
-                code=code,
-                field_path=field_path,
-                source_summary=summary,
-                remediation_hint=hint,
-            ) from e
-
-        if not command_value.strip():
-            summary = _source_summary(
-                command,
-                literal,
-                resolved_env_label,
-                resolved_env_value,
-                command_blocked_by_trust=command_blocked_by_trust,
-            )
-            raise SecretResolutionError(
-                code='secret-command-empty-output',
-                field_path=field_path,
-                source_summary=summary,
-                remediation_hint='Ensure the configured *_command prints a non-empty secret value.',
-            )
-
+    command_value = _resolve_command_secret(
+        field_path=field_path,
+        command=command,
+        literal=literal,
+        env_label=resolved_env_label,
+        env_value=resolved_env_value,
+        command_blocked_by_trust=command_blocked_by_trust,
+    )
+    if command_value is not None:
         return command_value
 
     if literal is not None and not _is_blank_secret(literal):
@@ -176,41 +199,15 @@ def resolve_optional_secret(
     resolved_env_label = env_label or env_var
     resolved_env_value = env_value if env_value is not None else os.environ.get(env_var, '')
 
-    if command is not None:
-        try:
-            command_value = run_secret_command(command)
-        except SecretCommandError as e:
-            summary = _source_summary(
-                command,
-                literal,
-                resolved_env_label,
-                resolved_env_value,
-                command_blocked_by_trust=command_blocked_by_trust,
-            )
-            code = _COMMAND_REASON_TO_CODE.get(e.reason, 'secret-command-error')
-            hint = _COMMAND_REASON_TO_HINT.get(e.reason, 'Check the configured *_command value and try again.')
-            raise SecretResolutionError(
-                code=code,
-                field_path=field_path,
-                source_summary=summary,
-                remediation_hint=hint,
-            ) from e
-
-        if not command_value.strip():
-            summary = _source_summary(
-                command,
-                literal,
-                resolved_env_label,
-                resolved_env_value,
-                command_blocked_by_trust=command_blocked_by_trust,
-            )
-            raise SecretResolutionError(
-                code='secret-command-empty-output',
-                field_path=field_path,
-                source_summary=summary,
-                remediation_hint='Ensure the configured *_command prints a non-empty secret value.',
-            )
-
+    command_value = _resolve_command_secret(
+        field_path=field_path,
+        command=command,
+        literal=literal,
+        env_label=resolved_env_label,
+        env_value=resolved_env_value,
+        command_blocked_by_trust=command_blocked_by_trust,
+    )
+    if command_value is not None:
         return command_value
 
     if literal is not None and not _is_blank_secret(literal):
