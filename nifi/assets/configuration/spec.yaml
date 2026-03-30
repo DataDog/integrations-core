@@ -1,0 +1,91 @@
+name: NiFi
+files:
+- name: nifi.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: api_url
+      description: |
+        The URL of the NiFi REST API.
+        NiFi 2.x uses HTTPS by default.
+      required: true
+      value:
+        type: string
+        example: https://localhost:8443/nifi-api
+    - name: collect_bulletins
+      description: |
+        Forward NiFi bulletins (errors, warnings) as Datadog events.
+      value:
+        type: boolean
+        example: true
+    - name: bulletin_min_level
+      description: |
+        Minimum bulletin severity level to forward.
+        Options: DEBUG, INFO, WARNING, ERROR
+      value:
+        type: string
+        example: WARNING
+    - name: collect_connection_metrics
+      description: |
+        Collect per-connection queue metrics.
+        WARNING: High cardinality in flows with many connections.
+      value:
+        type: boolean
+        example: false
+    - name: collect_processor_metrics
+      description: |
+        Collect per-processor metrics.
+        WARNING: High cardinality in flows with many processors.
+      value:
+        type: boolean
+        example: false
+    - name: process_groups
+      description: |
+        List of process group IDs to monitor. Use "root" for the root group.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - root
+    - name: max_connections
+      description: |
+        Maximum number of connections to collect metrics for.
+        Connections are sorted by queue depth and truncated to this limit.
+      value:
+        type: integer
+        example: 200
+    - name: max_processors
+      description: |
+        Maximum number of processors to collect metrics for.
+        Processors are sorted by task count and truncated to this limit.
+      value:
+        type: integer
+        example: 200
+    - name: max_bulletins_per_cycle
+      description: |
+        Maximum number of bulletins to forward per check run.
+      value:
+        type: integer
+        example: 100
+    - template: instances/http
+      overrides:
+        username.description: |
+          Username for NiFi token-based authentication.
+          Used with `password` to obtain a bearer token via POST /access/token.
+        password.description: |
+          Password for NiFi token-based authentication.
+        auth_token.description: |
+          A pre-obtained NiFi bearer token.
+          If provided, username and password are not used for token acquisition.
+    - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /opt/nifi/logs/nifi-app.log
+      source: nifi
+      service: nifi
