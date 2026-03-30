@@ -707,7 +707,7 @@ class TestOrgs:
     def test_command_blocked_by_trust_falls_back_to_environment(self, monkeypatch):
         monkeypatch.setenv('DD_API_KEY', 'env-api-key')
         config = RootConfig(
-            {'orgs': {'default': {'api_key_command': 'missing-executable-12345'}}},
+            {'orgs': {'default': {}}},
             non_secret_metadata={'trust_blocked_command_fields': {'orgs.default.api_key_command'}},
         )
 
@@ -916,11 +916,22 @@ class TestGitHub:
     def test_user_command_blocked_by_trust_falls_back_to_environment(self, monkeypatch):
         monkeypatch.setenv('DD_GITHUB_USER', 'env-user')
         config = RootConfig(
-            {'github': {'user_command': 'missing-executable-12345'}},
+            {'github': {}},
             non_secret_metadata={'trust_blocked_command_fields': {'github.user_command'}},
         )
 
         assert config.github.user == 'env-user'
+
+    def test_global_user_command_is_not_suppressed_by_trust_block_metadata(self, tmp_path, monkeypatch):
+        monkeypatch.setenv('DD_GITHUB_USER', 'env-user')
+        script_path = tmp_path / 'github_user_global_command.py'
+        script_path.write_text("print('user_from_command')")
+        config = RootConfig(
+            {'github': {'user_command': f"{shlex.quote(sys.executable)} {shlex.quote(str(script_path))}"}},
+            non_secret_metadata={'trust_blocked_command_fields': {'github.user_command'}},
+        )
+
+        assert config.github.user == 'user_from_command'
 
     def test_token(self):
         config = RootConfig({'github': {'token': 'foo'}})

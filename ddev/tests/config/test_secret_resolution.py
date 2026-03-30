@@ -8,7 +8,7 @@ from ddev.config.secret_command import (
     reset_secret_command_cache,
     run_secret_command,
 )
-from ddev.config.secret_resolution import SecretResolutionError, resolve_required_secret
+from ddev.config.secret_resolution import SecretResolutionError, resolve_optional_secret, resolve_required_secret
 
 
 @pytest.fixture(autouse=True)
@@ -160,6 +160,104 @@ def test_precedence_missing_required_secret_summary_shape(monkeypatch):
     assert e.value.source_summary.environment == 'GH_TOKEN:absent'
 
 
+def test_optional_secret_executes_command_even_with_trust_block_flag(monkeypatch):
+    monkeypatch.setattr('ddev.config.secret_resolution.run_secret_command', lambda _command: 'command-user')
+
+    value = resolve_optional_secret(
+        field_path='github.user',
+        command='python user.py',
+        literal='literal-user',
+        env_var='DD_GITHUB_USER',
+        env_value='env-user',
+        command_blocked_by_trust=True,
+    )
+
+    assert value == 'command-user'
+
+
+def test_optional_secret_trust_blocked_fallback_chain_without_command():
+    assert (
+        resolve_optional_secret(
+            field_path='github.user',
+            command=None,
+            literal='literal-user',
+            env_var='DD_GITHUB_USER',
+            env_value='env-user',
+            command_blocked_by_trust=True,
+        )
+        == 'literal-user'
+    )
+
+    assert (
+        resolve_optional_secret(
+            field_path='github.user',
+            command=None,
+            literal='   ',
+            env_var='DD_GITHUB_USER',
+            env_value='env-user',
+            command_blocked_by_trust=True,
+        )
+        == 'env-user'
+    )
+
+    assert (
+        resolve_optional_secret(
+            field_path='github.user',
+            command=None,
+            literal='   ',
+            env_var='DD_GITHUB_USER',
+            env_value='',
+            command_blocked_by_trust=True,
+        )
+        == ''
+    )
+
+
+def test_optional_secret_command_empty_output_hard_stop(monkeypatch):
+    monkeypatch.setattr('ddev.config.secret_resolution.run_secret_command', lambda _command: '   ')
+
+    with pytest.raises(SecretResolutionError) as e:
+        resolve_optional_secret(
+            field_path='github.user',
+            command='python user.py',
+            literal='literal-user',
+            env_var='DD_GITHUB_USER',
+            env_value='env-user',
+        )
+
+    assert e.value.code == 'secret-command-empty-output'
+
+
+def test_optional_secret_command_executable_not_found(monkeypatch):
+    monkeypatch.setattr(
+        'ddev.config.secret_resolution.run_secret_command',
+        lambda _command: (_ for _ in ()).throw(_executable_not_found_error()),
+    )
+
+    with pytest.raises(SecretResolutionError) as e:
+        resolve_optional_secret(
+            field_path='github.user',
+            command='missing-executable-12345',
+            literal='literal-user',
+            env_var='DD_GITHUB_USER',
+            env_value='env-user',
+        )
+
+    assert e.value.code == 'secret-command-executable-not-found'
+
+
+def test_optional_secret_command_none_uses_environment():
+    value = resolve_optional_secret(
+        field_path='github.user',
+        command=None,
+        literal=None,
+        env_var='DD_GITHUB_USER',
+        env_value='env-user',
+    )
+
+    assert value == 'env-user'
+
+
 def test_identical_command_executes_once_per_process(monkeypatch):
     calls = []
 
@@ -297,3 +395,9 @@ def _non_zero_error():
     from ddev.config.secret_command import SecretCommandError
 
     return SecretCommandError('command failed with exit code 7', reason='non_zero_exit')
+
+
+def _executable_not_found_error():
+    from ddev.config.secret_command import SecretCommandError
+
+    return SecretCommandError('command executable was not found', reason='executable_not_found')

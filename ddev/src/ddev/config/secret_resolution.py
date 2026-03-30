@@ -176,7 +176,7 @@ def resolve_optional_secret(
     resolved_env_label = env_label or env_var
     resolved_env_value = env_value if env_value is not None else os.environ.get(env_var, '')
 
-    if command is not None and not command_blocked_by_trust:
+    if command is not None:
         try:
             command_value = run_secret_command(command)
         except SecretCommandError as e:
