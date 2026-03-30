@@ -3,19 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from datadog_checks.base.utils.db.utils import DBMAsyncJob
-
 from typing import TYPE_CHECKING
+
 import psycopg
 
+from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
     from datadog_checks.postgres.config_models.instance import InstanceConfig
 
+
 class PostgresDataObservability(DBMAsyncJob):
-
-
     def __init__(self, check: PostgreSql, config: InstanceConfig):
         self._check = check
         self._config = config.data_observability
