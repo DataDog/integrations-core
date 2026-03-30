@@ -8,6 +8,7 @@ Re-export PyASN1/PySNMP types and classes that we use, so that we can access the
 from pyasn1.type.base import Asn1Type
 from pyasn1.type.univ import OctetString
 from pysnmp import hlapi
+from pysnmp.hlapi.transport import AbstractTransportTarget
 from pysnmp.hlapi.v3arch.asyncio import (
     CommunityData,
     ContextData,
@@ -20,15 +21,14 @@ from pysnmp.hlapi.v3arch.asyncio import (
     usmHMACMD5AuthProtocol,
 )
 from pysnmp.hlapi.v3arch.asyncio.lcd import CommandGeneratorLcdConfigurator
-
-lcd = CommandGeneratorLcdConfigurator()
-from pysnmp.hlapi.transport import AbstractTransportTarget
 from pysnmp.proto.rfc1902 import ObjectName, Opaque
 from pysnmp.proto.rfc3412 import MsgAndPduDispatcher
 from pysnmp.smi.builder import DirMibSource, MibBuilder
 from pysnmp.smi.exval import endOfMibView, noSuchInstance, noSuchObject
 from pysnmp.smi.instrum import MibInstrumController
 from pysnmp.smi.view import MibViewController
+
+lcd = CommandGeneratorLcdConfigurator()
 
 __all__ = [
     'AbstractTransportTarget',
