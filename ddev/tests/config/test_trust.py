@@ -42,6 +42,17 @@ def test_trust_local_config_is_idempotent(monkeypatch, tmp_path):
     assert already_trusted is True
 
 
+def test_trust_local_config_returns_false_when_file_missing(monkeypatch, tmp_path, mocker):
+    monkeypatch.setenv('DDEV_DATA_DIR', str(tmp_path / 'ddev-data'))
+    local_config = Path(tmp_path) / '.ddev.toml'
+    save_mock = mocker.patch('ddev.config.trust.save_trust_records')
+
+    already_trusted = trust_local_config(local_config)
+
+    assert already_trusted is False
+    save_mock.assert_not_called()
+
+
 def test_deny_local_config_removes_record(monkeypatch, tmp_path):
     monkeypatch.setenv('DDEV_DATA_DIR', str(tmp_path / 'ddev-data'))
     local_config = Path(tmp_path) / '.ddev.toml'
@@ -102,6 +113,25 @@ def test_load_trust_records_returns_empty_for_invalid_toml(tmp_path):
         match=r"Trust store at `.*trusted-local-configs\.toml` is corrupt: .*Run `ddev config allow` to rebuild\.",
     ):
         assert load_trust_records(trust_store_path) == {}
+
+
+def test_load_trust_records_ignores_non_dict_entries(tmp_path):
+    trust_store_path = Path(tmp_path) / 'trusted-local-configs.toml'
+    trust_store_path.write_text(
+        '\n'.join(
+            [
+                'records = [',
+                '  "not-a-dict",',
+                '  123,',
+                '  { path = "/tmp/project/.ddev.toml", sha256 = "abc123" },',
+                ']',
+            ]
+        )
+    )
+
+    records = load_trust_records(trust_store_path)
+
+    assert records == {'/tmp/project/.ddev.toml': TrustRecord(path='/tmp/project/.ddev.toml', sha256='abc123')}
 
 
 def test_save_trust_records_wraps_write_failures(tmp_path, mocker) -> None:
