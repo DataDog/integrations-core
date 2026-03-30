@@ -27,8 +27,7 @@ class NiFiApi:
             extra_headers={'Content-Type': 'application/x-www-form-urlencoded'},
         )
         if resp.status_code != 201:
-            resp.raise_for_status()
-            raise HTTPError(f'Expected 201 from token endpoint, got {resp.status_code}')
+            raise HTTPError(f'Expected 201 from token endpoint, got {resp.status_code}', response=resp)
         self._token = resp.text
         self._log.debug('Obtained NiFi auth token (%d chars)', len(self._token))
 
@@ -38,7 +37,8 @@ class NiFiApi:
             self._authenticate()
 
     def _request(self, path):
-        """GET a JSON endpoint with bearer token auth, retry once on 401."""
+        """GET a JSON endpoint, authenticating and retrying once on 401."""
+        self._ensure_auth()
         url = f'{self._api_url}{path}'
         extra = {}
         if self._token:

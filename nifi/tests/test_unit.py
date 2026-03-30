@@ -7,6 +7,8 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from requests.exceptions import ConnectionError as RequestsConnectionError
+from requests.exceptions import HTTPError
 
 from datadog_checks.nifi import NifiCheck
 
@@ -30,8 +32,6 @@ def _mock_response(status_code=200, json_data=None, text=''):
     resp.headers = {}
     resp.content = b'content'
     if status_code >= 400:
-        from requests.exceptions import HTTPError
-
         resp.raise_for_status.side_effect = HTTPError(f'{status_code}')
     else:
         resp.raise_for_status.return_value = None
@@ -96,7 +96,7 @@ class TestAuth:
         api = check._get_api()
 
         with patch('requests.Session.request', return_value=_mock_response(403)):
-            with pytest.raises(Exception):
+            with pytest.raises(HTTPError):
                 api._authenticate()
 
     def test_token_refresh_on_401(self):
@@ -105,19 +105,15 @@ class TestAuth:
         api = check._get_api()
         api._token = 'expired-token'
 
-        call_count = {'n': 0}
-        responses = [
-            _mock_response(401),  # first GET (expired token)
-            _mock_response(201, text='new-token'),  # POST /access/token
-            _mock_response(200, json_data=ABOUT_RESPONSE),  # retry GET
-        ]
+        responses = iter(
+            [
+                _mock_response(401),  # first GET (expired token)
+                _mock_response(201, text='new-token'),  # POST /access/token
+                _mock_response(200, json_data=ABOUT_RESPONSE),  # retry GET
+            ]
+        )
 
-        def side_effect(*args, **kwargs):
-            resp = responses[call_count['n']]
-            call_count['n'] += 1
-            return resp
-
-        with patch('requests.Session.request', side_effect=side_effect):
+        with patch('requests.Session.request', side_effect=lambda *a, **kw: next(responses)):
             result = api._request('/flow/about')
 
         assert result == ABOUT_RESPONSE
@@ -148,9 +144,7 @@ class TestCanConnect:
         instance = _make_instance()
         check = NifiCheck('nifi', {}, [instance])
 
-        from requests.exceptions import ConnectionError
-
-        with patch('requests.Session.request', side_effect=ConnectionError('refused')):
+        with patch('requests.Session.request', side_effect=RequestsConnectionError('refused')):
             with pytest.raises(Exception):
                 dd_run_check(check)
 
@@ -228,21 +222,18 @@ class TestClusterHealth:
 
         call_log = []
 
-        def side_effect_factory():
-            def side_effect(method, url, **kwargs):
-                call_log.append(url)
-                if '/access/token' in url:
-                    return _mock_response(201, text='test-token')
-                elif '/flow/about' in url:
-                    return _mock_response(200, json_data=ABOUT_RESPONSE)
-                elif '/flow/cluster/summary' in url:
-                    return _mock_response(200, json_data=CLUSTER_SUMMARY_STANDALONE)
-                raise ValueError(f'Unmocked: {url}')
-
-            return side_effect
+        def side_effect(method, url, **kwargs):
+            call_log.append(url)
+            if '/access/token' in url:
+                return _mock_response(201, text='test-token')
+            elif '/flow/about' in url:
+                return _mock_response(200, json_data=ABOUT_RESPONSE)
+            elif '/flow/cluster/summary' in url:
+                return _mock_response(200, json_data=CLUSTER_SUMMARY_STANDALONE)
+            raise ValueError(f'Unmocked: {url}')
 
         # First run: token + about + cluster
-        with patch('requests.Session.request', side_effect=side_effect_factory()):
+        with patch('requests.Session.request', side_effect=side_effect):
             dd_run_check(check)
 
         about_calls_run1 = sum(1 for u in call_log if '/flow/about' in u)
@@ -251,7 +242,7 @@ class TestClusterHealth:
         call_log.clear()
 
         # Second run: only cluster (about is cached, token already obtained)
-        with patch('requests.Session.request', side_effect=side_effect_factory()):
+        with patch('requests.Session.request', side_effect=side_effect):
             dd_run_check(check)
 
         about_calls_run2 = sum(1 for u in call_log if '/flow/about' in u)

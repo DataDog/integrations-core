@@ -30,7 +30,6 @@ class NifiCheck(AgentCheck):
     def check(self, _):
         api = self._get_api()
         try:
-            api._ensure_auth()
             version = api.get_about()
             base_tags = [f'nifi_version:{version}'] + self.instance.get('tags', [])
 
@@ -38,6 +37,7 @@ class NifiCheck(AgentCheck):
 
             self.gauge('can_connect', 1, tags=base_tags)
         except Exception:
+            self.log.exception('NiFi check failed')
             self.gauge('can_connect', 0, tags=self.instance.get('tags', []))
             raise
 
@@ -51,5 +51,4 @@ class NifiCheck(AgentCheck):
         total = summary.get('totalNodeCount', 0)
         self.gauge('cluster.connected_node_count', connected, tags=base_tags)
         self.gauge('cluster.total_node_count', total, tags=base_tags)
-        is_healthy = 1 if connected == total and total > 0 else 0
-        self.gauge('cluster.is_healthy', is_healthy, tags=base_tags)
+        self.gauge('cluster.is_healthy', int(connected == total and total > 0), tags=base_tags)
