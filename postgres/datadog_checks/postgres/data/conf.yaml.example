@@ -434,10 +434,10 @@ instances:
     #
     # dbm: false
 
-    ## @param data_observability - boolean - optional - default: false
+    ## @param data_observability - mapping - optional
     ## Set to `true` to enable Data Observability.
     #
-    # data_observability: false
+    # data_observability: {}
 
     ## @param pg_stat_statements_view - string - optional - default: pg_stat_statements
     ## Set this value if you want to define a custom view or function to allow the datadog user to query the

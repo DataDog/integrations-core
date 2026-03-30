@@ -137,4 +137,5 @@ def instance_data_observability():
     return instance.DataObservability(
         enabled=False,
         collection_interval=600,
+        run_sync=False,
     )
