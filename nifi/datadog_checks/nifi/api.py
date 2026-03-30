@@ -10,6 +10,8 @@ from .constants import (
     ABOUT_ENDPOINT,
     ACCESS_TOKEN_ENDPOINT,
     CLUSTER_SUMMARY_ENDPOINT,
+    FLOW_STATUS_ENDPOINT,
+    PROCESS_GROUP_STATUS_ENDPOINT,
     SYSTEM_DIAGNOSTICS_ENDPOINT,
 )
 
@@ -74,3 +76,14 @@ class NiFiApi:
     def get_system_diagnostics(self):
         """GET /system-diagnostics — returns JVM, GC, and repository metrics."""
         return self._request(SYSTEM_DIAGNOSTICS_ENDPOINT)
+
+    def get_flow_status(self):
+        """GET /flow/status — returns controller-level flow summary."""
+        return self._request(FLOW_STATUS_ENDPOINT)
+
+    def get_process_group_status(self, pg_id, recursive=True):
+        """GET /flow/process-groups/{id}/status — returns process group metrics."""
+        path = PROCESS_GROUP_STATUS_ENDPOINT.format(pg_id)
+        if recursive:
+            path += '?recursive=true'
+        return self._request(path)

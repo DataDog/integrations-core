@@ -91,12 +91,49 @@ SYSTEM_DIAGNOSTICS_RESPONSE = {
 }
 
 
+FLOW_STATUS_RESPONSE = {
+    'controllerStatus': {
+        'activeThreadCount': 2,
+        'flowFilesQueued': 10,
+        'bytesQueued': 5120,
+        'runningCount': 4,
+        'stoppedCount': 0,
+        'invalidCount': 0,
+        'disabledCount': 1,
+    }
+}
+
+PROCESS_GROUP_STATUS_RESPONSE = {
+    'processGroupStatus': {
+        'id': 'root-pg-id',
+        'name': 'NiFi Flow',
+        'aggregateSnapshot': {
+            'id': 'root-pg-id',
+            'name': 'NiFi Flow',
+            'flowFilesQueued': 10,
+            'bytesQueued': 5120,
+            'bytesRead': 1024,
+            'bytesWritten': 2048,
+            'flowFilesReceived': 5,
+            'flowFilesSent': 3,
+            'flowFilesTransferred': 8,
+            'activeThreadCount': 2,
+            'connectionStatusSnapshots': [],
+            'processorStatusSnapshots': [],
+            'processGroupStatusSnapshots': [],
+        },
+    }
+}
+
+
 def _standard_responses(cluster=CLUSTER_SUMMARY_STANDALONE, sysdiag=SYSTEM_DIAGNOSTICS_RESPONSE):
     """Return the standard URL->response mapping for a full check run."""
     return {
         '/access/token': _mock_response(201, text='test-token'),
         '/flow/about': _mock_response(200, json_data=ABOUT_RESPONSE),
         '/system-diagnostics': _mock_response(200, json_data=sysdiag),
+        '/flow/status': _mock_response(200, json_data=FLOW_STATUS_RESPONSE),
+        '/flow/process-groups/': _mock_response(200, json_data=PROCESS_GROUP_STATUS_RESPONSE),
         '/flow/cluster/summary': _mock_response(200, json_data=cluster),
     }
 
@@ -181,6 +218,8 @@ class TestCanConnect:
         responses = {
             '/flow/about': _mock_response(200, json_data=ABOUT_RESPONSE),
             '/system-diagnostics': _mock_response(200, json_data=SYSTEM_DIAGNOSTICS_RESPONSE),
+            '/flow/status': _mock_response(200, json_data=FLOW_STATUS_RESPONSE),
+            '/flow/process-groups/': _mock_response(200, json_data=PROCESS_GROUP_STATUS_RESPONSE),
             '/flow/cluster/summary': _mock_response(200, json_data=CLUSTER_SUMMARY_STANDALONE),
         }
 
@@ -287,3 +326,98 @@ class TestSystemDiagnostics:
         assert NifiCheck._parse_utilization('0%') == 0.0
         assert NifiCheck._parse_utilization('100.0%') == 100.0
         assert NifiCheck._parse_utilization(42.5) == 42.5
+
+
+class TestFlowStatus:
+    def test_flow_status_metrics(self, dd_run_check, aggregator):
+        """Controller-level flow status metrics are emitted."""
+        check = NifiCheck('nifi', {}, [_make_instance()])
+
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
+            dd_run_check(check)
+
+        tags = ['nifi_version:2.8.0']
+        aggregator.assert_metric('nifi.flow.active_threads', value=2, tags=tags)
+        aggregator.assert_metric('nifi.flow.flowfiles_queued', value=10, tags=tags)
+        aggregator.assert_metric('nifi.flow.bytes_queued', value=5120, tags=tags)
+        aggregator.assert_metric('nifi.flow.running_count', value=4, tags=tags)
+        aggregator.assert_metric('nifi.flow.stopped_count', value=0, tags=tags)
+        aggregator.assert_metric('nifi.flow.invalid_count', value=0, tags=tags)
+        aggregator.assert_metric('nifi.flow.disabled_count', value=1, tags=tags)
+
+
+class TestProcessGroup:
+    def test_root_process_group(self, dd_run_check, aggregator):
+        """Root process group metrics are emitted with correct tags."""
+        check = NifiCheck('nifi', {}, [_make_instance()])
+
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
+            dd_run_check(check)
+
+        pg_tags = ['nifi_version:2.8.0', 'process_group_name:NiFi Flow', 'process_group_id:root-pg-id']
+        aggregator.assert_metric('nifi.process_group.flowfiles_queued', value=10, tags=pg_tags)
+        aggregator.assert_metric('nifi.process_group.bytes_queued', value=5120, tags=pg_tags)
+        aggregator.assert_metric('nifi.process_group.bytes_read', value=1024, tags=pg_tags)
+        aggregator.assert_metric('nifi.process_group.bytes_written', value=2048, tags=pg_tags)
+        aggregator.assert_metric('nifi.process_group.flowfiles_received', value=5, tags=pg_tags)
+        aggregator.assert_metric('nifi.process_group.flowfiles_sent', value=3, tags=pg_tags)
+        aggregator.assert_metric('nifi.process_group.flowfiles_transferred', value=8, tags=pg_tags)
+        aggregator.assert_metric('nifi.process_group.active_threads', value=2, tags=pg_tags)
+
+    def test_nested_process_groups(self, dd_run_check, aggregator):
+        """Nested process groups are recursively flattened."""
+        nested_response = {
+            'processGroupStatus': {
+                'id': 'root-id',
+                'name': 'Root',
+                'aggregateSnapshot': {
+                    'id': 'root-id',
+                    'name': 'Root',
+                    'flowFilesQueued': 10,
+                    'bytesQueued': 5120,
+                    'bytesRead': 0,
+                    'bytesWritten': 0,
+                    'flowFilesReceived': 0,
+                    'flowFilesSent': 0,
+                    'flowFilesTransferred': 0,
+                    'activeThreadCount': 0,
+                    'connectionStatusSnapshots': [],
+                    'processorStatusSnapshots': [],
+                    'processGroupStatusSnapshots': [
+                        {
+                            'id': 'child-id',
+                            'processGroupStatusSnapshot': {
+                                'id': 'child-id',
+                                'name': 'Child Group',
+                                'flowFilesQueued': 5,
+                                'bytesQueued': 2048,
+                                'bytesRead': 512,
+                                'bytesWritten': 256,
+                                'flowFilesReceived': 2,
+                                'flowFilesSent': 1,
+                                'flowFilesTransferred': 3,
+                                'activeThreadCount': 1,
+                                'connectionStatusSnapshots': [],
+                                'processorStatusSnapshots': [],
+                                'processGroupStatusSnapshots': [],
+                            },
+                        }
+                    ],
+                },
+            }
+        }
+
+        responses = _standard_responses()
+        responses['/flow/process-groups/'] = _mock_response(200, json_data=nested_response)
+        check = NifiCheck('nifi', {}, [_make_instance()])
+
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
+            dd_run_check(check)
+
+        root_tags = ['nifi_version:2.8.0', 'process_group_name:Root', 'process_group_id:root-id']
+        aggregator.assert_metric('nifi.process_group.flowfiles_queued', value=10, tags=root_tags)
+
+        child_tags = ['nifi_version:2.8.0', 'process_group_name:Child Group', 'process_group_id:child-id']
+        aggregator.assert_metric('nifi.process_group.flowfiles_queued', value=5, tags=child_tags)
+        aggregator.assert_metric('nifi.process_group.bytes_read', value=512, tags=child_tags)
+        aggregator.assert_metric('nifi.process_group.active_threads', value=1, tags=child_tags)
