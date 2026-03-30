@@ -27,6 +27,8 @@ def wait_for_nifi():
     except error.HTTPError:
         # NiFi returns 401 on all unauthenticated requests — that's fine, it means NiFi is up.
         return
+    except error.URLError:
+        raise
 
 
 def setup_test_flows():
