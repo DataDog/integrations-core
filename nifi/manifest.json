@@ -12,7 +12,7 @@
     "title": "NiFi",
     "media": [],
     "classifier_tags": [
-      "Category::Data Stores",
+      "Category::Orchestration",
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
