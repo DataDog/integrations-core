@@ -17,12 +17,13 @@ pytestmark = [pytest.mark.unit]
 class MockKafkaMessage:
     """Mock confluent_kafka.Message for testing."""
 
-    def __init__(self, key, value, topic='test-topic', partition=0, offset=0):
+    def __init__(self, key, value, topic='test-topic', partition=0, offset=0, headers=None):
         self._key = key
         self._value = value
         self._topic = topic
         self._partition = partition
         self._offset = offset
+        self._headers = headers
 
     def key(self):
         return self._key
@@ -43,7 +44,7 @@ class MockKafkaMessage:
         return (1, 1732128000000)  # (timestamp_type, timestamp_ms)
 
     def headers(self):
-        return None
+        return self._headers
 
 
 class TestMessageDeserializer:
@@ -682,6 +683,68 @@ class TestSchemaRegistryIntegration:
         msg = DeserializedMessage(kafka_msg, deserializer, config)
         assert msg.value['title'] == 'The Go Programming Language'
         assert msg.value_schema_id == 42
+
+
+class TestHeaderSerialization:
+    """Test header serialization in DeserializedMessage."""
+
+    def test_utf8_headers(self):
+        """Test that UTF-8 headers are decoded as strings."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+        kafka_msg = MockKafkaMessage(
+            key=b'key',
+            value=b'{}',
+            headers=[('dbmOrgId', b'2'), ('traceparent', b'00-abc-def-00')],
+        )
+        config = {'key_format': 'string', 'value_format': 'json', 'value_uses_schema_registry': False}
+        msg = DeserializedMessage(kafka_msg, deserializer, config)
+        assert msg.headers == {'dbmOrgId': '2', 'traceparent': '00-abc-def-00'}
+
+    def test_binary_headers_base64_encoded(self):
+        """Test that binary headers are base64-encoded with prefix."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+        binary_value = bytes([0x80, 0xFF, 0x00, 0x01, 0xDE, 0xAD, 0xBE, 0xEF])
+        kafka_msg = MockKafkaMessage(
+            key=b'key',
+            value=b'{}',
+            headers=[('koutrisngId', binary_value)],
+        )
+        config = {'key_format': 'string', 'value_format': 'json', 'value_uses_schema_registry': False}
+        msg = DeserializedMessage(kafka_msg, deserializer, config)
+        import base64
+
+        expected = f"<base64>{base64.b64encode(binary_value).decode('ascii')}"
+        assert msg.headers['koutrisngId'] == expected
+
+    def test_mixed_headers(self):
+        """Test mix of UTF-8 and binary headers."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+        binary_value = bytes([0x80, 0xFF])
+        kafka_msg = MockKafkaMessage(
+            key=b'key',
+            value=b'{}',
+            headers=[('text', b'hello'), ('binary', binary_value)],
+        )
+        config = {'key_format': 'string', 'value_format': 'json', 'value_uses_schema_registry': False}
+        msg = DeserializedMessage(kafka_msg, deserializer, config)
+        assert msg.headers['text'] == 'hello'
+        assert msg.headers['binary'].startswith('<base64>')
+
+    def test_null_header_value(self):
+        """Test that null header values are preserved as None."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+        kafka_msg = MockKafkaMessage(
+            key=b'key',
+            value=b'{}',
+            headers=[('empty', None)],
+        )
+        config = {'key_format': 'string', 'value_format': 'json', 'value_uses_schema_registry': False}
+        msg = DeserializedMessage(kafka_msg, deserializer, config)
+        assert msg.headers['empty'] is None
 
 
 if __name__ == '__main__':

@@ -17,12 +17,13 @@ pytestmark = [pytest.mark.unit]
 class MockKafkaMessage:
     """Mock confluent_kafka.Message for testing."""
 
-    def __init__(self, key, value, topic='test-topic', partition=0, offset=0):
+    def __init__(self, key, value, topic='test-topic', partition=0, offset=0, headers=None):
         self._key = key
         self._value = value
         self._topic = topic
         self._partition = partition
         self._offset = offset
+        self._headers = headers
 
     def key(self):
         return self._key
@@ -43,7 +44,7 @@ class MockKafkaMessage:
         return (1, 1732128000000)
 
     def headers(self):
-        return None
+        return self._headers
 
 
 class TestFilteringOperators:
@@ -533,6 +534,101 @@ class TestLiteralParsing:
 
         msg = self.create_message({'optional_field': None})
         assert check._evaluate_filter('.value.optional_field == null', msg) is True
+
+    def test_jq_filter_on_header(self):
+        """Test jq-style .headers.key filter."""
+        instance = {
+            'remote_config_id': 'test',
+            'kafka_connect_str': 'localhost:9092',
+            'read_messages': {'cluster': 'test', 'topic': 'test'},
+        }
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+
+        kafka_msg = MockKafkaMessage(
+            key=b'test-key',
+            value=json.dumps({'status': 'active'}).encode('utf-8'),
+            headers=[('dbmOrgId', b'2'), ('traceparent', b'00-abc-def-00')],
+        )
+        config = {'key_format': 'string', 'value_format': 'json', 'value_uses_schema_registry': False}
+        msg = DeserializedMessage(kafka_msg, self.deserializer, config)
+
+        assert check._evaluate_filter('.headers.dbmOrgId == "2"', msg) is True
+        assert check._evaluate_filter('.headers.dbmOrgId == "3"', msg) is False
+        assert check._evaluate_filter('.headers.traceparent contains "abc"', msg) is True
+        assert check._evaluate_filter('.headers.nonexistent == "x"', msg) is False
+
+
+class TestMessageFilterHeaderFiltering:
+    """Test header filtering in MessageFilter."""
+
+    def setup_method(self):
+        self.log = MagicMock()
+
+    def test_header_field_equality(self):
+        """Test filtering on header.key eq value."""
+        msg_filter = __import__('datadog_checks.kafka_actions.message_filter', fromlist=['MessageFilter']).MessageFilter
+        f = msg_filter(
+            [{'field': 'header.dbmOrgId', 'operator': 'eq', 'value': '2'}],
+            self.log,
+        )
+        msg = MockKafkaMessage(
+            key=b'key',
+            value=b'{}',
+            headers=[('dbmOrgId', b'2'), ('other', b'val')],
+        )
+        assert f.matches(msg) is True
+
+    def test_header_field_no_match(self):
+        """Test header filter that doesn't match."""
+        msg_filter = __import__('datadog_checks.kafka_actions.message_filter', fromlist=['MessageFilter']).MessageFilter
+        f = msg_filter(
+            [{'field': 'header.dbmOrgId', 'operator': 'eq', 'value': '3'}],
+            self.log,
+        )
+        msg = MockKafkaMessage(
+            key=b'key',
+            value=b'{}',
+            headers=[('dbmOrgId', b'2')],
+        )
+        assert f.matches(msg) is False
+
+    def test_header_field_missing(self):
+        """Test filtering on a header key that doesn't exist."""
+        msg_filter = __import__('datadog_checks.kafka_actions.message_filter', fromlist=['MessageFilter']).MessageFilter
+        f = msg_filter(
+            [{'field': 'header.nonexistent', 'operator': 'eq', 'value': 'x'}],
+            self.log,
+        )
+        msg = MockKafkaMessage(
+            key=b'key',
+            value=b'{}',
+            headers=[('dbmOrgId', b'2')],
+        )
+        assert f.matches(msg) is False
+
+    def test_header_field_contains(self):
+        """Test contains operator on headers."""
+        msg_filter = __import__('datadog_checks.kafka_actions.message_filter', fromlist=['MessageFilter']).MessageFilter
+        f = msg_filter(
+            [{'field': 'header.traceparent', 'operator': 'contains', 'value': 'abc'}],
+            self.log,
+        )
+        msg = MockKafkaMessage(
+            key=b'key',
+            value=b'{}',
+            headers=[('traceparent', b'00-abc-def-00')],
+        )
+        assert f.matches(msg) is True
+
+    def test_header_field_null_headers(self):
+        """Test header filtering when message has no headers."""
+        msg_filter = __import__('datadog_checks.kafka_actions.message_filter', fromlist=['MessageFilter']).MessageFilter
+        f = msg_filter(
+            [{'field': 'header.dbmOrgId', 'operator': 'eq', 'value': '2'}],
+            self.log,
+        )
+        msg = MockKafkaMessage(key=b'key', value=b'{}')
+        assert f.matches(msg) is False
 
 
 if __name__ == '__main__':

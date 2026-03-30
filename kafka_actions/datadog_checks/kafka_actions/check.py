@@ -340,6 +340,7 @@ class KafkaActionsCheck(AgentCheck):
             msg_dict = {
                 'key': deserialized_msg.key,
                 'value': deserialized_msg.value,
+                'headers': deserialized_msg.headers,
                 'topic': deserialized_msg.topic,
                 'partition': deserialized_msg.partition,
                 'offset': deserialized_msg.offset,
