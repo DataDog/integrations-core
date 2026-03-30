@@ -51,6 +51,7 @@ def snmp_get(config, oids, lookup_mib):
 
         cbCtx['error'] = errorIndication
         cbCtx['var_binds'] = newVarBinds
+        snmpEngine.transport_dispatcher.loop.stop()
 
     ctx = {}  # type: Dict[str, Any]
     var_binds = vbProcessor.make_varbinds(_engine_cache(config._snmp_engine), oids)
@@ -65,7 +66,7 @@ def snmp_get(config, oids, lookup_mib):
         ctx,
     )
 
-    config._snmp_engine.transportDispatcher.runDispatcher()
+    config._snmp_engine.transport_dispatcher.run_dispatcher()
 
     _handle_error(ctx, config)
 
@@ -89,6 +90,7 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
             errorIndication = None
         cbCtx['error'] = errorIndication
         cbCtx['var_bind_table'] = var_bind_table[0] if var_bind_table else []
+        snmpEngine.transport_dispatcher.loop.stop()
 
     ctx = {}  # type: Dict[str, Any]
 
@@ -109,7 +111,7 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
             ctx,
         )
 
-        config._snmp_engine.transportDispatcher.runDispatcher()
+        config._snmp_engine.transport_dispatcher.run_dispatcher()
 
         _handle_error(ctx, config)
 
@@ -144,6 +146,7 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
             errorIndication = None
         cbCtx['error'] = errorIndication
         cbCtx['var_bind_table'] = var_bind_table
+        snmpEngine.transport_dispatcher.loop.stop()
 
     ctx = {}  # type: Dict[str, Any]
 
@@ -165,7 +168,7 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
             ctx,
         )
 
-        config._snmp_engine.transportDispatcher.runDispatcher()
+        config._snmp_engine.transport_dispatcher.run_dispatcher()
 
         _handle_error(ctx, config)
 
