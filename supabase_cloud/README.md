@@ -45,7 +45,7 @@ A Personal Access Token (PAT) is required to access the Supabase Management API 
 
 ### Enable Database Monitoring (optional)
 
-> **Note**: To enable Database Monitoring for query performance insights on your Supabase Cloud databases, see [Setting Up Database Monitoring for Supabase Cloud][9].
+**Note**: To enable Database Monitoring for query performance insights on your Supabase Cloud databases, see [Setting Up Database Monitoring for Supabase Cloud][9].
 
 ### Connect your Supabase Cloud project to Datadog
 
