@@ -34,6 +34,8 @@ class NifiCheck(AgentCheck):
             base_tags = [f'nifi_version:{version}'] + self.instance.get('tags', [])
 
             self._collect_system_diagnostics(api, base_tags)
+            self._collect_flow_status(api, base_tags)
+            self._collect_process_group_metrics(api, base_tags)
             self._collect_cluster_health(api, base_tags)
 
             self.gauge('can_connect', 1, tags=base_tags)
@@ -87,6 +89,47 @@ class NifiCheck(AgentCheck):
             self.gauge('system.provenance_repo.free_space', repo.get('freeSpaceBytes', 0), tags=repo_tags)
             repo_util = repo.get('utilization', '0%')
             self.gauge('system.provenance_repo.utilization', self._parse_utilization(repo_util), tags=repo_tags)
+
+    def _collect_flow_status(self, api, base_tags):
+        data = api.get_flow_status()
+        status = data.get('controllerStatus', {})
+
+        self.gauge('flow.active_threads', status.get('activeThreadCount', 0), tags=base_tags)
+        self.gauge('flow.flowfiles_queued', status.get('flowFilesQueued', 0), tags=base_tags)
+        self.gauge('flow.bytes_queued', status.get('bytesQueued', 0), tags=base_tags)
+        self.gauge('flow.running_count', status.get('runningCount', 0), tags=base_tags)
+        self.gauge('flow.stopped_count', status.get('stoppedCount', 0), tags=base_tags)
+        self.gauge('flow.invalid_count', status.get('invalidCount', 0), tags=base_tags)
+        self.gauge('flow.disabled_count', status.get('disabledCount', 0), tags=base_tags)
+
+    def _collect_process_group_metrics(self, api, base_tags):
+        process_groups = self.instance.get('process_groups', ['root'])
+        for pg_id in process_groups:
+            data = api.get_process_group_status(pg_id)
+            pg_status = data.get('processGroupStatus', {})
+            self._emit_process_group(pg_status, base_tags)
+
+    def _emit_process_group(self, pg_status, base_tags):
+        """Emit metrics for a process group and recurse into child groups."""
+        snap = pg_status.get('aggregateSnapshot', {})
+        pg_tags = base_tags + [
+            f'process_group_name:{snap.get("name", "unknown")}',
+            f'process_group_id:{snap.get("id", "unknown")}',
+        ]
+
+        self.gauge('process_group.flowfiles_queued', snap.get('flowFilesQueued', 0), tags=pg_tags)
+        self.gauge('process_group.bytes_queued', snap.get('bytesQueued', 0), tags=pg_tags)
+        self.gauge('process_group.bytes_read', snap.get('bytesRead', 0), tags=pg_tags)
+        self.gauge('process_group.bytes_written', snap.get('bytesWritten', 0), tags=pg_tags)
+        self.gauge('process_group.flowfiles_received', snap.get('flowFilesReceived', 0), tags=pg_tags)
+        self.gauge('process_group.flowfiles_sent', snap.get('flowFilesSent', 0), tags=pg_tags)
+        self.gauge('process_group.flowfiles_transferred', snap.get('flowFilesTransferred', 0), tags=pg_tags)
+        self.gauge('process_group.active_threads', snap.get('activeThreadCount', 0), tags=pg_tags)
+
+        for child in snap.get('processGroupStatusSnapshots', []):
+            child_status = child.get('processGroupStatusSnapshot', {})
+            if child_status:
+                self._emit_process_group({'aggregateSnapshot': child_status}, base_tags)
 
     def _collect_cluster_health(self, api, base_tags):
         data = api.get_cluster_summary()
