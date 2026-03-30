@@ -3,8 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from typing import Any, Dict, Generator  # noqa: F401
 
+import pysnmp.hlapi.v3arch.asyncio as hlapi  # noqa: F401
 from pyasn1.type.univ import Null
-from pysnmp import hlapi  # noqa: F401
 from pysnmp.entity.rfc3413 import cmdgen
 from pysnmp.hlapi.varbinds import CommandGeneratorVarBinds
 from pysnmp.proto import errind
