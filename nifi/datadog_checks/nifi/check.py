@@ -21,7 +21,7 @@ class NifiCheck(AgentCheck):
         # Disable only the automatic Basic Auth that RequestsWrapper adds from username/password.
         # Preserve any explicitly configured auth (digest, kerberos, ntlm) for proxy scenarios.
         auth = self.http.options.get('auth')
-        if auth is not None and type(auth) is tuple:
+        if auth is not None and isinstance(auth, tuple):
             self.http.options['auth'] = None
         self._api = None
 
@@ -48,7 +48,10 @@ class NifiCheck(AgentCheck):
             self._collect_cluster_health(api, base_tags)
 
             if self.instance.get('collect_bulletins', True):
-                self._collect_bulletins(api, base_tags)
+                try:
+                    self._collect_bulletins(api, base_tags)
+                except Exception:
+                    self.log.warning('Failed to collect bulletins', exc_info=True)
 
             self.gauge('can_connect', 1, tags=base_tags)
         except Exception:

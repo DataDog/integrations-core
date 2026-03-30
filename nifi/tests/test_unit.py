@@ -72,18 +72,18 @@ SYSTEM_DIAGNOSTICS_RESPONSE = {
             },
             'contentRepositoryStorageUsage': [
                 {
-                    'identifier': 'default',
-                    'usedSpaceBytes': 86076280832,
-                    'freeSpaceBytes': 891819843584,
-                    'utilization': '9.0%',
+                    'identifier': 'content-default',
+                    'usedSpaceBytes': 50000000000,
+                    'freeSpaceBytes': 400000000000,
+                    'utilization': '11.0%',
                 }
             ],
             'provenanceRepositoryStorageUsage': [
                 {
-                    'identifier': 'default',
-                    'usedSpaceBytes': 86076280832,
-                    'freeSpaceBytes': 891819843584,
-                    'utilization': '9.0%',
+                    'identifier': 'prov-default',
+                    'usedSpaceBytes': 12000000000,
+                    'freeSpaceBytes': 200000000000,
+                    'utilization': '5.7%',
                 }
             ],
         }
@@ -327,6 +327,8 @@ class TestClusterHealth:
 
         aggregator.assert_metric('nifi.can_connect', value=1)
         assert not aggregator.metrics('nifi.cluster.connected_node_count')
+        assert not aggregator.metrics('nifi.cluster.total_node_count')
+        assert not aggregator.metrics('nifi.cluster.is_healthy')
 
 
 class TestSystemDiagnostics:
@@ -374,11 +376,13 @@ class TestSystemDiagnostics:
         aggregator.assert_metric('nifi.system.flowfile_repo.free_space', value=891819843584, tags=tags)
         aggregator.assert_metric('nifi.system.flowfile_repo.utilization', value=9.0, tags=tags)
 
-        repo_tags = tags + ['repo_identifier:default']
-        aggregator.assert_metric('nifi.system.content_repo.used_space', value=86076280832, tags=repo_tags)
-        aggregator.assert_metric('nifi.system.content_repo.utilization', value=9.0, tags=repo_tags)
-        aggregator.assert_metric('nifi.system.provenance_repo.used_space', value=86076280832, tags=repo_tags)
-        aggregator.assert_metric('nifi.system.provenance_repo.utilization', value=9.0, tags=repo_tags)
+        content_tags = tags + ['repo_identifier:content-default']
+        aggregator.assert_metric('nifi.system.content_repo.used_space', value=50000000000, tags=content_tags)
+        aggregator.assert_metric('nifi.system.content_repo.utilization', value=11.0, tags=content_tags)
+
+        prov_tags = tags + ['repo_identifier:prov-default']
+        aggregator.assert_metric('nifi.system.provenance_repo.used_space', value=12000000000, tags=prov_tags)
+        aggregator.assert_metric('nifi.system.provenance_repo.utilization', value=5.7, tags=prov_tags)
 
     def test_parse_utilization(self):
         """Percentage strings are parsed correctly."""
