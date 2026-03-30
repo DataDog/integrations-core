@@ -1,65 +1,68 @@
-# (C) Datadog, Inc. 2026-present
-# All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
-"""Async GitHub API client with 1:1 endpoint mapping."""
+"""Async GitHub API client for triggering and monitoring GitHub Actions workflows."""
 
 from __future__ import annotations
 
 import re
-import time
 from collections.abc import AsyncIterator
-from typing import Any, Self, cast
-from urllib.parse import urlparse
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from typing import Any
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
-from ddev.config.file import ConfigFileWithOverrides
+GITHUB_API_VERSION = "2022-11-28"
+DEFAULT_BASE_URL = "https://api.github.com"
 
-PAGINATION_KEYS = frozenset(
-    [
-        'items',
-        'workflows',
-        'workflow_runs',
-        'jobs',
-        'repositories',
-        'issues',
-        'pull_requests',
-        'artifacts',
-        'users',
-        'commits',
-        'releases',
-        'tags',
-        'branches',
-        'checks',
-        'annotations',
-    ]
-)
+_LINK_RE = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
 
 
-class PaginationInfo(BaseModel):
-    """GitHub API pagination information from Link header."""
+# ---------------------------------------------------------------------------
+# Pagination
+# ---------------------------------------------------------------------------
 
-    model_config = ConfigDict(extra="ignore")
 
-    next_url: str | None = None
-    prev_url: str | None = None
-    first_url: str | None = None
-    last_url: str | None = None
+@dataclass
+class PaginationData:
+    """Parsed pagination links from a GitHub API Link header."""
+
+    first: str | None = None
+    prev: str | None = None
+    next: str | None = None
+    last: str | None = None
+
+    @classmethod
+    def from_header(cls, header: str | None) -> PaginationData:
+        """Parse a Link header value and return a PaginationData instance."""
+        if not header:
+            return cls()
+        links: dict[str, str] = {}
+        for url, rel in _LINK_RE.findall(header):
+            links[rel] = url
+        return cls(
+            first=links.get("first"),
+            prev=links.get("prev"),
+            next=links.get("next"),
+            last=links.get("last"),
+        )
+
+
+# ---------------------------------------------------------------------------
+# Response and domain models
+# ---------------------------------------------------------------------------
 
 
 class GitHubResponse[T](BaseModel):
-    """Generic response model for GitHub API responses."""
+    """Generic wrapper for a GitHub API response."""
 
-    model_config = ConfigDict(extra="allow", arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    data: T | None = None
-    headers: dict[str, Any] = Field(default_factory=dict)
-    pagination: PaginationInfo = Field(default_factory=PaginationInfo)
+    data: T = Field(...)
+    headers: dict[str, str] = Field(default_factory=dict)
 
 
 class WorkflowRun(BaseModel):
-    """GitHub workflow run response model."""
+    """A GitHub Actions workflow run."""
 
     model_config = ConfigDict(extra="ignore")
 
@@ -72,19 +75,8 @@ class WorkflowRun(BaseModel):
     updated_at: str | None = None
 
 
-class Workflow(BaseModel):
-    """GitHub workflow response model."""
-
-    model_config = ConfigDict(extra="ignore")
-
-    id: int
-    name: str
-    path: str
-    state: str | None = None
-
-
 class Artifact(BaseModel):
-    """GitHub artifact response model."""
+    """A GitHub Actions artifact."""
 
     model_config = ConfigDict(extra="ignore")
 
@@ -93,18 +85,20 @@ class Artifact(BaseModel):
     size_in_bytes: int | None = None
     url: str | None = None
     archive_download_url: str | None = None
-    expired: bool = False
+    expired: bool
 
 
-class ArtifactsResponse(GitHubResponse[dict[str, Any]]):
-    """Response for list artifacts endpoint."""
+class ArtifactsList(BaseModel):
+    """A list of artifacts with a total count."""
 
-    total_count: int = 0
-    artifacts: list[Artifact] = Field(default_factory=list)
+    model_config = ConfigDict(extra="ignore")
+
+    total_count: int
+    artifacts: list[Artifact]
 
 
 class IssueComment(BaseModel):
-    """GitHub issue comment response model."""
+    """A GitHub issue (or PR) comment."""
 
     model_config = ConfigDict(extra="ignore")
 
@@ -116,270 +110,100 @@ class IssueComment(BaseModel):
     html_url: str | None = None
 
 
+class PullRequestReviewComment(BaseModel):
+    """An inline review comment on a pull request diff."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    id: int
+    body: str
+    path: str
+    commit_id: str
+    html_url: str | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
+    user: dict[str, Any] | None = None
+
+
+# ---------------------------------------------------------------------------
+# Client
+# ---------------------------------------------------------------------------
+
+
 class AsyncGitHubClient:
-    """Async GitHub API client with direct endpoint mapping.
+    """
+    Async HTTP client for the GitHub REST API.
 
-    Resource Management:
-        - Uses httpx.AsyncClient for HTTP connections
-        - Supports context manager protocol for automatic cleanup
-        - Client is lazily initialized on first request
-        - Properly closes connections via close() or context manager exit
-
-    Usage:
-        async with AsyncGitHubClient(token="...") as client:
-            response = await client.get_workflow_run("owner", "repo", 123)
+    Uses a shared httpx.AsyncClient for connection pooling. Call `aclose()` when
+    finished to release resources, or use the `async_github_client` context manager.
     """
 
-    API_VERSION = '2022-11-28'
-    BASE_URL = 'https://api.github.com'
-
-    def __init__(self, token: str | None = None, timeout: float = 30.0) -> None:
-        """
-        Initialize the async GitHub client.
-
-        Args:
-            token: GitHub personal access token. If not provided, loads from ddev config.
-            timeout: Request timeout in seconds
-        """
-        if token is None:
-            config_file = ConfigFileWithOverrides()
-            config_file.load()
-            token = config_file.combined_model.github.token
-
+    def __init__(
+        self,
+        token: str,
+        default_timeout: float = 30.0,
+        transport: httpx.AsyncBaseTransport | None = None,
+    ) -> None:
         if not token:
-            msg = (
-                "GitHub token not found. Please provide a token or set one of: "
-                "DD_GITHUB_TOKEN, GH_TOKEN, or GITHUB_TOKEN environment variable"
-            )
-            raise ValueError(msg)
+            raise ValueError("GitHub token must not be empty.")
 
-        self._token = token
-        self._timeout = timeout
-        self._client: httpx.AsyncClient | None = None
+        self._default_timeout = default_timeout
+        self._headers = {
+            "Authorization": f"Bearer {token}",
+            "X-GitHub-Api-Version": GITHUB_API_VERSION,
+            "Accept": "application/vnd.github+json",
+        }
+        self._client = httpx.AsyncClient(
+            base_url=DEFAULT_BASE_URL,
+            headers=self._headers,
+            timeout=default_timeout,
+            transport=transport,
+        )
 
-    async def __aenter__(self) -> Self:
-        await self._ensure_client()
-        return self
+    async def aclose(self) -> None:
+        """Close the underlying HTTP client and release connections."""
+        await self._client.aclose()
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        await self.close()
-
-    async def _ensure_client(self) -> None:
-        """Ensure the async client is initialized.
-
-        Creates an httpx.AsyncClient if not already initialized.
-        Called automatically before making requests.
-        """
-        if self._client is None:
-            self._client = httpx.AsyncClient(
-                base_url=self.BASE_URL,
-                headers={
-                    'Authorization': f'Bearer {self._token}',
-                    'X-GitHub-Api-Version': self.API_VERSION,
-                },
-                timeout=self._timeout,
-            )
-
-    async def close(self) -> None:
-        """Close the async client and release resources.
-
-        Safe to call multiple times.
-        Automatically called when using context manager.
-        """
-        if self._client is not None:
-            await self._client.aclose()
-            self._client = None
-
-    def _validate_github_url(self, url: str) -> bool:
-        """Validate that a URL points to GitHub API."""
-        parsed = urlparse(url)
-        return parsed.hostname == 'api.github.com' and parsed.scheme == 'https'
-
-    _link_pattern = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
-
-    def _extract_pagination(self, headers: httpx.Headers) -> PaginationInfo:
-        """Extract pagination information from Link header."""
-        link_header = headers.get('Link')
-        if not link_header:
-            return PaginationInfo()
-
-        links = {f'{rel}_url': url for url, rel in self._link_pattern.findall(link_header)}
-        return PaginationInfo(**links)
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
 
     async def _request(
         self,
         method: str,
-        url: str,
-        params: dict[str, Any] | None = None,
-        json: dict[str, Any] | None = None,
+        endpoint: str,
+        timeout: float | None = None,
+        **kwargs: Any,
     ) -> httpx.Response:
-        """Make an async HTTP request with rate limit handling."""
-        await self._ensure_client()
-        if self._client is None:
-            raise RuntimeError("HTTP client not initialized")
-
-        response = await self._client.request(method, url, params=params, json=json)
-
-        if response.status_code == 403:
-            remaining = response.headers.get('X-RateLimit-Remaining')
-            if remaining == '0':
-                reset_time = response.headers.get('X-RateLimit-Reset')
-                if reset_time:
-                    reset_timestamp = int(reset_time)
-                    current_time = int(time.time())
-                    wait_time = reset_timestamp - current_time
-
-                    if wait_time > 0:
-                        msg = (
-                            f"GitHub API rate limit exceeded. "
-                            f"Reset at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(reset_timestamp))} "
-                            f"(in {wait_time} seconds)"
-                        )
-                        raise httpx.HTTPStatusError(msg, request=response.request, response=response)
-
+        effective_timeout = timeout if timeout is not None else self._default_timeout
+        response = await self._client.request(method, endpoint, timeout=effective_timeout, **kwargs)
         response.raise_for_status()
         return response
 
-    async def request[T](
+    async def _paginated_request(
         self,
         method: str,
-        url: str,
-        params: dict[str, Any] | None = None,
-        json_body: dict[str, Any] | None = None,
-    ) -> GitHubResponse[T]:
-        """
-        Generic request for any GitHub API endpoint.
-
-        Args:
-            method: HTTP method (GET, POST, PUT, PATCH, DELETE, etc.)
-            url: URL path (relative to base_url or absolute GitHub API URL)
-            params: Query parameters
-            json_body: JSON request body
-
-        Returns:
-            GitHubResponse[T] with data accessible via .data property, headers via .headers property
-        """
-        response = await self._request(method, url, params=params, json=json_body)
-
-        data = response.json() if response.content else None
-
-        return GitHubResponse[T](
-            data=data,
-            headers=dict(response.headers),
-            pagination=self._extract_pagination(response.headers),
-        )
-
-    async def iter_pages[T](
-        self,
-        method: str,
-        url: str,
-        params: dict[str, Any] | None = None,
-        json_body: dict[str, Any] | None = None,
-    ) -> AsyncIterator[GitHubResponse[T]]:
-        """
-        Async generator that yields each page of a paginated response.
-
-        Args:
-            method: HTTP method (typically GET)
-            url: URL path (relative to base_url or absolute GitHub API URL)
-            params: Query parameters
-            json_body: JSON request body
-
-        Yields:
-            GitHubResponse[T] for each page
-        """
-        current_url: str | None = url
-        current_params = params
-        current_body = json_body
-
-        while current_url:
-            response: GitHubResponse[T] = await self.request(
-                method, current_url, params=current_params, json_body=current_body
-            )
+        endpoint: str,
+        timeout: float | None = None,
+        **kwargs: Any,
+    ) -> AsyncIterator[httpx.Response]:
+        """Yield one httpx.Response per page, following Link headers."""
+        url: str | None = endpoint
+        first = True
+        while url is not None:
+            if first:
+                response = await self._request(method, url, timeout=timeout, **kwargs)
+                first = False
+            else:
+                # Subsequent pages: use the absolute next URL, no extra kwargs
+                response = await self._request(method, url, timeout=timeout)
             yield response
+            pagination = PaginationData.from_header(response.headers.get("link"))
+            url = pagination.next
 
-            if not response.pagination.next_url:
-                break
-
-            if not self._validate_github_url(response.pagination.next_url):
-                msg = f"Invalid pagination URL: {response.pagination.next_url} - must point to api.github.com"
-                raise ValueError(msg)
-
-            current_url = response.pagination.next_url
-            current_params = None
-            current_body = None
-
-    async def request_all_pages[T](
-        self,
-        method: str,
-        url: str,
-        params: dict[str, Any] | None = None,
-        json_body: dict[str, Any] | None = None,
-        auto_paginate: bool = True,
-    ) -> GitHubResponse[list[T] | dict[str, Any]]:
-        """
-        Fetch all pages automatically for paginated endpoints.
-
-        Args:
-            method: HTTP method (typically GET)
-            url: URL path (relative to base_url or absolute GitHub API URL)
-            params: Query parameters
-            json_body: JSON request body
-            auto_paginate: Whether to automatically fetch all pages (default: True)
-
-        Returns:
-            GitHubResponse with all pages merged into a single list or dict with paginated items
-        """
-        if not auto_paginate:
-            return await self.request(method, url, params=params, json_body=json_body)
-
-        all_data: list[Any] = []
-        wrapper_key: str | None = None
-        last_response: GitHubResponse[T] | None = None
-        total_count: int | None = None
-
-        async for response in self.iter_pages(method, url, params=params, json_body=json_body):
-            last_response = response
-
-            if isinstance(response.data, list):
-                all_data.extend(response.data)
-            elif isinstance(response.data, dict):
-                list_key = self._find_list_key(response.data)
-                if list_key:
-                    all_data.extend(response.data[list_key])
-                    wrapper_key = list_key
-                    if 'total_count' in response.data:
-                        total_count = response.data['total_count']
-                else:
-                    all_data.append(response.data)
-
-        if wrapper_key and last_response:
-            result_data: dict[str, Any] = {wrapper_key: all_data}
-            if total_count is not None:
-                result_data['total_count'] = total_count
-            return GitHubResponse[dict[str, Any]](
-                data=result_data,
-                headers=last_response.headers,
-                pagination=last_response.pagination,
-            )
-
-        return GitHubResponse[list[T]](
-            data=all_data,
-            headers=last_response.headers if last_response else {},
-            pagination=last_response.pagination if last_response else PaginationInfo(),
-        )
-
-    def _find_list_key(self, data: dict[str, Any]) -> str | None:
-        """Find the key containing list data in a dict."""
-        for key in PAGINATION_KEYS:
-            if key in data and isinstance(data[key], list):
-                return key
-
-        for key, value in data.items():
-            if isinstance(value, list) and value:
-                return key
-
-        return None
+    # ------------------------------------------------------------------
+    # Endpoint methods
+    # ------------------------------------------------------------------
 
     async def create_workflow_dispatch(
         self,
@@ -387,89 +211,210 @@ class AsyncGitHubClient:
         repo: str,
         workflow_id: str | int,
         ref: str,
-        inputs: dict[str, Any] | None = None,
+        inputs: dict[str, str] | None = None,
+        timeout: float | None = None,
     ) -> GitHubResponse[None]:
         """
-        Create a workflow dispatch event.
+        Calls the GitHub API to trigger a workflow dispatch event.
 
+        GitHub API Documentation:
         https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event
 
         Args:
-            owner: Repository owner
-            repo: Repository name
-            workflow_id: Workflow ID or workflow file name (e.g., 'main.yml')
-            ref: Git reference (branch or tag name)
-            inputs: Input parameters defined in the workflow file
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            workflow_id: Workflow file name or numeric ID.
+            ref: Branch or tag name to run the workflow on.
+            inputs: Optional key/value inputs forwarded to the workflow.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
 
         Returns:
-            GitHubResponse[None] with None data (204 No Content on success)
+            GitHubResponse[None]: Empty response (204 No Content) with headers.
         """
-        body: dict[str, Any] = {'ref': ref}
-        if inputs:
-            body['inputs'] = inputs
-
-        return await self.request(
-            'POST', f'/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', json_body=body
+        body: dict[str, Any] = {"ref": ref}
+        if inputs is not None:
+            body["inputs"] = inputs
+        response = await self._request(
+            "POST",
+            f"/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches",
+            timeout=timeout,
+            json=body,
         )
+        return GitHubResponse[None].model_validate({"data": None, "headers": dict(response.headers)})
 
-    async def get_workflow_run(self, owner: str, repo: str, run_id: int) -> GitHubResponse[dict[str, Any]]:
+    async def get_workflow_run(
+        self,
+        owner: str,
+        repo: str,
+        run_id: int,
+        timeout: float | None = None,
+    ) -> GitHubResponse[WorkflowRun]:
         """
-        Get a workflow run.
+        Calls the GitHub API to get a single workflow run.
 
+        GitHub API Documentation:
         https://docs.github.com/en/rest/actions/workflow-runs#get-a-workflow-run
 
         Args:
-            owner: Repository owner
-            repo: Repository name
-            run_id: Workflow run ID
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            run_id: Numeric ID of the workflow run.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
 
         Returns:
-            GitHubResponse with workflow run data including status, conclusion, and other metadata
+            GitHubResponse[WorkflowRun]: The validated workflow run data and headers.
         """
-        return await self.request('GET', f'/repos/{owner}/{repo}/actions/runs/{run_id}')
+        response = await self._request("GET", f"/repos/{owner}/{repo}/actions/runs/{run_id}", timeout=timeout)
+        return GitHubResponse[WorkflowRun].model_validate(
+            {"data": WorkflowRun.model_validate(response.json()), "headers": dict(response.headers)}
+        )
 
     async def list_workflow_run_artifacts(
-        self, owner: str, repo: str, run_id: int, auto_paginate: bool = False, **kwargs: Any
-    ) -> GitHubResponse[dict[str, Any]]:
+        self,
+        owner: str,
+        repo: str,
+        run_id: int,
+        per_page: int = 30,
+        timeout: float | None = None,
+    ) -> AsyncIterator[GitHubResponse[ArtifactsList]]:
         """
-        List workflow run artifacts.
+        Calls the GitHub API to list artifacts for a workflow run (paginated).
 
+        GitHub API Documentation:
         https://docs.github.com/en/rest/actions/artifacts#list-workflow-run-artifacts
 
         Args:
-            owner: Repository owner
-            repo: Repository name
-            run_id: Workflow run ID
-            auto_paginate: Whether to automatically fetch all pages (default: False)
-            **kwargs: Additional query parameters (per_page, page, name)
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            run_id: Numeric ID of the workflow run.
+            per_page: Number of artifacts per page (default 30, max 100).
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
 
         Returns:
-            GitHubResponse with dict containing 'artifacts' list and total_count (all pages if auto_paginate=True)
+            AsyncIterator[GitHubResponse[ArtifactsList]]: One page of artifacts per iteration.
         """
-        if auto_paginate:
-            result = await self.request_all_pages(
-                'GET', f'/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts', params=kwargs, auto_paginate=True
+        endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"
+        async for response in self._paginated_request(
+            "GET", endpoint, timeout=timeout, params={"per_page": per_page}
+        ):
+            body = response.json()
+            yield GitHubResponse[ArtifactsList].model_validate(
+                {
+                    "data": ArtifactsList.model_validate(body),
+                    "headers": dict(response.headers),
+                }
             )
-            return cast(GitHubResponse[dict[str, Any]], result)
-        return await self.request('GET', f'/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts', params=kwargs)
 
     async def create_issue_comment(
-        self, owner: str, repo: str, issue_number: int, body: str
-    ) -> GitHubResponse[dict[str, Any]]:
+        self,
+        owner: str,
+        repo: str,
+        issue_number: int,
+        body: str,
+        timeout: float | None = None,
+    ) -> GitHubResponse[IssueComment]:
         """
-        Create a comment on an issue or pull request.
+        Calls the GitHub API to create a comment on an issue or pull request.
 
+        GitHub API Documentation:
         https://docs.github.com/en/rest/issues/comments#create-an-issue-comment
 
         Args:
-            owner: Repository owner
-            repo: Repository name
-            issue_number: Issue or pull request number
-            body: Comment body text
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            issue_number: Issue or pull request number.
+            body: Markdown body text of the comment.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
 
         Returns:
-            GitHubResponse with created comment data
+            GitHubResponse[IssueComment]: The validated comment data and headers.
         """
-        return await self.request(
-            'POST', f'/repos/{owner}/{repo}/issues/{issue_number}/comments', json_body={'body': body}
+        response = await self._request(
+            "POST",
+            f"/repos/{owner}/{repo}/issues/{issue_number}/comments",
+            timeout=timeout,
+            json={"body": body},
         )
+        return GitHubResponse[IssueComment].model_validate(
+            {"data": IssueComment.model_validate(response.json()), "headers": dict(response.headers)}
+        )
+
+    async def create_pr_review_comment(
+        self,
+        owner: str,
+        repo: str,
+        pull_number: int,
+        body: str,
+        commit_id: str,
+        path: str,
+        position: int | None = None,
+        line: int | None = None,
+        side: str | None = None,
+        timeout: float | None = None,
+    ) -> GitHubResponse[PullRequestReviewComment]:
+        """
+        Calls the GitHub API to create an inline review comment on a pull request diff.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/pulls/comments#create-a-review-comment-for-a-pull-request
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            pull_number: Pull request number.
+            body: Markdown body text of the review comment.
+            commit_id: SHA of the commit to comment on.
+            path: Relative path of the file to comment on.
+            position: Line index in the diff (deprecated but still supported by the API).
+            line: Line number in the file to comment on (used with `side`).
+            side: Side of the diff to comment on — ``"LEFT"`` or ``"RIGHT"``.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[PullRequestReviewComment]: The validated review comment data and headers.
+        """
+        payload: dict[str, Any] = {"body": body, "commit_id": commit_id, "path": path}
+        if position is not None:
+            payload["position"] = position
+        if line is not None:
+            payload["line"] = line
+        if side is not None:
+            payload["side"] = side
+        response = await self._request(
+            "POST",
+            f"/repos/{owner}/{repo}/pulls/{pull_number}/comments",
+            timeout=timeout,
+            json=payload,
+        )
+        return GitHubResponse[PullRequestReviewComment].model_validate(
+            {"data": PullRequestReviewComment.model_validate(response.json()), "headers": dict(response.headers)}
+        )
+
+
+# ---------------------------------------------------------------------------
+# Context manager helper
+# ---------------------------------------------------------------------------
+
+
+@asynccontextmanager
+async def async_github_client(
+    token: str,
+    default_timeout: float = 30.0,
+    transport: httpx.AsyncBaseTransport | None = None,
+) -> AsyncIterator[AsyncGitHubClient]:
+    """
+    Async context manager that creates an AsyncGitHubClient and ensures it is closed on exit.
+
+    Args:
+        token: GitHub personal access token or app token.
+        default_timeout: Default request timeout in seconds.
+        transport: Optional custom HTTPX transport (useful for testing with MockTransport).
+
+    Yields:
+        AsyncGitHubClient: A ready-to-use async GitHub client.
+    """
+    client = AsyncGitHubClient(token=token, default_timeout=default_timeout, transport=transport)
+    try:
+        yield client
+    finally:
+        await client.aclose()
