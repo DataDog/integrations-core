@@ -2,6 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+"""Model-agnostic types, exceptions, and protocol for the agent layer.
+
+All three concerns are co-located to avoid circular imports: AgentProtocol
+references ToolResultMessage and AgentResponse, and the exception hierarchy
+is small enough that a separate module would add fragmentation without benefit.
+"""
+
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any, Protocol
@@ -59,7 +66,7 @@ class TokenUsage:
     output_tokens: int  # tokens the model generated
     cache_read_input_tokens: int  # tokens read from prompt cache
     cache_creation_input_tokens: int  # tokens written to prompt cache
-    context_usage: ContextUsage | None = None
+    context_usage: ContextUsage | None = None  # None only for agents that don't provide context tracking
 
 
 @dataclass(frozen=True)

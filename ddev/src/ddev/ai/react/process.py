@@ -32,7 +32,7 @@ class TerminationReason(StrEnum):
 class ReActResult:
     """Immutable summary of a completed ReAct loop run."""
 
-    final_response: AgentResponse
+    final_response: AgentResponse  # if MAX_ITERATIONS, tool_calls here were requested but not executed
     iterations: int
     termination_reason: TerminationReason
     total_input_tokens: int  # sum across all iterations
@@ -70,6 +70,8 @@ def _derive_termination_reason(
         return TerminationReason.MAX_ITERATIONS
     if stop_reason == StopReason.MAX_TOKENS:
         return TerminationReason.MAX_TOKENS
+    # StopReason.OTHER (refusal, stop_sequence) maps to END_TURN by design.
+    # Callers needing the distinction can inspect result.final_response.stop_reason.
     return TerminationReason.END_TURN
 
 
@@ -126,14 +128,21 @@ class ReActProcess:
                 await cb.on_agent_response(response, iterations)
 
             while response.stop_reason == StopReason.TOOL_USE and iterations < self._max_iterations:
-                tool_results: list[ToolResult] = list(
-                    await asyncio.gather(*[self._tool_registry.run(tc.name, tc.input) for tc in response.tool_calls])
+                if not response.tool_calls:
+                    raise AgentError("Agent returned stop_reason=TOOL_USE with no tool calls")
+
+                raw_results = await asyncio.gather(
+                    *[self._tool_registry.run(tc.name, tc.input) for tc in response.tool_calls],
+                    return_exceptions=True,
                 )
+                tool_results: list[ToolResult] = [
+                    r if isinstance(r, ToolResult) else ToolResult(success=False, error=str(r)) for r in raw_results
+                ]
 
                 tool_call_results = list(zip(response.tool_calls, tool_results, strict=True))
 
-                for cb in self._callbacks:
-                    for tc, result in tool_call_results:
+                for tc, result in tool_call_results:
+                    for cb in self._callbacks:
                         await cb.on_tool_call(tc, result, iterations)
 
                 messages = [ToolResultMessage(tool_call_id=tc.id, result=result) for tc, result in tool_call_results]
@@ -163,5 +172,8 @@ class ReActProcess:
 
         except AgentError as e:
             for cb in self._callbacks:
-                await cb.on_error(e)
+                try:
+                    await cb.on_error(e)
+                except Exception:
+                    pass
             raise

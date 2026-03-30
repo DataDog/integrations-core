@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from typing import Any
+
 import pytest
 
 from ddev.ai.agent.types import (
@@ -11,6 +13,7 @@ from ddev.ai.agent.types import (
     StopReason,
     TokenUsage,
     ToolCall,
+    ToolResultMessage,
 )
 from ddev.ai.react.process import ReActCallback, ReActProcess, ReActResult, TerminationReason
 from ddev.ai.tools.core.types import ToolResult
@@ -25,9 +28,13 @@ class MockAgent:
 
     def __init__(self, responses: list[AgentResponse]) -> None:
         self._responses = iter(responses)
-        self.send_calls: list = []
+        self.send_calls: list[str | list[ToolResultMessage]] = []
 
-    async def send(self, content, allowed_tools=None) -> AgentResponse:
+    async def send(
+        self,
+        content: str | list[ToolResultMessage],
+        allowed_tools: list[str] | None = None,
+    ) -> AgentResponse:
         self.send_calls.append(content)
         return next(self._responses)
 
@@ -90,8 +97,8 @@ def make_response(
     )
 
 
-def make_tool_call(id: str = "tc_01", name: str = "read_file", input: dict | None = None) -> ToolCall:
-    return ToolCall(id=id, name=name, input=input or {})
+def make_tool_call(id: str = "tc_01", name: str = "read_file", tool_input: dict[str, Any] | None = None) -> ToolCall:
+    return ToolCall(id=id, name=name, input=tool_input or {})
 
 
 def make_process(
@@ -114,17 +121,18 @@ def make_process(
 
 
 @pytest.mark.parametrize(
-    "stop_reason,expected_termination",
+    "stop_reason,expected_termination,max_iterations",
     [
-        (StopReason.END_TURN, TerminationReason.END_TURN),
-        (StopReason.MAX_TOKENS, TerminationReason.MAX_TOKENS),
-        (StopReason.OTHER, TerminationReason.END_TURN),  # OTHER maps to END_TURN
+        (StopReason.END_TURN, TerminationReason.END_TURN, 10),
+        (StopReason.MAX_TOKENS, TerminationReason.MAX_TOKENS, 10),
+        (StopReason.OTHER, TerminationReason.END_TURN, 10),  # OTHER maps to END_TURN
+        (StopReason.TOOL_USE, TerminationReason.MAX_ITERATIONS, 1),  # hits cap immediately
     ],
 )
-async def test_termination_reason_single_response(stop_reason, expected_termination) -> None:
+async def test_termination_reason_single_response(stop_reason, expected_termination, max_iterations) -> None:
     agent = MockAgent([make_response(stop_reason)])
 
-    result = await make_process(agent).start("Hi")
+    result = await make_process(agent, max_iterations=max_iterations).start("Hi")
 
     assert result.termination_reason == expected_termination
     assert result.iterations == 1
@@ -156,6 +164,7 @@ async def test_single_tool_call_executes_tool_and_returns() -> None:
     assert agent.send_calls[0] == "Do something"
     assert isinstance(agent.send_calls[1], list)
     assert agent.send_calls[1][0].tool_call_id == "tc_01"
+    assert agent.send_calls[1][0].result == registry._result
 
 
 # ---------------------------------------------------------------------------
@@ -192,12 +201,14 @@ async def test_max_iterations_terminates_loop() -> None:
     # Agent always returns TOOL_USE — loop must be capped at max_iterations=3
     responses = [make_response(StopReason.TOOL_USE, tool_calls=[make_tool_call()])] * 10
     agent = MockAgent(responses)
+    registry = MockToolRegistry()
 
-    result = await make_process(agent, max_iterations=3).start("Loop forever")
+    result = await make_process(agent, registry=registry, max_iterations=3).start("Loop forever")
 
     assert result.termination_reason == TerminationReason.MAX_ITERATIONS
     assert result.iterations == 3
     assert len(agent.send_calls) == 3  # initial + 2 tool-result rounds
+    assert len(registry.run_calls) == 2  # tools run in iterations 1 and 2
 
 
 # ---------------------------------------------------------------------------

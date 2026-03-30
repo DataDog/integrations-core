@@ -88,6 +88,7 @@ class AnthropicAgent:
 
     def _map_stop_reason(self, raw: str) -> StopReason:
         """Map a raw Anthropic stop_reason string to the generic StopReason enum."""
+        # pause_turn gets an explicit check to provide a more informative message than "Unknown stop_reason"
         if raw == "pause_turn":
             raise AgentError("pause_turn is not supported in batch mode")
         mapping = {
@@ -98,7 +99,7 @@ class AnthropicAgent:
             "refusal": StopReason.OTHER,
         }
         if raw not in mapping:
-            raise AgentError(f"Unknown stop_reason: {raw!r}")
+            raise AgentError(f"Unknown stop_reason: {raw!r}") from None
         return mapping[raw]
 
     def _to_tool_result_params(self, messages: list[ToolResultMessage]) -> list[ToolResultBlockParam]:
@@ -107,7 +108,7 @@ class AnthropicAgent:
             {
                 "type": "tool_result",
                 "tool_use_id": msg.tool_call_id,
-                "content": msg.result.data if msg.result.success else (msg.result.error or ""),
+                "content": msg.result.data if msg.result.success else (msg.result.error or "(unknown error)"),
                 "is_error": not msg.result.success,
             }
             for msg in messages
