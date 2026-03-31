@@ -23,16 +23,18 @@ def build_model_file(
     # Whether or not there are options with default values
     options_with_defaults = len(model_info.defaults_file_lines) > 0
     model_file_lines = parsed_document.splitlines()
-    _add_imports(
-        model_file_lines, options_with_defaults, len(model_info.deprecation_data), bool(model_info.secure_field_names)
-    )
+    _add_imports(model_file_lines, options_with_defaults, len(model_info.deprecation_data))
     _fix_types(model_file_lines)
+
+    # Add constant for secure fields requiring trusted provider validation
+    if model_info.require_trusted_providers:
+        _add_secure_fields_constant(model_file_lines, model_info.require_trusted_providers)
 
     if model_id in model_info.deprecation_data:
         model_file_lines += _define_deprecation_functions(model_id, section_name)
 
     model_file_lines += _define_validator_functions(
-        model_id, model_info.validator_data, options_with_defaults, model_info.secure_field_names
+        model_id, model_info.validator_data, options_with_defaults, bool(model_info.require_trusted_providers)
     )
 
     config_lines = []
@@ -56,7 +58,7 @@ def build_model_file(
     return model_file_contents
 
 
-def _add_imports(model_file_lines, need_defaults, need_deprecations, need_secure_fields=False):
+def _add_imports(model_file_lines, need_defaults, need_deprecations):
     import_lines = []
     mapping_found = False
     typing_location = -1
@@ -85,20 +87,7 @@ def _add_imports(model_file_lines, need_defaults, need_deprecations, need_secure
             final_import_line += 2
         else:
             model_file_lines.insert(typing_location, 'from types import MappingProxyType')
-            # The insert shifts all subsequent lines down, including typing_location itself
-            typing_location += 1
             final_import_line += 1
-
-    if need_secure_fields:
-        if typing_location == -1:
-            insertion_index = import_lines[0] + 1
-            model_file_lines.insert(insertion_index, 'from typing import ClassVar')
-            model_file_lines.insert(insertion_index, '')
-            final_import_line += 2
-        else:
-            typing_line = model_file_lines[typing_location]
-            if 'ClassVar' not in typing_line:
-                model_file_lines[typing_location] = typing_line.rstrip() + ', ClassVar'
 
     local_imports = ['validators']
     if need_defaults:
@@ -143,6 +132,18 @@ def _fix_types(model_file_lines):
         model_file_lines[i] = buffer.decode('utf-8')
 
 
+def _add_secure_fields_constant(model_file_lines, require_trusted_providers):
+    """Add SECURE_FIELD_NAMES constant before the first class definition."""
+    class_line_index = next((i for i, line in enumerate(model_file_lines) if line.startswith('class ')), None)
+    if class_line_index is not None:
+        fields_str = ', '.join(f'{name!r}' for name in sorted(require_trusted_providers))
+        model_file_lines[class_line_index:class_line_index] = [
+            '',
+            f'SECURE_FIELD_NAMES = frozenset([{fields_str}])',
+            '',
+        ]
+
+
 def _define_deprecation_functions(model_id, section_name):
     model_file_lines = ['']
     model_file_lines.append("    @model_validator(mode='before')")
@@ -156,7 +157,7 @@ def _define_deprecation_functions(model_id, section_name):
     return model_file_lines
 
 
-def _define_validator_functions(model_id, validator_data, need_defaults, secure_field_names=None):
+def _define_validator_functions(model_id, validator_data, need_defaults, has_require_trusted_providers=False):
     model_file_lines = ['']
     model_file_lines.append("    @model_validator(mode='before')")
     model_file_lines.append('    def _initial_validation(cls, values):')
@@ -181,6 +182,15 @@ def _define_validator_functions(model_id, validator_data, need_defaults, secure_
         for import_path in import_paths:
             model_file_lines.append(f'                value = validators.{import_path}(value, field=field)')
 
+    # Add security validation for fields requiring trusted provider
+    if has_require_trusted_providers:
+        model_file_lines.append('')
+        model_file_lines.append('            if info.field_name in SECURE_FIELD_NAMES:')
+        model_file_lines.append(
+            "                validation.security.check_field_trusted_provider("
+            "info.field_name, value, info.context.get('security_config'))"
+        )
+
     if need_defaults:
         model_file_lines.append('        else:')
         model_file_lines.append(
@@ -191,25 +201,8 @@ def _define_validator_functions(model_id, validator_data, need_defaults, secure_
     model_file_lines.append('        return validation.utils.make_immutable(value)')
 
     model_file_lines.append('')
-    if secure_field_names:
-        names = ', '.join(repr(n) for n in sorted(secure_field_names))
-        model_file_lines.append(f'    SECURE_FIELD_NAMES: ClassVar[frozenset[str]] = frozenset({{{names}}})')
-        model_file_lines.append('')
-        model_file_lines.append("    @model_validator(mode='after')")
-        model_file_lines.append('    def _final_validation(cls, model, info):')
-        model_file_lines.append("        security_config = info.context.get('security_config')")
-        model_file_lines.append("        configured_fields = info.context.get('configured_fields', frozenset())")
-        model_file_lines.append('        for field_name in cls.SECURE_FIELD_NAMES & configured_fields:')
-        model_file_lines.append('            value = getattr(model, field_name, None)')
-        model_file_lines.append('            if value is not None:')
-        model_file_lines.append('                if hasattr(value, \'model_dump\'):')
-        model_file_lines.append('                    value = value.model_dump()')
-        model_file_lines.append(
-            '                validation.security.check_field_trusted_provider(field_name, value, security_config)'
-        )
-    else:
-        model_file_lines.append("    @model_validator(mode='after')")
-        model_file_lines.append('    def _final_validation(cls, model):')
+    model_file_lines.append("    @model_validator(mode='after')")
+    model_file_lines.append('    def _final_validation(cls, model):')
     model_file_lines.append(
         f"        return validation.core.check_model(getattr(validators, 'check_{model_id}', identity)(model))"
     )

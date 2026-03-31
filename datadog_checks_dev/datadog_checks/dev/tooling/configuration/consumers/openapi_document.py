@@ -87,6 +87,9 @@ def build_openapi_document(section: dict, model_id: str, schema_name: str, error
         if section_option['deprecation']:
             model_info.add_deprecation(model_id, option_name, section_option['deprecation'])
 
+        if type_data and type_data.get('require_trusted_provider', False):
+            model_info.require_trusted_providers.append(normalized_option_name)
+
         if section_option['required']:
             required_options.append(option_name)
         else:
@@ -94,9 +97,6 @@ def build_openapi_document(section: dict, model_id: str, schema_name: str, error
 
         validator_errors = model_info.add_type_validators(type_data, option_name, normalized_option_name)
         errors.extend(validator_errors)
-
-        if type_data.get('require_trusted_provider'):
-            model_info.add_secure_field(option_name)
 
         # Remove fields that aren't part of the OpenAPI specification
         for extra_field in set(type_data) - ALLOWED_TYPE_FIELDS:

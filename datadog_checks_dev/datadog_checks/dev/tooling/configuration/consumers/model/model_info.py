@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
-from typing import List
 
 # Singleton allowing `None` to be a valid default value
 NO_DEFAULT = object()
@@ -12,10 +11,10 @@ class ModelInfo:
     def __init__(self):
         self.defaults_file_needs_value_normalization = False
         # Contains function definitions as text for options that are optional so they have a default value
-        self.defaults_file_lines: List[str] = []
+        self.defaults_file_lines: list[str] = []
         self.validator_data = []
         self.deprecation_data = defaultdict(dict)
-        self.secure_field_names: List[str] = []
+        self.require_trusted_providers: list[str] = []
 
     def update(self, section_model):
         """
@@ -25,9 +24,9 @@ class ModelInfo:
         self.defaults_file_lines.extend(section_model.defaults_file_lines)
         self.validator_data.extend(section_model.validator_data)
         self.deprecation_data.update(section_model.deprecation_data)
-        self.secure_field_names.extend(section_model.secure_field_names)
+        self.require_trusted_providers.extend(section_model.require_trusted_providers)
 
-    def add_type_validators(self, type_data: dict, option_name: str, normalized_option_name: str) -> List[str]:
+    def add_type_validators(self, type_data: dict, option_name: str, normalized_option_name: str) -> list[str]:
         """
         :param type_data: dict with the option type information
         :param option_name: The option name
@@ -50,10 +49,6 @@ class ModelInfo:
                 validator_data.append((normalized_option_name, validators))
         self.validator_data += validator_data
         return errors
-
-    def add_secure_field(self, option_name: str):
-        """Track a field name that requires trusted provider validation."""
-        self.secure_field_names.append(option_name)
 
     def add_deprecation(self, model_id: str, option_name: str, deprecation_info: dict):
         """
