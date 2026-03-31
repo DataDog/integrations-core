@@ -288,6 +288,21 @@ pipeline:
         matchRules: |
           gitlab.production Started %{_method} "%{_url}" for %{_client_ip} at %{_date_access}(\n|\t|\s)+Processing by (%{_class}::)?%{_controller}\#%{_action} as %{_format}(\t|\s|\n)+(%{_details})?Completed %{_status_code} %{word} in %{_duration}ms \(Views: %{_view}ms \| ActiveRecord: %{_activerecord}ms\)
 
+    - type: grok-parser
+      name: GitLab Runner JSON Job log parser
+      enabled: true
+      source: message
+      samples:
+        - '2026-03-10T03:08:33.635990Z 01E {"event": "C++ to Python logger bridge initialized", "level": "info", "timestamp": "2026-03-10T03:08:33.628330Z", "logger": "core", "file": "<frozen importlib._bootstrap>:488", "TraceId": "0", "SpanId": "0", "service_environment": "docker"}'
+        - '2026-03-08T15:08:37.699056Z 01E {"event": "Creating database. Use `-v/--verbose` to see all logs", "logger": "app.cli", "level": "info", "timestamp": "2026-03-08T15:08:37.698374Z", "TraceId": "0", "SpanId": "0", "service_environment": "docker"}'
+        - '2026-03-08T15:08:47.505749Z 01E {"customer_count": 73, "col_count": 49, "endpoint_count": 251, "event": "shared stats", "pg_backend_pid": 71, "logger": "__main__", "level": "info", "timestamp": "2026-03-08T15:08:47.505258Z", "TraceId": "0", "SpanId": "0", "service_environment": "docker"}'
+      grok:
+        supportRules: |
+          _date %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"):date}
+          _line_number %{notSpace:line_number}
+        matchRules: |
+          gitlab_runner_json %{_date}\\s+%{_line_number}\\s+%{data::json}  
+
     # date
     - type: date-remapper
       name: Define `time`, `date`, `ts`, `date_access` as the official date of the log
