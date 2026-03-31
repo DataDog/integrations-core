@@ -9,7 +9,6 @@ import httpx
 import pytest
 
 from ddev.utils.github_async import (
-    Artifact,
     ArtifactsList,
     AsyncGitHubClient,
     GitHubResponse,
@@ -92,10 +91,7 @@ class TestPaginationData:
         assert p.last == "https://api.github.com/page5"
 
     def test_prev_and_last(self) -> None:
-        header = (
-            '<https://api.github.com/page1>; rel="prev", '
-            '<https://api.github.com/page5>; rel="last"'
-        )
+        header = '<https://api.github.com/page1>; rel="prev", <https://api.github.com/page5>; rel="last"'
         p = PaginationData.from_header(header)
         assert p.prev == "https://api.github.com/page1"
         assert p.last == "https://api.github.com/page5"
@@ -403,9 +399,7 @@ class TestCreatePrReviewComment:
             return _json_response(_pr_review_comment_payload(), status_code=201)
 
         client = _make_client(httpx.MockTransport(handler))
-        await client.create_pr_review_comment(
-            "o", "r", 1, "comment", "abc123", "file.py", line=10, side="RIGHT"
-        )
+        await client.create_pr_review_comment("o", "r", 1, "comment", "abc123", "file.py", line=10, side="RIGHT")
 
     @pytest.mark.asyncio
     async def test_http_error_raises(self) -> None:
@@ -423,11 +417,8 @@ class TestPerRequestTimeout:
     @pytest.mark.asyncio
     async def test_timeout_forwarded(self) -> None:
         """Ensure per-request timeout reaches the transport without raising."""
-        received_timeout: list[float | None] = []
 
         def handler(request: httpx.Request) -> httpx.Response:
-            # httpx does not expose the timeout on the request object directly,
-            # so we just verify the call completes without error.
             return _json_response(_workflow_run_payload())
 
         client = AsyncGitHubClient(token=TOKEN, default_timeout=5.0, transport=httpx.MockTransport(handler))
