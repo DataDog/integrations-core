@@ -1341,7 +1341,7 @@
             "id": 8236156193990667,
             "definition": {
               "type": "note",
-              "content": "Get insights into your topics' producers and consumers, including anomaly detection by instrumenting with Data Streams Monitoring. \nOpen in [Data Streams Monitoring](/data-streams) or [Learn More](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka).\n\nAssign the **topic** variable to view insights about a specific topic",
+              "content": "Get insights into your topics' producers and consumers, including anomaly detection by instrumenting with Data Streams Monitoring. \nOpen in [Data Streams Monitoring](/data-streams) or [Learn More](https://docs.datadoghq.com/data_streams/setup/technologies/kafka/?referrer=kafka).\n\nAssign the **topic** variable to view insights about a specific topic.",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "center",
