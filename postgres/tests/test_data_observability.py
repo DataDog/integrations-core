@@ -7,6 +7,7 @@ import json
 from copy import deepcopy
 from unittest.mock import MagicMock, patch
 
+import psycopg
 import pytest
 
 from datadog_checks.postgres import PostgreSql
@@ -66,18 +67,17 @@ def _make_mock_conn(rows=None, description=None):
     mock_cursor.__enter__ = MagicMock(return_value=mock_cursor)
     mock_cursor.__exit__ = MagicMock(return_value=False)
     mock_cursor.description = description or [('count',)]
-    mock_cursor.fetchall.return_value = rows if rows is not None else [(42,)]
+    mock_cursor.fetchmany.return_value = rows if rows is not None else [(42,)]
     mock_conn.cursor.return_value = mock_cursor
     return mock_conn, mock_cursor
 
 
-def _make_mock_pool(mock_conn):
-    mock_pool = MagicMock()
+def _mock_get_main_db(mock_conn):
+    """Create a mock _get_main_db that returns a context manager wrapping mock_conn."""
     mock_ctx = MagicMock()
     mock_ctx.__enter__ = MagicMock(return_value=mock_conn)
     mock_ctx.__exit__ = MagicMock(return_value=False)
-    mock_pool.get_connection.return_value = mock_ctx
-    return mock_pool
+    return MagicMock(return_value=mock_ctx)
 
 
 def _create_check(pg_instance, queries=None, config_id='test-config-123'):
@@ -89,22 +89,26 @@ def _create_check(pg_instance, queries=None, config_id='test-config-123'):
 def _setup_and_run(pg_instance, queries=None, config_id='test-config-123', mock_conn=None, mock_cursor=None):
     if mock_conn is None:
         mock_conn, mock_cursor = _make_mock_conn()
-    mock_pool = _make_mock_pool(mock_conn)
 
     check = _create_check(pg_instance, queries=queries, config_id=config_id)
-    check.db_pool = mock_pool
+    check._get_main_db = _mock_get_main_db(mock_conn)
     check.data_observability.run_job()
     return check, mock_conn, mock_cursor
 
 
+def _get_do_event_calls(mock_epe):
+    """Filter event_platform_event calls to only do-query-results events."""
+    return [c for c in mock_epe.call_args_list if len(c[0]) >= 2 and c[0][1] == EVENT_TRACK_TYPE]
+
+
 def test_no_queries_does_nothing(aggregator, pg_instance):
     check = _create_check(pg_instance, queries=[])
-    mock_pool = MagicMock()
-    check.db_pool = mock_pool
+    mock_get_main_db = MagicMock()
+    check._get_main_db = mock_get_main_db
 
     check.data_observability.run_job()
 
-    mock_pool.get_connection.assert_not_called()
+    mock_get_main_db.assert_not_called()
     assert len(aggregator.metrics('postgresql.data_observability.query_status')) == 0
 
 
@@ -115,21 +119,45 @@ def test_single_query_success(aggregator, pg_instance):
     aggregator.assert_metric('postgresql.data_observability.query_status', value=1)
 
 
-def test_query_failure(aggregator, pg_instance):
+def test_query_failure_database_error(aggregator, pg_instance):
+    """DatabaseError (e.g. syntax error) is caught per-query; execution continues."""
     mock_conn, mock_cursor = _make_mock_conn()
-    mock_cursor.execute.side_effect = Exception("syntax error")
+    mock_cursor.execute.side_effect = psycopg.errors.ProgrammingError("syntax error")
 
     _setup_and_run(pg_instance, mock_conn=mock_conn, mock_cursor=mock_cursor)
 
     aggregator.assert_metric('postgresql.data_observability.query_status', value=0)
 
 
-def test_per_query_interval_tracking(aggregator, pg_instance):
-    mock_conn, _ = _make_mock_conn()
-    mock_pool = _make_mock_pool(mock_conn)
+def test_connection_failure_propagates(pg_instance):
+    """Connection errors propagate to _job_loop for proper crash detection."""
+    check = _create_check(pg_instance)
+    mock_ctx = MagicMock()
+    mock_ctx.__enter__ = MagicMock(side_effect=psycopg.OperationalError("Connection refused"))
+    mock_ctx.__exit__ = MagicMock(return_value=False)
+    check._get_main_db = MagicMock(return_value=mock_ctx)
+
+    with pytest.raises(psycopg.OperationalError, match="Connection refused"):
+        check.data_observability.run_job()
+
+
+def test_interface_error_propagates(pg_instance):
+    """InterfaceError (broken connection mid-loop) propagates instead of being swallowed per-query."""
+    mock_conn, mock_cursor = _make_mock_conn()
+    mock_cursor.execute.side_effect = psycopg.InterfaceError("connection closed")
 
     check = _create_check(pg_instance)
-    check.db_pool = mock_pool
+    check._get_main_db = _mock_get_main_db(mock_conn)
+
+    with pytest.raises(psycopg.InterfaceError, match="connection closed"):
+        check.data_observability.run_job()
+
+
+def test_per_query_interval_tracking(aggregator, pg_instance):
+    mock_conn, _ = _make_mock_conn()
+
+    check = _create_check(pg_instance)
+    check._get_main_db = _mock_get_main_db(mock_conn)
 
     # First run: query executes
     check.data_observability.run_job()
@@ -147,21 +175,6 @@ def test_per_query_interval_tracking(aggregator, pg_instance):
     assert len(aggregator.metrics('postgresql.data_observability.query_status')) == 1
 
 
-def test_connection_failure_marks_all_critical(aggregator, pg_instance):
-    mock_pool = MagicMock()
-    mock_pool.get_connection.side_effect = Exception("Connection refused")
-
-    check = _create_check(pg_instance, queries=deepcopy(MULTI_QUERIES))
-    check.db_pool = mock_pool
-
-    check.data_observability.run_job()
-
-    status_metrics = aggregator.metrics('postgresql.data_observability.query_status')
-    assert len(status_metrics) == 2
-    for m in status_metrics:
-        assert m.value == 0
-
-
 def test_multi_query_execution(aggregator, pg_instance):
     _setup_and_run(pg_instance, queries=deepcopy(MULTI_QUERIES))
 
@@ -174,17 +187,12 @@ def test_multi_query_execution(aggregator, pg_instance):
         assert m.value == 1
 
 
-def _get_do_event_calls(mock_epe):
-    """Filter event_platform_event calls to only do-query-results events."""
-    return [c for c in mock_epe.call_args_list if len(c[0]) >= 2 and c[0][1] == EVENT_TRACK_TYPE]
-
-
 def test_event_payload_structure(aggregator, pg_instance):
     mock_conn, _ = _make_mock_conn(rows=[(42,)], description=[('count',)])
 
     with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
         check = _create_check(pg_instance)
-        check.db_pool = _make_mock_pool(mock_conn)
+        check._get_main_db = _mock_get_main_db(mock_conn)
         check.data_observability.run_job()
 
         do_calls = _get_do_event_calls(mock_epe)
@@ -214,7 +222,7 @@ def test_entity_schema_alias(aggregator, pg_instance):
 
     with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
         check = _create_check(pg_instance)
-        check.db_pool = _make_mock_pool(mock_conn)
+        check._get_main_db = _mock_get_main_db(mock_conn)
         check.data_observability.run_job()
 
         do_calls = _get_do_event_calls(mock_epe)
@@ -225,6 +233,7 @@ def test_entity_schema_alias(aggregator, pg_instance):
 
 
 def test_query_failure_does_not_block_subsequent(aggregator, pg_instance):
+    """First query raises DatabaseError, second query still runs."""
     mock_conn, mock_cursor = _make_mock_conn()
     call_count = 0
 
@@ -232,7 +241,7 @@ def test_query_failure_does_not_block_subsequent(aggregator, pg_instance):
         nonlocal call_count
         call_count += 1
         if call_count == 1:
-            raise Exception("table not found")
+            raise psycopg.errors.ProgrammingError("table not found")
 
     mock_cursor.execute = MagicMock(side_effect=execute_side_effect)
 
@@ -252,7 +261,7 @@ def test_custom_sql_select_fields_in_payload(aggregator, pg_instance):
 
     with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
         check = _create_check(pg_instance, queries=[query])
-        check.db_pool = _make_mock_pool(mock_conn)
+        check._get_main_db = _mock_get_main_db(mock_conn)
         check.data_observability.run_job()
 
         do_calls = _get_do_event_calls(mock_epe)
@@ -269,7 +278,7 @@ def test_dd_column_names_in_payload(aggregator, pg_instance):
 
     with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
         check = _create_check(pg_instance)
-        check.db_pool = _make_mock_pool(mock_conn)
+        check._get_main_db = _mock_get_main_db(mock_conn)
         check.data_observability.run_job()
 
         do_calls = _get_do_event_calls(mock_epe)
@@ -312,3 +321,57 @@ def test_query_with_no_description(aggregator, pg_instance):
     assert payload['columns'] == []
     assert payload['rows'] == []
     assert payload['row_count'] == 0
+
+
+def test_collection_interval_none_uses_default(pg_instance):
+    """collection_interval=None should not crash, uses default."""
+    instance = deepcopy(pg_instance)
+    instance['data_observability'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': None,
+        'queries': [],
+    }
+    check = PostgreSql('postgres', {}, [instance])
+    # Should not raise; verifies issue #4 fix
+    assert check.data_observability._enabled
+
+
+def test_failed_query_updates_last_execution(aggregator, pg_instance):
+    """A failed query still updates _last_execution so it's not retried until the next interval."""
+    mock_conn, mock_cursor = _make_mock_conn()
+    mock_cursor.execute.side_effect = psycopg.errors.ProgrammingError("syntax error")
+
+    check = _create_check(pg_instance)
+    check._get_main_db = _mock_get_main_db(mock_conn)
+
+    check.data_observability.run_job()
+    assert 1 in check.data_observability._last_execution
+
+    # Immediate re-run should skip the query (interval not elapsed)
+    aggregator.reset()
+    check.data_observability.run_job()
+    assert len(aggregator.metrics('postgresql.data_observability.query_status')) == 0
+
+
+def test_error_event_payload(aggregator, pg_instance):
+    """When a query fails, the event payload contains error details."""
+    mock_conn, mock_cursor = _make_mock_conn()
+    mock_cursor.execute.side_effect = psycopg.errors.ProgrammingError("relation does not exist")
+
+    with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
+        check = _create_check(pg_instance)
+        check._get_main_db = _mock_get_main_db(mock_conn)
+        check.data_observability.run_job()
+
+        do_calls = _get_do_event_calls(mock_epe)
+        assert len(do_calls) == 1
+        payload = json.loads(do_calls[0][0][0])
+
+    assert payload['status'] == 'error'
+    assert 'relation does not exist' in payload['error']
+    assert payload['columns'] == []
+    assert payload['rows'] == []
+    assert payload['row_count'] == 0
+    assert payload['monitor_id'] == 1
+    assert 'duration_s' in payload

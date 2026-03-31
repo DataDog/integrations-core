@@ -586,6 +586,12 @@ files:
             type: array
             items:
               type: object
+              required:
+                - monitor_id
+                - query
+                - interval_seconds
+                - timeout_seconds
+                - entity
               properties:
               - name: monitor_id
                 type: integer
@@ -599,6 +605,12 @@ files:
                 type: integer
               - name: entity
                 type: object
+                required:
+                  - platform
+                  - account
+                  - database
+                  - schema
+                  - table
                 properties:
                 - name: platform
                   type: string

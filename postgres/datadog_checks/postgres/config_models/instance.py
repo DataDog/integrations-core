@@ -125,11 +125,11 @@ class Entity(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    account: Optional[str] = None
-    database: Optional[str] = None
-    platform: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias='schema')
-    table: Optional[str] = None
+    account: str
+    database: str
+    platform: str
+    schema_: str = Field(..., alias='schema')
+    table: str
 
 
 class Query(BaseModel):
@@ -138,11 +138,11 @@ class Query(BaseModel):
         frozen=True,
     )
     custom_sql_select_fields: Optional[CustomSqlSelectFields] = None
-    entity: Optional[Entity] = None
-    interval_seconds: Optional[int] = None
-    monitor_id: Optional[int] = None
-    query: Optional[str] = None
-    timeout_seconds: Optional[int] = None
+    entity: Entity
+    interval_seconds: int
+    monitor_id: int
+    query: str
+    timeout_seconds: int
     type: Optional[str] = None
 
 
