@@ -1,0 +1,1 @@
+Use instance-level kafka_cluster_id parameter for cluster verification to prevent false mismatch errors.
