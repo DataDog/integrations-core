@@ -1,0 +1,1 @@
+Use kafka_cluster_id from instance config as actual cluster identity for verification, fixing mismatch errors when kafka_cluster_id_override is set.
