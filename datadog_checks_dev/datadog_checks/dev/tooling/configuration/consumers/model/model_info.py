@@ -15,6 +15,7 @@ class ModelInfo:
         self.defaults_file_lines: List[str] = []
         self.validator_data = []
         self.deprecation_data = defaultdict(dict)
+        self.secure_field_names: List[str] = []
 
     def update(self, section_model):
         """
@@ -24,6 +25,7 @@ class ModelInfo:
         self.defaults_file_lines.extend(section_model.defaults_file_lines)
         self.validator_data.extend(section_model.validator_data)
         self.deprecation_data.update(section_model.deprecation_data)
+        self.secure_field_names.extend(section_model.secure_field_names)
 
     def add_type_validators(self, type_data: dict, option_name: str, normalized_option_name: str) -> List[str]:
         """
@@ -48,6 +50,10 @@ class ModelInfo:
                 validator_data.append((normalized_option_name, validators))
         self.validator_data += validator_data
         return errors
+
+    def add_secure_field(self, option_name: str):
+        """Track a field name that requires trusted provider validation."""
+        self.secure_field_names.append(option_name)
 
     def add_deprecation(self, model_id: str, option_name: str, deprecation_info: dict):
         """

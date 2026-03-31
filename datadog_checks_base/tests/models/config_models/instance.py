@@ -10,7 +10,7 @@
 from __future__ import annotations
 
 from types import MappingProxyType
-from typing import Any, Optional
+from typing import Any, Optional, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -78,6 +78,16 @@ class InstanceConfig(BaseModel):
 
         return validation.utils.make_immutable(value)
 
+    SECURE_FIELD_NAMES: ClassVar[frozenset[str]] = frozenset({'auth_token', 'tls_cert'})
+
     @model_validator(mode='after')
-    def _final_validation(cls, model):
+    def _final_validation(cls, model, info):
+        security_config = info.context.get('security_config')
+        configured_fields = info.context.get('configured_fields', frozenset())
+        for field_name in cls.SECURE_FIELD_NAMES & configured_fields:
+            value = getattr(model, field_name, None)
+            if value is not None:
+                if hasattr(value, 'model_dump'):
+                    value = value.model_dump()
+                validation.security.check_field_trusted_provider(field_name, value, security_config)
         return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))

@@ -95,6 +95,9 @@ def build_openapi_document(section: dict, model_id: str, schema_name: str, error
         validator_errors = model_info.add_type_validators(type_data, option_name, normalized_option_name)
         errors.extend(validator_errors)
 
+        if type_data.get('require_trusted_provider'):
+            model_info.add_secure_field(option_name)
+
         # Remove fields that aren't part of the OpenAPI specification
         for extra_field in set(type_data) - ALLOWED_TYPE_FIELDS:
             type_data.pop(extra_field, None)
