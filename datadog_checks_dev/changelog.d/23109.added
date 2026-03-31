@@ -1,1 +1,1 @@
-Allow require_trusted_provider as a valid field in spec.yaml
+Add support for require_trusted_provider security validation
