@@ -89,17 +89,16 @@ class KafkaActionsCheck(AgentCheck):
             self.kafka_client.close()
 
     def _verify_cluster_id(self):
-        """Verify that the configured cluster matches the actual Kafka cluster ID.
-
-        Raises:
-            Exception: If cluster verification fails
-        """
+        """Verify that the configured cluster matches the actual Kafka cluster ID."""
         if not self.cluster:
             self.log.debug("No cluster parameter in action config, skipping cluster verification")
             return
 
         try:
-            actual_cluster_id = self.kafka_client.get_cluster_id()
+            # When kafka_cluster_id is set (via kafka_cluster_id_override from kafka_consumer),
+            # use it as the actual cluster identity since the backend uses the overridden ID
+            # when creating actions.
+            actual_cluster_id = self.instance.get('kafka_cluster_id') or self.kafka_client.get_cluster_id()
         except Exception as e:
             raise Exception(
                 f"Failed to retrieve Kafka cluster ID for verification. "

@@ -548,5 +548,53 @@ class TestConsumeMessagesEarlyReturn:
         assert consumer.poll.call_count == 2
 
 
+class TestClusterIdOverride:
+    """Test kafka_cluster_id instance parameter for cluster verification."""
+
+    def test_kafka_cluster_id_used_for_verification(self, aggregator, dd_run_check):
+        """When kafka_cluster_id is set, it should be used as the actual cluster identity."""
+        messages = [
+            MockKafkaMessage(key=b'key-1', value=b'value-1', offset=100),
+        ]
+
+        instance = {
+            'remote_config_id': 'test-override-001',
+            'kafka_connect_str': 'localhost:9092',
+            'kafka_cluster_id': 'msk-cluster-1',
+            'read_messages': {
+                'cluster': 'msk-cluster-1',
+                'topic': 'test-topic',
+            },
+        }
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        with (
+            patch.object(check.kafka_client, 'consume_messages', return_value=messages),
+            # get_cluster_id returns the real Kafka ID which differs from the override
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='WxTIBtwsQGWYO7itbY2d7g'),
+        ):
+            # Should not raise - kafka_cluster_id matches action's cluster field
+            dd_run_check(check)
+
+    def test_kafka_cluster_id_mismatch_raises(self, aggregator, dd_run_check):
+        """When kafka_cluster_id doesn't match the action's cluster, verification should fail."""
+        instance = {
+            'remote_config_id': 'test-override-002',
+            'kafka_connect_str': 'localhost:9092',
+            'kafka_cluster_id': 'wrong-cluster',
+            'read_messages': {
+                'cluster': 'msk-cluster-1',
+                'topic': 'test-topic',
+            },
+        }
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        with (
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='WxTIBtwsQGWYO7itbY2d7g'),
+        ):
+            with pytest.raises(Exception, match='Cluster ID mismatch'):
+                dd_run_check(check)
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-vv'])
