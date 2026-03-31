@@ -123,7 +123,7 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
             ),  # Deprecated, use `dbm` instead
             "data_observability": {
                 **dict_defaults.instance_data_observability().model_dump(),
-                **(instance.get('data_observability', {})),
+                **(instance.get('data_observability') or {}),
             },
             "custom_metrics": map_custom_metrics(
                 instance.get('custom_metrics', [])
@@ -435,6 +435,7 @@ def apply_features(config: InstanceConfig, validation_result: ValidationResult):
     validation_result.add_feature(FeatureKey.QUERY_METRICS, config.query_metrics.enabled and config.dbm)
     validation_result.add_feature(FeatureKey.COLLECT_SETTINGS, config.collect_settings.enabled and config.dbm)
     validation_result.add_feature(FeatureKey.COLLECT_SCHEMAS, config.collect_schemas.enabled and config.dbm)
+    validation_result.add_feature(FeatureKey.DATA_OBSERVABILITY, config.data_observability.enabled)
 
 
 METRIC_TYPES = {

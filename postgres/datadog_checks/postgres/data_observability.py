@@ -99,12 +99,18 @@ class PostgresDataObservability(DBMAsyncJob):
                 'error': None,
             }
         except psycopg.errors.DatabaseError as e:
+            # OperationalError is a subclass of DatabaseError. If the connection
+            # is broken (server crash, network failure), re-raise so _job_loop
+            # handles it with proper crash detection and health events.
+            if conn.broken:
+                raise
             duration = time.time() - start
             self._log.warning(
-                "Query failed for monitor_id=%d (%.3fs): %s",
+                "Query failed for monitor_id=%d (%.3fs): %s | SQL: %s",
                 monitor_id,
                 duration,
                 e,
+                sql,
             )
             return {
                 'status': 'error',
@@ -142,8 +148,8 @@ class PostgresDataObservability(DBMAsyncJob):
         }
 
     def run_job(self):
-        # Let connection errors propagate to _job_loop, which handles expected_db_exceptions
-        # and provides crash detection, health events, and proper retry semantics.
+        # Connection errors (InterfaceError, OperationalError with broken conn) propagate
+        # to _job_loop, which handles expected_db_exceptions with retry semantics.
         due_queries = self._get_due_queries()
         if not due_queries:
             self._log.debug("No data observability queries due for execution.")
@@ -164,20 +170,26 @@ class PostgresDataObservability(DBMAsyncJob):
                 # path cannot cause infinite re-execution of the same query.
                 self._last_execution[q.monitor_id] = now
 
-                self._check.gauge(
-                    'data_observability.query_execution_time',
-                    result['duration_s'],
-                    tags=tags,
-                    hostname=self._check.reported_hostname,
-                )
-                self._check.gauge(
-                    'data_observability.query_status',
-                    1 if result['status'] == 'success' else 0,
-                    tags=tags,
-                    hostname=self._check.reported_hostname,
-                )
+                try:
+                    self._check.gauge(
+                        'data_observability.query_execution_time',
+                        result['duration_s'],
+                        tags=tags,
+                        hostname=self._check.reported_hostname,
+                    )
+                    self._check.gauge(
+                        'data_observability.query_status',
+                        1 if result['status'] == 'success' else 0,
+                        tags=tags,
+                        hostname=self._check.reported_hostname,
+                    )
 
-                payload = self._build_event_payload(q, result)
-                raw_event = json.dumps(payload, default=default_json_event_encoding)
-                self._log.debug("Query result for monitor_id=%d: %s", q.monitor_id, raw_event)
-                self._check.event_platform_event(raw_event, EVENT_TRACK_TYPE)
+                    payload = self._build_event_payload(q, result)
+                    raw_event = json.dumps(payload, default=default_json_event_encoding)
+                    self._log.debug("Query result for monitor_id=%d: %s", q.monitor_id, raw_event)
+                    self._check.event_platform_event(raw_event, EVENT_TRACK_TYPE)
+                except Exception:
+                    self._log.exception(
+                        "Failed to emit metrics/event for monitor_id=%d",
+                        q.monitor_id,
+                    )

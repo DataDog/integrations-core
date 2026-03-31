@@ -61,8 +61,9 @@ def _make_do_instance(pg_instance, queries=None, config_id='test-config-123'):
     return instance
 
 
-def _make_mock_conn(rows=None, description=None):
+def _make_mock_conn(rows=None, description=None, broken=False):
     mock_conn = MagicMock()
+    mock_conn.broken = broken
     mock_cursor = MagicMock()
     mock_cursor.__enter__ = MagicMock(return_value=mock_cursor)
     mock_cursor.__exit__ = MagicMock(return_value=False)
@@ -150,6 +151,18 @@ def test_interface_error_propagates(pg_instance):
     check._get_main_db = _mock_get_main_db(mock_conn)
 
     with pytest.raises(psycopg.InterfaceError, match="connection closed"):
+        check.data_observability.run_job()
+
+
+def test_operational_error_with_broken_conn_propagates(pg_instance):
+    """OperationalError on a broken connection re-raises instead of being caught per-query."""
+    mock_conn, mock_cursor = _make_mock_conn(broken=True)
+    mock_cursor.execute.side_effect = psycopg.OperationalError("server closed the connection")
+
+    check = _create_check(pg_instance)
+    check._get_main_db = _mock_get_main_db(mock_conn)
+
+    with pytest.raises(psycopg.OperationalError, match="server closed"):
         check.data_observability.run_job()
 
 
@@ -375,3 +388,16 @@ def test_error_event_payload(aggregator, pg_instance):
     assert payload['row_count'] == 0
     assert payload['monitor_id'] == 1
     assert 'duration_s' in payload
+
+
+def test_fetchmany_called_with_max_rows(pg_instance):
+    """fetchmany is called with MAX_RESULT_ROWS to cap memory usage."""
+    from datadog_checks.postgres.data_observability import MAX_RESULT_ROWS
+
+    mock_conn, mock_cursor = _make_mock_conn()
+
+    check = _create_check(pg_instance)
+    check._get_main_db = _mock_get_main_db(mock_conn)
+    check.data_observability.run_job()
+
+    mock_cursor.fetchmany.assert_called_once_with(MAX_RESULT_ROWS)
