@@ -1,12 +1,12 @@
 {
-    "title": "Trend Micro Email Security - Policy Events",
-    "description": "- This provides insights to help you to track threat detections in email messages received or sent by Trend Micro Email Security.",
+    "title": "TrendAI Email Security - Policy Events",
+    "description": "- This provides insights to help you to track threat detections in email messages received or sent by TrendAI Email Security.",
     "widgets": [
         {
             "id": 8261523249406730,
             "definition": {
                 "title": "",
-                "banner_img": "https://www.trendmicro.com/content/dam/trendmicro/global/en/global/logo/trend-micro-logo.png",
+                "banner_img": "https://static.datadoghq.com/static/images/logos/trend-micro-email-security_large.svg",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -15,7 +15,7 @@
                         "id": 5872268233797356,
                         "definition": {
                             "type": "note",
-                            "content": "This dashboard provides insights to help you to track threat detections in email messages received or sent by Trend Micro Email Security. It offers insights into top security event types, suspicious objects found, and impacted senders and recipients. By visualizing threat distribution, policy actions, and event trends, the dashboard enhances your understanding of potential email threats.\n\nThis holistic approach strengthens your ability to monitor, analyze, and respond to email-related threats, improving overall security posture and ensuring the integrity of your organization's communication.\n\nFor more information, see the [Trend Micro Email Security Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_email_security).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                            "content": "This dashboard provides insights to help you to track threat detections in email messages received or sent by TrendAI Email Security. It offers insights into top security event types, suspicious objects found, and impacted senders and recipients. By visualizing threat distribution, policy actions, and event trends, the dashboard enhances your understanding of potential email threats.\n\nThis holistic approach strengthens your ability to monitor, analyze, and respond to email-related threats, improving overall security posture and ensuring the integrity of your organization's communication.\n\nFor more information, see the [TrendAI Email Security Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_email_security).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                             "background_color": "white",
                             "font_size": "14",
                             "text_align": "left",

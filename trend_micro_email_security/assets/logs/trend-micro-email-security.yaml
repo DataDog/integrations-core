@@ -94,7 +94,7 @@ facets:
       name: byte
 pipeline:
   type: pipeline
-  name: Trend Micro Email Security
+  name: TrendAI Email Security
   enabled: true
   filter:
     query: "source:trend-micro-email-security"

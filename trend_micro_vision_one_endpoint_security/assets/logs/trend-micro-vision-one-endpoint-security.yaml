@@ -130,13 +130,13 @@ facets:
     type: double
 pipeline:
   type: pipeline
-  name: Trend Micro Vision One Endpoint Security
+  name: TrendAI Vision One Endpoint Security
   enabled: true
   filter:
     query: "source:trend-micro-vision-one-endpoint-security"
   processors:
     - type: grok-parser
-      name: Parsing the log of Trend Micro Vision One Endpoint Security
+      name: Parsing the log of TrendAI Vision One Endpoint Security
       enabled: true
       source: message
       samples:
