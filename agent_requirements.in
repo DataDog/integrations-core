@@ -4,8 +4,8 @@ aws-requests-auth==0.4.3
 azure-identity==1.25.3
 beautifulsoup4==4.14.3
 binary==1.0.2
-boto3==1.42.71
-botocore==1.42.71
+boto3==1.42.72
+botocore==1.42.72
 cachetools==7.0.5
 clickhouse-connect==0.14.1
 cm-client==45.0.4

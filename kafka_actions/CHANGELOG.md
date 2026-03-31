@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.4.1 / 2026-03-24
+
+***Fixed***:
+
+* Return early from consume_messages when end of partition is reached instead of waiting for timeout ([#23004](https://github.com/DataDog/integrations-core/pull/23004))
+
 ## 2.4.0 / 2026-03-18
 
 ***Added***:

@@ -114,11 +114,6 @@ files:
         - name: enabled
           description: Enable database autodiscovery.
           fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
           value:
             type: boolean
             example: false
@@ -174,8 +169,6 @@ files:
             The maximum number of collections to collect metrics from per database.
             Defaults to 100.
           fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
           value:
             type: integer
             example: 100
@@ -208,9 +201,11 @@ files:
         type: string
     - name: reported_database_hostname
       description: |
-        Set the reported database hostname for the connected MongoDB instance. This value overrides the MongoDB hostname
-        detected by the Agent from MongoDB admin command serverStatus. It can be useful to set a custom hostname
-        when connecting to a remote database through a proxy.
+        Set the reported database hostname for the connected MongoDB instance.
+
+        This value overrides the MongoDB hostname detected by the Agent from MongoDB admin command
+        serverStatus. It can be useful to set a custom hostname when connecting to a remote database
+        through a proxy.
       fleet_configurable: true
       value:
         type: string
