@@ -18,6 +18,7 @@ files:
     - name: leader_election_kind
       description: |
         Kind of object to look at for the leader election.
+
         Can be:
           * auto
           * lease

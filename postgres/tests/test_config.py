@@ -153,15 +153,6 @@ def test_initialize_deprecated_options_warn(mock_check, minimal_instance):
     assert any("deprecated" in w for w in result.warnings)
 
 
-def test_initialize_empty_default_hostname_warns(mock_check, minimal_instance):
-    instance = minimal_instance
-    instance['empty_default_hostname'] = True
-    mock_check.instance = instance
-    mock_check.init_config = {}
-    config, result = build_config(check=mock_check)
-    assert any("empty_default_hostname" in w for w in result.warnings)
-
-
 @pytest.mark.parametrize(
     'instance, init_config, should_propagate',
     [
@@ -333,7 +324,6 @@ def test_apply_validated_defaults_ssl(mock_check, minimal_instance):
         ('deep_database_monitoring', 'dbm', True),
         ('managed_identity', 'azure.managed_authentication', {}),
         ('statement_samples', 'query_samples', {}),
-        ('collect_default_database', 'postgres', True),
     ],
 )
 def test_apply_deprecation_warnings(mock_check, minimal_instance, option, replacement, value):

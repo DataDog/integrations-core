@@ -847,6 +847,7 @@ instances:
 
     ## @param propagate_agent_tags - boolean - optional - default: false
     ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+    ##
     ## When set to `true`, the tags from the agent host are added to the check's tags for all instances.
     ## This option takes precedence over the `propagate_agent_tags` option in `init_config`.
     #
