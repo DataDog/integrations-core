@@ -114,11 +114,6 @@ files:
         - name: enabled
           description: Enable database autodiscovery.
           fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
           value:
             type: boolean
             example: false
@@ -173,8 +168,6 @@ files:
           description: |
             The maximum number of collections to collect metrics from per database.
             Defaults to 100.
-          fleet_configurable: true
-          fleet_configurable: true
           fleet_configurable: true
           value:
             type: integer

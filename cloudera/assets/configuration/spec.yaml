@@ -20,7 +20,6 @@ files:
       fleet_configurable: true
       secret: true
       required: true
-      secret: true
       value:
         type: string
     - template: init_config/default
