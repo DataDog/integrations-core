@@ -125,7 +125,10 @@ class ReActProcess:
             total_output = response.usage.output_tokens
 
             for cb in self._callbacks:
-                await cb.on_agent_response(response, iterations)
+                try:
+                    await cb.on_agent_response(response, iterations)
+                except Exception:
+                    pass  # in the future we should log this error
 
             while response.stop_reason == StopReason.TOOL_USE and iterations < self._max_iterations:
                 if not response.tool_calls:
@@ -143,7 +146,10 @@ class ReActProcess:
 
                 for tc, result in tool_call_results:
                     for cb in self._callbacks:
-                        await cb.on_tool_call(tc, result, iterations)
+                        try:
+                            await cb.on_tool_call(tc, result, iterations)
+                        except Exception:
+                            pass
 
                 messages = [ToolResultMessage(tool_call_id=tc.id, result=result) for tc, result in tool_call_results]
 
@@ -153,7 +159,10 @@ class ReActProcess:
                 total_output += response.usage.output_tokens
 
                 for cb in self._callbacks:
-                    await cb.on_agent_response(response, iterations)
+                    try:
+                        await cb.on_agent_response(response, iterations)
+                    except Exception:
+                        pass
 
             termination = _derive_termination_reason(response.stop_reason, iterations, self._max_iterations)
             react_result = ReActResult(
@@ -166,7 +175,10 @@ class ReActProcess:
             )
 
             for cb in self._callbacks:
-                await cb.on_complete(react_result)
+                try:
+                    await cb.on_complete(react_result)
+                except Exception:
+                    pass
 
             return react_result
 
