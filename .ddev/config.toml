@@ -17,6 +17,7 @@ lustre = "Lustre"
 prefect = "Prefect"
 n8n = "n8n"
 control_m = "Control-M"
+nifi = "Apache NiFi"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
@@ -24,6 +25,7 @@ lustre = "lustre."
 prefect = "prefect.server."
 n8n = "n8n."
 control_m = "control_m."
+nifi = "nifi."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -221,3 +223,4 @@ lustre = ["linux", "windows", "mac_os"]
 prefect = ["linux", "windows", "mac_os"]
 n8n = ["linux", "windows", "mac_os"]
 control_m = ["linux", "windows", "mac_os"]
+nifi = ["linux", "windows", "mac_os"]
