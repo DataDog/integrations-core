@@ -29,6 +29,7 @@ files:
           example: ^(datadog_test|dogs)$
           type: string
           display_default: null
+        fleet_configurable: true
       - name: host
         description: If `database_url` is not used, set up the host to connect to with the `host` parameter.
         value:
