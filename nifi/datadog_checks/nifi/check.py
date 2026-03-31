@@ -55,7 +55,9 @@ class NifiCheck(AgentCheck):
 
     @staticmethod
     def _parse_utilization(value):
-        """Parse a percentage string like '16.0%' to a float."""
+        """Parse a percentage string like '16.0%' to a float. Returns 0.0 for unavailable values."""
+        if not value or value == 'N/A':
+            return 0.0
         if isinstance(value, str) and value.endswith('%'):
             return float(value.rstrip('%'))
         return float(value)
@@ -113,17 +115,23 @@ class NifiCheck(AgentCheck):
 
     def _collect_process_group_metrics(self, api, base_tags):
         process_groups = self.instance.get('process_groups', ['root'])
+        visited = set()
         for pg_id in process_groups:
             data = api.get_process_group_status(pg_id)
             pg_status = data.get('processGroupStatus', {})
-            self._emit_process_group(pg_status, base_tags)
+            self._emit_process_group(pg_status, base_tags, visited)
 
-    def _emit_process_group(self, pg_status, base_tags):
+    def _emit_process_group(self, pg_status, base_tags, visited):
         """Emit metrics for a process group and recurse into child groups."""
         snap = pg_status.get('aggregateSnapshot', {})
+        pg_id = snap.get('id', 'unknown')
+        if pg_id in visited:
+            return
+        visited.add(pg_id)
+
         pg_tags = base_tags + [
             f'process_group_name:{snap.get("name", "unknown")}',
-            f'process_group_id:{snap.get("id", "unknown")}',
+            f'process_group_id:{pg_id}',
         ]
 
         self.gauge('process_group.flowfiles_queued', snap.get('flowFilesQueued', 0), tags=pg_tags)
@@ -144,7 +152,7 @@ class NifiCheck(AgentCheck):
         for child in snap.get('processGroupStatusSnapshots', []):
             child_status = child.get('processGroupStatusSnapshot', {})
             if child_status:
-                self._emit_process_group({'aggregateSnapshot': child_status}, base_tags)
+                self._emit_process_group({'aggregateSnapshot': child_status}, base_tags, visited)
 
     def _emit_connection_metrics(self, pg_snap, base_tags):
         max_connections = self.instance.get('max_connections', 200)
@@ -245,7 +253,11 @@ class NifiCheck(AgentCheck):
             if ts_iso:
                 try:
                     dt = datetime.fromisoformat(ts_iso.replace('Z', '+00:00'))
-                    ts = int(dt.replace(tzinfo=timezone.utc if dt.tzinfo is None else dt.tzinfo).timestamp())
+                    if dt.tzinfo is None:
+                        dt = dt.replace(tzinfo=timezone.utc)
+                    else:
+                        dt = dt.astimezone(timezone.utc)
+                    ts = int(dt.timestamp())
                 except (ValueError, OSError):
                     pass
 

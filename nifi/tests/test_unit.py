@@ -385,6 +385,12 @@ class TestSystemDiagnostics:
         assert NifiCheck._parse_utilization('100.0%') == 100.0
         assert NifiCheck._parse_utilization(42.5) == 42.5
 
+    def test_parse_utilization_unavailable(self):
+        """N/A and None (returned by NiFi when metrics are unavailable) return 0.0."""
+        assert NifiCheck._parse_utilization('N/A') == 0.0
+        assert NifiCheck._parse_utilization(None) == 0.0
+        assert NifiCheck._parse_utilization('') == 0.0
+
 
 class TestFlowStatus:
     def test_flow_status_metrics(self, dd_run_check, aggregator):
@@ -479,6 +485,71 @@ class TestProcessGroup:
         aggregator.assert_metric('nifi.process_group.flowfiles_queued', value=5, tags=child_tags)
         aggregator.assert_metric('nifi.process_group.bytes_read', value=512, tags=child_tags)
         aggregator.assert_metric('nifi.process_group.active_threads', value=1, tags=child_tags)
+
+    def test_overlapping_process_groups_no_duplicates(self, dd_run_check, aggregator):
+        """Configuring both a parent and child group ID does not emit duplicate metrics."""
+        child_snapshot = {
+            'id': 'child-id',
+            'name': 'Child Group',
+            'flowFilesQueued': 5,
+            'bytesQueued': 0,
+            'bytesRead': 0,
+            'bytesWritten': 0,
+            'flowFilesReceived': 0,
+            'flowFilesSent': 0,
+            'flowFilesTransferred': 0,
+            'activeThreadCount': 1,
+            'connectionStatusSnapshots': [],
+            'processorStatusSnapshots': [],
+            'processGroupStatusSnapshots': [],
+        }
+        parent_response = {
+            'processGroupStatus': {
+                'aggregateSnapshot': {
+                    'id': 'root-id',
+                    'name': 'Root',
+                    'flowFilesQueued': 10,
+                    'bytesQueued': 0,
+                    'bytesRead': 0,
+                    'bytesWritten': 0,
+                    'flowFilesReceived': 0,
+                    'flowFilesSent': 0,
+                    'flowFilesTransferred': 0,
+                    'activeThreadCount': 0,
+                    'connectionStatusSnapshots': [],
+                    'processorStatusSnapshots': [],
+                    'processGroupStatusSnapshots': [{'processGroupStatusSnapshot': child_snapshot}],
+                }
+            }
+        }
+        child_response = {'processGroupStatus': {'aggregateSnapshot': child_snapshot}}
+
+        def side_effect(method, url, **kwargs):
+            if '/access/token' in url:
+                return _mock_response(201, text='test-token')
+            if '/flow/about' in url:
+                return _mock_response(200, json_data=ABOUT_RESPONSE)
+            if '/system-diagnostics' in url:
+                return _mock_response(200, json_data=SYSTEM_DIAGNOSTICS_RESPONSE)
+            if '/flow/status' in url:
+                return _mock_response(200, json_data=FLOW_STATUS_RESPONSE)
+            if 'root-id' in url:
+                return _mock_response(200, json_data=parent_response)
+            if 'child-id' in url:
+                return _mock_response(200, json_data=child_response)
+            if '/flow/cluster/summary' in url:
+                return _mock_response(200, json_data=CLUSTER_SUMMARY_STANDALONE)
+            if '/flow/bulletin-board' in url:
+                return _mock_response(200, json_data=EMPTY_BULLETIN_BOARD)
+            raise ValueError(f'Unmocked URL: {method} {url}')
+
+        check = NifiCheck('nifi', {}, [_make_instance(process_groups=['root-id', 'child-id'])])
+        with patch('requests.Session.request', side_effect=side_effect):
+            dd_run_check(check)
+
+        child_tags = ['nifi_version:2.8.0', 'process_group_name:Child Group', 'process_group_id:child-id']
+        # Child group should only appear once even though it's reachable via both root and direct listing
+        aggregator.assert_metric('nifi.process_group.flowfiles_queued', value=5, tags=child_tags, count=1)
 
 
 PG_WITH_CONNECTIONS_AND_PROCESSORS = {
