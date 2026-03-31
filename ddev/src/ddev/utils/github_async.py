@@ -294,9 +294,7 @@ class AsyncGitHubClient:
             AsyncIterator[GitHubResponse[ArtifactsList]]: One page of artifacts per iteration.
         """
         endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"
-        async for response in self._paginated_request(
-            "GET", endpoint, timeout=timeout, params={"per_page": per_page}
-        ):
+        async for response in self._paginated_request("GET", endpoint, timeout=timeout, params={"per_page": per_page}):
             body = response.json()
             yield GitHubResponse[ArtifactsList].model_validate(
                 {
