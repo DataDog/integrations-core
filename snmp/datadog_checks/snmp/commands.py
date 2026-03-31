@@ -47,11 +47,12 @@ def snmp_get(config, oids, lookup_mib):
     def callback(  # type: ignore
         snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx
     ):
-        newVarBinds = unmakeVarbinds(snmpEngine, varBinds, lookup_mib)
-
-        cbCtx['error'] = errorIndication
-        cbCtx['var_binds'] = newVarBinds
-        snmpEngine.transport_dispatcher.loop.stop()
+        try:
+            newVarBinds = unmakeVarbinds(snmpEngine, varBinds, lookup_mib)
+            cbCtx['error'] = errorIndication
+            cbCtx['var_binds'] = newVarBinds
+        finally:
+            snmpEngine.transport_dispatcher.loop.stop()
 
     ctx = {}  # type: Dict[str, Any]
     var_binds = vbProcessor.make_varbinds(_engine_cache(config._snmp_engine), oids)
@@ -83,14 +84,15 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
     def callback(  # type: ignore
         snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx
     ):
-        var_bind_table = [
-            vbProcessor.unmake_varbinds(_engine_cache(snmpEngine), row, lookup_mib) for row in varBindTable
-        ]
-        if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
-            errorIndication = None
-        cbCtx['error'] = errorIndication
-        cbCtx['var_bind_table'] = var_bind_table[0] if var_bind_table else []
-        snmpEngine.transport_dispatcher.loop.stop()
+        try:
+            # pysnmp 7.x passes varBindTable as a flat list of (OID, val) pairs
+            processed = vbProcessor.unmake_varbinds(_engine_cache(snmpEngine), varBindTable, lookup_mib)
+            if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
+                errorIndication = None
+            cbCtx['error'] = errorIndication
+            cbCtx['var_bind_table'] = processed
+        finally:
+            snmpEngine.transport_dispatcher.loop.stop()
 
     ctx = {}  # type: Dict[str, Any]
 
@@ -139,14 +141,17 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
     def callback(  # type: ignore
         snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx
     ):
-        var_bind_table = [
-            vbProcessor.unmake_varbinds(_engine_cache(snmpEngine), row, lookup_mib) for row in varBindTable
-        ]
-        if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
-            errorIndication = None
-        cbCtx['error'] = errorIndication
-        cbCtx['var_bind_table'] = var_bind_table
-        snmpEngine.transport_dispatcher.loop.stop()
+        try:
+            # pysnmp 7.x passes varBindTable as a flat list of (OID, val) pairs;
+            # wrap each in a list to preserve the expected [(name, val)] row structure.
+            unmade = vbProcessor.unmake_varbinds(_engine_cache(snmpEngine), varBindTable, lookup_mib)
+            var_bind_table = [[vb] for vb in unmade]
+            if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
+                errorIndication = None
+            cbCtx['error'] = errorIndication
+            cbCtx['var_bind_table'] = var_bind_table
+        finally:
+            snmpEngine.transport_dispatcher.loop.stop()
 
     ctx = {}  # type: Dict[str, Any]
 
