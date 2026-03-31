@@ -12,6 +12,8 @@ files:
     - name: proxmox_server
       fleet_configurable: true
       display_priority: 5
+      formats:
+        - url
       description: |
         Proxmox API endpoint.
       value:

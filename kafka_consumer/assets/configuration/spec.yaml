@@ -239,6 +239,8 @@ files:
             example: us-west-2
         - name: url
           fleet_configurable: true
+          formats:
+            - url
           description: |
             The token endpoint. Required when method is `oidc`.
           value:
@@ -340,6 +342,8 @@ files:
         description: |
           Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.
         fleet_configurable: true
+        formats:
+          - url
         value:
           type: string
           example: http://localhost:8081
