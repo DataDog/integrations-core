@@ -19,7 +19,7 @@ def test_mock_response_json_with_custom_headers():
     headers = {'X-Custom': 'value'}
     response = MockHTTPResponse(json_data={'key': 'value'}, headers=headers)
 
-    assert response.headers['Content-Type'] == 'application/json'
+    assert response.headers['content-type'] == 'application/json'
     assert response.headers['x-custom'] == 'value'
 
 

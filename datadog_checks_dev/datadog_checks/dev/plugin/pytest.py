@@ -35,6 +35,8 @@ __aggregator = None
 __datadog_agent = None
 MockHTTPResponse = None
 
+_DEFAULT_MOCK_METHOD = 'requests.Session.get'  # TODO(httpx-migration): update when backend changes
+
 
 @pytest.fixture
 def aggregator():
@@ -296,7 +298,7 @@ def mock_response():
 @pytest.fixture
 def mock_http_response(mocker, mock_response):
     yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop('method', 'requests.Session.get'), return_value=mock_response(*args, **kwargs)
+        kwargs.pop('method', _DEFAULT_MOCK_METHOD), return_value=mock_response(*args, **kwargs)
     )
 
 
@@ -367,7 +369,7 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         responses_by_endpoint: Dict[str, list[MockHTTPResponse]],
         mode: Literal['cycle', 'exhaust', 'default'] = 'cycle',
         default_response: MockHTTPResponse | None = None,
-        method: str = 'requests.Session.get',  # TODO(httpx-migration): update default when backend changes
+        method: str = _DEFAULT_MOCK_METHOD,
         url_arg_index: int = 1,
         url_kwarg_name: str = "url",
         strict: bool = True,
