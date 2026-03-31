@@ -1,0 +1,1 @@
+Fix process_isolation parameter to handle log formats and external tags.

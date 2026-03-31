@@ -46,7 +46,7 @@ files:
         type: string
     - name: dbname
       description: |
-        The name of the PostgresSQL database to monitor.
+        The name of the PostgreSQL database to monitor.
         Note: If omitted, the default system Postgres database is queried.
       fleet_configurable: true
       value:
@@ -101,7 +101,7 @@ files:
     - name: ignore_databases
       fleet_configurable: true
       description: |
-        A list of database to ignore. No metrics or statement samples will be collected for these databases.
+        A list of databases to ignore. No metrics or statement samples will be collected for these databases.
         Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
         set collect_default_database to false in addition to adding it to this array.
         For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
@@ -146,9 +146,11 @@ files:
     - name: ssl
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
-        is negotiated with the server. There are six modes:
+        is negotiated with the server.
+
+        There are six modes:
         - `disable`: Only tries a non-SSL connection.
-        - `allow`: First tries a non-SSL connection; if if fails, tries an SSL connection.
+        - `allow`: First tries a non-SSL connection; if it fails, tries an SSL connection.
         - `prefer`: First tries an SSL connection; if it fails, tries a non-SSL connection.
         - `require`: Only tries an SSL connection. If a root CA file is present, verifies the certificate in
                      the same way as if verify-ca was specified.
@@ -234,7 +236,7 @@ files:
     - name: relations
       fleet_configurable: true
       description: |
-        The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
+        The list of relations/tables must be specified here to track per-relation (table, index, view, etc.) metrics.
         If enabled, `dbname` should be specified to collect database-specific relations metrics.
         You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
         from all matching relations (useful in cases where relation names are dynamically generated, e.g. TimescaleDB).
@@ -783,7 +785,7 @@ files:
         - name: ignored_settings_patterns
           fleet_configurable: true
           description: |
-            A list of setting patterns to ignore. Any setting key matching one of the value in this list will
+            A list of setting patterns to ignore. Any setting key matching one of the values in this list will
             not be collected. This uses the traditional LIKE pattern-matching approach.
           value:
               type: array
@@ -1133,7 +1135,7 @@ files:
         - name: keep_sql_alias
           fleet_configurable: true
           description: |
-            Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+            Set to `true` to keep SQL aliases in obfuscated SQL statements. Examples of aliases are
             `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
             When `true` these aliases will not be removed.
           value:
@@ -1261,6 +1263,7 @@ files:
       fleet_configurable: true
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+
         When set to `true`, the tags from the agent host are added to the check's tags for all instances.
         This option takes precedence over the `propagate_agent_tags` option in `init_config`.
       value:

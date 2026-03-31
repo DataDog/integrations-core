@@ -24,11 +24,13 @@ files:
       description: |
         The name of the performance counter set.
 
-          The following example fetches the number of processes and users:
-          # - countersetname: Processor
-          #   metrics:
-          #     - ['% Processor Time', pdh.processor.time, gauge]
-          #     - ['% User Time', pdh.processor.user.time, gauge]
+        The following example fetches the number of processes and users:
+        ```
+          - countersetname: Processor
+            metrics:
+              - ['% Processor Time', pdh.processor.time, gauge]
+              - ['% User Time', pdh.processor.user.time, gauge]
+        ```
 
       value:
         example: <COUNTER_SET_NAME>
@@ -39,6 +41,7 @@ files:
       description: |
         A list of metrics you want to capture, with each item in the
         list being a set of [<COUNTER_NAME>, <METRIC_NAME>, <METRIC_TYPE>]:
+
           * <COUNTER_NAME> is something like `NumberOfUsers` or `ThreadCount`.
                            The standard properties are also available on the MSDN docs for each
                            class. It's recommend to wrap the property in quotes to avoid YAML parsing

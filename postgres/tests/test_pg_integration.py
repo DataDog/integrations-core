@@ -61,6 +61,7 @@ from .utils import (
 )
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
+CONNECTION_METRICS_BY_DB = ['postgresql.database_connections', 'postgresql.percent_database_usage_connections']
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -425,10 +426,16 @@ def test_connections_metrics(aggregator, integration_check, pg_instance):
     check.run()
 
     expected_tags = _get_expected_tags(check, pg_instance)
+    expected_tags_with_db = expected_tags + ['db:datadog_test']
+
     for name in CONNECTION_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
-    expected_tags += ['db:datadog_test']
-    aggregator.assert_metric('postgresql.connections', count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.connections', count=1, tags=expected_tags_with_db)
+
+    for name in CONNECTION_METRICS_BY_DB:
+        aggregator.assert_metric(name, count=1, tags=expected_tags_with_db)
+    aggregator.assert_metric('postgresql.database_connections', count=1, tags=expected_tags_with_db)
+    aggregator.assert_metric('postgresql.percent_database_usage_connections', count=1, tags=expected_tags_with_db)
 
 
 @requires_over_10
@@ -810,6 +817,9 @@ def test_correct_hostname(
 
     for name in CONNECTION_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags_no_db, hostname=expected_hostname)
+
+    for name in CONNECTION_METRICS_BY_DB:
+        aggregator.assert_metric(name, count=1, tags=expected_tags_with_db, hostname=expected_hostname)
 
     aggregator.assert_service_check(
         'postgres.can_connect',
