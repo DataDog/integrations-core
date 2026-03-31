@@ -548,5 +548,74 @@ class TestConsumeMessagesEarlyReturn:
         assert consumer.poll.call_count == 2
 
 
+class TestClusterIdOverride:
+    """Test kafka_cluster_id instance-level override for cluster verification."""
+
+    def test_cluster_id_override_used_for_verification(self, aggregator, dd_run_check):
+        """When kafka_cluster_id is set, it should be used instead of the action's cluster field."""
+        messages = [
+            MockKafkaMessage(key=b'key-1', value=b'value-1', offset=100),
+        ]
+
+        instance = {
+            'remote_config_id': 'test-override-001',
+            'kafka_connect_str': 'localhost:9092',
+            'kafka_cluster_id': 'actual-kafka-id',
+            'read_messages': {
+                'cluster': 'human-readable-name',
+                'topic': 'test-topic',
+            },
+        }
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        with (
+            patch.object(check.kafka_client, 'consume_messages', return_value=messages),
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='actual-kafka-id'),
+        ):
+            # Should not raise - override matches actual cluster ID
+            dd_run_check(check)
+
+    def test_cluster_id_override_mismatch_raises(self, aggregator, dd_run_check):
+        """When kafka_cluster_id is set but doesn't match, verification should fail."""
+        instance = {
+            'remote_config_id': 'test-override-002',
+            'kafka_connect_str': 'localhost:9092',
+            'kafka_cluster_id': 'expected-cluster-id',
+            'read_messages': {
+                'cluster': 'human-readable-name',
+                'topic': 'test-topic',
+            },
+        }
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        with (
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='different-cluster-id'),
+        ):
+            with pytest.raises(Exception, match='Cluster ID mismatch'):
+                dd_run_check(check)
+
+    def test_no_override_falls_back_to_action_cluster(self, aggregator, dd_run_check):
+        """Without kafka_cluster_id, the action's cluster field is used for verification."""
+        messages = [
+            MockKafkaMessage(key=b'key-1', value=b'value-1', offset=100),
+        ]
+
+        instance = {
+            'remote_config_id': 'test-override-003',
+            'kafka_connect_str': 'localhost:9092',
+            'read_messages': {
+                'cluster': 'test-cluster',
+                'topic': 'test-topic',
+            },
+        }
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        with (
+            patch.object(check.kafka_client, 'consume_messages', return_value=messages),
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
+        ):
+            dd_run_check(check)
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-vv'])

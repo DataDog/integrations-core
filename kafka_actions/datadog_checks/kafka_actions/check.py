@@ -32,6 +32,7 @@ class KafkaActionsCheck(AgentCheck):
         self.remote_config_id = self.config.remote_config_id
         self.action = self.config.action
         self.cluster = 'unknown'  # Will be set by action handlers
+        self.kafka_cluster_id_override = self.instance.get('kafka_cluster_id')
 
         self.kafka_client = KafkaActionsClient(self.config, self.log)
 
@@ -89,12 +90,10 @@ class KafkaActionsCheck(AgentCheck):
             self.kafka_client.close()
 
     def _verify_cluster_id(self):
-        """Verify that the configured cluster matches the actual Kafka cluster ID.
+        """Verify that the configured cluster matches the actual Kafka cluster ID."""
+        expected_cluster_id = self.kafka_cluster_id_override or self.cluster
 
-        Raises:
-            Exception: If cluster verification fails
-        """
-        if not self.cluster:
+        if not expected_cluster_id:
             self.log.debug("No cluster parameter in action config, skipping cluster verification")
             return
 
@@ -103,22 +102,24 @@ class KafkaActionsCheck(AgentCheck):
         except Exception as e:
             raise Exception(
                 f"Failed to retrieve Kafka cluster ID for verification. "
-                f"Unable to verify that the configured cluster '{self.cluster}' "
+                f"Unable to verify that the configured cluster '{expected_cluster_id}' "
                 f"matches the actual Kafka cluster: {e}"
             )
 
-        if not self._normalize_cluster_id(self.cluster) or not self._normalize_cluster_id(actual_cluster_id):
-            raise Exception(f"Invalid cluster ID format. Configured: '{self.cluster}', Actual: '{actual_cluster_id}'")
-
-        if self._normalize_cluster_id(self.cluster) != self._normalize_cluster_id(actual_cluster_id):
+        if not self._normalize_cluster_id(expected_cluster_id) or not self._normalize_cluster_id(actual_cluster_id):
             raise Exception(
-                f"Cluster ID mismatch! Configured cluster '{self.cluster}' does not match "
+                f"Invalid cluster ID format. Configured: '{expected_cluster_id}', Actual: '{actual_cluster_id}'"
+            )
+
+        if self._normalize_cluster_id(expected_cluster_id) != self._normalize_cluster_id(actual_cluster_id):
+            raise Exception(
+                f"Cluster ID mismatch! Configured cluster '{expected_cluster_id}' does not match "
                 f"actual Kafka cluster ID '{actual_cluster_id}'. "
-                f"This action is configured to run on '{self.cluster}' "
+                f"This action is configured to run on '{expected_cluster_id}' "
                 f"but you are connected to '{actual_cluster_id}'."
             )
 
-        self.log.debug("Cluster ID verification successful: '%s' matches '%s'", self.cluster, actual_cluster_id)
+        self.log.debug("Cluster ID verification successful: '%s' matches '%s'", expected_cluster_id, actual_cluster_id)
 
     @staticmethod
     def _normalize_cluster_id(cluster_id: str) -> str:
