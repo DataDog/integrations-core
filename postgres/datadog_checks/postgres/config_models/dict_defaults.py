@@ -137,6 +137,8 @@ def instance_locks_idle_in_transaction():
 def instance_data_observability():
     return instance.DataObservability(
         enabled=False,
-        collection_interval=600,
+        collection_interval=10,
         run_sync=False,
+        config_id=None,
+        queries=(),
     )

@@ -545,23 +545,78 @@ files:
     - name: data_observability
       fleet_configurable: true
       description: |
-        Set to `true` to enable Data Observability.
-      value:
-        type: object
-        properties:
-          - name: enabled
+        Configure the Data Observability async job, which executes monitoring
+        queries delivered via Remote Configuration.
+      options:
+        - name: enabled
+          fleet_configurable: true
+          description: Enable the Data Observability job.
+          value:
             type: boolean
             example: false
             display_default: false
-          - name: collection_interval
+        - name: collection_interval
+          fleet_configurable: true
+          description: |
+            How often (in seconds) the job wakes up to check which queries are
+            due. Individual queries have their own interval_seconds.
+          value:
             type: number
-            example: 600
-            display_default: 600
-          - name: run_sync
-            hidden: true
+            example: 10
+            display_default: 10
+        - name: run_sync
+          hidden: true
+          description: Run the job synchronously (for testing).
+          value:
             type: boolean
             example: false
             display_default: false
+        - name: config_id
+          hidden: true
+          description: |
+            Identifier of the Remote Configuration payload. Injected by the
+            Go RC handler; should not be set manually.
+          value:
+            type: string
+        - name: queries
+          hidden: true
+          description: |
+            List of monitor queries to execute, injected by RC.
+          value:
+            type: array
+            items:
+              type: object
+              properties:
+              - name: monitor_id
+                type: integer
+              - name: type
+                type: string
+              - name: query
+                type: string
+              - name: interval_seconds
+                type: integer
+              - name: timeout_seconds
+                type: integer
+              - name: entity
+                type: object
+                properties:
+                - name: platform
+                  type: string
+                - name: account
+                  type: string
+                - name: database
+                  type: string
+                - name: schema
+                  type: string
+                - name: table
+                  type: string
+              - name: custom_sql_select_fields
+                type: object
+                properties:
+                - name: metric_config_id
+                  type: integer
+                - name: entity_id
+                  type: string
     - name: pg_stat_statements_view
       description: |
         Set this value if you want to define a custom view or function to allow the datadog user to query the

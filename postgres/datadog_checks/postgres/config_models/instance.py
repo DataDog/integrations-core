@@ -111,14 +111,51 @@ class CustomQuery(BaseModel):
     tags: Optional[tuple[str, ...]] = None
 
 
+class CustomSqlSelectFields(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    entity_id: Optional[str] = None
+    metric_config_id: Optional[int] = None
+
+
+class Entity(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    account: Optional[str] = None
+    database: Optional[str] = None
+    platform: Optional[str] = None
+    schema_: Optional[str] = Field(None, alias='schema')
+    table: Optional[str] = None
+
+
+class Query(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    custom_sql_select_fields: Optional[CustomSqlSelectFields] = None
+    entity: Optional[Entity] = None
+    interval_seconds: Optional[int] = None
+    monitor_id: Optional[int] = None
+    query: Optional[str] = None
+    timeout_seconds: Optional[int] = None
+    type: Optional[str] = None
+
+
 class DataObservability(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    collection_interval: Optional[float] = Field(None, examples=[600])
-    enabled: Optional[bool] = Field(None, examples=[False])
-    run_sync: Optional[bool] = Field(None, examples=[False])
+    collection_interval: Optional[float] = None
+    config_id: Optional[str] = None
+    enabled: Optional[bool] = None
+    queries: Optional[tuple[Query, ...]] = None
+    run_sync: Optional[bool] = None
 
 
 class DatabaseAutodiscovery(BaseModel):

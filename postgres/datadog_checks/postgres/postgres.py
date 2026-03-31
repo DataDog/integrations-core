@@ -481,8 +481,11 @@ class PostgreSql(DatabaseCheck):
                 self.metadata_samples._job_loop_future.result()
         elif self._config.data_observability.enabled:
             self.metadata_samples.cancel()
+            self.data_observability.cancel()
             if self.metadata_samples._job_loop_future:
                 self.metadata_samples._job_loop_future.result()
+            if self.data_observability._job_loop_future:
+                self.data_observability._job_loop_future.result()
         self._close_db_pool()
 
     def _clean_state(self):
@@ -1161,6 +1164,7 @@ class PostgreSql(DatabaseCheck):
                     self.metadata_samples.run_job_loop(tags)
                 elif self._config.data_observability.enabled:
                     self.metadata_samples.run_job_loop(tags)
+                    self.data_observability.run_job_loop(tags)
                 if self._config.collect_wal_metrics is True:
                     # collect wal metrics for pg < 10 only when explicitly enabled
                     # (requires local filesystem access to the WAL directory)

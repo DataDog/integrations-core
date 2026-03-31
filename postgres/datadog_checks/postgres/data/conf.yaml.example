@@ -434,10 +434,21 @@ instances:
     #
     # dbm: false
 
-    ## @param data_observability - mapping - optional
-    ## Set to `true` to enable Data Observability.
+    ## Configure the Data Observability async job, which executes monitoring
+    ## queries delivered via Remote Configuration.
     #
-    # data_observability: {}
+    # data_observability:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable the Data Observability job.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 10
+        ## How often (in seconds) the job wakes up to check which queries are
+        ## due. Individual queries have their own interval_seconds.
+        #
+        # collection_interval: 10
 
     ## @param pg_stat_statements_view - string - optional - default: pg_stat_statements
     ## Set this value if you want to define a custom view or function to allow the datadog user to query the
