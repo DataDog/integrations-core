@@ -104,6 +104,7 @@ RELATIVE_PATH="postgresql-{{version}}" \
 echo PATH="${DD_PREFIX_PATH}/bin:${PATH:-}" >> "$DD_ENV_FILE"
 
 # zstd for librdkafka compression support
+# Keep version in sync with github.com/DataDog/datadog-agent/deps/repos.MODULE.bazel
 DOWNLOAD_URL="https://github.com/facebook/zstd/releases/download/v{{version}}/zstd-{{version}}.tar.gz" \
 VERSION="1.5.7" \
 SHA256="eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3" \
