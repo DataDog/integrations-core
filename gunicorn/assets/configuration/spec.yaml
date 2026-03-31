@@ -10,6 +10,7 @@ files:
           can be overwritten on an instance
         value:
           type: string
+          require_trusted_provider: true
           example: gunicorn
       - template: init_config/default
   - template: instances
@@ -29,6 +30,7 @@ files:
       description: Command or path to gunicorn (e.g. `/usr/local/bin/gunicorn` or `docker exec container gunicorn`)
       value:
         type: string
+        require_trusted_provider: true
         example: gunicorn
     - template: instances/default
   - template: logs
