@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import asyncio
 import json
 import time
 import weakref  # noqa: F401
@@ -25,6 +26,9 @@ def discover_instances(config, interval, check_ref):
     the reference to the instance, the check is garbage collected properly and
     that function can stop.
     """
+    # pysnmp 7.x uses asyncio; worker threads have no event loop by default in Python 3.10+.
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
     while True:
         start_time = time.time()

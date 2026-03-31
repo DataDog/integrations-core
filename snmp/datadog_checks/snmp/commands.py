@@ -5,12 +5,15 @@ import weakref
 from typing import Any, Dict, Generator  # noqa: F401
 
 import pysnmp.hlapi.v3arch.asyncio as hlapi  # noqa: F401
+from pyasn1.error import PyAsn1Error
 from pyasn1.type.univ import Null
 from pysnmp.entity.rfc3413 import cmdgen
 from pysnmp.hlapi.varbinds import CommandGeneratorVarBinds
 from pysnmp.proto import errind
 from pysnmp.proto.rfc1905 import endOfMibView
+from pysnmp.smi.error import SmiError
 from pysnmp.smi.rfc1902 import ObjectIdentity, ObjectType
+from pysnmp.smi.view import MibViewController
 
 from datadog_checks.base.errors import CheckException
 
@@ -25,7 +28,12 @@ _engine_caches: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
 def _engine_cache(engine):
     # type: (Any) -> Dict[str, Any]
     if engine not in _engine_caches:
-        _engine_caches[engine] = {}
+        # Pre-populate with a MibViewController backed by the engine's own MibBuilder so that
+        # vbProcessor.make_varbinds and the OIDResolver share the same MIB namespace.
+        # Without this, MIBs loaded during make_varbinds (e.g. TCP-MIB) are loaded into a
+        # separate MibBuilder and are invisible to the resolver when lookup_mib=False.
+        cache = {"mibViewController": MibViewController(engine.get_mib_builder())}
+        _engine_caches[engine] = cache
     return _engine_caches[engine]
 
 
@@ -51,6 +59,10 @@ def snmp_get(config, oids, lookup_mib):
             newVarBinds = unmakeVarbinds(snmpEngine, varBinds, lookup_mib)
             cbCtx['error'] = errorIndication
             cbCtx['var_binds'] = newVarBinds
+        except Exception as exc:
+            cbCtx['error'] = None
+            cbCtx['var_binds'] = []
+            cbCtx['exception'] = exc
         finally:
             snmpEngine.transport_dispatcher.loop.stop()
 
@@ -70,6 +82,9 @@ def snmp_get(config, oids, lookup_mib):
     config._snmp_engine.transport_dispatcher.run_dispatcher()
 
     _handle_error(ctx, config)
+
+    if 'exception' in ctx:
+        raise ctx['exception']
 
     return ctx['var_binds']
 
@@ -191,9 +206,27 @@ def unmakeVarbinds(snmpEngine, varBinds, lookupMib=True):
     """Taken from pysnmp's varbinds.py, amended to not ignore the errors that return when resolving the MIB."""
     if lookupMib:
         mibViewController = vbProcessor.get_mib_view_controller(_engine_cache(snmpEngine))
-        varBinds = [
-            ObjectType(ObjectIdentity(x[0]), x[1]).resolveWithMib(mibViewController, ignoreErrors=False)
-            for x in varBinds
-        ]
+        resolved = []
+        for x in varBinds:
+            obj_type = ObjectType(ObjectIdentity(x[0]), x[1]).resolve_with_mib(mibViewController, ignoreErrors=False)
+            # pysnmp 7.x bypasses constraint checking for received SimpleAsn1Type values in
+            # resolve_with_mib; explicitly validate by cloning through the MIB syntax.
+            if not isinstance(obj_type[1], Null):
+                mib_node = obj_type[0].get_mib_node()
+                if mib_node is not None and hasattr(mib_node, 'getSyntax'):
+                    try:
+                        mib_node.getSyntax().clone(obj_type[1])
+                    except PyAsn1Error as e:
+                        raise SmiError(
+                            'MIB object %r having type %r failed to cast value %r: %s'
+                            % (
+                                obj_type[0].prettyPrint(),
+                                mib_node.getSyntax().__class__.__name__,
+                                obj_type[1],
+                                e,
+                            )
+                        )
+            resolved.append(obj_type)
+        varBinds = resolved
 
     return varBinds
