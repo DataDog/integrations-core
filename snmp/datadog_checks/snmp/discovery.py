@@ -27,6 +27,12 @@ def discover_instances(config, interval, check_ref):
     that function can stop.
     """
     # pysnmp 7.x uses asyncio; worker threads have no event loop by default in Python 3.10+.
+    # Save and restore the current loop so that callers (e.g. tests) that already have a
+    # loop in this thread don't lose it when we clean up.
+    try:
+        _prev_loop = asyncio.get_event_loop()
+    except RuntimeError:
+        _prev_loop = None
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
@@ -82,4 +88,4 @@ def discover_instances(config, interval, check_ref):
         if pending:
             loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
         loop.close()
-        asyncio.set_event_loop(None)
+        asyncio.set_event_loop(_prev_loop)

@@ -435,7 +435,12 @@ class SnmpCheck(AgentCheck):
         # KeyError('error').  A fresh per-worker loop avoids the race and also prevents
         # stale timer callbacks from stopping a subsequent check's run_forever() early.
         loop = None
+        _prev_loop = None
         if isolated_loop:
+            try:
+                _prev_loop = asyncio.get_event_loop()
+            except RuntimeError:
+                _prev_loop = None
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             # Shadow with a shallow copy so reinitialize_engine() doesn't mutate
@@ -504,7 +509,7 @@ class SnmpCheck(AgentCheck):
                 if pending:
                     loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
                 loop.close()
-                asyncio.set_event_loop(None)
+                asyncio.set_event_loop(_prev_loop)
 
     def extract_metric_tags(self, metric_tags, results):
         # type: (List[SymbolTag], Dict[str, dict]) -> List[str]
