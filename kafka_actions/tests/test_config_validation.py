@@ -48,6 +48,30 @@ class TestConfigValidation:
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
 
+    def test_kafka_connect_str_list(self, dd_run_check):
+        """Test that kafka_connect_str accepts a list of brokers and joins them."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': ['broker1:9092', 'broker2:9092'],
+            'produce_message': {'cluster': 'test', 'topic': 'test', 'value': 'test'},
+        }
+
+        config = KafkaActionsConfig(instance, None)
+        config.validate_config()
+        assert config.kafka_connect_str == 'broker1:9092,broker2:9092'
+
+    def test_kafka_connect_str_string(self, dd_run_check):
+        """Test that kafka_connect_str works as a plain string."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'broker1:9092,broker2:9092',
+            'produce_message': {'cluster': 'test', 'topic': 'test', 'value': 'test'},
+        }
+
+        config = KafkaActionsConfig(instance, None)
+        config.validate_config()
+        assert config.kafka_connect_str == 'broker1:9092,broker2:9092'
+
 
 class TestReadMessagesValidation:
     """Test read_messages action validation."""
