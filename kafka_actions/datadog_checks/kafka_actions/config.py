@@ -14,7 +14,10 @@ class KafkaActionsConfig:
         self.log = log
 
         self.remote_config_id = instance.get('remote_config_id')
-        self.kafka_connect_str = instance.get('kafka_connect_str')
+        kafka_connect_str = instance.get('kafka_connect_str')
+        if isinstance(kafka_connect_str, list):
+            kafka_connect_str = ','.join(str(s) for s in kafka_connect_str)
+        self.kafka_connect_str = kafka_connect_str
         self.tags = instance.get('tags', [])
 
         # Authentication fields (same pattern as kafka_consumer)
