@@ -81,7 +81,7 @@ facets:
     type: double
 pipeline:
   type: pipeline
-  name: Trend Micro Vision One XDR
+  name: TrendAI Vision One XDR
   enabled: true
   filter:
     query: "source:trend-micro-vision-one-xdr"

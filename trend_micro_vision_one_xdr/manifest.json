@@ -9,17 +9,37 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Trend Micro Vision One XDR logs",
-    "title": "Trend Micro Vision One XDR",
+    "description": "Gain insights into TrendAI Vision One XDR logs",
+    "title": "TrendAI Vision One XDR",
     "media": [
       {
-        "caption": "Trend Micro Vision One XDR - Workbench Alerts",
-        "image_url": "images/trend_micro_vision_one_xdr_workbench_alerts.png",
+        "caption": "TrendAI Vision One XDR - Workbench Alerts",
+        "image_url": "images/trend_ai_vision_one_xdr_workbench_alerts_light.png",
         "media_type": "image"
       },
       {
-        "caption": "Trend Micro Vision One XDR - Observed Attack Techniques",
-        "image_url": "images/trend_micro_vision_one_xdr_oat.png",
+        "caption": "TrendAI Vision One XDR - Workbench Alerts",
+        "image_url": "images/trend_ai_vision_one_xdr_workbench_alerts_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "TrendAI Vision One XDR - Observed Attack Techniques",
+        "image_url": "images/trend_ai_vision_one_xdr_oat_1_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "TrendAI Vision One XDR - Observed Attack Techniques",
+        "image_url": "images/trend_ai_vision_one_xdr_oat_1_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "TrendAI Vision One XDR - Observed Attack Techniques",
+        "image_url": "images/trend_ai_vision_one_xdr_oat_2_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "TrendAI Vision One XDR - Observed Attack Techniques",
+        "image_url": "images/trend_ai_vision_one_xdr_oat_2_dark.png",
         "media_type": "image"
       }
     ],
@@ -43,8 +63,8 @@
       }
     },
     "dashboards": {
-      "Trend Micro Vision One XDR - Workbench Alerts": "assets/dashboards/trend_micro_vision_one_xdr_workbench_alerts.json",
-      "Trend Micro Vision One XDR - Observed Attack Techniques": "assets/dashboards/trend_micro_vision_one_xdr_observed_attack_techniques.json"
+      "TrendAI Vision One XDR - Workbench Alerts": "assets/dashboards/trend_micro_vision_one_xdr_workbench_alerts.json",
+      "TrendAI Vision One XDR - Observed Attack Techniques": "assets/dashboards/trend_micro_vision_one_xdr_observed_attack_techniques.json"
     },
     "logs": {
       "source": "trend-micro-vision-one-xdr"
