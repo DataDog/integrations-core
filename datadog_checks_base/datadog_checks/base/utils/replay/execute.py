@@ -91,10 +91,11 @@ def run_with_isolation(check, aggregator, datadog_agent):
                 if message_type == 'aggregator':
                     getattr(aggregator, message['method'])(check, *message['args'], **message['kwargs'])
                 elif message_type == 'log':
-                    getattr(check.log, message['method'])(*message['args'])
+                    args = message.get('args', [])
+                    if args:
+                        getattr(check.log, message['method'])(args[0])
                 elif message_type == 'datadog_agent':
                     method = message['method']
-                    value = getattr(datadog_agent, method)(*message['args'], **message['kwargs'])
                     args = message['args']
                     if method == 'set_external_tags':
                         args = [[tuple(item) for item in args[0]]]
