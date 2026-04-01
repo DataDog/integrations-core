@@ -20,10 +20,10 @@ datadog-avi-vantage==6.4.0
 datadog-aws-neuron==3.4.0
 datadog-azure-iot-edge==6.5.0
 datadog-barracuda-secure-edge==1.1.0
-datadog-bentoml==1.4.0
+datadog-bentoml==1.5.0
 datadog-beyondtrust-password-safe==1.2.0
 datadog-beyondtrust-privileged-remote-access==1.0.0; sys_platform == 'linux2'
-datadog-boundary==4.3.0
+datadog-boundary==4.4.0
 datadog-btrfs==4.3.0; sys_platform != 'win32'
 datadog-cacti==4.4.0; sys_platform == 'linux2'
 datadog-calico==5.3.0
