@@ -568,9 +568,5 @@ class KafkaActionsClient:
         """
         if self.consumer:
             self.consumer.unassign()
-            self.consumer = None
         if self.producer:
             self.producer.purge()
-            self.producer = None
-        self.admin_client = None
-        self.log.debug("Kafka clients released (non-blocking)")
