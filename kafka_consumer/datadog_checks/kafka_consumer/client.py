@@ -208,6 +208,7 @@ class KafkaClient:
             # https://github.com/confluentinc/confluent-kafka-python/issues/1699
             self.kafka_client.poll(1)
             raise
+        self.kafka_client.poll(0)
 
     def list_consumer_groups(self):
         groups = []
@@ -283,6 +284,8 @@ class KafkaClient:
         return desc.state.name
 
     def close_admin_client(self):
+        if self._kafka_client is not None:
+            self._kafka_client.poll(0)
         self._kafka_client = None
 
     def destroy(self):

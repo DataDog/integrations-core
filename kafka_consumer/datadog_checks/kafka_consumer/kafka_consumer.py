@@ -414,21 +414,22 @@ class KafkaCheck(AgentCheck):
 
         # Open consumer once for both cluster_id and offset fetching
         self.client.open_consumer(dd_consumer_group)
-        cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
+        try:
+            cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
 
-        self.log.debug(
-            'Querying %s %s offsets',
-            len(topic_partitions_to_check),
-            'highwater' if mode == HIGH_WATERMARK else 'lowwater',
-        )
+            self.log.debug(
+                'Querying %s %s offsets',
+                len(topic_partitions_to_check),
+                'highwater' if mode == HIGH_WATERMARK else 'lowwater',
+            )
 
-        result = {}
-        for topic, partition, offset in self.client.consumer_offsets_for_times(
-            partitions=topic_partitions_to_check, offset=mode
-        ):
-            result[(topic, partition)] = offset
-
-        self.client.close_consumer()
+            result = {}
+            for topic, partition, offset in self.client.consumer_offsets_for_times(
+                partitions=topic_partitions_to_check, offset=mode
+            ):
+                result[(topic, partition)] = offset
+        finally:
+            self.client.close_consumer()
 
         self.log.debug('Got %s %s offsets', len(result), 'highwater' if mode == HIGH_WATERMARK else 'lowwater')
         return result, cluster_id
