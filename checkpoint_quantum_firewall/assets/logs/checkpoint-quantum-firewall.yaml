@@ -144,7 +144,7 @@ facets:
     name: Client Outbound Packets
     path: checkpoint.quantum.firewall.client_outbound_packets
     source: log
-    type: integers
+    type: integer
   - facetType: range
     groups:
       - Checkpoint Quantum Firewall
