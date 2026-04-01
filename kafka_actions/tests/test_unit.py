@@ -64,7 +64,7 @@ class TestCancel:
         with patch('datadog_checks.kafka_actions.check.KafkaActionsClient') as mock_client_cls:
             check = KafkaActionsCheck('kafka_actions', {}, [instance])
             check.cancel()
-            mock_client_cls.return_value.close.assert_called_once()
+            mock_client_cls.return_value.close_non_blocking.assert_called_once()
 
 
 class TestReadMessagesAction:

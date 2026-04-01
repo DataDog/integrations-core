@@ -58,7 +58,7 @@ class KafkaActionsCheck(AgentCheck):
 
     def cancel(self):
         """Clean up native librdkafka resources when the check is unscheduled by the CLC."""
-        self.kafka_client.close()
+        self.kafka_client.close_non_blocking()
 
     def check(self, _):
         """Execute the configured action once."""
