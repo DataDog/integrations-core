@@ -233,7 +233,7 @@ datadog-temporal==4.5.0
 datadog-tenable==3.2.0
 datadog-teradata==4.3.0; sys_platform != 'darwin'
 datadog-tibco-ems==2.5.0; sys_platform != 'win32'
-datadog-tls==5.5.0
+datadog-tls==5.6.0
 datadog-tokumx==3.5.0
 datadog-tomcat==4.2.0
 datadog-torchserve==4.3.0
