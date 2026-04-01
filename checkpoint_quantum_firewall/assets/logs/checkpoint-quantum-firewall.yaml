@@ -144,7 +144,7 @@ facets:
     name: Client Outbound Packets
     path: checkpoint.quantum.firewall.client_outbound_packets
     source: log
-    type: integer
+    type: integers
   - facetType: range
     groups:
       - Checkpoint Quantum Firewall
@@ -171,7 +171,7 @@ facets:
       name: byte
 pipeline:
   type: pipeline
-  name: Checkpoint Quantum Firewall
+  name: Check Point Quantum Firewall
   enabled: true
   filter:
     query: "source:checkpoint-quantum-firewall"

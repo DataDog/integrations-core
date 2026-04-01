@@ -10,7 +10,7 @@ This integration ingests URL Filtering logs, Anti Bot logs, Application Control,
 
 ### Installation
 
-To install the Checkpoint Quantum Firewall integration, follow the steps below:
+To install the Check Point Quantum Firewall integration, follow the steps below:
 
 **Note**: This step is not necessary for Agent version >= 7.52.0.
 
@@ -20,7 +20,7 @@ To install the Checkpoint Quantum Firewall integration, follow the steps below:
 
 #### Log collection
 
-**Checkpoint Quantum Firewall:**
+**Check Point Quantum Firewall:**
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` file:
 
@@ -28,7 +28,7 @@ To install the Checkpoint Quantum Firewall integration, follow the steps below:
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `checkpoint_quantum_firewall.d/conf.yaml` file to start collecting your Checkpoint Quantum Firewall logs.
+2. Add this configuration block to your `checkpoint_quantum_firewall.d/conf.yaml` file to start collecting your Check Point Quantum Firewall logs.
 
    See the [sample checkpoint_quantum_firewall.d/conf.yaml][6] for available configuration options.
 
@@ -42,7 +42,7 @@ To install the Checkpoint Quantum Firewall integration, follow the steps below:
 
 3. [Restart the Agent][1].
 
-4. Configure Syslog Message Forwarding from Checkpoint Quantum Firewall:
+4. Configure Syslog Message Forwarding from Check Point Quantum Firewall:
    1. Connect to the command line on the Management Server / Log Server.
    2. Login to the Expert mode. Enter your administrative credentials (after entering credentials, expert mode is enabled).
    3. In order to configure a new target for the exported logs, enter the following commands:
@@ -52,7 +52,7 @@ To install the Checkpoint Quantum Firewall integration, follow the steps below:
       - In the commands above, specify the following Syslog Server Details:
  
         - name: The Name of the syslog server. For example: `datadog_syslog`.
-        - target-server: The destination where you want to send the Checkpoint Quantum Firewall logs.
+        - target-server: The destination where you want to send the Check Point Quantum Firewall logs.
         - target-port: The port on which the syslog server is listening (typically 514).
         - protocol: The protocol name, or which protocol will be used to send logs (TCP/UDP).
         - format: Format must be 'json'.
@@ -70,23 +70,23 @@ To install the Checkpoint Quantum Firewall integration, follow the steps below:
 
 ### Logs
 
-The Checkpoint Quantum Firewall integration collects Firewall, URL Filtering, IPS, Identity Awareness, Application Control, Threat Emulation, Audit, Anti Ransomware, Anti Spam & Email Security, Anti Exploit, Anti Bot, Anti Virus, HTTPS Inspection, DLP, and Anti Malware logs.
+The Check Point Quantum Firewall integration collects Firewall, URL Filtering, IPS, Identity Awareness, Application Control, Threat Emulation, Audit, Anti Ransomware, Anti Spam & Email Security, Anti Exploit, Anti Bot, Anti Virus, HTTPS Inspection, DLP, and Anti Malware logs.
 
 ### Metrics
 
-The Checkpoint Quantum Firewall integration does not include any metrics.
+The Check Point Quantum Firewall integration does not include any metrics.
 
 ### Events
 
-The Checkpoint Quantum Firewall integration does not include any events.
+The Check Point Quantum Firewall integration does not include any events.
 
 ### Service Checks
 
-The Checkpoint Quantum Firewall integration does not include any service checks.
+The Check Point Quantum Firewall integration does not include any service checks.
 
 ## Troubleshooting
 
-**Checkpoint Quantum Firewall:**
+**Check Point Quantum Firewall:**
 
 #### Permission denied while port binding
 
@@ -124,7 +124,7 @@ Make sure that traffic is bypassed from the configured port if the firewall is e
 
 If you see the **Port <PORT-NO\> Already in Use** error, see the following instructions. The example below is for PORT-NO = 514:
 
-On systems using Syslog, if the Agent listens for Checkpoint Quantum Firewall logs on port 514, the following error can appear in the Agent logs: `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`.
+On systems using Syslog, if the Agent listens for Check Point Quantum Firewall logs on port 514, the following error can appear in the Agent logs: `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`.
 
 This error occurs because by default, Syslog listens on port 514. To resolve this error, take **one** of the following steps:
 
