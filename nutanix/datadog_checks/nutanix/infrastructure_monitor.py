@@ -65,7 +65,7 @@ class InfrastructureMonitor:
         # Cluster capacity accumulator
         self._cluster_capacity = ClusterCapacity()
         self._vms_by_host: dict[str, list[dict]] = {}
-        self._hostless_vm_capacity_by_cluster: dict[str, tuple[int, int]] = {}  # cluster_id -> (vcpus, memory_bytes)
+        self._hostless_vm_capacity_by_cluster: dict[str, ClusterCapacity] = {}
 
     def reset_state(self) -> None:
         """Reset all caches and counters for a new collection run."""
@@ -159,9 +159,10 @@ class InfrastructureMonitor:
 
                 self._process_hosts(cluster, vm_stats, cluster_name, pc_label)
 
-                # Add capacity from VMs without a host assignment
-                hostless_vcpus, hostless_memory = self._hostless_vm_capacity_by_cluster.get(cluster_id, (0, 0))
-                self._cluster_capacity.add_vm(hostless_vcpus, hostless_memory)
+                # Add capacity from VMs without a host assignment (batch mode only;
+                # non-batch mode does not fetch unassigned VMs so hostless capacity is not counted)
+                if hostless_cap := self._hostless_vm_capacity_by_cluster.get(cluster_id):
+                    self._cluster_capacity.add_vm(hostless_cap.vcpus_allocated, hostless_cap.memory_allocated_bytes)
 
                 # Report cluster capacity metrics (aggregated from hosts and VMs)
                 cluster_tags = self.check.base_tags + self._extract_cluster_tags(cluster)
@@ -225,13 +226,19 @@ class InfrastructureMonitor:
 
         self._report_vm_capacity_metrics(vm, hostname, vm_tags)
 
+    def _extract_vm_capacity(self, vm: dict) -> tuple[int, int]:
+        """Return (vcpus_allocated, memory_bytes) for a VM."""
+        num_sockets = int(vm.get("numSockets") or 0)
+        num_cores_per_socket = int(vm.get("numCoresPerSocket") or 0)
+        memory_bytes = int(vm.get("memorySizeBytes") or 0)
+        return num_sockets * num_cores_per_socket, memory_bytes
+
     def _report_vm_capacity_metrics(self, vm: dict, hostname: str, vm_tags: list[str]) -> None:
         """Report VM capacity metrics (CPU and memory allocation)."""
         num_sockets = int(vm.get("numSockets") or 0)
         num_cores_per_socket = int(vm.get("numCoresPerSocket") or 0)
         num_threads_per_core = int(vm.get("numThreadsPerCore") or 0)
-        vcpus_allocated = num_sockets * num_cores_per_socket
-        memory_bytes = int(vm.get("memorySizeBytes") or 0)
+        vcpus_allocated, memory_bytes = self._extract_vm_capacity(vm)
 
         self.check.gauge("vm.cpu.sockets", num_sockets, hostname=hostname, tags=vm_tags)
         self.check.gauge("vm.cpu.cores_per_socket", num_cores_per_socket, hostname=hostname, tags=vm_tags)
@@ -244,10 +251,8 @@ class InfrastructureMonitor:
 
     def _accumulate_vm_capacity(self, vm: dict) -> None:
         """Accumulate VM capacity into cluster totals without reporting per-VM metrics."""
-        num_sockets = int(vm.get("numSockets") or 0)
-        num_cores_per_socket = int(vm.get("numCoresPerSocket") or 0)
-        memory_bytes = int(vm.get("memorySizeBytes") or 0)
-        self._cluster_capacity.add_vm(num_sockets * num_cores_per_socket, memory_bytes)
+        vcpus, memory_bytes = self._extract_vm_capacity(vm)
+        self._cluster_capacity.add_vm(vcpus, memory_bytes)
 
     def _report_cluster_basic_metrics(self, cluster: dict, cluster_tags: list[str]) -> None:
         """Report basic cluster metrics (counts)."""
@@ -521,13 +526,12 @@ class InfrastructureMonitor:
             else:
                 cluster_id = get_nested(vm, "cluster/extId")
                 if not cluster_id:
+                    self.check.log.debug("[batch] Skipping hostless VM %s: no cluster ID", vm.get("extId"))
                     continue
-                num_sockets = int(vm.get("numSockets") or 0)
-                num_cores_per_socket = int(vm.get("numCoresPerSocket") or 0)
-                vcpus = num_sockets * num_cores_per_socket
-                memory = int(vm.get("memorySizeBytes") or 0)
-                prev_vcpus, prev_mem = self._hostless_vm_capacity_by_cluster.get(cluster_id, (0, 0))
-                self._hostless_vm_capacity_by_cluster[cluster_id] = (prev_vcpus + vcpus, prev_mem + memory)
+                # Accumulate capacity regardless of power state or resource filters,
+                # mirroring the hosted-VM path where filtered VMs still contribute to cluster totals.
+                vcpus, memory = self._extract_vm_capacity(vm)
+                self._hostless_vm_capacity_by_cluster.setdefault(cluster_id, ClusterCapacity()).add_vm(vcpus, memory)
 
     def _list_clusters(self) -> list[dict]:
         """Fetch all clusters from Prism Central."""

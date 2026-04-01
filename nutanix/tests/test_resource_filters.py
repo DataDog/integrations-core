@@ -6,14 +6,13 @@
 import pytest
 
 from datadog_checks.nutanix import NutanixCheck
-from tests.constants import CLUSTER_TAGS
+from tests.constants import CLUSTER_TAGS, HOST_NAME
 
 pytestmark = [pytest.mark.unit]
 
 CLUSTER_ID = "00064715-c043-5d8f-ee4b-176ec875554d"
 CLUSTER_NAME = "datadog-nutanix-dev"
 HOST_ID = "d8787814-4fe8-4ba5-931f-e1ee31c294a6"
-HOST_NAME = "10-0-0-103-aws-us-east-1a"
 VM_ID = "63e222ec-87ff-491b-b7ba-9247752d44a3"
 
 
@@ -60,7 +59,9 @@ def test_include_host_by_name_regex(dd_run_check, aggregator, mock_instance, moc
     aggregator.assert_metric("nutanix.cluster.count", value=1)
 
 
-def test_exclude_vm_by_id(dd_run_check, aggregator, mock_instance, mock_http_get):
+@pytest.mark.parametrize("batch_vm_collection", [True, False])
+def test_exclude_vm_by_id(dd_run_check, aggregator, mock_instance, mock_http_get, batch_vm_collection):
+    mock_instance["batch_vm_collection"] = batch_vm_collection
     mock_instance["resource_filters"] = [
         {"resource": "vm", "property": "extId", "type": "exclude", "patterns": [f"^{VM_ID}$"]},
     ]
