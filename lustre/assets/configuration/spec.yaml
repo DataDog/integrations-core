@@ -48,6 +48,7 @@ files:
       required: false
       value:
         type: string
+        require_trusted_provider: true
         default: /usr/sbin/lctl
     - name: lnetctl_path
       description: Path to the lnetctl binary.
@@ -55,6 +56,7 @@ files:
       required: false
       value:
         type: string
+        require_trusted_provider: true
         default: /usr/sbin/lnetctl
     - name: lfs_path
       description: Path to the lfs binary.
@@ -62,6 +64,7 @@ files:
       required: false
       value:
         type: string
+        require_trusted_provider: true
         default: /usr/bin/lfs
     - name: enable_lnetctl_detailed
       description: Enable detailed LNET statistics collection.

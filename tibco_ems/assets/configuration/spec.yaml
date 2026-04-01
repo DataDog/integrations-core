@@ -12,6 +12,7 @@ files:
         fleet_configurable: true
         value:
           type: string
+          require_trusted_provider: true
           example: /usr/bin/tibemsadmin
       - template: init_config/default
   - template: instances
@@ -52,6 +53,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
     - name:  tibemsadmin
       description: |
         The command or path to tibemsadmin (for example /usr/bin/tibemsadmin or docker exec <container> tibemsadmin)
@@ -60,4 +62,5 @@ files:
         This overrides `tibemsadmin` defined in `init_config`.
       value:
         type: string
+        require_trusted_provider: true
     - template: instances/default

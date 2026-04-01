@@ -56,6 +56,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
     - name: server_hostname
       description: |
         The hostname of the service with which to connect for servers that support SNI. This
