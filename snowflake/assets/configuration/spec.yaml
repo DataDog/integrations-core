@@ -113,6 +113,7 @@ files:
             Windows - %USERPROFILE%\AppData\Local\Snowflake\Caches\ocsp_response_cache
         value:
           type: string
+          require_trusted_provider: true
           example: <OCSP_RESPONSE_CACHE_FILENAME>
       - name: authenticator
         fleet_configurable: true
@@ -137,6 +138,7 @@ files:
           The token is re-read at every check run.
         value:
           type: string
+          require_trusted_provider: true
           example: /path/to/token
       - name: private_key_path
         fleet_configurable: true
@@ -145,6 +147,7 @@ files:
           The key is re-read at every check run.
         value:
           type: string
+          require_trusted_provider: true
           display_default: null
           example: /path/to/private_key
       - name: private_key_password

@@ -14,6 +14,7 @@ files:
             value:
               example: /usr/bin/ceph
               type: string
+              require_trusted_provider: true
           - name: ceph_cluster
             description: Cluster ceph to query.
             fleet_configurable: true

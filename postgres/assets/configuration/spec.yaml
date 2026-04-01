@@ -171,6 +171,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         default: null
     - name: ssl_cert
       description: |
@@ -180,6 +181,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         default: null
     - name: ssl_key
       description: |
@@ -188,6 +190,7 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
+        require_trusted_provider: true
         default: null
     - name: ssl_password
       description: |

@@ -117,6 +117,7 @@ files:
             fleet_configurable: true
             value:
               type: string
+              require_trusted_provider: true
           - name: charset
             description: Charset you want to use.
             fleet_configurable: true
@@ -130,6 +131,7 @@ files:
               If providing this then there is no need to specify host, port, user, pass or socket.
             value:
               type: string
+              require_trusted_provider: true
 
           - name: connect_timeout
             description: |

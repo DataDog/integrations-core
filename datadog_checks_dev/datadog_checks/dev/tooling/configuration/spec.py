@@ -361,6 +361,14 @@ def options_validator(options, loader, file_name, *sections):
 
 
 def value_validator(value, loader, file_name, sections_display, option_name, depth=0):
+    # Validate require_trusted_provider property if present
+    if 'require_trusted_provider' in value and not isinstance(value['require_trusted_provider'], bool):
+        loader.errors.append(
+            '{}, {}, {}{}: Attribute `require_trusted_provider` must be true or false'.format(
+                loader.source, file_name, sections_display, option_name
+            )
+        )
+
     if 'anyOf' in value:
         if 'type' in value:
             loader.errors.append(

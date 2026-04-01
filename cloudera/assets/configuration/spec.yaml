@@ -54,16 +54,19 @@ files:
       value:
         example: <CERT_PATH>
         type: string
+        require_trusted_provider: true
     - name: cert_file
       description: Path to the file from which the local certificates can be loaded.
       value:
         example: <CERT_FILE_PATH>
         type: string
+        require_trusted_provider: true
     - name: key_file
       description: Path to the file from which to load the private key.
       value:
         example: <KEY_FILE_PATH>
         type: string
+        require_trusted_provider: true
     - name: pools_size
       description: |
         Number of connection pools to cache before discarding the least recently used pool.
