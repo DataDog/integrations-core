@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import base64
+import gc
 import json
 from collections import defaultdict
 from io import BytesIO
@@ -46,7 +47,8 @@ class KafkaCheck(AgentCheck):
 
     def cancel(self):
         """Clean up native librdkafka resources when the check is unscheduled by the CLC."""
-        self.client.close_admin_client()
+        self.client.destroy()
+        gc.collect()
 
     def check(self, _):
         """The main entrypoint of the check."""

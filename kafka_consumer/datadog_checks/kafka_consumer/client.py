@@ -284,3 +284,9 @@ class KafkaClient:
 
     def close_admin_client(self):
         self._kafka_client = None
+
+    def destroy(self):
+        """Delete all native librdkafka client objects to trigger rd_kafka_destroy()."""
+        del self._kafka_client
+        del self._consumer
+        del self._cluster_metadata
