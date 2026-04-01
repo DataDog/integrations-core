@@ -77,7 +77,6 @@
                             "title": "Raw events",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -144,7 +143,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -543,7 +541,6 @@
                             "title": "Events by vendor endpoint",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "queries": [
@@ -613,7 +610,6 @@
                             "title": "Top users",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -683,7 +679,6 @@
                             "title": "Top source IPs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "bar_chart",
                             "requests": [
                                 {
@@ -720,7 +715,7 @@
                                         }
                                     ],
                                     "sort": {
-                                        "count": 1,
+                                        "count": 10,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -751,7 +746,6 @@
                             "title": "Geo distribution of source IPs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "geomap",
                             "requests": [
                                 {
@@ -822,7 +816,6 @@
                             "title": "Event details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
