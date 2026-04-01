@@ -240,7 +240,7 @@ datadog-torchserve==4.4.0
 datadog-traefik-mesh==3.4.0
 datadog-traffic-server==3.6.0
 datadog-twemproxy==3.3.0
-datadog-twistlock==6.3.0
+datadog-twistlock==6.4.0
 datadog-varnish==4.3.0
 datadog-vault==7.3.0
 datadog-velero==3.3.0
