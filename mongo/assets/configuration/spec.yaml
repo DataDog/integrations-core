@@ -455,6 +455,7 @@ files:
       description: A file containing the client certificate and private key. Implies tls=True.
       value:
         type: string
+        require_trusted_provider: true
     - name: tls_ca_file
       description: |
         A file containing one or a bundle of “certification authority” certificates,
@@ -462,6 +463,7 @@ files:
         Implies tls=True.
       value:
         type: string
+        require_trusted_provider: true
     - name: tls_allow_invalid_hostnames
       description: |
         If `True`, disables TLS hostname verification. tls_allow_invalid_hostnames=False implies tls=True.
