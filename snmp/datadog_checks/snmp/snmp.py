@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import asyncio
 import copy
 import fnmatch
 import functools
@@ -385,7 +386,7 @@ class SnmpCheck(AgentCheck):
 
             sent = []
             for host, discovered in list(config.discovered_instances.items()):
-                future = executor.submit(self._check_device, discovered)  # type: Any
+                future = executor.submit(self._check_device, discovered, True)  # type: Any
                 sent.append(future)
                 future.add_done_callback(functools.partial(self._on_check_device_done, host))
             futures.wait(sent)
@@ -425,8 +426,19 @@ class SnmpCheck(AgentCheck):
             # Reset the counter if not's failing
             config.failing_instances.pop(host, None)
 
-    def _check_device(self, config):
-        # type: (InstanceConfig) -> Tuple[Optional[str], List[str]]
+    def _check_device(self, config, isolated_loop=False):
+        # type: (InstanceConfig, bool) -> Tuple[Optional[str], List[str]]
+        # Worker threads must pass isolated_loop=True.  pysnmp 7.x's AsyncioDispatcher
+        # captures asyncio.get_event_loop() when the first transport is registered; if
+        # multiple workers share the same loop, run_dispatcher() returns immediately on
+        # all but the first (loop.is_running() == True), leaving ctx={} and causing
+        # KeyError('error').  A fresh per-worker loop avoids the race and also prevents
+        # stale timer callbacks from stopping a subsequent check's run_forever() early.
+        if isolated_loop:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            config.reinitialize_engine()
+
         # Reset errors
         if config.device is None:
             raise RuntimeError('No device set')  # pragma: no cover

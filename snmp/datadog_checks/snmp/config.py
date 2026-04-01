@@ -77,6 +77,15 @@ class InstanceConfig:
         profiles_by_oid = {} if profiles_by_oid is None else profiles_by_oid
         loader = MIBLoader() if loader is None else loader
 
+        # Store parameters needed to re-create the SNMP engine in worker threads.
+        # See reinitialize_engine().
+        self._loader = loader
+        self._mibs_path = mibs_path
+        self._ip_address = None  # type: Optional[str]
+        self._port = None  # type: Optional[int]
+        self._timeout = None  # type: Optional[int]
+        self._retries = None  # type: Optional[int]
+
         # Clean empty or null values. This will help templating.
         for key, value in list(instance.items()):
             if value in (None, ""):
@@ -114,6 +123,8 @@ class InstanceConfig:
 
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
+        self._timeout = timeout
+        self._retries = retries
 
         ip_address = instance.get('ip_address')
         network_address = instance.get('network_address')
@@ -126,6 +137,8 @@ class InstanceConfig:
 
         if ip_address:
             port = int(instance.get('port', 161))
+            self._ip_address = ip_address
+            self._port = port
 
             target = register_device_target(
                 ip_address,
@@ -209,6 +222,31 @@ class InstanceConfig:
             tag = device.get(device_tag)
             if tag:
                 self.tags.append('device_{}:{}'.format(device_tag, tag))
+
+    def reinitialize_engine(self):
+        # type: () -> None
+        """Re-create the SNMP engine using the current thread's event loop.
+
+        pysnmp 7.x's AsyncioDispatcher captures asyncio.get_event_loop() when the
+        first transport is registered (inside lcd.configure).  If multiple worker
+        threads share the same event loop, run_dispatcher() returns immediately on
+        all but the first worker (loop.is_running() == True), leaving ctx={} and
+        triggering KeyError('error').  Call this at the start of each worker-thread
+        execution after setting a fresh thread-local event loop so the dispatcher
+        captures that loop exclusively.
+        """
+        self._snmp_engine = self._loader.create_snmp_engine(self._mibs_path)
+        if self.device is not None:
+            new_target = register_device_target(
+                self._ip_address,
+                self._port,
+                timeout=self._timeout,
+                retries=self._retries,
+                engine=self._snmp_engine,
+                auth_data=self._auth_data,
+                context_data=self._context_data,
+            )
+            self.device = Device(ip=self._ip_address, port=self._port, target=new_target)
 
     @classmethod
     def get_auth_data(cls, instance):
