@@ -162,6 +162,7 @@ files:
           value:
             example: <PATH_TO_YAML_FILE>
             type: string
+            require_trusted_provider: true
         - name: openstack_cloud_name
           description: |
            Name of the cloud configuration to use.

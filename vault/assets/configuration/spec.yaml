@@ -62,6 +62,7 @@ files:
       value:
         example: <CLIENT_TOKEN_PATH>
         type: string
+        require_trusted_provider: true
     - name: no_token
       description: Attempt metric collection without a token.
       fleet_configurable: true
