@@ -54,7 +54,7 @@ datadog-consul==5.4.0
 datadog-control-m==1.1.0
 datadog-coredns==6.4.0; sys_platform == 'linux2'
 datadog-couch==9.4.0
-datadog-couchbase==6.4.0
+datadog-couchbase==6.5.0
 datadog-crio==5.3.0
 datadog-datadog-cluster-agent==6.4.0
 datadog-datadog-csi-driver==1.4.0; sys_platform != 'win32'
