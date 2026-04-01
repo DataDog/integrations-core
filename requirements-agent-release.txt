@@ -152,7 +152,7 @@ datadog-mac-audit-logs==1.4.0; sys_platform == 'darwin'
 datadog-mapr==3.4.0; sys_platform == 'linux2'
 datadog-mapreduce==7.4.0
 datadog-marathon==5.4.0; sys_platform != 'win32'
-datadog-marklogic==6.4.0
+datadog-marklogic==6.5.0
 datadog-mcache==6.4.0; sys_platform != 'win32'
 datadog-mesos-master==6.3.0; sys_platform != 'win32'
 datadog-mesos-slave==6.3.0; sys_platform != 'win32'
