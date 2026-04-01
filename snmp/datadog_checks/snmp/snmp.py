@@ -438,6 +438,12 @@ class SnmpCheck(AgentCheck):
         if isolated_loop:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
+            # Shadow with a shallow copy so reinitialize_engine() doesn't mutate
+            # the shared InstanceConfig stored in discovered_instances. The copy
+            # gets its own _snmp_engine and device; all other fields (oid_config,
+            # tags, metrics, …) still point to the same underlying objects, which
+            # matches the pre-existing behaviour for those fields.
+            config = copy.copy(config)
             config.reinitialize_engine()
 
         try:

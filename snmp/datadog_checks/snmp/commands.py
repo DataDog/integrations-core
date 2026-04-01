@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import threading
 import weakref
 from typing import Any, Dict, Generator  # noqa: F401
 
@@ -23,23 +24,25 @@ vbProcessor = CommandGeneratorVarBinds()
 
 # pysnmp 7.x make_varbinds/unmake_varbinds expect a Dict cache keyed by engine.
 _engine_caches: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
+_engine_caches_lock = threading.Lock()
 
 
 def _engine_cache(engine):
     # type: (Any) -> Dict[str, Any]
-    if engine not in _engine_caches:
-        # Pre-populate with a MibViewController backed by the engine's own MibBuilder so that
-        # vbProcessor.make_varbinds and the OIDResolver share the same MIB namespace.
-        # Without this, MIBs loaded during make_varbinds (e.g. TCP-MIB) are loaded into a
-        # separate MibBuilder and are invisible to the resolver when lookup_mib=False.
-        cache = {"mibViewController": MibViewController(engine.get_mib_builder())}
-        _engine_caches[engine] = cache
-    return _engine_caches[engine]
+    with _engine_caches_lock:
+        if engine not in _engine_caches:
+            # Pre-populate with a MibViewController backed by the engine's own MibBuilder so that
+            # vbProcessor.make_varbinds and the OIDResolver share the same MIB namespace.
+            # Without this, MIBs loaded during make_varbinds (e.g. TCP-MIB) are loaded into a
+            # separate MibBuilder and are invisible to the resolver when lookup_mib=False.
+            cache = {"mibViewController": MibViewController(engine.get_mib_builder())}
+            _engine_caches[engine] = cache
+        return _engine_caches[engine]
 
 
 def _handle_error(ctx, config):
     # type: (dict, InstanceConfig) -> None
-    error = ctx['error']
+    error = ctx.get('error')
     if error:
         message = '{} for device {}'.format(error, config.device)
         raise CheckException(message)
@@ -106,6 +109,10 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
                 errorIndication = None
             cbCtx['error'] = errorIndication
             cbCtx['var_bind_table'] = processed
+        except Exception as exc:
+            cbCtx['error'] = None
+            cbCtx['var_bind_table'] = []
+            cbCtx['exception'] = exc
         finally:
             snmpEngine.transport_dispatcher.loop.stop()
 
@@ -131,6 +138,9 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
         config._snmp_engine.transport_dispatcher.run_dispatcher()
 
         _handle_error(ctx, config)
+
+        if 'exception' in ctx:
+            raise ctx['exception']
 
         var_binds = []
 
@@ -165,6 +175,10 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
                 errorIndication = None
             cbCtx['error'] = errorIndication
             cbCtx['var_bind_table'] = var_bind_table
+        except Exception as exc:
+            cbCtx['error'] = None
+            cbCtx['var_bind_table'] = []
+            cbCtx['exception'] = exc
         finally:
             snmpEngine.transport_dispatcher.loop.stop()
 
@@ -191,6 +205,9 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
         config._snmp_engine.transport_dispatcher.run_dispatcher()
 
         _handle_error(ctx, config)
+
+        if 'exception' in ctx:
+            raise ctx['exception']
 
         for var_binds in ctx['var_bind_table']:
             name, value = var_binds[0]
