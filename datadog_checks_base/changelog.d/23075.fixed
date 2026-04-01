@@ -1,1 +1,0 @@
-Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place.
