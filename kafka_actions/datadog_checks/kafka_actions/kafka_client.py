@@ -563,11 +563,14 @@ class KafkaActionsClient:
         """Release all Kafka clients without blocking on pending operations.
 
         Safe to call from AgentCheck.cancel() which must not block.
-        Skips producer.flush() and consumer.close() (which waits for
-        group coordination) and simply drops references so that
-        librdkafka resources are freed by the garbage collector.
+        Uses purge/unassign to release resources immediately instead of
+        flush/close which can block waiting on broker communication.
         """
-        self.consumer = None
-        self.producer = None
+        if self.consumer:
+            self.consumer.unassign()
+            self.consumer = None
+        if self.producer:
+            self.producer.purge()
+            self.producer = None
         self.admin_client = None
         self.log.debug("Kafka clients released (non-blocking)")
