@@ -13,27 +13,16 @@ import pytest
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.clickhouse.config_models.instance import InstanceConfig
 
-# Single source of truth for all expected default values.
-# Organized by category for readability.
-# These values are intentionally duplicated from defaults.py / dict_defaults.py so that
-# any change to either source breaks this test and forces a conscious review.
 EXPECTED_DEFAULTS = {
     # === Required fields (no defaults) ===
-    'server': None,  # Required — provided by the minimal instance fixture
+    'server': None,
     # === Connection configuration ===
-    # Note: old inline code had port=None (no default). New default is 8123,
-    # which matches ClickHouse's documented HTTP port and is functionally equivalent.
     'port': 8123,
     'db': 'default',
     'username': 'default',
-    # Note: old inline code defaulted to ''. Fixed in #23015 after the Pydantic
-    # refactor accidentally defaulted to None, causing auth error 194.
     'password': '',
     'connect_timeout': 10,
     'read_timeout': 10,
-    # Note: old inline code defaulted to False (bool). New default is None,
-    # which is coerced to False in connect() via `compression if compression else False`.
-    # coerce_bool(None) == coerce_bool(False) == False in clickhouse_connect — no behaviour change.
     'compression': None,
     'tls_verify': False,
     'tls_ca_cert': None,
@@ -135,7 +124,6 @@ def test_all_config_defaults(minimal_instance):
 
     for field_name, expected_value in EXPECTED_DEFAULTS.items():
         if field_name == 'server':
-            # Required field provided by the fixture — skip default check
             continue
 
         actual_value = getattr(config, field_name)
