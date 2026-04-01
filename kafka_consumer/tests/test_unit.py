@@ -28,6 +28,13 @@ from datadog_checks.kafka_consumer.kafka_consumer import (
 pytestmark = [pytest.mark.unit]
 
 
+def test_cancel_closes_admin_client(check):
+    kafka_consumer_check = check({})
+    kafka_consumer_check.client = mock.create_autospec(KafkaClient)
+    kafka_consumer_check.cancel()
+    kafka_consumer_check.client.close_admin_client.assert_called_once()
+
+
 def fake_consumer_offsets_for_times(partitions, offset=-1):
     """In our testing environment the offset is 80 for all partitions and topics."""
 

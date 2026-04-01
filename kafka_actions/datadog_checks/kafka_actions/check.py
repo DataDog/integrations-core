@@ -56,6 +56,10 @@ class KafkaActionsCheck(AgentCheck):
             "Kafka Actions check initialized - Action: %s, Remote Config ID: %s", self.action, self.remote_config_id
         )
 
+    def cancel(self):
+        """Clean up native librdkafka resources when the check is unscheduled by the CLC."""
+        self.kafka_client.close()
+
     def check(self, _):
         """Execute the configured action once."""
         self.log.debug("Executing Kafka action: %s (Remote Config ID: %s)", self.action, self.remote_config_id)

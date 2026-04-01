@@ -44,6 +44,10 @@ class KafkaCheck(AgentCheck):
         # Initialize cluster metadata collector
         self.metadata_collector = ClusterMetadataCollector(self, self.client, self.config, self.log)
 
+    def cancel(self):
+        """Clean up native librdkafka resources when the check is unscheduled by the CLC."""
+        self.client.close_admin_client()
+
     def check(self, _):
         """The main entrypoint of the check."""
         # Fetch Kafka consumer offsets
