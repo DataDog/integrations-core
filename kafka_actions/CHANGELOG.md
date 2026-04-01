@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 2.5.0 / 2026-04-01
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+***Fixed***:
+
+* Accept list format for `kafka_connect_str` when copied from kafka_consumer config via autodiscovery ([#23115](https://github.com/DataDog/integrations-core/pull/23115))
+
 ## 2.4.1 / 2026-03-24
 
 ***Fixed***:
