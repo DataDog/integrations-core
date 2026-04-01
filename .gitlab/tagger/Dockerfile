@@ -19,6 +19,7 @@ RUN apt-get update \
       libffi-dev \
       libssl-dev \
       moreutils \
+      openssh-client \
       python3-dev \
  # Clean up
  && apt-get -y autoremove \
@@ -26,6 +27,11 @@ RUN apt-get update \
  && rm -rf /tmp/* \
  && rm -rf /var/lib/apt/lists/* \
  && rm -rf /var/tmp/*
+
+# Add GitHub public host key to the list of known hosts
+# https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints
+RUN mkdir -p ~/.ssh \
+ && ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 
 # dd-octo-sts CLI for GitHub token exchange (replaces SSH deploy key)
 # To update: crane ls registry.ddbuild.io/dd-octo-sts | sort -V | tail -1
