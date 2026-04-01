@@ -189,6 +189,11 @@ def test_create_batched_payload_structure(check_with_dbm):
     assert 'timestamp' in payload
     assert 'host' in payload
     assert 'database_instance' in payload
+    assert payload['ddagentversion'] == '7.64.0'
+    assert payload['ddtags'] == ['test:clickhouse', 'server:localhost']
+    assert payload['collection_interval'] == query_errors._collection_interval
+    assert 'clickhouse_version' in payload
+    assert 'service' in payload
 
 
 def test_query_errors_sql_query_format():
@@ -256,3 +261,37 @@ def test_separate_checkpoint_key(check_with_dbm):
     """Test that query errors use a separate checkpoint cache key from completions"""
     assert check_with_dbm.query_errors.CHECKPOINT_CACHE_KEY == "query_errors_last_checkpoint_microseconds"
     assert check_with_dbm.query_errors.CHECKPOINT_CACHE_KEY != check_with_dbm.query_completions.CHECKPOINT_CACHE_KEY
+
+
+def test_collect_and_submit_no_rows(check_with_dbm):
+    """Test that _collect_and_submit returns early and advances checkpoint when no rows are returned"""
+    query_errors = check_with_dbm.query_errors
+
+    with (
+        mock.patch.object(query_errors, '_collect_query_errors', return_value=[]) as mock_collect,
+        mock.patch.object(query_errors, '_advance_checkpoint') as mock_advance,
+        mock.patch.object(query_errors, '_create_batched_payload') as mock_payload,
+    ):
+        query_errors._collect_and_submit()
+
+    mock_collect.assert_called_once()
+    mock_advance.assert_called_once()
+    mock_payload.assert_not_called()
+
+
+def test_collect_and_submit_all_rate_limited(check_with_dbm):
+    """Test that _collect_and_submit returns early and advances checkpoint when all rows are rate-limited"""
+    query_errors = check_with_dbm.query_errors
+    rows = [{'query_signature': 'abc123', 'statement': 'SELECT 1'}]
+
+    with (
+        mock.patch.object(query_errors, '_collect_query_errors', return_value=rows),
+        mock.patch.object(query_errors, '_create_batched_payload', return_value=None) as mock_payload,
+        mock.patch.object(query_errors, '_advance_checkpoint') as mock_advance,
+        mock.patch.object(query_errors._check, 'database_monitoring_query_activity') as mock_submit,
+    ):
+        query_errors._collect_and_submit()
+
+    mock_payload.assert_called_once_with(rows)
+    mock_submit.assert_not_called()
+    mock_advance.assert_called_once()

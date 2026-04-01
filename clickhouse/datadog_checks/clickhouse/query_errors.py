@@ -199,11 +199,9 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
                     # failed before table resolution. Fall back to `current_database` (the
                     # connection's default database) so the field is always populated.
                     'databases': (
-                        str(databases[0])
-                        if databases and len(databases) > 0
-                        else (str(current_database) if current_database else '')
+                        str(databases[0]) if databases else (str(current_database) if current_database else '')
                     ),
-                    'tables': tables if tables else [],
+                    'tables': [str(t) for t in tables] if tables else [],
                     'query_duration_ms': float(query_duration_ms) if query_duration_ms else 0.0,
                     'read_rows': int(read_rows) if read_rows else 0,
                     'read_bytes': int(read_bytes) if read_bytes else 0,
@@ -233,7 +231,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
             return result_rows
 
         except Exception as e:
-            self._log.exception("Failed to load query errors from system.query_log: %s", e)
+            self._log.exception("Failed to load query errors from %s: %s", query_log_table, e)
 
             self._check.count(
                 "dd.clickhouse.query_errors.error",
