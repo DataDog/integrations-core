@@ -323,7 +323,7 @@ jobs:
 
   publish:
     name: Publish artifacts and commit lockfiles to branch
-    if: needs.check-should-run.outputs.should_run_build == 'true' && github.event_name == 'pull_request'
+    if: needs.check-should-run.outputs.should_run_build == 'true' && github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork
     needs:
     - build
     - build-macos
