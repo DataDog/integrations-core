@@ -559,7 +559,10 @@ files:
           fleet_configurable: true
           description: |
             How often (in seconds) the job wakes up to check which queries are
-            due. Individual queries have their own interval_seconds.
+            due. Individual queries have their own interval_seconds. This value
+            must be less than or equal to the smallest interval_seconds across
+            all configured queries (i.e. the least common denominator), otherwise
+            queries with short intervals will be delayed.
           value:
             type: number
             example: 10
@@ -574,14 +577,21 @@ files:
         - name: config_id
           hidden: true
           description: |
-            Identifier of the Remote Configuration payload. Injected by the
-            Go RC handler; should not be set manually.
+            Unique identifier of the Remote Configuration payload that populated
+            this data_observability block. Set automatically by the Datadog Agent
+            Go RC handler when it delivers query configuration; do not set this
+            field manually. It is forwarded as-is on every emitted event so that
+            the intake can correlate results back to the originating RC config.
           value:
             type: string
         - name: queries
           hidden: true
           description: |
-            List of monitor queries to execute, injected by RC.
+            List of monitor queries to execute. Populated automatically by the
+            Datadog Agent Go RC handler when Remote Configuration delivers a
+            DO_QUERY_ACTIONS payload; do not set this field manually. Each entry
+            describes one SQL monitoring query along with its scheduling
+            parameters and entity metadata.
           value:
             type: array
             items:
@@ -590,7 +600,6 @@ files:
                 - monitor_id
                 - query
                 - interval_seconds
-                - timeout_seconds
                 - entity
               properties:
               - name: monitor_id
@@ -600,8 +609,6 @@ files:
               - name: query
                 type: string
               - name: interval_seconds
-                type: integer
-              - name: timeout_seconds
                 type: integer
               - name: entity
                 type: object

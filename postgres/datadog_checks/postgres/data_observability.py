@@ -17,11 +17,9 @@ if TYPE_CHECKING:
 
 EVENT_TRACK_TYPE = 'do-query-results'
 
-# Cap the number of rows fetched per query to prevent unbounded memory usage.
-# Queries come from RC and can be arbitrary SQL.
+# Cap the number of rows returned per query to prevent unbounded memory usage.
+# Applied both at the database level (subquery LIMIT) and as a Python-side safety net.
 MAX_RESULT_ROWS = 10_000
-
-DEFAULT_COLLECTION_INTERVAL = 10
 
 
 class PostgresDataObservability(DBMAsyncJob):
@@ -29,8 +27,7 @@ class PostgresDataObservability(DBMAsyncJob):
         self._check = check
         self._config = config
         self._last_execution: dict[int, float] = {}
-        self._timeout_warning_logged = False
-        collection_interval = config.data_observability.collection_interval or DEFAULT_COLLECTION_INTERVAL
+        collection_interval = config.data_observability.collection_interval or 10
         super(PostgresDataObservability, self).__init__(
             check,
             rate_limit=1 / float(collection_interval),
@@ -57,7 +54,8 @@ class PostgresDataObservability(DBMAsyncJob):
         return due
 
     def _build_base_tags(self) -> list[str]:
-        # Filter out dd.internal tags, matching the pattern used by all other async jobs
+        # self._tags is set by run_job_loop(tags) in the DBMAsyncJob parent; it may be
+        # None if run_job() is called directly (e.g. in tests), so we guard with a fallback.
         tags = [t for t in self._tags if not t.startswith('dd.internal')] if self._tags else []
         config_id = self._do_config.config_id
         if config_id:
@@ -65,30 +63,20 @@ class PostgresDataObservability(DBMAsyncJob):
         tags.append('db_type:postgres')
         return tags
 
-    def _warn_timeout_ignored(self) -> None:
-        if self._timeout_warning_logged:
-            return
-        queries = self._do_config.queries or ()
-        if any(q.timeout_seconds for q in queries):
-            self._log.warning(
-                "Per-query timeout_seconds is configured but not applied; "
-                "the check's global query_timeout (%sms) is used instead.",
-                self._config.query_timeout,
-            )
-            self._timeout_warning_logged = True
-
     def _execute_single_query(self, conn: Any, query_spec: Query) -> dict[str, Any]:
         """Execute a query, catching DatabaseError per-query so the loop continues."""
         sql = query_spec.query
         monitor_id = query_spec.monitor_id
+        # Wrap in a subquery to apply the row cap at the database level.
+        limited_sql = f"SELECT * FROM ({sql}) _dd_row_limit LIMIT {MAX_RESULT_ROWS}"
         start = time.time()
         try:
             if self._cancel_event.is_set():
                 raise Exception("Job loop cancelled. Aborting query.")
             with conn.cursor() as cursor:
-                cursor.execute(sql)
-                columns = [desc[0] for desc in cursor.description] if cursor.description else []
-                rows = [list(row) for row in cursor.fetchmany(MAX_RESULT_ROWS)] if cursor.description else []
+                cursor.execute(limited_sql)
+                columns = [desc[0] for desc in cursor.description]
+                rows = [list(row) for row in cursor.fetchmany(MAX_RESULT_ROWS)]
             duration = time.time() - start
             return {
                 'status': 'success',
@@ -139,12 +127,7 @@ class PostgresDataObservability(DBMAsyncJob):
             'query': query_spec.query,
             'entity': entity,
             'custom_sql_select_fields': custom_fields,
-            'status': result['status'],
-            'columns': result['columns'],
-            'rows': result['rows'],
-            'row_count': result['row_count'],
-            'duration_s': result['duration_s'],
-            'error': result['error'],
+            **result,
         }
 
     def run_job(self):
@@ -156,7 +139,6 @@ class PostgresDataObservability(DBMAsyncJob):
             return
 
         base_tags = self._build_base_tags()
-        self._warn_timeout_ignored()
 
         with self._check._get_main_db() as conn:
             now = time.time()
@@ -172,16 +154,18 @@ class PostgresDataObservability(DBMAsyncJob):
 
                 try:
                     self._check.gauge(
-                        'data_observability.query_execution_time',
+                        'dd.postgres.data_observability.query_execution_time',
                         result['duration_s'],
                         tags=tags,
                         hostname=self._check.reported_hostname,
+                        raw=True,
                     )
                     self._check.gauge(
-                        'data_observability.query_status',
+                        'dd.postgres.data_observability.query_status',
                         1 if result['status'] == 'success' else 0,
                         tags=tags,
                         hostname=self._check.reported_hostname,
+                        raw=True,
                     )
 
                     payload = self._build_event_payload(q, result)

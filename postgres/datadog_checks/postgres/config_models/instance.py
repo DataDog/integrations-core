@@ -142,7 +142,6 @@ class Query(BaseModel):
     interval_seconds: int
     monitor_id: int
     query: str
-    timeout_seconds: int
     type: Optional[str] = None
 
 

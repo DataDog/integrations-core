@@ -64,8 +64,6 @@ postgresql.create_index.tuples_done,gauge,,,,"Number of tuples already processed
 postgresql.create_index.tuples_total,gauge,,,,"Total number of tuples to be processed in the current phase. Only available with PostgreSQL 12 and newer. This metric is tagged with db, table, index, command, phase.",0,postgres,postgres index tuples total,,
 postgresql.database_connections,gauge,,connection,,The number of connections being made to this database instance as a fraction of the maximum number of allowed connections per logical database.,0,postgres,db conns,,
 postgresql.database_size,gauge,,byte,,The disk space used by this database. This metric is tagged with db.,0,postgres,db size,,
-postgresql.data_observability.query_execution_time,gauge,,second,,The execution time of a Data Observability monitoring query.,0,postgres,do query time,,
-postgresql.data_observability.query_status,gauge,,,,The status of a Data Observability monitoring query execution. 1 for success and 0 for failure.,0,postgres,do query status,,
 postgresql.db.count,gauge,,item,,The number of available databases.,0,postgres,db cnt,,
 postgresql.dead_rows,gauge,,row,,"Enabled with `relations`. The estimated number of dead rows. This metric is tagged with db, schema, table.",0,postgres,dead rows,,
 postgresql.deadlocks,rate,,lock,second,The rate of deadlocks detected in this database. This metric is tagged with db.,-1,postgres,deadlocks,,

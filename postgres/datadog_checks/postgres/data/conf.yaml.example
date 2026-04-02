@@ -446,7 +446,10 @@ instances:
 
         ## @param collection_interval - number - optional - default: 10
         ## How often (in seconds) the job wakes up to check which queries are
-        ## due. Individual queries have their own interval_seconds.
+        ## due. Individual queries have their own interval_seconds. This value
+        ## must be less than or equal to the smallest interval_seconds across
+        ## all configured queries (i.e. the least common denominator), otherwise
+        ## queries with short intervals will be delayed.
         #
         # collection_interval: 10
 
