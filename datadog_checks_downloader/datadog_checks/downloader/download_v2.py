@@ -161,7 +161,11 @@ class TUFPointerDownloader:
         the pointer file.
         """
         pointer = self.get_pointer(project, version)
-        wheel_url = pointer['repository'] + pointer['wheel_path']
+        # Use the caller-supplied repository URL for the wheel fetch so that
+        # --repository can point at a staging bucket and override the prod URL
+        # baked into the pointer file.  This allows pre-promotion validation
+        # against staging S3 without modifying pointer content.
+        wheel_url = self._repository_url + pointer['wheel_path']
         wheel_filename = Path(pointer['wheel_path']).name
         dest = (dest_dir or Path(tempfile.mkdtemp())) / wheel_filename
 

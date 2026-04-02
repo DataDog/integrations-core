@@ -91,6 +91,46 @@ class TestHappyPath:
 
     @patch('datadog_checks.downloader.download_v2.Updater')
     @patch('datadog_checks.downloader.download_v2.urllib.request.urlopen')
+    def test_repository_flag_overrides_pointer_repository(self, mock_urlopen, mock_updater_cls, tmp_path):
+        """--repository supersedes the repository field baked into the pointer.
+
+        This is what allows staging validation: the pointer always contains the
+        prod URL, but passing --repository <staging-url> redirects the wheel
+        fetch to staging so new packages can be verified before promotion.
+        """
+        staging_url = 'https://agent-integration-wheels-staging.s3.amazonaws.com'
+        # Pointer deliberately carries the prod URL — different from staging_url.
+        prod_pointer = {
+            **_POINTER,
+            'repository': 'https://agent-integration-wheels-prod.s3.amazonaws.com',
+        }
+        mock_updater_cls.return_value = _mock_tuf_updater(prod_pointer)
+
+        captured_urls = []
+
+        def fake_urlopen(url):
+            captured_urls.append(url)
+            mock_resp = MagicMock()
+            mock_resp.__enter__ = lambda s: s
+            mock_resp.__exit__ = MagicMock(return_value=False)
+            mock_resp.read.return_value = _WHEEL_CONTENT
+            return mock_resp
+
+        mock_urlopen.side_effect = fake_urlopen
+
+        trust_anchor = tmp_path / 'root.json'
+        trust_anchor.write_text('{}')
+
+        downloader = TUFPointerDownloader(repository_url=staging_url, trust_anchor=trust_anchor)
+        downloader.download(_PROJECT, version=_VERSION, dest_dir=tmp_path)
+
+        wheel_fetch_url = captured_urls[-1]
+        assert wheel_fetch_url.startswith(staging_url), (
+            f'Expected wheel fetch from {staging_url!r}, got {wheel_fetch_url!r}'
+        )
+
+    @patch('datadog_checks.downloader.download_v2.Updater')
+    @patch('datadog_checks.downloader.download_v2.urllib.request.urlopen')
     def test_get_pointer_returns_dict(self, mock_urlopen, mock_updater_cls, tmp_path):
         """get_pointer returns the parsed JSON without downloading the wheel."""
         mock_updater_cls.return_value = _mock_tuf_updater(_POINTER)
