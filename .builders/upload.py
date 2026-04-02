@@ -107,7 +107,7 @@ def process_wheel_for_upload(wheel: Path, artifact_type: str, project_name: str,
     print(f'{padding}Version: {project_metadata["Version"]}')
 
     sha256_digest = hash_file(wheel)
-    index_url = f'${{PACKAGE_BASE_URL}}/{artifact_type}/{project_name}'
+    index_url = f'https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/{artifact_type}/{project_name}'
 
     if artifact_type == 'external':
         artifact_name = wheel.name

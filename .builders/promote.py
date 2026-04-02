@@ -37,18 +37,23 @@ def parse_lockfile_urls(lockfile: Path) -> list[str]:
     return urls
 
 
-def url_to_blob_path(url: str) -> str | None:
-    """Convert a wheel URL to its GCS blob path, or None if not a dev/ path.
+STORAGE_BASE = "https://agent-int-packages.datadoghq.com/"
+STORAGE_TEMPLATE_PREFIX = f"{STORAGE_BASE}${{INTEGRATIONS_WHEELS_STORAGE}}/"
 
-    Handles the templated ``${PACKAGE_BASE_URL}/...`` format used in lockfiles.
+
+def url_to_blob_path(url: str) -> str | None:
+    """Convert a wheel URL to its GCS blob path, or None if not a templated storage URL.
+
+    Handles the templated ``https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/...``
+    format used in lockfiles.
     """
-    if url.startswith("${PACKAGE_BASE_URL}/"):
-        return url[len("${PACKAGE_BASE_URL}/"):]
+    if url.startswith(STORAGE_TEMPLATE_PREFIX):
+        return url[len(STORAGE_TEMPLATE_PREFIX):]
     return None
 
 
 def collect_relative_paths() -> list[str]:
-    """Read all lockfiles and return relative wheel paths from ${PACKAGE_BASE_URL} entries."""
+    """Read all lockfiles and return relative wheel paths from ${INTEGRATIONS_WHEELS_STORAGE} entries."""
     if not LOCK_FILE_DIR.is_dir():
         print(f"No lockfile directory found at {LOCK_FILE_DIR}", file=sys.stderr)
         sys.exit(1)

@@ -140,7 +140,7 @@ def test_upload_external_existing_returns_full_url_with_hash(setup_targets_dir, 
 
     assert not uploaded_files
     assert lockfiles == {'linux-x86_64': [
-        f'existing-pkg @ ${{PACKAGE_BASE_URL}}/external/existing-pkg/'
+        f'existing-pkg @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/external/existing-pkg/'
         f'existing_pkg-1.0.0-py3-none-any.whl#sha256={existing_hash}',
         '',
     ]}
@@ -247,7 +247,7 @@ def test_upload_built_existing_sha_match_returns_full_url_with_hash(
 
     assert not uploaded_files
     assert lockfiles == {'linux-x86_64': [
-        f'existing @ ${{PACKAGE_BASE_URL}}/built/existing/'
+        f'existing @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/built/existing/'
         f'existing-1.1.1-20241201000000-cp311-cp311-manylinux2010_x86_64.whl#sha256={whl_hash}',
         '',
     ]}
@@ -408,7 +408,7 @@ def test_external_wheel_priority(tmp_path, setup_targets_dir, setup_fake_hash):
 
     targets = upload.upload(targets_dir, bucket=mock_bucket)
     assert targets ==  {'linux-x86_64': [
-        f'existing @ ${{PACKAGE_BASE_URL}}/external/existing/existing-1.1.1-cp312-cp312-manylinux2010_x86_64.whl#sha256={external_hash}',
+        f'existing @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/external/existing/existing-1.1.1-cp312-cp312-manylinux2010_x86_64.whl#sha256={external_hash}',
           '']}
 
 def test_built_wheel_priority(tmp_path, setup_targets_dir, setup_fake_hash, frozen_timestamp):
@@ -444,7 +444,7 @@ def test_built_wheel_priority(tmp_path, setup_targets_dir, setup_fake_hash, froz
 
     targets = upload.upload(targets_dir, bucket=mock_bucket)
     assert targets ==  {'linux-x86_64': [
-        f'existing @ ${{PACKAGE_BASE_URL}}/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_x86_64.whl#sha256={built_hash}',
+        f'existing @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_x86_64.whl#sha256={built_hash}',
           '']}
 
 
@@ -452,9 +452,9 @@ def test_lockfile_generation(tmp_path, setup_targets_dir):
 
     lockfile = {
         'linux-x86_64': [
-            f'existing @ ${{PACKAGE_BASE_URL}}/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_x86_64.whl#sha256=built-hash', ''], # noqa: E501
+            f'existing @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_x86_64.whl#sha256=built-hash', ''], # noqa: E501
         'linux-aarch64': [
-            f'existing @ ${{PACKAGE_BASE_URL}}/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_aarch64.whl#sha256=built-hash', ''], # noqa: E501
+            f'existing @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_aarch64.whl#sha256=built-hash', ''], # noqa: E501
     }
     # We don't need to upload anything, we just need to generate the lockfile
     targets_dir = setup_targets_dir({})
@@ -471,9 +471,9 @@ def test_lockfile_generation(tmp_path, setup_targets_dir):
         assert lock_files, "No lock files generated"
         lockfile_map = {lock_file.name: lock_file.read_text().strip() for lock_file in lock_files}
         linux_x86_64_lockfile = lockfile_map[f"linux-x86_64_{upload.CURRENT_PYTHON_VERSION}.txt"]
-        assert linux_x86_64_lockfile == f'existing @ ${{PACKAGE_BASE_URL}}/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_x86_64.whl#sha256=built-hash'
+        assert linux_x86_64_lockfile == f'existing @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_x86_64.whl#sha256=built-hash'
         linux_aarch64_lockfile = lockfile_map[f"linux-aarch64_{upload.CURRENT_PYTHON_VERSION}.txt"]
-        assert linux_aarch64_lockfile == f'existing @ ${{PACKAGE_BASE_URL}}/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_aarch64.whl#sha256=built-hash'
+        assert linux_aarch64_lockfile == f'existing @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_aarch64.whl#sha256=built-hash'
         assert len(lock_files) == 2
 
 
@@ -542,7 +542,7 @@ def test_process_wheel_for_upload_external_new(setup_fake_hash):
     )
 
     assert artifact_name == "test.whl"
-    assert "test-pkg @ ${PACKAGE_BASE_URL}/external/test-pkg/test.whl#sha256=abc123" == lockfile_entry
+    assert "test-pkg @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/external/test-pkg/test.whl#sha256=abc123" == lockfile_entry
 
 
 def test_process_wheel_for_upload_external_existing(setup_fake_hash):
@@ -563,7 +563,7 @@ def test_process_wheel_for_upload_external_existing(setup_fake_hash):
     )
 
     assert artifact_name is None
-    assert "test-pkg @ ${PACKAGE_BASE_URL}/external/test-pkg/test.whl#sha256=existing123" == lockfile_entry
+    assert "test-pkg @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/external/test-pkg/test.whl#sha256=existing123" == lockfile_entry
 
 
 def test_generate_artifact_listings():
@@ -630,4 +630,4 @@ def test_upload(setup_targets_dir, setup_fake_hash):
     lockfiles = upload.upload(targets_dir, bucket=mock_bucket)
 
     assert 'dev/external/test-pkg/test_pkg-1.0.0-py3-none-any.whl' in uploaded_files
-    assert 'test-pkg @ ${PACKAGE_BASE_URL}/external/test-pkg/test_pkg-1.0.0-py3-none-any.whl#sha256=abc123' in lockfiles['linux-x86_64'][0]
+    assert 'test-pkg @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/external/test-pkg/test_pkg-1.0.0-py3-none-any.whl#sha256=abc123' in lockfiles['linux-x86_64'][0]

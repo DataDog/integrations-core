@@ -4,31 +4,33 @@ from unittest import mock
 import pytest
 import promote
 
+BASE = "https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}"
+
 
 def write_lockfile(path: Path, entries: list[str]) -> None:
     path.write_text("\n".join(entries))
 
 
 def test_parse_lockfile_urls_templated(tmp_path):
-    """parse_lockfile_urls extracts URLs from ${PACKAGE_BASE_URL} lockfile entries."""
+    """parse_lockfile_urls extracts URLs from ${INTEGRATIONS_WHEELS_STORAGE} lockfile entries."""
     lockfile = tmp_path / "linux-x86_64_3.13.txt"
     write_lockfile(lockfile, [
-        "aerospike @ ${PACKAGE_BASE_URL}/built/aerospike/aerospike-7.1.1-cp313-cp313-linux_x86_64.whl#sha256=abc",
-        "requests @ ${PACKAGE_BASE_URL}/external/requests/requests-2.32.0-py3-none-any.whl#sha256=def",
+        f"aerospike @ {BASE}/built/aerospike/aerospike-7.1.1-cp313-cp313-linux_x86_64.whl#sha256=abc",
+        f"requests @ {BASE}/external/requests/requests-2.32.0-py3-none-any.whl#sha256=def",
         "",
     ])
 
     urls = promote.parse_lockfile_urls(lockfile)
 
     assert urls == [
-        "${PACKAGE_BASE_URL}/built/aerospike/aerospike-7.1.1-cp313-cp313-linux_x86_64.whl",
-        "${PACKAGE_BASE_URL}/external/requests/requests-2.32.0-py3-none-any.whl",
+        f"{BASE}/built/aerospike/aerospike-7.1.1-cp313-cp313-linux_x86_64.whl",
+        f"{BASE}/external/requests/requests-2.32.0-py3-none-any.whl",
     ]
 
 
 def test_url_to_blob_path_templated():
-    """url_to_blob_path extracts the relative path from a ${PACKAGE_BASE_URL} URL."""
-    url = "${PACKAGE_BASE_URL}/built/aerospike/aerospike-7.1.1-cp313-cp313-linux_x86_64.whl"
+    """url_to_blob_path extracts the relative path from a ${INTEGRATIONS_WHEELS_STORAGE} URL."""
+    url = f"{BASE}/built/aerospike/aerospike-7.1.1-cp313-cp313-linux_x86_64.whl"
     assert promote.url_to_blob_path(url) == "built/aerospike/aerospike-7.1.1-cp313-cp313-linux_x86_64.whl"
 
 
@@ -36,6 +38,7 @@ def test_url_to_blob_path_returns_none_for_other_urls():
     """url_to_blob_path returns None for non-templated URLs."""
     assert promote.url_to_blob_path("https://example.com/some.whl") is None
     assert promote.url_to_blob_path("https://agent-int-packages.datadoghq.com/built/foo/foo-1.0.whl") is None
+    assert promote.url_to_blob_path("https://agent-int-packages.datadoghq.com/stable/built/foo/foo-1.0.whl") is None
 
 
 def test_collect_relative_paths(tmp_path):
@@ -44,10 +47,10 @@ def test_collect_relative_paths(tmp_path):
     lock_dir.mkdir(parents=True)
 
     write_lockfile(lock_dir / "linux-x86_64_3.13.txt", [
-        "aerospike @ ${PACKAGE_BASE_URL}/built/aerospike/aerospike-7.1.1-cp313-cp313-linux_x86_64.whl#sha256=abc",
+        f"aerospike @ {BASE}/built/aerospike/aerospike-7.1.1-cp313-cp313-linux_x86_64.whl#sha256=abc",
     ])
     write_lockfile(lock_dir / "linux-aarch64_3.13.txt", [
-        "aerospike @ ${PACKAGE_BASE_URL}/built/aerospike/aerospike-7.1.1-cp313-cp313-linux_aarch64.whl#sha256=xyz",
+        f"aerospike @ {BASE}/built/aerospike/aerospike-7.1.1-cp313-cp313-linux_aarch64.whl#sha256=xyz",
     ])
 
     with mock.patch.object(promote, "LOCK_FILE_DIR", lock_dir):
@@ -60,11 +63,11 @@ def test_collect_relative_paths(tmp_path):
 
 
 def test_collect_relative_paths_deduplicates(tmp_path):
-    """collect_relative_paths deduplicates paths that appear in multiple lockfiles."""
+    """collect_relative_paths returns all paths even when shared across lockfiles."""
     lock_dir = tmp_path / ".deps" / "resolved"
     lock_dir.mkdir(parents=True)
 
-    shared_entry = "requests @ ${PACKAGE_BASE_URL}/external/requests/requests-2.32.0-py3-none-any.whl#sha256=def"
+    shared_entry = f"requests @ {BASE}/external/requests/requests-2.32.0-py3-none-any.whl#sha256=def"
     write_lockfile(lock_dir / "linux-x86_64_3.13.txt", [shared_entry])
     write_lockfile(lock_dir / "linux-aarch64_3.13.txt", [shared_entry])
 
