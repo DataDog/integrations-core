@@ -616,6 +616,66 @@ class TestTransformerCompilation:
         ):
             query_manager.compile_queries()
 
+    def test_expression_rejects_dunder_attributes(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [
+                    {
+                        'name': 'result',
+                        'type': 'expression',
+                        'expression': 'test.foo.__class__',
+                        'verbose': True,
+                    },
+                ],
+                'tags': ['test:bar'],
+            }
+        )
+        with pytest.raises(ValueError, match='dunder attribute access is not allowed'):
+            query_manager.compile_queries()
+
+    def test_expression_rejects_unsupported_syntax_lambda(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [
+                    {
+                        'name': 'result',
+                        'type': 'expression',
+                        'expression': '(lambda x: x)(1)',
+                        'verbose': True,
+                    },
+                ],
+                'tags': ['test:bar'],
+            }
+        )
+        with pytest.raises(ValueError, match='disallowed syntax'):
+            query_manager.compile_queries()
+
+    def test_expression_rejects_unsupported_syntax_comprehension(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [
+                    {
+                        'name': 'result',
+                        'type': 'expression',
+                        'expression': '[v for v in (1, 2, 3)]',
+                        'verbose': True,
+                    },
+                ],
+                'tags': ['test:bar'],
+            }
+        )
+        with pytest.raises(ValueError, match='disallowed syntax'):
+            query_manager.compile_queries()
+
     @pytest.mark.parametrize('expression', ['import os', 'raise Exception', 'foo = 5'])
     def test_expression_compile_error(self, expression):
         query_manager = create_query_manager(
