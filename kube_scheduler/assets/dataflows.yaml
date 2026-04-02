@@ -1,0 +1,5 @@
+provides:
+  - id: kube-scheduler-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound

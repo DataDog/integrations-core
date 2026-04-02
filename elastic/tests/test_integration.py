@@ -359,8 +359,55 @@ def test_cat_allocation_metrics(dd_environment, aggregator, instance, cluster_ta
     elastic_check = ESCheck('elastic', {}, instances=[instance])
 
     elastic_check.check(None)
+
+    # Check all cat allocation metrics including aggregated shards
     for m_name in CAT_ALLOCATION_METRICS:
         aggregator.assert_metric(m_name)
+
+    # Verify default behavior - shards metric should NOT have index/prirep tags
+    metrics = aggregator.metrics('elasticsearch.shards')
+    assert len(metrics) > 0, "Expected at least one elasticsearch.shards metric"
+
+    # Default behavior: should only have node_name tag, no index or prirep
+    for metric in metrics:
+        tags = metric.tags
+        has_index_tag = any(tag.startswith('index:') for tag in tags)
+        has_prirep_tag = any(tag.startswith('prirep:') for tag in tags)
+        assert not has_index_tag, "Should not have index tag with detailed_shard_metrics disabled"
+        assert not has_prirep_tag, "Should not have prirep tag with detailed_shard_metrics disabled"
+
+
+def test_cat_allocation_detailed_shard_metrics(dd_environment, aggregator, instance, cluster_tags):
+    instance['cat_allocation_stats'] = True
+    instance['detailed_shard_metrics'] = True
+    elastic_check = ESCheck('elastic', {}, instances=[instance])
+
+    elastic_check.check(None)
+
+    # Check disk metrics (all except shards)
+    for m_name in CAT_ALLOCATION_METRICS:
+        if m_name != 'elasticsearch.shards':
+            aggregator.assert_metric(m_name)
+
+    # Check detailed shard placement metrics
+    aggregator.assert_metric('elasticsearch.shards')
+
+    # Verify tags are present - we should have index_name and prirep tags
+    metrics = aggregator.metrics('elasticsearch.shards')
+    assert metrics, "Expected at least one elasticsearch.shards metric"
+
+    # Check that at least one metric has both index_name and prirep tags
+    has_index_tag = False
+    has_prirep_tag = False
+    for metric in metrics:
+        tags = metric.tags
+        if any(tag.startswith('index_name:') for tag in tags):
+            has_index_tag = True
+        if any(tag.startswith('prirep:') for tag in tags):
+            has_prirep_tag = True
+
+    assert has_index_tag, "Expected index_name tag on elasticsearch.shards metric"
+    assert has_prirep_tag, "Expected prirep tag on elasticsearch.shards metric"
 
 
 def test_health_event(dd_environment, aggregator):

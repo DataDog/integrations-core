@@ -1,4 +1,5 @@
 name: Sidekiq
+fleet_configurable: true
 files:
 - name: sidekiq.yaml
   options:

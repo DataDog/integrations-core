@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import fnmatch
 import json
 import os
 import re
@@ -160,7 +161,7 @@ def is_valid_integration_file(
         included_folder = "datadog_checks" + os.sep
 
     if git_ignore is None:
-        git_ignore = get_gitignore_files(repo_path)
+        git_ignore = get_gitignore_files(Path(repo_path))
     # It is not an integration
     if path.startswith("."):
         return False
@@ -171,20 +172,34 @@ def is_valid_integration_file(
     elif any(ignore in path for ignore in ignored_files):
         return False
     # This file is contained in .gitignore
-    elif any(ignore in path for ignore in git_ignore):
+    elif _matches_gitignore(path, git_ignore):
         return False
     else:
         return True
 
 
-def get_gitignore_files(repo_path: str | Path) -> list[str]:
-    gitignore_path = os.path.join(repo_path, ".gitignore")
-    with open(gitignore_path, "r", encoding="utf-8") as file:
-        gitignore_content = file.read()
-        ignored_patterns = [
-            line.strip() for line in gitignore_content.splitlines() if line.strip() and not line.startswith("#")
-        ]
-        return ignored_patterns
+def _matches_gitignore(path: str, patterns: list[str]) -> bool:
+    parts = path.replace(os.sep, "/").split("/")
+    for pattern in patterns:
+        norm = pattern.rstrip("/")
+        if fnmatch.fnmatch(path, norm):
+            return True
+        if fnmatch.fnmatch(os.path.basename(path), norm):
+            return True
+        if any(fnmatch.fnmatch(part, norm) for part in parts):
+            return True
+    return False
+
+
+def get_gitignore_files(repo_path: Path) -> list[str]:
+    gitignore_path = repo_path / ".gitignore"
+    if not gitignore_path.is_file():
+        return []
+
+    with gitignore_path.open(mode="r", encoding="utf-8") as f:
+        lines = [line.strip() for line in f.read().splitlines() if line.strip() and not line.startswith("#")]
+
+    return lines
 
 
 def convert_to_human_readable_size(size_bytes: float) -> str:
@@ -1004,7 +1019,11 @@ def get_last_dependency_sizes_artifact(
     dep_sizes_json = get_dep_sizes_json(app, commit, platform, py_version)
     if not dep_sizes_json:
         app.display_debug("No dependency sizes in current commit, searching ancestors")
-        base_commit = app.repo.git.merge_base(commit, "origin/master")
+        try:
+            base_commit = app.repo.git.merge_base(commit, "origin/master")
+        except Exception as e:
+            app.display_error(f"Failed to find merge base for {commit}: {e}")
+            return None
         if base_commit != commit:
             app.display_debug(f"Found base commit: {base_commit}")
             previous_commit = base_commit
@@ -1037,11 +1056,6 @@ def get_dep_sizes_json(app: Application, current_commit: str, platform: str, py_
 def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
     app.display_debug(f"Fetching workflow run ID for {commit} ({os.path.basename(workflow)})")
 
-    if workflow == MEASURE_DISK_USAGE_WORKFLOW:
-        jq = f'.[] | select(.name == "Measure Disk Usage [{commit}]") | .databaseId'
-    else:
-        jq = '.[-1].databaseId'
-
     result = subprocess.run(
         [
             'gh',
@@ -1054,7 +1068,7 @@ def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
             '--json',
             'databaseId,name',
             '--jq',
-            jq,
+            '.[-1].databaseId',
         ],
         capture_output=True,
         text=True,
@@ -1066,6 +1080,46 @@ def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
         app.display_warning(f"No workflow run found for {commit} ({os.path.basename(workflow)})")
 
     return run_id
+
+
+@cache
+def get_run_id_measure_disk_usage(app: Application, commit: str) -> str | None:
+    workflow_name = os.path.basename(MEASURE_DISK_USAGE_WORKFLOW)
+    wanted_name = f"Measure Disk Usage [{commit}]"
+
+    app.display_debug(f"Fetching workflow run ID for {commit} ({workflow_name})")
+
+    per_page = 100
+    max_pages = 5
+
+    for page in range(1, max_pages + 1):
+        app.display_debug(f"Fetching workflow run ID for {commit} ({workflow_name}) - Page {page} of {max_pages}")
+        result = subprocess.run(
+            [
+                "gh",
+                "api",
+                f"repos/DataDog/integrations-core/actions/workflows/{workflow_name}/runs",
+                "-X",
+                "GET",
+                "-f",
+                f"per_page={per_page}",
+                "-f",
+                f"page={page}",
+                "--jq",
+                (f'[.workflow_runs[] | select(.name == "{wanted_name}") | .id] | first // empty'),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            app.display_warning(f"No workflow run found for {commit} ({workflow_name}) ")
+            return None
+
+        out = (result.stdout or "").strip()
+        if out:
+            app.display_debug(f"Workflow run ID: {out}")
+            return out
+    return None
 
 
 @cache
@@ -1147,7 +1201,7 @@ def get_previous_dep_sizes(
     Gets the dependency sizes for a given commit when dependencies were not resolved.
     '''
     with tempfile.TemporaryDirectory() as tmpdir:
-        if (run_id := get_run_id(app, base_commit, MEASURE_DISK_USAGE_WORKFLOW)) is None:
+        if (run_id := get_run_id_measure_disk_usage(app, base_commit)) is None:
             return None
 
         artifact_name = 'status_compressed.json' if compressed else 'status_uncompressed.json'

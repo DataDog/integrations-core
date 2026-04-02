@@ -78,7 +78,6 @@ def dd_environment(e2e_instance, skip_env):
             "POSTGRES_LOCALE": POSTGRES_LOCALE,
             "PGDATA": "/var/lib/postgresql/$PG_MAJOR/docker",
         },
-        capture=True,
     ):
         yield e2e_instance, E2E_METADATA
 

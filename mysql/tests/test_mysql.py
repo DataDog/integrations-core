@@ -28,7 +28,15 @@ from datadog_checks.mysql.const import (
 )
 
 from . import common, tags, variables
-from .common import HOST, MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT, requires_static_version
+from .common import (
+    HOST,
+    MYSQL_FLAVOR,
+    MYSQL_REPLICATION,
+    MYSQL_VERSION_PARSED,
+    PORT,
+    requires_hybrid_replication,
+    requires_static_version,
+)
 
 
 @pytest.mark.integration
@@ -197,9 +205,13 @@ def _assert_complex_config(
     else:
         testable_metrics.extend(variables.INNODB_ROW_LOCK_VARS)
 
-    operation_time_metrics = variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMPLEX_OPERATION_TIME_METRICS
+    operation_time_metrics = (
+        variables.SIMPLE_OPERATION_TIME_METRICS
+        + variables.COMPLEX_OPERATION_TIME_METRICS
+        + variables.REPLICATION_OPERATION_TIME_METRICS
+    )
 
-    if MYSQL_REPLICATION == 'group':
+    if MYSQL_REPLICATION in ('group', 'hybrid'):
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
         group_replication_tags = ('channel_name:group_replication_applier', 'member_state:ONLINE')
         if MYSQL_VERSION_PARSED >= parse_version('8.0'):
@@ -212,8 +224,12 @@ def _assert_complex_config(
             count=1,
         )
         operation_time_metrics.extend(variables.GROUP_REPLICATION_OPERATION_TIME_METRICS)
-    else:
-        operation_time_metrics.extend(variables.REPLICATION_OPERATION_TIME_METRICS)
+
+        if MYSQL_REPLICATION == 'group':
+            for metric in variables.TRADITIONAL_REPLICATION_METRICS:
+                aggregator.assert_metric(metric, count=0)
+            aggregator.assert_service_check('mysql.replication.slave_running', count=0)
+            aggregator.assert_service_check('mysql.replication.replica_running', count=0)
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6'):
         testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
@@ -326,7 +342,7 @@ def _assert_complex_config(
     _test_index_metrics(aggregator, variables.INDEX_USAGE_VARS + variables.INDEX_SIZE_VARS, metric_tags)
     # test optional metrics
     optional_metrics = (
-        variables.OPTIONAL_REPLICATION_METRICS
+        variables.TRADITIONAL_REPLICATION_METRICS
         + variables.OPTIONAL_INNODB_VARS
         + variables.OPTIONAL_STATUS_VARS
         + variables.OPTIONAL_STATUS_VARS_5_6_6
@@ -393,6 +409,127 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     # Make sure group replication is not detected
     with mysql_check._connect() as db:
         assert mysql_check._is_group_replication_active(db) is False
+
+
+@requires_hybrid_replication
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_hybrid_replication_primary(aggregator, dd_run_check, instance_hybrid_primary):
+    """Test that the hybrid primary reports both group replication and traditional replication metrics."""
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_hybrid_primary])
+    dd_run_check(mysql_check)
+
+    with mysql_check._connect() as db:
+        assert mysql_check._is_group_replication_active(db) is True
+
+    service_check_tags = tags.SC_TAGS_HYBRID_PRIMARY
+
+    group_replication_tags = ('channel_name:group_replication_applier', 'member_state:ONLINE', 'member_role:PRIMARY')
+    aggregator.assert_service_check(
+        'mysql.replication.group.status',
+        status=MySql.OK,
+        tags=service_check_tags + group_replication_tags,
+        count=1,
+    )
+
+    aggregator.assert_service_check(
+        'mysql.replication.slave_running',
+        status=MySql.OK,
+        tags=service_check_tags + ('replication_mode:source',),
+        at_least=1,
+    )
+
+    for metric in variables.GROUP_REPLICATION_VARS:
+        aggregator.assert_metric(metric, at_least=1)
+
+    if MYSQL_VERSION_PARSED >= parse_version('8.0'):
+        for metric in variables.GROUP_REPLICATION_VARS_8_0_2:
+            aggregator.assert_metric(metric, at_least=1)
+
+    aggregator.assert_metric('mysql.replication.replicas_connected', at_least=1)
+    aggregator.assert_metric('mysql.replication.slaves_connected', at_least=1)
+
+
+@common.requires_classic_replication
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_classic_replication_source_with_replica_offline(aggregator, dd_run_check, instance_complex, root_conn):
+    """Test that a source emits WARNING when all replicas go offline (replica-loss detection)."""
+    import os
+
+    from datadog_checks.dev.docker import temporarily_stop_service
+
+    compose_file = os.path.join(common.HERE, 'compose', os.getenv('COMPOSE_FILE'))
+
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
+
+    dd_run_check(mysql_check)
+
+    slave_running_checks = [
+        sc
+        for sc in aggregator.service_checks('mysql.replication.slave_running')
+        if 'replication_mode:source' in sc.tags
+    ]
+    assert len(slave_running_checks) >= 1, "Expected at least one service check with replication_mode:source"
+    assert slave_running_checks[0].status == MySql.OK
+    aggregator.assert_metric('mysql.replication.replicas_connected', value=1, at_least=1)
+    aggregator.reset()
+
+    with temporarily_stop_service('mysql-slave', compose_file):
+        # Kill binlog dump threads via root to force immediate disconnect
+        with root_conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT PROCESSLIST_ID FROM performance_schema.threads WHERE PROCESSLIST_COMMAND LIKE 'Binlog dump%'"
+            )
+            for (thread_id,) in cursor.fetchall():
+                cursor.execute(f"KILL {thread_id}")
+
+        dd_run_check(mysql_check)
+
+        slave_running_checks = [
+            sc
+            for sc in aggregator.service_checks('mysql.replication.slave_running')
+            if 'replication_mode:source' in sc.tags
+        ]
+
+        assert len(slave_running_checks) >= 1, (
+            "Expected service check with replication_mode:source after replica offline"
+        )
+        assert slave_running_checks[0].status == MySql.WARNING
+
+        replicas_metrics = aggregator.metrics('mysql.replication.replicas_connected')
+        assert len(replicas_metrics) >= 1
+        assert replicas_metrics[0].value == 0
+
+
+@requires_hybrid_replication
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_hybrid_replication_traditional_replica(aggregator, dd_run_check, instance_hybrid_traditional_replica):
+    """Test that the traditional replica reports only traditional replication metrics, not group replication."""
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_hybrid_traditional_replica])
+    dd_run_check(mysql_check)
+
+    with mysql_check._connect() as db:
+        assert mysql_check._is_group_replication_active(db) is False
+
+    service_check_tags = tags.SC_TAGS_HYBRID_TRADITIONAL_REPLICA
+
+    aggregator.assert_service_check('mysql.replication.group.status', count=0)
+
+    aggregator.assert_service_check(
+        'mysql.replication.slave_running',
+        status=MySql.OK,
+        tags=service_check_tags + ('replication_mode:replica',),
+        at_least=1,
+    )
+
+    for metric in variables.GROUP_REPLICATION_VARS:
+        aggregator.assert_metric(metric, count=0)
+
+    aggregator.assert_metric('mysql.replication.seconds_behind_master', at_least=1)
+    aggregator.assert_metric('mysql.replication.seconds_behind_source', at_least=1)
+    aggregator.assert_metric('mysql.replication.slave_running', at_least=1)
 
 
 @pytest.mark.integration

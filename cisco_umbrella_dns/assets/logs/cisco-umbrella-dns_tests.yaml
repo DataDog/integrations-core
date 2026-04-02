@@ -110,6 +110,7 @@ tests:
           rcode: 0
         question:
           name: "optimizationguide-pa.someapis.com"
+      domain: "optimizationguide-pa.someapis.com"
       external:
         geoip:
           city:
@@ -118,6 +119,7 @@ tests:
             code: "EU"
             name: "Europe"
           country:
+            iso_code: "FR"
             name: "France"
           ipAddress: "185.64.148.0"
           location:
@@ -146,6 +148,34 @@ tests:
           label: "Networks"
           type: "network"
       internalip: "185.64.148.0"
+      ocsf:
+        activity_id: 6
+        activity_name: "Traffic"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        metadata:
+          product:
+            name: "Cisco Umbrella"
+            vendor_name: "Cisco"
+          profiles:
+           - "network_proxy"
+          version: "1.5.0"
+        proxy_endpoint:
+          ip: "185.64.148.0"
+        query:
+          hostname: "optimizationguide-pa.someapis.com"
+          type: "A"
+        rcode: "NoError"
+        rcode_id: 0
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "185.64.148.0"
+        status: "Failure"
+        status_id: 2
+        time: 1702288020000
       policycategories:
        -
         deprecated: false
@@ -153,6 +183,8 @@ tests:
         id: 190
         label: "Search Engines and Portals"
         type: "content"
+      querytype: "A"
+      returncode: 0
       returnmessage: "NOERROR"
       time: "09:47:00"
       timestamp: 1702288020000
@@ -341,6 +373,7 @@ tests:
           rcode: 0
         question:
           name: "test.com"
+      domain: "test.com"
       external:
         geoip:
           city:
@@ -349,6 +382,7 @@ tests:
             code: "EU"
             name: "Europe"
           country:
+            iso_code: "FR"
             name: "France"
           ipAddress: "185.64.148.0"
           location:
@@ -369,6 +403,34 @@ tests:
           label: "Roaming Computers"
           type: "roaming"
       internalip: "185.64.148.0"
+      ocsf:
+        activity_id: 6
+        activity_name: "Traffic"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        metadata:
+          product:
+            name: "Cisco Umbrella"
+            vendor_name: "Cisco"
+          profiles:
+           - "network_proxy"
+          version: "1.5.0"
+        proxy_endpoint:
+          ip: "185.64.148.0"
+        query:
+          hostname: "test.com"
+          type: "A"
+        rcode: "NoError"
+        rcode_id: 0
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "185.64.148.0"
+        status: "Success"
+        status_id: 1
+        time: 1702990616000
       policycategories:
        -
         deprecated: false
@@ -376,6 +438,8 @@ tests:
         id: 194
         label: "Streaming Video"
         type: "content"
+      querytype: "A"
+      returncode: 0
       returnmessage: "NOERROR"
       time: "12:56:56"
       timestamp: 1702990616000
@@ -549,6 +613,7 @@ tests:
           rcode: 0
         question:
           name: "instagram.com"
+      domain: "instagram.com"
       external:
         geoip:
           city:
@@ -557,6 +622,7 @@ tests:
             code: "EU"
             name: "Europe"
           country:
+            iso_code: "FR"
             name: "France"
           ipAddress: "185.64.148.0"
           location:
@@ -577,6 +643,32 @@ tests:
           label: "Roaming Computers"
           type: "roaming"
       internalip: "185.64.148.0"
+      ocsf:
+        activity_id: 6
+        activity_name: "Traffic"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "DNS Activity"
+        class_uid: 4003
+        metadata:
+          product:
+            name: "Cisco Umbrella"
+            vendor_name: "Cisco"
+          profiles:
+           - "network_proxy"
+          version: "1.5.0"
+        proxy_endpoint:
+          ip: "185.64.148.0"
+        query:
+          hostname: "instagram.com"
+          type: "A"
+        rcode: "NoError"
+        rcode_id: 0
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "185.64.148.0"
+        time: 1702990616000
       policycategories:
        -
         deprecated: false
@@ -584,6 +676,8 @@ tests:
         id: 24
         label: "Social Networking"
         type: "content"
+      querytype: "A"
+      returncode: 0
       returnmessage: "NOERROR"
       time: "12:56:56"
       timestamp: 1702990616000
@@ -786,9 +880,11 @@ tests:
       datalossprevention:
         state: ""
       date: "2023-12-11"
+      destinationip: ""
       egress:
         ip: "185.64.148.0"
         type: "shared"
+      externalip: "185.64.148.0"
       forwardingmethod: ""
       http:
         method: "POST"
@@ -858,6 +954,38 @@ tests:
           ip: "185.64.148.0"
         destination:
           ip: ""
+      ocsf:
+        activity_id: 6
+        activity_name: "Post"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "HTTP Activity"
+        class_uid: 4002
+        http_request:
+          referrer: ""
+          url:
+            url_string: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
+          user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
+        http_response:
+          code: 303
+        metadata:
+          product:
+            name: "Cisco Umbrella"
+            vendor_name: "Cisco"
+          profiles:
+           - "network_proxy"
+           - "security_control"
+          version: "1.5.0"
+        proxy_endpoint:
+          ip: "185.64.148.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "185.64.148.0"
+        status: "Failure"
+        status_code: "303"
+        status_id: 2
+        time: 1702288841000
       policy:
         timebasedrule: false
       policycategories:
@@ -868,13 +996,18 @@ tests:
         label: "Search Engines and Portals"
         type: "content"
       port: 443
+      referer: ""
+      requestmethod: "POST"
       responsefilename: ""
       securityoverridden: false
       sha256: ""
+      statuscode: 303
       tenantcontrols: false
       time: "10:00:41"
       timestamp: 1702288841000
       type: "proxy"
+      url: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
+      useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
       verdict: "blocked"
       warnstatus: ""
     message: |-
@@ -1113,9 +1246,11 @@ tests:
       datalossprevention:
         state: ""
       date: "2023-12-07"
+      destinationip: ""
       egress:
         ip: "185.64.148.0"
         type: "shared"
+      externalip: "185.64.148.0"
       forwardingmethod: ""
       http:
         method: "POST"
@@ -1185,6 +1320,38 @@ tests:
           ip: "185.64.148.0"
         destination:
           ip: ""
+      ocsf:
+        activity_id: 6
+        activity_name: "Post"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "HTTP Activity"
+        class_uid: 4002
+        http_request:
+          referrer: ""
+          url:
+            url_string: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
+          user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
+        http_response:
+          code: 303
+        metadata:
+          product:
+            name: "Cisco Umbrella"
+            vendor_name: "Cisco"
+          profiles:
+           - "network_proxy"
+           - "security_control"
+          version: "1.5.0"
+        proxy_endpoint:
+          ip: "185.64.148.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "185.64.148.0"
+        status: "Success"
+        status_code: "303"
+        status_id: 1
+        time: 1701943235000
       policy:
         timebasedrule: false
       policycategories:
@@ -1195,13 +1362,18 @@ tests:
         label: "Search Engines and Portals"
         type: "content"
       port: 443
+      referer: ""
+      requestmethod: "POST"
       responsefilename: ""
       securityoverridden: false
       sha256: ""
+      statuscode: 303
       tenantcontrols: false
       time: "10:00:35"
       timestamp: 1701943235000
       type: "proxy"
+      url: "https://www.bing.com/api/shopping/v1/savings/user/readNotifications"
+      useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
       verdict: "allowed"
       warnstatus: ""
     message: |-

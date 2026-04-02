@@ -13,7 +13,7 @@ def shared_propagate_agent_tags():
 
 
 def instance_adoprovider():
-    return 'SQLOLEDB'
+    return 'MSOLEDBSQL'
 
 
 def instance_autodiscovery_db_service_check():
@@ -58,6 +58,10 @@ def instance_driver():
 
 def instance_empty_default_hostname():
     return False
+
+
+def instance_enable_legacy_tags_normalization():
+    return True
 
 
 def instance_exclude_hostname():

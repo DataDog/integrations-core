@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import argparse
-import email
+import email.message
+import fnmatch
 import json
 import os
 import re
@@ -21,8 +22,30 @@ import pathspec
 import urllib3
 from dotenv import dotenv_values
 from utils import iter_wheels
-from wheel.cli.pack import pack
-from wheel.cli.unpack import unpack
+
+
+def unpack_wheel(wheel_file: Path, dest_dir: Path | None = None):
+    """
+    Unpack a wheel file into a directory using the supported CLI entrypoint:
+      python -m wheel unpack <wheel> [-d <dest>]
+    """
+    cmd = [sys.executable, '-m', 'wheel', 'unpack']
+    if dest_dir:
+        cmd += ['-d', str(dest_dir)]
+    cmd.append(str(wheel_file))
+    subprocess.check_call(cmd)
+
+
+def pack_wheel(wheel_dir: Path, dest_dir: Path | None = None):
+    """
+    Pack a wheel directory into a wheel using:
+      python -m wheel pack <wheel-dir> [-d <dest>]
+    """
+    cmd = [sys.executable, '-m', 'wheel', 'pack']
+    if dest_dir:
+        cmd += ['-d', str(dest_dir)]
+    cmd.append(str(wheel_dir))
+    subprocess.check_call(cmd)
 
 INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
@@ -35,6 +58,10 @@ class WheelSizes(TypedDict):
     uncompressed: int
 
 
+class VersionedWheelSizes(WheelSizes):
+    version: str
+
+
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
     PY2_PATH = Path('C:\\py2\\Scripts\\python.exe')
@@ -44,7 +71,7 @@ if sys.platform == 'win32':
     def join_command_args(args: list[str]) -> str:
         return subprocess.list2cmdline(args)
 
-    def path_to_uri(path: str) -> str:
+    def path_to_uri(path: str | Path) -> str:
         return f'file:///{os.path.abspath(path).replace(" ", "%20").replace(os.sep, "/")}'
 
 else:
@@ -58,7 +85,7 @@ else:
     def join_command_args(args: list[str]) -> str:
         return shlex.join(args)
 
-    def path_to_uri(path: str) -> str:
+    def path_to_uri(path: str | Path) -> str:
         return f'file://{os.path.abspath(path).replace(" ", "%20")}'
 
 
@@ -76,7 +103,7 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
     return process
 
 
-def extract_metadata(wheel: Path) -> email.Message:
+def extract_metadata(wheel: Path) -> email.message.Message:
     with ZipFile(str(wheel)) as zip_archive:
         for path in zip_archive.namelist():
             root = path.split('/', 1)[0]
@@ -145,52 +172,23 @@ def wheel_was_built(wheel: Path) -> bool:
     return file_hash != wheel_hashes[wheel.name]
 
 
-def remove_test_files(wheel_path: Path) -> bool:
-    '''
-    Unpack the wheel, remove excluded test files, then repack it to rebuild RECORD correctly.
-    '''
-    # First, check whether the wheel contains any files that should be excluded. If not, leave it untouched.
-    with ZipFile(wheel_path, 'r') as zf:
-        excluded_members = [name for name in zf.namelist() if is_excluded_from_wheel(name)]
-
-    if not excluded_members:
-        # Nothing to strip, so skip rewriting the wheel
-        return False
-    with TemporaryDirectory() as td:
-        td_path = Path(td)
-
-        # Unpack the wheel into temp dir
-        unpack(wheel_path, dest=td_path)
-        unpacked_dir = next(td_path.iterdir())
-        # Remove excluded files/folders
-        for root, dirs, files in os.walk(td, topdown=False):
-            for d in list(dirs):
-                full_dir = Path(root) / d
-                rel = full_dir.relative_to(unpacked_dir).as_posix()
-                if is_excluded_from_wheel(rel):
-                    shutil.rmtree(full_dir)
-                    dirs.remove(d)
-            for f in files:
-                rel = Path(root).joinpath(f).relative_to(unpacked_dir).as_posix()
-                if is_excluded_from_wheel(rel):
-                    os.remove(Path(root) / f)
-
-        print(f'Tests removed from {wheel_path.name}')
-
-        dest_dir = wheel_path.parent
-        before = {p.resolve() for p in dest_dir.glob("*.whl")}
-        # Repack to same directory, regenerating RECORD
-        pack(unpacked_dir, dest_dir=dest_dir, build_number=None)
-
-        # The wheel might not be platform-specific, so repacking restores its original name.
-        # We need to move the repacked wheel to wheel_path, which was changed to be platform-specific.
-        after = {p.resolve() for p in wheel_path.parent.glob("*.whl")}
-        new_files = sorted(after - before, key=lambda p: p.stat().st_mtime, reverse=True)
-
-        if new_files:
-            shutil.move(str(new_files[0]), str(wheel_path))
-
-    return True
+def _remove_test_files_from_dir(unpacked_dir: Path) -> bool:
+    """Remove excluded test files and directories from an unpacked wheel directory."""
+    removed_any = False
+    for root, dirs, files in unpacked_dir.walk(top_down=False):
+        for d in list(dirs):
+            full_dir = root / d
+            rel = full_dir.relative_to(unpacked_dir).as_posix()
+            if is_excluded_from_wheel(rel):
+                shutil.rmtree(full_dir)
+                dirs.remove(d)
+                removed_any = True
+        for f in files:
+            rel = (root / f).relative_to(unpacked_dir).as_posix()
+            if is_excluded_from_wheel(rel):
+                (root / f).unlink()
+                removed_any = True
+    return removed_any
 
 
 @cache
@@ -223,7 +221,123 @@ def is_excluded_from_wheel(path: str | Path) -> bool:
     return False
 
 
-def add_dependency(dependencies: dict[str, str], sizes: dict[str, WheelSizes], wheel: Path) -> None:
+@cache
+def _load_line_removal_rules() -> list[dict]:
+    '''
+    Load the line removal rules from the toml file and compile the regex patterns.
+    '''
+
+    config_p = Path(__file__).parent / "lines_to_remove.toml"
+    with open(config_p, "rb") as f:
+        config = tomllib.load(f)
+
+    rules = config.get("rules", [])
+    for rule in rules:
+        rule['_compiled_patterns'] = [re.compile(p) for p in rule.get('line_patterns', [])]
+    return rules
+
+
+def _get_matching_rules(wheel_name: str) -> list[dict]:
+    '''
+    Match the rules in the toml to the wheel name.
+    '''
+    rules = _load_line_removal_rules()
+    matching = []
+    for rule in rules:
+        pattern = rule.get('package_pattern', '*')
+        if fnmatch.fnmatch(wheel_name, pattern):
+            matching.append(rule)
+    return matching
+
+
+def _strip_lines_from_dir(unpacked_dir: Path, rules: list[dict]) -> bool:
+    """Strip matching lines and their indented blocks from files."""
+    modified = False
+    for rule in rules:
+        file_pattern = rule.get('file_pattern', '*.py')
+        compiled_patterns = rule['_compiled_patterns']
+
+        for py_file in unpacked_dir.rglob(file_pattern):
+            if not py_file.is_file():
+                continue
+
+            try:
+                original_content = py_file.read_text(encoding='utf-8')
+            except UnicodeDecodeError:
+                continue
+
+            lines = original_content.splitlines(keepends=True)
+            kept_lines: list[str] = []
+            skip_indent: int | None = None
+
+            for line in lines:
+                stripped = line.rstrip('\n\r')
+
+                if skip_indent is not None:
+                    expanded = stripped.expandtabs()
+                    line_indent = len(expanded) - len(expanded.lstrip())
+                    if stripped == '' or line_indent > skip_indent:
+                        continue
+                    skip_indent = None
+
+                if any(pattern.search(line) for pattern in compiled_patterns):
+                    expanded = stripped.expandtabs()
+                    skip_indent = len(expanded) - len(expanded.lstrip())
+                    continue
+
+                kept_lines.append(line)
+
+            if len(kept_lines) != len(lines):
+                py_file.write_text(''.join(kept_lines), encoding='utf-8')
+                modified = True
+    return modified
+
+
+def clean_wheel(wheel_path: Path) -> bool:
+    """
+    Unpack the wheel at most once, remove excluded test files and strip
+    matching lines, then repack only if changes were made.
+    """
+    with ZipFile(wheel_path, 'r') as zf:
+        has_excluded_files = any(is_excluded_from_wheel(name) for name in zf.namelist())
+
+    line_removal_rules = _get_matching_rules(wheel_path.name)
+
+    if not has_excluded_files and not line_removal_rules:
+        return False
+
+    with TemporaryDirectory() as td:
+        td_path = Path(td)
+        unpack_wheel(wheel_path, dest_dir=td_path)
+        unpacked_dir = next(td_path.iterdir())
+
+        modified = False
+        if has_excluded_files:
+            if _remove_test_files_from_dir(unpacked_dir):
+                print(f'Tests removed from {wheel_path.name}')
+                modified = True
+        if line_removal_rules:
+            if _strip_lines_from_dir(unpacked_dir, line_removal_rules):
+                print(f'Stripped lines from {wheel_path.name}')
+                modified = True
+
+        if not modified:
+            return False
+
+        dest_dir = wheel_path.parent
+        before = {p.resolve() for p in dest_dir.glob("*.whl")}
+        pack_wheel(unpacked_dir, dest_dir=dest_dir)
+        # Repacking may restore the wheel's original (non-platform-specific) name.
+        # Move the repacked wheel back to the platform-specific path.
+        after = {p.resolve() for p in dest_dir.glob("*.whl")}
+        new_files = sorted(after - before, key=lambda p: p.stat().st_mtime, reverse=True)
+
+        if new_files:
+            shutil.move(str(new_files[0]), str(wheel_path))
+
+    return True
+
+def add_dependency(dependencies: dict[str, str], sizes: dict[str, VersionedWheelSizes], wheel: Path) -> None:
     project_metadata = extract_metadata(wheel)
     project_name = normalize_project_name(project_metadata['Name'])
     project_version = project_metadata['Version']
@@ -276,6 +390,8 @@ def main():
         env_vars['DD_ENV_FILE'] = str(ENV_FILE)
 
         # Off is on, see: https://github.com/pypa/pip/issues/5735
+        # We don't want pip build isolation because we manage have one env for everything.
+        # We manage our build dependencies in .builders/deps/build_dependencies.txt.
         env_vars['PIP_NO_BUILD_ISOLATION'] = '0'
 
         # Spaces are used to separate multiple values which means paths themselves cannot contain spaces, see:
@@ -311,6 +427,13 @@ def main():
             CUSTOM_EXTERNAL_INDEX,
         ]
 
+        # Apply version constraints for transitive dependencies if available.
+        # This is passed as -c rather than via PIP_CONSTRAINT to avoid
+        # constraining the build dependencies installed earlier.
+        transitive_constraints = MOUNT_DIR / 'constraints.txt'
+        if transitive_constraints.is_file():
+            command_args.extend(['-c', str(transitive_constraints)])
+
         check_process(command_args, env=env_vars)
 
         # Classify wheels
@@ -337,24 +460,23 @@ def main():
             ]
         )
 
-    dependencies: dict[str, tuple[str, str]] = {}
-    sizes: dict[str, WheelSizes] = {}
+    dependencies: dict[str, str] = {}
+    sizes: dict[str, VersionedWheelSizes] = {}
+
+    # Handle wheels already in the built directory
+    for wheel in iter_wheels(built_wheels_dir):
+        clean_wheel(wheel)
+        add_dependency(dependencies, sizes, wheel)
 
     # Handle wheels currently in the external directory and move them to the built directory if they were modified
     for wheel in iter_wheels(external_wheels_dir):
-        was_modified = remove_test_files(wheel)
+        was_modified = clean_wheel(wheel)
         if was_modified:
-            # A modified wheel is no longer external → move it to built directory
             new_path = built_wheels_dir / wheel.name
             wheel.rename(new_path)
             wheel = new_path
             print(f'Moved {wheel.name} to built directory')
 
-        add_dependency(dependencies, sizes, wheel)
-
-    # Handle wheels already in the built directory
-    for wheel in iter_wheels(built_wheels_dir):
-        remove_test_files(wheel)
         add_dependency(dependencies, sizes, wheel)
 
     output_path = MOUNT_DIR / 'sizes.json'

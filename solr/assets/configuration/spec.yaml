@@ -1,4 +1,5 @@
 name: Solr
+fleet_configurable: true
 files:
 - name: solr.yaml
   options:

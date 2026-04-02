@@ -53,6 +53,7 @@ from .util import (
     BUFFERCACHE_METRICS,
     CLUSTER_VACUUM_PROGRESS_METRICS,
     CONNECTION_METRICS,
+    CONNECTION_METRICS_BY_DB,
     COUNT_METRICS,
     FUNCTION_METRICS,
     IDLE_TX_LOCK_AGE_METRICS,
@@ -397,7 +398,8 @@ class PostgreSql(DatabaseCheck):
             if self.is_aurora is False:
                 queries.append(QUERY_PG_STAT_WAL_RECEIVER)
                 if self._config.collect_wal_metrics is not False:
-                    # collect wal metrics for pg >= 10 only if the user has not explicitly disabled it
+                    # collect wal metrics for pg >= 10 by default (uses pg_ls_waldir via SQL)
+                    # unless the user has explicitly disabled it
                     queries.append(WAL_FILE_METRICS)
             if self._config.collect_buffercache_metrics:
                 queries.append(BUFFERCACHE_METRICS)
@@ -857,6 +859,18 @@ class PostgreSql(DatabaseCheck):
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
         metric_scope = [CONNECTION_METRICS]
+
+        connection_metrics_by_db = copy.deepcopy(CONNECTION_METRICS_BY_DB)
+        databases_to_ignore = ""
+        if len(self._config.ignore_databases) > 0:
+            escaped_databases = ["'{}'".format(db.replace("'", "''")) for db in self._config.ignore_databases]
+            databases_to_ignore = "AND datname NOT IN ({})".format(", ".join(escaped_databases))
+        connection_metrics_by_db["query"] = connection_metrics_by_db["query"].format(
+            ignore_database_filter=databases_to_ignore
+        )
+        metric_scope.append(connection_metrics_by_db)
+        self.log.debug("Connection Metrics by DB query [%s]", connection_metrics_by_db["query"])
+
         per_database_metric_scope = []
 
         if self._config.collect_function_metrics:
@@ -1088,7 +1102,7 @@ class PostgreSql(DatabaseCheck):
         tags = self.tags + self._get_debug_tags() + (tags or [])
         return {
             'tags': tags,
-            "hostname": self.resolved_hostname,
+            "hostname": self.reported_hostname,
         }
 
     def check(self, _):
@@ -1097,6 +1111,8 @@ class PostgreSql(DatabaseCheck):
 
         tags = copy.copy(self.tags)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
+        # Reset _non_internal_tags to prevent stale dynamic tags (e.g., replication_role) from accumulating
+        self._non_internal_tags = [t for t in copy.copy(self.tags) if not t.startswith("dd.internal")]
         tags_to_add = []
         try:
             # Check version
@@ -1137,8 +1153,9 @@ class PostgreSql(DatabaseCheck):
                     self.statement_metrics.run_job_loop(tags)
                     self.statement_samples.run_job_loop(tags)
                     self.metadata_samples.run_job_loop(tags)
-                if self._config.collect_wal_metrics:
-                    # collect wal metrics for pg < 10, disabled by enabled
+                if self._config.collect_wal_metrics is True:
+                    # collect wal metrics for pg < 10 only when explicitly enabled
+                    # (requires local filesystem access to the WAL directory)
                     self._collect_wal_metrics()
 
             if self._query_manager.queries:

@@ -1525,6 +1525,7 @@ def _check_until_time(check, dbm_instance, sleep_time, check_interval):
         elapsed = time.time() - start_time
 
 
+@pytest.mark.flaky
 def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the main collection loop rate limit
     collection_interval = 0.2

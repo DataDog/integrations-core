@@ -1,4 +1,5 @@
 name: DNS
+fleet_configurable: true
 files:
   - name: dns_check.yaml
     options:
@@ -6,6 +7,7 @@ files:
         options:
           - name: default_timeout
             description: Timeout to use as a default for all your instances.
+            fleet_configurable: true
             value:
               example: 5
               type: integer
@@ -16,20 +18,24 @@ files:
             description: |
                Name of your DNS check instance.
                To create multiple DNS checks, create multiple instances with unique names.
+            fleet_configurable: true
             value:
               type: string
               example: <INSTANCE_NAME>
           - name: hostname
+            fleet_configurable: true
             required: true
             description: Hostname to resolve.
             value:
               type: string
           - name: nameserver
             description: IP address of the name server to query.
+            fleet_configurable: true
             value:
               type: string
           - name: nameserver_port
             description: Port for the name server.
+            fleet_configurable: true
             value:
               type: integer
               example: 53
@@ -37,11 +43,13 @@ files:
             description: |
               A comma separated list of IP addresses that the hostname is expected to resolve as.
               Useful to ensure that the name hasn't been hijacked and points to the expected servers.
+            fleet_configurable: true
             value:
               type: string
               example: <IP_ADDRESSES>
           - name: timeout
             description: Timeout to honor for this instance of the check.
+            fleet_configurable: true
             value:
               type: integer
               example: 5
@@ -57,6 +65,7 @@ files:
               on the resolver's configured search domain.
 
               For these reasons, these queries are good candidates to monitor the worst-case performance of a DNS lookup.
+            fleet_configurable: true
             value:
               type: string
               example: A

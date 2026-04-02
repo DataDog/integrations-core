@@ -25,6 +25,7 @@ from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_he
 from datadog_checks.sqlserver.const import (
     STATIC_INFO_SERVERNAME,
 )
+from datadog_checks.sqlserver.utils import construct_use_statement
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_YEAR
 from .conftest import DEFAULT_TIMEOUT
@@ -136,7 +137,7 @@ def test_collect_load_activity(
 
     def run_test_query(c, q):
         cur = c.cursor()
-        cur.execute("USE [{}]".format(database))
+        cur.execute(construct_use_statement(database))
         # 0xFF can't be decoded to Unicode, which makes it good test data,
         # since Unicode is a default format
         cur.execute("SET CONTEXT_INFO 0xff")
@@ -318,7 +319,7 @@ def test_activity_nested_blocking_transactions(
 
     def run_queries(conn, queries):
         cur = conn.cursor()
-        cur.execute("USE [{}]".format("datadog_test-1"))
+        cur.execute(construct_use_statement("datadog_test-1"))
         cur.execute("BEGIN TRANSACTION")
         for q in queries:
             try:
@@ -455,7 +456,7 @@ def test_activity_metadata(
 
     def _run_test_query(conn, q):
         cur = conn.cursor()
-        cur.execute("USE [{}]".format("datadog_test-1"))
+        cur.execute(construct_use_statement("datadog_test-1"))
         cur.execute(q)
 
     def _obfuscate_sql(sql_query, options=None):
@@ -643,6 +644,72 @@ def test_truncate_on_max_size_bytes(dbm_instance, datadog_agent, rows, expected_
         assert len(result_rows) == expected_len
         for index, user in enumerate(expected_users):
             assert result_rows[index]['user_name'] == user
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "procedure_name,schema_name,expected_procedure_name",
+    [
+        pytest.param(
+            None,
+            None,
+            "myproc",
+            id="no_connect_permission_falls_back_to_text",
+        ),
+        pytest.param(
+            "myProc",
+            "dbo",
+            "dbo.myproc",
+            id="connect_permission_granted_uses_object_name",
+        ),
+    ],
+)
+def test_activity_procedure_name_fallback_without_connect_permission(
+    dbm_instance, datadog_agent, procedure_name, schema_name, expected_procedure_name
+):
+    """When the monitoring user lacks CONNECT on the target database, OBJECT_NAME() returns NULL
+    and procedure_name is None. The procedure SQL text from sys.dm_exec_sql_text is still
+    available in `text` and should be used as a fallback to extract the procedure name via
+    obfuscator metadata, mirroring the fallback logic in statement metrics."""
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    statement_text = "SELECT * FROM ϑings WHERE id = @P1"
+    procedure_text = "CREATE PROCEDURE dbo.myProc AS BEGIN SELECT * FROM ϑings WHERE id = @P1 END;"
+
+    def _obfuscate_sql(sql_query, options=None):
+        return json.dumps(
+            {
+                'query': sql_query,
+                'metadata': {
+                    'tables_csv': 'ϑings',
+                    'commands': ['SELECT'],
+                    'comments': [],
+                    'procedures': ['myProc'],
+                },
+            }
+        )
+
+    row = {
+        "user_name": "testuser",
+        "id": 1,
+        "statement_text": statement_text,
+        "text": procedure_text,
+        "query_start": new_time(),
+        "procedure_name": procedure_name,
+        "schema_name": schema_name,
+        "query_hash": b'\x01\x02\x03\x04',
+        "query_plan_hash": b'\x05\x06\x07\x08',
+    }
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        result_rows = check.activity._normalize_queries_and_filter_rows([row], 10000)
+
+    assert len(result_rows) == 1
+    result_row = result_rows[0]
+    assert result_row['is_proc'] is True, "should identify the row as a stored procedure"
+    assert result_row.get('procedure_name') == expected_procedure_name
+    assert result_row.get('procedure_signature'), "should have a procedure_signature"
 
 
 @pytest.mark.unit

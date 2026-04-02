@@ -1,4 +1,5 @@
 name: Cisco Secure Web Appliance
+fleet_configurable: true
 files:
 - name: cisco_secure_web_appliance.yaml
   options:

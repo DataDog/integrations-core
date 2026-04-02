@@ -224,6 +224,12 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
     def _collect_performance_metrics(self):
         self.log.debug("Collecting performance metrics")
         metrics_response = self.http.get(f"{self.config.proxmox_server}/cluster/metrics/export")
+        if not metrics_response.ok:
+            self.log.warning(
+                "Performance metrics endpoint not available (HTTP %s), skipping collection",
+                metrics_response.status_code,
+            )
+            return
         metrics_response_json = metrics_response.json()
         metrics = metrics_response_json.get('data', {}).get('data', [])
 

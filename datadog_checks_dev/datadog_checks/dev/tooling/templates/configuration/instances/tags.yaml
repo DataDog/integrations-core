@@ -10,3 +10,4 @@ description: |
   A list of tags to attach to every metric and service check emitted by this instance.
 
   Learn more about tagging at https://docs.datadoghq.com/tagging
+fleet_configurable: true

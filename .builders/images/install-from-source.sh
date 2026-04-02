@@ -10,6 +10,7 @@
 # Optional:
 # - CONFIGURE_SCRIPT: Alternative to the default ./configure
 # - INSTALL_COMMAND: Specify a command for installation other than the default `make install`
+# - PATCHES: Paths to patches to apply, relative to the patches folder
 
 set -euxo pipefail
 
@@ -23,6 +24,11 @@ curl "${url}" -Lo "${workdir}/${archive_name}"
 echo "${SHA256}  ${workdir}/${archive_name}" | sha256sum --check
 tar -C "${workdir}" -xf "${workdir}/${archive_name}"
 pushd "${workdir}/${relative_path}"
+
+for p in ${PATCHES:-}; do
+    patch -p1 -i "${DD_MOUNT_DIR}/patches/${p}"
+done
+
 ${CONFIGURE_SCRIPT:-./configure} "$@"
 make -j $(nproc)
 ${INSTALL_COMMAND:-make install}

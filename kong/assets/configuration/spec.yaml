@@ -1,4 +1,5 @@
 name: Kong
+fleet_configurable: true
 files:
 - name: kong.yaml
   options:
@@ -16,6 +17,8 @@ files:
         extra_metrics.value.example:
         - kong_memory_workers_lua_vms_bytes: memory.workers.lua.vms.bytes
     - name: kong_status_url
+      legacy: true
+      fleet_configurable: true
       display_priority: 1
       description: |
         The check collects and parses metrics from the admin /status endpoint.

@@ -1,4 +1,5 @@
 name: Kube DNS
+fleet_configurable: true
 files:
 - name: kube_dns.yaml
   options:
@@ -8,6 +9,7 @@ files:
   - template: instances
     options:
     - name: prometheus_endpoint
+      fleet_configurable: true
       required: true
       description: |
         The URL where your application metrics are exposed by Prometheus.

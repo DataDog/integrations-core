@@ -50,7 +50,7 @@ GROUP BY object_id
 INDEX_QUERY = """
 SELECT
     i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint,
-    i.is_disabled, STRING_AGG(c.name, ',') AS column_names
+    i.is_disabled, STRING_AGG(CAST(c.name AS NVARCHAR(MAX)), ',') AS column_names
 FROM
     sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id
     AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id

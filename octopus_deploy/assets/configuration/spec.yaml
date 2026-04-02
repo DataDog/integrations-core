@@ -1,4 +1,5 @@
 name: Octopus Deploy
+fleet_configurable: true
 files:
 - name: octopus_deploy.yaml
   options:
@@ -9,6 +10,7 @@ files:
   - template: instances
     options:
     - name: octopus_endpoint
+      fleet_configurable: true
       display_priority: 8
       description: |
         Octopus API endpoint.
@@ -18,6 +20,7 @@ files:
         type: string
       required: true
     - name: spaces
+      fleet_configurable: true
       display_priority: 5
       description: |
         Optional configuration to indicate the spaces to process. If not configured,
@@ -79,6 +82,7 @@ files:
             type: integer
         example: {}
     - name: project_groups
+      fleet_configurable: true
       display_priority: 5
       description: |
         Optional configuration to indicate the project groups to process. If not configured,
@@ -137,6 +141,7 @@ files:
             type: integer
         example: {}
     - name: projects
+      fleet_configurable: true
       display_priority: 5
       description: |
         Optional configuration to indicate the projects to process. If not configured,
@@ -185,6 +190,7 @@ files:
             type: integer
         example: {}
     - name: environments
+      fleet_configurable: true
       display_priority: 6
       description: |
           Optional configuration to indicate the environments to process. If not configured,

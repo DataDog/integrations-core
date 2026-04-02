@@ -1,4 +1,5 @@
 name: Falco
+fleet_configurable: true
 files:
 - name: falco.yaml
   options:

@@ -10,6 +10,7 @@ files:
           can be overwritten on an instance
         value:
           type: string
+          require_trusted_provider: true
           example: gunicorn
       - template: init_config/default
   - template: instances
@@ -24,10 +25,12 @@ files:
         the name is `<WEB_APP_NAME>`
       value:
         type: string
+      fleet_configurable: true
     - name: gunicorn
       description: Command or path to gunicorn (e.g. `/usr/local/bin/gunicorn` or `docker exec container gunicorn`)
       value:
         type: string
+        require_trusted_provider: true
         example: gunicorn
     - template: instances/default
   - template: logs

@@ -29,6 +29,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
 from datadog_checks.postgres.features import Feature, FeatureKey, FeatureNames
+from datadog_checks.postgres.util import AWS_RDS_HOSTNAME_SUFFIX
 
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
@@ -316,11 +317,15 @@ def apply_validated_defaults(args: dict, instance: dict, validation_result: Vali
 
 
 def apply_cloud_defaults(args: dict, instance: dict, validation_result: ValidationResult):
+    # Auto-detect RDS endpoints and backfill instance_endpoint when not explicitly configured
+    if not args['aws'].get('instance_endpoint') and AWS_RDS_HOSTNAME_SUFFIX in args['host']:
+        args['aws']['instance_endpoint'] = args['host']
+
     # AWS backfill and validation
     if (
         not instance.get("aws", {}).get("managed_authentication", None)
         and args.get('aws', {}).get('region')
-        and not args.get('password')
+        and args.get('password') is None
     ):
         # if managed_authentication is not set, we assume it is enabled if region is set and password is not set
         args['aws'] = {
@@ -368,7 +373,6 @@ def apply_deprecation_warnings(instance: dict, validation_result: ValidationResu
         ['deep_database_monitoring', 'dbm'],
         ['managed_identity', 'azure.managed_authentication'],
         ['statement_samples', 'query_samples'],
-        ['collect_default_database', 'postgres'],
     ]
 
     for deprecation in deprecations:
@@ -384,12 +388,6 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
     if config.relations and not (config.dbname or config.database_autodiscovery.enabled):
         validation_result.add_error(
             '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
-        )
-
-    if config.empty_default_hostname:
-        validation_result.add_warning(
-            'The `empty_default_hostname` option has no effect in the Postgres check. '
-            'Use the `exclude_hostname` option instead.'
         )
 
     # Validate dbname is not excluded when using autodiscovery

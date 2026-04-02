@@ -83,11 +83,11 @@ class GuarddogCheck(AgentCheck):
             try:
                 results = json.loads(cmd_result.stdout)
                 for result in results:
-                    triggered_rules = [
+                    rules_triggered = [
                         key for key, value in result.get("result", {}).get("results", {}).items() if value
                     ]
                     enrichment_details = {
-                        "triggered_rules": triggered_rules,
+                        "rules_triggered": rules_triggered,
                         "package_ecosystem": self.package_ecosystem,
                     }
                     event = self.get_enriched_event(enrichment_details, result)

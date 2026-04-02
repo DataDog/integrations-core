@@ -1,0 +1,1745 @@
+[
+  {
+    "data": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "22795c6e-136f-4b02-b7da-a9a141e5a193",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:27:52.422Z",
+        "operationEndTime": "2026-01-15T10:27:52.422Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:27:52.422736Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "ab9e6ea8-19a9-4323-9068-d2fe9c4c108d",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:28:55.645Z",
+        "operationEndTime": "2026-01-15T10:28:55.645Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:28:55.646522Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "17482d31-fe4b-4d63-bef7-0aac2d6799fb",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:29:59.766Z",
+        "operationEndTime": "2026-01-15T10:29:59.766Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:29:59.766988Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "5d8761da-36ee-4e0b-be7d-fc00fbd21c77",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:31:05.183Z",
+        "operationEndTime": "2026-01-15T10:31:05.183Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:31:05.184396Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "a0600725-acde-46e9-ae2d-7c4744ce59ee",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:32:07.899Z",
+        "operationEndTime": "2026-01-15T10:32:07.899Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:32:07.899964Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "97758912-dca1-4ca1-bd72-cd37c04167e2",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:33:13.16Z",
+        "operationEndTime": "2026-01-15T10:33:13.16Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:33:13.161582Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "a773501a-211e-4479-b203-45198a5a51f2",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:34:21.739Z",
+        "operationEndTime": "2026-01-15T10:34:21.739Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:34:21.739708Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "e52fa757-bb90-43f2-82e9-ef4934c7f1af",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:35:29.928Z",
+        "operationEndTime": "2026-01-15T10:35:29.928Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:35:29.92978Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "43cc109f-a704-4108-91b3-4ea3b9f71fc9",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:36:34.871Z",
+        "operationEndTime": "2026-01-15T10:36:34.871Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:36:34.872021Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "5812bf54-da70-4f27-8182-ab8ff6a6005a",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:37:38.032Z",
+        "operationEndTime": "2026-01-15T10:37:38.032Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:37:38.033602Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "3d8e7347-5221-4ccc-8bef-477e38ef0f5d",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:38:41.938Z",
+        "operationEndTime": "2026-01-15T10:38:41.938Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:38:41.939042Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "4a5ab12f-d47f-4af1-b350-dc7f6e917046",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:39:50.441Z",
+        "operationEndTime": "2026-01-15T10:39:50.441Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:39:50.442763Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "e147aa08-bdbe-4d64-a144-19ee34dc4275",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:41:06.971Z",
+        "operationEndTime": "2026-01-15T10:41:06.971Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:41:06.97225Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "fe8f18e8-5ce7-4ae2-9352-e4d921c4db09",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:42:22.95Z",
+        "operationEndTime": "2026-01-15T10:42:22.95Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:42:22.95093Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "3903f1c8-6b37-46fb-bf5b-a5dd4e81fdb9",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:43:32.53Z",
+        "operationEndTime": "2026-01-15T10:43:32.53Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:43:32.530704Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "e90e77df-71de-47e6-a5b7-78a2d694dc26",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:44:44.424Z",
+        "operationEndTime": "2026-01-15T10:44:44.424Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:44:44.425423Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "529bb5f3-fb9f-412c-9452-1dbff8a5b1fc",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:45:47.13Z",
+        "operationEndTime": "2026-01-15T10:45:47.13Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:45:47.130767Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "cee0bd9d-ec29-4f47-a7f8-3a341a7e56c4",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:45:47.897Z",
+        "operationEndTime": "2026-01-15T10:45:47.897Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:45:47.897749Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "c583fa23-d8fd-42af-a0f3-3425bd2e4300",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:46:49.991Z",
+        "operationEndTime": "2026-01-15T10:46:49.991Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:46:49.991782Z"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "monitoring.v4.serviceability.Audit",
+        "extId": "f13a286e-6a73-492d-bc91-c9e6041cf4a2",
+        "sourceEntity": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.AuditEntityReference",
+          "type": "IAM",
+          "name": "admin",
+          "extId": "admin"
+        },
+        "clusterReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.common.EntityReference",
+          "name": "datadog-nutanix-dev",
+          "extId": "00064715-c043-5d8f-ee4b-176ec875554d"
+        },
+        "affectedEntities": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.EntityReference",
+            "type": "IAM",
+            "name": "admin",
+            "extId": "admin"
+          }
+        ],
+        "operationType": "$UNKNOWN",
+        "message": "User {audit_user} has logged in from {ip_address}",
+        "parameters": [
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "admin"
+            },
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "monitoring.v4.common.Parameter",
+            "paramName": "audit_user"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "127.0.0.1"
+            },
+            "paramName": "ip_address"
+          },
+          {
+            "paramValue": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "monitoring.v4.common.StringValue",
+              "stringValue": "Apache-CXF/3.5.10"
+            },
+            "paramName": "browser_info"
+          }
+        ],
+        "operationStartTime": "2026-01-15T10:46:50.758Z",
+        "operationEndTime": "2026-01-15T10:46:50.758Z",
+        "userReference": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "monitoring.v4.serviceability.UserReference",
+          "name": "admin"
+        },
+        "auditType": "LoginInfoAudit",
+        "creationTime": "2026-01-15T10:46:50.759793Z"
+      }
+    ],
+    "$reserved": {
+      "$fv": "v4.r1"
+    },
+    "$objectType": "monitoring.v4.serviceability.ListAuditsApiResponse",
+    "metadata": {
+      "flags": [
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "hasError",
+          "value": false
+        },
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "isPaginated",
+          "value": true
+        },
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "isTruncated",
+          "value": false
+        }
+      ],
+      "$reserved": {
+        "$fv": "v1.r0"
+      },
+      "$objectType": "common.v1.response.ApiResponseMetadata",
+      "links": [
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.response.ApiLink",
+          "href": "https://nutanix.local:9440/api/monitoring/v4.0/serviceability/audits?$limit=50&$page=1",
+          "rel": "next"
+        },
+        {
+          "href": "https://nutanix.local:9440/api/monitoring/v4.0/serviceability/audits?$limit=50&$page=386",
+          "rel": "last"
+        },
+        {
+          "href": "https://nutanix.local:9440/api/monitoring/v4.0/serviceability/audits?$limit=50&$page=0",
+          "rel": "self"
+        },
+        {
+          "href": "https://nutanix.local:9440/api/monitoring/v4.0/serviceability/audits?$limit=50&$page=0",
+          "rel": "first"
+        }
+      ],
+      "totalAvailableResults": 20
+    }
+  }
+]

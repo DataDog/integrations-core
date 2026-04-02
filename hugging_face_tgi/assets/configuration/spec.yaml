@@ -1,4 +1,5 @@
 name: Hugging Face TGI
+fleet_configurable: true
 files:
 - name: hugging_face_tgi.yaml
   options:

@@ -1,4 +1,5 @@
 name: Twistlock
+fleet_configurable: true
 files:
 - name: twistlock.yaml
   options:
@@ -9,6 +10,8 @@ files:
   - template: instances
     options:
     - name: url
+      fleet_configurable: true
+      formats: ["url"]
       required: true
       description: The Prisma Cloud url to connect to.
       value:
@@ -18,6 +21,7 @@ files:
       description: |
         The Twistlock project if enabled.
         See https://cdn.twistlock.com/docs/api/twistlock_api.html
+      fleet_configurable: true
       value:
         type: string
     - template: instances/http

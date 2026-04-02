@@ -31,11 +31,3 @@ jobs:
       pytest-args: '-m "not flaky"'
       context: "nightly-base-package"
     secrets: inherit
-
-  submit-traces:
-    needs:
-    - test
-    if: success() || failure()
-
-    uses: ./.github/workflows/submit-traces.yml
-    secrets: inherit

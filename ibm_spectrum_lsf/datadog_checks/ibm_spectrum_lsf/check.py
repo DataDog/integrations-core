@@ -5,9 +5,11 @@
 from datadog_checks.base import AgentCheck
 
 from .client import LSFClient
+from .common import RecentlyCompletedJobIDs
 from .config_models import ConfigMixin
 from .processors import (
     BadminPerfmonProcessor,
+    BHistDetailsProcessor,
     BHistProcessor,
     BHostsProcessor,
     BJobsProcessor,
@@ -25,11 +27,12 @@ from .processors import (
 class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'ibm_spectrum_lsf'
 
-    def __init__(self, name, init_config, instances):
+    def __init__(self, name, init_config, instances) -> None:
         super(IbmSpectrumLsfCheck, self).__init__(name, init_config, instances)
         self.client: LSFClient = LSFClient(self.log)
         self.processors: list[LSFMetricsProcessor] = []
         self.tags: list[str] = []
+        self.completed_job_ids = RecentlyCompletedJobIDs()
         self.check_initializations.append(self.parse_config)
         self.check_initializations.append(self.initialize_processors)
 
@@ -45,7 +48,8 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
             BJobsProcessor(self.client, self.config, self.log, self.tags),
             BQueuesProcessor(self.client, self.config, self.log, self.tags),
             BSlotsProcessor(self.client, self.config, self.log, self.tags),
-            BHistProcessor(self.client, self.config, self.log, self.tags),
+            BHistProcessor(self.client, self.config, self.log, self.tags, self.completed_job_ids),
+            BHistDetailsProcessor(self.client, self.config, self.log, self.tags, self.completed_job_ids),
             GPULoadProcessor(self.client, self.config, self.log, self.tags),
             GPUHostsProcessor(self.client, self.config, self.log, self.tags),
             BadminPerfmonProcessor(self.client, self.config, self.log, self.tags),

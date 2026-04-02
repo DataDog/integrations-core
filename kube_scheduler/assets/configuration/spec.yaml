@@ -1,4 +1,5 @@
 name: Kube_scheduler
+fleet_configurable: true
 files:
 - name: kube_scheduler.yaml
   options:
@@ -10,24 +11,29 @@ files:
     - name: leader_election
       description: |
         Monitor the leader-election process on the kube-system:kube-scheduler.
+      fleet_configurable: true
       value:
         type: boolean
         example: true
     - name: leader_election_kind
       description: |
         Kind of object to look at for the leader election.
+
         Can be:
           * auto
           * lease
           * endpoints
           * configmap
         auto makes the check try lease first and fallback to endpoints if lease isn't available
+      fleet_configurable: true
       value:
         type: string
         example: auto
     - name: health_url
       description: |
         URL for the kube-scheduler health endpoint.
+      fleet_configurable: true
+      formats: ["url"]
       value:
         type: string
         example: http://localhost:10251/healthz
@@ -78,7 +84,6 @@ files:
       enabled: true
       value:
         example: tls_only
-        default: false
         anyOf:
         - type: boolean
         - type: string
@@ -86,6 +91,7 @@ files:
       description: Used to specify the path where the service account token is located.
       value:
         type: string
+        require_trusted_provider: true
         example: /var/run/secrets/kubernetes.io/serviceaccount/token
     - name: ssl_verify
       description: Used to verify self signed certificates.

@@ -64,7 +64,7 @@ instances:
     #
     # query_timeout: 30
 
-    ## @param queries - list of mappings - optional
+    ## @param queries - list of mappings - optional - default: [{'name': 'disk_usage'}, {'name': 'cpu_usage'}, {'name': 'jobq_job_status'}, {'name': 'active_job_status'}, {'name': 'job_memory_usage'}, {'name': 'memory_info'}, {'name': 'subsystem'}, {'name': 'job_queue'}, {'name': 'message_queue_info'}]
     ## List of queries to be run against the IBM i system. By default, all queries are run.
     #
     # queries:

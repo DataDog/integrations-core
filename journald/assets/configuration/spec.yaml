@@ -1,4 +1,5 @@
 name: journald
+fleet_configurable: true
 files:
 - name: journald.yaml
   options:
@@ -7,6 +8,7 @@ files:
     multiple: true
     options:
       - name: type
+        fleet_configurable: true
         description: ''
         required: true
         enabled: true
@@ -15,6 +17,7 @@ files:
           example: journald
           display_default: journald
       - name: container_mode
+        fleet_configurable: true
         description: |
           Automatically sets the source attribute to the corresponding short image
             name of the container for logs coming from Docker containers.
@@ -25,6 +28,7 @@ files:
           display_default: false
           example: true
       - name: include_units
+        fleet_configurable: true
         description: |
           List of system-level service units to include from log collection.
         value:
@@ -35,6 +39,7 @@ files:
             - docker.service
             - sshd.service
       - name: exclude_units
+        fleet_configurable: true
         description: |
           List of system-level service units to exclude from log collection.
           Note: The excluded units will take precedence over include_units.
@@ -48,6 +53,7 @@ files:
           example:
             - '*'
       - name: include_user_units
+        fleet_configurable: true
         description: |
           List of user-level service units to include from log collection.
         value:
@@ -57,6 +63,7 @@ files:
           example:
             - linger-example.service
       - name: exclude_user_units
+        fleet_configurable: true
         description: |
           List of user-level service units to exclude from log collection.
           Note: The excluded units will take precedence over include_user_units.

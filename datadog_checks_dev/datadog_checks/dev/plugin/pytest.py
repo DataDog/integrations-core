@@ -9,7 +9,7 @@ import re
 from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from io import open
-from typing import Dict, List, Optional, Tuple  # noqa: F401
+from typing import Dict, List, Literal, Optional, Tuple, overload  # noqa: F401
 
 import pytest
 
@@ -285,15 +285,98 @@ def dd_default_hostname():
 
 
 @pytest.fixture
-def mock_http_response(mocker):
+def mock_response():
     # Lazily import `requests` as it may be costly under certain conditions
     global MockResponse
     if MockResponse is None:
         from datadog_checks.dev.http import MockResponse
 
+    yield MockResponse
+
+
+@pytest.fixture
+def mock_http_response(mocker, mock_response):
     yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop('method', 'requests.Session.get'), return_value=MockResponse(*args, **kwargs)
+        kwargs.pop('method', 'requests.Session.get'), return_value=mock_response(*args, **kwargs)
     )
+
+
+@pytest.fixture
+def mock_http_response_per_endpoint(mocker, mock_response):
+    @overload
+    def _mock(
+        responses_by_endpoint: Dict[str, list[MockResponse]],
+        *,
+        mode: Literal["default"],
+        default_response: MockResponse,
+        method: str = ...,
+        url_arg_index: int = ...,
+        url_kwarg_name: str = ...,
+        strict: bool = ...,
+    ): ...
+    @overload
+    def _mock(
+        responses_by_endpoint: Dict[str, list[MockResponse]],
+        *,
+        mode: Literal["cycle", "exhaust"],
+        default_response: None = None,
+        method: str = ...,
+        url_arg_index: int = ...,
+        url_kwarg_name: str = ...,
+        strict: bool = ...,
+    ): ...
+    def _mock(
+        responses_by_endpoint: Dict[str, list[MockResponse]],
+        mode: Literal['cycle', 'exhaust', 'default'] = 'cycle',
+        default_response: MockResponse | None = None,
+        method: str = 'requests.Session.get',
+        url_arg_index: int = 1,
+        url_kwarg_name: str = "url",
+        strict: bool = True,
+    ):
+        """
+        Mocks HTTP responses for specific endpoints.
+        mode: The mode to use for the queue.
+            - 'cycle': loop through responses forever.
+            - 'exhaust': return each response once, then raise error.
+            - 'default': return responses once, then always return the default response.
+        url_arg_index: The index of the URL argument in the args tuple. e.g. for requests.get(url), url_arg_index=0
+        url_kwarg_name: The name of the URL key in the kwargs dict. e.g. for requests.get(url=url), url_kwarg_name="url"
+        strict: If True, an error is raised if the endpoint is not found. Otherwise, a 404 response is returned.
+        """
+
+        if default_response is None and mode == 'default':
+            raise ValueError("default_response is required when mode is 'default'")
+        elif default_response is not None and mode != 'default':
+            raise ValueError("default_response is only allowed when mode is 'default'")
+
+        if mode == 'cycle':
+            from itertools import cycle
+
+            queues = {url: cycle(resps) for url, resps in responses_by_endpoint.items()}
+
+        elif mode == 'exhaust' or mode == 'default':
+            queues = {url: iter(resps) for url, resps in responses_by_endpoint.items()}
+
+        def side_effect(*args, **kwargs):
+            url = kwargs.get(url_kwarg_name) or args[url_arg_index]
+            if url not in queues:
+                if strict:
+                    raise ValueError(f"Endpoint {url} not found in mocked responses")
+                else:
+                    return MockResponse(status_code=404)
+            else:
+                try:
+                    return next(queues[url])
+                except StopIteration:
+                    if mode == 'exhaust':
+                        raise StopIteration(f"No more responses available for endpoint {url}")
+                    elif mode == 'default':
+                        return default_response
+
+        return mocker.patch(method, autospec=True, side_effect=side_effect)
+
+    yield _mock
 
 
 @pytest.fixture

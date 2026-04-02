@@ -138,7 +138,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:payout @evt.name:PAYOUT_THIRDPARTY @notificationItems.NotificationRequestItem.success:true $MerchantAccount $Currency"
+                                                "query": "source:adyen @evt.name:PAYOUT_THIRDPARTY @notificationItems.NotificationRequestItem.success:true $MerchantAccount $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -193,7 +193,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:payout @evt.name:PAYOUT_THIRDPARTY @notificationItems.NotificationRequestItem.success:false $MerchantAccount $Currency"
+                                                "query": "source:adyen @evt.name:PAYOUT_THIRDPARTY @notificationItems.NotificationRequestItem.success:false $MerchantAccount $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -255,7 +255,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:payout @evt.name:PAYOUT_EXPIRE $MerchantAccount $Currency"
+                                                "query": "source:adyen @evt.name:PAYOUT_EXPIRE $MerchantAccount $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -314,7 +314,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:payout @evt.name:PAYOUT_DECLINE $MerchantAccount $Currency"
+                                                "query": "source:adyen @evt.name:PAYOUT_DECLINE $MerchantAccount $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -373,7 +373,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:adyen service:payout @evt.name:PAIDOUT_REVERSED $MerchantAccount $Currency"
+                                                "query": "source:adyen @evt.name:PAIDOUT_REVERSED $MerchantAccount $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -459,7 +459,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:payout @evt.name:PAYOUT_THIRDPARTY @notificationItems.NotificationRequestItem.success:false -@notificationItems.NotificationRequestItem.reason:\"\" $MerchantAccount $Currency"
+                                                "query": "source:adyen @evt.name:PAYOUT_THIRDPARTY @notificationItems.NotificationRequestItem.success:false -@notificationItems.NotificationRequestItem.reason:\"\" $MerchantAccount $Currency"
                                             },
                                             "storage": "hot"
                                         }
@@ -539,7 +539,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:adyen service:payout @evt.name:PAYOUT_THIRDPARTY $MerchantAccount $Currency"
+                                                "query": "source:adyen @evt.name:PAYOUT_THIRDPARTY $MerchantAccount $Currency"
                                             },
                                             "storage": "hot"
                                         }
