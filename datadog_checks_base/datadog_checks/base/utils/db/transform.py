@@ -83,12 +83,12 @@ _ALLOWED_AST_NODES = frozenset(
 )
 
 
-def _validate_expression_ast(tree, name):
+def _validate_expression_ast(tree: ast.Expression, name: str) -> None:
     for node in ast.walk(tree):
         node_type = type(node)
         if node_type not in _ALLOWED_AST_NODES:
             raise ValueError('expression for {} contains unsupported syntax `{}`'.format(name, node_type.__name__))
-        if node_type is ast.Attribute and node.attr.startswith('__') and node.attr.endswith('__'):
+        if node_type is ast.Attribute and node.attr.startswith('__'):
             raise ValueError(
                 'expression for {} accesses reserved attribute `{}`; reference source columns by name directly'.format(
                     name, node.attr
