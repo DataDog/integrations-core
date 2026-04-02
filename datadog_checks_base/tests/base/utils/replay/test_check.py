@@ -73,6 +73,7 @@ class ReplayCheckBadLog(AgentCheck):
     def check(self, _):
         self.log.debug('TypeError format: %d', 'not_a_number')
         self.log.debug('OverflowError format: %c', 2**32)
+        self.log.info('Replayed ok with %d arg', 1)
 
 
 def test_replay_skips_invalid_log_format(caplog, dd_run_check, aggregator, datadog_agent):
@@ -86,6 +87,7 @@ def test_replay_skips_invalid_log_format(caplog, dd_run_check, aggregator, datad
 
     assert 'TypeError format' not in caplog.text
     assert 'OverflowError format' not in caplog.text
+    assert 'Replayed ok with 1 arg' in caplog.text
 
 
 class SlowReplayCheck(AgentCheck):
