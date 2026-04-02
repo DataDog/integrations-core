@@ -2,6 +2,7 @@ import json
 import os
 import urllib.request
 from datetime import datetime, timedelta, timezone
+from typing import Any
 
 AGENT_REPO = "DataDog/datadog-agent"
 RELEASE_JSON_URL = f"https://raw.githubusercontent.com/{AGENT_REPO}/main/release.json"
@@ -9,13 +10,13 @@ COMMITS_API_URL = f"https://api.github.com/repos/{AGENT_REPO}/commits"
 GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
 
 
-def fetch_json(url, headers=None):
+def fetch_json(url: str, headers: dict[str, str] | None = None) -> Any:
     req = urllib.request.Request(url, headers=headers or {})
     with urllib.request.urlopen(req) as resp:
         return json.loads(resp.read().decode())
 
 
-def get_integrations_core_version(sha):
+def get_integrations_core_version(sha: str) -> str:
     raw_url = f"https://raw.githubusercontent.com/{AGENT_REPO}/{sha}/release.json"
     req = urllib.request.Request(raw_url, headers={"Authorization": f"token {GITHUB_TOKEN}"})
     with urllib.request.urlopen(req) as resp:
@@ -62,7 +63,8 @@ while not pin_changed:
         else:
             pin_changed = True
             break  # last_pin_commit is the oldest commit still on the current pin
-    page += 1
+    if not pin_changed:
+        page += 1
 
 # Step 4: compute days
 now_utc = datetime.now(timezone.utc)
