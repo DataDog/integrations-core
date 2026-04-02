@@ -1,4 +1,4 @@
-name: Promote Wheels
+name: Dependency Wheel Promotion
 
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   promote:
-    name: Promote wheels from dev to stable
+    name: Promote dependency wheels from dev to stable
     runs-on: ubuntu-22.04
     permissions:
       contents: read

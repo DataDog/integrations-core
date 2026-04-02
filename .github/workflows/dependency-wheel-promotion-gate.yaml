@@ -1,4 +1,4 @@
-name: Promote Gate
+name: Dependency Wheel Promotion Gate
 
 on:
   pull_request:
