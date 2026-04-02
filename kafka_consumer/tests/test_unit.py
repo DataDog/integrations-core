@@ -46,6 +46,13 @@ def seed_mock_client(cluster_id="cluster_id"):
     client = mock.create_autospec(KafkaClient)
     client.list_consumer_groups.return_value = ["consumer_group1", "datadog-agent"]
     client.get_partitions_for_topic.return_value = ['partition1']
+    client.get_topic_partitions.return_value = {
+        'topic1': ['partition1'],
+        'topic2': ['partition2'],
+        'dc': [0, 1],
+        'unconsumed_topic': [0, 1],
+        'marvel': [0, 1],
+    }
     client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", 2)])]
     client.describe_consumer_group.return_value = 'STABLE'
     client.consumer_get_cluster_id_and_list_topics.return_value = (
@@ -325,6 +332,7 @@ def test_when_no_partitions_then_emit_warning_log(check, kafka_instance, dd_run_
 
     mock_client = seed_mock_client()
     mock_client.get_partitions_for_topic.return_value = []
+    mock_client.get_topic_partitions.return_value = {}
     kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.client = mock_client
 
@@ -364,6 +372,7 @@ def test_when_partition_not_in_partitions_then_emit_warning_log(
 
     mock_client = seed_mock_client()
     mock_client.get_partitions_for_topic.return_value = ['partition2']
+    mock_client.get_topic_partitions.return_value = {'topic1': ['partition2']}
     kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.client = mock_client
 
@@ -1508,6 +1517,7 @@ def test_consumer_group_state_fetched_once_per_group(check, kafka_instance, dd_r
         [(topic, partitions)],
     )
     mock_client.get_partitions_for_topic.return_value = partitions
+    mock_client.get_topic_partitions.return_value = {topic: partitions}
     consumer_group_offsets = [(topic, p, o) for p, o in zip(partitions, offsets)]
     mock_client.list_consumer_group_offsets.return_value = [
         (

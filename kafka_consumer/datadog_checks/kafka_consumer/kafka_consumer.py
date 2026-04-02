@@ -283,6 +283,7 @@ class KafkaCheck(AgentCheck):
         """Report the consumer offsets and consumer lag."""
         reported_contexts = 0
         self.log.debug("Reporting consumer offsets and lag metrics")
+        all_topic_partitions = self.client.get_topic_partitions()
         for consumer_group, offsets in consumer_offsets.items():
             consumer_group_state = None
             for (topic, partition), consumer_offset in offsets.items():
@@ -308,7 +309,7 @@ class KafkaCheck(AgentCheck):
                     consumer_group_tags.append(f'consumer_group_state:{consumer_group_state}')
                 consumer_group_tags.extend(self.config._custom_tags)
 
-                partitions = self.client.get_partitions_for_topic(topic)
+                partitions = all_topic_partitions.get(topic, [])
                 self.log.debug("Received partitions %s for topic %s", partitions, topic)
                 if partition in partitions:
                     # report consumer offset if the partition is valid because even if leaderless
