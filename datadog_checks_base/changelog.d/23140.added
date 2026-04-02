@@ -1,1 +1,1 @@
-Add AST based expression validation for query extras
+Improve error messages for invalid DB query extras syntax
