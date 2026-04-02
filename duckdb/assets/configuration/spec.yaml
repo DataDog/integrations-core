@@ -1,4 +1,5 @@
 name: DuckDB
+fleet_configurable: true
 files:
 - name: duckdb.yaml
   options:
@@ -8,6 +9,7 @@ files:
   - template: instances
     options:
     - name: db_name
+      fleet_configurable: true
       required: true
       description: |
         The database to connect to (file path).
@@ -18,6 +20,7 @@ files:
     - name: connection_attempt
       description: | 
         The number of retries to connect to the database in case of failure
+      fleet_configurable: true
       value:
         type: integer
         default: 3

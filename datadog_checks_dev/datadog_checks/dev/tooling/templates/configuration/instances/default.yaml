@@ -9,6 +9,17 @@
     example: true
   hidden: true
   fleet_configurable: true
+- name: enable_legacy_tags_normalization
+  description: |
+    Whether to enable legacy tags normalization. When enabled (default), hyphens in tag
+    values are replaced with underscores. Set to `false` to preserve hyphens, which is
+    consistent with Datadog's tag format.
+  value:
+    type: boolean
+    example: false
+    display_default: true
+  hidden: true
+  fleet_configurable: true
 - name: metric_patterns
   description: |
     A mapping of metrics to include or exclude, with each entry being a regular expression.

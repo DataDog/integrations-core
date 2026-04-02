@@ -214,7 +214,7 @@ elasticsearch.search.scroll.time,gauge,,second,,The total time spent on scroll q
 elasticsearch.search.scroll.time.count,count,,second,,The total time spent on scroll queries submitted as a count [v5+].,0,elasticsearch,total scroll query time,
 elasticsearch.search.scroll.total,gauge,,query,,The total number of scroll queries [v5+].,0,elasticsearch,total scroll queries,
 elasticsearch.search.scroll.total.count,count,,query,,The total number of scroll queries submitted as a count [v5+].,0,elasticsearch,total scroll queries,
-elasticsearch.shards,gauge,,shard,,Number of primary and replica shards assigned to the node.,0,elasticsearch,shards,
+elasticsearch.shards,gauge,,shard,,Number of shards assigned to each node. When detailed_shard_metrics is disabled (default) reports total shards per node. When enabled reports shards per node-index-prirep combination with tags: node_name index and prirep (primary or replica).,0,elasticsearch,shards,
 elasticsearch.slm.snapshot_deletion_failures,gauge,,error,,The total number of snapshot deletion failures.,0,elasticsearch,slm del fail,
 elasticsearch.slm.snapshots_deleted,gauge,,,,The total number of deleted snapshots.,0,elasticsearch,slm del,
 elasticsearch.slm.snapshots_failed,gauge,,error,,The total number of failed snapshots.,0,elasticsearch,slm fail,

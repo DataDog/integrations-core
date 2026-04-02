@@ -16,6 +16,10 @@ The ClickHouse check is included in the [Datadog Agent][3] package. No additiona
 
 ### Configuration
 
+#### Prepare ClickHouse
+
+As a best practice, Datadog recommends using a read-only user to monitor your ClickHouse instance. This limits the access granted to the Datadog Agent.
+
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 

@@ -15,7 +15,10 @@ from ddev.utils.fs import Path
         pytest.param("7.x", id='not enough parts'),
     ],
 )
-def test_create_invalid_branch_name(ddev, name):
+def test_create_invalid_branch_name(ddev, name, mocker):
+    # Mock the confirmation to bypass it (we're testing validation, not confirmation)
+    mocker.patch('click.confirm', return_value=True)
+
     result = ddev('release', 'branch', 'create', name)
     assert result.exit_code == 1, result.output
     assert f'Invalid branch name: {name}. Branch name must match the pattern ^\\d+\\.\\d+\\.x$\n' in result.output
@@ -33,6 +36,8 @@ def test_create_branch(ddev, mocker, yaml_updated, expected_git_call_count):
     run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=yaml_updated)
+    # Mock the confirmation prompt to return True
+    mocker.patch('click.confirm', return_value=True)
 
     result = ddev('release', 'branch', 'create', '5.5.x')
 
@@ -91,3 +96,44 @@ def test_ensure_build_agent_yaml_updated_file_not_found(mocker, tmp_path):
 
     assert result is False
     app_mock.display_warning.assert_called_once()
+
+
+def test_create_branch_confirmation_required(ddev, mocker):
+    mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('click.confirm', return_value=False)
+
+    result = ddev('release', 'branch', 'create', '5.5.x')
+
+    assert result.exit_code == 1, result.output
+    assert 'Did not get confirmation' in result.output
+
+
+def test_create_branch_with_suggestion(ddev, mocker):
+    mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.git.GitRepository.capture', return_value='  origin/7.77.x\n  origin/7.76.x\n')
+    mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('click.prompt', return_value='7.78.x')
+    mocker.patch('click.confirm', return_value=True)
+
+    result = ddev('release', 'branch', 'create')
+
+    assert result.exit_code == 0, result.output
+    assert 'Creating the release branch `7.78.x`' in result.output
+
+
+def test_create_branch_with_gap_suggests_missing_branch(ddev, mocker):
+    mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.git.GitRepository.capture', return_value='  origin/7.62.x\n  origin/7.60.x\n')
+    mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('click.prompt', return_value='7.61.x')
+    mocker.patch('click.confirm', return_value=True)
+
+    result = ddev('release', 'branch', 'create')
+
+    assert result.exit_code == 0, result.output
+    assert 'Gap detected' in result.output
+    assert 'Creating the release branch `7.61.x`' in result.output

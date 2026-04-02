@@ -1,0 +1,13 @@
+provides:
+  - id: nagios-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: nagios-logs
+    always_on: false
+    data_type: logs
+    direction: inbound
+  - id: nagios-events
+    always_on: false
+    data_type: events
+    direction: inbound

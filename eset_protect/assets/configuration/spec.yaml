@@ -1,4 +1,5 @@
 name: ESET Protect
+fleet_configurable: true
 files:
 - name: eset_protect.yaml
   options:

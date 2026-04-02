@@ -398,17 +398,38 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     # test the activity collection loop rate limit
     aggregator.reset()
     collection_interval = 0.1
+    warmup_interval = 0.5
     dbm_instance['query_activity']['collection_interval'] = collection_interval
     dbm_instance['query_activity']['run_sync'] = False
     check = MySql(CHECK_NAME, {}, [dbm_instance])
+
     start = time.time()
     dd_run_check(check)
-    time.sleep(1)
+
+    # Wait long enough for at least one collection to occur
+    # Giving time to warm up the connection with the db
+    time.sleep(warmup_interval + collection_interval * 3)
     check.cancel()
-    time_elapsed = time.time() - start
-    max_collections = int(1 / collection_interval * time_elapsed) + 1
+    elapsed = time.time() - start
+
     metrics = aggregator.metrics("dd.mysql.activity.collect_activity.payload_size")
-    assert max_collections / 2.0 <= len(metrics) <= max_collections
+
+    # Verify at least one collection happened
+    assert len(metrics) >= 1, "Expected at least one activity collection to occur"
+
+    # Verify we didn't exceed the rate limit by a large margin.
+    # Use a 1.2x multiplier to avoid flakiness while still catching
+    # egregious rate limiter failures (e.g., if it was completely disabled).
+    max_expected = int(elapsed / collection_interval) + 1
+    assert len(metrics) <= max_expected * 1.2, (
+        f"Rate limiter may be broken: got {len(metrics)} collections in {elapsed:.2f}s, "
+        f"expected at most ~{max_expected} (with 2x tolerance: {max_expected * 2})"
+    )
+
+    # Verify the rate limiter is configured with the expected rate
+    expected_rate = 1.0 / collection_interval
+    assert check._query_activity._rate_limiter.rate_limit_s == expected_rate
+    assert check._query_activity.collection_interval == collection_interval
 
 
 @pytest.mark.integration

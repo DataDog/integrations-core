@@ -1,4 +1,5 @@
 name: suricata
+fleet_configurable: true
 files:
 - name: suricata.yaml
   options:

@@ -1,4 +1,5 @@
 name: CockroachDB
+fleet_configurable: true
 files:
 - name: cockroachdb.yaml
   options:

@@ -1,4 +1,5 @@
 - name: proxy
+  fleet_configurable: true
   value:
     example:
       http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>

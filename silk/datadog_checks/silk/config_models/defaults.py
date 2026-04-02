@@ -36,6 +36,10 @@ def instance_enable_blocksize_statistics():
     return False
 
 
+def instance_enable_legacy_tags_normalization():
+    return True
+
+
 def instance_enable_read_write_statistics():
     return False
 

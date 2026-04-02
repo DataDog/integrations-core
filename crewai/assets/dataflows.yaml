@@ -1,0 +1,5 @@
+provides:
+  - id: crewai-traces
+    always_on: false
+    data_type: traces
+    direction: inbound

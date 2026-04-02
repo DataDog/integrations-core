@@ -1,4 +1,5 @@
 name: Temporal
+fleet_configurable: true
 files:
 - name: temporal.yaml
   options:

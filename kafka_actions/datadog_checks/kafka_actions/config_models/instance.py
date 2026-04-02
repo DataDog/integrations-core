@@ -20,6 +20,18 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+SECURE_FIELD_NAMES = frozenset(
+    [
+        'schema_registry_tls_ca_cert',
+        'schema_registry_tls_cert',
+        'schema_registry_tls_key',
+        'tls_ca_cert',
+        'tls_cert',
+        'tls_private_key',
+    ]
+)
+
+
 class CreateTopic(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -108,7 +120,7 @@ class ReadMessages(BaseModel):
     )
     key_format: Optional[str] = Field(
         'json',
-        description='Message key format:\n- string: Plain UTF-8 text (most common for keys)\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- protobuf: Protocol Buffers\n- avro: Apache Avro\n',
+        description='Message key format.\n\nSupported formats:\n- string: Plain UTF-8 text (most common for keys)\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- protobuf: Protocol Buffers\n- avro: Apache Avro\n',
         examples=['json'],
     )
     key_schema: Optional[str] = Field(None, description='Schema definition for protobuf/avro key')
@@ -127,16 +139,51 @@ class ReadMessages(BaseModel):
         -1, description='Specific partition to read from (-1 for all partitions)', examples=[-1]
     )
     start_offset: Optional[int] = Field(
-        -1, description='Starting offset (-1 for latest, -2 for earliest, or specific offset)', examples=[-1]
+        -1,
+        description='Starting offset (-1 for latest, -2 for earliest, or specific offset).\nIgnored when start_timestamp is set.\n',
+        examples=[-1],
+    )
+    start_timestamp: Optional[int] = Field(
+        None,
+        description='Starting timestamp in milliseconds since epoch.\nWhen set, the consumer seeks to the first message at or after this timestamp\nin each partition. The start_offset parameter is ignored when this is set.\n',
+        examples=[1700000000000],
     )
     topic: str = Field(..., description='Topic to read messages from', examples=['orders'])
     value_format: Optional[str] = Field(
         'json',
-        description='Message value format:\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- string: Plain UTF-8 text (use for non-JSON text messages)\n- protobuf: Protocol Buffers\n- avro: Apache Avro\nNote: If any message fails deserialization, the read_messages action will stop immediately.\nEnsure the format matches the actual messages in your topic.\n',
+        description='Message value format.\n\nSupported formats:\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- string: Plain UTF-8 text (use for non-JSON text messages)\n- protobuf: Protocol Buffers\n- avro: Apache Avro\nNote: If any message fails deserialization, the read_messages action will stop immediately.\nEnsure the format matches the actual messages in your topic.\n',
         examples=['json'],
     )
     value_schema: Optional[str] = Field(None, description='Schema definition for protobuf/avro value')
     value_uses_schema_registry: Optional[bool] = Field(False, description='Whether value uses Schema Registry format')
+
+
+class SaslOauthTokenProvider(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    aws_region: Optional[str] = None
+    client_id: Optional[str] = None
+    client_secret: Optional[str] = None
+    extensions: Optional[str] = None
+    method: Optional[str] = None
+    scope: Optional[str] = None
+    tls_ca_cert: Optional[str] = None
+    url: Optional[str] = None
+
+
+class SchemaRegistryOauthTokenProvider(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    client_id: Optional[str] = None
+    client_secret: Optional[str] = None
+    custom_headers: Optional[MappingProxyType[str, str]] = None
+    scope: Optional[str] = None
+    tls_ca_cert: Optional[str] = None
+    url: Optional[str] = None
 
 
 class Offset(BaseModel):
@@ -196,6 +243,7 @@ class InstanceConfig(BaseModel):
     delete_topic: Optional[DeleteTopic] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     kafka_cluster_id: Optional[str] = None
     kafka_connect_str: str
     metric_patterns: Optional[MetricPatterns] = None
@@ -203,12 +251,33 @@ class InstanceConfig(BaseModel):
     produce_message: Optional[ProduceMessage] = None
     read_messages: Optional[ReadMessages] = None
     remote_config_id: str
+    sasl_kerberos_domain_name: Optional[str] = None
+    sasl_kerberos_keytab: Optional[str] = None
+    sasl_kerberos_principal: Optional[str] = None
+    sasl_kerberos_service_name: Optional[str] = None
     sasl_mechanism: Optional[str] = None
+    sasl_oauth_token_provider: Optional[SaslOauthTokenProvider] = None
     sasl_plain_password: Optional[str] = None
     sasl_plain_username: Optional[str] = None
+    schema_registry_oauth_token_provider: Optional[SchemaRegistryOauthTokenProvider] = None
+    schema_registry_password: Optional[str] = None
+    schema_registry_tls_ca_cert: Optional[str] = None
+    schema_registry_tls_cert: Optional[str] = None
+    schema_registry_tls_key: Optional[str] = None
+    schema_registry_tls_verify: Optional[bool] = None
+    schema_registry_url: Optional[str] = None
+    schema_registry_username: Optional[str] = None
     security_protocol: Optional[str] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+    tls_ca_cert: Optional[str] = None
+    tls_cert: Optional[str] = None
+    tls_ciphers: Optional[tuple[str, ...]] = None
+    tls_crlfile: Optional[str] = None
+    tls_private_key: Optional[str] = None
+    tls_private_key_password: Optional[str] = None
+    tls_validate_hostname: Optional[bool] = None
+    tls_verify: Optional[bool] = None
     update_consumer_group_offsets: Optional[UpdateConsumerGroupOffsets] = None
     update_topic_config: Optional[UpdateTopicConfig] = None
 
@@ -222,6 +291,11 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+
+            if info.field_name in SECURE_FIELD_NAMES:
+                validation.security.check_field_trusted_provider(
+                    info.field_name, value, info.context.get('security_config')
+                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

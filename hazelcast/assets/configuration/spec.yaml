@@ -1,4 +1,5 @@
 name: Hazelcast
+fleet_configurable: true
 files:
 - name: hazelcast.yaml
   options:

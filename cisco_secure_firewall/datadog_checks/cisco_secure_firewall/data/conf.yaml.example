@@ -18,3 +18,5 @@
 #     port: <PORT>
 #     service: cisco-secure-firewall
 #     source: cisco-secure-firewall
+#     tags:
+#     - ndm_syslog:true

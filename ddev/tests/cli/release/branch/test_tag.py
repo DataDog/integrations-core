@@ -36,7 +36,8 @@ def basic_git(mocker):
 
 
 @pytest.fixture
-def git(basic_git):
+def git(basic_git, mocker):
+    mocker.patch('ddev.cli.release.branch.tag._build_agent_yaml_points_to_main', return_value=False)
     basic_git.current_branch.return_value = '7.56.x'
     basic_git.tags.return_value = EXAMPLE_TAGS[:]
     yield basic_git
@@ -221,6 +222,24 @@ def test_final(ddev, git, latest_final_tag, expected_new_final_tag):
     result = ddev('release', 'branch', 'tag', '--final', input='y\n')
 
     _assert_tag_pushed(git, result, expected_new_final_tag)
+
+
+def test_build_agent_yaml_points_to_main_aborts(ddev, basic_git, mocker):
+    """
+    When build_agent.yaml still points to main, the command aborts with an actionable
+    message directing the user to the update-build-agent-yaml workflow.
+    """
+    basic_git.current_branch.return_value = '7.56.x'
+    mocker.patch('ddev.cli.release.branch.tag._build_agent_yaml_points_to_main', return_value=True)
+
+    result = ddev('release', 'branch', 'tag')
+
+    assert result.exit_code == 1, result.output
+    assert '`.gitlab/build_agent.yaml` still points to `main`' in result.output
+    assert 'gh workflow run update-build-agent-yaml.yml -f branch=7.56.x' in result.output
+    basic_git.run.assert_not_called()
+    basic_git.tag.assert_not_called()
+    basic_git.push.assert_not_called()
 
 
 # TODO: test for adding RCs for a bugfix release

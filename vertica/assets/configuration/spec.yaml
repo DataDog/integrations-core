@@ -1,4 +1,5 @@
 name: Vertica
+fleet_configurable: true
 
 files:
   - name: vertica.yaml
@@ -16,16 +17,19 @@ files:
         options:
           - name: db
             description: The name of the database to establish a connection with, defaulting to the `username`.
+            fleet_configurable: true
             value:
               type: string
               example: <DATABASE_NAME>
           - name: server
             description: The hostname used to connect to the database.
+            fleet_configurable: true
             value:
               type: string
               example: localhost
           - name: port
             description: The port used to connect to the database.
+            fleet_configurable: true
             value:
               type: integer
               example: 5433
@@ -33,6 +37,7 @@ files:
             description: |
               Enable metric groups for metric collection. Metric groups are based on Vertica tables.
               By default all metric groups are collected.
+            fleet_configurable: true
             value:
               type: array
               items:
@@ -52,11 +57,13 @@ files:
                 - resource_usage
           - name: username
             description: The database user to authenticate as.
+            fleet_configurable: true
             value:
               type: string
               example: <USERNAME>
           - name: password
             description: The password of `username`.
+            fleet_configurable: true
             secret: true
             value:
               type: string
@@ -75,6 +82,7 @@ files:
                 - server: <SERVER_2>
                   port: <PORT_2>
           - name: connection_load_balance
+            fleet_configurable: true
             description: |
               Whether or not to enable connection load balancing. This helps automatically spread
               the overhead caused by client connections across clusters by having hosts redirect
@@ -86,6 +94,7 @@ files:
               type: boolean
               example: false
           - name: timeout
+            fleet_configurable: true
             description: The timeout for connecting to `server` or `backup_servers`.
             value:
               type: integer
@@ -118,6 +127,7 @@ files:
               When this option is not set, library logging is disabled, or set to DEBUG
               when the Agent log level is DEBUG or lower (TRACE).
               Valid values: CRITICAL, FATAL, ERROR, WARN, WARNING, INFO, DEBUG
+            fleet_configurable: true
             value:
               type: string
               example: <CLIENT_LIB_LOG_LEVEL>

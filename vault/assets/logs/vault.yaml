@@ -2,6 +2,9 @@
 id: vault
 metric_id: vault
 backend_only: false
+installation_sources:
+  - vault
+  - vault-enterprise
 facets:
   - groups:
       - Web Access
@@ -128,7 +131,7 @@ pipeline:
   name: Vault
   enabled: true
   filter:
-    query: source:vault
+    query: source:(vault OR vault-enterprise)
   processors:
     - type: grok-parser
       name: Parsing Vault Server logs
@@ -136,8 +139,8 @@ pipeline:
       source: message
       samples:
         - 2019-11-04T17:48:44.226-0800 [WARN]  no `api_addr` value specified in config or in VAULT_API_ADDR; falling back to detection if possible, but this value should be manually set
-        - '2019-11-04T17:48:58.967-0800 [DEBUG] core: starting cluster listeners'
-        - '2019-11-04T17:48:58.967-0800 [INFO]  core.cluster-listener: starting listener: listener_address=0.0.0.0:8201'
+        - "2019-11-04T17:48:58.967-0800 [DEBUG] core: starting cluster listeners"
+        - "2019-11-04T17:48:58.967-0800 [INFO]  core.cluster-listener: starting listener: listener_address=0.0.0.0:8201"
       grok:
         supportRules: |
           _date %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):timestamp}

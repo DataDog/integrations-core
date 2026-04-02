@@ -1,4 +1,5 @@
 name: Kubernetes Cluster Autoscaler
+fleet_configurable: true
 files:
 - name: kubernetes_cluster_autoscaler.yaml
   options:

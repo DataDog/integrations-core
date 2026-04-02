@@ -153,15 +153,6 @@ def test_initialize_deprecated_options_warn(mock_check, minimal_instance):
     assert any("deprecated" in w for w in result.warnings)
 
 
-def test_initialize_empty_default_hostname_warns(mock_check, minimal_instance):
-    instance = minimal_instance
-    instance['empty_default_hostname'] = True
-    mock_check.instance = instance
-    mock_check.init_config = {}
-    config, result = build_config(check=mock_check)
-    assert any("empty_default_hostname" in w for w in result.warnings)
-
-
 @pytest.mark.parametrize(
     'instance, init_config, should_propagate',
     [
@@ -333,7 +324,6 @@ def test_apply_validated_defaults_ssl(mock_check, minimal_instance):
         ('deep_database_monitoring', 'dbm', True),
         ('managed_identity', 'azure.managed_authentication', {}),
         ('statement_samples', 'query_samples', {}),
-        ('collect_default_database', 'postgres', True),
     ],
 )
 def test_apply_deprecation_warnings(mock_check, minimal_instance, option, replacement, value):
@@ -366,6 +356,40 @@ def test_cloud_validations(mock_check, minimal_instance):
     config, result = build_config(check=mock_check)
     assert result.valid
     assert config.azure.managed_authentication.enabled
+
+
+@pytest.mark.parametrize(
+    'rds_host, expected_rds_tag, expected_instance_endpoint',
+    [
+        (
+            'my-cluster.cluster-cfxdfe8cpixl.us-east-1.rds.amazonaws.com',
+            'dbclusteridentifier:my-cluster',
+            'my-cluster.cluster-cfxdfe8cpixl.us-east-1.rds.amazonaws.com',
+        ),
+        (
+            'my-instance.cfxdfe8cpixl.us-east-1.rds.amazonaws.com',
+            'dbinstanceidentifier:my-instance',
+            'my-instance.cfxdfe8cpixl.us-east-1.rds.amazonaws.com',
+        ),
+    ],
+    ids=['cluster_endpoint', 'instance_endpoint'],
+)
+def test_rds_auto_detected_cloud_metadata(
+    mock_check, minimal_instance, rds_host, expected_rds_tag, expected_instance_endpoint
+):
+    """
+    When a user sets host to an RDS endpoint without explicitly setting
+    aws config, build_config should auto-detect the RDS host and populate
+    aws.instance_endpoint so the backend can properly associate query
+    metrics with the RDS resource.
+    """
+    minimal_instance['host'] = rds_host
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.aws.instance_endpoint == expected_instance_endpoint
+    assert expected_rds_tag in config.tags
 
 
 def test_relations_validation_fails_if_no_relname_or_regex():

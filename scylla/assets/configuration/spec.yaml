@@ -1,4 +1,5 @@
 name: Scylla
+fleet_configurable: true
 files:
 - name: scylla.yaml
   options:
@@ -12,6 +13,7 @@ files:
         List of additional Scylla metric groups to collect in addition to the default. Certain metric groups are
         only exposed in newer versions of Scylla. Refer to the documentation to see what metrics are available 
         for the different Scylla versions.
+      fleet_configurable: true
       value:
         type: array
         items:

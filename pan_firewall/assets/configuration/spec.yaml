@@ -1,4 +1,5 @@
 name: Palo Alto Networks Firewall
+fleet_configurable: true
 files:
 - name: pan_firewall.yaml
   options:
@@ -9,3 +10,5 @@ files:
       port: 10518
       service: "firewall"
       source: "pan.firewall"
+      tags:
+        - "ndm_syslog:true"

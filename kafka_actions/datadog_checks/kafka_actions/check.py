@@ -10,6 +10,7 @@ from datadog_checks.base import AgentCheck
 from .config import KafkaActionsConfig
 from .kafka_client import KafkaActionsClient
 from .message_deserializer import DeserializedMessage, MessageDeserializer
+from .schema_registry import SchemaRegistryClient
 
 
 class KafkaActionsCheck(AgentCheck):
@@ -32,8 +33,14 @@ class KafkaActionsCheck(AgentCheck):
         self.action = self.config.action
         self.cluster = 'unknown'  # Will be set by action handlers
 
-        self.kafka_client = KafkaActionsClient(self.instance, self.log)
-        self.deserializer = MessageDeserializer(self.log)
+        self.kafka_client = KafkaActionsClient(self.config, self.log)
+
+        schema_registry = None
+        schema_registry_url = self.instance.get('schema_registry_url')
+        if schema_registry_url:
+            schema_registry = SchemaRegistryClient(self.http, schema_registry_url, self.log, self.instance)
+
+        self.deserializer = MessageDeserializer(self.log, schema_registry=schema_registry)
 
         self.action_handlers = {
             'read_messages': self._action_read_messages,
@@ -225,6 +232,7 @@ class KafkaActionsCheck(AgentCheck):
         topic = config['topic']
         partition = config.get('partition', -1)
         start_offset = config.get('start_offset', -1)
+        start_timestamp = config.get('start_timestamp')
         n_messages_retrieved = config.get('n_messages_retrieved', 10)
         max_scanned_messages = config.get('max_scanned_messages', 1000)
         timeout_ms = config.get('timeout_ms', 20000)
@@ -235,7 +243,7 @@ class KafkaActionsCheck(AgentCheck):
             'value_format': config.get('value_format', 'json'),
             'value_schema': config.get('value_schema'),
             'value_uses_schema_registry': config.get('value_uses_schema_registry', False),
-            'key_format': config.get('key_format', 'json'),
+            'key_format': config.get('key_format', 'string'),
             'key_schema': config.get('key_schema'),
             'key_uses_schema_registry': config.get('key_uses_schema_registry', False),
         }
@@ -260,6 +268,7 @@ class KafkaActionsCheck(AgentCheck):
             topic=topic,
             partition=partition,
             start_offset=start_offset,
+            start_timestamp=start_timestamp,
             max_messages=max_scanned_messages,
             timeout_ms=timeout_ms,
             group_id=consumer_group_id,
@@ -505,7 +514,7 @@ class KafkaActionsCheck(AgentCheck):
             cluster: Kafka cluster identifier
         """
         event_data = {
-            'message_timestamp': int(time.time() * 1000),
+            'message_timestamp': deserialized_msg.timestamp,
             'remote_config_id': self.remote_config_id,
             'kafka_cluster_id': cluster,
             'topic': deserialized_msg.topic,

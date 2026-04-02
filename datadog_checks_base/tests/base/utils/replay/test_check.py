@@ -29,6 +29,9 @@ class ReplayCheck(AgentCheck):
     def check(self, _):
         self.gauge('metric', 0, tags=self.tags)
         self.service_check('sc', ServiceCheck.OK if self.redirecting else ServiceCheck.CRITICAL, tags=self.tags)
+        self.log.debug('Metric count: %d', 42)
+        self.log.debug('Test log: %s', 'test')
+        self.set_external_tags([('myhost', {'src': ['tag:val']})])
 
 
 @pytest.mark.parametrize(
@@ -56,9 +59,49 @@ def test_replay_all(caplog, dd_run_check, aggregator, datadog_agent, init_config
     aggregator.assert_service_check('replay.sc', ServiceCheck.OK, count=1, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
 
-    expected_message = 'Initializing - replay - test:123'
-    for _, level, message in caplog.record_tuples:
-        if level == logging.DEBUG and message == expected_message:
-            break
-    else:
-        raise AssertionError('Expected DEBUG log with message: {}'.format(expected_message))
+    captured_logs = {(level, message) for _, level, message in caplog.record_tuples}
+    assert (logging.DEBUG, 'Initializing - replay - test:123') in captured_logs
+    assert (logging.DEBUG, 'Metric count: 42') in captured_logs
+
+    datadog_agent.assert_external_tags('myhost', {'src': ['tag:val']})
+    datadog_agent.assert_external_tags_count(1)
+
+
+class ReplayCheckBadLog(AgentCheck):
+    __NAMESPACE__ = 'replay'
+
+    def check(self, _):
+        self.log.debug('TypeError format: %d', 'not_a_number')
+        self.log.debug('OverflowError format: %c', 2**32)
+
+
+def test_replay_skips_invalid_log_format(caplog, dd_run_check, aggregator, datadog_agent):
+    datadog_agent._config['log_level'] = 'debug'
+
+    check = ReplayCheckBadLog('replay', {}, [{'process_isolation': True}])
+    check.check_id = 'test:123'
+
+    with caplog.at_level(logging.DEBUG):
+        dd_run_check(check)
+
+    assert 'TypeError format' not in caplog.text
+    assert 'OverflowError format' not in caplog.text
+
+
+class SlowReplayCheck(AgentCheck):
+    __NAMESPACE__ = 'slow_replay'
+
+    def check(self, _):
+        import time
+
+        time.sleep(9999)
+
+
+def test_replay_timeout(caplog, dd_run_check):
+    instance = {'process_isolation': True, 'process_isolation_timeout': 1}
+    check = SlowReplayCheck('slow_replay', {}, [instance])
+
+    with caplog.at_level(logging.ERROR):
+        dd_run_check(check)
+
+    assert 'Check timed out' in caplog.text
