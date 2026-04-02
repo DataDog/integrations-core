@@ -3,10 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import logging
 from collections.abc import Iterator
 
 from prometheus_client.samples import Sample
 
+logger = logging.getLogger(__name__)
+
+# Metric types where pre-aggregation is meaningful. Histograms and summaries
+# have sub-metric structure (buckets, quantiles) that makes label-collision
+# aggregation ambiguous, so they are left unchanged.
 _AGGREGABLE_TYPES = frozenset(('gauge', 'counter'))
 
 
@@ -14,6 +20,9 @@ def should_aggregate(exclude_labels: set[str]) -> bool:
     return bool(exclude_labels)
 
 
+# Pre-aggregate samples whose tags collide after label exclusion.
+# Only aggregates gauge and counter. Histogram and summary samples pass
+# through unchanged because their sub-metric structure makes aggregation ambiguous.
 def aggregate_sample_data(
     sample_data: Iterator[tuple[Sample, list[str], str]],
     metric_type: str,
