@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.34.1 / 2026-04-02
+
+***Fixed***:
+
+* Fix logging when using process_isolation parameter. ([#23136](https://github.com/DataDog/integrations-core/pull/23136))
+
 ## 37.34.0 / 2026-04-01
 
 ***Added***:
