@@ -697,3 +697,17 @@ def test_source_with_zero_replicas_emits_warning_service_check(aggregator, insta
         tags=['foo:bar', 'replication_mode:source'],
         count=1,
     )
+
+
+@pytest.mark.parametrize(
+    'exclude_hostname, expected_hostname',
+    [
+        (False, 'resolved.hostname'),
+        (True, None),
+    ],
+)
+def test_debug_stats_kwargs_respects_exclude_hostname(exclude_hostname, expected_hostname):
+    instance = {'server': 'localhost', 'user': 'datadog', 'exclude_hostname': exclude_hostname}
+    with mock.patch('datadog_checks.mysql.MySql.resolve_db_host', return_value='resolved.hostname'):
+        mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance])
+    assert mysql_check.debug_stats_kwargs()['hostname'] == expected_hostname

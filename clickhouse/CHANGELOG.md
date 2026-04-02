@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 6.4.1 / 2026-03-24
+
+***Fixed***:
+
+* Fix authentication regression where a missing `password` config option defaults to `None` instead of an empty string, causing ClickHouse to reject connections with error code 194. ([#23015](https://github.com/DataDog/integrations-core/pull/23015))
+
+## 6.4.0 / 2026-03-18
+
+***Added***:
+
+* Add ClickHouse support for DBM with Query Metrics, Query Samples, and Query Completions ([#22341](https://github.com/DataDog/integrations-core/pull/22341))
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+***Fixed***:
+
+* Fix query_signature mismatch between DBM query metrics and query samples by using raw query text instead of ClickHouse's normalizeQuery() for obfuscation ([#22831](https://github.com/DataDog/integrations-core/pull/22831))
+* Fix ClickHouse Cloud query undercounting by using per-node checkpoint tracking to prevent cross-node query_log flush races from skipping queries ([#22903](https://github.com/DataDog/integrations-core/pull/22903))
+
 ## 6.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

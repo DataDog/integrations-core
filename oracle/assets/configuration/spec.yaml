@@ -57,6 +57,7 @@ files:
         You can also add it to your $CLASSPATH instead.
       value:
         type: string
+        require_trusted_provider: true
         example: <DRIVER_PATH>.jar
     - name: jdbc_truststore_path
       description: |
@@ -65,6 +66,7 @@ files:
         Note: This option is required if connecting with TCPS through JDBC.
       value:
         type: string
+        require_trusted_provider: true
     - name: jdbc_truststore_type
       description: |
         The JDBC truststore file type. Supported truststore types include JKS, SSO, and PKCS12.

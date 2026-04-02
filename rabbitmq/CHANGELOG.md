@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.5.1 / 2026-03-19
+
+***Fixed***:
+
+* Restore HTTP/TLS configuration options for the Management Plugin in the example configuration file. ([#22675](https://github.com/DataDog/integrations-core/pull/22675))
+
 ## 8.5.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

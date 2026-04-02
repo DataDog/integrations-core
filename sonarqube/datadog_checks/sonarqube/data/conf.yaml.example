@@ -125,7 +125,9 @@ instances:
     # default_exclude: []
 
     ## @param components - mapping - optional
-    ## A mapping of components for which metrics should be collected. Each object may override the default
+    ## A mapping of components for which metrics should be collected.
+    ##
+    ## Each object may override the default
     ## options. Each component key may be configured with an optional configuration mapping to filter the metrics 
     ## that should be collected.
     ##

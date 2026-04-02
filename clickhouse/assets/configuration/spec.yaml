@@ -41,6 +41,7 @@ files:
       secret: true
       value:
         type: string
+        display_default: ''
     - name: db
       description: The database to connect to.
       fleet_configurable: true
@@ -76,6 +77,7 @@ files:
       description: The path to the CA certificate file.
       value:
         type: string
+        require_trusted_provider: true
     - name: tls_verify
       description: Whether or not to connect securely using TLS. The server must also support this.
       value:

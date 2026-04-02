@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 10.8.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+***Fixed***:
+
+* Fix ``FailedToParse`` errors in DBM explain plans for aggregate queries by adding the required ``cursor`` option to the explain command. ([#22822](https://github.com/DataDog/integrations-core/pull/22822))
+* Fix ``IllegalOperation`` errors in DBM explain plans caused by attempting to explain ``listIndexes`` commands. ([#22825](https://github.com/DataDog/integrations-core/pull/22825))
+
 ## 10.7.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
