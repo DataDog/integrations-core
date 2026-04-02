@@ -20,9 +20,6 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-SECURE_FIELD_NAMES = frozenset(['tls_ca_cert', 'tls_cert', 'tls_crlfile', 'tls_private_key'])
-
-
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -41,6 +38,7 @@ class SaslOauthTokenProvider(BaseModel):
     client_id: Optional[str] = None
     client_secret: Optional[str] = None
     extensions: Optional[str] = None
+    gcp_credentials_file: Optional[str] = None
     method: Optional[str] = None
     scope: Optional[str] = None
     tls_ca_cert: Optional[str] = None
@@ -122,11 +120,6 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-            if info.field_name in SECURE_FIELD_NAMES:
-                validation.security.check_field_trusted_provider(
-                    info.field_name, value, info.context.get('security_config')
-                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
