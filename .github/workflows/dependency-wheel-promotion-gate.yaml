@@ -14,19 +14,22 @@ jobs:
       statuses: write
       contents: read
     steps:
-    - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
     - name: Check if dependency files changed
       id: deps-changed
-      run: |
-        CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.sha }} -- \
-          agent_requirements.in '.deps/resolved/')
-        if [ -n "$CHANGED" ]; then
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "changed=false" >> "$GITHUB_OUTPUT"
-        fi
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      with:
+        script: |
+          const { data: files } = await github.rest.pulls.listFiles({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.payload.pull_request.number,
+            per_page: 100,
+          });
+          const depPaths = ['agent_requirements.in'];
+          const changed = files.some(f =>
+            depPaths.includes(f.filename) || f.filename.startsWith('.deps/resolved/')
+          );
+          core.setOutput('changed', changed ? 'true' : 'false');
 
     - name: Set dependency-wheel-promotion status to pending
       if: steps.deps-changed.outputs.changed == 'true'
