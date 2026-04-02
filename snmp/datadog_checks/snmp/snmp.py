@@ -443,11 +443,6 @@ class SnmpCheck(AgentCheck):
                 _prev_loop = None  # no loop in this thread yet (normal for worker threads)
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            # Shadow with a shallow copy so reinitialize_engine() doesn't mutate
-            # the shared InstanceConfig stored in discovered_instances. The copy
-            # gets its own _snmp_engine and device; all other fields (oid_config,
-            # tags, metrics, …) still point to the same underlying objects, which
-            # matches the pre-existing behaviour for those fields.
             config = copy.copy(config)
             config.reinitialize_engine()
 
@@ -501,8 +496,7 @@ class SnmpCheck(AgentCheck):
             return error, tags
         finally:
             if loop is not None:
-                # Cancel pending tasks (e.g. pysnmp's handle_timeout), let them handle
-                # CancelledError, then close the loop to release file descriptors.
+                # Cancel pending pysnmp tasks and close the loop to release file descriptors.
                 pending = asyncio.all_tasks(loop)
                 for task in pending:
                     task.cancel()

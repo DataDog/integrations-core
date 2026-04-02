@@ -80,8 +80,7 @@ def discover_instances(config, interval, check_ref):
             if interval - time_elapsed > 0:
                 time.sleep(interval - time_elapsed)
     finally:
-        # Close the event loop on exit to release UDP socket FDs and other handles
-        # attached by pysnmp transports during discovery scans.
+        # Cancel pending pysnmp tasks and close the loop to release file descriptors.
         pending = asyncio.all_tasks(loop)
         for task in pending:
             task.cancel()

@@ -31,10 +31,7 @@ def _engine_cache(engine):
     # type: (Any) -> Dict[str, Any]
     with _engine_caches_lock:
         if engine not in _engine_caches:
-            # Pre-populate with a MibViewController backed by the engine's own MibBuilder so that
-            # vbProcessor.make_varbinds and the OIDResolver share the same MIB namespace.
-            # Without this, MIBs loaded during make_varbinds (e.g. TCP-MIB) are loaded into a
-            # separate MibBuilder and are invisible to the resolver when lookup_mib=False.
+            # Share the engine's MibBuilder so make_varbinds and the OIDResolver use the same MIB namespace.
             cache = {"mibViewController": MibViewController(engine.get_mib_builder())}
             _engine_caches[engine] = cache
         return _engine_caches[engine]
