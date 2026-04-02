@@ -386,6 +386,20 @@ def test_error_event_payload(aggregator, pg_instance):
     assert 'duration_s' in payload
 
 
+def test_trailing_semicolon_stripped(pg_instance):
+    """Queries with trailing semicolons must not break the subquery wrapping."""
+    query = deepcopy(BASE_QUERY)
+    query['query'] = 'SELECT count(*) FROM orders;'
+    mock_conn, mock_cursor = _make_mock_conn()
+
+    check = _create_check(pg_instance, queries=[query])
+    check._get_main_db = _mock_get_main_db(mock_conn)
+    check.data_observability.run_job()
+
+    executed_sql = mock_cursor.execute.call_args[0][0]
+    assert ';' not in executed_sql.split('_dd_row_limit')[0]
+
+
 def test_fetchmany_called_with_max_rows(pg_instance):
     """fetchmany is called with MAX_RESULT_ROWS to cap memory usage."""
     from datadog_checks.postgres.data_observability import MAX_RESULT_ROWS

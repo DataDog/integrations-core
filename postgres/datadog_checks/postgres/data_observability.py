@@ -65,7 +65,7 @@ class PostgresDataObservability(DBMAsyncJob):
 
     def _execute_single_query(self, conn: Any, query_spec: Query) -> dict[str, Any]:
         """Execute a query, catching DatabaseError per-query so the loop continues."""
-        sql = query_spec.query
+        sql = query_spec.query.rstrip('; \t\n')
         monitor_id = query_spec.monitor_id
         # Wrap in a subquery to apply the row cap at the database level.
         limited_sql = f"SELECT * FROM ({sql}) _dd_row_limit LIMIT {MAX_RESULT_ROWS}"
