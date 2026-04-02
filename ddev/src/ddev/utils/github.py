@@ -75,6 +75,12 @@ class GitHubManager:
     # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#list-commits-on-a-repository
     COMMIT_API = 'https://api.github.com/repos/{repo_id}/commits/{sha}'
 
+    # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#get-a-pull-request
+    PULL_REQUEST_API = 'https://api.github.com/repos/{repo_id}/pulls/{pr_number}'
+
+    # https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28#create-a-workflow-dispatch-event
+    WORKFLOW_DISPATCH_API = 'https://api.github.com/repos/{repo_id}/actions/workflows/{workflow_id}/dispatches'
+
     def __init__(self, repo: Repository, *, user: str, token: str, status: BorrowedStatus):
         self.__repo = repo
         self.__auth = (user, token)
@@ -146,6 +152,19 @@ class GitHubManager:
         except HTTPStatusError:
             return None
         return [file_data['filename'] for file_data in response.json().get('files', [])]
+
+    def get_pr_head(self, pr_number: int) -> tuple[str, str]:
+        """Return the (head SHA, head branch ref) of a pull request."""
+        response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
+        data = response.json()
+        return data['head']['sha'], data['head']['ref']
+
+    def dispatch_workflow(self, workflow_id: str, ref: str, inputs: dict[str, Any]) -> None:
+        """Trigger a workflow_dispatch event."""
+        self.__api_post(
+            self.WORKFLOW_DISPATCH_API.format(repo_id=self.repo_id, workflow_id=workflow_id),
+            content=json.dumps({'ref': ref, 'inputs': inputs}),
+        )
 
     def create_label(self, name, color):
         self.__api_post(

@@ -7,6 +7,7 @@
     BUCKET_BRANCH: "dev"
     DEPLOY_AGENT: "false"
     INTEGRATIONS_CORE_VERSION: ${CI_COMMIT_REF_NAME}
+    INTEGRATIONS_WHEELS_STORAGE: "dev"
     RUN_E2E_TESTS: "on"
     # disable kitchen tests
     RUN_KITCHEN_TESTS: "false"
