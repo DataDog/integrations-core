@@ -31,6 +31,7 @@ ALLOWED_GLOBALS = {
 # Simple heuristic to not mistake a source for part of a string (which we also transform it into)
 SOURCE_PATTERN = r'(?<!"|\')({})(?!"|\')'
 
+
 _ALLOWED_AST_NODES = frozenset(
     {
         ast.Expression,
@@ -86,10 +87,12 @@ def _validate_expression_ast(tree, name):
     for node in ast.walk(tree):
         node_type = type(node)
         if node_type not in _ALLOWED_AST_NODES:
-            raise ValueError('expression for {} uses disallowed syntax: {}'.format(name, node_type.__name__))
+            raise ValueError('expression for {} contains unsupported syntax `{}`'.format(name, node_type.__name__))
         if node_type is ast.Attribute and node.attr.startswith('__') and node.attr.endswith('__'):
             raise ValueError(
-                'expression for {} uses dunder attribute access is not allowed: {}'.format(name, node.attr)
+                'expression for {} accesses reserved attribute `{}`; reference source columns by name directly'.format(
+                    name, node.attr
+                )
             )
 
 
