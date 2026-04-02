@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: shopify
 metric_id: shopify
 backend_only: false
