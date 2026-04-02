@@ -52,6 +52,14 @@ def discover_instances(config, interval, check_ref):
                     check.log.debug("Error scanning host %s: %s", host, e)
                     del check
                     continue
+                finally:
+                    # Drain tasks left by this SNMP call; leftover handle_timeout tasks
+                    # would stop the loop before the next host's request completes.
+                    _pending = asyncio.all_tasks(loop)
+                    for _t in _pending:
+                        _t.cancel()
+                    if _pending:
+                        loop.run_until_complete(asyncio.gather(*_pending, return_exceptions=True))
 
                 try:
                     profile = check._profile_for_sysobject_oid(sys_object_oid)
