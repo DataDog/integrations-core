@@ -319,10 +319,7 @@ class MongoConfig(object):
         init_config_propagate_agent_tags = init_config.get('propagate_agent_tags')
 
         if instance_propagate_agent_tags is not None:
-            # if the instance has explicitly set the value, return the boolean
-            return instance_propagate_agent_tags
+            return is_affirmative(instance_propagate_agent_tags)
         if init_config_propagate_agent_tags is not None:
-            # if the init_config has explicitly set the value, return the boolean
-            return init_config_propagate_agent_tags
-        # if neither the instance nor the init_config has set the value, return False
+            return is_affirmative(init_config_propagate_agent_tags)
         return False

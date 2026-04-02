@@ -21,6 +21,10 @@ from datadog_checks.mongo.config import MongoConfig
         pytest.param(None, None, False, id="default to false"),
         pytest.param(True, None, True, id="instance config true prevails, init_config is None"),
         pytest.param(False, None, False, id="instance config false prevails, init_config is None"),
+        pytest.param("true", None, True, id="string true is affirmative"),
+        pytest.param("false", None, False, id="string false is not affirmative"),
+        pytest.param(None, "true", True, id="init_config string true is affirmative"),
+        pytest.param(None, "false", False, id="init_config string false is not affirmative"),
     ],
 )
 def test_propagate_agent_tags(
@@ -44,6 +48,10 @@ def test_propagate_agent_tags(
             for tag in agent_tags:
                 assert tag in config.metric_tags
                 assert tag in config.service_check_tags
+        else:
+            for tag in agent_tags:
+                assert tag not in config.metric_tags
+                assert tag not in config.service_check_tags
 
 
 def test_none_hosts():
