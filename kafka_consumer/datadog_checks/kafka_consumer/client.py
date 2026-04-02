@@ -15,6 +15,15 @@ try:
 except ImportError:
     AWS_MSK_IAM_AVAILABLE = False
 
+# GCP Cloud Managed Kafka IAM authentication support
+try:
+    import google.auth
+    import google.auth.transport.requests
+
+    GCP_IAM_AVAILABLE = True
+except ImportError:
+    GCP_IAM_AVAILABLE = False
+
 
 class KafkaClient:
     def __init__(self, config, log) -> None:
@@ -111,6 +120,52 @@ class KafkaClient:
                         raise
 
                 extras_parameters['oauth_cb'] = _aws_msk_iam_oauth_cb
+
+            elif method == "gcp_cloud_managed_kafka":
+                if not GCP_IAM_AVAILABLE:
+                    raise Exception(
+                        "GCP Cloud Managed Kafka IAM authentication requires 'google-auth' library. "
+                        "Install it with: pip install google-auth"
+                    )
+
+                def _gcp_oauth_cb(oauth_config):
+                    """OAuth callback that generates GCP IAM access tokens for Cloud Managed Kafka."""
+                    try:
+                        credentials_file = self.config._sasl_oauth_token_provider.get("gcp_credentials_file")
+                        scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+
+                        if credentials_file:
+                            credentials, project = google.auth.load_credentials_from_file(
+                                credentials_file, scopes=scopes
+                            )
+                        else:
+                            credentials, project = google.auth.default(scopes=scopes)
+
+                        request = google.auth.transport.requests.Request()
+                        credentials.refresh(request)
+
+                        token = credentials.token
+                        expiry = credentials.expiry
+                        if expiry is not None:
+                            import time
+
+                            expiry_seconds = expiry.timestamp()
+                        else:
+                            # Default to 1 hour if no expiry is provided
+                            import time
+
+                            expiry_seconds = time.time() + 3600
+
+                        self.log.debug(
+                            "Generated GCP IAM token for Cloud Managed Kafka, expires at %s",
+                            expiry,
+                        )
+                        return token, expiry_seconds
+                    except Exception as e:
+                        self.log.error("Failed to generate GCP IAM token: %s", e)
+                        raise
+
+                extras_parameters['oauth_cb'] = _gcp_oauth_cb
 
             elif method == "oidc":
                 extras_parameters['sasl.oauthbearer.method'] = "oidc"
