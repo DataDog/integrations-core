@@ -17,12 +17,13 @@ pytestmark = [pytest.mark.unit]
 class MockKafkaMessage:
     """Mock confluent_kafka.Message for testing."""
 
-    def __init__(self, key, value, topic='test-topic', partition=0, offset=0):
+    def __init__(self, key, value, topic='test-topic', partition=0, offset=0, headers=None):
         self._key = key
         self._value = value
         self._topic = topic
         self._partition = partition
         self._offset = offset
+        self._headers = headers
 
     def key(self):
         return self._key
@@ -43,7 +44,7 @@ class MockKafkaMessage:
         return (1, 1732128000000)
 
     def headers(self):
-        return None
+        return self._headers
 
 
 class TestFilteringOperators:
@@ -533,6 +534,28 @@ class TestLiteralParsing:
 
         msg = self.create_message({'optional_field': None})
         assert check._evaluate_filter('.value.optional_field == null', msg) is True
+
+    def test_jq_filter_on_header(self):
+        """Test jq-style .headers.key filter."""
+        instance = {
+            'remote_config_id': 'test',
+            'kafka_connect_str': 'localhost:9092',
+            'read_messages': {'cluster': 'test', 'topic': 'test'},
+        }
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+
+        kafka_msg = MockKafkaMessage(
+            key=b'test-key',
+            value=json.dumps({'status': 'active'}).encode('utf-8'),
+            headers=[('dbmOrgId', b'2'), ('traceparent', b'00-abc-def-00')],
+        )
+        config = {'key_format': 'string', 'value_format': 'json', 'value_uses_schema_registry': False}
+        msg = DeserializedMessage(kafka_msg, self.deserializer, config)
+
+        assert check._evaluate_filter('.headers.dbmOrgId == "2"', msg) is True
+        assert check._evaluate_filter('.headers.dbmOrgId == "3"', msg) is False
+        assert check._evaluate_filter('.headers.traceparent contains "abc"', msg) is True
+        assert check._evaluate_filter('.headers.nonexistent == "x"', msg) is False
 
 
 if __name__ == '__main__':

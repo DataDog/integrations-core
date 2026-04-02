@@ -510,7 +510,7 @@ class DeserializedMessage:
                 try:
                     headers[key] = value.decode('utf-8') if value else None
                 except UnicodeDecodeError:
-                    headers[key] = f"<binary, {len(value)} bytes>"
+                    headers[key] = f"<base64>{base64.b64encode(value).decode('ascii')}"
         return headers
 
     @staticmethod
