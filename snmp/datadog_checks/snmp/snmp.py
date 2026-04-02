@@ -440,7 +440,7 @@ class SnmpCheck(AgentCheck):
             try:
                 _prev_loop = asyncio.get_event_loop()
             except RuntimeError:
-                _prev_loop = None
+                _prev_loop = None  # no loop in this thread yet (normal for worker threads)
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             # Shadow with a shallow copy so reinitialize_engine() doesn't mutate
@@ -451,8 +451,8 @@ class SnmpCheck(AgentCheck):
             config = copy.copy(config)
             config.reinitialize_engine()
 
+        # Outer try/finally: event loop teardown. Inner try/except/finally: SNMP error handling.
         try:
-            # Reset errors
             if config.device is None:
                 raise RuntimeError('No device set')  # pragma: no cover
 
@@ -509,7 +509,7 @@ class SnmpCheck(AgentCheck):
                 if pending:
                     loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
                 loop.close()
-                asyncio.set_event_loop(_prev_loop)
+                asyncio.set_event_loop(_prev_loop)  # restore so callers in the same thread still have a loop
 
     def extract_metric_tags(self, metric_tags, results):
         # type: (List[SymbolTag], Dict[str, dict]) -> List[str]
