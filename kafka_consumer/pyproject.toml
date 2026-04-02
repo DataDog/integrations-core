@@ -40,7 +40,9 @@ deps = [
     "boto3==1.42.72",
     "confluent-kafka==2.13.2",
     "fastavro==1.12.1",
+    "google-auth==2.49.1",
     "protobuf==7.34.0",
+    "pyasn1-modules==0.4.1",
 ]
 
 [project.urls]
