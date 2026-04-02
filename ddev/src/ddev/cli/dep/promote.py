@@ -34,6 +34,7 @@ def promote(app: Application, pr_url: str):
     match = PR_URL_RE.search(pr_url)
     if not match:
         app.abort(f'Could not extract a PR number from: {pr_url}')
+    assert match
 
     pr_number = int(match.group(1))
 
