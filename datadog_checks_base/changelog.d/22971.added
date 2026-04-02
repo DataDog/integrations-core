@@ -1,1 +1,1 @@
-Fix aggregation logic for metrics aggregated by exclude_labels
+Add ``aggregate_metrics_on_label_exclusion`` option to pre-aggregate gauge and counter samples whose tag sets collide after label exclusion.

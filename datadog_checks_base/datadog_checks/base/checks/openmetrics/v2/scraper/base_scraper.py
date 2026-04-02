@@ -249,8 +249,6 @@ class OpenMetricsScraper:
             if transformer is None:
                 continue
 
-            # When exclude_labels causes tag-set collisions, pre-aggregate by
-            # summing so transformers receive one sample per unique context.
             sample_data = self.generate_sample_data(metric)
             if self._should_aggregate:
                 sample_data = aggregate_sample_data(sample_data, metric.type)
@@ -373,10 +371,6 @@ class OpenMetricsScraper:
         """
         label_normalizer = get_label_normalizer(metric.type)
 
-        # When aggregate_metrics_on_label_exclusion is enabled, histogram and
-        # summary metrics skip label exclusion to preserve unique contexts —
-        # excluding labels without aggregation would cause the agent aggregator
-        # to combine distinct series incorrectly.
         skip_label_exclusion = self._aggregate_on_label_exclusion and metric.type in ('histogram', 'summary')
 
         for sample in metric.samples:

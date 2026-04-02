@@ -225,6 +225,16 @@
     type: array
     items:
       type: string
+- name: aggregate_metrics_on_label_exclusion
+  description: |
+    When enabled, gauge and counter metrics whose tag sets collide after label
+    exclusion are pre-aggregated by summing their values. Histogram and summary
+    metrics are left unchanged because their sub-metric structure makes
+    aggregation ambiguous; when this option is active, those metric types also
+    skip label exclusion entirely to preserve unique contexts.
+  value:
+    type: boolean
+    example: false
 - name: include_labels
   description: |
     A list of labels to include. May be used in conjunction with `exclude_labels`.

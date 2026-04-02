@@ -27,6 +27,15 @@ car_counter_total{make="toyota", model="corolla", color="#900C3F"} 55
 car_counter_total{make="toyota", model="corolla", color="#DAF7A6"} 60
 """.strip()
 
+COUNTER_WITH_CREATED_PAYLOAD = """
+# HELP car_counter_total The number of cars seen coming into lot
+# TYPE car_counter_total counter
+car_counter_total{make="honda", color="red"} 120
+car_counter_total{make="honda", color="blue"} 95
+car_counter_created{make="honda", color="red"} 1609459200.0
+car_counter_created{make="honda", color="blue"} 1609459200.0
+""".strip()
+
 SUMMARY_PAYLOAD = """
 # HELP rpc_duration RPC latency distributions
 # TYPE rpc_duration summary
@@ -225,3 +234,19 @@ def test_histogram_given_exclude_labels_ignores_exclusion(aggregator, dd_run_che
     for name in ('test.request_duration.count', 'test.request_duration.sum', 'test.request_duration.bucket'):
         for m in aggregator.metrics(name):
             assert any(t.startswith('color:') for t in m.tags), f"Expected 'color' tag preserved in {m.tags}"
+
+
+def test_counter_given_created_samples_does_not_inflate_total(aggregator, dd_run_check, mock_http_response):
+    """_total and _created samples must not be collapsed together when aggregating."""
+    mock_http_response(COUNTER_WITH_CREATED_PAYLOAD)
+    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color'], 'aggregate_metrics_on_label_exclusion': True})
+    dd_run_check(check)
+
+    # Only _total samples should be summed: 120 + 95 = 215
+    # _created timestamps must NOT be added to this value
+    aggregator.assert_metric(
+        'test.car_counter.count',
+        215.0,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=['endpoint:test', 'make:honda'],
+    )
