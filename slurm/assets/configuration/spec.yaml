@@ -11,6 +11,7 @@ files:
           sinfo, sacct, sdiag, sshare and sdiag.
         value:
           type: string
+          require_trusted_provider: true
           example: /usr/bin/
       - template: init_config/default
   - template: instances
@@ -80,36 +81,42 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /usr/bin/sinfo
     - name: sacct_path
       description: Full path to the sacct binary.
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /usr/bin/sacct
     - name: sdiag_path
       description: Full path to the sdiag binary.
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /usr/bin/sdiag
     - name: sshare_path
       description: Full path to the sshare binary.
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /usr/bin/sshare
     - name: squeue_path
       description: Full path to the squeue binary.
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /usr/bin/squeue
     - name: scontrol_path
       description: Full path to the scontrol binary.
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /usr/bin/scontrol
     - name: debug_sinfo_stats
       description: |

@@ -1,6 +1,7 @@
-"""Dispatch build-wheels events to agent-integration-wheels-release in batches.
+"""Build repository_dispatch batches and write the release summary.
 
-Environment variables: GH_TOKEN, PACKAGES, SOURCE_REPO, REF, TARGET, DRY_RUN.
+Environment variables: PACKAGES, SOURCE_REPO, REF, DRY_RUN.
+Outputs: batches (JSON array of client_payload dicts, one per batch).
 """
 import json
 import os
@@ -9,8 +10,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from _release.dispatch import DispatchError, dispatch_in_batches
-from _release.github import parse_bool_env, write_summary
+from _release.dispatch import build_batches
+from _release.github import parse_bool_env, set_outputs, write_summary
 from _release.summary import build_summary
 
 
@@ -37,7 +38,6 @@ def main() -> None:
     packages = json.loads(os.environ["PACKAGES"])
     source_repo = os.environ["SOURCE_REPO"]
     ref = os.environ["REF"]
-    target = os.environ["TARGET"]
 
     dry_run = parse_bool_env("DRY_RUN", default=False)
 
@@ -45,22 +45,18 @@ def main() -> None:
     results = validation.get("results", [])
     mode = validation.get("mode", "")
 
-    print(f"Releasing {len(packages)} package(s) from {source_repo}@{ref} → {target} S3:")
+    print(f"Releasing {len(packages)} package(s) from {source_repo}@{ref}:")
 
     if dry_run:
         for name in packages:
             print(f"  - {name}")
         print("\nDRY RUN: no tags pushed, no builds triggered")
-        write_summary(build_summary(packages, results, mode, source_repo, ref, target, dry_run, was_dispatched=False))
+        write_summary(build_summary(packages, results, mode, source_repo, ref, dry_run=True, was_dispatched=False))
         return
 
-    token = os.environ["GH_TOKEN"]
-    try:
-        dispatch_in_batches(packages, source_repo, ref, target, token)
-    except DispatchError:
-        sys.exit(1)
-
-    write_summary(build_summary(packages, results, mode, source_repo, ref, target, dry_run, was_dispatched=True))
+    batches = build_batches(packages, source_repo, ref)
+    set_outputs(batches=json.dumps(batches))
+    write_summary(build_summary(packages, results, mode, source_repo, ref, dry_run=False, was_dispatched=False))
 
 
 if __name__ == "__main__":

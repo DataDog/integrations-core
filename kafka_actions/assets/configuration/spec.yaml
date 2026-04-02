@@ -628,6 +628,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /path/to/ca_cert.pem
     - name: schema_registry_tls_cert
       description: |
@@ -636,6 +637,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /path/to/client_cert.pem
     - name: schema_registry_tls_key
       description: |
@@ -644,6 +646,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /path/to/client_key.pem
     - name: schema_registry_oauth_token_provider
       description: |

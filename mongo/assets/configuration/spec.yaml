@@ -114,11 +114,6 @@ files:
         - name: enabled
           description: Enable database autodiscovery.
           fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
-          fleet_configurable: true
           value:
             type: boolean
             example: false
@@ -173,8 +168,6 @@ files:
           description: |
             The maximum number of collections to collect metrics from per database.
             Defaults to 100.
-          fleet_configurable: true
-          fleet_configurable: true
           fleet_configurable: true
           value:
             type: integer
@@ -462,6 +455,7 @@ files:
       description: A file containing the client certificate and private key. Implies tls=True.
       value:
         type: string
+        require_trusted_provider: true
     - name: tls_ca_file
       description: |
         A file containing one or a bundle of “certification authority” certificates,
@@ -469,6 +463,7 @@ files:
         Implies tls=True.
       value:
         type: string
+        require_trusted_provider: true
     - name: tls_allow_invalid_hostnames
       description: |
         If `True`, disables TLS hostname verification. tls_allow_invalid_hostnames=False implies tls=True.
