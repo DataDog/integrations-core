@@ -42,7 +42,7 @@ jobs:
             sha: context.payload.pull_request.head.sha,
             state: 'pending',
             context: 'dependency-wheel-promotion',
-            description: 'Wheels must be promoted to stable before merge. Run: ddev promote <PR_URL>',
+            description: 'Wheels must be promoted to stable before merge. Run: ddev dep promote <PR_URL>',
           });
 
     - name: Set dependency-wheel-promotion status to success
