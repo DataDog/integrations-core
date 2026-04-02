@@ -5,3 +5,4 @@ description: |
   Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
 
   Overrides any `service` defined in the `init_config` section.
+fleet_configurable: true

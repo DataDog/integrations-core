@@ -21,6 +21,11 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+SECURE_FIELD_NAMES = frozenset(
+    ['auth_token', 'kerberos_cache', 'kerberos_keytab', 'tls_ca_cert', 'tls_cert', 'tls_private_key']
+)
+
+
 class AuthToken(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -68,6 +73,7 @@ class InstanceConfig(BaseModel):
     disable_spark_job_stage_tags: Optional[bool] = None
     disable_spark_stage_metrics: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     enable_query_name_tag: Optional[bool] = None
     executor_level_metrics: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
@@ -96,6 +102,7 @@ class InstanceConfig(BaseModel):
     spark_proxy_enabled: Optional[bool] = None
     spark_ui_ports: Optional[tuple[int, ...]] = None
     spark_url: str
+    startup_wait_retries: Optional[int] = None
     streaming_metrics: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[float] = None
@@ -120,6 +127,11 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+
+            if info.field_name in SECURE_FIELD_NAMES:
+                validation.security.check_field_trusted_provider(
+                    info.field_name, value, info.context.get('security_config')
+                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

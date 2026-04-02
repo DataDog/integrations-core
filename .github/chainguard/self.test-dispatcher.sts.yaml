@@ -1,0 +1,13 @@
+issuer: https://token.actions.githubusercontent.com
+
+subject_pattern: repo:DataDog/integrations-core:(pull_request|ref:refs/heads/master)
+
+claim_pattern:
+  workflow: "ZZ - POC - Trigger PR Checks"
+  event_name: (pull_request|push|workflow_dispatch)
+
+permissions:
+  # Need to manage workflow runs
+  actions: write
+  # Need to read the repository contents to trigger the workflow
+  contents: read

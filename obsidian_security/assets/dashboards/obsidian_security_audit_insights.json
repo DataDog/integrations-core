@@ -898,15 +898,15 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "evt.name",
+                                            "field": "@evt.name",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "usr.name",
+                                            "field": "@usr.name",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "evt.outcome",
+                                            "field": "@evt.outcome",
                                             "width": "auto"
                                         },
                                         {
@@ -1883,7 +1883,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "evt.name",
+                                            "field": "@evt.name",
                                             "width": "auto"
                                         },
                                         {
@@ -1891,11 +1891,11 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "evt.outcome",
+                                            "field": "@evt.outcome",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "network.client.ip",
+                                            "field": "@network.client.ip",
                                             "width": "auto"
                                         },
                                         {

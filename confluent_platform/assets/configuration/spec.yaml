@@ -1,4 +1,5 @@
 name: Confluent Platform
+fleet_configurable: true
 files:
 - name: confluent_platform.yaml
   options:

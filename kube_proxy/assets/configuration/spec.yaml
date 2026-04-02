@@ -1,4 +1,5 @@
 name: Kube Proxy
+fleet_configurable: true
 files:
 - name: kube_proxy.yaml
   options:
@@ -14,6 +15,7 @@ files:
     - name: health_url
       description: |
         URL for the kube-proxy health endpoint.
+      fleet_configurable: true
       value:
         type: string
         example: http://localhost:10256/healthz

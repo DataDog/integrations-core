@@ -1,4 +1,5 @@
 name: Hive
+fleet_configurable: true
 files:
 - name: hive.yaml
   options:

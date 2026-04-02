@@ -34,7 +34,7 @@ license = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "in-toto==2.0.0",
-    "packaging==25.0",
+    "packaging==26.0",
     "securesystemslib[crypto,pynacl]==0.28.0",
     "tuf==4.0.0",
 ]

@@ -750,7 +750,7 @@ NODE_SYSTEM_METRICS_POST_1 = {
 }
 
 NODE_SYSTEM_METRICS_POST_5 = {
-    'system.cpu.idle': ('gauge', 'os.cpu.percent', lambda v: (100 - v)),
+    'system.cpu.idle': ('gauge', 'os.cpu.percent', lambda v: 100 - v),
     'system.load.1': ('gauge', 'os.cpu.load_average.1m'),
     'system.load.5': ('gauge', 'os.cpu.load_average.5m'),
     'system.load.15': ('gauge', 'os.cpu.load_average.15m'),

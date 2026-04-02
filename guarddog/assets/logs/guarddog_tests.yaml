@@ -1,0 +1,130 @@
+# bypass-global-timestamp-format-in-sample-checks
+id: "guarddog"
+tests:
+ -
+  sample: |-
+    {
+      "enrichment_details" : {
+        "package_ecosystem" : "npm",
+        "rules_triggered" : [ "shady-links" ]
+      },
+      "log" : {
+        "result" : {
+          "issues" : 2,
+          "results" : {
+            "empty_information" : "This package has an empty description on npm",
+            "shady-links" : [ {
+              "code" : "  \"author\": \"Dominic Tarr <dominic.tarr@gmail.com> (http://bit.ly/dominictarr)\"\n",
+              "location" : "package/package.json:35",
+              "message" : "This package contains an URL to a domain with a suspicious extension"
+            } ]
+          }
+        },
+        "path" : "/tmp/tmpmm2wc69i/event-stream",
+        "dependency" : "event-stream",
+        "version" : "4.0.1"
+      },
+      "timestamp" : 1758799611
+    }
+  result:
+    custom:
+      enrichment_details:
+        package_ecosystem: "npm"
+        rules_triggered:
+         - "shady-links"
+      log:
+        dependency: "event-stream"
+        path: "/tmp/tmpmm2wc69i/event-stream"
+        result:
+          issues: 2
+          results:
+            empty_information: "This package has an empty description on npm"
+            shady-links:
+             -
+              code: |2
+                  "author": "Dominic Tarr <dominic.tarr@gmail.com> (http://bit.ly/dominictarr)"
+              location: "package/package.json:35"
+              message: "This package contains an URL to a domain with a suspicious extension"
+        version: "4.0.1"
+      timestamp: 1758799611
+    message: |-
+      {
+        "enrichment_details" : {
+          "package_ecosystem" : "npm",
+          "rules_triggered" : [ "shady-links" ]
+        },
+        "log" : {
+          "result" : {
+            "issues" : 2,
+            "results" : {
+              "empty_information" : "This package has an empty description on npm",
+              "shady-links" : [ {
+                "code" : "  \"author\": \"Dominic Tarr <dominic.tarr@gmail.com> (http://bit.ly/dominictarr)\"\n",
+                "location" : "package/package.json:35",
+                "message" : "This package contains an URL to a domain with a suspicious extension"
+              } ]
+            }
+          },
+          "path" : "/tmp/tmpmm2wc69i/event-stream",
+          "dependency" : "event-stream",
+          "version" : "4.0.1"
+        },
+        "timestamp" : 1758799611
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1758799611
+ -
+  sample: |-
+    {
+      "enrichment_details" : {
+        "package_ecosystem" : "pypi"
+      },
+      "log" : {
+        "result" : {
+          "path" : "/tmp/tmpo8dtzk8y/urllib3",
+          "issues" : 0,
+          "errors" : {
+            "repository_integrity_mismatch" : "failed to run rule repository_integrity_mismatch: [Errno 20] Not a directory: '/tmp/tmpo8dtzk8y/sources/urllib3/LICENSE.txt'"
+          }
+        },
+        "dependency" : "urllib3",
+        "version" : "1.24.1"
+      },
+      "timestamp" : 1758799611
+    }
+  result:
+    custom:
+      enrichment_details:
+        package_ecosystem: "pypi"
+      has_errors: "yes"
+      log:
+        dependency: "urllib3"
+        result:
+          errors:
+            repository_integrity_mismatch: "failed to run rule repository_integrity_mismatch: [Errno 20] Not a directory: '/tmp/tmpo8dtzk8y/sources/urllib3/LICENSE.txt'"
+          issues: 0
+          path: "/tmp/tmpo8dtzk8y/urllib3"
+        version: "1.24.1"
+      timestamp: 1758799611
+    message: |-
+      {
+        "enrichment_details" : {
+          "package_ecosystem" : "pypi"
+        },
+        "log" : {
+          "result" : {
+            "path" : "/tmp/tmpo8dtzk8y/urllib3",
+            "issues" : 0,
+            "errors" : {
+              "repository_integrity_mismatch" : "failed to run rule repository_integrity_mismatch: [Errno 20] Not a directory: '/tmp/tmpo8dtzk8y/sources/urllib3/LICENSE.txt'"
+            }
+          },
+          "dependency" : "urllib3",
+          "version" : "1.24.1"
+        },
+        "timestamp" : 1758799611
+      }
+    tags:
+    - "source:LOGS_SOURCE"
+    timestamp: 1758799611

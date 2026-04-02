@@ -17,13 +17,15 @@ env:
   WARN_MAJOR_UPDATE_MESSAGE: "⚠️ **Major version bump**\nThe changelog type `changed` or `removed` was used in this Pull Request, so the next release will bump major version. Please make sure this is a breaking change, or use the `fixed` or `added` type instead."
 
 jobs:
-  check:
-    name: Check PR
+  check_changelog:
+    name: Check PR changelog
     runs-on: ubuntu-22.04
+    outputs:
+      major_bump_fragments: ${{ steps.changes.outputs.major_bump_fragments }}
 
     permissions:
-      pull-requests: write # For the "Comment" step, read for the "Fetch script" and "Check changelog" steps
-      contents: read # For the "Fetch diff" and "Check changelog" steps
+      pull-requests: read
+      contents: read
 
     steps:
     # Uncomment for testing purposes
@@ -33,7 +35,7 @@ jobs:
     #     ref: "${{ github.event.pull_request.head.sha }}"
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
@@ -74,17 +76,27 @@ jobs:
             - '*/changelog.d/*.removed'
             - '*/changelog.d/*.major'
 
+  comment_for_changelog:
+    name: Comment for PR changelog
+    needs: check_changelog
+    runs-on: ubuntu-22.04
+
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
     - name: Check for major version bump comment
-      if: ${{ steps.changes.outputs.major_bump_fragments == 'true' }}
+      if: ${{ needs.check_changelog.outputs.major_bump_fragments == 'true' }}
       id: find_comment
-      uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
+      uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body-includes: ${{ env.WARN_MAJOR_UPDATE_MESSAGE }}
 
     - name: Comment
-      if: ${{ steps.changes.outputs.major_bump_fragments == 'true' && steps.find_comment.outputs.comment-id == '' }}
-      uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
+      if: ${{ needs.check_changelog.outputs.major_bump_fragments == 'true' && steps.find_comment.outputs.comment-id == '' }}
+      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: ${{ env.WARN_MAJOR_UPDATE_MESSAGE }}

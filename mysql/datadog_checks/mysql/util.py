@@ -21,6 +21,7 @@ class DatabaseConfigurationError(Enum):
     performance_schema_not_enabled = 'performance-schema-not-enabled'
     events_statements_consumer_missing = 'events-statements-consumer-missing'
     events_waits_current_not_enabled = 'events-waits-current-not-enabled'
+    events_statements_time_instrumentation_not_enabled = 'events-statements-time-instrumentation-not-enabled'
 
 
 def warning_with_tags(warning_message, *args, **kwargs):

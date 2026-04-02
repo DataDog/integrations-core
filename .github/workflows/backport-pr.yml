@@ -9,6 +9,9 @@ jobs:
   backport:
     name: Backport PR
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC token federation with dd-octo-sts
+      contents: read
     if: >
       github.event.pull_request.merged
       && (
@@ -19,13 +22,12 @@ jobs:
         )
       )
     steps:
-      - name: Create token
-        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
-        id: token-generator
+      - name: Get GitHub token via dd-octo-sts
+        uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80 # v1.0.3
+        id: octo-sts
         with:
-          app-id: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
-          private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
-          repositories: integrations-core
+          scope: DataDog/integrations-core
+          policy: self.backport.pull-request-target
       - uses: tibdex/backport@9565281eda0731b1d20c4025c43339fb0a23812e # v2.0.4
         with:
           label_pattern: "^backport/(?<base>([^ ]+))$"
@@ -36,4 +38,4 @@ jobs:
             ___
 
             <%= body %>
-          github_token: ${{ steps.token-generator.outputs.token }}
+          github_token: ${{ steps.octo-sts.outputs.token }}

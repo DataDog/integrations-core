@@ -1,0 +1,68 @@
+id: "ibm_spectrum_lsf"
+tests:
+ -
+  sample: |
+    Jan 15 21:46:34 2025 30196:30196 3 10.1 mbdReConf: start
+  tags:
+   - "log_type:system"
+  result:
+    custom:
+      level: 3.0
+      pid: 30196
+      tid: 30196
+      timestamp: 1736977594000
+      version: "10.1"
+    message: "mbdReConf: start"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "log_type:system"
+    timestamp: 1736977594000
+ -
+  sample: "Jan 15 19:18:46 2026 30170 3 10.1 successExitJob: Job <2566[10]> exit with error code <42>"
+  tags:
+   - "log_type:system"
+  result:
+    custom:
+      level: 3
+      pid: 30170
+      timestamp: 1768504726000
+      version: "10.1"
+    message: "successExitJob: Job <2566[10]> exit with error code <42>"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "log_type:system"
+    timestamp: 1768504726000
+ -
+  sample: "Jan  4 02:32:17 2026 30133 4 3.4.0 collectGpuInfo: GPU collection thread stopped responding. GPU information not updated."
+  tags:
+   - "log_type:system"
+  result:
+    custom:
+      level: 4
+      pid: 30133
+      timestamp: 1767493937000
+      version: "3.4.0"
+    message: "collectGpuInfo: GPU collection thread stopped responding. GPU information not updated."
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "log_type:system"
+    timestamp: 1767493937000
+ -
+  sample: "Feb 15 22:02:12 2025 7288 4 10.1 write_jobinfo_report(): Cannot open your job file: /home/test-user/.lsbatch/8322342.23.10"
+  tags:
+   - "log_type:system"
+  result:
+    custom:
+      level: 4
+      pid: 7288
+      timestamp: 1739656932000
+      version: "10.1"
+    message: "write_jobinfo_report(): Cannot open your job file: /home/test-user/.lsbatch/8322342.23.10"
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "log_type:system"
+    timestamp: 1739656932000

@@ -5,7 +5,8 @@
 # E501: line too long (XXX > 120 characters)
 # flake8: noqa: E501
 # Source for metric names: https://github.com/temporalio/temporal/blob/master/common/metrics/metric_defs.go
-METRIC_MAP = {
+
+BASE_METRICS = {
     # General
     'service_requests': 'service.requests',
     'service_pending_requests': 'service.pending_requests',
@@ -408,3 +409,272 @@ METRIC_MAP = {
     'visibility_persistence_resource_exhausted': 'visibility.persistence.resource_exhausted',
     'visibility_persistence_latency': 'visibility.persistence.latency',
 }
+
+METRIC_MAP = {}
+
+METRIC_MAP.update(BASE_METRICS)
+
+TEMPORAL_V1_19_0_METRICS = {
+    'elasticsearch_bulk_processor_retries': 'elasticsearch.bulk_processor_retries',
+    'namespace_registry_callback_lock_latency': 'namespace_registry.callback_lock_latency',
+    'persistence_errors_bad_request': 'persistence.errors.bad_request',
+    'persistence_errors_busy': 'persistence.errors.busy',
+    'persistence_errors_condition_failed': 'persistence.errors.condition_failed',
+    'persistence_errors_current_workflow_condition_failed': 'persistence.errors.current_workflow_condition_failed',
+    'persistence_errors_entity_not_exists': 'persistence.errors.entity_not_exists',
+    'persistence_errors_namespace_already_exists': 'persistence.errors.namespace_already_exists',
+    'persistence_errors_shard_exists': 'persistence.errors.shard_exists',
+    'persistence_errors_shard_ownership_lost': 'persistence.errors.shard_ownership_lost',
+    'persistence_errors_timeout': 'persistence.errors.timeout',
+    'persistence_errors_workflow_condition_failed': 'persistence.errors.workflow_condition_failed',
+    'service_errors_authorize_failed': 'service.errors.authorize_failed',
+    'service_errors_bad_binary': 'service.errors.bad_binary',
+    'service_errors_cancellation_already_requested': 'service.errors.cancellation_already_requested',
+    'service_errors_client_version_not_supported': 'service.errors.client_version_not_supported',
+    'service_errors_context_cancelled': 'service.errors.context_cancelled',
+    'service_errors_context_timeout': 'service.errors.context_timeout',
+    'service_errors_entity_not_found': 'service.errors.entity_not_found',
+    'service_errors_execution_already_started': 'service.errors.execution_already_started',
+    'service_errors_incomplete_history': 'service.errors.incomplete_history',
+    'service_errors_invalid_argument': 'service.errors.invalid_argument',
+    'service_errors_namespace_already_exists': 'service.errors.namespace_already_exists',
+    'service_errors_namespace_not_active': 'service.errors.namespace_not_active',
+    'service_errors_nondeterministic': 'service.errors.nondeterministic',
+    'service_errors_query_failed': 'service.errors.query_failed',
+    'service_errors_retry_task': 'service.errors.retry_task',
+    'service_errors_unauthorized': 'service.errors.unauthorized',
+    'shardinfo_timer_diff': 'shardinfo.timer_diff',
+    'shardinfo_timer_failover_in_progress': 'shardinfo.timer_failover_in_progress',
+    'shardinfo_timer_failover_latency': 'shardinfo.timer_failover_latency',
+    'shardinfo_transfer_diff': 'shardinfo.transfer.diff',
+    'shardinfo_transfer_failover_in_progress': 'shardinfo.transfer.failover_in_progress',
+    'shardinfo_transfer_failover_latency': 'shardinfo.transfer.failover_latency',
+    'task_throttled_counter': 'task.throttled_counter',
+}
+
+METRIC_MAP.update(TEMPORAL_V1_19_0_METRICS)
+
+TEMPORAL_V1_21_0_METRICS = {
+    'elasticsearch_bulk_processor_bulk_request_took_latency': 'elasticsearch.bulk_processor.bulk_request_took_latency',
+    'elasticsearch_custom_order_by_clause_counter': 'elasticsearch.custom_order_by_clause_counter',
+    'invalid_state_transition_workflow_update_message': 'invalid_state_transition_workflow_update_message',
+    'persistence_shard_rps': 'persistence.shard_rps',
+    'protocol_message_command': 'protocol_message_command',
+    'queue_action_errors': 'queue.action_errors',
+    'replication_dlq_non_empty': 'replication.dlq_non_empty',
+    'replication_tasks_recv': 'replication.tasks_recv',
+    'replication_tasks_recv_backlog': 'replication.tasks_recv_backlog',
+    'replication_tasks_send': 'replication.tasks_send',
+    'request_workflow_update_message': 'request_workflow_update_message',
+    'respond_workflow_update_message': 'respond_workflow_update_message',
+    'signal_request_id_count': 'signal_request_id_count',
+    'signal_request_id_size': 'signal_request_id_size',
+    'total_activity_count': 'total_activity_count',
+    'total_child_execution_count': 'total_child_execution_count',
+    'total_request_cancel_external_count': 'total_request_cancel_external_count',
+    'total_signal_count': 'total_signal_count',
+    'total_signal_external_count': 'total_signal_external_count',
+    'total_user_timer_count': 'total_user_timer_count',
+    'workflow_delayed_start_backoff_timer': 'workflow_delayed_start.backoff_timer',
+}
+
+METRIC_MAP.update(TEMPORAL_V1_21_0_METRICS)
+
+TEMPORAL_V1_22_0_METRICS = {
+    'encounter_not_found_workflow_count': 'encounter_not_found_workflow_count',
+    'encounter_pass_retention_workflow_count': 'encounter_pass_retention_workflow_count',
+    'encounter_zombie_workflow_count': 'encounter_zombie_workflow_count',
+    'generate_replication_tasks_latency': 'generate_replication_tasks_latency',
+    'http_service_requests': 'http.service_requests',
+    'mutable_state_dirty': 'mutable_state_dirty',
+    'replication_outlier_namespace': 'replication.outlier_namespace',
+    'replication_tasks_skipped': 'replication.tasks_skipped',
+    'service_panics': 'service.panics',
+    'shard_linger_success': 'shard.linger_success',
+    'shard_linger_timeouts': 'shard.linger_timeouts',
+    'unknown_build_polls': 'unknown_build.polls',
+    'unknown_build_tasks': 'unknown_build.tasks',
+    'verify_describe_mutable_state_latency': 'verify.describe_mutable_state_latency',
+    'verify_replication_task_failed': 'verify.replication_task.failed',
+    'verify_replication_task_not_found': 'verify.replication_task.not_found',
+    'verify_replication_task_success': 'verify.replication_task.success',
+    'verify_replication_tasks_latency': 'verify.replication_tasks.latency',
+}
+
+METRIC_MAP.update(TEMPORAL_V1_22_0_METRICS)
+
+TEMPORAL_V1_23_0_METRICS = {
+    'batchable_task_batch_count': 'batchable_task.batch_count',
+    'cassandra_init_session_latency': 'cassandra.init_session.latency',
+    'cassandra_session_refresh_failures': 'cassandra.session_refresh.failures',
+    'command': 'command',
+    'dd_cluster_metadata_callback_lock_latency': 'dd.cluster_metadata.callback_lock.latency',
+    'dd_cluster_metadata_lock_latency': 'dd.cluster_metadata_lock_latency',
+    'dd_namespace_registry_lock_latency': 'dd.namespace_registry_lock_latency',
+    'dd_shard_controller_lock_latency': 'dd.shard_controller_lock_latency',
+    'dd_shard_io_semaphore_latency': 'dd.shard_io_semaphore_latency',
+    'dd_shard_lock_latency': 'dd.shard_lock_latency',
+    'dlq_writes': 'dlq_writes',
+    'dynamic_rate_limit_multiplier': 'dynamic_rate_limit_multiplier',
+    'poll_latency': 'poll_latency',
+    'replication_stream_panic': 'replication.stream_panic',
+    'replication_task_transmission_latency': 'replication.task_transmission_latency',
+    'schedule_action_delay': 'schedule_action_delay',
+    'semaphore_failures': 'semaphore.failures',
+    'semaphore_latency': 'semaphore.latency',
+    'semaphore_requests': 'semaphore.requests',
+    'task_dispatch_latency': 'task.dispatch_latency',
+    'task_dlq_failures': 'task.dlq_failures',
+    'task_dlq_latency': 'task.dlq_latency',
+    'task_terminal_failures': 'task.terminal_failures',
+}
+
+METRIC_MAP.update(TEMPORAL_V1_23_0_METRICS)
+
+TEMPORAL_V1_24_0_METRICS = {
+    'cache_entry_age_on_eviction': 'cache_entry.age_on_eviction',
+    'cache_entry_age_on_get': 'cache_entry.age_on_get',
+    'cache_pinned_usage': 'cache.pinned_usage',
+    'cache_size': 'cache.size',
+    'cache_ttl': 'cache.ttl',
+    'cache_usage': 'cache.usage',
+    'gomaxprocs': 'gomaxprocs',
+    'host_rps_limit': 'host_rps_limit',
+    'invalid_task_queue_partition': 'invalid_task_queue_partition',
+    'loaded_physical_task_queue_count': 'loaded_physical_task_queue_count',
+    'loaded_task_queue_family_count': 'loaded_task_queue_family_count',
+    'loaded_task_queue_partition_count': 'loaded_task_queue_partition_count',
+    'memory_allocated': 'memory.allocated',
+    'memory_gc_pause_ms': 'memory.gc_pause_ms',
+    'memory_heap': 'memory.heap',
+    'memory_heapidle': 'memory.heapidle',
+    'memory_heapinuse': 'memory.heapinuse',
+    'memory_num_gc': 'memory.num_gc',
+    'memory_stack': 'memory.stack',
+    'namespace_host_rps_limit': 'namespace_host_rps_limit',
+    'nexus_completion_latency': 'nexus.completion_latency',
+    'nexus_completion_request_preprocess_errors': 'nexus.completion_request_preprocess_errors',
+    'nexus_completion_requests': 'nexus.completion_requests',
+    'nexus_latency': 'nexus.latency',
+    'nexus_request_preprocess_errors': 'nexus.request_preprocess_errors',
+    'nexus_requests': 'nexus.requests',
+    'num_goroutines': 'num_goroutines',
+    'persisted_mutable_state_size': 'persisted_mutable_state_size',
+    'reachability_exit_point_count': 'reachability_exit_point_count',
+    'replication_service_error': 'replication.service_error',
+    'replication_stream_error': 'replication.stream_error',
+    'respond_nexus_failed': 'respond_nexus_failed',  #  added in temporal version v1.24.0
+    'restarts': 'restarts',
+    'task_errors_internal': 'task.errors.internal',
+    'tasks_per_shardinfo_update': 'tasks.per_shardinfo_update',
+    'time_between_shardinfo_update': 'time_between_shardinfo_update',
+    'utf8_validation_errors': 'utf8_validation_errors',
+    'workflow_update_aborted': 'workflow_update.aborted',
+    'workflow_update_client_timeout': 'workflow_update.client_timeout',
+    'workflow_update_normal_workflow_task': 'workflow_update.normal_workflow_task',
+    'workflow_update_registry_size': 'workflow_update.registry_size',
+    'workflow_update_request_rate_limited': 'workflow_update.request_rate_limited',
+    'workflow_update_request_too_many': 'workflow_update.request_too_many',
+    'workflow_update_sent_to_worker': 'workflow_update.sent_to_worker',
+    'workflow_update_sent_to_worker_again': 'workflow_update.sent_to_worker_again',
+    'workflow_update_server_timeout': 'workflow_update.server_timeout',
+    'workflow_update_speculative_workflow_task': 'workflow_update.speculative_workflow_task',
+    'workflow_update_wait_stage_accepted': 'workflow_update.wait_stage_accepted',
+    'workflow_update_wait_stage_completed': 'workflow_update.wait_stage_completed',
+}
+
+METRIC_MAP.update(TEMPORAL_V1_24_0_METRICS)
+
+TEMPORAL_V1_25_0_METRICS = {
+    'approximate_backlog_age_seconds': 'approximate_backlog_age_seconds',
+    'approximate_backlog_count': 'approximate_backlog_count',
+    'circuit_breaker_executable_blocked': 'circuit_breaker.executable_blocked',
+    'dlq_message_count': 'dlq.message_count',
+    'dynamic_worker_pool_scheduler_active_workers': 'dynamic_worker_pool_scheduler.active_workers',
+    'dynamic_worker_pool_scheduler_buffer_size': 'dynamic_worker_pool_scheduler.buffer_size',
+    'dynamic_worker_pool_scheduler_dequeued_tasks': 'dynamic_worker_pool_scheduler.dequeued_tasks',
+    'dynamic_worker_pool_scheduler_enqueued_tasks': 'dynamic_worker_pool_scheduler.enqueued_tasks',
+    'dynamic_worker_pool_scheduler_rejected_tasks': 'dynamic_worker_pool_scheduler.rejected_tasks',
+    'finalizer_items_completed': 'finalizer.items_completed',
+    'finalizer_items_unfinished': 'finalizer.items_unfinished',
+    'finalizer_latency': 'finalizer.latency',
+    'history_workflow_execution_cache_lock_hold_duration': 'history_workflow_execution_cache.lock_hold_duration',
+    'out_of_order_buffered_events': 'out_of_order_buffered_events',
+    'persistence_session_refresh_attempts': 'persistence.session_refresh_attempts',
+    'persistence_session_refresh_failures': 'persistence.session_refresh_failures',
+    'rate_limited_task_runnable_wait_time': 'rate_limited_task.runnable_wait_time',
+    'read_namespace_errors': 'read_namespace.errors',
+    'replication_stream_stuck': 'replication.stream_stuck',
+    'schedule_action_attempt': 'schedule_action.attempt',
+    'speculative_workflow_task_commits': 'speculative_workflow_task.commits',
+    'speculative_workflow_task_rollbacks': 'speculative_workflow_task.rollbacks',
+    'state_machine_timer_processing_failures': 'state_machine_timer.processing_failures',
+    'state_machine_timer_skips': 'state_machine_timer.skips',
+    'workflow_backoff_timer': 'workflow_backoff_timer',
+}
+
+METRIC_MAP.update(TEMPORAL_V1_25_0_METRICS)
+
+TEMPORAL_V1_26_0_METRICS = {
+    'force_loaded_task_queue_partition_unnecessarily_count': 'force_loaded_task_queue_partition_unnecessarily_count',
+    'force_loaded_task_queue_partitions_count': 'force_loaded_task_queue_partitions_count',
+    'signal_with_start_skip_delay_count': 'signal_with_start_skip_delay_count',
+}
+
+METRIC_MAP.update(TEMPORAL_V1_26_0_METRICS)
+
+TEMPORAL_V1_27_0_METRICS = {
+    'delete_executions_failure': 'delete_executions.failure',
+    'delete_executions_not_found': 'delete_executions.not_found',
+    'memory_num_gc_last': 'memory.num_gc_last',
+    'memory_pause_total_ns_last': 'memory.pause_total_ns_last',
+    'non_retryable_tasks': 'non_retryable_tasks',
+    'reclaim_resources_delete_executions_failure': 'reclaim_resources.delete_executions.failure',
+    'reclaim_resources_delete_executions_success': 'reclaim_resources.delete_executions.success',
+    'reclaim_resources_namespace_delete_failure': 'reclaim_resources.namespace_delete.failure',
+    'reclaim_resources_namespace_delete_success': 'reclaim_resources.namespace_delete.success',
+    'replication_duplicated_task': 'replication.duplicated_task',
+    'workflow_update_continue_as_new_suggestions': 'workflow_update.continue_as_new_suggestions',
+    'workflow_update_registry_size_limited': 'workflow_update.registry_size_limited',
+}
+
+METRIC_MAP.update(TEMPORAL_V1_27_0_METRICS)
+
+TEMPORAL_V1_28_0_METRICS = {
+    'chasm_total_size': 'chasm.total_size',
+    'dd_current_suspected_deadlocks': 'dd.current_suspected_deadlocks',
+    'dd_suspected_deadlocks': 'dd.suspected_deadlocks',
+    'handover_wait_latency': 'handover.wait_latency',
+    'host_health': 'host.health',
+    'memory_frees': 'memory.frees',
+    'memory_heap_objects': 'memory.heap_objects',
+    'memory_mallocs': 'memory.mallocs',
+    'operation': 'operation',
+    'paused_activities': 'paused_activities',
+    'replication_task_generation_latency': 'replication.task_generation_latency',
+    'replication_task_load_latency': 'replication.task_load_latency',
+    'replication_task_load_size': 'replication.task_load_size',
+    'replication_task_processing_latency': 'replication.task_processing_latency',
+    'replication_task_send_attempt': 'replication.task_send_attempt',
+    'replication_task_send_backlog': 'replication.task_send_backlog',
+    'replication_task_send_error': 'replication.task_send_error',
+    'replication_task_send_latency': 'replication.task_send_latency',
+    'replication_tasks_back_fill': 'replication.tasks_back_fill',
+    'replication_tasks_back_fill_latency': 'replication.tasks_back_fill_latency',
+    'schedule_action_dropped': 'schedule_action.dropped',
+    'start_deployment_transition_count': 'start_deployment.transition_count',
+    'start_workflow_request_deduped': 'start_workflow_request_deduped',
+    'task_rewrites': 'task_rewrites',
+    'worker_deployment_created': 'worker_deployment_created',
+    'worker_deployment_version_created': 'worker_deployment_version_created',
+    'worker_deployment_version_created_managed_by_controller': 'worker_deployment_version_created_managed_by_controller',
+    'worker_deployment_version_visibility_query_count': 'worker_deployment_version_visibility_query_count',
+    'worker_deployment_versioning_override_count': 'worker_deployment_versioning_override_count',
+    'workflow_query_failure_count': 'workflow_query.failure_count',
+    'workflow_query_success_count': 'workflow_query.success_count',
+    'workflow_query_timeout_count': 'workflow_query.timeout_count',
+    'workflow_reset_count': 'workflow_reset_count',
+    'workflow_tasks_completed': 'workflow_tasks.completed',
+}
+
+METRIC_MAP.update(TEMPORAL_V1_28_0_METRICS)

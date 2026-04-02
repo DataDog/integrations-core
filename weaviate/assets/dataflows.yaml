@@ -1,0 +1,5 @@
+provides:
+  - id: weaviate-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound

@@ -1,0 +1,1 @@
+Accept list format for `kafka_connect_str` when copied from kafka_consumer config via autodiscovery

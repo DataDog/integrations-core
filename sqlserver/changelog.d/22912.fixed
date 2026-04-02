@@ -1,0 +1,1 @@
+Fix ``database_autodiscovery_interval`` config option being silently ignored. The check was reading ``autodiscovery_interval`` instead of the documented ``database_autodiscovery_interval`` key, so customers setting this option were always getting the default 3600s interval.

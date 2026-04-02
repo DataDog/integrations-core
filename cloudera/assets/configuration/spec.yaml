@@ -1,4 +1,5 @@
 name: Cloudera
+fleet_configurable: true
 files:
 - name: cloudera.yaml
   options:
@@ -8,6 +9,7 @@ files:
       description: |
         The Workload username. This value can be found in the `User Management` tab of the Management
         Console in the `Workload User Name`.
+      fleet_configurable: true
       required: true
       value:
         type: string
@@ -15,6 +17,8 @@ files:
       description: |
         The Workload password. This value can be found in the `User Management` tab of the Management
         Console in the `Workload Password`.
+      fleet_configurable: true
+      secret: true
       required: true
       value:
         type: string
@@ -22,6 +26,8 @@ files:
   - template: instances
     options:
     - name: api_url
+      fleet_configurable: true
+      formats: ["url"]
       required: true
       description: |
         The URL endpoint for the Cloudera Manager API. This can be found under the Endpoints tab for
@@ -36,25 +42,30 @@ files:
         type: string
     - name: verify_ssl
       description: Enable SSL/TLS encryption for the check.
+      fleet_configurable: true
       value:
         default: true
         type: boolean
         example: true
     - name: ssl_ca_cert
       description: Path to the file containing the CA certificates to trust.
+      fleet_configurable: true
       value:
         example: <CERT_PATH>
         type: string
+        require_trusted_provider: true
     - name: cert_file
       description: Path to the file from which the local certificates can be loaded.
       value:
         example: <CERT_FILE_PATH>
         type: string
+        require_trusted_provider: true
     - name: key_file
       description: Path to the file from which to load the private key.
       value:
         example: <KEY_FILE_PATH>
         type: string
+        require_trusted_provider: true
     - name: pools_size
       description: |
         Number of connection pools to cache before discarding the least recently used pool.
@@ -145,6 +156,7 @@ files:
 
         This configuration will collect cloudera.<CATEGORY>.foo and cloudera.<CATEGORY>.bar,
         both with custom tags of `baz:1`.
+      fleet_configurable: true
       value:
         type: array
         items:

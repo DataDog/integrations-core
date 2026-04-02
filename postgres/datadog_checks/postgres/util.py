@@ -588,6 +588,29 @@ GROUP BY application_name, datname, usename, backend_type, wait_event
 """.strip(),
 }
 
+CONNECTION_METRICS_BY_DB = {
+    'descriptors': [('database_name', 'db')],
+    'metrics': {
+        'connections': ('database_connections', AgentCheck.gauge),
+        'pct_connections': ('percent_database_usage_connections', AgentCheck.gauge),
+    },
+    'relation': False,
+    'query': """
+WITH max_con AS (
+    SELECT setting::float
+    FROM pg_settings
+    WHERE name = 'max_connections'
+)
+SELECT datname,
+    numbackends,
+    SUM(numbackends)/MAX(setting)
+    FROM pg_stat_database, max_con
+WHERE datname IS NOT NULL {ignore_database_filter}
+GROUP BY datname, numbackends
+""",
+    'name': 'connections_by_database',
+}
+
 CONNECTION_METRICS = {
     'descriptors': [],
     'metrics': {
@@ -803,7 +826,7 @@ EXTRACT (EPOCH FROM now() - min(modification))
     ],
 }
 
-STAT_WAL_METRICS = {
+STAT_WAL_METRICS_LT_18 = {
     'name': 'stat_wal_metrics',
     'query': """
 SELECT wal_records, wal_fpi,
@@ -821,6 +844,22 @@ SELECT wal_records, wal_fpi,
         {'name': 'wal.sync', 'type': 'monotonic_count'},
         {'name': 'wal.write_time', 'type': 'monotonic_count'},
         {'name': 'wal.sync_time', 'type': 'monotonic_count'},
+    ],
+}
+
+# TODO: Handle missing wal IO metrics for PG18
+STAT_WAL_METRICS = {
+    'name': 'stat_wal_metrics',
+    'query': """
+SELECT wal_records, wal_fpi,
+       wal_bytes, wal_buffers_full
+  FROM pg_stat_wal
+""",
+    'columns': [
+        {'name': 'wal.records', 'type': 'monotonic_count'},
+        {'name': 'wal.full_page_images', 'type': 'monotonic_count'},
+        {'name': 'wal.bytes', 'type': 'monotonic_count'},
+        {'name': 'wal.buffers_full', 'type': 'monotonic_count'},
     ],
 }
 

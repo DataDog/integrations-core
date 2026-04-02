@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 from datetime import datetime
 
 from dateutil import tz
@@ -19,6 +20,51 @@ def sanitize_strings(s):
     if found >= 0:
         s = s[:found]
     return s.strip()
+
+
+def decode_mq_description(s: bytes | str, log=None) -> str:
+    """Decode an IBM MQ description field.
+
+    IBM MQ queue managers may return description fields (e.g. MQCACH_DESC, MQCA_Q_DESC)
+    in non-UTF-8 encodings because they are free-form text entered by administrators.
+    Falls back to UTF-8 with replacement characters on decode failure to avoid crashing.
+    """
+    if isinstance(s, bytes):
+        try:
+            return s.decode('utf-8')
+        except UnicodeDecodeError:
+            if log is not None:
+                log.debug("Failed to decode IBM MQ description as UTF-8, falling back to replacement: %r", s)
+            return s.decode('utf-8', errors='replace')
+    return s
+
+
+def normalize_desc_tag(desc):
+    """
+    Normalize description strings for use as tag values.
+    https://docs.datadoghq.com/getting_started/tagging/#define-tags
+    """
+    if not desc:
+        return ''
+
+    # Convert to lowercase
+    normalized = desc.lower()
+
+    # Replace spaces and special characters with underscores
+    # Keep only alphanumeric, hyphens, and underscores
+    normalized = re.sub(r'[^a-z0-9\-_]', '_', normalized)
+
+    # Replace multiple consecutive underscores with single underscore
+    normalized = re.sub(r'_+', '_', normalized)
+
+    # Strip leading/trailing underscores
+    normalized = normalized.strip('_')
+
+    # Limit length (Datadog recommends keeping tag values reasonable)
+    if len(normalized) > 200:
+        normalized = normalized[:200].rstrip('_')
+
+    return normalized
 
 
 def calculate_elapsed_time(datestamp, timestamp, qm_timezone, current_time=None):

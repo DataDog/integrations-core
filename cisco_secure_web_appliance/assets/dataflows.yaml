@@ -1,0 +1,5 @@
+provides:
+  - id: cisco-secure-web-appliance-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

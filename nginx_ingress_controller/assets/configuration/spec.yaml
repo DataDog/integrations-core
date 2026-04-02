@@ -1,4 +1,5 @@
 name: nginx-ingress-controller
+fleet_configurable: true
 files:
   - name: nginx_ingress_controller.yaml
     options:
@@ -13,6 +14,7 @@ files:
             Recommended to use with distribution metrics tag whitelist, please enable `send_distribution_buckets`.
             For more information about distribution metrics and tags,
             see https://docs.datadoghq.com/metrics/distributions/#customize-tagging.
+          fleet_configurable: true
           value:
             example: false
             type: boolean

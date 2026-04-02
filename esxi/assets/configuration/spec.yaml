@@ -1,4 +1,5 @@
 name: ESXi
+fleet_configurable: true
 files:
 - name: esxi.yaml
   options:
@@ -15,6 +16,7 @@ files:
   - template: instances
     options:
         - name: host
+          fleet_configurable: true
           required: true
           display_priority: 1
           description: The host used to resolve the ESXi IP. It is either a FQDN or an IP.
@@ -22,6 +24,7 @@ files:
             type: string
             example: <HOSTNAME>
         - name: username
+          fleet_configurable: true
           required: true
           display_priority: 1
           description: |
@@ -30,10 +33,12 @@ files:
             type: string
             example: <USERNAME>
         - name: password
+          fleet_configurable: true
           required: true
           display_priority: 1
           description: |
             The ESXi host password
+          secret: true
           value:
             type: string
             example: <PASSWORD>
@@ -46,6 +51,7 @@ files:
             in the web application UI.
             Note: If VMs are duplicated in the Infrastructure List, follow these troubleshooting steps
                   https://docs.datadoghq.com/integrations/faq/troubleshooting-duplicated-hosts-with-vsphere/.
+          fleet_configurable: true
           value:
             type: boolean
             example: false
@@ -54,6 +60,7 @@ files:
             If true, the check will use the configured `host` parameter for ESXi hostnames instead of the Host name.
             You may need to use this if you install both the vSphere check and ESXi check to avoid duplicate entries
             for hosts in the web application UI.
+          fleet_configurable: true
           value:
             type: boolean
             example: true
@@ -94,6 +101,7 @@ files:
               - hostname to filter on the ESXi Host name (only valid for if 'resource' equals 'vm')
               - guest_hostname to filter on the VM hostname (only valid for if 'resource' equals 'vm' and
                 if VMware tools are installed)
+          fleet_configurable: true
           value:
             example:
               - resource: vm
@@ -178,12 +186,14 @@ files:
             SOCKS Proxy to use for this instance. Overrides the `proxy` setting in `init_config`.
         - name: ssl_verify
           description: Set to false to disable SSL verification when connecting to the ESXi host
+          fleet_configurable: true
           value:
             type: boolean
             example: true
         - name: ssl_cafile
           description: |
             Set to the absolute file path of CA certificates in PEM format
+          fleet_configurable: true
           value:
             type: string
             example: "<FILE_PATH>"
@@ -191,6 +201,7 @@ files:
           description: |
             Set to the absolute file path of a directory containing CA certificates
             in PEM format
+          fleet_configurable: true
           value:
             type: string
             example: "<DIRECTORY_PATH>"

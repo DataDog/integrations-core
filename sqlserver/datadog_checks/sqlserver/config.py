@@ -32,7 +32,9 @@ class SQLServerConfig:
         self.autodiscovery_exclude: list[str] = instance.get('autodiscovery_exclude', ['model']) or ['model']
         self.autodiscovery_db_service_check: bool = is_affirmative(instance.get('autodiscovery_db_service_check', True))
         self.min_collection_interval: int = instance.get('min_collection_interval', 15)
-        self.autodiscovery_interval: int = instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
+        self.autodiscovery_interval: int = instance.get(
+            'database_autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL
+        )
         self.database_instance_collection_interval: int = instance.get(
             'database_instance_collection_interval', DEFAULT_LONG_METRICS_COLLECTION_INTERVAL
         )
@@ -41,6 +43,7 @@ class SQLServerConfig:
 
         self.proc: str = instance.get('stored_procedure')
         self.custom_metrics: list[dict] = init_config.get('custom_metrics', []) or []
+        self.only_custom_queries: bool = is_affirmative(instance.get('only_custom_queries', False))
         self.ignore_missing_database = is_affirmative(instance.get("ignore_missing_database", False))
         if self.ignore_missing_database:
             self.log.warning(
@@ -135,6 +138,8 @@ class SQLServerConfig:
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
             additional_tags=["raw_query_statement:enabled"] if self.collect_raw_query_statement["enabled"] else [],
         )
+
+        self._validate_only_custom_queries(instance)
 
     def _compile_valid_patterns(self, patterns: list[str]) -> re.Pattern:
         valid_patterns = []
@@ -275,6 +280,22 @@ class SQLServerConfig:
                 if value is not None:
                     config[key] = value
         return configurable_metrics
+
+    def _validate_only_custom_queries(self, instance):
+        # Warn about any metric-collecting options that are enabled
+        if self.only_custom_queries:
+            if self.dbm_enabled:
+                self.log.warning(
+                    "only_custom_queries is enabled with DBM. if you don't want to collect DBM metrics, set dbm: false"
+                )
+
+            if self.proc:
+                self.log.warning(
+                    "`stored_procedure` is deprecated. to run custom queries, add to the `custom_queries` configuration"
+                )
+
+            if instance.get('custom_queries', []) == []:
+                self.log.warning("only_custom_queries is enabled but no custom queries are defined")
 
 
 def sanitize(config: dict) -> dict:

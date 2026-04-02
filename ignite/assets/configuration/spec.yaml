@@ -1,4 +1,5 @@
 name: Ignite
+fleet_configurable: true
 files:
 - name: ignite.yaml
   options:

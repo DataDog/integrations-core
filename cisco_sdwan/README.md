@@ -2,12 +2,25 @@
 # Agent Check: Cisco SD-WAN
 
 ## Overview
+[Network Device Monitoring][1] for Cisco SD-WAN delivers unified visibility into WAN edge health, transport performance, and application traffic across environments managed by Cisco SD-WAN. By collecting metrics from controllers and edge devices, this integration enables teams to monitor SD-WAN reliability, detect performance degradation, and correlate network behavior with application impact.
 
-The Cisco SD-WAN integration lets you monitor your Cisco SD-WAN environment within [Network Device Monitoring][1]. Gain comprehensive insights into the performance and health of your SD-WAN infrastructure, including sites, tunnels, and devices.
+With automatic discovery of SD-WAN components and consistent tagging across sites and devices, Datadog helps teams manage complex, large-scale WAN deployments more effectively.
+
+### WAN edge and control plane monitoring
+
+This integration tracks the availability and resource utilization of Cisco SD-WAN edge devices and controllers, helping teams quickly identify outages, overloaded devices, or control plane issues that could disrupt connectivity or routing decisions.
+
+### Transport and SLA performance
+
+Cisco SD-WAN environments depend on continuous evaluation of link quality across transports such as MPLS, broadband, and LTE. Datadog monitors latency, jitter, packet loss, throughput, and utilization per transport and path, making it easier to troubleshoot degraded links and validate SLA-driven routing behavior.
+
+### Traffic and application visibility
+
+By surfacing traffic and throughput metrics at the device and interface level, this integration helps teams understand where bandwidth is being consumed and identify hotspots or oversubscribed links. Combined with Datadog's broader observability platform, network data can be correlated with application and service performance for faster root cause analysis.
 
 ## Setup
 
-**The Cisco SD-WAN NDM integration is in Preview and will not be billed until it is Generally Available.**
+**The Cisco SD-WAN NDM integration is Generally Available. To learn more about billing implications, visit our [pricing page][8].**
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
@@ -50,3 +63,4 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://github.com/DataDog/integrations-core/blob/master/cisco_sdwan/metadata.csv
 [7]: https://docs.datadoghq.com/help/
+[8]: https://www.datadoghq.com/pricing/?product=network-monitoring&tab=network-device-monitoring#products

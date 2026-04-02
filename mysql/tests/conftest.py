@@ -12,6 +12,7 @@ from packaging.version import parse as parse_version
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.mysql.version_utils import parse_version as parse_mysql_version
 
 from . import common, tags
 from .common import MYSQL_REPLICATION, MYSQL_VERSION_PARSED
@@ -260,6 +261,47 @@ def instance_error():
     return {'host': common.HOST, 'username': 'unknown', 'password': common.PASS, 'disable_generic_tags': 'true'}
 
 
+@pytest.fixture
+def instance_hybrid_primary():
+    """Instance config for node1 in the hybrid topology (group primary with a traditional replica)."""
+    return {
+        'host': common.HOST,
+        'username': common.USER,
+        'password': common.PASS,
+        'port': common.PORTS_HYBRID_GROUP[0],
+        'disable_generic_tags': True,
+        'options': {
+            'replication': True,
+            'extra_status_metrics': True,
+            'extra_innodb_metrics': True,
+            'extra_performance_metrics': True,
+            'schema_size_metrics': False,
+            'galera_cluster': True,
+        },
+        'tags': tags.METRIC_TAGS,
+    }
+
+
+@pytest.fixture
+def instance_hybrid_traditional_replica():
+    """Instance config for the traditional replica in the hybrid topology."""
+    return {
+        'host': common.HOST,
+        'username': common.USER,
+        'password': common.PASS,
+        'port': common.PORT_HYBRID_TRADITIONAL_REPLICA,
+        'disable_generic_tags': True,
+        'options': {
+            'replication': True,
+            'extra_status_metrics': True,
+            'extra_innodb_metrics': True,
+            'extra_performance_metrics': True,
+            'schema_size_metrics': False,
+        },
+        'tags': tags.METRIC_TAGS,
+    }
+
+
 @pytest.fixture(scope='session')
 def version_metadata():
     parts = MYSQL_VERSION.split('-')
@@ -282,7 +324,10 @@ def version_metadata():
         'version.raw': mock.ANY,
         'version.build': mock.ANY,
         'flavor': flavor,
-        'resolved_hostname': 'forced_hostname',
+        # Hostname resolution varies by environment but should always be a non-empty string
+        # CI might use 'forced_hostname', local might use 'stubbed.hostname' or actual hostname
+        # The actual value is tested separately in test_database_identifier and other tests
+        'resolved_hostname': mock.ANY,
     }
 
 
@@ -293,6 +338,15 @@ def _get_warmup_conditions():
             CheckDockerLogs('node2', "X Plugin ready for connections. Bind-address: '::' port: 33060"),
             CheckDockerLogs('node3', "X Plugin ready for connections. Bind-address: '::' port: 33060"),
             init_group_replication,
+            populate_database,
+        ]
+    if MYSQL_REPLICATION == 'hybrid':
+        return [
+            CheckDockerLogs('node1', "X Plugin ready for connections. Bind-address: '::' port: 33060"),
+            CheckDockerLogs('node2', "X Plugin ready for connections. Bind-address: '::' port: 33060"),
+            CheckDockerLogs('node3', "X Plugin ready for connections. Bind-address: '::' port: 33060"),
+            CheckDockerLogs('traditional-replica', "ready for connections"),
+            init_hybrid_replication,
             populate_database,
         ]
     return [
@@ -329,6 +383,60 @@ def init_group_replication():
         cur = c.cursor()
         cur.execute("change master to master_user='repl' for channel 'group_replication_recovery';")
         cur.execute("START GROUP_REPLICATION;")
+
+
+def init_hybrid_replication():
+    """Initialize hybrid topology: group replication cluster (node1-3) + traditional replica of node1."""
+    logger.debug("initializing hybrid replication")
+    import time
+
+    time.sleep(5)
+
+    group_conns = [
+        pymysql.connect(host=common.HOST, port=p, user='root', password='mypass') for p in common.PORTS_HYBRID_GROUP
+    ]
+    _add_dog_user(group_conns[0])
+    _add_bob_user(group_conns[0])
+    _add_fred_user(group_conns[0])
+    _init_datadog_sample_collection(group_conns[0])
+
+    cur_primary = group_conns[0].cursor()
+    cur_primary.execute("SET @@GLOBAL.group_replication_bootstrap_group=1;")
+    cur_primary.execute("create user 'repl'@'%';")
+    cur_primary.execute("GRANT REPLICATION SLAVE ON *.* TO repl@'%';")
+    cur_primary.execute("flush privileges;")
+    cur_primary.execute("change master to master_user='root' for channel 'group_replication_recovery';")
+    cur_primary.execute("START GROUP_REPLICATION;")
+    cur_primary.execute("SET @@GLOBAL.group_replication_bootstrap_group=0;")
+    cur_primary.execute("SELECT * FROM performance_schema.replication_group_members;")
+
+    for c in group_conns[1:]:
+        cur = c.cursor()
+        cur.execute("change master to master_user='repl' for channel 'group_replication_recovery';")
+        cur.execute("START GROUP_REPLICATION;")
+
+    time.sleep(3)
+
+    # Set up the traditional replica to replicate from node1 (the group primary)
+    traditional_replica_conn = pymysql.connect(
+        host=common.HOST, port=common.PORT_HYBRID_TRADITIONAL_REPLICA, user='root', password='mypass'
+    )
+    _add_dog_user(traditional_replica_conn)
+
+    cur_replica = traditional_replica_conn.cursor()
+    cur_replica.execute(
+        """
+        CHANGE MASTER TO
+            MASTER_HOST='node1',
+            MASTER_PORT=3306,
+            MASTER_USER='repl',
+            MASTER_AUTO_POSITION=1
+        """
+    )
+    cur_replica.execute("START SLAVE;")
+
+    time.sleep(2)
+    logger.debug("hybrid replication initialized successfully")
 
 
 def _init_datadog_sample_collection(conn):
@@ -391,14 +499,19 @@ def init_master():
     _init_datadog_sample_collection(conn)
 
 
-@pytest.fixture
-def root_conn():
-    conn = pymysql.connect(
+def _get_root_connection():
+    """Create a root connection to MySQL. Caller is responsible for closing."""
+    return pymysql.connect(
         host=common.HOST,
         port=common.PORT,
         user='root',
-        password='mypass' if MYSQL_FLAVOR == 'percona' or MYSQL_REPLICATION == 'group' else None,
+        password='mypass' if MYSQL_FLAVOR == 'percona' or MYSQL_REPLICATION in ('group', 'hybrid') else None,
     )
+
+
+@pytest.fixture
+def root_conn():
+    conn = _get_root_connection()
     yield conn
     conn.close()
 
@@ -426,7 +539,10 @@ def _add_dog_user(conn):
     # need to get better exception in order to raise errors in the future
     except Exception:
         if MYSQL_FLAVOR == 'mariadb':
-            cur.execute("GRANT SLAVE MONITOR ON *.* TO 'dog'@'%'")
+            if MYSQL_VERSION_PARSED >= parse_version('10.5.0'):
+                cur.execute("GRANT SLAVE MONITOR ON *.* TO 'dog'@'%'")
+            else:
+                cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%'")
         cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
 
 
@@ -464,7 +580,7 @@ def populate_database():
         host=common.HOST,
         port=common.PORT,
         user='root',
-        password='mypass' if MYSQL_REPLICATION == 'group' or MYSQL_FLAVOR == 'percona' else None,
+        password='mypass' if MYSQL_REPLICATION in ('group', 'hybrid') or MYSQL_FLAVOR == 'percona' else None,
     )
 
     cur = conn.cursor()
@@ -629,3 +745,46 @@ def _mysql_docker_repo():
         return 'percona/percona-server'
     else:
         raise ValueError('Unsupported MySQL flavor: {}'.format(MYSQL_FLAVOR))
+
+
+# Runtime version detection fixtures
+
+# Well-known MySQL/MariaDB version thresholds
+JSON_AGGREGATION_MYSQL = (8, 0, 19)
+JSON_AGGREGATION_MARIADB = (10, 5, 0)
+
+
+@pytest.fixture(scope='session')
+def mysql_version(dd_environment):
+    """
+    Query the actual MySQL/MariaDB version from the running database.
+
+    Returns the MySQLVersion object from version_utils with:
+        - version: string like "8.0.32"
+        - flavor: "MySQL", "MariaDB", or "Percona"
+        - build: build info
+        - version_compatible(tuple): method to check version >= tuple
+
+    Usage:
+        def test_my_feature(mysql_version):
+            if mysql_version.version_compatible((8, 0, 19)):
+                # MySQL 8.0.19+ specific code
+    """
+    conn = _get_root_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT @@version, @@version_comment")
+            version_str, version_comment = cursor.fetchone()
+
+        mysql_ver = parse_mysql_version(version_str, version_comment)
+        logger.info("Detected runtime MySQL version: %s %s", mysql_ver.flavor, mysql_ver.version)
+        return mysql_ver
+    finally:
+        conn.close()
+
+
+def _supports_json_aggregation(mysql_version):
+    """Check if the MySQL/MariaDB version supports JSON aggregation functions."""
+    if mysql_version.flavor.lower() == 'mariadb':
+        return mysql_version.version_compatible(JSON_AGGREGATION_MARIADB)
+    return mysql_version.version_compatible(JSON_AGGREGATION_MYSQL)

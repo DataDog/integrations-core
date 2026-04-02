@@ -29,9 +29,6 @@ build-agent-auto:
     # Only run if the branch is not a Github Merge Queue one.
     - if: $CI_COMMIT_BRANCH !~ /^gh-readonly-queue.*/
       changes:
-        # We don't yet support variable expansion in `compare_to`. It was added in gitlab 17.2:
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/369916#note_1972773223
-        compare_to: "master"
         paths:
           - .deps/*
           - .gitlab/build_agent.yaml

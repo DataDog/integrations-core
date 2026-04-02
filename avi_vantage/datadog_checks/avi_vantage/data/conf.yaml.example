@@ -50,7 +50,7 @@ instances:
     #
   - avi_controller_url: https://<AVI_CONTROLLER_HOSTNAME>/
 
-    ## @param entities - list of strings - optional
+    ## @param entities - list of strings - optional - default: ['controller', 'pool', 'serviceengine', 'virtualservice']
     ## List of entity types to collect metrics from. Valid options are
     ## `controller`, `pool`, `serviceengine` and `virtualservice`. By default all types
     ## are monitored.
@@ -134,6 +134,7 @@ instances:
     ## @param exclude_metrics - list of strings - optional
     ## A list of metrics to exclude, with each entry being either
     ## the exact metric name or a regular expression.
+    ##
     ## In order to exclude all metrics but the ones matching a specific filter,
     ## you can use a negative lookahead regex like:
     ##   - ^(?!foo).*$

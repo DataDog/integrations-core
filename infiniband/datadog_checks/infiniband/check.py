@@ -121,11 +121,14 @@ class InfinibandCheck(AgentCheck):
                         self.monotonic_count(f"port_{status_file}.count", value, metric_tags)
 
     def _submit_counter_metric(self, file_path, metric_name, tags):
-        with open(file_path, "r") as f:
-            value = int(f.read().strip())
+        try:
+            with open(file_path, "r") as f:
+                value = int(f.read().strip())
 
-            if self.collection_type in {'gauge', 'both'}:
-                self.gauge(metric_name, value, tags)
+                if self.collection_type in {'gauge', 'both'}:
+                    self.gauge(metric_name, value, tags)
 
-            if self.collection_type in {'monotonic_count', 'both'}:
-                self.monotonic_count(f"{metric_name}.count", value, tags)
+                if self.collection_type in {'monotonic_count', 'both'}:
+                    self.monotonic_count(f"{metric_name}.count", value, tags)
+        except OSError as e:
+            self.log.debug("Failed to read value from %s: %s", file_path, e)

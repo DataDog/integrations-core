@@ -29,7 +29,7 @@ Visualize detailed insights into SNMP requests, identity-based firewall logs, re
 
 ### Installation
 
-To install the Cisco Secure Firewall integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management documentation][6].
+To install the Cisco Secure Firewall integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management documentation][8].
 
 **Note**: This step is not necessary for Agent version >= 7.52.0.
 
@@ -164,5 +164,6 @@ For any further assistance, contact [Datadog support][3].
 [3]: https://docs.datadoghq.com/help/
 [4]: https://docs.datadoghq.com/agent/
 [5]: https://www.cisco.com/c/en/us/support/security/firepower-ngfw/series.html
-[6]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
+[6]: https://github.com/DataDog/integrations-core/blob/0d1bcd19bdab3e7d35331c18f7e694ce735834e4/cisco_secure_firewall/datadog_checks/cisco_secure_firewall/data/conf.yaml.example
 [7]: https://www.cisco.com/c/en/us/products/collateral/security/firesight-management-center/datasheet-c78-736775.html
+[8]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install

@@ -15,7 +15,9 @@ This integration collects logs from the sources listed above and sends them to D
 
 ### Generate API credentials in Tenable.io
 
-1. Log in to [Tenable.io][4] with an account that has the `Administrator` user role.
+1. Log in to [Tenable.io][4] with an account that has the required role based on your use case:
+    - **Activity Logs**: Requires the Administrator user role.
+    - **Vulnerability Logs**: Requires the Basic user role.
 2. Click the profile icon and select **My Profile**.
 3. Navigate to the **API Keys** section.
 4. Click the **Generate** button in the lower right-corner of the page.
@@ -28,6 +30,8 @@ This integration collects logs from the sources listed above and sends them to D
     |--------------------|--------------------|
     |Access Key|The access key for your Tenable.io account.|
     |Secret Key|The secret key for your Tenable.io account.|
+    |Collect activity logs| Controls the collection of activity logs from Tenable.io. <br> Enabled by default.|
+    |Collect vulnerability logs| Controls the collection of vulnerability logs from Tenable.io. <br> Enabled by default.|
 2. Click the **Save** button to save your settings.
 
 ## Data Collected

@@ -1,4 +1,5 @@
 [env.collectors.datadog-checks]
+base-package-features = ["deps", "db"]
 
 [envs.default.env-vars]
 CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"

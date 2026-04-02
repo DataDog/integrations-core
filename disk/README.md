@@ -17,7 +17,7 @@ The disk check is included in the [Datadog Agent][1] package, so you don't need 
 The Disk check is enabled by default, and the Agent collects metrics on all local partitions. To configure the check with custom options, edit the `disk.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample disk.d/conf.yaml][3] for all available configuration options.
 
 #### Note for Windows hosts
-There are three scenarios where the Disk check can be used:
+See the following scenarios where the Disk check can be used:
 
 1. Monitoring physical drives
 
@@ -33,6 +33,11 @@ There are three scenarios where the Disk check can be used:
   Collecting mount point metrics for file shares on Windows is only supported by using the `create_mounts` option in the configuration.
   On Windows, each mounted folder is only visible to the user who mounted the share.
   Therefore, the `create_mounts` option allows the Agent to create the mount points to monitor in the context of the Agent's user.
+  
+4. Monitoring Cluster Shared Volumes
+
+  Cluster Shared Volumes (CSVs) in Windows Failover Clustering require elevated access for proper discovery.
+  While there may be other ways to grant the necessary permissions, running the Datadog Agent as LocalSystem is the most reliable and consistent method to ensure full CSV visibility and metric collection.
 
 ### Validation
 

@@ -1,0 +1,19 @@
+# Minimal waypoint proxy Prometheus metrics for Istio ambient mode (v1.24+)
+# TYPE istio_requests_total counter
+istio_requests_total{response_code="200",reporter="source"} 10
+# TYPE istio_request_duration_milliseconds histogram
+istio_request_duration_milliseconds_bucket{le="10"} 5
+istio_request_duration_milliseconds_bucket{le="100"} 10
+istio_request_duration_milliseconds_bucket{le="+Inf"} 10
+istio_request_duration_milliseconds_sum 500
+istio_request_duration_milliseconds_count 10
+# TYPE istio_tcp_connections_opened_total counter
+istio_tcp_connections_opened_total{} 20
+# TYPE istio_tcp_connections_closed_total counter
+istio_tcp_connections_closed_total{} 18
+# TYPE istio_tcp_sent_bytes_total counter
+istio_tcp_sent_bytes_total{} 4096
+# TYPE istio_tcp_received_bytes_total counter
+istio_tcp_received_bytes_total{} 8192
+# TYPE istio_build gauge
+istio_build{component="waypoint",tag="1.24.0"} 1

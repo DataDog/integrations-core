@@ -4,6 +4,7 @@
 
 import os
 
+import mock
 import pytest
 
 from datadog_checks.dev import docker_run
@@ -17,6 +18,7 @@ from .common import (
     GITLAB_RUNNER_URL,
     GITLAB_TEST_TOKEN,
     HERE,
+    HOST,
 )
 
 # Needed to mount volume for logging
@@ -57,3 +59,30 @@ def dd_environment():
         conditions=conditions,
     ):
         yield CONFIG, E2E_METADATA
+
+
+def _mocked_requests_get(*args, **kwargs):
+    url = args[0]
+
+    if url == 'http://{}:{}/metrics'.format(HOST, GITLAB_LOCAL_RUNNER_PORT):
+        fixtures_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
+        with open(fixtures_path, 'r') as f:
+            text_data = f.read()
+            return mock.MagicMock(
+                status_code=200,
+                iter_lines=lambda **kwargs: text_data.split("\n"),
+                headers={'Content-Type': "text/plain"},
+            )
+    elif url == 'http://{}:{}/ci'.format(HOST, GITLAB_LOCAL_MASTER_PORT):
+        return mock.MagicMock(status_code=200)
+
+    return mock.MagicMock(status_code=404)
+
+
+@pytest.fixture()
+def mock_data():
+    with mock.patch(
+        'requests.Session.get',
+        side_effect=_mocked_requests_get,
+    ):
+        yield

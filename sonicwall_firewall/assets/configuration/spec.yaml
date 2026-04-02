@@ -1,4 +1,5 @@
 name: Sonicwall Firewall
+fleet_configurable: true
 files:
 - name: sonicwall_firewall.yaml
   options:

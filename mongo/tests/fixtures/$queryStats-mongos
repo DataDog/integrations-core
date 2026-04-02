@@ -1,0 +1,71 @@
+[
+  {
+    "key": {
+      "queryShape": {
+        "cmdNs": {"db": "test", "coll": "orders"},
+        "command": "find",
+        "filter": {"status": {"$eq": "?string"}, "amount": {"$gt": "?number"}}
+      },
+      "client": {"application": {"name": "test_app"}},
+      "collectionType": "collection"
+    },
+    "keyHash": "abc123def456",
+    "queryShapeHash": "shape123hash",
+    "metrics": {
+      "execCount": 150,
+      "totalExecMicros": {"sum": 15000, "max": 500, "min": 10},
+      "keysExamined": {"sum": 300, "max": 10, "min": 0},
+      "docsExamined": {"sum": 450, "max": 15, "min": 1},
+      "docsReturned": {"sum": 150, "max": 5, "min": 1},
+      "firstSeenTimestamp": {"$date": "2024-01-15T10:00:00Z"},
+      "latestSeenTimestamp": {"$date": "2024-01-15T12:00:00Z"}
+    }
+  },
+  {
+    "key": {
+      "queryShape": {
+        "cmdNs": {"db": "test", "coll": "orders"},
+        "command": "aggregate",
+        "pipeline": [
+          {"$match": {"cust_id": {"$eq": "?string"}}},
+          {"$group": {"_id": "?string", "total": {"$sum": "?number"}}}
+        ]
+      },
+      "client": {"application": {"name": "test_app"}},
+      "collectionType": "collection"
+    },
+    "keyHash": "xyz789abc012",
+    "queryShapeHash": "shape456hash",
+    "metrics": {
+      "execCount": 50,
+      "totalExecMicros": {"sum": 25000, "max": 1000, "min": 100},
+      "keysExamined": {"sum": 500, "max": 20, "min": 5},
+      "docsExamined": {"sum": 1000, "max": 50, "min": 10},
+      "docsReturned": {"sum": 50, "max": 2, "min": 1},
+      "firstSeenTimestamp": {"$date": "2024-01-15T09:00:00Z"},
+      "latestSeenTimestamp": {"$date": "2024-01-15T12:30:00Z"}
+    }
+  },
+  {
+    "key": {
+      "queryShape": {
+        "cmdNs": {"db": "test", "coll": "foo"},
+        "command": "find",
+        "filter": {"1": {"$type": "?number"}}
+      },
+      "client": {"application": {"name": "test_app"}},
+      "collectionType": "collection"
+    },
+    "keyHash": "foo123bar456",
+    "queryShapeHash": "shape789hash",
+    "metrics": {
+      "execCount": 200,
+      "totalExecMicros": {"sum": 5000, "max": 100, "min": 5},
+      "keysExamined": {"sum": 0, "max": 0, "min": 0},
+      "docsExamined": {"sum": 600, "max": 10, "min": 1},
+      "docsReturned": {"sum": 200, "max": 3, "min": 1},
+      "firstSeenTimestamp": {"$date": "2024-01-15T08:00:00Z"},
+      "latestSeenTimestamp": {"$date": "2024-01-15T12:45:00Z"}
+    }
+  }
+]

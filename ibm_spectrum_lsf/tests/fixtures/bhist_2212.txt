@@ -1,0 +1,29 @@
+
+Job <2212>, Job Name <hii>, User <test-user>, Project <default>, Command <sleep
+                     5; exit 42>
+Wed Jan 21 22:26:40: Submitted from host <ip-11-21-111-198.ec2.internal>, to Qu
+                     eue <normal>, CWD <$HOME>;
+Wed Jan 21 22:26:41: Dispatched 1 Task(s) on Host(s) <ip-11-21-111-198.ec2.inte
+                     rnal>, Allocated 1 Slot(s) on Host(s) <ip-11-21-111-198.ec
+                     2.internal>, Effective RES_REQ <select[type == local] orde
+                     r[r15s:pg] >;
+Wed Jan 21 22:26:41: Starting (Pid 22169);
+Wed Jan 21 22:26:41: Running with execution home </home/test-user>, Execution CW
+                     D </home/test-user>, Execution Pid <22169>;
+Wed Jan 21 22:26:46: Exited with exit code 42. The CPU time used is 0.0 seconds
+                     ;
+Wed Jan 21 22:26:46: Completed <exit>;
+
+
+MEMORY USAGE:
+MAX MEM: 6 Mbytes;  AVG MEM: 6 Mbytes; MEM Efficiency: 0.00%
+
+CPU USAGE:
+CPU PEAK: 0.00 ;  CPU PEAK DURATION: 0 second(s)
+CPU AVERAGE EFFICIENCY: 0.00% ;  CPU PEAK EFFICIENCY: 0.00%
+
+Summary of time in seconds spent in various states by  Wed Jan 21 22:26:46
+  PEND     PSUSP    RUN      USUSP    SSUSP    UNKWN    TOTAL
+  1        0        5        0        0        0        6
+
+You have new mail in /var/spool/mail/test-user

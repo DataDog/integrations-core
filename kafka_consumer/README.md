@@ -58,6 +58,42 @@ instances:
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+### Cluster Monitoring (Preview)
+
+When `enable_cluster_monitoring` is enabled, the integration collects cluster-wide metrics for [Data Streams Monitoring][18] in addition to consumer lag:
+
+- **Brokers**: Configuration and health metrics
+- **Topics and partitions**: Sizes, offsets, and replication status
+- **Consumer groups**: Member details and group state
+- **Schema registry**: Schema metadata (requires `schema_registry_url`)
+
+#### Batched collection
+
+Broker configurations, topic configurations, and schema registry version checks are collected in batches across multiple agent runs rather than all at once. This reduces load on large Kafka clusters but means that not all metrics are emitted in every check run. On a cluster with many brokers, topics, or schema subjects, the integration spreads the work over successive runs so that each run stays fast and does not overload the cluster.
+
+Example configuration:
+```yaml
+instances:
+  - kafka_connect_str: localhost:9092
+    enable_cluster_monitoring: true
+    schema_registry_url: http://localhost:8081  # optional
+```
+
+### Kafka ACL Permissions
+
+**Cluster** (`kafka-cluster`)
+- DESCRIBE
+- DESCRIBE_CONFIGS (cluster monitoring only)
+
+**Topic** (`*`)
+- DESCRIBE
+- DESCRIBE_CONFIGS (cluster monitoring only)
+- READ, WRITE ([Kafka messages][21] only)
+
+**Consumer group** (`*`)
+- DESCRIBE
+- READ
+
 ### Validation
 
 1. [Run the Agent's status subcommand][8] and look for `kafka_consumer` under the Checks section.

@@ -1,3 +1,4 @@
+# bypass-global-timestamp-format-in-sample-checks
 id: "argo_workflows"
 tests:
  -
@@ -159,4 +160,20 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 31505324902
-
+ -
+   sample: time="2025-12-16T20:23:31.258Z" level=info duration="144.502µs"
+      method=GET path=index.html size=487 status=0
+   result:
+    custom:
+      duration: "144.502µs"
+      level: "info"
+      method: "GET"
+      path: "index.html"
+      size: 487
+      status: 0
+      timestamp: 1765916611258
+    message: "time=\"2025-12-16T20:23:31.258Z\" level=info duration=\"144.502µs\" method=GET path=index.html size=487 status=0"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1765916611258

@@ -103,8 +103,6 @@ Query OK, 0 rows affected (0.00 sec)
 
 ### Configuration
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Docker](?tab=docker#docker), [Kubernetes](?tab=kubernetes#kubernetes), or [ECS](?tab=ecs#ecs) sections.
-
 **Note**: For a full list of available configuration options, see the [sample mysql.d/conf.yaml][8].
 
 <!-- xxx tabs xxx -->
@@ -113,10 +111,6 @@ Follow the instructions below to configure this check for an Agent running on a 
 #### Host
 
 To configure this check for an Agent running on a host:
-
-Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection).
-
-For a full list of available configuration options, see the [sample `mysql.d/conf.yaml`][8].
 
 ##### Metric collection
 
@@ -290,7 +284,7 @@ metadata:
     ad.datadoghq.com/mysql.instances: |
       [
         {
-          "server": "%%host%%", 
+          "server": "%%host%%",
           "username": "datadog",
           "password": "<UNIQUEPASSWORD>"
         }
@@ -315,7 +309,7 @@ metadata:
         "mysql": {
           "instances": [
             {
-              "server": "%%host%%", 
+              "server": "%%host%%",
               "username": "datadog",
               "password": "<UNIQUEPASSWORD>"
             }
@@ -608,5 +602,5 @@ Additional helpful documentation, links, and articles:
 [29]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges/
 [30]: https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/#collecting-metrics-from-a-custom-procedure
 [31]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics
-[32]: https://docs.datadoghq.com/database_monitoring/
+[32]: https://docs.datadoghq.com/database_monitoring/setup_mysql/
 [33]: https://docs.datadoghq.com/database_monitoring/#mysql

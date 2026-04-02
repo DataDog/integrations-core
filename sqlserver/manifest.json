@@ -71,8 +71,7 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
-        "sqlservr",
-        "sqlservr.exe"
+        "sqlservr"
       ],
       "source_type_id": 45,
       "auto_install": true

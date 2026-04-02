@@ -1,0 +1,7 @@
+Summary of time in seconds spent in various states:
+JOBID   USER    JOB_NAME  PEND    PSUSP   RUN     USUSP   SSUSP   UNKWN   TOTAL
+2211    test-user test-job 0       0       56      0       0       0       56
+2212    test-user test-job1 1       0       57      0       0       0       58
+2226[3] test-user myArray[3] 6       0       4       0       0       0       10
+2226[4] test-user myArray[4] 6       0       4       0       0       0       10
+2226[5] test-user myArray[5] 10      0       0       0       0       0       10

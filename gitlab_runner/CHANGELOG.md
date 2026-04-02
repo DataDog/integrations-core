@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 7.1.1 / 2025-10-31
+## 7.4.0 / 2026-03-18
+
+***Added***:
+
+* Add default metrics list to automatically collect all standard GitLab Runner metrics. Add `gitlab_runner_job_queue_duration_seconds` and `gitlab_runner_api_request_duration_seconds` metrics. ([#22621](https://github.com/DataDog/integrations-core/pull/22621))
+
+## 7.3.0 / 2026-02-19 / Agent 7.77.0
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+
+## 7.2.0 / 2025-11-26 / Agent 7.74.0
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.24.0 ([#21945](https://github.com/DataDog/integrations-core/pull/21945))
+
+## 7.1.1 / 2025-10-31 / Agent 7.73.0
 
 ***Fixed***:
 

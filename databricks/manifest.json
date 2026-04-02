@@ -13,12 +13,11 @@
     "title": "Databricks",
     "media": [],
     "classifier_tags": [
+      "Category::AI/ML",
       "Category::Cloud",
       "Category::Cost Management",
       "Category::Log Collection",
-      "Supported OS::Linux",
-      "Supported OS::Windows",
-      "Supported OS::macOS",
+      "Category::Metrics",
       "Offering::Integration"
     ],
     "resources": [
@@ -33,6 +32,10 @@
       {
         "resource_type": "blog",
         "url": "https://www.datadoghq.com/blog/databricks-monitoring-datadog/"
+      },
+      {
+        "url": "https://docs.datadoghq.com/integrations/databricks",
+        "resource_type": "documentation"
       }
     ]
   },

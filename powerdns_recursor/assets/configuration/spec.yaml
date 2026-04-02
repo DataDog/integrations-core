@@ -1,4 +1,5 @@
 name: PowerDNS Recursor
+fleet_configurable: true
 files:
 - name: powerdns_recursor.yaml
   options:
@@ -9,20 +10,24 @@ files:
   - template: instances
     options:
     - name: host
+      fleet_configurable: true
       required: true
       description: Host running the recursor.
       value:
         type: string
         example: 127.0.0.1
     - name: port
+      fleet_configurable: true
       required: true
       description: Recursor web server port.
       value:
         type: integer
         example: 8082
     - name: api_key
+      fleet_configurable: true
       required: true
       description: Recursor web server api key.
+      secret: true
       value:
         type: string
     - name: version
@@ -38,6 +43,7 @@ files:
         non-experimental web server.
 
         https://doc.powerdns.com/md/httpapi/api_spec/#url-apiv1serversserver95idstatistics
+      fleet_configurable: true
       value:
         type: integer
         example: 3

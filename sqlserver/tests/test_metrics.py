@@ -39,7 +39,7 @@ from .common import (
     EXPECTED_QUERY_EXECUTOR_AO_METRICS_REPLICA_COMMON,
     EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY,
     SERVER_METRICS,
-    SQLSERVER_MAJOR_VERSION,
+    SQLSERVER_YEAR,
 )
 from .utils import always_on, is_always_on, not_windows_ci
 
@@ -427,7 +427,7 @@ def test_check_tempdb_file_space_usage_metrics(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.skipif(SQLSERVER_MAJOR_VERSION < 2016, reason='Metric not supported')
+@pytest.mark.skipif(SQLSERVER_YEAR < 2016, reason='Metric not supported')
 def test_check_incr_fraction_metrics(
     aggregator,
     dd_run_check,

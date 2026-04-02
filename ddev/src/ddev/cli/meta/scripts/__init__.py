@@ -6,6 +6,7 @@ from datadog_checks.dev.tooling.commands.meta.scripts.github_user import email2g
 from datadog_checks.dev.tooling.commands.meta.scripts.metrics2md import metrics2md
 from datadog_checks.dev.tooling.commands.meta.scripts.remove_labels import remove_labels
 
+from ddev.cli.meta.scripts.dynamicd import dynamicd
 from ddev.cli.meta.scripts.generate_metrics import generate_metrics
 from ddev.cli.meta.scripts.monitor import monitor
 from ddev.cli.meta.scripts.saved_views import sv
@@ -21,6 +22,7 @@ def scripts():
     """
 
 
+scripts.add_command(dynamicd)
 scripts.add_command(email2ghuser)
 scripts.add_command(generate_metrics)
 scripts.add_command(metrics2md)

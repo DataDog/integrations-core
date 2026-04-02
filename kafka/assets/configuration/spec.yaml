@@ -1,4 +1,5 @@
 name: Kafka
+fleet_configurable: true
 files:
 - name: kafka.yaml
   options:

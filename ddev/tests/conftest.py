@@ -22,7 +22,7 @@ from ddev.utils.fs import Path, temp_directory
 from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
 
-from .helpers import APPLICATION, PLATFORM
+from .helpers import APPLICATION, LOCAL_REPO_BRANCH, PLATFORM
 from .helpers.git import ClonedRepo
 from .helpers.runner import CliRunner
 
@@ -177,7 +177,7 @@ def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
         PLATFORM.check_command_output(['git', 'worktree', 'add', 'wt', 'HEAD'])
         PLATFORM.check_command_output(['git', 'worktree', 'add', '../wt2', 'HEAD'])
 
-    cloned_repo = ClonedRepo(cloned_repo_path, 'origin/master', 'ddev-testing')
+    cloned_repo = ClonedRepo(cloned_repo_path, 'origin/master', LOCAL_REPO_BRANCH)
     cloned_repo.reset_branch()
 
     yield cloned_repo

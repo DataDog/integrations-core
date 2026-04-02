@@ -1,0 +1,9 @@
+provides:
+  - id: twistlock-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: twistlock-events
+    always_on: true
+    data_type: events
+    direction: inbound
