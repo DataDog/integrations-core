@@ -49,7 +49,4 @@ def promote(app: Application, pr_url: str):
             inputs={'pr_number': str(pr_number), 'head_sha': head_sha},
         )
 
-    app.display_success(
-        f'Promote workflow dispatched for PR #{pr_number}. '
-        'Check the Actions tab for progress.'
-    )
+    app.display_success(f'Promote workflow dispatched for PR #{pr_number}. Check the Actions tab for progress.')

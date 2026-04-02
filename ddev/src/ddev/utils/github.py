@@ -155,9 +155,7 @@ class GitHubManager:
 
     def get_pr_head(self, pr_number: int) -> tuple[str, str]:
         """Return the (head SHA, head branch ref) of a pull request."""
-        response = self.__api_get(
-            self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number)
-        )
+        response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
         data = response.json()
         return data['head']['sha'], data['head']['ref']
 
