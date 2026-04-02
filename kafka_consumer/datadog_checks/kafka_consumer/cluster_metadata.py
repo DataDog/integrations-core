@@ -14,7 +14,7 @@ from urllib.parse import quote
 
 from confluent_kafka.admin import ConfigResource, ResourceType
 
-from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, LOW_WATERMARK
+from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
 
 class SchemaDefinition(TypedDict):
@@ -517,8 +517,6 @@ class ClusterMetadataCollector:
 
         self.check.gauge('topic.count', len(topic_partitions), tags=self._get_tags(cluster_id))
 
-        earliest_offsets, _ = self.check.get_watermark_offsets(None, mode=LOW_WATERMARK)
-
         now_ts = time.time()
         prev_ts = None
         previous_partition_offsets = {}
@@ -545,92 +543,52 @@ class ClusterMetadataCollector:
 
             self.check.gauge('topic.partitions', len(partitions), tags=topic_tags)
 
-            total_messages = 0
             topic_metadata = all_topics_metadata.get(topic_name)
 
             if not topic_metadata:
                 self.log.warning("No metadata found for topic %s", topic_name)
                 continue
 
-            for partition_id in partitions:
-                partition_tags = topic_tags + [f'partition:{partition_id}']
-
-                partition_metadata = topic_metadata.partitions.get(partition_id)
-                latest = highwater_offsets.get((topic_name, partition_id), 0)
-                earliest = earliest_offsets.get((topic_name, partition_id), 0)
-                partition_size = max(0, latest - earliest)
-                total_messages += partition_size
-
-                self.check.gauge('partition.beginning_offset', earliest, tags=partition_tags)
-                if partition_metadata:
-                    leader = partition_metadata.leader
-                    replicas = partition_metadata.replicas
-                    isrs = partition_metadata.isrs
-
-                    partition_broker_tags = partition_tags + [f'leader_broker_id:{leader}']
-                    for replica in replicas:
-                        partition_broker_tags.append(f'replica_broker_id:{replica}')
-
-                    self.check.gauge('partition.replicas', len(replicas), tags=partition_broker_tags)
-                    self.check.gauge('partition.isr', len(isrs), tags=partition_broker_tags)
-
-                    self.check.gauge('partition.size', partition_size, tags=partition_broker_tags)
-
-                    is_under_replicated = len(isrs) < len(replicas)
-                    self.check.gauge(
-                        'partition.under_replicated',
-                        1 if is_under_replicated else 0,
-                        tags=partition_broker_tags,
-                    )
-
-                    is_offline = leader == -1
-                    self.check.gauge('partition.offline', 1 if is_offline else 0, tags=partition_broker_tags)
-                else:
-                    self.check.gauge('partition.size', partition_size, tags=partition_tags)
-
-            self.check.gauge('topic.size', total_messages, tags=topic_tags)
-
-            # Calculate topic throughput
+            total_size = 0
             sum_latest = 0
             sum_previous = 0
+
             for partition_id in partitions:
+                latest = highwater_offsets.get((topic_name, partition_id), 0)
+                total_size += latest
+
+                partition_metadata = topic_metadata.partitions.get(partition_id)
+                if partition_metadata:
+                    is_under_replicated = len(partition_metadata.isrs) < len(partition_metadata.replicas)
+                    is_offline = partition_metadata.leader == -1
+                    if is_under_replicated or is_offline:
+                        partition_tags = topic_tags + [
+                            f'partition:{partition_id}',
+                            f'leader_broker_id:{partition_metadata.leader}',
+                        ]
+                        if is_under_replicated:
+                            self.check.gauge('partition.under_replicated', 1, tags=partition_tags)
+                        if is_offline:
+                            self.check.gauge('partition.offline', 1, tags=partition_tags)
+
+                # Throughput tracking
                 partition_key = f"{topic_name}:{partition_id}"
                 current_offset = highwater_offsets.get((topic_name, partition_id), -1)
 
                 if current_offset < 0:
-                    self.log.debug(
-                        "Partition %s:%s is unavailable (offset: %s), using previous offset for throughput",
-                        topic_name,
-                        partition_id,
-                        current_offset,
-                    )
-                    # Retain previous valid offset in cache for when partition becomes available again
                     if partition_key in previous_partition_offsets:
                         current_partition_offsets[partition_key] = previous_partition_offsets[partition_key]
                     continue
 
                 current_partition_offsets[partition_key] = current_offset
 
-                # Check for offset decrease (data loss scenario)
                 if partition_key in previous_partition_offsets:
                     previous_offset = previous_partition_offsets[partition_key]
-                    if current_offset < previous_offset:
-                        self.log.debug(
-                            "Detected offset decrease for partition %s:%s (was %s, now %s). "
-                            "This may indicate data loss. "
-                            "Resetting baseline for throughput calculation.",
-                            topic_name,
-                            partition_id,
-                            previous_offset,
-                            current_offset,
-                        )
-                        continue
-                    sum_latest += current_offset
-                    sum_previous += previous_offset
-                else:
-                    # New partition, don't include in throughput to avoid
-                    # huge fake spike in traffic when integration is started
-                    pass
+                    if current_offset >= previous_offset:
+                        sum_latest += current_offset
+                        sum_previous += previous_offset
+
+            self.check.gauge('topic.size', total_size, tags=topic_tags)
 
             if prev_ts and (now_ts - prev_ts) > 0:
                 message_rate = (sum_latest - sum_previous) / (now_ts - prev_ts)

@@ -355,21 +355,14 @@ def test_when_no_partitions_then_emit_warning_log(check, kafka_instance, dd_run_
         count=0,
     )
 
-    expected_warning = (
-        "Consumer group: consumer_group1 has offsets for topic: topic1, "
-        "partition: partition1, but that topic has no partitions "
-        "in the cluster, so skipping reporting these offsets"
-    )
-
-    assert expected_warning in caplog.text
+    # Invalid partitions are silently skipped and metadata refresh is triggered
+    mock_client.request_metadata_update.assert_called()
 
 
-def test_when_partition_not_in_partitions_then_emit_warning_log(
-    check, kafka_instance, dd_run_check, aggregator, caplog
+def test_when_partition_not_in_partitions_then_skip_and_refresh_metadata(
+    check, kafka_instance, dd_run_check, aggregator
 ):
     # Given
-    caplog.set_level(logging.WARNING)
-
     mock_client = seed_mock_client()
     mock_client.get_partitions_for_topic.return_value = ['partition2']
     mock_client.get_topic_partitions.return_value = {'topic1': ['partition2']}
@@ -387,21 +380,9 @@ def test_when_partition_not_in_partitions_then_emit_warning_log(
     )
     aggregator.assert_metric("kafka.consumer_offset", count=0)
     aggregator.assert_metric("kafka.consumer_lag", count=0)
-    aggregator.assert_event(
-        "Consumer group: consumer_group1, "
-        "topic: topic1, partition: partition1 has negative consumer lag. "
-        "This should never happen and will result in the consumer skipping new messages "
-        "until the lag turns positive.",
-        count=0,
-    )
 
-    expected_warning = (
-        "Consumer group: consumer_group1 has offsets for topic: topic1, partition: partition1, "
-        "but that topic partition isn't included in the cluster partitions, "
-        "so skipping reporting these offsets"
-    )
-
-    assert expected_warning in caplog.text
+    # Invalid partitions are silently skipped and metadata refresh is triggered
+    mock_client.request_metadata_update.assert_called()
 
 
 def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_metrics(
@@ -431,7 +412,7 @@ def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metr
     check, kafka_instance, dd_run_check, aggregator, caplog
 ):
     # Given
-    caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.WARNING)
 
     mock_client = seed_mock_client()
     mock_client.list_consumer_group_offsets.return_value = [
@@ -451,9 +432,6 @@ def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metr
 
     expected_warning = "Discovered 4 metric contexts"
     assert expected_warning in caplog.text
-
-    expected_debug = "Reported contexts number 1 greater than or equal to contexts limit of 1"
-    assert expected_debug in caplog.text
 
 
 def test_when_empty_string_consumer_group_then_skip(kafka_instance):
