@@ -9,6 +9,43 @@ from datadog_checks.mongo import MongoDb
 from datadog_checks.mongo.config import MongoConfig
 
 
+@pytest.mark.parametrize(
+    'instance_propagate_agent_tags,init_config_propagate_agent_tags,should_propagate_agent_tags',
+    [
+        pytest.param(True, True, True, id="both true"),
+        pytest.param(True, False, True, id="instance config true prevails"),
+        pytest.param(False, True, False, id="instance config false prevails"),
+        pytest.param(False, False, False, id="both false"),
+        pytest.param(None, True, True, id="init_config true applies to all instances"),
+        pytest.param(None, False, False, id="init_config false applies to all instances"),
+        pytest.param(None, None, False, id="default to false"),
+        pytest.param(True, None, True, id="instance config true prevails, init_config is None"),
+        pytest.param(False, None, False, id="instance config false prevails, init_config is None"),
+    ],
+)
+def test_propagate_agent_tags(
+    instance,
+    instance_propagate_agent_tags,
+    init_config_propagate_agent_tags,
+    should_propagate_agent_tags,
+):
+    init_config = {}
+    if instance_propagate_agent_tags is not None:
+        instance['propagate_agent_tags'] = instance_propagate_agent_tags
+    if init_config_propagate_agent_tags is not None:
+        init_config['propagate_agent_tags'] = init_config_propagate_agent_tags
+
+    agent_tags = ["my-env:test-env", "random:tag", "bar:foo"]
+
+    with mock.patch('datadog_checks.mongo.config.get_agent_host_tags', return_value=agent_tags):
+        config = MongoConfig(instance, mock.Mock(), init_config)
+        assert config._should_propagate_agent_tags(instance, init_config) == should_propagate_agent_tags
+        if should_propagate_agent_tags:
+            for tag in agent_tags:
+                assert tag in config.metric_tags
+                assert tag in config.service_check_tags
+
+
 def test_none_hosts():
     instance = {}
     with pytest.raises(ConfigurationError, match='No `hosts` specified'):

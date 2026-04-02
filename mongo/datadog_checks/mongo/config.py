@@ -6,6 +6,7 @@ import certifi
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import exclude_undefined_keys
+from datadog_checks.base.utils.db.utils import get_agent_host_tags
 from datadog_checks.mongo.common import DEFAULT_TIMEOUT
 from datadog_checks.mongo.utils import build_connection_string, parse_mongo_uri
 
@@ -100,6 +101,15 @@ class MongoConfig(object):
         self.free_storage_metrics = is_affirmative(instance.get('free_storage_metrics', True))
 
         self._base_tags = list(set(instance.get('tags', [])))
+        self._propagate_agent_tags = self._should_propagate_agent_tags(instance, init_config)
+        if self._propagate_agent_tags:
+            try:
+                agent_tags = get_agent_host_tags()
+                self._base_tags.extend(agent_tags)
+            except Exception as e:
+                raise ConfigurationError(
+                    'propagate_agent_tags enabled but there was an error fetching agent tags {}'.format(e)
+                )
 
         # DBM config options
         self.dbm_enabled = is_affirmative(instance.get('dbm', False))
@@ -299,3 +309,20 @@ class MongoConfig(object):
             'db_stats': int(self._metrics_collection_interval.get('db_stats', self.min_collection_interval)),
             'session_stats': int(self._metrics_collection_interval.get('session_stats', self.min_collection_interval)),
         }
+
+    @staticmethod
+    def _should_propagate_agent_tags(instance, init_config) -> bool:
+        '''
+        return True if the agent tags should be propagated to the check
+        '''
+        instance_propagate_agent_tags = instance.get('propagate_agent_tags')
+        init_config_propagate_agent_tags = init_config.get('propagate_agent_tags')
+
+        if instance_propagate_agent_tags is not None:
+            # if the instance has explicitly set the value, return the boolean
+            return instance_propagate_agent_tags
+        if init_config_propagate_agent_tags is not None:
+            # if the init_config has explicitly set the value, return the boolean
+            return init_config_propagate_agent_tags
+        # if neither the instance nor the init_config has set the value, return False
+        return False
