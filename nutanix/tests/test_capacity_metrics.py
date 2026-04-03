@@ -85,6 +85,29 @@ def test_hostless_vcpus_not_overcounted_across_clusters(dd_run_check, aggregator
     aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=12, tags=CLUSTER_TAGS)
 
 
+def test_exclude_filtered_resources_from_cluster_capacity(dd_run_check, aggregator, mock_instance, mock_http_get):
+    mock_instance["exclude_filtered_resources_from_cluster_capacity"] = True
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    # cluster1: only 3 ON VMs contribute (PCVM=6, ubuntu=2, random=2 = 10 vcpus)
+    aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=10, tags=CLUSTER_TAGS)
+    # cluster2: only vm-on-second-cluster (8 vcpus) contributes
+    aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=8, tags=SECOND_CLUSTER_TAGS)
+
+
+def test_default_includes_filtered_resources_in_cluster_capacity(
+    dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    # cluster1: all 4 VMs contribute (PCVM=6, ubuntu=2, random=2, OFF=2 = 12 vcpus)
+    aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=12, tags=CLUSTER_TAGS)
+    # cluster2: both VMs contribute (on-host=8, hostless=4 = 12 vcpus)
+    aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=12, tags=SECOND_CLUSTER_TAGS)
+
+
 def test_hostless_memory_not_overcounted_across_clusters(dd_run_check, aggregator, mock_instance, mock_http_get):
     """Each cluster should only count hostless VM memory that belongs to it."""
     check = NutanixCheck('nutanix', {}, [mock_instance])

@@ -54,6 +54,22 @@ def test_vm_status_off(dd_run_check, aggregator, mock_instance, mock_http_get):
     )
 
 
+@pytest.mark.parametrize("batch_vm_collection", [True, False])
+def test_batch_and_non_batch_produce_same_counts(
+    dd_run_check, aggregator, mock_instance, mock_http_get, batch_vm_collection
+):
+    mock_instance["batch_vm_collection"] = batch_vm_collection
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    assert check.infrastructure_monitor.cluster_count == 2
+    assert check.infrastructure_monitor.host_count == 2
+    assert check.infrastructure_monitor.vm_count == 4
+    aggregator.assert_metric("nutanix.vm.count", count=4)
+    aggregator.assert_metric("nutanix.host.count", count=2)
+    aggregator.assert_metric("nutanix.cluster.count", count=2)
+
+
 def test_external_tags_for_vm(dd_run_check, aggregator, mock_instance, mock_http_get, datadog_agent):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)

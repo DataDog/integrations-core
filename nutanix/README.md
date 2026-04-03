@@ -99,6 +99,10 @@ resource_filters:
 
 Category tags use the Nutanix category key as the tag name (e.g., `Environment:Production`). Set `prefix_category_tags: true` to prefix them with `ntnx_` (e.g., `ntnx_Environment:Production`) to avoid collisions with existing Datadog tags.
 
+### Cluster capacity planning
+
+Cluster-level capacity metrics (`cluster.cpu.total_cores`, `cluster.cpu.vcpus_allocated`, `cluster.memory.allocated_bytes`, etc.) aggregate resources from all hosts and VMs. By default, all resources contribute regardless of `resource_filters`, giving a complete view of provisioned capacity. Set `exclude_filtered_resources_from_cluster_capacity: true` to only count resources that pass filter checks.
+
 ### Duplicate hostnames
 
 The Nutanix API does not expose the real hostname of VMs. VM metrics use the VM name from Prism Central as the hostname. If the Datadog Agent is installed on a Nutanix VM, its auto-detected hostname may differ from the VM name, causing duplicate hosts in Datadog. To fix this, set `hostname` in `datadog.yaml` (or the `DD_HOSTNAME` environment variable) to match the VM name in Prism Central.

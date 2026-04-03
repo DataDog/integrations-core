@@ -146,24 +146,13 @@ class InfrastructureMonitor:
             self.check.log.info("[%s][%s] Processing cluster", pc_label, cluster_name)
 
             try:
-                # Reset capacity accumulator for this cluster
-                self._cluster_capacity.reset()
-
-                self._process_cluster(cluster, pc_label)
-
-                # Fetch VM stats for entire cluster in one call
-                vm_stats = self._get_vm_stats_by_cluster_id(cluster_id, pc_label, cluster_name)
-                self.check.log.debug("[%s][%s] Fetched stats for %d VMs", pc_label, cluster_name, len(vm_stats))
-
-                self._process_hosts(cluster, vm_stats, cluster_name, pc_label)
-
-                # Add capacity from VMs with no host assignment that belong to this cluster
-                # (batch mode only; non-batch mode does not fetch unassigned VMs)
-                self._accumulate_hostless_vm_capacity(cluster_id)
-
-                # Report cluster capacity metrics (aggregated from hosts and VMs)
                 cluster_tags = self.check.base_tags + self._extract_cluster_tags(cluster)
-                self._report_cluster_capacity_metrics(cluster_tags)
+                self._report_cluster_metrics(cluster, cluster_tags, pc_label)
+
+                vm_stats = self._get_vm_stats_by_cluster_id(cluster_id, pc_label, cluster_name)
+                hosts = self._list_hosts_by_cluster(cluster_id)
+                self._process_hosts(hosts, cluster_id, cluster_tags, vm_stats, cluster_name, pc_label)
+                self._report_cluster_capacity_metrics(hosts, cluster_id, cluster_tags)
 
                 self.cluster_count += 1
                 processed += 1
@@ -185,25 +174,21 @@ class InfrastructureMonitor:
         cluster_function = get_nested(cluster, "config/clusterFunction") or []
         return "PRISM_CENTRAL" in cluster_function
 
-    def _process_cluster(self, cluster: dict, pc_label: str) -> None:
-        """Process and report metrics for a single cluster."""
+    def _report_cluster_metrics(self, cluster: dict, cluster_tags: list[str], pc_label: str) -> None:
+        """Report basic metrics and time-series stats for a cluster."""
         cluster_id = cluster.get("extId", "unknown")
         cluster_name = cluster.get("name", "unknown")
-        cluster_tags = self.check.base_tags + self._extract_cluster_tags(cluster)
 
         self._report_cluster_basic_metrics(cluster, cluster_tags)
         self._report_cluster_stats(cluster_name, cluster_id, cluster_tags, pc_label)
 
     def _process_vm(self, vm: dict, vm_stats_dict: dict, cluster_name: str, pc_label: str) -> bool:
-        """Process a single VM: always accumulate capacity, then report metrics if collected."""
+        """Report metrics for a single VM if it passes filters. Returns True if collected."""
         vm_id = vm.get("extId")
         hostname = vm.get("name")
         if not vm_id or not hostname:
             self.check.log.debug("[%s][%s] Skipping VM missing extId or name: %r", pc_label, cluster_name, vm)
             return False
-
-        vcpus, memory = self._extract_vm_capacity(vm)
-        self._cluster_capacity.add_vm(vcpus, memory)
 
         if not self._should_collect_vm(vm):
             return False
@@ -257,8 +242,43 @@ class InfrastructureMonitor:
         self.check.gauge("cluster.vm.count", vm_count, tags=cluster_tags)
         self.check.gauge("cluster.vm.inefficient_count", inefficient_vm_count, tags=cluster_tags)
 
-    def _report_cluster_capacity_metrics(self, cluster_tags: list[str]) -> None:
-        """Report cluster capacity metrics aggregated from hosts and VMs."""
+    def _report_cluster_capacity_metrics(self, hosts: list[dict], cluster_id: str, cluster_tags: list[str]) -> None:
+        """Compute cluster capacity from hosts and VM cache, then report the metrics.
+
+        Cluster capacity aggregates two sources:
+          1. Host physical capacity (cores, threads, memory)
+          2. VM allocations (vcpus, memory) from all cache keys — hosted VMs keyed by
+             host_id, hostless VMs keyed by "".
+        By default all resources contribute. Set exclude_filtered_resources_from_cluster_capacity
+        to only count resources that pass filter checks.
+        """
+        self._cluster_capacity.reset()
+        exclude_filtered = self.check.exclude_filtered_resources_from_cluster_capacity
+
+        host_ids = set()
+        for host in hosts:
+            host_id = host.get("extId")
+            if not host_id:
+                continue
+            host_ids.add(host_id)
+            if exclude_filtered and not should_collect_resource(
+                "host", host, self.check.resource_filters, self.check.log
+            ):
+                continue
+            cores, threads, memory = self._extract_host_capacity(host)
+            self._cluster_capacity.add_host(cores, threads, memory)
+
+        for key, vms in self._vms_by_host.items():
+            if key and key not in host_ids:
+                continue
+            for vm in vms:
+                if not key and get_nested(vm, "cluster/extId") != cluster_id:
+                    continue
+                if exclude_filtered and not self._should_collect_vm(vm):
+                    continue
+                vcpus, memory = self._extract_vm_capacity(vm)
+                self._cluster_capacity.add_vm(vcpus, memory)
+
         cap = self._cluster_capacity
         self.check.gauge("cluster.cpu.total_cores", cap.total_cores, tags=cluster_tags)
         self.check.gauge("cluster.cpu.total_threads", cap.total_threads, tags=cluster_tags)
@@ -313,22 +333,28 @@ class InfrastructureMonitor:
                 hostname=hostname,
             )
 
-    def _process_hosts(self, cluster: dict, cluster_vm_stats_dict: dict, cluster_name: str, pc_label: str) -> None:
-        """Process and report metrics for all hosts in a cluster."""
-        cluster_id = cluster.get("extId", "unknown")
-        cluster_tags = self.check.base_tags + self._extract_cluster_tags(cluster)
-
-        hosts = self._list_hosts_by_cluster(cluster_id)
+    def _process_hosts(
+        self,
+        hosts: list[dict],
+        cluster_id: str,
+        cluster_tags: list[str],
+        cluster_vm_stats_dict: dict,
+        cluster_name: str,
+        pc_label: str,
+    ) -> None:
+        """Report metrics for all hosts and their VMs in a cluster."""
         self.check.log.info("[%s][%s] Processing %d hosts", pc_label, cluster_name, len(hosts))
 
         hosts_before, vms_before = self.host_count, self.vm_count
         for host in hosts:
             self._process_single_host(host, cluster_id, cluster_tags, cluster_vm_stats_dict, cluster_name, pc_label)
 
-        hosts_collected = self.host_count - hosts_before
-        vms_collected = self.vm_count - vms_before
         self.check.log.info(
-            "[%s][%s] Processed %d hosts and %d VMs", pc_label, cluster_name, hosts_collected, vms_collected
+            "[%s][%s] Processed %d hosts and %d VMs",
+            pc_label,
+            cluster_name,
+            self.host_count - hosts_before,
+            self.vm_count - vms_before,
         )
 
     def _process_single_host(
@@ -353,21 +379,15 @@ class InfrastructureMonitor:
 
         self.host_count += 1
 
-        # Cache host name for VM tagging
         if host_name:
             self.host_names[host_id] = host_name
 
-        # Report host metrics
         host_tags = cluster_tags + self._extract_host_tags(host)
         self.check.gauge("host.count", 1, hostname=host_name, tags=host_tags)
-
         self._report_host_status_metrics(host, host_name, host_tags)
         self._set_external_tags_for_host(host_name, host_tags)
         self._report_host_capacity_metrics(host, host_name, host_tags)
-        cpu_cores, cpu_threads, memory_bytes = self._extract_host_capacity(host)
-        self._cluster_capacity.add_host(cpu_cores, cpu_threads, memory_bytes)
 
-        # Report host stats
         try:
             stats = self._get_stats(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id}")
             if stats:
@@ -381,7 +401,6 @@ class InfrastructureMonitor:
         except Exception:
             self.check.log.exception("[%s][%s] Failed to fetch stats for host %s", pc_label, cluster_name, host_name)
 
-        # Process VMs on this host
         try:
             vms = self._get_vms_for_host(host_id)
         except Exception:
@@ -389,7 +408,6 @@ class InfrastructureMonitor:
             return
 
         self.check.log.debug("[%s][%s] Host %s has %d VMs", pc_label, cluster_name, host_name, len(vms))
-
         for vm in vms:
             if self._process_vm(vm, cluster_vm_stats_dict, cluster_name, pc_label):
                 self.vm_count += 1
@@ -522,17 +540,6 @@ class InfrastructureMonitor:
         for vm in self._list_vms():
             host_id = get_nested(vm, "host/extId") or ""
             self._vms_by_host.setdefault(host_id, []).append(vm)
-
-    def _accumulate_hostless_vm_capacity(self, cluster_id: str) -> None:
-        """Accumulate capacity from hostless VMs belonging to this cluster (batch mode only)."""
-        for vm in self._vms_by_host.get("", []):
-            vm_cluster_id = get_nested(vm, "cluster/extId")
-            if not vm_cluster_id:
-                self.check.log.debug("[batch] Skipping hostless VM %s: no cluster ID", vm.get("extId"))
-                continue
-            if vm_cluster_id == cluster_id:
-                vcpus, memory = self._extract_vm_capacity(vm)
-                self._cluster_capacity.add_vm(vcpus, memory)
 
     def _list_clusters(self) -> list[dict]:
         """Fetch all clusters from Prism Central."""

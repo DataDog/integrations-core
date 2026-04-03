@@ -60,6 +60,10 @@ class NutanixCheck(AgentCheck):
 
         self.batch_vm_collection = is_affirmative(self.instance.get("batch_vm_collection", True))
 
+        self.exclude_filtered_resources_from_cluster_capacity = is_affirmative(
+            self.instance.get("exclude_filtered_resources_from_cluster_capacity", False)
+        )
+
         self.prefix_category_tags = is_affirmative(self.instance.get("prefix_category_tags", False))
 
         self.resource_filters = parse_resource_filters(self.instance.get("resource_filters") or [], self.log)
