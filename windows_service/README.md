@@ -99,7 +99,7 @@ Beginning with Agent version 7.73, the check automatically adds a `windows_servi
 
 See [metadata.csv][19] for a list of metrics provided by this integration.
 
-**Note:** Metrics are tagged with the same tags as the service check.
+**Note:** Metrics are tagged with the same tags as the service check. These metrics require Agent version 7.74 or later.
 
 ### Events
 
@@ -121,7 +121,7 @@ If a service is present and matches the configuration, but the Datadog Agent doe
 ```
 If the service is present in the output, permissions are the issue. To give the Datadog Agent permission [grant `Read` access on the service][14] to the [Datadog Agent User][15]. We recommend [granting `Read` access with Group Policy][16] to ensure the permissions persist through Windows Updates.
 
-## Further Reading
+## Further reading
 
 - [Monitoring Windows Server 2012][8]
 - [How to collect Windows Server 2012 metrics][9]
