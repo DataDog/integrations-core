@@ -135,10 +135,7 @@ AGENT_METRICS = {
     "cilium_policy_selector_cache_selectors": "policy.selector_cache.selectors",
     "cilium_policy_selector_cache_identities": "policy.selector_cache.identities",
     "cilium_policy_selector_cache_operation_duration_seconds": "policy.selector_cache.operation_duration.seconds",
-    # Active Connection Tracking (ACT)
-    "cilium_act_new_connections_total": "act.new_connections.total",
-    "cilium_act_active_connections_total": "act.active_connections.total",
-    "cilium_act_failed_connections_total": "act.failed_connections.total",
+    # Active Connection Tracking (ACT) - see ACT_GAUGE_METRICS for the _total gauges
     "cilium_act_processing_time_seconds": "act.processing_time.seconds",
     "cilium_act_errors": "act.errors",
     # BGP Control Plane (conditional on EnableBGPControlPlane)
@@ -147,19 +144,19 @@ AGENT_METRICS = {
     "cilium_bgp_control_plane_received_routes": "bgp.control_plane.received_routes",
     # Drift checker
     "cilium_drift_checker_config_delta": "drift_checker.config_delta",
-    # Envoy XDS
-    "cilium_xds_events_count": "xds.events_count",
+    # Envoy XDS (counter with _count in name; V2 appends .count automatically)
+    "cilium_xds_events_count": "xds.events",
     # Disabled by default - NAT GC
     "cilium_datapath_nat_gc_entries": "datapath.nat_gc.entries",
     # Disabled by default - FQDN
     "cilium_fqdn_semaphore_rejected_total": "fqdn.semaphore_rejected.total",
     # Disabled by default - Hive
     "cilium_hive_degraded_status": "hive.degraded_status",
-    # Disabled by default - Neighbor
-    "cilium_neighbor_entry_refresh_count": "neighbor.entry_refresh_count",
-    "cilium_neighbor_nexthop_lookup_count": "neighbor.nexthop_lookup_count",
-    "cilium_neighbor_entry_insert_count": "neighbor.entry_insert_count",
-    "cilium_neighbor_entry_delete_count": "neighbor.entry_delete_count",
+    # Disabled by default - Neighbor (counters with _count in name; V2 appends .count)
+    "cilium_neighbor_entry_refresh_count": "neighbor.entry_refresh",
+    "cilium_neighbor_nexthop_lookup_count": "neighbor.nexthop_lookup",
+    "cilium_neighbor_entry_insert_count": "neighbor.entry_insert",
+    "cilium_neighbor_entry_delete_count": "neighbor.entry_delete",
     # Disabled by default - StateDB
     "cilium_statedb_write_txn_duration_seconds": "statedb.write_txn_duration.seconds",
     "cilium_statedb_table_contention_seconds": "statedb.table_contention.seconds",
@@ -363,6 +360,15 @@ AGENT_V2_METRICS.update(AGENT_V2_OVERRIDE)
 
 OPERATOR_V2_METRICS = deepcopy(OPERATOR_METRICS)
 OPERATOR_V2_METRICS.update(OPERATOR_V2_OVERRIDES)
+
+# Gauges whose Prometheus name ends with _total. These bypass construct_metrics_config
+# because that function strips _total (designed for counters), which would break matching
+# for gauges where _total is part of the registered metric name.
+ACT_GAUGE_METRICS = [
+    {"cilium_act_new_connections_total": {"name": "act.new_connections"}},
+    {"cilium_act_active_connections_total": {"name": "act.active_connections"}},
+    {"cilium_act_failed_connections_total": {"name": "act.failed_connections"}},
+]
 
 
 def construct_metrics_config(metric_map):
