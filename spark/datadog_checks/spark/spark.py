@@ -691,7 +691,9 @@ class SparkCheck(AgentCheck):
             HTTPInvalidURLError,
             AgentHTTPConnectionError,
         ) as e:
-            if isinstance(e, ConnectionError) and self._should_suppress_connection_error(e, tags):
+            if isinstance(e, (ConnectionError, AgentHTTPConnectionError)) and self._should_suppress_connection_error(
+                e, tags
+            ):
                 return None
 
             self.service_check(
