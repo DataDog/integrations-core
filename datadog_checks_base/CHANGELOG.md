@@ -21,6 +21,12 @@
 * Fix process_isolation parameter to handle log formats and external tags. ([#22973](https://github.com/DataDog/integrations-core/pull/22973))
 * Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place. ([#23075](https://github.com/DataDog/integrations-core/pull/23075))
 
+## 37.33.2 / 2026-04-03
+
+***Fixed***:
+
+* Improve compile-time error messages for invalid syntax in DB query extras expressions ([#23140](https://github.com/DataDog/integrations-core/pull/23140))
+
 ## 37.33.1 / 2026-03-27
 
 ***Fixed***:
