@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import re
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import click
@@ -113,7 +114,7 @@ def compute_next_milestone(branch_name: str) -> str:
     return f'{version.major}.{version.minor + 1}.0'
 
 
-def update_release_json(path: str, milestone: str) -> None:
+def update_release_json(path: str | Path, milestone: str) -> None:
     with open(path) as f:
         data = json.load(f)
     data['current_milestone'] = milestone
