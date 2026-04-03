@@ -99,7 +99,7 @@ Beginning with Agent version 7.73, the check automatically adds a `windows_servi
 
 See [metadata.csv][19] for a list of metrics provided by this integration.
 
-**Note:** Metrics are tagged with the same tags as the service check. These metrics require Agent version 7.74 or later.
+**Note:** Metrics are tagged with the same tags as the service check. These metrics are available starting with Agent version 7.74.
 
 ### Events
 
