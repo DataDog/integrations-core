@@ -22,7 +22,7 @@ Integrate BlueCat Edge with Datadog to analyze DNS query logs using pre-built da
 5. Navigate to **DNS service > Sites**.
 6. Click on a site and copy the **Site ID** from the **ID** field.
 7. Repeat step 6 for each additional site you want to include for DNS query log collection.
-**Note**: Steps 5–7 are optional if you want to collect logs from all sites.
+**Note**: Steps 5-7 are optional if you want to collect logs from all sites.
 
 ### Connect your BlueCat Edge account to Datadog
 
