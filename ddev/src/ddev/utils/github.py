@@ -69,6 +69,9 @@ class GitHubManager:
     # https://docs.github.com/en/rest/issues/labels?apiVersion=2022-11-28#create-a-label
     LABELS_API = 'https://api.github.com/repos/{repo_id}/labels'
 
+    # https://docs.github.com/en/rest/issues/milestones?apiVersion=2022-11-28#create-a-milestone
+    MILESTONES_API = 'https://api.github.com/repos/{repo_id}/milestones'
+
     # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#list-pull-requests-files
     PULL_REQUEST_FILES_API = 'https://api.github.com/repos/{repo_id}/pulls/{pr_number}/files'
 
@@ -150,6 +153,11 @@ class GitHubManager:
     def create_label(self, name, color):
         self.__api_post(
             self.LABELS_API.format(repo_id=self.repo_id), content=json.dumps({'name': name, 'color': color})
+        )
+
+    def create_milestone(self, title: str) -> None:
+        self.__api_post(
+            self.MILESTONES_API.format(repo_id=self.repo_id), content=json.dumps({'title': title})
         )
 
     def get_label(self, name):

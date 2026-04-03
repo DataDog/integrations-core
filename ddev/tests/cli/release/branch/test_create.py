@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+from unittest.mock import call
+
 import pytest
 
-from ddev.cli.release.branch.create import ensure_build_agent_yaml_updated
+from ddev.cli.release.branch.create import compute_next_milestone, ensure_build_agent_yaml_updated, update_release_json
 from ddev.utils.fs import Path
 
 
@@ -25,24 +28,40 @@ def test_create_invalid_branch_name(ddev, name, mocker):
 
 
 @pytest.mark.parametrize(
-    'yaml_updated,expected_git_call_count',
+    'yaml_updated',
     [
-        pytest.param(True, 6, id='agent_branch_exists'),
-        pytest.param(False, 4, id='agent_branch_not_exists'),
+        pytest.param(True, id='agent_branch_exists'),
+        pytest.param(False, id='agent_branch_not_exists'),
     ],
 )
-def test_create_branch(ddev, mocker, yaml_updated, expected_git_call_count):
-    """Test branch creation with and without agent branch existing."""
+def test_create_branch(ddev, mocker, yaml_updated):
+    """Test that the full git workflow is executed correctly."""
     run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=yaml_updated)
-    # Mock the confirmation prompt to return True
+    mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
 
     result = ddev('release', 'branch', 'create', '5.5.x')
 
     assert result.exit_code == 0, result.output
-    assert len(run_mock.call_args_list) == expected_git_call_count
+
+    # Release branch workflow
+    run_mock.assert_any_call('checkout', 'master')
+    run_mock.assert_any_call('pull', 'origin', 'master')
+    run_mock.assert_any_call('checkout', '-B', '5.5.x')
+    run_mock.assert_any_call('push', 'origin', '5.5.x')
+
+    # yaml commit only happens when agent branch exists
+    yaml_commit = call('add', '.gitlab/build_agent.yaml')
+    assert (yaml_commit in run_mock.call_args_list) is yaml_updated
+
+    # Milestone bump workflow
+    run_mock.assert_any_call('checkout', '-b', 'release/bump-milestone-5.6.0')
+    run_mock.assert_any_call('add', 'release.json')
+    run_mock.assert_any_call('commit', '-m', 'Update current_milestone to 5.6.0')
+    run_mock.assert_any_call('push', 'origin', 'release/bump-milestone-5.6.0')
 
 
 @pytest.mark.parametrize(
@@ -101,7 +120,9 @@ def test_ensure_build_agent_yaml_updated_file_not_found(mocker, tmp_path):
 def test_create_branch_confirmation_required(ddev, mocker):
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=False)
 
     result = ddev('release', 'branch', 'create', '5.5.x')
@@ -114,7 +135,9 @@ def test_create_branch_with_suggestion(ddev, mocker):
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.git.GitRepository.capture', return_value='  origin/7.77.x\n  origin/7.76.x\n')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.prompt', return_value='7.78.x')
     mocker.patch('click.confirm', return_value=True)
 
@@ -128,7 +151,9 @@ def test_create_branch_with_gap_suggests_missing_branch(ddev, mocker):
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.git.GitRepository.capture', return_value='  origin/7.62.x\n  origin/7.60.x\n')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.prompt', return_value='7.61.x')
     mocker.patch('click.confirm', return_value=True)
 
@@ -137,3 +162,42 @@ def test_create_branch_with_gap_suggests_missing_branch(ddev, mocker):
     assert result.exit_code == 0, result.output
     assert 'Gap detected' in result.output
     assert 'Creating the release branch `7.61.x`' in result.output
+
+
+@pytest.mark.parametrize(
+    'branch_name,expected_milestone',
+    [
+        pytest.param('7.79.x', '7.80.0', id='standard_minor_bump'),
+        pytest.param('7.0.x', '7.1.0', id='zero_minor'),
+        pytest.param('8.5.x', '8.6.0', id='different_major'),
+    ],
+)
+def test_compute_next_milestone(branch_name, expected_milestone):
+    assert compute_next_milestone(branch_name) == expected_milestone
+
+
+def test_update_release_json(tmp_path):
+    release_json = tmp_path / 'release.json'
+    release_json.write_text('{\n\t"current_milestone": "7.79.0"\n}\n')
+
+    with Path(tmp_path).as_cwd():
+        update_release_json('7.80.0')
+
+    data = json.loads(release_json.read_text())
+    assert data['current_milestone'] == '7.80.0'
+
+
+def test_create_branch_creates_milestone_and_updates_release_json(ddev, mocker):
+    mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    create_milestone_mock = mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
+    mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    update_release_json_mock = mocker.patch('ddev.cli.release.branch.create.update_release_json')
+    mocker.patch('click.confirm', return_value=True)
+
+    result = ddev('release', 'branch', 'create', '7.79.x')
+
+    assert result.exit_code == 0, result.output
+    create_milestone_mock.assert_called_once_with('7.80.0')
+    update_release_json_mock.assert_called_once_with('7.80.0')
+    assert 'Please create a PR' in result.output

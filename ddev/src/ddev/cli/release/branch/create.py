@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import json
 import re
 from typing import TYPE_CHECKING
 
@@ -77,7 +78,49 @@ def create(app: Application, branch_name: str | None):
     app.github.create_label(f'backport/{branch_name}', GITHUB_LABEL_COLOR)
     app.display_success("Done.")
 
+    next_milestone = compute_next_milestone(branch_name)
+
+    app.display_waiting(f"Creating the `{next_milestone}` milestone on GitHub...")
+    app.github.create_milestone(next_milestone)
+    app.display_success("Done.")
+
+    app.display_waiting("Checking out master to update release.json...")
+    app.repo.git.run('checkout', 'master')
+    app.display_success("Done.")
+
+    bump_branch = f'release/bump-milestone-{next_milestone}'
+    app.repo.git.run('checkout', '-b', bump_branch)
+
+    app.display_waiting(f"Updating release.json with new milestone `{next_milestone}`...")
+    update_release_json(next_milestone)
+    app.repo.git.run('add', 'release.json')
+    app.repo.git.run('commit', '-m', f'Update current_milestone to {next_milestone}')
+    app.display_success("Done.")
+
+    app.display_waiting(f"Pushing the `{bump_branch}` branch...")
+    app.repo.git.run('push', 'origin', bump_branch)
+    app.display_success("Done.")
+
+    app.display_info(
+        f'Please create a PR from `{bump_branch}` to `master` to update the current milestone to `{next_milestone}`.'
+    )
+
     app.display_success("All done.")
+
+
+def compute_next_milestone(branch_name: str) -> str:
+    version = Version(branch_name.replace('.x', '.0'))
+    return f'{version.major}.{version.minor + 1}.0'
+
+
+def update_release_json(milestone: str) -> None:
+    release_json_path = 'release.json'
+    with open(release_json_path) as f:
+        data = json.load(f)
+    data['current_milestone'] = milestone
+    with open(release_json_path, 'w') as f:
+        json.dump(data, f, indent='\t')
+        f.write('\n')
 
 
 def suggest_next_branch(app: Application) -> str:
