@@ -333,7 +333,7 @@ OPERATOR_METRICS = {
     # Operator k8s workqueue (uses cilium_k8s_workqueue_* prefix on the wire, distinct DD names)
     "cilium_k8s_workqueue_adds_total": "operator.k8s.workqueue.adds.total",
     "cilium_k8s_workqueue_depth": "operator.k8s.workqueue.depth",
-    "cilium_k8s_workqueue_longest_running_processor_seconds": "operator.k8s.workqueue.longest_running_processor.seconds",
+    "cilium_k8s_workqueue_longest_running_processor_seconds": "operator.k8s.workqueue.longest_running_processor.seconds",  # noqa: E501
     "cilium_k8s_workqueue_queue_duration_seconds": "operator.k8s.workqueue.queue_duration.seconds",
     "cilium_k8s_workqueue_retries_total": "operator.k8s.workqueue.retries.total",
     "cilium_k8s_workqueue_unfinished_work_seconds": "operator.k8s.workqueue.unfinished_work.seconds",
@@ -341,8 +341,8 @@ OPERATOR_METRICS = {
     # Cilium 1.17+ - Operator hive jobs
     "cilium_operator_hive_jobs_runs_total": "operator.hive.jobs_runs.total",
     "cilium_operator_hive_jobs_runs_failed": "operator.hive.jobs_runs_failed",
-    "cilium_operator_hive_jobs_oneshot_last_run_duration_seconds": "operator.hive.jobs.oneshot.last_run_duration.seconds",
-    "cilium_operator_hive_jobs_observer_last_run_duration_seconds": "operator.hive.jobs.observer.last_run_duration.seconds",
+    "cilium_operator_hive_jobs_oneshot_last_run_duration_seconds": "operator.hive.jobs.oneshot.last_run_duration.seconds",  # noqa: E501
+    "cilium_operator_hive_jobs_observer_last_run_duration_seconds": "operator.hive.jobs.observer.last_run_duration.seconds",  # noqa: E501
     "cilium_operator_hive_jobs_observer_run_duration_seconds": "operator.hive.jobs.observer.run_duration.seconds",
     "cilium_operator_hive_jobs_timer_last_run_duration_seconds": "operator.hive.jobs.timer.last_run_duration.seconds",
     "cilium_operator_hive_jobs_timer_run_duration_seconds": "operator.hive.jobs.timer.run_duration.seconds",
