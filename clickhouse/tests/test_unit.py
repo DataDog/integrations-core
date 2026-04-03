@@ -237,3 +237,37 @@ def test_connect_no_password_uses_empty_string():
         check.connect()
         _, kwargs = m.call_args
         assert kwargs['password'] == '', "connect() must pass password='' not password=None to clickhouse_connect"
+
+
+@pytest.mark.parametrize("bad_value", [0, -1, -100])
+def test_query_errors_zero_samples_per_hour_defaults(bad_value):
+    """Zero or negative samples_per_hour_per_query must not crash the constructor via ZeroDivisionError."""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'dbm': True,
+        'query_errors': {'enabled': True, 'samples_per_hour_per_query': bad_value},
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    assert check._config.query_errors.samples_per_hour_per_query > 0
+    assert any(
+        'query_errors.samples_per_hour_per_query' in w for w in check._validation_result.warnings
+    )
+
+
+@pytest.mark.parametrize("bad_value", [0, -1, -100])
+def test_query_completions_zero_samples_per_hour_defaults(bad_value):
+    """Zero or negative samples_per_hour_per_query must not crash the constructor via ZeroDivisionError."""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'dbm': True,
+        'query_completions': {'enabled': True, 'samples_per_hour_per_query': bad_value},
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    assert check._config.query_completions.samples_per_hour_per_query > 0
+    assert any(
+        'query_completions.samples_per_hour_per_query' in w for w in check._validation_result.warnings
+    )

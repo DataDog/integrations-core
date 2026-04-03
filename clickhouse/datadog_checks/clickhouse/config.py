@@ -192,11 +192,25 @@ def _apply_validated_defaults(args: dict, instance: dict, validation_result: Val
             f"query_completions.collection_interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
+    if _safefloat(args.get('query_completions', {}).get('samples_per_hour_per_query')) <= 0:
+        default_value = dict_defaults.instance_query_completions().samples_per_hour_per_query
+        args['query_completions']['samples_per_hour_per_query'] = default_value
+        validation_result.add_warning(
+            f"query_completions.samples_per_hour_per_query must be greater than 0, defaulting to {default_value}."
+        )
+
     if _safefloat(args.get('query_errors', {}).get('collection_interval')) <= 0:
         default_value = dict_defaults.instance_query_errors().collection_interval
         args['query_errors']['collection_interval'] = default_value
         validation_result.add_warning(
             f"query_errors.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
+    if _safefloat(args.get('query_errors', {}).get('samples_per_hour_per_query')) <= 0:
+        default_value = dict_defaults.instance_query_errors().samples_per_hour_per_query
+        args['query_errors']['samples_per_hour_per_query'] = default_value
+        validation_result.add_warning(
+            f"query_errors.samples_per_hour_per_query must be greater than 0, defaulting to {default_value}."
         )
 
 
