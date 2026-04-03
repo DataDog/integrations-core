@@ -32,6 +32,8 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.clickhouse.query_log_job import INTERNAL_CLOUD_USERS
+from datadog_checks.clickhouse.utils import get_internal_user_filter
 
 # Query to get currently running/active queries from system.processes
 # This is the ClickHouse equivalent of Postgres pg_stat_activity
@@ -71,6 +73,7 @@ FROM {processes_table}
 WHERE query NOT LIKE '%system.processes%'
   AND query NOT LIKE '%system.query_log%'
   AND query != ''
+  {internal_user_filter}
 """
 
 # Query to get active connections aggregated by user, database, etc
@@ -83,6 +86,7 @@ SELECT
     count(*) as connections
 FROM {processes_table}
 WHERE query NOT LIKE '%system.processes%'
+  {internal_user_filter}
 GROUP BY user, query_kind, current_database
 """
 
@@ -167,7 +171,10 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         try:
             # Get the appropriate table reference based on deployment type
             processes_table = self._check.get_system_table('processes')
-            query = ACTIVE_QUERIES_QUERY.format(processes_table=processes_table)
+            query = ACTIVE_QUERIES_QUERY.format(
+                processes_table=processes_table,
+                internal_user_filter=get_internal_user_filter(INTERNAL_CLOUD_USERS),
+            )
 
             # Use the dedicated client for this job
             if self._db_client is None:
@@ -325,7 +332,10 @@ class ClickhouseStatementSamples(DBMAsyncJob):
 
             # Get the appropriate table reference based on deployment type
             processes_table = self._check.get_system_table('processes')
-            query = ACTIVE_CONNECTIONS_QUERY.format(processes_table=processes_table)
+            query = ACTIVE_CONNECTIONS_QUERY.format(
+                processes_table=processes_table,
+                internal_user_filter=get_internal_user_filter(INTERNAL_CLOUD_USERS),
+            )
 
             # Use the dedicated client for this job
             if self._db_client is None:
