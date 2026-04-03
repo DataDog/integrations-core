@@ -4,7 +4,7 @@
 
 ## 37.33.2 / 2026-04-03
 
-***Added***:
+***Fixed***:
 
 * Improve compile-time error messages for invalid syntax in DB query extras expressions ([#23140](https://github.com/DataDog/integrations-core/pull/23140))
 
