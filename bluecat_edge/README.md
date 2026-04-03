@@ -19,6 +19,10 @@ Integrate BlueCat Edge with Datadog to analyze DNS query logs using pre-built da
 3. In the **Access key sets** section, click **New**. The **Client ID** and **Secret key** are displayed.
 4. Identify your **BlueCat Edge Domain URL** using the URL of your BlueCat Edge cloud instance.
    - For example, if your BlueCat Edge cloud instance URL is **https://myBlueCat.edge.bluec.at/**, the BlueCat Edge Domain URL is **myBlueCat.edge.bluec.at**.
+5. Navigate to **DNS service > Sites**.
+6. Click on a site and copy the **Site ID** from the **ID** field.
+7. Repeat step 6 for each additional site you want to include for DNS query log collection.
+**Note**: Steps 5–7 are optional if you want to collect logs from all sites.
 
 ### Connect your BlueCat Edge account to Datadog
 
@@ -29,6 +33,7 @@ Integrate BlueCat Edge with Datadog to analyze DNS query logs using pre-built da
    | Client ID | The Client ID for BlueCat Edge. |
    | Secret key | The secret key for BlueCat Edge. |
    | Collect NOERROR DNS Query Logs | Controls the collection of NOERROR DNS query logs. Enabled by default. |
+   | Site IDs | Enter site IDs (comma-separated) to collect logs from specific sites. Leave blank to collect from all sites. |
 2. Click **Save**.
 
 ## Data Collected
