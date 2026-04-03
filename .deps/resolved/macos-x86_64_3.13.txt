@@ -109,7 +109,6 @@ s3transfer @ https://agent-int-packages.datadoghq.com/external/s3transfer/s3tran
 semver @ https://agent-int-packages.datadoghq.com/external/semver/semver-3.0.4-py3-none-any.whl#sha256=9c824d87ba7f7ab4a1890799cec8596f15c1241cb473404ea1cb0c55e4b04746
 service-identity @ https://agent-int-packages.datadoghq.com/external/service-identity/service_identity-24.2.0-py3-none-any.whl#sha256=6b047fbd8a84fd0bb0d55ebce4031e400562b9196e1e0d3e0fe2b8a59f6d4a85
 six @ https://agent-int-packages.datadoghq.com/external/six/six-1.17.0-py2.py3-none-any.whl#sha256=4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274
-snowflake-connector-python @ https://agent-int-packages.datadoghq.com/external/snowflake-connector-python/snowflake_connector_python-4.0.0-cp313-cp313-macosx_11_0_x86_64.whl#sha256=1fea301e3d1e8022b9f2ff87dc3be139d5ed7be5e85fab8a6c59d400a02e6d58
 sortedcontainers @ https://agent-int-packages.datadoghq.com/external/sortedcontainers/sortedcontainers-2.4.0-py2.py3-none-any.whl#sha256=a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0
 soupsieve @ https://agent-int-packages.datadoghq.com/external/soupsieve/soupsieve-2.8.3-py3-none-any.whl#sha256=ed64f2ba4eebeab06cc4962affce381647455978ffc1e36bb79a545b91f45a95
 tomlkit @ https://agent-int-packages.datadoghq.com/external/tomlkit/tomlkit-0.14.0-py3-none-any.whl#sha256=592064ed85b40fa213469f81ac584f67a4f2992509a7c3ea2d632208623a3680
