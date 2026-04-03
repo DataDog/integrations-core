@@ -1,0 +1,1 @@
+Fix pysnmp 7.x API incompatibilities: varBindTable format, MIB sharing, constraint enforcement, and asyncio event-loop race condition in discovery worker threads.
