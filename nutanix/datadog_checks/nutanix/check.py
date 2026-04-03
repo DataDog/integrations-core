@@ -144,7 +144,7 @@ class NutanixCheck(AgentCheck):
         self.activity_monitor.reset_state()
 
         if not self._check_health():
-            self.log.warning("[PC:%s:%s] Health check failed, aborting", self.pc_ip, self.pc_port)
+            self.log.error("[PC:%s:%s] Health check failed, aborting", self.pc_ip, self.pc_port)
             return
 
         self.infrastructure_monitor.init_collection_time_window()
