@@ -162,7 +162,7 @@ def test_create_batched_payload_error_fields(check_with_dbm):
 
 
 def test_create_batched_payload_structure(check_with_dbm):
-    """Test that payload uses dbm_type=query_errors and key=clickhouse_query_errors"""
+    """Test that payload uses dbm_type=query_error and key=clickhouse_query_errors"""
     query_errors = check_with_dbm.query_errors
     query_errors._tags_no_db = ['test:clickhouse', 'server:localhost']
 

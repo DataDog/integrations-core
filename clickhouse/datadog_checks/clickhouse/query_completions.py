@@ -211,7 +211,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                     'user': str(user) if user else '',
                     'query_type': str(query_type) if query_type else '',
                     'databases': str(databases[0]) if databases and len(databases) > 0 else '',
-                    'tables': tables if tables else [],
+                    'tables': [str(t) for t in tables] if tables else [],
                     'query_duration_ms': float(query_duration_ms) if query_duration_ms else 0.0,
                     'read_rows': int(read_rows) if read_rows else 0,
                     'read_bytes': int(read_bytes) if read_bytes else 0,
@@ -239,7 +239,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             return result_rows
 
         except Exception as e:
-            self._log.exception("Failed to load completed queries from system.query_log: %s", e)
+            self._log.warning("Failed to load completed queries from system.query_log: %s", e)
 
             self._check.count(
                 "dd.clickhouse.query_completions.error",
@@ -251,22 +251,6 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             # Re-raise to let outer handler log the error.
             # Checkpoint will still advance to avoid duplicates on retry.
             raise
-
-    def _normalize_query(self, row):
-        """
-        Normalize and obfuscate a single query row
-        """
-        obfuscation_result = self._obfuscate_query(row['query'])
-        if obfuscation_result is None:
-            return None
-
-        row['statement'] = obfuscation_result['query']
-        row['query_signature'] = obfuscation_result['query_signature']
-        row['dd_tables'] = obfuscation_result['dd_tables']
-        row['dd_commands'] = obfuscation_result['dd_commands']
-        row['dd_comments'] = obfuscation_result['dd_comments']
-
-        return row
 
     def _create_batched_payload(self, rows):
         """

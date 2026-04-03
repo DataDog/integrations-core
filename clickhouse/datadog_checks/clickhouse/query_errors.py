@@ -232,7 +232,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
             return result_rows
 
         except Exception as e:
-            self._log.exception("Failed to load query errors from %s: %s", query_log_table, e)
+            self._log.warning("Failed to load query errors from %s: %s", query_log_table, e)
 
             self._check.count(
                 "dd.clickhouse.query_errors.error",
@@ -242,20 +242,6 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
             )
 
             raise
-
-    def _normalize_query(self, row: dict) -> dict | None:
-        """Normalize and obfuscate a single query error row."""
-        obfuscation_result = self._obfuscate_query(row['query'])
-        if obfuscation_result is None:
-            return None
-
-        row['statement'] = obfuscation_result['query']
-        row['query_signature'] = obfuscation_result['query_signature']
-        row['dd_tables'] = obfuscation_result['dd_tables']
-        row['dd_commands'] = obfuscation_result['dd_commands']
-        row['dd_comments'] = obfuscation_result['dd_comments']
-
-        return row
 
     def _create_batched_payload(self, rows: list) -> dict | None:
         """Create a batched payload with rate limiting applied."""
