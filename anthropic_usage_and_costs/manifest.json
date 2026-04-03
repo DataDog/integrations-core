@@ -28,9 +28,6 @@
       "Category::Metrics",
       "Category::Cost Management",
       "Submitted Data Type::Metrics",
-      "Supported OS::Linux",
-      "Supported OS::Windows",
-      "Supported OS::macOS",
       "Offering::Integration"
     ]
   },

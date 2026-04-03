@@ -34,9 +34,6 @@
       }
     ],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::Windows",
-      "Supported OS::macOS",
       "Category::Log Collection",
       "Category::Security",
       "Submitted Data Type::Logs",

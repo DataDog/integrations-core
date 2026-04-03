@@ -24,8 +24,6 @@
       }
     ],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
       "Category::Log Collection",
       "Category::Security",
       "Offering::Integration",

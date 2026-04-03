@@ -13,9 +13,6 @@
     "title": "Snowflake - Agent based (Deprecated)",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::Cloud",
       "Category::Data Stores",
       "Category::Cost Management",
