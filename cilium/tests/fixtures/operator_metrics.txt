@@ -1482,3 +1482,60 @@ cilium_operator_feature_adv_connect_and_lb_node_ipam_enabled 0
 # HELP cilium_operator_feature_controlplane_kubernetes_version Kubernetes version detected by the operator
 # TYPE cilium_operator_feature_controlplane_kubernetes_version gauge
 cilium_operator_feature_controlplane_kubernetes_version{version="1.34.5"} 1
+# HELP cilium_operator_endpoint_gc_objects Number of endpoint objects garbage collected
+# TYPE cilium_operator_endpoint_gc_objects counter
+cilium_operator_endpoint_gc_objects{outcome="success"} 5
+# HELP cilium_operator_bgp_control_plane_reconcile_errors_total BGP control plane reconciliation errors
+# TYPE cilium_operator_bgp_control_plane_reconcile_errors_total counter
+cilium_operator_bgp_control_plane_reconcile_errors_total{resource_kind="BGPPeerConfig",resource_name="default"} 0
+# HELP cilium_operator_bgp_control_plane_reconcile_run_duration_seconds BGP control plane reconciliation duration
+# TYPE cilium_operator_bgp_control_plane_reconcile_run_duration_seconds histogram
+cilium_operator_bgp_control_plane_reconcile_run_duration_seconds_bucket{le="0.005"} 5
+cilium_operator_bgp_control_plane_reconcile_run_duration_seconds_bucket{le="0.025"} 5
+cilium_operator_bgp_control_plane_reconcile_run_duration_seconds_bucket{le="+Inf"} 5
+cilium_operator_bgp_control_plane_reconcile_run_duration_seconds_sum 0.01
+cilium_operator_bgp_control_plane_reconcile_run_duration_seconds_count 5
+# HELP cilium_operator_lbipam_event_processing_time_seconds LB IPAM event processing time
+# TYPE cilium_operator_lbipam_event_processing_time_seconds histogram
+cilium_operator_lbipam_event_processing_time_seconds_bucket{event="add",resource="pool",le="0.005"} 3
+cilium_operator_lbipam_event_processing_time_seconds_bucket{event="add",resource="pool",le="0.025"} 3
+cilium_operator_lbipam_event_processing_time_seconds_bucket{event="add",resource="pool",le="+Inf"} 3
+cilium_operator_lbipam_event_processing_time_seconds_sum{event="add",resource="pool"} 0.006
+cilium_operator_lbipam_event_processing_time_seconds_count{event="add",resource="pool"} 3
+# HELP cilium_operator_hive_jobs_runs_failed Failed job runs
+# TYPE cilium_operator_hive_jobs_runs_failed gauge
+cilium_operator_hive_jobs_runs_failed{job_name="sync-ces",module_id="ces-controller"} 0
+# HELP cilium_k8s_workqueue_depth Current depth of workqueue
+# TYPE cilium_k8s_workqueue_depth gauge
+cilium_k8s_workqueue_depth{name="ciliumendpointslice"} 0
+cilium_k8s_workqueue_depth{name="ciliumidentity"} 0
+# HELP cilium_k8s_workqueue_adds_total Total number of adds handled by workqueue
+# TYPE cilium_k8s_workqueue_adds_total counter
+cilium_k8s_workqueue_adds_total{name="ciliumendpointslice"} 27055
+cilium_k8s_workqueue_adds_total{name="ciliumidentity"} 928
+# HELP cilium_k8s_workqueue_queue_duration_seconds How long in seconds an item stays in workqueue before being requested
+# TYPE cilium_k8s_workqueue_queue_duration_seconds histogram
+cilium_k8s_workqueue_queue_duration_seconds_bucket{name="ciliumendpointslice",le="0.005"} 26990
+cilium_k8s_workqueue_queue_duration_seconds_bucket{name="ciliumendpointslice",le="0.025"} 27050
+cilium_k8s_workqueue_queue_duration_seconds_bucket{name="ciliumendpointslice",le="+Inf"} 27055
+cilium_k8s_workqueue_queue_duration_seconds_sum{name="ciliumendpointslice"} 1.6453085490000022
+cilium_k8s_workqueue_queue_duration_seconds_count{name="ciliumendpointslice"} 27055
+# HELP cilium_k8s_workqueue_work_duration_seconds How long in seconds processing an item from workqueue takes
+# TYPE cilium_k8s_workqueue_work_duration_seconds histogram
+cilium_k8s_workqueue_work_duration_seconds_bucket{name="ciliumendpointslice",le="0.005"} 26811
+cilium_k8s_workqueue_work_duration_seconds_bucket{name="ciliumendpointslice",le="0.025"} 27040
+cilium_k8s_workqueue_work_duration_seconds_bucket{name="ciliumendpointslice",le="+Inf"} 27055
+cilium_k8s_workqueue_work_duration_seconds_sum{name="ciliumendpointslice"} 22.050688862000057
+cilium_k8s_workqueue_work_duration_seconds_count{name="ciliumendpointslice"} 27055
+# HELP cilium_k8s_workqueue_unfinished_work_seconds How many seconds of work has been done that is in progress and hasn't been observed by work_duration
+# TYPE cilium_k8s_workqueue_unfinished_work_seconds gauge
+cilium_k8s_workqueue_unfinished_work_seconds{name="ciliumendpointslice"} 0
+cilium_k8s_workqueue_unfinished_work_seconds{name="ciliumidentity"} 0
+# HELP cilium_k8s_workqueue_longest_running_processor_seconds How many seconds has the longest running processor for workqueue been running
+# TYPE cilium_k8s_workqueue_longest_running_processor_seconds gauge
+cilium_k8s_workqueue_longest_running_processor_seconds{name="ciliumendpointslice"} 0
+cilium_k8s_workqueue_longest_running_processor_seconds{name="ciliumidentity"} 0
+# HELP cilium_k8s_workqueue_retries_total Total number of retries handled by workqueue
+# TYPE cilium_k8s_workqueue_retries_total counter
+cilium_k8s_workqueue_retries_total{name="ciliumendpointslice"} 0
+cilium_k8s_workqueue_retries_total{name="ciliumidentity"} 0

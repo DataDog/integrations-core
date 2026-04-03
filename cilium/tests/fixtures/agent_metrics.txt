@@ -1458,3 +1458,84 @@ cilium_feature_adv_connect_and_lb_node_port_configuration{acceleration="disabled
 # HELP cilium_feature_adv_connect_and_lb_bgp_enabled BGP enabled on the agent
 # TYPE cilium_feature_adv_connect_and_lb_bgp_enabled gauge
 cilium_feature_adv_connect_and_lb_bgp_enabled 0
+# HELP cilium_feature_adv_connect_and_lb_clustermesh_enabled ClusterMesh enabled on the agent
+# TYPE cilium_feature_adv_connect_and_lb_clustermesh_enabled gauge
+cilium_feature_adv_connect_and_lb_clustermesh_enabled{max_connected_clusters="255",mode="disabled"} 0
+# HELP cilium_feature_adv_connect_and_lb_transparent_encryption Transparent encryption on the agent
+# TYPE cilium_feature_adv_connect_and_lb_transparent_encryption gauge
+cilium_feature_adv_connect_and_lb_transparent_encryption{mode="disabled",node2node_enabled="false",strict_mode_enabled="false"} 0
+# HELP cilium_feature_network_policies_cidr_policies CIDR policy feature mode
+# TYPE cilium_feature_network_policies_cidr_policies gauge
+cilium_feature_network_policies_cidr_policies{mode="none"} 0
+# HELP cilium_feature_network_policies_non_defaultdeny_policies_enabled Non DefaultDeny Policies is enabled in the agent
+# TYPE cilium_feature_network_policies_non_defaultdeny_policies_enabled gauge
+cilium_feature_network_policies_non_defaultdeny_policies_enabled 1
+# HELP cilium_act_new_connections_total Number of new connections per zone and service
+# TYPE cilium_act_new_connections_total gauge
+cilium_act_new_connections_total{service="default/nginx",zone="zone-a"} 0
+# HELP cilium_act_active_connections_total Number of active connections per zone and service
+# TYPE cilium_act_active_connections_total gauge
+cilium_act_active_connections_total{service="default/nginx",zone="zone-a"} 0
+# HELP cilium_act_failed_connections_total Number of failed connections per zone and service
+# TYPE cilium_act_failed_connections_total gauge
+cilium_act_failed_connections_total{service="default/nginx",zone="zone-a"} 0
+# HELP cilium_act_errors Number of ACT processing errors
+# TYPE cilium_act_errors counter
+cilium_act_errors{msg="map-read"} 0
+# HELP cilium_bgp_control_plane_session_state BGP session state with peer
+# TYPE cilium_bgp_control_plane_session_state gauge
+cilium_bgp_control_plane_session_state{neighbor="10.0.0.1:179",neighbor_asn="65001",vrouter="65000"} 1
+# HELP cilium_bgp_control_plane_advertised_routes Number of routes advertised to BGP peer
+# TYPE cilium_bgp_control_plane_advertised_routes gauge
+cilium_bgp_control_plane_advertised_routes{afi="ipv4",neighbor="10.0.0.1:179",neighbor_asn="65001",safi="unicast",vrouter="65000"} 10
+# HELP cilium_bgp_control_plane_received_routes Number of routes received from BGP peer
+# TYPE cilium_bgp_control_plane_received_routes gauge
+cilium_bgp_control_plane_received_routes{afi="ipv4",neighbor="10.0.0.1:179",neighbor_asn="65001",safi="unicast",vrouter="65000"} 8
+# HELP cilium_xds_events_count Number of ACK/NACK event responses from Envoy
+# TYPE cilium_xds_events_count counter
+cilium_xds_events_count{status="ack",type_url="type.googleapis.com/envoy.config.listener.v3.Listener"} 15
+# HELP cilium_datapath_nat_gc_entries NAT garbage collection entries
+# TYPE cilium_datapath_nat_gc_entries gauge
+cilium_datapath_nat_gc_entries{direction="ingress",family="ipv4",status="alive"} 10
+# HELP cilium_fqdn_semaphore_rejected_total FQDN semaphore rejections
+# TYPE cilium_fqdn_semaphore_rejected_total counter
+cilium_fqdn_semaphore_rejected_total 0
+# HELP cilium_hive_degraded_status Hive module degraded state
+# TYPE cilium_hive_degraded_status gauge
+cilium_hive_degraded_status{module="endpoint-manager"} 0
+# HELP cilium_neighbor_entry_refresh_count Neighbor entry refresh operations
+# TYPE cilium_neighbor_entry_refresh_count counter
+cilium_neighbor_entry_refresh_count 0
+# HELP cilium_neighbor_nexthop_lookup_count Nexthop lookup operations
+# TYPE cilium_neighbor_nexthop_lookup_count counter
+cilium_neighbor_nexthop_lookup_count 0
+# HELP cilium_neighbor_entry_insert_count Neighbor entry insert operations
+# TYPE cilium_neighbor_entry_insert_count counter
+cilium_neighbor_entry_insert_count 0
+# HELP cilium_neighbor_entry_delete_count Neighbor entry delete operations
+# TYPE cilium_neighbor_entry_delete_count counter
+cilium_neighbor_entry_delete_count 0
+# HELP cilium_statedb_write_txn_duration_seconds StateDB write transaction duration
+# TYPE cilium_statedb_write_txn_duration_seconds histogram
+cilium_statedb_write_txn_duration_seconds_bucket{handle="endpoint-manager",le="0.005"} 5
+cilium_statedb_write_txn_duration_seconds_bucket{handle="endpoint-manager",le="+Inf"} 5
+cilium_statedb_write_txn_duration_seconds_sum{handle="endpoint-manager"} 0.001
+cilium_statedb_write_txn_duration_seconds_count{handle="endpoint-manager"} 5
+# HELP cilium_statedb_table_objects StateDB objects per table
+# TYPE cilium_statedb_table_objects gauge
+cilium_statedb_table_objects{table="endpoints"} 42
+# HELP cilium_statedb_table_revision StateDB table revision
+# TYPE cilium_statedb_table_revision gauge
+cilium_statedb_table_revision{table="endpoints"} 100
+# HELP cilium_statedb_table_delete_trackers StateDB delete trackers
+# TYPE cilium_statedb_table_delete_trackers gauge
+cilium_statedb_table_delete_trackers{table="endpoints"} 0
+# HELP cilium_statedb_table_graveyard_objects StateDB graveyard objects
+# TYPE cilium_statedb_table_graveyard_objects gauge
+cilium_statedb_table_graveyard_objects{table="endpoints"} 0
+# HELP cilium_statedb_table_graveyard_low_watermark StateDB graveyard low watermark
+# TYPE cilium_statedb_table_graveyard_low_watermark gauge
+cilium_statedb_table_graveyard_low_watermark{table="endpoints"} 0
+# HELP cilium_reconciler_errors_current Current reconciler errors
+# TYPE cilium_reconciler_errors_current gauge
+cilium_reconciler_errors_current{module_id="endpoint-manager"} 0

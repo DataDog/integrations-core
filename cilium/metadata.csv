@@ -288,6 +288,19 @@ cilium.operator.lbipam.event_processing_time.seconds.bucket,count,,second,,[Open
 cilium.operator.lbipam.event_processing_time.seconds.count,count,,request,,[OpenMetrics V2] Count of LB IPAM event processing durations,0,cilium,lbipam event processing count,,event:resource
 cilium.operator.lbipam.event_processing_time.seconds.sum,count,,second,,[OpenMetrics V2] Sum of LB IPAM event processing durations,0,cilium,lbipam event processing sum,,event:resource
 cilium.operator.lbipam.services.unsatisfied.total,gauge,,unit,,[OpenMetrics V1 and V2] The number of services which did not receive all requested IPs,0,cilium,unsatisfied pools,,
+cilium.operator.k8s.workqueue.adds.count,count,,operation,,[OpenMetrics V2] Total adds to operator k8s workqueue,0,cilium,op k8s wq adds,,name
+cilium.operator.k8s.workqueue.adds.total,count,,operation,,[OpenMetrics V1] Total adds to operator k8s workqueue,0,cilium,op k8s wq adds v1,,name
+cilium.operator.k8s.workqueue.depth,gauge,,,,[OpenMetrics V2] Current operator k8s workqueue depth,0,cilium,op k8s wq depth,,name
+cilium.operator.k8s.workqueue.longest_running_processor.seconds,gauge,,second,,[OpenMetrics V2] Longest running operator k8s workqueue processor,0,cilium,op k8s wq longest,,name
+cilium.operator.k8s.workqueue.queue_duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of operator k8s workqueue item queue durations,0,cilium,op k8s wq queue dur bucket,,name
+cilium.operator.k8s.workqueue.queue_duration.seconds.count,count,,request,,[OpenMetrics V2] Count of operator k8s workqueue item queue durations,0,cilium,op k8s wq queue dur count,,name
+cilium.operator.k8s.workqueue.queue_duration.seconds.sum,count,,second,,[OpenMetrics V2] Sum of operator k8s workqueue item queue durations,0,cilium,op k8s wq queue dur sum,,name
+cilium.operator.k8s.workqueue.retries.count,count,,operation,,[OpenMetrics V2] Total operator k8s workqueue retries,0,cilium,op k8s wq retries,,name
+cilium.operator.k8s.workqueue.retries.total,count,,operation,,[OpenMetrics V1] Total operator k8s workqueue retries,0,cilium,op k8s wq retries v1,,name
+cilium.operator.k8s.workqueue.unfinished_work.seconds,gauge,,second,,[OpenMetrics V2] Operator k8s workqueue unfinished work duration,0,cilium,op k8s wq unfinished,,name
+cilium.operator.k8s.workqueue.work_duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of operator k8s workqueue processing durations,0,cilium,op k8s wq work dur bucket,,name
+cilium.operator.k8s.workqueue.work_duration.seconds.count,count,,request,,[OpenMetrics V2] Count of operator k8s workqueue processing durations,0,cilium,op k8s wq work dur count,,name
+cilium.operator.k8s.workqueue.work_duration.seconds.sum,count,,second,,[OpenMetrics V2] Sum of operator k8s workqueue processing durations,0,cilium,op k8s wq work dur sum,,name
 cilium.operator.num_ceps_per_ces.bucket,count,,unit,,[OpenMetrics V2] Sample of CEPs batched in a CES. Available in Cilium v1.11+,0,cilium,cep per ces sample,,
 cilium.operator.num_ceps_per_ces.count,count,,unit,,[OpenMetrics V1 and V2] Count of CEPs batched in a CES. Available in Cilium v1.11+,0,cilium,cep per ces count,,
 cilium.operator.num_ceps_per_ces.sum,count,,unit,,[OpenMetrics V1 and V2] Sum of CEPs batched in a CES. Available in Cilium v1.11+,0,cilium,cep per ces sum,,

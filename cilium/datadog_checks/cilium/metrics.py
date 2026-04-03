@@ -333,14 +333,14 @@ OPERATOR_METRICS = {
     "cilium_operator_lbipam_event_processing_time_seconds": "operator.lbipam.event_processing_time.seconds",
     # Cilium 1.17+ - IPAM background sync
     "cilium_operator_ipam_background_sync_duration_seconds": "operator.ipam.background_sync_duration.seconds",
-    # Operator k8s workqueue (same metric names as agent, scraped from operator endpoint)
-    "cilium_k8s_workqueue_adds_total": "k8s.workqueue.adds.total",
-    "cilium_k8s_workqueue_depth": "k8s.workqueue.depth",
-    "cilium_k8s_workqueue_longest_running_processor_seconds": "k8s.workqueue.longest.running.processor.seconds",
-    "cilium_k8s_workqueue_queue_duration_seconds": "k8s.workqueue.queue.duration.seconds",
-    "cilium_k8s_workqueue_retries_total": "k8s.workqueue.retries.total",
-    "cilium_k8s_workqueue_unfinished_work_seconds": "k8s.workqueue.unfinished.work.seconds",
-    "cilium_k8s_workqueue_work_duration_seconds": "k8s.workqueue.work_duration.seconds",
+    # Operator k8s workqueue (uses cilium_k8s_workqueue_* prefix on the wire, distinct DD names)
+    "cilium_k8s_workqueue_adds_total": "operator.k8s.workqueue.adds.total",
+    "cilium_k8s_workqueue_depth": "operator.k8s.workqueue.depth",
+    "cilium_k8s_workqueue_longest_running_processor_seconds": "operator.k8s.workqueue.longest_running_processor.seconds",
+    "cilium_k8s_workqueue_queue_duration_seconds": "operator.k8s.workqueue.queue_duration.seconds",
+    "cilium_k8s_workqueue_retries_total": "operator.k8s.workqueue.retries.total",
+    "cilium_k8s_workqueue_unfinished_work_seconds": "operator.k8s.workqueue.unfinished_work.seconds",
+    "cilium_k8s_workqueue_work_duration_seconds": "operator.k8s.workqueue.work_duration.seconds",
     # Cilium 1.17+ - Operator hive jobs
     "cilium_operator_hive_jobs_runs_total": "operator.hive.jobs_runs.total",
     "cilium_operator_hive_jobs_runs_failed": "operator.hive.jobs_runs_failed",
