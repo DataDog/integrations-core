@@ -85,15 +85,22 @@ def test_hostless_vcpus_not_overcounted_across_clusters(dd_run_check, aggregator
     aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=12, tags=CLUSTER_TAGS)
 
 
-def test_exclude_filtered_resources_from_cluster_capacity(dd_run_check, aggregator, mock_instance, mock_http_get):
+@pytest.mark.parametrize("batch_vm_collection", [True, False])
+def test_exclude_filtered_resources_from_cluster_capacity(
+    dd_run_check, aggregator, mock_instance, mock_http_get, batch_vm_collection
+):
+    mock_instance["batch_vm_collection"] = batch_vm_collection
     mock_instance["exclude_filtered_resources_from_cluster_capacity"] = True
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
     # cluster1: only 3 ON VMs contribute (PCVM=6, ubuntu=2, random=2 = 10 vcpus)
     aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=10, tags=CLUSTER_TAGS)
-    # cluster2: only vm-on-second-cluster (8 vcpus) contributes
+    # PCVM(30064771072) + ubuntu(8589934592) + random(8589934592) = 47244640256
+    aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=47244640256, tags=CLUSTER_TAGS)
+    # cluster2: only vm-on-second-cluster (8 vcpus, 17179869184 bytes) contributes
     aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=8, tags=SECOND_CLUSTER_TAGS)
+    aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=17179869184, tags=SECOND_CLUSTER_TAGS)
 
 
 def test_default_includes_filtered_resources_in_cluster_capacity(
