@@ -6,7 +6,9 @@ from unittest import mock
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
+from datadog_checks.clickhouse.query_log_job import INTERNAL_CLOUD_USERS
 from datadog_checks.clickhouse.statement_samples import ClickhouseStatementSamples
+from datadog_checks.clickhouse.utils import get_internal_user_filter
 
 pytestmark = pytest.mark.unit
 
@@ -329,34 +331,21 @@ class TestInternalUserFilter:
         assert '{internal_user_filter}' in ACTIVE_CONNECTIONS_QUERY
 
     def test_filter_excludes_internal_suffix(self):
-        from datadog_checks.clickhouse.query_log_job import INTERNAL_CLOUD_USERS
-        from datadog_checks.clickhouse.utils import get_internal_user_filter
-
         assert "user NOT LIKE '%-internal'" in get_internal_user_filter(INTERNAL_CLOUD_USERS)
 
     def test_filter_starts_with_and(self):
-        from datadog_checks.clickhouse.query_log_job import INTERNAL_CLOUD_USERS
-        from datadog_checks.clickhouse.utils import get_internal_user_filter
-
         assert get_internal_user_filter(INTERNAL_CLOUD_USERS).startswith('AND ')
 
     def test_filter_excludes_named_cloud_users(self):
-        from datadog_checks.clickhouse.utils import get_internal_user_filter
-
         user_filter = get_internal_user_filter(frozenset({'cloud-svc-user', 'datadog-internal'}))
         assert 'user NOT IN' in user_filter
         assert "'cloud-svc-user'" in user_filter
         assert "'datadog-internal'" in user_filter
 
     def test_filter_omits_not_in_when_cloud_users_empty(self):
-        from datadog_checks.clickhouse.utils import get_internal_user_filter
-
         assert 'user NOT IN' not in get_internal_user_filter(frozenset())
 
     def test_active_queries_query_includes_filter(self, check_with_dbm):
-        from datadog_checks.clickhouse.query_log_job import INTERNAL_CLOUD_USERS
-        from datadog_checks.clickhouse.utils import get_internal_user_filter
-
         samples = check_with_dbm.statement_samples
         mock_result = mock.MagicMock()
         mock_result.result_rows = []
@@ -374,9 +363,6 @@ class TestInternalUserFilter:
         assert '{internal_user_filter}' not in executed_query
 
     def test_active_connections_query_includes_filter(self, check_with_dbm):
-        from datadog_checks.clickhouse.query_log_job import INTERNAL_CLOUD_USERS
-        from datadog_checks.clickhouse.utils import get_internal_user_filter
-
         samples = check_with_dbm.statement_samples
         mock_result = mock.MagicMock()
         mock_result.result_rows = []
