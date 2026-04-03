@@ -506,13 +506,14 @@ class KafkaActionsCheck(AgentCheck):
         if type(left) is type(right):
             return left, right
 
-        # If one side is a numeric string and the other is a number, convert the string
-        if isinstance(left, str) and isinstance(right, (int, float)):
+        # If one side is a numeric string and the other is a number, convert the string.
+        # Exclude bools since bool is a subclass of int in Python.
+        if isinstance(left, str) and isinstance(right, (int, float)) and not isinstance(right, bool):
             try:
                 return (float(left) if '.' in left else int(left)), right
             except ValueError:
                 pass
-        elif isinstance(right, str) and isinstance(left, (int, float)):
+        elif isinstance(right, str) and isinstance(left, (int, float)) and not isinstance(left, bool):
             try:
                 return left, (float(right) if '.' in right else int(right))
             except ValueError:

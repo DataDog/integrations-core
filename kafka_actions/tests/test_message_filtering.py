@@ -603,6 +603,21 @@ class TestTypeCoercion:
         msg = self.create_message({'name': 'alice'})
         assert self.check._evaluate_filter('.value.name == 42', msg) is False
 
+    def test_boolean_not_coerced_with_string(self):
+        """Ensure bool fields don't coerce strings (bool is subclass of int in Python)."""
+        msg = self.create_message({'flag': '1'})
+        assert self.check._evaluate_filter('.value.flag == true', msg) is False
+
+        msg = self.create_message({'flag': '0'})
+        assert self.check._evaluate_filter('.value.flag == false', msg) is False
+
+    def test_boolean_equality_still_works(self):
+        msg = self.create_message({'flag': True})
+        assert self.check._evaluate_filter('.value.flag == true', msg) is True
+
+        msg = self.create_message({'flag': False})
+        assert self.check._evaluate_filter('.value.flag == false', msg) is True
+
 
 if __name__ == '__main__':
     pytest.main([__file__, '-vv'])
