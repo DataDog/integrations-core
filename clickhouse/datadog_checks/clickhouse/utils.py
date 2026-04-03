@@ -25,15 +25,3 @@ class ErrorSanitizer(object):
 
 def compact_query(query):
     return re.sub(r'\n\s+', ' ', query.strip())
-
-
-def get_internal_user_filter(internal_cloud_users: frozenset) -> str:
-    """Build the SQL fragment to exclude internal Cloud users.
-
-    Returns an "AND ..." clause ready to be injected into a WHERE condition.
-    """
-    filters = ["user NOT LIKE '%-internal'"]
-    if internal_cloud_users:
-        users_list = ", ".join(f"'{user}'" for user in internal_cloud_users)
-        filters.append(f"user NOT IN ({users_list})")
-    return "AND " + " AND ".join(filters)
