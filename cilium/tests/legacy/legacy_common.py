@@ -75,6 +75,44 @@ AGENT_METRICS_1_14 = [
     "cilium.bgp.control_plane.received_routes",
     "cilium.drift_checker.config_delta",
     "cilium.xds.events_count",
+    # Disabled by default (V1 forms)
+    "cilium.datapath.nat_gc.entries",
+    "cilium.fqdn.semaphore_rejected.total",
+    "cilium.hive.degraded_status",
+    "cilium.neighbor.entry_refresh_count",
+    "cilium.neighbor.nexthop_lookup_count",
+    "cilium.neighbor.entry_insert_count",
+    "cilium.neighbor.entry_delete_count",
+    "cilium.statedb.write_txn_duration.seconds.count",
+    "cilium.statedb.write_txn_duration.seconds.sum",
+    "cilium.statedb.table_objects",
+    "cilium.statedb.table_revision",
+    "cilium.statedb.table_delete_trackers",
+    "cilium.statedb.table_graveyard_objects",
+    "cilium.statedb.table_graveyard_low_watermark",
+    "cilium.reconciler.errors_current",
+    # Feature metrics (gauges)
+    "cilium.feature.controlplane.ipam",
+    "cilium.feature.controlplane.identity_allocation",
+    "cilium.feature.controlplane.cilium_endpoint_slices_enabled",
+    "cilium.feature.datapath.network",
+    "cilium.feature.datapath.chaining_enabled",
+    "cilium.feature.datapath.internet_protocol",
+    "cilium.feature.datapath.config",
+    "cilium.feature.datapath.endpoint_routes_enabled",
+    "cilium.feature.datapath.kernel_version",
+    "cilium.feature.network_policies.host_firewall_enabled",
+    "cilium.feature.network_policies.local_redirect_policy_enabled",
+    "cilium.feature.network_policies.mutual_auth_enabled",
+    "cilium.feature.network_policies.non_defaultdeny_policies_enabled",
+    "cilium.feature.network_policies.cidr_policies",
+    "cilium.feature.network_policies.l3_policies.total",
+    "cilium.feature.network_policies.cilium_network_policies.total",
+    "cilium.feature.adv_connect_and_lb.transparent_encryption",
+    "cilium.feature.adv_connect_and_lb.kube_proxy_replacement_enabled",
+    "cilium.feature.adv_connect_and_lb.node_port_configuration",
+    "cilium.feature.adv_connect_and_lb.bgp_enabled",
+    "cilium.feature.adv_connect_and_lb.clustermesh_enabled",
 ]
 
 ADDL_AGENT_METRICS = [
@@ -184,6 +222,13 @@ OPERATOR_METRICS_1_14 = [
     "cilium.operator.hive.jobs.timer.last_run_duration.seconds",
     "cilium.operator.hive.jobs.timer.run_duration.seconds.count",
     "cilium.operator.hive.jobs.timer.run_duration.seconds.sum",
+    # Operator feature metrics
+    "cilium.operator.feature.adv_connect_and_lb.gateway_api_enabled",
+    "cilium.operator.feature.adv_connect_and_lb.ingress_controller_enabled",
+    "cilium.operator.feature.adv_connect_and_lb.lb_ipam_enabled",
+    "cilium.operator.feature.adv_connect_and_lb.l7_aware_traffic_management_enabled",
+    "cilium.operator.feature.adv_connect_and_lb.node_ipam_enabled",
+    "cilium.operator.feature.controlplane.kubernetes_version",
 ]
 
 OPERATOR_AWS_METRICS = [
