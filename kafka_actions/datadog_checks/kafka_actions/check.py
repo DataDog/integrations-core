@@ -453,6 +453,8 @@ class KafkaActionsCheck(AgentCheck):
                 left_value = self._get_field_from_path(left, context)
                 right_value = self._parse_literal(right)
 
+                left_value, right_value = self._coerce_types(left_value, right_value)
+
                 if op == '==':
                     return left_value == right_value
                 elif op == '!=':
@@ -497,6 +499,26 @@ class KafkaActionsCheck(AgentCheck):
                 return None
 
         return current
+
+    @staticmethod
+    def _coerce_types(left, right):
+        """Coerce mismatched types for comparison (e.g., str vs int from protobuf int64)."""
+        if type(left) is type(right):
+            return left, right
+
+        # If one side is a numeric string and the other is a number, convert the string
+        if isinstance(left, str) and isinstance(right, (int, float)):
+            try:
+                return (float(left) if '.' in left else int(left)), right
+            except ValueError:
+                pass
+        elif isinstance(right, str) and isinstance(left, (int, float)):
+            try:
+                return left, (float(right) if '.' in right else int(right))
+            except ValueError:
+                pass
+
+        return left, right
 
     def _parse_literal(self, value_str: str):
         """Parse a literal value from string.
