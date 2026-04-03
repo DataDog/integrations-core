@@ -60,7 +60,7 @@ EXPECTED_DEFAULTS = {
     },
     # === DBM: Query errors ===
     'query_errors': {
-        'enabled': True,
+        'enabled': False,
         'collection_interval': 10,
         'samples_per_hour_per_query': 60,
         'seen_samples_cache_maxsize': 10000,

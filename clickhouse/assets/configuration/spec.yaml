@@ -246,7 +246,7 @@ files:
             exception message, error code, and stack trace.
           value:
             type: boolean
-            example: true
+            example: false
         - name: collection_interval
           description: |
             Set the query errors collection interval (in seconds).

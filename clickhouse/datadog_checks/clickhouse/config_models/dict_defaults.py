@@ -46,7 +46,7 @@ def instance_query_completions():
 
 def instance_query_errors():
     return instance.QueryErrors(
-        enabled=True,
+        enabled=False,
         collection_interval=10,
         samples_per_hour_per_query=60,
         seen_samples_cache_maxsize=10000,

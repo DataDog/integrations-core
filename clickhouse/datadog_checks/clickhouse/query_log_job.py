@@ -29,6 +29,7 @@ from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.clickhouse.utils import get_internal_user_filter
 
 # Query to get current timestamp from ClickHouse in microseconds
 # Used for first run or when no rows are returned (to advance checkpoint during idle periods)
@@ -242,17 +243,7 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
             )
 
     def _get_internal_user_filter(self) -> str:
-        """
-        Build the SQL filter to exclude internal Cloud users.
-
-        Returns:
-            SQL fragment starting with "AND " to exclude internal users
-        """
-        filters = ["user NOT LIKE '%-internal'"]
-        if INTERNAL_CLOUD_USERS:
-            users_list = ", ".join(f"'{user}'" for user in INTERNAL_CLOUD_USERS)
-            filters.append(f"user NOT IN ({users_list})")
-        return "AND " + " AND ".join(filters)
+        return get_internal_user_filter(INTERNAL_CLOUD_USERS)
 
     def _obfuscate_query(self, query_text: str) -> dict | None:
         """
