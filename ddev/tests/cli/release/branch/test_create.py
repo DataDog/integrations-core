@@ -180,8 +180,7 @@ def test_update_release_json(tmp_path):
     release_json = tmp_path / 'release.json'
     release_json.write_text('{\n\t"current_milestone": "7.79.0"\n}\n')
 
-    with Path(tmp_path).as_cwd():
-        update_release_json('7.80.0')
+    update_release_json(release_json, '7.80.0')
 
     data = json.loads(release_json.read_text())
     assert data['current_milestone'] == '7.80.0'
@@ -199,5 +198,6 @@ def test_create_branch_creates_milestone_and_updates_release_json(ddev, mocker):
 
     assert result.exit_code == 0, result.output
     create_milestone_mock.assert_called_once_with('7.80.0')
-    update_release_json_mock.assert_called_once_with('7.80.0')
+    update_release_json_mock.assert_called_once()
+    assert update_release_json_mock.call_args.args[1] == '7.80.0'
     assert 'Please create a PR' in result.output

@@ -92,7 +92,7 @@ def create(app: Application, branch_name: str | None):
     app.repo.git.run('checkout', '-b', bump_branch)
 
     app.display_waiting(f"Updating release.json with new milestone `{next_milestone}`...")
-    update_release_json(next_milestone)
+    update_release_json(app.repo.path / 'release.json', next_milestone)
     app.repo.git.run('add', 'release.json')
     app.repo.git.run('commit', '-m', f'Update current_milestone to {next_milestone}')
     app.display_success("Done.")
@@ -113,12 +113,11 @@ def compute_next_milestone(branch_name: str) -> str:
     return f'{version.major}.{version.minor + 1}.0'
 
 
-def update_release_json(milestone: str) -> None:
-    release_json_path = 'release.json'
-    with open(release_json_path) as f:
+def update_release_json(path: str, milestone: str) -> None:
+    with open(path) as f:
         data = json.load(f)
     data['current_milestone'] = milestone
-    with open(release_json_path, 'w') as f:
+    with open(path, 'w') as f:
         json.dump(data, f, indent='\t')
         f.write('\n')
 
