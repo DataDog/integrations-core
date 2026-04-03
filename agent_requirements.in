@@ -15,6 +15,7 @@ ddtrace==3.19.5
 dnspython==2.8.0
 fastavro==1.12.1
 foundationdb==6.3.25
+google-auth==2.49.1
 hazelcast-python-client==5.6.0
 in-toto==2.0.0
 jellyfish==1.2.1
@@ -33,6 +34,7 @@ prometheus-client==0.24.1
 protobuf==7.34.0
 psutil==6.0.0
 psycopg[c,pool]==3.3.3
+pyasn1-modules==0.4.1
 pyasn1==0.4.8
 pydantic==2.12.5
 pyjwt==2.12.1
