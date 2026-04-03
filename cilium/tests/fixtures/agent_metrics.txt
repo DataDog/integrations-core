@@ -1326,3 +1326,69 @@ cilium_k8s_client_rate_limiter_duration_seconds_count{method="DELETE",path="/api
 # TYPE cilium_policy_change_total counter
 cilium_policy_change_total{outcome="fail"} 106
 cilium_policy_change_total{outcome="success"} 24128
+# HELP cilium_endpoint_propagation_delay_seconds Delay between local CiliumEndpoint creation and propagation
+# TYPE cilium_endpoint_propagation_delay_seconds histogram
+cilium_endpoint_propagation_delay_seconds_bucket{le="0.005"} 10
+cilium_endpoint_propagation_delay_seconds_bucket{le="0.025"} 10
+cilium_endpoint_propagation_delay_seconds_bucket{le="+Inf"} 10
+cilium_endpoint_propagation_delay_seconds_sum 0.002
+cilium_endpoint_propagation_delay_seconds_count 10
+# HELP cilium_datapath_conntrack_gc_interval_seconds Interval between conntrack GC runs
+# TYPE cilium_datapath_conntrack_gc_interval_seconds gauge
+cilium_datapath_conntrack_gc_interval_seconds{global="true"} 12
+# HELP cilium_datapath_signals_handled_total Number of datapath signals handled
+# TYPE cilium_datapath_signals_handled_total counter
+cilium_datapath_signals_handled_total{data="reason=0",signal="wake-up",status="received"} 25
+# HELP cilium_bpf_maps Number of active BPF maps
+# TYPE cilium_bpf_maps gauge
+cilium_bpf_maps 42
+# HELP cilium_bpf_progs Number of active BPF programs
+# TYPE cilium_bpf_progs gauge
+cilium_bpf_progs 18
+# HELP cilium_policy_selector_cache_selectors Number of selectors in selector cache
+# TYPE cilium_policy_selector_cache_selectors gauge
+cilium_policy_selector_cache_selectors{type="peer"} 24
+# HELP cilium_policy_selector_cache_identities Number of identities in selector cache
+# TYPE cilium_policy_selector_cache_identities gauge
+cilium_policy_selector_cache_identities{type="peer"} 100
+# HELP cilium_policy_selector_cache_operation_duration_seconds Latency of selector cache operations
+# TYPE cilium_policy_selector_cache_operation_duration_seconds histogram
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="add",scope="full",type="peer",le="0.005"} 5
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="add",scope="full",type="peer",le="0.025"} 5
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="add",scope="full",type="peer",le="+Inf"} 5
+cilium_policy_selector_cache_operation_duration_seconds_sum{operation="add",scope="full",type="peer"} 0.01
+cilium_policy_selector_cache_operation_duration_seconds_count{operation="add",scope="full",type="peer"} 5
+# HELP cilium_act_new_connections_total Number of new connections per zone and service
+# TYPE cilium_act_new_connections_total gauge
+cilium_act_new_connections_total{service="default/nginx",zone="zone-a"} 5
+# HELP cilium_act_active_connections_total Number of active connections per zone and service
+# TYPE cilium_act_active_connections_total gauge
+cilium_act_active_connections_total{service="default/nginx",zone="zone-a"} 12
+# HELP cilium_act_failed_connections_total Number of failed connections per zone and service
+# TYPE cilium_act_failed_connections_total gauge
+cilium_act_failed_connections_total{service="default/nginx",zone="zone-a"} 0
+# HELP cilium_act_processing_time_seconds Time to process ACT map and update metrics
+# TYPE cilium_act_processing_time_seconds histogram
+cilium_act_processing_time_seconds_bucket{le="0.005"} 8
+cilium_act_processing_time_seconds_bucket{le="0.025"} 8
+cilium_act_processing_time_seconds_bucket{le="+Inf"} 8
+cilium_act_processing_time_seconds_sum 0.016
+cilium_act_processing_time_seconds_count 8
+# HELP cilium_act_errors Number of ACT processing errors
+# TYPE cilium_act_errors counter
+cilium_act_errors{msg="failed to read map"} 0
+# HELP cilium_bgp_control_plane_session_state BGP session state with peer
+# TYPE cilium_bgp_control_plane_session_state gauge
+cilium_bgp_control_plane_session_state{neighbor="10.0.0.1:179",neighbor_asn="65001",vrouter="65000"} 1
+# HELP cilium_bgp_control_plane_advertised_routes Number of routes advertised to BGP peer
+# TYPE cilium_bgp_control_plane_advertised_routes gauge
+cilium_bgp_control_plane_advertised_routes{afi="ipv4",neighbor="10.0.0.1:179",neighbor_asn="65001",safi="unicast",vrouter="65000"} 10
+# HELP cilium_bgp_control_plane_received_routes Number of routes received from BGP peer
+# TYPE cilium_bgp_control_plane_received_routes gauge
+cilium_bgp_control_plane_received_routes{afi="ipv4",neighbor="10.0.0.1:179",neighbor_asn="65001",safi="unicast",vrouter="65000"} 8
+# HELP cilium_drift_checker_config_delta Number of configuration deltas detected by drift checker
+# TYPE cilium_drift_checker_config_delta gauge
+cilium_drift_checker_config_delta 0
+# HELP cilium_xds_events_count Number of ACK/NACK event responses from Envoy
+# TYPE cilium_xds_events_count counter
+cilium_xds_events_count{status="ack",type_url="type.googleapis.com/envoy.config.listener.v3.Listener"} 15

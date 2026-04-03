@@ -1415,3 +1415,91 @@ cilium_operator_ipam_used_ips{target_node="ip-10-131-49-46.ec2.internal"} 3
 cilium_operator_ipam_used_ips{target_node="ip-10-131-49-69.ec2.internal"} 4
 cilium_operator_ipam_used_ips{target_node="ip-10-131-49-73.ec2.internal"} 7
 cilium_operator_ipam_used_ips{target_node="ip-10-131-49-76.ec2.internal"} 23
+# HELP cilium_operator_identity_gc_latency Duration of last successful identity GC
+# TYPE cilium_operator_identity_gc_latency gauge
+cilium_operator_identity_gc_latency{identity_type="global",outcome="success"} 0.002
+# HELP cilium_operator_endpoint_gc_objects Number of endpoint objects garbage collected
+# TYPE cilium_operator_endpoint_gc_objects counter
+cilium_operator_endpoint_gc_objects{outcome="success"} 5
+# HELP cilium_operator_bgp_control_plane_reconcile_errors_total BGP control plane reconciliation errors
+# TYPE cilium_operator_bgp_control_plane_reconcile_errors_total counter
+cilium_operator_bgp_control_plane_reconcile_errors_total{resource_kind="BGPPeerConfig",resource_name="default"} 0
+# HELP cilium_operator_bgp_control_plane_reconcile_run_duration_seconds BGP control plane reconciliation duration
+# TYPE cilium_operator_bgp_control_plane_reconcile_run_duration_seconds histogram
+cilium_operator_bgp_control_plane_reconcile_run_duration_seconds_bucket{le="0.005"} 5
+cilium_operator_bgp_control_plane_reconcile_run_duration_seconds_bucket{le="0.025"} 5
+cilium_operator_bgp_control_plane_reconcile_run_duration_seconds_bucket{le="+Inf"} 5
+cilium_operator_bgp_control_plane_reconcile_run_duration_seconds_sum 0.01
+cilium_operator_bgp_control_plane_reconcile_run_duration_seconds_count 5
+# HELP cilium_operator_lbipam_event_processing_time_seconds LB IPAM event processing time
+# TYPE cilium_operator_lbipam_event_processing_time_seconds histogram
+cilium_operator_lbipam_event_processing_time_seconds_bucket{event="add",resource="pool",le="0.005"} 3
+cilium_operator_lbipam_event_processing_time_seconds_bucket{event="add",resource="pool",le="0.025"} 3
+cilium_operator_lbipam_event_processing_time_seconds_bucket{event="add",resource="pool",le="+Inf"} 3
+cilium_operator_lbipam_event_processing_time_seconds_sum{event="add",resource="pool"} 0.006
+cilium_operator_lbipam_event_processing_time_seconds_count{event="add",resource="pool"} 3
+# HELP cilium_operator_ipam_background_sync_duration_seconds IPAM background sync duration
+# TYPE cilium_operator_ipam_background_sync_duration_seconds histogram
+cilium_operator_ipam_background_sync_duration_seconds_bucket{status="success",le="0.005"} 2
+cilium_operator_ipam_background_sync_duration_seconds_bucket{status="success",le="0.025"} 2
+cilium_operator_ipam_background_sync_duration_seconds_bucket{status="success",le="+Inf"} 2
+cilium_operator_ipam_background_sync_duration_seconds_sum{status="success"} 0.004
+cilium_operator_ipam_background_sync_duration_seconds_count{status="success"} 2
+# HELP cilium_operator_workqueue_depth Current operator client-go workqueue depth
+# TYPE cilium_operator_workqueue_depth gauge
+cilium_operator_workqueue_depth{queue_name="ces-reconciler"} 0
+# HELP cilium_operator_workqueue_adds_total Total adds to operator workqueue
+# TYPE cilium_operator_workqueue_adds_total counter
+cilium_operator_workqueue_adds_total{queue_name="ces-reconciler"} 50
+# HELP cilium_operator_workqueue_queue_duration_seconds Item duration in workqueue
+# TYPE cilium_operator_workqueue_queue_duration_seconds histogram
+cilium_operator_workqueue_queue_duration_seconds_bucket{queue_name="ces-reconciler",le="0.005"} 25
+cilium_operator_workqueue_queue_duration_seconds_bucket{queue_name="ces-reconciler",le="0.025"} 25
+cilium_operator_workqueue_queue_duration_seconds_bucket{queue_name="ces-reconciler",le="+Inf"} 25
+cilium_operator_workqueue_queue_duration_seconds_sum{queue_name="ces-reconciler"} 0.05
+cilium_operator_workqueue_queue_duration_seconds_count{queue_name="ces-reconciler"} 25
+# HELP cilium_operator_workqueue_work_duration_seconds Item processing duration from workqueue
+# TYPE cilium_operator_workqueue_work_duration_seconds histogram
+cilium_operator_workqueue_work_duration_seconds_bucket{queue_name="ces-reconciler",le="0.005"} 25
+cilium_operator_workqueue_work_duration_seconds_bucket{queue_name="ces-reconciler",le="0.025"} 25
+cilium_operator_workqueue_work_duration_seconds_bucket{queue_name="ces-reconciler",le="+Inf"} 25
+cilium_operator_workqueue_work_duration_seconds_sum{queue_name="ces-reconciler"} 0.025
+cilium_operator_workqueue_work_duration_seconds_count{queue_name="ces-reconciler"} 25
+# HELP cilium_operator_workqueue_unfinished_work_seconds Work in progress not yet observed
+# TYPE cilium_operator_workqueue_unfinished_work_seconds gauge
+cilium_operator_workqueue_unfinished_work_seconds{queue_name="ces-reconciler"} 0
+# HELP cilium_operator_workqueue_longest_running_processor_seconds Longest running workqueue processor
+# TYPE cilium_operator_workqueue_longest_running_processor_seconds gauge
+cilium_operator_workqueue_longest_running_processor_seconds{queue_name="ces-reconciler"} 0
+# HELP cilium_operator_workqueue_retries_total Total workqueue retries
+# TYPE cilium_operator_workqueue_retries_total counter
+cilium_operator_workqueue_retries_total{queue_name="ces-reconciler"} 2
+# HELP cilium_operator_hive_jobs_runs_total Total operator job runs
+# TYPE cilium_operator_hive_jobs_runs_total counter
+cilium_operator_hive_jobs_runs_total{job_name="sync-ces",module_id="ces-controller"} 10
+# HELP cilium_operator_hive_jobs_runs_failed Failed operator job runs
+# TYPE cilium_operator_hive_jobs_runs_failed gauge
+cilium_operator_hive_jobs_runs_failed{job_name="sync-ces",module_id="ces-controller"} 0
+# HELP cilium_operator_hive_jobs_oneshot_last_run_duration_seconds Operator one-shot job last run duration
+# TYPE cilium_operator_hive_jobs_oneshot_last_run_duration_seconds gauge
+cilium_operator_hive_jobs_oneshot_last_run_duration_seconds{job_name="init-gc",module_id="identity-gc"} 0.003
+# HELP cilium_operator_hive_jobs_observer_last_run_duration_seconds Operator observer job last run duration
+# TYPE cilium_operator_hive_jobs_observer_last_run_duration_seconds gauge
+cilium_operator_hive_jobs_observer_last_run_duration_seconds{job_name="watch-ces",module_id="ces-controller"} 0.001
+# HELP cilium_operator_hive_jobs_observer_run_duration_seconds Operator observer job run duration
+# TYPE cilium_operator_hive_jobs_observer_run_duration_seconds histogram
+cilium_operator_hive_jobs_observer_run_duration_seconds_bucket{job_name="watch-ces",module_id="ces-controller",le="0.005"} 10
+cilium_operator_hive_jobs_observer_run_duration_seconds_bucket{job_name="watch-ces",module_id="ces-controller",le="0.025"} 10
+cilium_operator_hive_jobs_observer_run_duration_seconds_bucket{job_name="watch-ces",module_id="ces-controller",le="+Inf"} 10
+cilium_operator_hive_jobs_observer_run_duration_seconds_sum{job_name="watch-ces",module_id="ces-controller"} 0.01
+cilium_operator_hive_jobs_observer_run_duration_seconds_count{job_name="watch-ces",module_id="ces-controller"} 10
+# HELP cilium_operator_hive_jobs_timer_last_run_duration_seconds Operator timer job last run duration
+# TYPE cilium_operator_hive_jobs_timer_last_run_duration_seconds gauge
+cilium_operator_hive_jobs_timer_last_run_duration_seconds{job_name="gc-identities",module_id="identity-gc"} 0.005
+# HELP cilium_operator_hive_jobs_timer_run_duration_seconds Operator timer job run duration
+# TYPE cilium_operator_hive_jobs_timer_run_duration_seconds histogram
+cilium_operator_hive_jobs_timer_run_duration_seconds_bucket{job_name="gc-identities",module_id="identity-gc",le="0.005"} 3
+cilium_operator_hive_jobs_timer_run_duration_seconds_bucket{job_name="gc-identities",module_id="identity-gc",le="0.025"} 3
+cilium_operator_hive_jobs_timer_run_duration_seconds_bucket{job_name="gc-identities",module_id="identity-gc",le="+Inf"} 3
+cilium_operator_hive_jobs_timer_run_duration_seconds_sum{job_name="gc-identities",module_id="identity-gc"} 0.015
+cilium_operator_hive_jobs_timer_run_duration_seconds_count{job_name="gc-identities",module_id="identity-gc"} 3

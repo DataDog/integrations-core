@@ -123,6 +123,32 @@ AGENT_METRICS = {
     # Cilium 1.16+
     "cilium_fqdn_selectors": "fqdn.selectors",
     "cilium_identity_label_sources": "identity.label_sources",
+    # Cilium 1.17+ - Endpoint
+    "cilium_endpoint_propagation_delay_seconds": "endpoint.propagation_delay.seconds",
+    # Cilium 1.17+ - Datapath
+    "cilium_datapath_conntrack_gc_interval_seconds": "datapath.conntrack_gc.interval.seconds",
+    "cilium_datapath_signals_handled_total": "datapath.signals_handled.total",
+    # BPF counts
+    "cilium_bpf_maps": "bpf.maps.count",
+    "cilium_bpf_progs": "bpf.progs.count",
+    # Policy selector cache
+    "cilium_policy_selector_cache_selectors": "policy.selector_cache.selectors",
+    "cilium_policy_selector_cache_identities": "policy.selector_cache.identities",
+    "cilium_policy_selector_cache_operation_duration_seconds": "policy.selector_cache.operation_duration.seconds",
+    # Active Connection Tracking (ACT)
+    "cilium_act_new_connections_total": "act.new_connections.total",
+    "cilium_act_active_connections_total": "act.active_connections.total",
+    "cilium_act_failed_connections_total": "act.failed_connections.total",
+    "cilium_act_processing_time_seconds": "act.processing_time.seconds",
+    "cilium_act_errors": "act.errors",
+    # BGP Control Plane (conditional on EnableBGPControlPlane)
+    "cilium_bgp_control_plane_session_state": "bgp.control_plane.session_state",
+    "cilium_bgp_control_plane_advertised_routes": "bgp.control_plane.advertised_routes",
+    "cilium_bgp_control_plane_received_routes": "bgp.control_plane.received_routes",
+    # Drift checker
+    "cilium_drift_checker_config_delta": "drift_checker.config_delta",
+    # Envoy XDS
+    "cilium_xds_events_count": "xds.events_count",
 }
 
 OPERATOR_V2_OVERRIDES = {
@@ -215,6 +241,33 @@ OPERATOR_METRICS = {
     "cilium_operator_lbipam_conflicting_pools_total": "operator.lbipam.conflicting.pools.total",
     "cilium_operator_lbipam_services_matching_total": "operator.lbipam.services.matching.total",
     "cilium_operator_lbipam_services_unsatisfied_total": "operator.lbipam.services.unsatisfied.total",
+    # Cilium 1.17+ - Identity GC
+    "cilium_operator_identity_gc_latency": "operator.identity_gc.latency",
+    # Cilium 1.17+ - Endpoint GC
+    "cilium_operator_endpoint_gc_objects": "operator.endpoint_gc.objects",
+    # Cilium 1.17+ - BGP Control Plane
+    "cilium_operator_bgp_control_plane_reconcile_errors_total": "operator.bgp.control_plane.reconcile_errors.total",
+    "cilium_operator_bgp_control_plane_reconcile_run_duration_seconds": "operator.bgp.control_plane.reconcile_run_duration.seconds",
+    # Cilium 1.17+ - LB IPAM event processing
+    "cilium_operator_lbipam_event_processing_time_seconds": "operator.lbipam.event_processing_time.seconds",
+    # Cilium 1.17+ - IPAM background sync
+    "cilium_operator_ipam_background_sync_duration_seconds": "operator.ipam.background_sync_duration.seconds",
+    # Cilium 1.17+ - Operator workqueue (client-go workqueues)
+    "cilium_operator_workqueue_depth": "operator.workqueue.depth",
+    "cilium_operator_workqueue_adds_total": "operator.workqueue.adds.total",
+    "cilium_operator_workqueue_queue_duration_seconds": "operator.workqueue.queue_duration.seconds",
+    "cilium_operator_workqueue_work_duration_seconds": "operator.workqueue.work_duration.seconds",
+    "cilium_operator_workqueue_unfinished_work_seconds": "operator.workqueue.unfinished_work.seconds",
+    "cilium_operator_workqueue_longest_running_processor_seconds": "operator.workqueue.longest_running_processor.seconds",
+    "cilium_operator_workqueue_retries_total": "operator.workqueue.retries.total",
+    # Cilium 1.17+ - Operator hive jobs
+    "cilium_operator_hive_jobs_runs_total": "operator.hive.jobs_runs.total",
+    "cilium_operator_hive_jobs_runs_failed": "operator.hive.jobs_runs_failed",
+    "cilium_operator_hive_jobs_oneshot_last_run_duration_seconds": "operator.hive.jobs.oneshot.last_run_duration.seconds",
+    "cilium_operator_hive_jobs_observer_last_run_duration_seconds": "operator.hive.jobs.observer.last_run_duration.seconds",
+    "cilium_operator_hive_jobs_observer_run_duration_seconds": "operator.hive.jobs.observer.run_duration.seconds",
+    "cilium_operator_hive_jobs_timer_last_run_duration_seconds": "operator.hive.jobs.timer.last_run_duration.seconds",
+    "cilium_operator_hive_jobs_timer_run_duration_seconds": "operator.hive.jobs.timer.run_duration.seconds",
 }
 
 AGENT_V2_METRICS = deepcopy(AGENT_METRICS)

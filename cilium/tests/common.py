@@ -139,6 +139,38 @@ AGENT_V2_METRICS_1_14 = [
     # 1.16+
     "cilium.fqdn.selectors",
     "cilium.identity.label_sources",
+    # 1.17+ - Endpoint propagation delay
+    "cilium.endpoint.propagation_delay.seconds.bucket",
+    "cilium.endpoint.propagation_delay.seconds.count",
+    "cilium.endpoint.propagation_delay.seconds.sum",
+    # 1.17+ - Datapath
+    "cilium.datapath.conntrack_gc.interval.seconds",
+    "cilium.datapath.signals_handled.count",
+    # BPF counts
+    "cilium.bpf.maps.count",
+    "cilium.bpf.progs.count",
+    # Policy selector cache
+    "cilium.policy.selector_cache.selectors",
+    "cilium.policy.selector_cache.identities",
+    "cilium.policy.selector_cache.operation_duration.seconds.bucket",
+    "cilium.policy.selector_cache.operation_duration.seconds.count",
+    "cilium.policy.selector_cache.operation_duration.seconds.sum",
+    # Active Connection Tracking (ACT)
+    "cilium.act.new_connections.count",
+    "cilium.act.active_connections.count",
+    "cilium.act.failed_connections.count",
+    "cilium.act.processing_time.seconds.bucket",
+    "cilium.act.processing_time.seconds.count",
+    "cilium.act.processing_time.seconds.sum",
+    "cilium.act.errors",
+    # BGP Control Plane
+    "cilium.bgp.control_plane.session_state",
+    "cilium.bgp.control_plane.advertised_routes",
+    "cilium.bgp.control_plane.received_routes",
+    # Drift checker
+    "cilium.drift_checker.config_delta",
+    # Envoy XDS
+    "cilium.xds.events_count",
 ]
 
 AGENT_V1_METRICS = [
@@ -244,6 +276,35 @@ AGENT_V1_METRICS_1_14 = [
     # 1.16+
     "cilium.fqdn.selectors",
     "cilium.identity.label_sources",
+    # 1.17+ - Endpoint propagation delay (histogram V1: count+sum only)
+    "cilium.endpoint.propagation_delay.seconds.count",
+    "cilium.endpoint.propagation_delay.seconds.sum",
+    # 1.17+ - Datapath
+    "cilium.datapath.conntrack_gc.interval.seconds",
+    "cilium.datapath.signals_handled.total",
+    # BPF counts
+    "cilium.bpf.maps.count",
+    "cilium.bpf.progs.count",
+    # Policy selector cache (gauge + histogram V1)
+    "cilium.policy.selector_cache.selectors",
+    "cilium.policy.selector_cache.identities",
+    "cilium.policy.selector_cache.operation_duration.seconds.count",
+    "cilium.policy.selector_cache.operation_duration.seconds.sum",
+    # Active Connection Tracking (ACT) - gauge + histogram V1 + counter V1
+    "cilium.act.new_connections.total",
+    "cilium.act.active_connections.total",
+    "cilium.act.failed_connections.total",
+    "cilium.act.processing_time.seconds.count",
+    "cilium.act.processing_time.seconds.sum",
+    "cilium.act.errors",
+    # BGP Control Plane (gauge)
+    "cilium.bgp.control_plane.session_state",
+    "cilium.bgp.control_plane.advertised_routes",
+    "cilium.bgp.control_plane.received_routes",
+    # Drift checker (gauge)
+    "cilium.drift_checker.config_delta",
+    # Envoy XDS (counter V1)
+    "cilium.xds.events_count",
 ]
 
 # Some types changed moving from v1 to v2. We keep v2 in the metadata.csv file.
@@ -271,6 +332,12 @@ AGENT_V1_METRICS_EXCLUDE_METADATA_CHECK = [
     "cilium.proxy.upstream_reply.seconds.sum",
     "cilium.k8s_client.rate_limiter_duration.seconds.count",
     "cilium.k8s_client.rate_limiter_duration.seconds.sum",
+    "cilium.endpoint.propagation_delay.seconds.count",
+    "cilium.endpoint.propagation_delay.seconds.sum",
+    "cilium.policy.selector_cache.operation_duration.seconds.count",
+    "cilium.policy.selector_cache.operation_duration.seconds.sum",
+    "cilium.act.processing_time.seconds.count",
+    "cilium.act.processing_time.seconds.sum",
 ]
 
 OPERATOR_V2_PROCESS_METRICS = [
@@ -376,6 +443,47 @@ OPERATOR_V2_METRICS_1_14 = [
     "cilium.operator.ipam.release.duration.seconds.sum",
     "cilium.operator.ipam.release.duration.seconds.count",
     "cilium.operator.ipam.used_ips",
+    # 1.17+ - Identity GC latency
+    "cilium.operator.identity_gc.latency",
+    # 1.17+ - Endpoint GC
+    "cilium.operator.endpoint_gc.objects",
+    # 1.17+ - BGP
+    "cilium.operator.bgp.control_plane.reconcile_errors.count",
+    "cilium.operator.bgp.control_plane.reconcile_run_duration.seconds.bucket",
+    "cilium.operator.bgp.control_plane.reconcile_run_duration.seconds.count",
+    "cilium.operator.bgp.control_plane.reconcile_run_duration.seconds.sum",
+    # 1.17+ - LB IPAM event processing
+    "cilium.operator.lbipam.event_processing_time.seconds.bucket",
+    "cilium.operator.lbipam.event_processing_time.seconds.count",
+    "cilium.operator.lbipam.event_processing_time.seconds.sum",
+    # 1.17+ - IPAM background sync
+    "cilium.operator.ipam.background_sync_duration.seconds.bucket",
+    "cilium.operator.ipam.background_sync_duration.seconds.count",
+    "cilium.operator.ipam.background_sync_duration.seconds.sum",
+    # 1.17+ - Operator workqueue (client-go)
+    "cilium.operator.workqueue.depth",
+    "cilium.operator.workqueue.adds.count",
+    "cilium.operator.workqueue.queue_duration.seconds.bucket",
+    "cilium.operator.workqueue.queue_duration.seconds.count",
+    "cilium.operator.workqueue.queue_duration.seconds.sum",
+    "cilium.operator.workqueue.work_duration.seconds.bucket",
+    "cilium.operator.workqueue.work_duration.seconds.count",
+    "cilium.operator.workqueue.work_duration.seconds.sum",
+    "cilium.operator.workqueue.unfinished_work.seconds",
+    "cilium.operator.workqueue.longest_running_processor.seconds",
+    "cilium.operator.workqueue.retries.count",
+    # 1.17+ - Operator hive jobs
+    "cilium.operator.hive.jobs_runs.count",
+    "cilium.operator.hive.jobs_runs_failed",
+    "cilium.operator.hive.jobs.oneshot.last_run_duration.seconds",
+    "cilium.operator.hive.jobs.observer.last_run_duration.seconds",
+    "cilium.operator.hive.jobs.observer.run_duration.seconds.bucket",
+    "cilium.operator.hive.jobs.observer.run_duration.seconds.count",
+    "cilium.operator.hive.jobs.observer.run_duration.seconds.sum",
+    "cilium.operator.hive.jobs.timer.last_run_duration.seconds",
+    "cilium.operator.hive.jobs.timer.run_duration.seconds.bucket",
+    "cilium.operator.hive.jobs.timer.run_duration.seconds.count",
+    "cilium.operator.hive.jobs.timer.run_duration.seconds.sum",
 ]
 
 # Not available in test metric fixtures
@@ -442,4 +550,29 @@ OPTIONAL_METRICS = {
     "cilium.proxy.upstream_reply.seconds.sum",
     "cilium.proxy.datapath.update_timeout.count",
     "cilium.policy.l7.count",
+    # 1.17+ agent metrics not in E2E
+    "cilium.endpoint.propagation_delay.seconds.bucket",
+    "cilium.endpoint.propagation_delay.seconds.count",
+    "cilium.endpoint.propagation_delay.seconds.sum",
+    "cilium.datapath.conntrack_gc.interval.seconds",
+    "cilium.datapath.signals_handled.count",
+    "cilium.bpf.maps.count",
+    "cilium.bpf.progs.count",
+    "cilium.policy.selector_cache.selectors",
+    "cilium.policy.selector_cache.identities",
+    "cilium.policy.selector_cache.operation_duration.seconds.bucket",
+    "cilium.policy.selector_cache.operation_duration.seconds.count",
+    "cilium.policy.selector_cache.operation_duration.seconds.sum",
+    "cilium.act.new_connections.count",
+    "cilium.act.active_connections.count",
+    "cilium.act.failed_connections.count",
+    "cilium.act.processing_time.seconds.bucket",
+    "cilium.act.processing_time.seconds.count",
+    "cilium.act.processing_time.seconds.sum",
+    "cilium.act.errors",
+    "cilium.bgp.control_plane.session_state",
+    "cilium.bgp.control_plane.advertised_routes",
+    "cilium.bgp.control_plane.received_routes",
+    "cilium.drift_checker.config_delta",
+    "cilium.xds.events_count",
 }
