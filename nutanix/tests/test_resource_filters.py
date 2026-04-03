@@ -6,7 +6,7 @@
 import pytest
 
 from datadog_checks.nutanix import NutanixCheck
-from tests.constants import CLUSTER_TAGS, HOST_NAME
+from tests.constants import CLUSTER_TAGS
 
 pytestmark = [pytest.mark.unit]
 
