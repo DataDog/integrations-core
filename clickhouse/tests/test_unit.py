@@ -251,9 +251,7 @@ def test_query_errors_zero_samples_per_hour_defaults(bad_value):
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
     assert check._config.query_errors.samples_per_hour_per_query > 0
-    assert any(
-        'query_errors.samples_per_hour_per_query' in w for w in check._validation_result.warnings
-    )
+    assert any('query_errors.samples_per_hour_per_query' in w for w in check._validation_result.warnings)
 
 
 @pytest.mark.parametrize("bad_value", [0, -1, -100])
@@ -268,6 +266,4 @@ def test_query_completions_zero_samples_per_hour_defaults(bad_value):
     }
     check = ClickhouseCheck('clickhouse', {}, [instance])
     assert check._config.query_completions.samples_per_hour_per_query > 0
-    assert any(
-        'query_completions.samples_per_hour_per_query' in w for w in check._validation_result.warnings
-    )
+    assert any('query_completions.samples_per_hour_per_query' in w for w in check._validation_result.warnings)
