@@ -108,14 +108,17 @@ def test_no_queries_does_nothing(aggregator, pg_instance):
     check.data_observability.run_job()
 
     mock_get_main_db.assert_not_called()
-    assert len(aggregator.metrics('dd.postgres.data_observability.query_status')) == 0
+    assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 0
 
 
 def test_single_query_success(aggregator, pg_instance):
     _setup_and_run(pg_instance)
 
     aggregator.assert_metric('dd.postgres.data_observability.query_execution_time')
-    aggregator.assert_metric('dd.postgres.data_observability.query_status', value=1)
+    metrics = aggregator.metrics('dd.postgres.data_observability.query_executions')
+    assert len(metrics) == 1
+    assert metrics[0].value == 1
+    assert 'status:success' in metrics[0].tags
 
 
 def test_query_failure_database_error(aggregator, pg_instance):
@@ -125,7 +128,10 @@ def test_query_failure_database_error(aggregator, pg_instance):
 
     _setup_and_run(pg_instance, mock_conn=mock_conn, mock_cursor=mock_cursor)
 
-    aggregator.assert_metric('dd.postgres.data_observability.query_status', value=0)
+    metrics = aggregator.metrics('dd.postgres.data_observability.query_executions')
+    assert len(metrics) == 1
+    assert metrics[0].value == 1
+    assert 'status:error' in metrics[0].tags
 
 
 def test_connection_failure_propagates(pg_instance):
@@ -172,18 +178,18 @@ def test_per_query_interval_tracking(aggregator, pg_instance):
 
     # First run: query executes
     check.data_observability.run_job()
-    assert len(aggregator.metrics('dd.postgres.data_observability.query_status')) == 1
+    assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 1
 
     # Immediate second run: query skipped (interval not elapsed)
     aggregator.reset()
     check.data_observability.run_job()
-    assert len(aggregator.metrics('dd.postgres.data_observability.query_status')) == 0
+    assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 0
 
     # Reset _last_execution to force re-run
     aggregator.reset()
     check.data_observability._last_execution = {1: 0.0}
     check.data_observability.run_job()
-    assert len(aggregator.metrics('dd.postgres.data_observability.query_status')) == 1
+    assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 1
 
 
 def test_multi_query_execution(aggregator, pg_instance):
@@ -192,10 +198,10 @@ def test_multi_query_execution(aggregator, pg_instance):
     time_metrics = aggregator.metrics('dd.postgres.data_observability.query_execution_time')
     assert len(time_metrics) == 2
 
-    status_metrics = aggregator.metrics('dd.postgres.data_observability.query_status')
+    status_metrics = aggregator.metrics('dd.postgres.data_observability.query_executions')
     assert len(status_metrics) == 2
-    for m in status_metrics:
-        assert m.value == 1
+    assert all(m.value == 1 for m in status_metrics)
+    assert all('status:success' in m.tags for m in status_metrics)
 
 
 def test_event_payload_structure(aggregator, pg_instance):
@@ -258,7 +264,7 @@ def test_query_failure_does_not_block_subsequent(aggregator, pg_instance):
 
     _setup_and_run(pg_instance, queries=deepcopy(MULTI_QUERIES), mock_conn=mock_conn, mock_cursor=mock_cursor)
 
-    status_metrics = aggregator.metrics('dd.postgres.data_observability.query_status')
+    status_metrics = aggregator.metrics('dd.postgres.data_observability.query_executions')
     assert len(status_metrics) == 2
 
 
@@ -302,16 +308,18 @@ def test_dd_column_names_in_payload(aggregator, pg_instance):
 def test_tags_include_monitor_id(aggregator, pg_instance):
     _setup_and_run(pg_instance)
 
-    for metric_name in [
-        'dd.postgres.data_observability.query_execution_time',
-        'dd.postgres.data_observability.query_status',
-    ]:
-        metrics = aggregator.metrics(metric_name)
-        assert len(metrics) == 1
-        tags = metrics[0].tags
-        assert 'monitor_id:1' in tags
-        assert 'config_id:test-config-123' in tags
-        assert 'db_type:postgres' in tags
+    time_metrics = aggregator.metrics('dd.postgres.data_observability.query_execution_time')
+    assert len(time_metrics) == 1
+    assert 'monitor_id:1' in time_metrics[0].tags
+    assert 'config_id:test-config-123' in time_metrics[0].tags
+    assert 'db_type:postgres' in time_metrics[0].tags
+
+    exec_metrics = aggregator.metrics('dd.postgres.data_observability.query_executions')
+    assert len(exec_metrics) == 1
+    assert 'monitor_id:1' in exec_metrics[0].tags
+    assert 'config_id:test-config-123' in exec_metrics[0].tags
+    assert 'db_type:postgres' in exec_metrics[0].tags
+    assert 'status:success' in exec_metrics[0].tags
 
 
 def test_query_with_no_description(pg_instance):
@@ -360,7 +368,7 @@ def test_failed_query_updates_last_execution(aggregator, pg_instance):
     # Immediate re-run should skip the query (interval not elapsed)
     aggregator.reset()
     check.data_observability.run_job()
-    assert len(aggregator.metrics('dd.postgres.data_observability.query_status')) == 0
+    assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 0
 
 
 def test_error_event_payload(aggregator, pg_instance):

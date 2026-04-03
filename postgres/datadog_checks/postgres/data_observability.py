@@ -160,10 +160,10 @@ class PostgresDataObservability(DBMAsyncJob):
                         hostname=self._check.reported_hostname,
                         raw=True,
                     )
-                    self._check.gauge(
-                        'dd.postgres.data_observability.query_status',
-                        1 if result['status'] == 'success' else 0,
-                        tags=tags,
+                    self._check.count(
+                        'dd.postgres.data_observability.query_executions',
+                        1,
+                        tags=tags + [f'status:{result["status"]}'],
                         hostname=self._check.reported_hostname,
                         raw=True,
                     )
