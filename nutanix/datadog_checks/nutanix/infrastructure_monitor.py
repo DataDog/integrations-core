@@ -512,10 +512,10 @@ class InfrastructureMonitor:
         return True
 
     def _get_vms_for_host(self, host_id: str) -> list[dict]:
-        """Return VMs assigned to this host. Uses the pre-built cache in batch mode, API in non-batch mode."""
-        if self.check.batch_vm_collection:
-            return self._vms_by_host.get(host_id, [])
-        return self._list_vms(host_id)
+        """Return VMs assigned to this host, fetching and caching on first access."""
+        if host_id not in self._vms_by_host:
+            self._vms_by_host[host_id] = self._list_vms(host_id)
+        return self._vms_by_host[host_id]
 
     def _build_vms_by_host_cache(self) -> None:
         """Fetch all VMs and group them by host. Hostless VMs are stored under the "" key."""

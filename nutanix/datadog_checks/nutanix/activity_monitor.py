@@ -36,6 +36,11 @@ class ActivityMonitor:
         self.audits: dict[str, dict] = {}
         self.alerts: dict[str, dict] = {}
         self.tasks: dict[str, dict] = {}
+        # Entity counters
+        self.events_count = 0
+        self.tasks_count = 0
+        self.audits_count = 0
+        self.alerts_count = 0
         # Read boolean flag from cache (stored as string)
         cached_value = self.check.read_persistent_cache("alerts_v42_supported")
         if cached_value == "True":
@@ -46,11 +51,15 @@ class ActivityMonitor:
             self.alerts_v42_supported = None
 
     def reset_state(self) -> None:
-        """Reset in-memory caches for a new collection run."""
+        """Reset in-memory caches and counters for a new collection run."""
         self.events = {}
         self.audits = {}
         self.alerts = {}
         self.tasks = {}
+        self.events_count = 0
+        self.tasks_count = 0
+        self.audits_count = 0
+        self.alerts_count = 0
 
     def _collect(
         self,
@@ -148,8 +157,8 @@ class ActivityMonitor:
             )
             return 0
 
-    def collect_events(self) -> int:
-        return self._safe_collect(
+    def collect_events(self) -> None:
+        self.events_count = self._safe_collect(
             "event",
             lambda: self._collect(
                 activity_kind="event",
@@ -160,13 +169,13 @@ class ActivityMonitor:
             ),
         )
 
-    def collect_tasks(self) -> int:
+    def collect_tasks(self) -> None:
         def _filter_subtasks(tasks: list[dict]) -> list[dict]:
             if not self.check.collect_subtasks_enabled:
                 return [t for t in tasks if not t.get("parentTask")]
             return tasks
 
-        return self._safe_collect(
+        self.tasks_count = self._safe_collect(
             "task",
             lambda: self._collect(
                 activity_kind="task",
@@ -178,8 +187,8 @@ class ActivityMonitor:
             ),
         )
 
-    def collect_audits(self) -> int:
-        return self._safe_collect(
+    def collect_audits(self) -> None:
+        self.audits_count = self._safe_collect(
             "audit",
             lambda: self._collect(
                 activity_kind="audit",
@@ -190,8 +199,8 @@ class ActivityMonitor:
             ),
         )
 
-    def collect_alerts(self) -> int:
-        return self._safe_collect(
+    def collect_alerts(self) -> None:
+        self.alerts_count = self._safe_collect(
             "alert",
             lambda: self._collect(
                 activity_kind="alert",

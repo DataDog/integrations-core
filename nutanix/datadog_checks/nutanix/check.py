@@ -140,13 +140,12 @@ class NutanixCheck(AgentCheck):
     def check(self, _):
         self.log.info("Starting check for Prism Central: %s:%s", self.pc_ip, self.pc_port)
 
-        self.infrastructure_monitor.reset_state()
-        self.activity_monitor.reset_state()
-
         if not self._check_health():
             self.log.error("[PC:%s:%s] Health check failed, aborting", self.pc_ip, self.pc_port)
             return
 
+        self.infrastructure_monitor.reset_state()
+        self.activity_monitor.reset_state()
         self.infrastructure_monitor.init_collection_time_window()
         start_time, end_time = self.infrastructure_monitor.collection_time_window
         window_seconds = (datetime.fromisoformat(end_time) - datetime.fromisoformat(start_time)).total_seconds()
@@ -162,7 +161,7 @@ class NutanixCheck(AgentCheck):
 
         self.infrastructure_monitor.collect_cluster_metrics()
 
-        events_count, tasks_count, audits_count, alerts_count = self._collect_activity()
+        self._collect_activity()
 
         if self.infrastructure_monitor.external_tags:
             self.set_external_tags(self.infrastructure_monitor.external_tags)
@@ -173,19 +172,22 @@ class NutanixCheck(AgentCheck):
             self.infrastructure_monitor.cluster_count,
             self.infrastructure_monitor.host_count,
             self.infrastructure_monitor.vm_count,
-            events_count,
-            tasks_count,
-            audits_count,
-            alerts_count,
+            self.activity_monitor.events_count,
+            self.activity_monitor.tasks_count,
+            self.activity_monitor.audits_count,
+            self.activity_monitor.alerts_count,
         )
 
-    def _collect_activity(self) -> tuple[int, int, int, int]:
+    def _collect_activity(self) -> None:
         """Collect events, tasks, audits, and alerts if enabled."""
-        events_count = self.activity_monitor.collect_events() if self.collect_events_enabled else 0
-        alerts_count = self.activity_monitor.collect_alerts() if self.collect_alerts_enabled else 0
-        tasks_count = self.activity_monitor.collect_tasks() if self.collect_tasks_enabled else 0
-        audits_count = self.activity_monitor.collect_audits() if self.collect_audits_enabled else 0
-        return events_count, tasks_count, audits_count, alerts_count
+        if self.collect_events_enabled:
+            self.activity_monitor.collect_events()
+        if self.collect_alerts_enabled:
+            self.activity_monitor.collect_alerts()
+        if self.collect_tasks_enabled:
+            self.activity_monitor.collect_tasks()
+        if self.collect_audits_enabled:
+            self.activity_monitor.collect_audits()
 
     def _check_health(self):
         try:
