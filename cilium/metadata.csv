@@ -299,19 +299,6 @@ cilium.operator.process.resident_memory.bytes,gauge,,byte,,[OpenMetrics V1 and V
 cilium.operator.process.start_time.seconds,gauge,,second,,[OpenMetrics V1 and V2] Start time of the process since unix epoch in seconds,0,cilium,proc start time operator,,
 cilium.operator.process.virtual_memory.bytes,gauge,,byte,,[OpenMetrics V1 and V2] Virtual memory size in bytes,0,cilium,virtual mem size operator,,
 cilium.operator.process.virtual_memory_max.bytes,gauge,,byte,,[OpenMetrics V1 and V2] Maximum amount of virtual memory available in bytes,0,cilium,virtual mem size max operator,,
-cilium.operator.workqueue.adds.count,count,,operation,,[OpenMetrics V2] Total adds to operator client-go workqueue,0,cilium,op wq adds,,queue_name
-cilium.operator.workqueue.adds.total,count,,operation,,[OpenMetrics V1] Total adds to operator client-go workqueue,0,cilium,op wq adds v1,,queue_name
-cilium.operator.workqueue.depth,gauge,,,,[OpenMetrics V2] Current operator client-go workqueue depth,0,cilium,op wq depth,,queue_name
-cilium.operator.workqueue.longest_running_processor.seconds,gauge,,second,,[OpenMetrics V2] Longest running operator workqueue processor,0,cilium,op wq longest,,queue_name
-cilium.operator.workqueue.queue_duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of operator workqueue item durations,0,cilium,op wq queue dur bucket,,queue_name
-cilium.operator.workqueue.queue_duration.seconds.count,count,,request,,[OpenMetrics V2] Count of operator workqueue item durations,0,cilium,op wq queue dur count,,queue_name
-cilium.operator.workqueue.queue_duration.seconds.sum,count,,second,,[OpenMetrics V2] Sum of operator workqueue item durations,0,cilium,op wq queue dur sum,,queue_name
-cilium.operator.workqueue.retries.count,count,,operation,,[OpenMetrics V2] Total operator workqueue retries,0,cilium,op wq retries,,queue_name
-cilium.operator.workqueue.retries.total,count,,operation,,[OpenMetrics V1] Total operator workqueue retries,0,cilium,op wq retries v1,,queue_name
-cilium.operator.workqueue.unfinished_work.seconds,gauge,,second,,[OpenMetrics V2] Operator workqueue unfinished work duration,0,cilium,op wq unfinished,,queue_name
-cilium.operator.workqueue.work_duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of operator workqueue processing durations,0,cilium,op wq work dur bucket,,queue_name
-cilium.operator.workqueue.work_duration.seconds.count,count,,request,,[OpenMetrics V2] Count of operator workqueue processing durations,0,cilium,op wq work dur count,,queue_name
-cilium.operator.workqueue.work_duration.seconds.sum,count,,second,,[OpenMetrics V2] Sum of operator workqueue processing durations,0,cilium,op wq work dur sum,,queue_name
 cilium.policy.change.count,count,,unit,,[OpenMetrics V2] Number of policy changes by outcome,0,cilium,policy change count,,
 cilium.policy.change.total,count,,unit,,[OpenMetrics V1] Number of policy changes by outcome,0,cilium,policy change,,
 cilium.policy.count,gauge,,unit,,[OpenMetrics V1 and V2] Number of policies currently loaded,0,cilium,policy count,,

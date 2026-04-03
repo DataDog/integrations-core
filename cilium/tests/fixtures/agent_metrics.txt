@@ -1326,177 +1326,135 @@ cilium_k8s_client_rate_limiter_duration_seconds_count{method="DELETE",path="/api
 # TYPE cilium_policy_change_total counter
 cilium_policy_change_total{outcome="fail"} 106
 cilium_policy_change_total{outcome="success"} 24128
-# HELP cilium_endpoint_propagation_delay_seconds Delay between local CiliumEndpoint creation and propagation
+# HELP cilium_endpoint_propagation_delay_seconds CiliumEndpoint roundtrip propagation delay in seconds
 # TYPE cilium_endpoint_propagation_delay_seconds histogram
-cilium_endpoint_propagation_delay_seconds_bucket{le="0.005"} 10
-cilium_endpoint_propagation_delay_seconds_bucket{le="0.025"} 10
-cilium_endpoint_propagation_delay_seconds_bucket{le="+Inf"} 10
-cilium_endpoint_propagation_delay_seconds_sum 0.002
-cilium_endpoint_propagation_delay_seconds_count 10
-# HELP cilium_datapath_conntrack_gc_interval_seconds Interval between conntrack GC runs
+cilium_endpoint_propagation_delay_seconds_bucket{le="0.05"} 0
+cilium_endpoint_propagation_delay_seconds_bucket{le="0.1"} 0
+cilium_endpoint_propagation_delay_seconds_bucket{le="1"} 48
+cilium_endpoint_propagation_delay_seconds_bucket{le="5"} 48
+cilium_endpoint_propagation_delay_seconds_bucket{le="30"} 48
+cilium_endpoint_propagation_delay_seconds_bucket{le="60"} 48
+cilium_endpoint_propagation_delay_seconds_bucket{le="120"} 48
+cilium_endpoint_propagation_delay_seconds_bucket{le="240"} 48
+cilium_endpoint_propagation_delay_seconds_bucket{le="300"} 48
+cilium_endpoint_propagation_delay_seconds_bucket{le="600"} 48
+cilium_endpoint_propagation_delay_seconds_bucket{le="+Inf"} 48
+cilium_endpoint_propagation_delay_seconds_sum 26.566924649999994
+cilium_endpoint_propagation_delay_seconds_count 48
+# HELP cilium_datapath_conntrack_gc_interval_seconds Interval in seconds between conntrack garbage collector runs
 # TYPE cilium_datapath_conntrack_gc_interval_seconds gauge
-cilium_datapath_conntrack_gc_interval_seconds{global="true"} 12
-# HELP cilium_datapath_signals_handled_total Number of datapath signals handled
+cilium_datapath_conntrack_gc_interval_seconds{global="global"} 675
+# HELP cilium_datapath_signals_handled_total Number of times that the datapath signal handler process was run labeled by signal type, data and completion status
 # TYPE cilium_datapath_signals_handled_total counter
 cilium_datapath_signals_handled_total{data="reason=0",signal="wake-up",status="received"} 25
-# HELP cilium_bpf_maps Number of active BPF maps
+# HELP cilium_bpf_maps Total count of BPF maps.
 # TYPE cilium_bpf_maps gauge
-cilium_bpf_maps 42
-# HELP cilium_bpf_progs Number of active BPF programs
+cilium_bpf_maps 182
+# HELP cilium_bpf_progs Total count of BPF programs.
 # TYPE cilium_bpf_progs gauge
-cilium_bpf_progs 18
-# HELP cilium_policy_selector_cache_selectors Number of selectors in selector cache
+cilium_bpf_progs 289
+# HELP cilium_policy_selector_cache_selectors The number of selectors in the selector cache
 # TYPE cilium_policy_selector_cache_selectors gauge
-cilium_policy_selector_cache_selectors{type="peer"} 24
-# HELP cilium_policy_selector_cache_identities Number of identities in selector cache
+cilium_policy_selector_cache_selectors{type="peer"} 129
+# HELP cilium_policy_selector_cache_identities The number of identities in the selector cache
 # TYPE cilium_policy_selector_cache_identities gauge
-cilium_policy_selector_cache_identities{type="peer"} 100
-# HELP cilium_policy_selector_cache_operation_duration_seconds Latency of selector cache operations
+cilium_policy_selector_cache_identities{type="peer"} 236
+# HELP cilium_policy_selector_cache_operation_duration_seconds The latency of selector cache operations
 # TYPE cilium_policy_selector_cache_operation_duration_seconds histogram
-cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="add",scope="full",type="peer",le="0.005"} 5
-cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="add",scope="full",type="peer",le="0.025"} 5
-cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="add",scope="full",type="peer",le="+Inf"} 5
-cilium_policy_selector_cache_operation_duration_seconds_sum{operation="add",scope="full",type="peer"} 0.01
-cilium_policy_selector_cache_operation_duration_seconds_count{operation="add",scope="full",type="peer"} 5
-# HELP cilium_act_new_connections_total Number of new connections per zone and service
-# TYPE cilium_act_new_connections_total gauge
-cilium_act_new_connections_total{service="default/nginx",zone="zone-a"} 5
-# HELP cilium_act_active_connections_total Number of active connections per zone and service
-# TYPE cilium_act_active_connections_total gauge
-cilium_act_active_connections_total{service="default/nginx",zone="zone-a"} 12
-# HELP cilium_act_failed_connections_total Number of failed connections per zone and service
-# TYPE cilium_act_failed_connections_total gauge
-cilium_act_failed_connections_total{service="default/nginx",zone="zone-a"} 0
-# HELP cilium_act_processing_time_seconds Time to process ACT map and update metrics
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="add_selector",scope="operation",type="peer",le="0.0005"} 258
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="add_selector",scope="operation",type="peer",le="0.001"} 260
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="add_selector",scope="operation",type="peer",le="0.005"} 261
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="add_selector",scope="operation",type="peer",le="0.025"} 261
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="add_selector",scope="operation",type="peer",le="0.05"} 261
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="add_selector",scope="operation",type="peer",le="0.1"} 261
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="add_selector",scope="operation",type="peer",le="0.2"} 261
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="add_selector",scope="operation",type="peer",le="0.4"} 261
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="add_selector",scope="operation",type="peer",le="+Inf"} 261
+cilium_policy_selector_cache_operation_duration_seconds_sum{operation="add_selector",scope="operation",type="peer"} 0.009997448
+cilium_policy_selector_cache_operation_duration_seconds_count{operation="add_selector",scope="operation",type="peer"} 261
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="identity_updates",scope="operation",type="peer",le="0.0005"} 214
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="identity_updates",scope="operation",type="peer",le="0.001"} 220
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="identity_updates",scope="operation",type="peer",le="0.005"} 225
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="identity_updates",scope="operation",type="peer",le="0.025"} 225
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="identity_updates",scope="operation",type="peer",le="0.05"} 225
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="identity_updates",scope="operation",type="peer",le="0.1"} 225
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="identity_updates",scope="operation",type="peer",le="0.2"} 225
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="identity_updates",scope="operation",type="peer",le="0.4"} 225
+cilium_policy_selector_cache_operation_duration_seconds_bucket{operation="identity_updates",scope="operation",type="peer",le="+Inf"} 225
+cilium_policy_selector_cache_operation_duration_seconds_sum{operation="identity_updates",scope="operation",type="peer"} 0.03802983799999999
+cilium_policy_selector_cache_operation_duration_seconds_count{operation="identity_updates",scope="operation",type="peer"} 225
+# HELP cilium_act_processing_time_seconds time to go over ACT map and update the metrics
 # TYPE cilium_act_processing_time_seconds histogram
-cilium_act_processing_time_seconds_bucket{le="0.005"} 8
-cilium_act_processing_time_seconds_bucket{le="0.025"} 8
-cilium_act_processing_time_seconds_bucket{le="+Inf"} 8
-cilium_act_processing_time_seconds_sum 0.016
-cilium_act_processing_time_seconds_count 8
-# HELP cilium_act_errors Number of ACT processing errors
-# TYPE cilium_act_errors counter
-cilium_act_errors{msg="failed to read map"} 0
-# HELP cilium_bgp_control_plane_session_state BGP session state with peer
-# TYPE cilium_bgp_control_plane_session_state gauge
-cilium_bgp_control_plane_session_state{neighbor="10.0.0.1:179",neighbor_asn="65001",vrouter="65000"} 1
-# HELP cilium_bgp_control_plane_advertised_routes Number of routes advertised to BGP peer
-# TYPE cilium_bgp_control_plane_advertised_routes gauge
-cilium_bgp_control_plane_advertised_routes{afi="ipv4",neighbor="10.0.0.1:179",neighbor_asn="65001",safi="unicast",vrouter="65000"} 10
-# HELP cilium_bgp_control_plane_received_routes Number of routes received from BGP peer
-# TYPE cilium_bgp_control_plane_received_routes gauge
-cilium_bgp_control_plane_received_routes{afi="ipv4",neighbor="10.0.0.1:179",neighbor_asn="65001",safi="unicast",vrouter="65000"} 8
-# HELP cilium_drift_checker_config_delta Number of configuration deltas detected by drift checker
+cilium_act_processing_time_seconds_bucket{le="0.005"} 0
+cilium_act_processing_time_seconds_bucket{le="0.01"} 0
+cilium_act_processing_time_seconds_bucket{le="0.025"} 0
+cilium_act_processing_time_seconds_bucket{le="0.05"} 0
+cilium_act_processing_time_seconds_bucket{le="0.1"} 0
+cilium_act_processing_time_seconds_bucket{le="0.25"} 0
+cilium_act_processing_time_seconds_bucket{le="0.5"} 0
+cilium_act_processing_time_seconds_bucket{le="1"} 0
+cilium_act_processing_time_seconds_bucket{le="2.5"} 0
+cilium_act_processing_time_seconds_bucket{le="5"} 0
+cilium_act_processing_time_seconds_bucket{le="10"} 0
+cilium_act_processing_time_seconds_bucket{le="+Inf"} 0
+cilium_act_processing_time_seconds_sum 0
+cilium_act_processing_time_seconds_count 0
+# HELP cilium_drift_checker_config_delta Total number of deltas found to mismatch between agent settings and remote sources.
 # TYPE cilium_drift_checker_config_delta gauge
 cilium_drift_checker_config_delta 0
-# HELP cilium_xds_events_count Number of ACK/NACK event responses from Envoy
-# TYPE cilium_xds_events_count counter
-cilium_xds_events_count{status="ack",type_url="type.googleapis.com/envoy.config.listener.v3.Listener"} 15
-# HELP cilium_datapath_nat_gc_entries NAT GC entries
-# TYPE cilium_datapath_nat_gc_entries gauge
-cilium_datapath_nat_gc_entries{direction="ingress",family="ipv4",status="alive"} 10
-# HELP cilium_fqdn_semaphore_rejected_total FQDN semaphore rejections
-# TYPE cilium_fqdn_semaphore_rejected_total counter
-cilium_fqdn_semaphore_rejected_total 0
-# HELP cilium_hive_degraded_status Hive module degraded state
-# TYPE cilium_hive_degraded_status gauge
-cilium_hive_degraded_status{module="endpoint-manager"} 0
-# HELP cilium_neighbor_entry_refresh_count Neighbor entry refresh operations
-# TYPE cilium_neighbor_entry_refresh_count counter
-cilium_neighbor_entry_refresh_count 5
-# HELP cilium_neighbor_nexthop_lookup_count Nexthop lookup operations
-# TYPE cilium_neighbor_nexthop_lookup_count counter
-cilium_neighbor_nexthop_lookup_count 10
-# HELP cilium_neighbor_entry_insert_count Neighbor entry insert operations
-# TYPE cilium_neighbor_entry_insert_count counter
-cilium_neighbor_entry_insert_count 3
-# HELP cilium_neighbor_entry_delete_count Neighbor entry delete operations
-# TYPE cilium_neighbor_entry_delete_count counter
-cilium_neighbor_entry_delete_count 1
-# HELP cilium_statedb_write_txn_duration_seconds StateDB write transaction duration
-# TYPE cilium_statedb_write_txn_duration_seconds histogram
-cilium_statedb_write_txn_duration_seconds_bucket{handle="endpoint-manager",le="0.005"} 5
-cilium_statedb_write_txn_duration_seconds_bucket{handle="endpoint-manager",le="+Inf"} 5
-cilium_statedb_write_txn_duration_seconds_sum{handle="endpoint-manager"} 0.001
-cilium_statedb_write_txn_duration_seconds_count{handle="endpoint-manager"} 5
-# HELP cilium_statedb_table_objects StateDB objects per table
-# TYPE cilium_statedb_table_objects gauge
-cilium_statedb_table_objects{table="endpoints"} 42
-# HELP cilium_statedb_table_revision StateDB table revision
-# TYPE cilium_statedb_table_revision gauge
-cilium_statedb_table_revision{table="endpoints"} 100
-# HELP cilium_statedb_table_delete_trackers StateDB delete trackers
-# TYPE cilium_statedb_table_delete_trackers gauge
-cilium_statedb_table_delete_trackers{table="endpoints"} 0
-# HELP cilium_statedb_table_graveyard_objects StateDB graveyard objects
-# TYPE cilium_statedb_table_graveyard_objects gauge
-cilium_statedb_table_graveyard_objects{table="endpoints"} 0
-# HELP cilium_statedb_table_graveyard_low_watermark StateDB graveyard low watermark
-# TYPE cilium_statedb_table_graveyard_low_watermark gauge
-cilium_statedb_table_graveyard_low_watermark{table="endpoints"} 0
-# HELP cilium_reconciler_errors_current Current reconciler errors
-# TYPE cilium_reconciler_errors_current gauge
-cilium_reconciler_errors_current{module_id="endpoint-manager"} 0
-# HELP cilium_feature_controlplane_ipam IPAM feature mode
+# HELP cilium_feature_controlplane_ipam IPAM mode enabled on the agent
 # TYPE cilium_feature_controlplane_ipam gauge
-cilium_feature_controlplane_ipam{mode="cluster-pool"} 1
-# HELP cilium_feature_controlplane_identity_allocation Identity allocation mode
+cilium_feature_controlplane_ipam{mode="eni"} 1
+# HELP cilium_feature_controlplane_identity_allocation Identity Allocation mode enabled on the agent
 # TYPE cilium_feature_controlplane_identity_allocation gauge
 cilium_feature_controlplane_identity_allocation{mode="crd"} 1
-# HELP cilium_feature_controlplane_cilium_endpoint_slices_enabled CES enabled
+# HELP cilium_feature_controlplane_cilium_endpoint_slices_enabled Cilium Endpoint Slices enabled on the agent
 # TYPE cilium_feature_controlplane_cilium_endpoint_slices_enabled gauge
 cilium_feature_controlplane_cilium_endpoint_slices_enabled 1
-# HELP cilium_feature_datapath_network Datapath network mode
+# HELP cilium_feature_datapath_network Network mode enabled on the agent
 # TYPE cilium_feature_datapath_network gauge
-cilium_feature_datapath_network{mode="vxlan"} 1
-# HELP cilium_feature_datapath_chaining_enabled Datapath chaining
+cilium_feature_datapath_network{mode="direct-routing"} 1
+# HELP cilium_feature_datapath_chaining_enabled Chaining mode enabled on the agent
 # TYPE cilium_feature_datapath_chaining_enabled gauge
 cilium_feature_datapath_chaining_enabled{mode="none"} 1
-# HELP cilium_feature_datapath_internet_protocol IP address family
+# HELP cilium_feature_datapath_internet_protocol IP mode enabled on the agent
 # TYPE cilium_feature_datapath_internet_protocol gauge
-cilium_feature_datapath_internet_protocol{address_family="ipv4"} 1
-# HELP cilium_feature_datapath_config Datapath config mode
+cilium_feature_datapath_internet_protocol{address_family="ipv4-only"} 1
+# HELP cilium_feature_datapath_config Datapath config mode enabled on the agent
 # TYPE cilium_feature_datapath_config gauge
-cilium_feature_datapath_config{mode="veth"} 1
-# HELP cilium_feature_datapath_endpoint_routes_enabled Endpoint routes enabled
+cilium_feature_datapath_config{mode="netkit"} 1
+# HELP cilium_feature_datapath_endpoint_routes_enabled Endpoint Routes enabled in the datapath
 # TYPE cilium_feature_datapath_endpoint_routes_enabled gauge
-cilium_feature_datapath_endpoint_routes_enabled 0
-# HELP cilium_feature_datapath_kernel_version Kernel version
+cilium_feature_datapath_endpoint_routes_enabled 1
+# HELP cilium_feature_datapath_kernel_version Kernel version used by the datapath
 # TYPE cilium_feature_datapath_kernel_version gauge
-cilium_feature_datapath_kernel_version{version="6.1.0"} 1
-# HELP cilium_feature_network_policies_host_firewall_enabled Host firewall enabled
+cilium_feature_datapath_kernel_version{version="6.8.0"} 1
+# HELP cilium_feature_network_policies_host_firewall_enabled Host firewall enabled on the agent
 # TYPE cilium_feature_network_policies_host_firewall_enabled gauge
 cilium_feature_network_policies_host_firewall_enabled 0
-# HELP cilium_feature_network_policies_local_redirect_policy_enabled LRP enabled
+# HELP cilium_feature_network_policies_local_redirect_policy_enabled Local Redirect Policy enabled on the agent
 # TYPE cilium_feature_network_policies_local_redirect_policy_enabled gauge
-cilium_feature_network_policies_local_redirect_policy_enabled 0
-# HELP cilium_feature_network_policies_mutual_auth_enabled Mutual auth enabled
+cilium_feature_network_policies_local_redirect_policy_enabled 1
+# HELP cilium_feature_network_policies_mutual_auth_enabled Mutual Auth enabled on the agent
 # TYPE cilium_feature_network_policies_mutual_auth_enabled gauge
 cilium_feature_network_policies_mutual_auth_enabled 0
-# HELP cilium_feature_network_policies_non_defaultdeny_policies_enabled Non default-deny enabled
+# HELP cilium_feature_network_policies_non_defaultdeny_policies_enabled Non DefaultDeny Policies is enabled in the agent
 # TYPE cilium_feature_network_policies_non_defaultdeny_policies_enabled gauge
-cilium_feature_network_policies_non_defaultdeny_policies_enabled 0
-# HELP cilium_feature_network_policies_cidr_policies CIDR policy mode
-# TYPE cilium_feature_network_policies_cidr_policies gauge
-cilium_feature_network_policies_cidr_policies{mode="none"} 0
-# HELP cilium_feature_network_policies_l3_policies_total L3 policies
+cilium_feature_network_policies_non_defaultdeny_policies_enabled 1
+# HELP cilium_feature_network_policies_l3_policies_total Layer 3 and Layer 4 policies have been ingested since the agent started
 # TYPE cilium_feature_network_policies_l3_policies_total counter
-cilium_feature_network_policies_l3_policies_total{action="add"} 5
-# HELP cilium_feature_network_policies_cilium_network_policies_total CNP count
+cilium_feature_network_policies_l3_policies_total{action="add"} 758
+cilium_feature_network_policies_l3_policies_total{action="delete"} 23
+# HELP cilium_feature_network_policies_cilium_network_policies_total Cilium Network Policies have been ingested since the agent started
 # TYPE cilium_feature_network_policies_cilium_network_policies_total counter
-cilium_feature_network_policies_cilium_network_policies_total{action="add"} 3
-# HELP cilium_feature_adv_connect_and_lb_transparent_encryption Transparent encryption
-# TYPE cilium_feature_adv_connect_and_lb_transparent_encryption gauge
-cilium_feature_adv_connect_and_lb_transparent_encryption{mode="disabled",node2node_enabled="false",strict_mode_enabled="false"} 1
-# HELP cilium_feature_adv_connect_and_lb_kube_proxy_replacement_enabled KPR enabled
+cilium_feature_network_policies_cilium_network_policies_total{action="add"} 97
+cilium_feature_network_policies_cilium_network_policies_total{action="delete"} 3
+# HELP cilium_feature_adv_connect_and_lb_kube_proxy_replacement_enabled KubeProxyReplacement enabled on the agent
 # TYPE cilium_feature_adv_connect_and_lb_kube_proxy_replacement_enabled gauge
 cilium_feature_adv_connect_and_lb_kube_proxy_replacement_enabled 1
-# HELP cilium_feature_adv_connect_and_lb_node_port_configuration NodePort config
+# HELP cilium_feature_adv_connect_and_lb_node_port_configuration Node Port configuration enabled on the agent
 # TYPE cilium_feature_adv_connect_and_lb_node_port_configuration gauge
 cilium_feature_adv_connect_and_lb_node_port_configuration{acceleration="disabled",algorithm="random",mode="snat"} 1
-# HELP cilium_feature_adv_connect_and_lb_bgp_enabled BGP enabled
+# HELP cilium_feature_adv_connect_and_lb_bgp_enabled BGP enabled on the agent
 # TYPE cilium_feature_adv_connect_and_lb_bgp_enabled gauge
 cilium_feature_adv_connect_and_lb_bgp_enabled 0
-# HELP cilium_feature_adv_connect_and_lb_clustermesh_enabled ClusterMesh enabled
-# TYPE cilium_feature_adv_connect_and_lb_clustermesh_enabled gauge
-cilium_feature_adv_connect_and_lb_clustermesh_enabled{max_connected_clusters="255",mode="disabled"} 0
