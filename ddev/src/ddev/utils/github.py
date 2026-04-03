@@ -156,9 +156,7 @@ class GitHubManager:
         )
 
     def create_milestone(self, title: str) -> None:
-        self.__api_post(
-            self.MILESTONES_API.format(repo_id=self.repo_id), content=json.dumps({'title': title})
-        )
+        self.__api_post(self.MILESTONES_API.format(repo_id=self.repo_id), content=json.dumps({'title': title}))
 
     def get_label(self, name):
         return self.__api_get(f'{self.LABELS_API.format(repo_id=self.repo_id)}/{name}')
