@@ -1,5 +1,0 @@
-[env.collectors.datadog-checks]
-check-types = false
-
-[[envs.default.matrix]]
-python = ["3.13"]
