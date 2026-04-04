@@ -367,20 +367,20 @@ cilium.triggers_policy.update_folds,gauge,,unit,,[OpenMetrics V1 and V2] Number 
 cilium.unreachable.health_endpoints,gauge,,unit,,[OpenMetrics V1 and V2] Number of health endpoints that cannot be reached,0,cilium,unreachable health endpoint,,
 cilium.unreachable.nodes,gauge,,node,,[OpenMetrics V1 and V2] Number of nodes that cannot be reached,0,cilium,unreachable nodes,,
 cilium.version,gauge,,node,,[OpenMetrics V1 and V2] Cilium version,0,cilium,version,,
+cilium.xds.events,count,,,,[OpenMetrics V1] Number of ACK/NACK event responses from Envoy,0,cilium,xds events,,status:type_url
 cilium.xds.events.count,count,,,,[OpenMetrics V2] Number of ACK/NACK event responses from Envoy,0,cilium,xds events count,,status:type_url
-cilium.xds.events.total,count,,,,[OpenMetrics V1] Number of ACK/NACK event responses from Envoy,0,cilium,xds events total,,status:type_url
 cilium.datapath.nat_gc.entries,gauge,,,,[OpenMetrics V2] NAT garbage collection entries by direction family and status,0,cilium,nat gc entries,,direction:family:status
 cilium.fqdn.semaphore_rejected.count,count,,,,[OpenMetrics V2] FQDN semaphore rejections,0,cilium,fqdn sem rej ct,,
 cilium.fqdn.semaphore_rejected.total,count,,,,[OpenMetrics V1] FQDN semaphore rejections,0,cilium,fqdn sem rej tot,,
 cilium.hive.degraded_status,gauge,,,,[OpenMetrics V2] Whether a Hive module is in a degraded state,0,cilium,hive degraded,,module
 cilium.neighbor.entry_delete.count,count,,,,[OpenMetrics V2] Neighbor entry delete operations,0,cilium,neigh del ct,,
-cilium.neighbor.entry_delete.total,count,,,,[OpenMetrics V1] Neighbor entry delete operations,0,cilium,neigh del tot,,
+cilium.neighbor.entry_delete,count,,,,[OpenMetrics V1] Neighbor entry delete operations,0,cilium,neigh del tot,,
 cilium.neighbor.entry_insert.count,count,,,,[OpenMetrics V2] Neighbor entry insert operations,0,cilium,neigh ins ct,,
-cilium.neighbor.entry_insert.total,count,,,,[OpenMetrics V1] Neighbor entry insert operations,0,cilium,neigh ins tot,,
+cilium.neighbor.entry_insert,count,,,,[OpenMetrics V1] Neighbor entry insert operations,0,cilium,neigh ins tot,,
 cilium.neighbor.entry_refresh.count,count,,,,[OpenMetrics V2] Neighbor entry refresh operations,0,cilium,neigh refr ct,,
-cilium.neighbor.entry_refresh.total,count,,,,[OpenMetrics V1] Neighbor entry refresh operations,0,cilium,neigh refr tot,,
+cilium.neighbor.entry_refresh,count,,,,[OpenMetrics V1] Neighbor entry refresh operations,0,cilium,neigh refr tot,,
 cilium.neighbor.nexthop_lookup.count,count,,,,[OpenMetrics V2] Nexthop lookup operations,0,cilium,neigh nh lk ct,,
-cilium.neighbor.nexthop_lookup.total,count,,,,[OpenMetrics V1] Nexthop lookup operations,0,cilium,neigh nh lk tot,,
+cilium.neighbor.nexthop_lookup,count,,,,[OpenMetrics V1] Nexthop lookup operations,0,cilium,neigh nh lk tot,,
 cilium.statedb.write_txn_duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of statedb write transaction duration,0,cilium,sdb wtxn bkt,,handle
 cilium.statedb.write_txn_duration.seconds.count,count,,operation,,[OpenMetrics V2] Count of statedb write transaction durations,0,cilium,sdb wtxn cnt,,handle
 cilium.statedb.write_txn_duration.seconds.sum,count,,second,,[OpenMetrics V2] Sum of statedb write transaction durations,0,cilium,sdb wtxn sum,,handle

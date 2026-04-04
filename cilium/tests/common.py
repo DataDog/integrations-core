@@ -346,8 +346,8 @@ AGENT_V1_METRICS_1_14 = [
     "cilium.bgp.control_plane.received_routes",
     # Drift checker (gauge)
     "cilium.drift_checker.config_delta",
-    # Envoy XDS (counter V1)
-    "cilium.xds.events.total",
+    # Envoy XDS (counter without _total suffix, V1 uses raw name)
+    "cilium.xds.events",
 ]
 
 # Some types changed moving from v1 to v2. We keep v2 in the metadata.csv file.
