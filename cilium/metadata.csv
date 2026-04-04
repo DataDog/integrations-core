@@ -1,7 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 cilium.act.active_connections,gauge,,,,[OpenMetrics V1 and V2] Number of active connections per zone and service,0,cilium,act active connections,,service:zone
+cilium.act.errors,count,,,,[OpenMetrics V1] Number of ACT processing errors,0,cilium,act errors,,msg
 cilium.act.errors.count,count,,,,[OpenMetrics V2] Number of ACT processing errors,0,cilium,act errors count,,msg
-cilium.act.errors.total,count,,,,[OpenMetrics V1] Number of ACT processing errors,0,cilium,act errors total,,msg
 cilium.act.failed_connections,gauge,,,,[OpenMetrics V1 and V2] Number of failed connections per zone and service,0,cilium,act failed connections,,service:zone
 cilium.act.new_connections,gauge,,,,[OpenMetrics V1 and V2] Number of new connections per zone and service,0,cilium,act new connections,,service:zone
 cilium.act.processing_time.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of ACT map processing durations,0,cilium,act processing bucket,,

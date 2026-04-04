@@ -69,7 +69,7 @@ AGENT_METRICS_1_14 = [
     "cilium.act.failed_connections",
     "cilium.act.processing_time.seconds.count",
     "cilium.act.processing_time.seconds.sum",
-    "cilium.act.errors.total",
+    "cilium.act.errors",
     "cilium.bgp.control_plane.session_state",
     "cilium.bgp.control_plane.advertised_routes",
     "cilium.bgp.control_plane.received_routes",
