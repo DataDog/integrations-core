@@ -189,7 +189,8 @@ cilium.operator.eni.resync.total,count,,unit,,[OpenMetrics V1] Number of resync 
 cilium.operator.eni_ec2.rate_limit.duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of duration of client-side rate limiter blocking. Available in Cilium <= v1.9,0,cilium,api rate limit duration sample,,
 cilium.operator.eni_ec2.rate_limit.duration.seconds.count,count,,request,,[OpenMetrics V1 and V2] Count of duration of client-side rate limiter blocking. Available in Cilium <= v1.9,0,cilium,api rate limit duration count,,
 cilium.operator.eni_ec2.rate_limit.duration.seconds.sum,count,,second,,[OpenMetrics V1 and V2] Sum of duration of client-side rate limiter blocking. Available in Cilium <= v1.9,0,cilium,api rate limit duration sum,,
-cilium.operator.endpoint_gc.objects,count,,,,[OpenMetrics V2] Number of endpoint objects garbage collected,0,cilium,endpoint gc objects,,outcome
+cilium.operator.endpoint_gc.objects,count,,,,[OpenMetrics V1] Number of endpoint objects garbage collected,0,cilium,endpoint gc objects,,outcome
+cilium.operator.endpoint_gc.objects.count,count,,,,[OpenMetrics V2] Number of endpoint objects garbage collected,0,cilium,endpoint gc objects count,,outcome
 cilium.operator.errors.warnings.total,count,,item,,[OpenMetrics V1 and V2] Number of total errors in cilium-operator instances,0,cilium,errors total,,
 cilium.operator.bgp.control_plane.reconcile_errors.count,count,,,,[OpenMetrics V2] Number of BGP control plane reconciliation errors,0,cilium,op bgp reconcile errors,,resource_kind:resource_name
 cilium.operator.bgp.control_plane.reconcile_errors.total,count,,,,[OpenMetrics V1] Number of BGP control plane reconciliation errors,0,cilium,op bgp reconcile errors,,resource_kind:resource_name

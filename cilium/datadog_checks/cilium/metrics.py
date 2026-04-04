@@ -135,7 +135,10 @@ AGENT_METRICS = {
     "cilium_policy_selector_cache_selectors": "policy.selector_cache.selectors",
     "cilium_policy_selector_cache_identities": "policy.selector_cache.identities",
     "cilium_policy_selector_cache_operation_duration_seconds": "policy.selector_cache.operation_duration.seconds",
-    # Active Connection Tracking (ACT) - see ACT_GAUGE_METRICS for the _total gauges
+    # Active Connection Tracking (ACT) - V1 scraper matches full names; V2 uses ACT_GAUGE_METRICS
+    "cilium_act_new_connections_total": "act.new_connections",
+    "cilium_act_active_connections_total": "act.active_connections",
+    "cilium_act_failed_connections_total": "act.failed_connections",
     "cilium_act_processing_time_seconds": "act.processing_time.seconds",
     "cilium_act_errors": "act.errors",
     # BGP Control Plane (conditional on EnableBGPControlPlane)

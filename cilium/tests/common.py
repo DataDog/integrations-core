@@ -489,7 +489,7 @@ OPERATOR_V2_METRICS_1_14 = [
     # 1.17+ - Identity GC latency
     "cilium.operator.identity_gc.latency",
     # 1.17+ - Endpoint GC
-    "cilium.operator.endpoint_gc.objects",
+    "cilium.operator.endpoint_gc.objects.count",
     # 1.17+ - BGP
     "cilium.operator.bgp.control_plane.reconcile_errors.count",
     "cilium.operator.bgp.control_plane.reconcile_run_duration.seconds.bucket",
