@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+
 import pytest
 
 from datadog_checks.base import AgentCheck
@@ -92,3 +94,48 @@ def test_mock_response_reason_property():
     assert MockHTTPResponse(status_code=200).reason == 'OK'
     assert MockHTTPResponse(status_code=404).reason == 'Not Found'
     assert MockHTTPResponse(status_code=999).reason == ''
+
+
+def test_mock_response_headers_case_insensitive():
+    response = MockHTTPResponse(headers={'Content-Type': 'text/plain', 'X-Custom': 'val'})
+
+    assert response.headers['Content-Type'] == 'text/plain'
+    assert response.headers['content-type'] == 'text/plain'
+    assert response.headers.get('Content-Type') == 'text/plain'
+    assert response.headers.get('cOnTeNt-tYpE') == 'text/plain'
+
+
+def test_mock_response_headers_delete_and_pop():
+    response = MockHTTPResponse(headers={'Content-Type': 'text/plain', 'X-Custom': 'val'})
+
+    del response.headers['Content-Type']
+    assert 'content-type' not in response.headers
+
+    assert response.headers.pop('X-Custom') == 'val'
+    assert response.headers.pop('X-Custom', 'gone') == 'gone'
+
+
+def test_mock_response_headers_update_and_setdefault():
+    response = MockHTTPResponse(headers={'Content-Type': 'text/plain'})
+
+    response.headers.update({'X-New': 'new_val'})
+    assert response.headers['x-new'] == 'new_val'
+
+    response.headers.setdefault('X-Default', 'default_val')
+    assert response.headers['x-default'] == 'default_val'
+
+    response.headers.setdefault('Content-Type', 'should-not-change')
+    assert response.headers['content-type'] == 'text/plain'
+
+    response.headers.update([('X-Iter', 'iter_val')])
+    assert response.headers['x-iter'] == 'iter_val'
+
+
+def test_mock_response_url():
+    assert MockHTTPResponse(url='http://example.com').url == 'http://example.com'
+    assert MockHTTPResponse().url == ''
+
+
+def test_mock_response_raw_readable():
+    response = MockHTTPResponse(json_data={'key': 'value'})
+    assert json.load(response.raw) == {'key': 'value'}
