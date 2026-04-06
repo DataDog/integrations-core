@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from requests.exceptions import ConnectionError
 from unittest.mock import MagicMock
+
+from requests.exceptions import ConnectionError
 
 from datadog_checks.dell_powerflex import DellPowerflexCheck
 
