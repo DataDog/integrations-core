@@ -26,8 +26,7 @@
   },
   "assets": {
     "dashboards": {
-      "network_metrics": "assets/dashboards/network_metrics.json",
-      "gpu_cost_overview": "assets/dashboards/gpu_cost_overview.json"
+      "network_metrics": "assets/dashboards/network_metrics.json"
     },
     "integration": {
       "source_type_name": "GPU",
