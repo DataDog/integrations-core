@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 36.1.0 / 2026-04-06
+
+***Added***:
+
+* Add support for require_trusted_provider security validation ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
 ## 36.0.0 / 2026-03-28
 
 ***Changed***:
