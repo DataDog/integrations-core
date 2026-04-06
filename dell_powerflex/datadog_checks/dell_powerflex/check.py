@@ -11,7 +11,6 @@ from datadog_checks.base import AgentCheck  # noqa: F401
 
 
 class DellPowerflexCheck(AgentCheck):
-
     # This will be the prefix of every metric the integration sends
     __NAMESPACE__ = 'dell_powerflex'
 
