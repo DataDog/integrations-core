@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: cisco-secure-web-appliance
 metric_id: cisco-secure-web-appliance
 backend_only: false

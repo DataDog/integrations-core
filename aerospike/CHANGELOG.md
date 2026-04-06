@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 5.3.0 / 2026-02-19
+## 5.3.1 / 2026-03-18
+
+***Fixed***:
+
+* Collect secondary index data using sindex-list and sindex-stat because the sindex command is deprecated. ([#22510](https://github.com/DataDog/integrations-core/pull/22510))
+
+## 5.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 

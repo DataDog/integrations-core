@@ -55,13 +55,20 @@ def test_xdr_metrics(aggregator):
 def test_sindex_metrics(aggregator, dd_run_check):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
     original_get_info = check.get_info
+    print("\t *** original_get_info --> ", original_get_info)
 
     def mock_get_info(command, separator=";"):
         if command == "sindex/test":
             return [
                 "ns=test:indexname=idx_characters_name:set=characters:bin=name:type=string:indextype=default:context=null:state=RW"
             ]
+        elif command == "sindex-list:":
+            return [
+                "ns=test:indexname=idx_characters_name:set=characters:bin=name:type=string:indextype=default:context=null:state=RW"
+            ]
         elif command == "sindex/test/idx_characters_name":
+            return common.MOCK_INDEXES_METRICS
+        elif command == "sindex-stat:ns=test;indexname=idx_characters_name":
             return common.MOCK_INDEXES_METRICS
         elif command.startswith("sets/"):
             return []

@@ -1,0 +1,524 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.do_query_actions import DOQueryActionsCheck
+
+from .common import METRICS
+
+pytestmark = pytest.mark.unit
+
+
+def _make_mock_conn(rows=None, description=None):
+    """Create a mock DB connection with cursor context manager support."""
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    mock_cursor.__enter__ = MagicMock(return_value=mock_cursor)
+    mock_cursor.__exit__ = MagicMock(return_value=False)
+    mock_cursor.description = description or [('count',)]
+    mock_cursor.fetchall.return_value = rows if rows is not None else [(42,)]
+    mock_conn.cursor.return_value = mock_cursor
+    return mock_conn
+
+
+def _make_mock_pool(rows=None, description=None):
+    """Create a mock ConnectionPool wrapping a mock connection."""
+    mock_conn = _make_mock_conn(rows, description)
+    mock_pool = MagicMock()
+    mock_pool.connection.return_value.__enter__ = MagicMock(return_value=mock_conn)
+    mock_pool.connection.return_value.__exit__ = MagicMock(return_value=False)
+    return mock_pool, mock_conn
+
+
+def test_empty_instance(dd_run_check):
+    with pytest.raises(
+        Exception,
+        match='db_identifier\n  Field required',
+    ):
+        check = DOQueryActionsCheck('do_query_actions', {}, [{}])
+        dd_run_check(check)
+
+
+def test_missing_db_type(dd_run_check):
+    with pytest.raises(
+        Exception,
+        match='db_type\n  Field required',
+    ):
+        check = DOQueryActionsCheck(
+            'do_query_actions',
+            {},
+            [
+                {
+                    'db_identifier': {'host': 'localhost', 'dbname': 'test'},
+                    'username': 'test',
+                    'queries': [],
+                }
+            ],
+        )
+        dd_run_check(check)
+
+
+def test_postgres_single_query_success(dd_run_check, aggregator, postgres_instance):
+    mock_pool, _ = _make_mock_pool()
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+        dd_run_check(check)
+
+    for metric in METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_metric('do_query_actions.query_status', value=1)
+
+
+def test_postgres_query_failure(dd_run_check, aggregator, postgres_instance):
+    mock_pool, mock_conn = _make_mock_pool()
+    mock_cursor = mock_conn.cursor.return_value
+    call_count = 0
+
+    def execute_side_effect(sql, *args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        # Call 1: SET statement_timeout, Call 2: actual query (fail)
+        if call_count == 2:
+            raise Exception("syntax error")
+
+    mock_cursor.execute = MagicMock(side_effect=execute_side_effect)
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+        dd_run_check(check)
+
+    aggregator.assert_metric('do_query_actions.query_status', value=0)
+
+
+def test_unsupported_db_type(dd_run_check, aggregator, postgres_instance):
+    postgres_instance['db_type'] = 'oracle'
+
+    check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('do_query_actions.query_status', value=0)
+
+
+def test_connection_failure_marks_all_queries_critical(dd_run_check, aggregator, multi_query_instance):
+    with patch(
+        'datadog_checks.do_query_actions.check.ConnectionPool',
+        side_effect=Exception('Connection refused'),
+    ):
+        check = DOQueryActionsCheck('do_query_actions', {}, [multi_query_instance])
+        dd_run_check(check)
+
+    assert len(aggregator.metrics('do_query_actions.query_status')) == 2
+    for m in aggregator.metrics('do_query_actions.query_status'):
+        assert m.value == 0
+
+
+def test_multi_query_execution(dd_run_check, aggregator, multi_query_instance):
+    mock_pool, _ = _make_mock_pool()
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [multi_query_instance])
+        dd_run_check(check)
+
+    time_metrics = aggregator.metrics('do_query_actions.query_execution_time')
+    assert len(time_metrics) == 2
+
+    status_metrics = aggregator.metrics('do_query_actions.query_status')
+    assert len(status_metrics) == 2
+    for m in status_metrics:
+        assert m.value == 1
+
+
+def test_scheduling_interval(dd_run_check, aggregator, postgres_instance):
+    """First check runs all queries, immediate second check runs none, time-advanced third runs all."""
+    mock_pool, _ = _make_mock_pool()
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+
+        dd_run_check(check)
+        assert len(aggregator.metrics('do_query_actions.query_status')) == 1
+
+        aggregator.reset()
+        dd_run_check(check)
+        assert len(aggregator.metrics('do_query_actions.query_status')) == 0
+
+        aggregator.reset()
+        check._last_execution = {1: 0.0}
+        dd_run_check(check)
+        assert len(aggregator.metrics('do_query_actions.query_status')) == 1
+
+
+def test_per_query_timeout_is_set(dd_run_check, aggregator, postgres_instance):
+    mock_pool, mock_conn = _make_mock_pool()
+    execute_calls = []
+    mock_cursor = mock_conn.cursor.return_value
+    original_execute = mock_cursor.execute
+
+    def capture_execute(sql, *args, **kwargs):
+        execute_calls.append((sql, args))
+        return original_execute(sql, *args, **kwargs)
+
+    mock_cursor.execute = MagicMock(side_effect=capture_execute)
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+        dd_run_check(check)
+
+    timeout_calls = [sql for sql, args in execute_calls if 'statement_timeout' in str(sql)]
+    assert len(timeout_calls) == 1
+    assert 'SET statement_timeout = 10000' in timeout_calls[0]
+
+
+def test_event_platform_event_payload(dd_run_check, aggregator, postgres_instance):
+    mock_pool, _ = _make_mock_pool(rows=[(42,)], description=[('count',)])
+
+    with (
+        patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool),
+        patch.object(DOQueryActionsCheck, 'event_platform_event') as mock_epe,
+    ):
+        check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+        dd_run_check(check)
+
+    mock_epe.assert_called_once()
+    raw_event = mock_epe.call_args[0][0]
+    event_type = mock_epe.call_args[0][1]
+    payload = json.loads(raw_event)
+
+    assert event_type == 'do-query-results'
+    assert payload['config_id'] == 'test-config-123'
+    assert payload['db_type'] == 'postgres'
+    assert payload['db_host'] == 'localhost'
+    assert payload['db_name'] == 'test_db'
+    assert payload['monitor_id'] == 1
+    assert payload['status'] == 'success'
+    assert payload['columns'] == ['count']
+    assert payload['rows'] == [[42]]
+    assert payload['row_count'] == 1
+    assert payload['error'] is None
+    assert 'duration_s' in payload
+    assert 'entity' in payload
+    assert payload['entity']['platform'] == 'aws'
+    assert payload['entity']['table'] == 'orders'
+    assert payload['entity']['schema'] == 'public'
+    assert 'schema_' not in payload['entity']
+
+
+def test_tags_include_monitor_id(dd_run_check, aggregator, postgres_instance):
+    mock_pool, _ = _make_mock_pool()
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+        dd_run_check(check)
+
+    expected_tags = [
+        'config_id:test-config-123',
+        'db_type:postgres',
+        'db_name:test_db',
+        'db_host:localhost',
+        'port:5432',
+        'monitor_id:1',
+    ]
+
+    for metric in METRICS:
+        aggregator.assert_metric(metric, tags=expected_tags)
+
+
+def test_shared_connection_pool_reuse(dd_run_check, aggregator, postgres_instance):
+    """Pool is created once and reused across multiple check() calls."""
+    mock_pool, _ = _make_mock_pool()
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool) as MockPool:
+        check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+
+        dd_run_check(check)
+        assert MockPool.call_count == 1
+
+        check._last_execution = {}
+        aggregator.reset()
+
+        dd_run_check(check)
+        assert MockPool.call_count == 1  # pool not recreated
+
+
+def test_query_failure_does_not_block_subsequent_queries(dd_run_check, aggregator, multi_query_instance):
+    """If the first query fails, the second query should still execute."""
+    mock_pool, mock_conn = _make_mock_pool()
+    mock_cursor = mock_conn.cursor.return_value
+    call_count = 0
+
+    def execute_side_effect(sql, *args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        # Calls: 1=timeout1, 2=query1 (fail), 3=timeout2, 4=query2 (ok)
+        if call_count == 2:
+            raise Exception("table not found")
+
+    mock_cursor.execute = MagicMock(side_effect=execute_side_effect)
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [multi_query_instance])
+        dd_run_check(check)
+
+    status_metrics = aggregator.metrics('do_query_actions.query_status')
+    assert len(status_metrics) == 2
+
+
+def test_cancel_closes_pool(postgres_instance):
+    mock_pool = MagicMock()
+
+    check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+    check._pool = mock_pool
+    check.cancel()
+
+    mock_pool.close.assert_called_once()
+    assert check._pool is None
+
+
+def test_cancel_handles_close_error(postgres_instance):
+    """cancel() should not raise even if pool.close() fails."""
+    mock_pool = MagicMock()
+    mock_pool.close.side_effect = Exception("close failed")
+
+    check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+    check._pool = mock_pool
+    check.cancel()
+
+    mock_pool.close.assert_called_once()
+    assert check._pool is None
+
+
+def test_no_queries_emits_nothing(dd_run_check, aggregator, postgres_instance):
+    postgres_instance['queries'] = []
+
+    check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+    dd_run_check(check)
+
+    assert len(aggregator.metrics('do_query_actions.query_status')) == 0
+    assert len(aggregator.metrics('do_query_actions.query_status')) == 0
+
+
+def test_pool_timeout_marks_queries_critical(dd_run_check, aggregator, postgres_instance):
+    """If the pool cannot provide a connection, queries are marked CRITICAL."""
+    from psycopg_pool import PoolTimeout
+
+    mock_pool = MagicMock()
+    mock_pool.connection.side_effect = PoolTimeout("no connection available")
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+        dd_run_check(check)
+
+    aggregator.assert_metric('do_query_actions.query_status', value=0)
+
+
+def test_postgres_ssl_params_forwarded(dd_run_check, postgres_instance):
+    """SSL parameters from instance config are passed to ConnectionPool kwargs."""
+    postgres_instance['ssl'] = 'verify-full'
+    postgres_instance['ssl_cert'] = '/path/to/cert.pem'
+    postgres_instance['ssl_root_cert'] = '/path/to/ca.pem'
+    postgres_instance['ssl_key'] = '/path/to/key.pem'
+
+    check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool') as MockPool:
+        mock_pool, _ = _make_mock_pool()
+        MockPool.return_value = mock_pool
+        dd_run_check(check)
+
+    pool_kwargs = MockPool.call_args.kwargs['kwargs']
+    assert pool_kwargs['sslmode'] == 'verify-full'
+    assert pool_kwargs['sslcert'] == '/path/to/cert.pem'
+    assert pool_kwargs['sslrootcert'] == '/path/to/ca.pem'
+    assert pool_kwargs['sslkey'] == '/path/to/key.pem'
+
+
+def test_aws_iam_token_provider(dd_run_check, postgres_instance):
+    """AWS IAM auth config creates an AWSTokenProvider."""
+    postgres_instance['aws'] = {
+        'region': 'us-east-1',
+        'managed_authentication': {'enabled': True, 'role_arn': 'arn:aws:iam::role/test'},
+    }
+
+    check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+    dd_run_check(check)
+    provider = check._build_token_provider()
+
+    from datadog_checks.do_query_actions.postgres_connection import AWSTokenProvider
+
+    assert isinstance(provider, AWSTokenProvider)
+    assert provider.host == check.config.db_identifier.host
+    assert provider.region == 'us-east-1'
+    assert provider.role_arn == 'arn:aws:iam::role/test'
+
+
+def test_azure_managed_identity_token_provider(dd_run_check, postgres_instance):
+    """Azure managed identity config creates an AzureTokenProvider."""
+    postgres_instance['managed_authentication'] = {
+        'enabled': True,
+        'client_id': 'my-client-id',
+        'identity_scope': 'https://custom.scope/.default',
+    }
+
+    check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+    dd_run_check(check)
+    provider = check._build_token_provider()
+
+    from datadog_checks.do_query_actions.postgres_connection import AzureTokenProvider
+
+    assert isinstance(provider, AzureTokenProvider)
+    assert provider.client_id == 'my-client-id'
+    assert provider.identity_scope == 'https://custom.scope/.default'
+
+
+def test_token_provider_sets_pool_kwargs(dd_run_check, postgres_instance):
+    """When a token provider is configured, it is passed to the ConnectionPool."""
+    postgres_instance['aws'] = {
+        'region': 'us-east-1',
+        'managed_authentication': {'enabled': True},
+    }
+
+    check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool') as MockPool:
+        mock_pool, _ = _make_mock_pool()
+        MockPool.return_value = mock_pool
+        dd_run_check(check)
+
+    pool_kwargs = MockPool.call_args.kwargs['kwargs']
+    assert 'token_provider' in pool_kwargs
+
+
+def test_do_query_cursor_prepends_comment():
+    """DoQueryCursor.execute prepends the datadog-agent SQL comment to string queries."""
+    import psycopg
+
+    from datadog_checks.do_query_actions.check import DoQueryCursor
+
+    captured = []
+
+    with patch.object(psycopg.Cursor, 'execute', lambda self, q, p=None, **kw: captured.append(q)):
+        cursor = DoQueryCursor.__new__(DoQueryCursor)
+        cursor.execute('SELECT 1')
+
+    assert len(captured) == 1
+    assert 'datadog-agent' in captured[0]
+    assert 'SELECT 1' in captured[0]
+
+
+def test_rollback_exception_swallowed(dd_run_check, aggregator, postgres_instance):
+    """If rollback raises after a query error, the exception is swallowed."""
+    mock_pool, mock_conn = _make_mock_pool()
+    mock_cursor = mock_conn.cursor.return_value
+    call_count = 0
+
+    def execute_side_effect(sql, *args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        # Call 1: SET statement_timeout, Call 2: actual query (fail)
+        if call_count == 2:
+            raise Exception("query failed")
+
+    mock_cursor.execute = MagicMock(side_effect=execute_side_effect)
+    mock_conn.rollback.side_effect = Exception("rollback also failed")
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+        dd_run_check(check)
+
+    aggregator.assert_metric('do_query_actions.query_status', value=0)
+
+
+def test_event_payload_entity_model_dump(dd_run_check, aggregator, postgres_instance):
+    """Entity from pydantic model is serialized correctly via model_dump."""
+    mock_pool, _ = _make_mock_pool()
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+        dd_run_check(check)
+
+    events = aggregator.get_event_platform_events('do-query-results')
+    assert len(events) == 1
+    assert events[0]['entity']['platform'] == 'aws'
+    assert events[0]['entity']['table'] == 'orders'
+
+
+def test_query_with_no_description(dd_run_check, aggregator, postgres_instance):
+    """When cursor.description is None (e.g., INSERT/UPDATE), return empty columns and rows."""
+    mock_pool, mock_conn = _make_mock_pool()
+    mock_cursor = mock_conn.cursor.return_value
+    call_count = 0
+
+    def execute_side_effect(sql, *args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        # After SET statement_timeout, the actual query returns no description
+        if call_count == 2:
+            mock_cursor.description = None
+
+    mock_cursor.execute = MagicMock(side_effect=execute_side_effect)
+
+    with (
+        patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool),
+        patch.object(DOQueryActionsCheck, 'event_platform_event') as mock_epe,
+    ):
+        check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+        dd_run_check(check)
+
+    aggregator.assert_metric('do_query_actions.query_status', value=1)
+
+    payload = json.loads(mock_epe.call_args[0][0])
+    assert payload['columns'] == []
+    assert payload['rows'] == []
+    assert payload['row_count'] == 0
+
+
+def test_custom_sql_select_fields_in_payload(dd_run_check, aggregator, custom_fields_instance):
+    """custom_sql_select_fields from the query spec are forwarded in the event payload."""
+    mock_pool, _ = _make_mock_pool()
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [custom_fields_instance])
+        dd_run_check(check)
+
+    events = aggregator.get_event_platform_events('do-query-results')
+    assert len(events) == 1
+    custom = events[0]['custom_sql_select_fields']
+    assert custom['metric_config_id'] == 42
+    assert custom['entity_id'] == 'ent-abc-123'
+
+
+def test_dd_column_names_in_payload(dd_run_check, aggregator, dd_columns_instance):
+    """dd_{type}_{name} column names from query results are forwarded as-is in the event payload."""
+    dd_cols = [('dd_count_failed_queries',), ('dd_gauge_latency_ms',), ('dd_tag_schema_name',)]
+    mock_pool, _ = _make_mock_pool(rows=[(500, 0.42, 'public')], description=dd_cols)
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [dd_columns_instance])
+        dd_run_check(check)
+
+    events = aggregator.get_event_platform_events('do-query-results')
+    assert len(events) == 1
+    assert events[0]['columns'] == ['dd_count_failed_queries', 'dd_gauge_latency_ms', 'dd_tag_schema_name']
+    assert events[0]['rows'] == [[500, 0.42, 'public']]
+
+
+def test_all_metrics_covered(dd_run_check, aggregator, postgres_instance):
+    """All emitted metrics are declared in metadata.csv."""
+    mock_pool, _ = _make_mock_pool()
+
+    with patch('datadog_checks.do_query_actions.check.ConnectionPool', return_value=mock_pool):
+        check = DOQueryActionsCheck('do_query_actions', {}, [postgres_instance])
+        dd_run_check(check)
+
+    for metric in METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

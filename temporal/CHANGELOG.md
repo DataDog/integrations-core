@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 4.3.0 / 2026-02-19
+## 4.4.0 / 2026-03-18
+
+***Added***:
+
+* Update temporal integration to support metrics up to temporal v1.28.0 ([#20627](https://github.com/DataDog/integrations-core/pull/20627))
+
+## 4.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 

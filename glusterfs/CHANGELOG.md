@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 3.4.0 / 2026-02-19
+## 3.4.1 / 2026-03-18
+
+***Fixed***:
+
+* Fix service check and metrics for stopped volumes ([#22486](https://github.com/DataDog/integrations-core/pull/22486))
+
+## 3.4.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 

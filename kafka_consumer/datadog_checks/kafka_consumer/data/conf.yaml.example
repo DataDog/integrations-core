@@ -345,8 +345,16 @@ instances:
     #
     # data_streams_enabled: false
 
+    ## @param kafka_cluster_id_override - string - optional
+    ## Override the auto-detected kafka_cluster_id. When set, this value is used as
+    ## the kafka_cluster_id tag on all metrics and events. The original auto-detected
+    ## cluster ID is preserved as an original_kafka_cluster_id tag.
+    #
+    # kafka_cluster_id_override: <KAFKA_CLUSTER_ID_OVERRIDE>
+
     ## @param enable_cluster_monitoring - boolean - optional - default: false
-    ## (PREVIEW) Enable cluster monitoring to collect broker, topic, partition, consumer group,
+    ## (PREVIEW) Enable cluster monitoring to collect cluster-wide metrics for Data Streams
+    ## Monitoring. Collects broker, topic, partition, consumer group,
     ## and schema registry metadata. Events are cached and tagged with kafka_cluster_id.
     ## May increase resource consumption on large clusters.
     ##
@@ -356,6 +364,15 @@ instances:
     ##   - Enables Data Streams monitoring (same as data_streams_enabled)
     #
     # enable_cluster_monitoring: false
+
+    ## @param kafka_configs_refresh_interval - integer - optional - default: 180
+    ## How often (in seconds) to re-fetch broker configurations, topic configurations,
+    ## and schema registry version checks from Kafka. A longer interval reduces load on
+    ## the Kafka cluster and Schema Registry. On clusters with many topics or schemas,
+    ## the check fetches in batches and gracefully degrades by re-fetching less often if
+    ## it cannot keep up within this interval.
+    #
+    # kafka_configs_refresh_interval: 180
 
     ## @param schema_registry_url - string - optional - default: http://localhost:8081
     ## Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.

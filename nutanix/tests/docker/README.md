@@ -29,8 +29,8 @@ docker/
 
 The Flask server (`mock_server.py`):
 - Reads fixtures from `../fixtures/` directory
-- Handles pagination via `$page` query parameter
-- Applies time-based filtering for events/audits/alerts/tasks
+- Handles pagination with the `$page` query parameter
+- Applies time-based filtering for events, audits, alerts, and tasks
 - Mimics Nutanix Prism Central v4 API responses
 
 **Key Features:**
@@ -41,7 +41,7 @@ The Flask server (`mock_server.py`):
 
 ## Setup
 
-No setup required! The fixtures are already in `../fixtures/` and are shared with unit tests.
+No setup is needed. The fixtures are already in `../fixtures/` and are shared with unit tests.
 
 ## Running Integration Tests
 
@@ -127,7 +127,7 @@ Fixtures store pages as JSON arrays, e.g., `events.json`:
 
 ## Time Filtering
 
-Activity endpoints support time-based filtering via `$filter` parameter:
+Activity endpoints support time-based filtering with the `$filter` parameter:
 - Events: `?$filter=creationTime gt 2026-01-02T14:35:00Z`
 - Audits: `?$filter=creationTime gt 2026-01-02T14:35:00Z`
 - Alerts: `?$filter=creationTime gt 2026-01-02T14:35:00Z`
@@ -174,7 +174,7 @@ When you need to update the fixtures:
    docker-compose restart
    ```
 
-That's it! The same fixtures are used by both unit tests and Docker integration tests.
+The same fixtures are used by both unit tests and Docker integration tests.
 
 ## Troubleshooting
 
@@ -189,7 +189,7 @@ docker logs nutanix-prism-central
 ```
 
 ### Fixtures not found
-Ensure fixtures exist in `../fixtures/` directory. You can verify:
+Verify that fixtures exist in the `../fixtures/` directory:
 ```bash
 ls -la ../fixtures/
 ```
@@ -209,11 +209,11 @@ Check if Flask is installed correctly:
 docker logs nutanix-prism-central | grep -i error
 ```
 
-## Comparison with vsphere Integration
+## Comparison with vSphere integration
 
-Unlike vsphere (which uses pure Python mocking), this setup:
+Unlike vSphere (which uses pure Python mocking), this setup:
 - Provides more realistic E2E testing with actual HTTP calls
-- Tests serialization/deserialization over the wire
+- Tests serialization and deserialization over the wire
 - Validates HTTP client behavior (retries, timeouts, etc.)
 - Closer to production behavior
 

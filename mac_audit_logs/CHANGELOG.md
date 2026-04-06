@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 1.3.0 / 2026-02-19
+## 1.3.1 / 2026-03-18
+
+***Fixed***:
+
+* Skip over directories and files that don't match the log file pattern. ([#22479](https://github.com/DataDog/integrations-core/pull/22479))
+
+## 1.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 

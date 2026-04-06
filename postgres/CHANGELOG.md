@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 23.4.0 / 2026-02-19
+## 23.5.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+
+***Fixed***:
+
+* Fix a bug where `cloud_metadata.aws.instance_endpoint` was not populated for auto-detected RDS hosts, which could prevent query metrics from being properly associated with the database instance in the UI ([#22744](https://github.com/DataDog/integrations-core/pull/22744))
+
+## 23.4.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 
@@ -20,7 +30,7 @@
 * Updates collect_raw_query_statements config description ([#22611](https://github.com/DataDog/integrations-core/pull/22611))
 * Fix a truthy check on AWS authentication fallback logic ([#22614](https://github.com/DataDog/integrations-core/pull/22614))
 
-## 23.3.4 / 2026-01-21
+## 23.3.4 / 2026-01-21 / Agent 7.76.0
 
 ***Fixed***:
 

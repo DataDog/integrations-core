@@ -1,0 +1,1 @@
+Add support for new ArgoCD metrics including kubectl, OCI, GitHub API, login, and proxy extension metrics.

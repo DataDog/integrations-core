@@ -87,6 +87,9 @@ class KafkaConfig:
         # Data Streams live messages
         self.live_messages_configs = instance.get('live_messages_configs', [])
 
+        self._kafka_cluster_id_override = instance.get('kafka_cluster_id_override')
+        self._auto_detected_cluster_id = ""
+
         self._cluster_monitoring_enabled = is_affirmative(instance.get('enable_cluster_monitoring', False))
 
         if self._cluster_monitoring_enabled:
@@ -105,6 +108,8 @@ class KafkaConfig:
                 )
         else:
             self._data_streams_enabled = is_affirmative(instance.get('data_streams_enabled', False))
+
+        self._kafka_configs_refresh_interval = int(instance.get('kafka_configs_refresh_interval', 180))
 
         self._collect_schema_registry = instance.get('schema_registry_url')
 

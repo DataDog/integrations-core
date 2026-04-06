@@ -1,0 +1,161 @@
+name: DO Query Actions
+files:
+- name: do_query_actions.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: db_identifier
+      required: true
+      description: |
+        Identifies the target database for this query configuration.
+      value:
+        type: object
+        required:
+          - host
+          - dbname
+        properties:
+        - name: host
+          type: string
+        - name: dbname
+          type: string
+    - name: username
+      required: true
+      description: |
+        The database username for authentication.
+      value:
+        example: "datadog"
+        type: string
+    - name: password
+      secret: true
+      description: |
+        The database password for authentication.
+      value:
+        type: string
+    - name: port
+      description: |
+        The database port to connect to.
+        If not specified, defaults to 5432.
+      value:
+        type: integer
+    - name: ssl
+      description: |
+        SSL mode for PostgreSQL connections.
+        Valid values: disable, allow, prefer, require, verify-ca, verify-full.
+      value:
+        type: string
+    - name: ssl_cert
+      description: |
+        Path to the client SSL certificate.
+      value:
+        type: string
+    - name: ssl_root_cert
+      description: |
+        Path to the SSL root certificate authority.
+      value:
+        type: string
+    - name: ssl_key
+      description: |
+        Path to the client SSL private key.
+      value:
+        type: string
+    - name: ssl_password
+      secret: true
+      description: |
+        Password for the client SSL private key.
+      value:
+        type: string
+    - name: aws
+      description: |
+        AWS configuration for RDS IAM authentication.
+      value:
+        type: object
+        properties:
+        - name: region
+          type: string
+        - name: managed_authentication
+          type: object
+          properties:
+          - name: enabled
+            type: boolean
+          - name: role_arn
+            type: string
+    - name: managed_authentication
+      description: |
+        Azure Managed Identity configuration.
+      value:
+        type: object
+        properties:
+        - name: enabled
+          type: boolean
+        - name: client_id
+          type: string
+        - name: identity_scope
+          type: string
+    - name: config_id
+      description: |
+        An identifier for tracking this query configuration via Remote Config.
+      value:
+        type: string
+    - name: db_type
+      required: true
+      description: |
+        The database engine to connect to. Currently only 'postgres' is supported.
+      value:
+        example: "postgres"
+        type: string
+    - name: queries
+      required: true
+      description: |
+        List of SQL queries to execute with per-query scheduling.
+        Each query has its own interval and timeout settings.
+      value:
+        type: array
+        items:
+          type: object
+          required:
+            - monitor_id
+            - query
+            - interval_seconds
+            - timeout_seconds
+            - entity
+          properties:
+          - name: type
+            type: string
+          - name: monitor_id
+            type: integer
+          - name: query
+            type: string
+          - name: interval_seconds
+            type: integer
+          - name: timeout_seconds
+            type: integer
+          - name: entity
+            type: object
+            required:
+              - platform
+              - account
+              - database
+              - schema
+              - table
+            properties:
+            - name: platform
+              type: string
+            - name: account
+              type: string
+            - name: database
+              type: string
+            - name: schema
+              type: string
+            - name: table
+              type: string
+          - name: custom_sql_select_fields
+            type: object
+            properties:
+            - name: metric_config_id
+              type: integer
+            - name: entity_id
+              type: string
+    - template: instances/default

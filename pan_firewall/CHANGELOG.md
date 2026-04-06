@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.3.0 / 2026-03-18
+
+***Added***:
+
+* Add ndm_syslog:true tag to log configuration to enable NDM device syslog correlation. ([#22674](https://github.com/DataDog/integrations-core/pull/22674))
+
 ## 3.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:

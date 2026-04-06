@@ -56,5 +56,9 @@ def instance_ssl_cert_reqs():
     return 2
 
 
+def instance_ssl_check_hostname():
+    return True
+
+
 def instance_warn_on_missing_keys():
     return True
