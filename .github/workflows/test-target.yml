@@ -102,6 +102,8 @@ jobs:
     permissions:
        # needed for compute-matrix in test-target.yml
        contents: read
+       # needed for dd-sts
+       id_token: write
     steps:
 
     - name: Set up Windows
