@@ -1,5 +1,5 @@
 {
-  "title": "GPU Usage and Costs Overview",
+  "title": "GPU Cost Overview",
   "description": "Monitor GPU compute spend across AWS, Azure, and GCP including spend breakdowns by instance type and team, pricing coverage, unused capacity, and cost attribution.",
   "widgets": [
     {

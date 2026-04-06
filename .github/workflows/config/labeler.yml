@@ -598,10 +598,6 @@ integration/gpu:
 - changed-files:
   - any-glob-to-any-file:
     - gpu/**/*
-integration/gpu_usage_and_costs:
-- changed-files:
-  - any-glob-to-any-file:
-    - gpu_usage_and_costs/**/*
 integration/greenhouse:
 - changed-files:
   - any-glob-to-any-file:
