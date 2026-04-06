@@ -22,6 +22,23 @@ from . import defaults, validators
 SECURE_FIELD_NAMES = frozenset(['ssl_ca_certs', 'ssl_certfile', 'ssl_keyfile', 'unix_socket_path'])
 
 
+class ManagedAuthentication(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[False])
+    service_account: Optional[str] = Field(None, examples=['datadog@my-project.iam.gserviceaccount.com'])
+
+
+class Gcp(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    managed_authentication: Optional[ManagedAuthentication] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -44,6 +61,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
+    gcp: Optional[Gcp] = None
     host: str
     keys: Optional[tuple[str, ...]] = None
     metric_patterns: Optional[MetricPatterns] = None
