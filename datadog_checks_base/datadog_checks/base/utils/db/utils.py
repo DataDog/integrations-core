@@ -162,7 +162,7 @@ class RateLimitingTTLCache(TTLCache):
         return True
 
 
-def resolve_db_host(db_host, fallback_to_agent=True):
+def resolve_db_host(db_host):
     if db_host and db_host.endswith('.local'):
         return db_host
 
@@ -173,15 +173,14 @@ def resolve_db_host(db_host, fallback_to_agent=True):
     try:
         host_ip = socket.gethostbyname(db_host)
     except (socket.gaierror, UnicodeError) as e:
-        fallback_hostname = agent_hostname if fallback_to_agent else db_host
         # could be connecting via a unix domain socket
         logger.debug(
             "failed to resolve DB host '%s' due to %r. falling back to: %s",
             db_host,
             e,
-            fallback_hostname,
+            db_host,
         )
-        return fallback_hostname
+        return db_host
 
     try:
         agent_host_ip = socket.gethostbyname(agent_hostname)
