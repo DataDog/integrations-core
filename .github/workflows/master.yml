@@ -5,7 +5,6 @@ on:
     branches:
     - master
     paths:
-  workflow_dispatch:  # temporary — remove after verification
       # List of files/paths that should trigger the run. The intention is to avoid running all tests if the commit only includes changes on assets or README
     - '*/datadog_checks/**'
     - '*/tests/**'
@@ -25,6 +24,7 @@ on:
     - 'pyproject.toml'
   schedule:
     - cron: '0 2 * * *'
+  workflow_dispatch:  # temporary — remove after verification
 
 jobs:
   cache:
