@@ -391,3 +391,61 @@ class TestGCPIAMGetConn:
             redis_check._get_conn(redis_check.instance)
 
         mock_conn.connection_pool.disconnect.assert_not_called()
+
+
+class TestGCPIAMCheckDbRetry:
+    def _make_iam_check(self, check):
+        instance = {
+            'host': 'memorystore.googleapis.com',
+            'port': 6380,
+            'gcp': {'managed_authentication': {'enabled': True}},
+        }
+        mock_provider = MagicMock()
+        mock_provider.username = "default"
+        mock_provider.get_token.return_value = "iam-token-abc"
+        mock_provider.is_token_expired.return_value = False
+        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider', return_value=mock_provider):
+            redis_check = check(instance)
+        redis_check._gcp_token_provider = mock_provider
+        return redis_check, mock_provider
+
+    def test_check_db_retries_on_auth_error_with_iam(self, check):
+        redis_check, mock_provider = self._make_iam_check(check)
+        call_count = {'n': 0}
+
+        def run_side_effect():
+            call_count['n'] += 1
+            if call_count['n'] == 1:
+                raise redis.AuthenticationError("token expired")
+
+        with patch.object(redis_check, '_run_check_db', side_effect=run_side_effect):
+            with patch.object(redis_check, '_force_iam_reconnect') as mock_reconnect:
+                redis_check._check_db()
+                assert call_count['n'] == 2
+                mock_reconnect.assert_called_once()
+
+    def test_check_db_does_not_retry_without_iam(self, check, redis_instance):
+        redis_check = check(redis_instance)
+        with patch.object(redis_check, '_run_check_db', side_effect=redis.AuthenticationError("bad pass")):
+            with pytest.raises(redis.AuthenticationError):
+                redis_check._check_db()
+
+    def test_check_db_propagates_second_auth_error(self, check):
+        redis_check, mock_provider = self._make_iam_check(check)
+        with patch.object(redis_check, '_run_check_db', side_effect=redis.AuthenticationError("still bad")):
+            with patch.object(redis_check, '_force_iam_reconnect'):
+                with pytest.raises(redis.AuthenticationError):
+                    redis_check._check_db()
+
+    def test_force_iam_reconnect_disconnects_and_invalidates(self, check):
+        redis_check, mock_provider = self._make_iam_check(check)
+
+        mock_conn = MagicMock()
+        key = redis_check._generate_instance_key(redis_check.instance)
+        redis_check.connections[key] = mock_conn
+
+        redis_check._force_iam_reconnect()
+
+        mock_conn.connection_pool.disconnect.assert_called_once()
+        assert key not in redis_check.connections
+        mock_provider.invalidate.assert_called_once()

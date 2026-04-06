@@ -137,6 +137,23 @@ class Redis(AgentCheck):
         return tags
 
     def _check_db(self):
+        try:
+            self._run_check_db()
+        except redis.AuthenticationError:
+            if self._gcp_token_provider:
+                self._force_iam_reconnect()
+                self._run_check_db()  # second failure propagates
+            else:
+                raise
+
+    def _force_iam_reconnect(self):
+        key = self._generate_instance_key(self.instance)
+        conn = self.connections.pop(key, None)
+        if conn:
+            conn.connection_pool.disconnect()
+        self._gcp_token_provider.invalidate()
+
+    def _run_check_db(self):
         tags = list(self.tags)
         conn = self._get_conn(self.instance)
 
