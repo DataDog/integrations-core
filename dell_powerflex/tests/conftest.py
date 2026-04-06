@@ -11,4 +11,4 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return {}
+    return {'powerflex_gateway_url': 'https://localhost:443'}

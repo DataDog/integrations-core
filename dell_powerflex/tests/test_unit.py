@@ -2,18 +2,31 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Any, Callable, Dict  # noqa: F401
+from requests.exceptions import ConnectionError
+from unittest.mock import MagicMock
 
-from datadog_checks.base import AgentCheck  # noqa: F401
-from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dell_powerflex import DellPowerflexCheck
-from datadog_checks.dev.utils import get_metadata_metrics
 
 
-def test_check(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
+def test_can_connect_down(dd_run_check, aggregator, instance, mocker):
+    mocker.patch('requests.Session.get', side_effect=ConnectionError('connection refused'))
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metric(
+        'dell_powerflex.api.can_connect',
+        value=0,
+        tags=['powerflex_gateway_url:https://localhost:443'],
+    )
+
+
+def test_can_connect_up(dd_run_check, aggregator, instance, mocker):
+    mocker.patch('requests.Session.get', return_value=MagicMock(raise_for_status=MagicMock()))
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'dell_powerflex.api.can_connect',
+        value=1,
+        tags=['powerflex_gateway_url:https://localhost:443'],
+    )

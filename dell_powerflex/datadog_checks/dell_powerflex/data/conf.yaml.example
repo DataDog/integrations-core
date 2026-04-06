@@ -13,7 +13,11 @@ init_config:
 #
 instances:
 
-  -
+    ## @param powerflex_gateway_url - string - required
+    ## URL of the PowerFlex Gateway REST API.
+    #
+  - powerflex_gateway_url: https://localhost:443
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

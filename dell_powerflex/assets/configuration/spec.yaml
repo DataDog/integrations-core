@@ -7,4 +7,10 @@ files:
     - template: init_config/default
   - template: instances
     options:
+    - name: powerflex_gateway_url
+      required: true
+      description: URL of the PowerFlex Gateway REST API.
+      value:
+        example: https://localhost:443
+        type: string
     - template: instances/default
