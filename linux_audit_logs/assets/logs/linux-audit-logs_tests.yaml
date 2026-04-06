@@ -1851,3 +1851,98 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1740378303789
+ -
+  sample: "type=SYSCALL msg=audit(1740378304.100:2260): arch=c000003e syscall=313 success=yes exit=0 a0=3 a1=0 a2=0 a3=0 items=0 ppid=1407 pid=226245 auid=502 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=4 comm=\"insmod\" exe=\"/usr/bin/kmod\" subj=unconfined key=\"modules\"\x1dARCH=x86_64 SYSCALL=finit_module AUID=\"lima\" UID=\"root\" GID=\"root\" EUID=\"root\" SUID=\"root\" FSUID=\"root\" EGID=\"root\" SGID=\"root\" FSGID=\"root\""
+  result:
+    custom:
+      ARCH: "x86_64"
+      AUID: "lima"
+      EGID: "root"
+      EUID: "root"
+      FSGID: "root"
+      FSUID: "root"
+      GID: "root"
+      SGID: "root"
+      SUID: "root"
+      SYSCALL: "finit_module"
+      UID: "root"
+      a0: 3
+      a1: 0
+      a2: 0
+      a3: 0
+      arch: "c000003e"
+      auid: 502
+      comm: "insmod"
+      egid: 0
+      euid: 0
+      event_id: 2260
+      exe: "/usr/bin/kmod"
+      exit: 0
+      fsgid: 0
+      fsuid: 0
+      gid: 0
+      items: 0
+      key: "modules"
+      msg_raw: ""
+      ocsf:
+        activity_id: 1
+        activity_name: "Load"
+        actor:
+          app_name: "Unknown"
+          process:
+            name: "insmod"
+            path: "/usr/bin/kmod"
+            pid: 226245
+            user:
+              name: "root"
+              uid: "0"
+          session:
+            terminal: "pts0"
+            uid: "4"
+          user:
+            name: "lima"
+            uid: "502"
+        category_name: "System Activity"
+        category_uid: 1
+        class_name: "Module Activity"
+        class_uid: 1005
+        device:
+          name: "Unknown"
+          type: "Unknown"
+          type_id: 0
+        metadata:
+          event_code: "SYSCALL"
+          original_time: "1.7403783041E9"
+          product:
+            name: "Auditd"
+            vendor_name: "Linux"
+          version: "1.5.0"
+        module:
+          load_type: "Standard"
+          load_type_id: 1
+        severity: "Informational"
+        severity_id: 1
+        status: "Success"
+        status_id: 1
+        time: 1740378304100
+      pid: 226245
+      post_msg_kv: ""
+      ppid: 1407
+      pre_msg_kv: ""
+      ses: 4
+      sgid: 0
+      subj: "unconfined"
+      success: "yes"
+      suid: 0
+      syscall: 313
+      timestamp: 1.7403783041E12
+      tty: "pts0"
+      type: "SYSCALL"
+      uid: 0
+      usr:
+        id: 0
+        name: "root"
+    message: "type=SYSCALL msg=audit(1740378304.100:2260): arch=c000003e syscall=313 success=yes exit=0 a0=3 a1=0 a2=0 a3=0 items=0 ppid=1407 pid=226245 auid=502 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts0 ses=4 comm=\"insmod\" exe=\"/usr/bin/kmod\" subj=unconfined key=\"modules\"\x1dARCH=x86_64 SYSCALL=finit_module AUID=\"lima\" UID=\"root\" GID=\"root\" EUID=\"root\" SUID=\"root\" FSUID=\"root\" EGID=\"root\" SGID=\"root\" FSGID=\"root\""
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1740378304100
