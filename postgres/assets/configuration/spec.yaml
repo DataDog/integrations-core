@@ -28,7 +28,6 @@ files:
     - name: port
       description: The port to use when connecting to PostgreSQL.
       fleet_configurable: true
-      formats: ["port"]
       value:
         type: integer
         display_default: 5432
@@ -66,6 +65,14 @@ files:
       value:
         type: boolean
         example: false
+    - name: fallback_hostname_to_agent
+      description: |
+        Set to `true` to fallback to the agent hostname for the resolved hostname value if the database host cannot
+        be resolved. If set to `false`, the provided database host will be used as the resolved hostname value.
+      value:
+        type: boolean
+        example: true
+        default: true
     - name: database_identifier
       description: |
         Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
