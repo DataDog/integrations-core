@@ -173,7 +173,6 @@ def resolve_db_host(db_host):
     try:
         host_ip = socket.gethostbyname(db_host)
     except (socket.gaierror, UnicodeError) as e:
-        # could be connecting via a unix domain socket
         logger.debug(
             "failed to resolve DB host '%s' due to %r. falling back to: %s",
             db_host,
