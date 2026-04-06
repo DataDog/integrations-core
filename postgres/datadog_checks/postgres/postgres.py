@@ -477,6 +477,9 @@ class PostgreSql(DatabaseCheck):
                 self.statement_samples._job_loop_future.result()
             if self.metadata_samples._job_loop_future:
                 self.metadata_samples._job_loop_future.result()
+            self.statement_samples = None
+            self.statement_metrics = None
+            self.metadata_samples = None
         self._close_db_pool()
 
     def _clean_state(self):
