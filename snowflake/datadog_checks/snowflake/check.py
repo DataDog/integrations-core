@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import closing
 
-import snowflake.connector as sf
-
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_bytes, to_native_string
 from datadog_checks.base.utils.db import QueryManager
 
@@ -165,38 +163,6 @@ class SnowflakeCheck(AgentCheck):
             self.proxy_host,
             self.proxy_port,
         )
-
-        try:
-            conn = sf.connect(
-                user=self._config.user,
-                password=self._config.password,
-                account=self._config.account,
-                database=self._config.database,
-                schema=self._config.schema,
-                warehouse=self._config.warehouse,
-                role=self._config.role,
-                passcode_in_password=self._config.passcode_in_password,
-                passcode=self._config.passcode,
-                client_prefetch_threads=self._config.client_prefetch_threads,
-                login_timeout=self._config.login_timeout,
-                ocsp_response_cache_filename=self._config.ocsp_response_cache_filename,
-                authenticator=self._config.authenticator,
-                token=self.read_token(),
-                private_key_file=self._config.private_key_path,
-                private_key_file_pwd=ensure_bytes(self._config.private_key_password),
-                client_session_keep_alive=self._config.client_keep_alive,
-                proxy_host=self.proxy_host,
-                proxy_port=self.proxy_port,
-                proxy_user=self.proxy_user,
-                proxy_password=self.proxy_password,
-            )
-        except Exception as e:
-            msg = "Unable to connect to Snowflake: {}".format(e)
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
-            self.warning(msg)
-        else:
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
-            self._conn = conn
 
     @AgentCheck.metadata_entrypoint
     def _collect_version(self):
