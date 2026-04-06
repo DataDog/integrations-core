@@ -434,6 +434,10 @@ integration/delinea_secret_server:
 - changed-files:
   - any-glob-to-any-file:
     - delinea_secret_server/**/*
+integration/dell_powerflex:
+- changed-files:
+  - any-glob-to-any-file:
+    - dell_powerflex/**/*
 integration/directory:
 - changed-files:
   - any-glob-to-any-file:
