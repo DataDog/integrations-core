@@ -89,9 +89,13 @@ class Redis(AgentCheck):
         no_cache = is_affirmative(instance_config.get('disable_connection_cache', False))
         key = self._generate_instance_key(instance_config)
 
+        if self._gcp_token_provider and self._gcp_token_provider.is_token_expired():
+            for conn in self.connections.values():
+                conn.connection_pool.disconnect()
+            self.connections.clear()
+
         if no_cache or key not in self.connections:
             try:
-                # Only send useful parameters to the redis client constructor
                 list_params = [
                     'host',
                     'port',
@@ -108,11 +112,13 @@ class Redis(AgentCheck):
                     'ssl_check_hostname',
                 ]
 
-                # Set a default timeout (in seconds) if no timeout is specified in the instance config
                 instance_config['socket_timeout'] = instance_config.get('socket_timeout', 5)
                 connection_params = {k: instance_config[k] for k in list_params if k in instance_config}
-                # If caching is disabled, we overwrite the dictionary value so the old connection
-                # will be closed as soon as the corresponding Python object gets garbage collected
+
+                if self._gcp_token_provider:
+                    connection_params['username'] = self._gcp_token_provider.username
+                    connection_params['password'] = self._gcp_token_provider.get_token()
+
                 self.connections[key] = redis.Redis(**connection_params)
 
             except TypeError:

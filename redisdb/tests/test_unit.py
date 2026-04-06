@@ -336,3 +336,58 @@ class TestGCPIAMInit:
             with caplog.at_level(logging.WARNING):
                 check(instance)
         assert not any("plaintext" in msg for msg in caplog.messages)
+
+
+class TestGCPIAMGetConn:
+    def _make_iam_check(self, check):
+        instance = {
+            'host': 'memorystore.googleapis.com',
+            'port': 6380,
+            'gcp': {'managed_authentication': {'enabled': True}},
+        }
+        mock_provider = MagicMock()
+        mock_provider.username = "default"
+        mock_provider.get_token.return_value = "iam-token-abc"
+        mock_provider.is_token_expired.return_value = False
+        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider', return_value=mock_provider):
+            redis_check = check(instance)
+        redis_check._gcp_token_provider = mock_provider
+        return redis_check, mock_provider
+
+    def test_get_conn_injects_iam_credentials(self, check):
+        redis_check, mock_provider = self._make_iam_check(check)
+        with patch('redis.Redis') as mock_redis_cls:
+            redis_check._get_conn(redis_check.instance)
+            call_kwargs = mock_redis_cls.call_args.kwargs
+            assert call_kwargs['username'] == 'default'
+            assert call_kwargs['password'] == 'iam-token-abc'
+
+    def test_get_conn_evicts_all_connections_when_token_expired(self, check):
+        redis_check, mock_provider = self._make_iam_check(check)
+
+        mock_conn_a = MagicMock()
+        mock_conn_b = MagicMock()
+        redis_check.connections[('memorystore.googleapis.com', 6380, None)] = mock_conn_a
+        redis_check.connections[('memorystore.googleapis.com', 6380, 1)] = mock_conn_b
+
+        mock_provider.is_token_expired.return_value = True
+
+        with patch('redis.Redis'):
+            redis_check._get_conn(redis_check.instance)
+
+        mock_conn_a.connection_pool.disconnect.assert_called_once()
+        mock_conn_b.connection_pool.disconnect.assert_called_once()
+        assert len(redis_check.connections) == 1
+
+    def test_get_conn_does_not_evict_when_token_not_expired(self, check):
+        redis_check, mock_provider = self._make_iam_check(check)
+
+        mock_conn = MagicMock()
+        key = ('memorystore.googleapis.com', 6380, None)
+        redis_check.connections[key] = mock_conn
+        mock_provider.is_token_expired.return_value = False
+
+        with patch('redis.Redis'):
+            redis_check._get_conn(redis_check.instance)
+
+        mock_conn.connection_pool.disconnect.assert_not_called()
