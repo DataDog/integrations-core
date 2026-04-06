@@ -7,6 +7,7 @@
 ***Fixed***:
 
 * Fix logging when using process_isolation parameter. ([#23136](https://github.com/DataDog/integrations-core/pull/23136))
+* Improve compile-time error messages for invalid syntax in DB query extras expressions ([#23140](https://github.com/DataDog/integrations-core/pull/23140))
 
 ## 37.34.0 / 2026-04-01
 
