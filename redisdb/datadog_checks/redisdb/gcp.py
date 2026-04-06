@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import threading
 import time
 
 try:
@@ -16,7 +17,7 @@ except ImportError:
 from datadog_checks.base import ConfigurationError
 
 GCP_SCOPE = "https://www.googleapis.com/auth/cloud-platform"
-TOKEN_TTL = 55 * 60  # 55 minutes; GCP tokens expire at 60
+TOKEN_TTL_SECONDS = 55 * 60  # 55 minutes; GCP tokens expire at 60
 
 
 class GCPIAMTokenProvider:
@@ -50,21 +51,29 @@ class GCPIAMTokenProvider:
         else:
             self._credentials = source_credentials
 
-        self._token_fetched_at: float = 0.0
+        self._lock = threading.Lock()
+        self._token: str | None = None
+        self._expires_at: float = 0.0
 
     @property
     def username(self) -> str:
         return "default"
 
     def get_token(self) -> str:
-        if self.is_token_expired():
-            request = google.auth.transport.requests.Request()
-            self._credentials.refresh(request)
-            self._token_fetched_at = time.monotonic()
-        return self._credentials.token
+        now = time.time()
+        with self._lock:
+            if self._token is None or now >= self._expires_at:
+                self._token, self._expires_at = self._fetch_token()
+            return self._token
+
+    def _fetch_token(self) -> tuple[str, float]:
+        request = google.auth.transport.requests.Request()
+        self._credentials.refresh(request)
+        return self._credentials.token, time.time() + TOKEN_TTL_SECONDS
 
     def is_token_expired(self) -> bool:
-        return time.monotonic() - self._token_fetched_at >= TOKEN_TTL
+        return time.time() >= self._expires_at
 
     def invalidate(self) -> None:
-        self._token_fetched_at = 0.0
+        with self._lock:
+            self._expires_at = 0.0
