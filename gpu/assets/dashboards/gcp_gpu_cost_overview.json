@@ -107,7 +107,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:gcp.cost.amortized{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:g2* OR compute.googleapis.com/machine_spec:a2* OR compute.googleapis.com/machine_spec:a3*) AND $availability-zone AND $team AND $kube_cluster_name} by {compute.googleapis.com/machine_spec}"
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name} by {compute.googleapis.com/machine_spec}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -159,7 +159,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:gcp.cost.amortized{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:g2* OR compute.googleapis.com/machine_spec:a2* OR compute.googleapis.com/machine_spec:a3*) AND $availability-zone AND $team AND $kube_cluster_name} by {google_usage_type}"
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name} by {google_usage_type}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -265,12 +265,12 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query2",
-                      "query": "sum:gcp.cost.amortized{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:g2* OR compute.googleapis.com/machine_spec:a2* OR compute.googleapis.com/machine_spec:a3*) AND NOT google_usage_type:*Commitment* AND $availability-zone AND $team AND $kube_cluster_name}"
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*a3*) AND NOT google_usage_type:*Commitment* AND $availability-zone AND $team AND $kube_cluster_name}"
                     },
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:gcp.cost.amortized{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:g2* OR compute.googleapis.com/machine_spec:a2* OR compute.googleapis.com/machine_spec:a3*) AND $availability-zone AND $team AND $kube_cluster_name}"
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name}"
                     }
                   ],
                   "response_format": "timeseries",
