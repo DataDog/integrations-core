@@ -165,7 +165,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query2",
-                      "query": "sum:all.cost{providername IN (aws) AND aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND aws_cost_type:Usage AND $availability-zone AND $team AND $kube_cluster_name}.rollup(sum, daily)"
+                      "query": "sum:all.cost{providername IN (aws) AND aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND is_aws_ec2_compute_on_demand:true AND $availability-zone AND $team AND $kube_cluster_name}.rollup(sum, daily)"
                     },
                     {
                       "data_source": "cloud_cost",
