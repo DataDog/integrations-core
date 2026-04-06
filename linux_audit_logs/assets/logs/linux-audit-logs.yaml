@@ -570,6 +570,15 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+              sources:
+                - event_id
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `original_timestamp` to `ocsf.metadata.original_time`
               sources:
                 - original_timestamp
@@ -755,6 +764,15 @@ pipeline:
                 - type
               sourceType: attribute
               target: ocsf.metadata.event_code
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+              sources:
+                - event_id
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -1003,6 +1021,15 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+              sources:
+                - event_id
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `original_timestamp` to `ocsf.metadata.original_time`
               sources:
                 - original_timestamp
@@ -1229,6 +1256,15 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+              sources:
+                - event_id
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `original_timestamp` to `ocsf.metadata.original_time`
               sources:
                 - original_timestamp
@@ -1361,6 +1397,15 @@ pipeline:
                 - type
               sourceType: attribute
               target: ocsf.metadata.event_code
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+              sources:
+                - event_id
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -1679,6 +1724,15 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+              sources:
+                - event_id
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
               sources:
                 - ocsf.metadata.product.vendor_name
@@ -1968,6 +2022,15 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+              sources:
+                - event_id
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `msg.exe` to `ocsf.actor.process.path`
               sources:
                 - msg.exe
@@ -2146,6 +2209,15 @@ pipeline:
                 - type
               sourceType: attribute
               target: ocsf.metadata.event_code
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+              sources:
+                - event_id
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -2450,6 +2522,15 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+              sources:
+                - event_id
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `original_timestamp` to `ocsf.metadata.original_time`
               sources:
                 - original_timestamp
@@ -2701,6 +2782,15 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+              sources:
+                - event_id
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `original_timestamp` to `ocsf.metadata.original_time`
               sources:
                 - original_timestamp
@@ -2850,6 +2940,15 @@ pipeline:
                 - type
               sourceType: attribute
               target: ocsf.metadata.event_code
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+              sources:
+                - event_id
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -3052,6 +3151,15 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+              sources:
+                - event_id
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: Map `original_timestamp` to `ocsf.metadata.original_time`
               sources:
                 - original_timestamp
@@ -3191,6 +3299,15 @@ pipeline:
                 - type
               sourceType: attribute
               target: ocsf.metadata.event_code
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+              sources:
+                - event_id
+              sourceType: attribute
+              target: ocsf.metadata.correlation_uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
