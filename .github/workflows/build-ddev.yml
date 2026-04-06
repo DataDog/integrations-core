@@ -97,6 +97,9 @@ jobs:
     - define-tags
     - python-artifacts
     runs-on: ${{ matrix.job.os }}
+    permissions:
+      # needed for dd-sts
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
