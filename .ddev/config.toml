@@ -97,6 +97,9 @@ requests-ntlm = ['ISC']
 requests-unixsocket2 = ['ISC']
 # https://github.com/rethinkdb/rethinkdb-python/blob/master/LICENSE
 rethinkdb = ['Apache-2.0']
+# https://github.com/ijl/orjson/blob/master/LICENSE-APACHE
+# https://github.com/ijl/orjson/blob/master/LICENSE-MIT
+orjson = ['Apache-2.0', 'MIT', 'MPL-2.0']
 # https://github.com/python-semver/python-semver/blob/master/LICENSE.txt
 semver = ['BSD-3-Clause']
 # https://github.com/simplejson/simplejson/blob/master/LICENSE.txt
