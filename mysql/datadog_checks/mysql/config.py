@@ -18,6 +18,7 @@ class MySQLConfig(object):
         self.exclude_hostname = instance.get("exclude_hostname", False)
         self.host = instance.get('host', instance.get('server', ''))
         self.port = int(instance.get('port', 0))
+        self.fallback_hostname_to_agent = is_affirmative(instance.get('fallback_hostname_to_agent', True))
         self.reported_hostname = instance.get('reported_hostname', '')
         self.mysql_sock = instance.get('sock', '')
         self.defaults_file = instance.get('defaults_file', '')

@@ -88,6 +88,10 @@ def instance_exclude_hostname():
     return False
 
 
+def instance_fallback_hostname_to_agent():
+    return True
+
+
 def instance_host():
     return 'localhost'
 

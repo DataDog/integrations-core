@@ -362,7 +362,7 @@ class MySql(DatabaseCheck):
         return self._events_wait_current_enabled
 
     def resolve_db_host(self):
-        return agent_host_resolver(self._config.host)
+        return agent_host_resolver(self._config.host, self._config.fallback_hostname_to_agent)
 
     def _get_debug_tags(self):
         return ['agent_hostname:{}'.format(datadog_agent.get_hostname())]

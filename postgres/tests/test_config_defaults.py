@@ -36,6 +36,7 @@ EXPECTED_DEFAULTS = {
     # === Identification ===
     'reported_hostname': None,
     'exclude_hostname': False,
+    'fallback_hostname_to_agent': True,
     'data_directory': '/usr/local/pgsql/data',
     'database_identifier': {
         'template': '$resolved_hostname',

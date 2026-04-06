@@ -74,6 +74,14 @@ files:
       value:
         type: string
         example: master
+    - name: fallback_hostname_to_agent
+      description: |
+        Set to `true` to fallback to the agent hostname for the resolved hostname value if the database host cannot
+        be resolved. If set to `false`, the provided database host will be used as the resolved hostname value.
+      value:
+        type: boolean
+        example: true
+        default: true
     - name: reported_hostname
       description: |
         Set the reported hostname for this instance. This value overrides the hostname detected by the Agent

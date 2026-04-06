@@ -640,7 +640,7 @@ class PostgreSql(DatabaseCheck):
         return self._database_hostname
 
     def resolve_db_host(self):
-        return agent_host_resolver(self._config.host)
+        return agent_host_resolver(self._config.host, self._config.fallback_hostname_to_agent)
 
     def _run_query_scope(self, scope, is_custom_metrics, cols, descriptors, dbname=None):
         if scope is None:

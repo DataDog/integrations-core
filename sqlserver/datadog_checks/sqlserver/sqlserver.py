@@ -328,7 +328,7 @@ class SQLServer(DatabaseCheck):
         return self.host_and_port[1]
 
     def resolve_db_host(self):
-        return agent_host_resolver(self.host)
+        return agent_host_resolver(self.host, self._config.fallback_hostname_to_agent)
 
     @property
     def tags(self):
