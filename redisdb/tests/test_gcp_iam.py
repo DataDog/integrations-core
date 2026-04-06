@@ -113,7 +113,7 @@ class TestGCPIAMTokenProviderTokenLifecycle:
             assert token == "test-iam-token-123"
 
     def test_get_token_refreshes_after_ttl_expires(self, mock_google_auth):
-        from datadog_checks.redisdb.gcp import GCPIAMTokenProvider, TOKEN_TTL
+        from datadog_checks.redisdb.gcp import TOKEN_TTL, GCPIAMTokenProvider
 
         with patch("datadog_checks.redisdb.gcp.google.auth.transport.requests.Request"):
             provider = GCPIAMTokenProvider()

@@ -264,6 +264,7 @@ class TestGCPIAMInit:
         instance = {
             'host': 'memorystore.googleapis.com',
             'port': 6380,
+            'ssl': True,
             'gcp': {'managed_authentication': {'enabled': True}},
         }
         with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider') as mock_provider_cls:
@@ -275,6 +276,7 @@ class TestGCPIAMInit:
         instance = {
             'host': 'memorystore.googleapis.com',
             'port': 6380,
+            'ssl': True,
             'gcp': {
                 'managed_authentication': {
                     'enabled': True,
@@ -283,7 +285,7 @@ class TestGCPIAMInit:
             },
         }
         with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider') as mock_provider_cls:
-            redis_check = check(instance)
+            check(instance)
             mock_provider_cls.assert_called_once_with('datadog@my-project.iam.gserviceaccount.com')
 
     def test_gcp_iam_provider_is_none_when_disabled(self, check, redis_instance):
@@ -312,20 +314,17 @@ class TestGCPIAMInit:
             with pytest.raises(ConfigurationError, match="username"):
                 check(instance)
 
-    def test_ssl_warning_when_iam_enabled_without_ssl(self, check, caplog):
-        import logging
+    def test_ssl_required_when_iam_enabled_without_ssl(self, check):
         instance = {
             'host': 'memorystore.googleapis.com',
             'port': 6380,
             'gcp': {'managed_authentication': {'enabled': True}},
         }
         with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider'):
-            with caplog.at_level(logging.WARNING):
+            with pytest.raises(ConfigurationError, match="SSL"):
                 check(instance)
-        assert any("plaintext" in msg for msg in caplog.messages)
 
-    def test_no_ssl_warning_when_ssl_is_set(self, check, caplog):
-        import logging
+    def test_no_error_when_ssl_is_set(self, check):
         instance = {
             'host': 'memorystore.googleapis.com',
             'port': 6380,
@@ -333,9 +332,7 @@ class TestGCPIAMInit:
             'gcp': {'managed_authentication': {'enabled': True}},
         }
         with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider'):
-            with caplog.at_level(logging.WARNING):
-                check(instance)
-        assert not any("plaintext" in msg for msg in caplog.messages)
+            check(instance)  # should not raise
 
 
 class TestGCPIAMGetConn:
@@ -343,6 +340,7 @@ class TestGCPIAMGetConn:
         instance = {
             'host': 'memorystore.googleapis.com',
             'port': 6380,
+            'ssl': True,
             'gcp': {'managed_authentication': {'enabled': True}},
         }
         mock_provider = MagicMock()
@@ -398,6 +396,7 @@ class TestGCPIAMCheckDbRetry:
         instance = {
             'host': 'memorystore.googleapis.com',
             'port': 6380,
+            'ssl': True,
             'gcp': {'managed_authentication': {'enabled': True}},
         }
         mock_provider = MagicMock()
@@ -437,15 +436,19 @@ class TestGCPIAMCheckDbRetry:
                 with pytest.raises(redis.AuthenticationError):
                     redis_check._check_db()
 
-    def test_force_iam_reconnect_disconnects_and_invalidates(self, check):
+    def test_force_iam_reconnect_disconnects_all_and_invalidates(self, check):
         redis_check, mock_provider = self._make_iam_check(check)
 
-        mock_conn = MagicMock()
-        key = redis_check._generate_instance_key(redis_check.instance)
-        redis_check.connections[key] = mock_conn
+        mock_conn_a = MagicMock()
+        mock_conn_b = MagicMock()
+        key_a = ('host-a', 6379, 0)
+        key_b = ('host-b', 6380, 1)
+        redis_check.connections[key_a] = mock_conn_a
+        redis_check.connections[key_b] = mock_conn_b
 
         redis_check._force_iam_reconnect()
 
-        mock_conn.connection_pool.disconnect.assert_called_once()
-        assert key not in redis_check.connections
+        mock_conn_a.connection_pool.disconnect.assert_called_once()
+        mock_conn_b.connection_pool.disconnect.assert_called_once()
+        assert redis_check.connections == {}
         mock_provider.invalidate.assert_called_once()

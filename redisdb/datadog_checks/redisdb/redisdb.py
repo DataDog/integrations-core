@@ -13,7 +13,6 @@ import redis
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.common import round_value
 
-from .gcp import GCPIAMTokenProvider
 from .constants import (
     CLUSTER_INFO_GAUGE_KEYS,
     CONFIG_GAUGE_KEYS,
@@ -25,6 +24,7 @@ from .constants import (
     RATE_KEYS,
     REPL_KEY,
 )
+from .gcp import GCPIAMTokenProvider
 
 
 class Redis(AgentCheck):
@@ -52,9 +52,9 @@ class Redis(AgentCheck):
                     "IAM auth injects credentials automatically."
                 )
             if not self.instance.get('ssl'):
-                self.log.warning(
-                    "GCP IAM auth is enabled but 'ssl' is not set. "
-                    "Tokens will be transmitted in plaintext."
+                raise ConfigurationError(
+                    "GCP IAM auth requires SSL. Set 'ssl: true' in the instance configuration "
+                    "to prevent IAM tokens from being transmitted in plaintext."
                 )
             self._gcp_token_provider = GCPIAMTokenProvider(managed_auth.get('service_account'))
         else:
@@ -146,11 +146,16 @@ class Redis(AgentCheck):
             else:
                 raise
 
+    def _safe_error_message(self, e: Exception) -> str:
+        """Return a sanitized error message, omitting credentials when IAM auth is active."""
+        if self._gcp_token_provider:
+            return type(e).__name__
+        return str(e)
+
     def _force_iam_reconnect(self):
-        key = self._generate_instance_key(self.instance)
-        conn = self.connections.pop(key, None)
-        if conn:
+        for conn in self.connections.values():
             conn.connection_pool.disconnect()
+        self.connections.clear()
         self._gcp_token_provider.invalidate()
 
     def _run_check_db(self):
@@ -175,10 +180,14 @@ class Redis(AgentCheck):
 
             self._collect_metadata(info)
         except ValueError as e:
-            self.service_check('redis.can_connect', AgentCheck.CRITICAL, message=str(e), tags=self.tags)
+            self.service_check(
+                'redis.can_connect', AgentCheck.CRITICAL, message=self._safe_error_message(e), tags=self.tags
+            )
             raise
         except Exception as e:
-            self.service_check('redis.can_connect', AgentCheck.CRITICAL, message=str(e), tags=self.tags)
+            self.service_check(
+                'redis.can_connect', AgentCheck.CRITICAL, message=self._safe_error_message(e), tags=self.tags
+            )
             raise
         else:
             self.service_check('redis.can_connect', AgentCheck.OK, tags=tags)
