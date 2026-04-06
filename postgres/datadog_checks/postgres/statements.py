@@ -164,6 +164,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             dbms="postgres",
             rate_limit=1 / float(collection_interval),
             job_name="query-metrics",
+            use_direct_thread=True,
         )
         self._check = check
         self._metrics_collection_interval = collection_interval

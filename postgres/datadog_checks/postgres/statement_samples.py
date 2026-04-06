@@ -163,6 +163,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="query-samples",
+            use_direct_thread=True,
         )
         self._check = check
         self._config = config
