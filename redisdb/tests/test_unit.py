@@ -2,12 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from unittest.mock import MagicMock, patch
 
 import mock
 import pytest
 import redis
 from redis.exceptions import ResponseError
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 
 pytestmark = pytest.mark.unit
@@ -255,3 +257,82 @@ def test_info_command_fallback(check, redis_instance, caplog):
             redis_check._check_db()
     mock_conn.info.assert_has_calls((mock.call(section='all'), mock.call(), mock.call('keyspace')))
     assert any(msg.startswith('`INFO all` command failed, falling back to `INFO`:') for msg in caplog.messages)
+
+
+class TestGCPIAMInit:
+    def test_gcp_iam_provider_created_when_enabled(self, check):
+        instance = {
+            'host': 'memorystore.googleapis.com',
+            'port': 6380,
+            'gcp': {'managed_authentication': {'enabled': True}},
+        }
+        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider') as mock_provider_cls:
+            redis_check = check(instance)
+            mock_provider_cls.assert_called_once_with(None)
+            assert redis_check._gcp_token_provider is mock_provider_cls.return_value
+
+    def test_gcp_iam_provider_uses_service_account_when_set(self, check):
+        instance = {
+            'host': 'memorystore.googleapis.com',
+            'port': 6380,
+            'gcp': {
+                'managed_authentication': {
+                    'enabled': True,
+                    'service_account': 'datadog@my-project.iam.gserviceaccount.com',
+                }
+            },
+        }
+        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider') as mock_provider_cls:
+            redis_check = check(instance)
+            mock_provider_cls.assert_called_once_with('datadog@my-project.iam.gserviceaccount.com')
+
+    def test_gcp_iam_provider_is_none_when_disabled(self, check, redis_instance):
+        redis_check = check(redis_instance)
+        assert redis_check._gcp_token_provider is None
+
+    def test_raises_config_error_when_password_and_iam_both_set(self, check):
+        instance = {
+            'host': 'memorystore.googleapis.com',
+            'port': 6380,
+            'password': 'secret',
+            'gcp': {'managed_authentication': {'enabled': True}},
+        }
+        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider'):
+            with pytest.raises(ConfigurationError, match="password"):
+                check(instance)
+
+    def test_raises_config_error_when_username_and_iam_both_set(self, check):
+        instance = {
+            'host': 'memorystore.googleapis.com',
+            'port': 6380,
+            'username': 'someuser',
+            'gcp': {'managed_authentication': {'enabled': True}},
+        }
+        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider'):
+            with pytest.raises(ConfigurationError, match="username"):
+                check(instance)
+
+    def test_ssl_warning_when_iam_enabled_without_ssl(self, check, caplog):
+        import logging
+        instance = {
+            'host': 'memorystore.googleapis.com',
+            'port': 6380,
+            'gcp': {'managed_authentication': {'enabled': True}},
+        }
+        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider'):
+            with caplog.at_level(logging.WARNING):
+                check(instance)
+        assert any("plaintext" in msg for msg in caplog.messages)
+
+    def test_no_ssl_warning_when_ssl_is_set(self, check, caplog):
+        import logging
+        instance = {
+            'host': 'memorystore.googleapis.com',
+            'port': 6380,
+            'ssl': True,
+            'gcp': {'managed_authentication': {'enabled': True}},
+        }
+        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider'):
+            with caplog.at_level(logging.WARNING):
+                check(instance)
+        assert not any("plaintext" in msg for msg in caplog.messages)

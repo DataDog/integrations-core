@@ -13,6 +13,7 @@ import redis
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.common import round_value
 
+from .gcp import GCPIAMTokenProvider
 from .constants import (
     CLUSTER_INFO_GAUGE_KEYS,
     CONFIG_GAUGE_KEYS,
@@ -42,6 +43,22 @@ class Redis(AgentCheck):
         self.collect_client_metrics = is_affirmative(self.instance.get('collect_client_metrics', False))
         if ("host" not in self.instance or "port" not in self.instance) and "unix_socket_path" not in self.instance:
             raise ConfigurationError("You must specify a host/port couple or a unix_socket_path")
+        gcp_config = self.instance.get('gcp', {})
+        managed_auth = gcp_config.get('managed_authentication', {})
+        if is_affirmative(managed_auth.get('enabled', False)):
+            if self.instance.get('username') or self.instance.get('password'):
+                raise ConfigurationError(
+                    "Cannot set 'username' or 'password' alongside gcp.managed_authentication. "
+                    "IAM auth injects credentials automatically."
+                )
+            if not self.instance.get('ssl'):
+                self.log.warning(
+                    "GCP IAM auth is enabled but 'ssl' is not set. "
+                    "Tokens will be transmitted in plaintext."
+                )
+            self._gcp_token_provider = GCPIAMTokenProvider(managed_auth.get('service_account'))
+        else:
+            self._gcp_token_provider = None
 
     def get_library_versions(self):
         return {"redis": redis.__version__}
