@@ -52,7 +52,7 @@ tests:
           type_id: 0
         metadata:
           event_code: "USER_MAC_CONFIG_CHANGE"
-          correlation_uid: "6532"
+          uid: "6532"
           original_time: "1.736329118112E9"
           product:
             name: "Auditd"
@@ -133,7 +133,7 @@ tests:
           ip: "10.10.10.10"
         metadata:
           event_code: "USER_AUTH"
-          correlation_uid: "1778"
+          uid: "1778"
           original_time: "1.740139921923E9"
           product:
             name: "Auditd"
@@ -185,7 +185,7 @@ tests:
         class_uid: 0
         metadata:
           event_code: "MAC_STATUS"
-          correlation_uid: "1674"
+          uid: "1674"
           original_time: "1.740386730535E9"
           product:
             name: "Auditd"
@@ -231,7 +231,7 @@ tests:
         class_uid: 0
         metadata:
           event_code: "AVC"
-          correlation_uid: "182"
+          uid: "182"
           original_time: "1.669185724533E9"
           product:
             name: "Auditd"
@@ -284,7 +284,7 @@ tests:
         class_uid: 0
         metadata:
           event_code: "USER_SELINUX_ERR"
-          correlation_uid: "198"
+          uid: "198"
           original_time: "1.669714331555E9"
           product:
             name: "Auditd"
@@ -337,7 +337,7 @@ tests:
         class_uid: 0
         metadata:
           event_code: "USER_ROLE_CHANGE"
-          correlation_uid: "2606"
+          uid: "2606"
           original_time: "1.741000050325E9"
           product:
             name: "Auditd"
@@ -383,7 +383,7 @@ tests:
         class_uid: 0
         metadata:
           event_code: "MAC_CONFIG_CHANGE"
-          correlation_uid: "121"
+          uid: "121"
           original_time: "1.678360880644E9"
           product:
             name: "Auditd"
@@ -456,7 +456,7 @@ tests:
           uid: "1004"
         metadata:
           event_code: "ADD_GROUP"
-          correlation_uid: "5766"
+          uid: "5766"
           original_time: "1.740980591704E9"
           product:
             name: "Auditd"
@@ -535,7 +535,7 @@ tests:
           name: "testuser"
         metadata:
           event_code: "DEL_GROUP"
-          correlation_uid: "2333"
+          uid: "2333"
           original_time: "1.765794074279E9"
           product:
             name: "Auditd"
@@ -611,7 +611,7 @@ tests:
           type_id: 0
         metadata:
           event_code: "ADD_USER"
-          correlation_uid: "345"
+          uid: "345"
           original_time: "1.635509157089E9"
           product:
             name: "Auditd"
@@ -690,7 +690,7 @@ tests:
           type_id: 0
         metadata:
           event_code: "DEL_USER"
-          correlation_uid: "2332"
+          uid: "2332"
           original_time: "1.740379094277E9"
           product:
             name: "Auditd"
@@ -772,7 +772,7 @@ tests:
           type_id: 0
         metadata:
           event_code: "USER_CHAUTHTOK"
-          correlation_uid: "347"
+          uid: "347"
           original_time: "1.63550918986E9"
           product:
             name: "Auditd"
@@ -858,7 +858,7 @@ tests:
           type_id: 0
         metadata:
           event_code: "ROLE_ASSIGN"
-          correlation_uid: "879"
+          uid: "879"
           original_time: "1.74072094567E9"
           product:
             name: "Auditd"
@@ -946,7 +946,7 @@ tests:
           type_id: 0
         metadata:
           event_code: "ROLE_REMOVE"
-          correlation_uid: "1002"
+          uid: "1002"
           original_time: "1.740130059788E9"
           product:
             name: "Auditd"
@@ -1023,7 +1023,7 @@ tests:
           uid: "50314523"
         metadata:
           event_code: "PATH"
-          correlation_uid: "2247"
+          uid: "2247"
           original_time: "1.740378301873E9"
           product:
             name: "Auditd"
@@ -1089,7 +1089,7 @@ tests:
           uid: "50314523"
         metadata:
           event_code: "PATH"
-          correlation_uid: "2247"
+          uid: "2247"
           original_time: "1.740378301873E9"
           product:
             name: "Auditd"
@@ -1154,7 +1154,7 @@ tests:
           uid: "50314523"
         metadata:
           event_code: "PATH"
-          correlation_uid: "2247"
+          uid: "2247"
           original_time: "1.740378301873E9"
           product:
             name: "Auditd"
@@ -1220,7 +1220,7 @@ tests:
           uid: "50314523"
         metadata:
           event_code: "PATH"
-          correlation_uid: "2247"
+          uid: "2247"
           original_time: "1.740378301873E9"
           product:
             name: "Auditd"
@@ -1260,7 +1260,7 @@ tests:
         class_uid: 0
         metadata:
           event_code: "DAEMON_CONFIG"
-          correlation_uid: "946"
+          uid: "946"
           original_time: "1.740139921923E9"
           product:
             name: "Auditd"
@@ -1308,7 +1308,7 @@ tests:
         class_uid: 0
         metadata:
           event_code: "DAEMON_ABORT"
-          correlation_uid: "1849"
+          uid: "1849"
           original_time: "1.740139921923E9"
           product:
             name: "Auditd"
@@ -1357,7 +1357,7 @@ tests:
         class_uid: 0
         metadata:
           event_code: "MAC_POLICY_LOAD"
-          correlation_uid: "235"
+          uid: "235"
           original_time: "1.740139921923E9"
           product:
             name: "Auditd"
@@ -1403,7 +1403,7 @@ tests:
         class_uid: 0
         metadata:
           event_code: "CONFIG_CHANGE"
-          correlation_uid: "2361"
+          uid: "2361"
           original_time: "1.740139921923E9"
           product:
             name: "Auditd"
@@ -1456,7 +1456,7 @@ tests:
           type_id: 0
         metadata:
           event_code: "EXECVE"
-          correlation_uid: "2249"
+          uid: "2249"
           original_time: "1.740378302456E9"
           product:
             name: "Auditd"
@@ -1537,7 +1537,7 @@ tests:
           type_id: 0
         metadata:
           event_code: "SYSCALL"
-          correlation_uid: "2250"
+          uid: "2250"
           original_time: "1.740378303123E9"
           product:
             name: "Auditd"
@@ -1617,7 +1617,7 @@ tests:
           name: "Unknown"
         metadata:
           event_code: "SYSCALL"
-          correlation_uid: "354317"
+          uid: "354317"
           original_time: "1.770316388442E9"
           product:
             name: "Auditd"
@@ -1670,7 +1670,7 @@ tests:
           port: 4444
         metadata:
           event_code: "SOCKADDR"
-          correlation_uid: "354317"
+          uid: "354317"
           original_time: "1.770316388442E9"
           product:
             name: "Auditd"
@@ -1751,7 +1751,7 @@ tests:
           type_id: 0
         metadata:
           event_code: "SYSCALL"
-          correlation_uid: "2252"
+          uid: "2252"
           original_time: "1.740378303456E9"
           product:
             name: "Auditd"
@@ -1847,7 +1847,7 @@ tests:
           type_id: 0
         metadata:
           event_code: "SYSCALL"
-          correlation_uid: "2253"
+          uid: "2253"
           original_time: "1.740378303789E9"
           product:
             name: "Auditd"
@@ -1940,7 +1940,7 @@ tests:
           type_id: 0
         metadata:
           event_code: "SYSCALL"
-          correlation_uid: "2260"
+          uid: "2260"
           original_time: "1.7403783041E9"
           product:
             name: "Auditd"

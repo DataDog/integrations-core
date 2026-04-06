@@ -570,11 +570,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+            - name: Map `event_id` to `ocsf.metadata.uid`
               sources:
                 - event_id
               sourceType: attribute
-              target: ocsf.metadata.correlation_uid
+              target: ocsf.metadata.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -768,11 +768,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+            - name: Map `event_id` to `ocsf.metadata.uid`
               sources:
                 - event_id
               sourceType: attribute
-              target: ocsf.metadata.correlation_uid
+              target: ocsf.metadata.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -1021,11 +1021,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+            - name: Map `event_id` to `ocsf.metadata.uid`
               sources:
                 - event_id
               sourceType: attribute
-              target: ocsf.metadata.correlation_uid
+              target: ocsf.metadata.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -1256,11 +1256,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+            - name: Map `event_id` to `ocsf.metadata.uid`
               sources:
                 - event_id
               sourceType: attribute
-              target: ocsf.metadata.correlation_uid
+              target: ocsf.metadata.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -1401,11 +1401,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+            - name: Map `event_id` to `ocsf.metadata.uid`
               sources:
                 - event_id
               sourceType: attribute
-              target: ocsf.metadata.correlation_uid
+              target: ocsf.metadata.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -1724,11 +1724,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+            - name: Map `event_id` to `ocsf.metadata.uid`
               sources:
                 - event_id
               sourceType: attribute
-              target: ocsf.metadata.correlation_uid
+              target: ocsf.metadata.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -2022,11 +2022,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+            - name: Map `event_id` to `ocsf.metadata.uid`
               sources:
                 - event_id
               sourceType: attribute
-              target: ocsf.metadata.correlation_uid
+              target: ocsf.metadata.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -2213,11 +2213,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+            - name: Map `event_id` to `ocsf.metadata.uid`
               sources:
                 - event_id
               sourceType: attribute
-              target: ocsf.metadata.correlation_uid
+              target: ocsf.metadata.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -2522,11 +2522,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+            - name: Map `event_id` to `ocsf.metadata.uid`
               sources:
                 - event_id
               sourceType: attribute
-              target: ocsf.metadata.correlation_uid
+              target: ocsf.metadata.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -2782,11 +2782,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+            - name: Map `event_id` to `ocsf.metadata.uid`
               sources:
                 - event_id
               sourceType: attribute
-              target: ocsf.metadata.correlation_uid
+              target: ocsf.metadata.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -2944,11 +2944,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+            - name: Map `event_id` to `ocsf.metadata.uid`
               sources:
                 - event_id
               sourceType: attribute
-              target: ocsf.metadata.correlation_uid
+              target: ocsf.metadata.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -3151,11 +3151,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+            - name: Map `event_id` to `ocsf.metadata.uid`
               sources:
                 - event_id
               sourceType: attribute
-              target: ocsf.metadata.correlation_uid
+              target: ocsf.metadata.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
@@ -3303,11 +3303,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `event_id` to `ocsf.metadata.correlation_uid`
+            - name: Map `event_id` to `ocsf.metadata.uid`
               sources:
                 - event_id
               sourceType: attribute
-              target: ocsf.metadata.correlation_uid
+              target: ocsf.metadata.uid
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
