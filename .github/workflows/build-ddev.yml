@@ -65,6 +65,12 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Get Datadog credentials
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-core
+
     - name: Tag Job
       uses: ./.github/actions/tag-job
       if: ${{ github.event.pull_request.head.repo.fork != true }}
