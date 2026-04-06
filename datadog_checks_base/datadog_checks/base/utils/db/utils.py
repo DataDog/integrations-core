@@ -272,9 +272,9 @@ def obfuscate_sql_with_metadata(query, options=None, replace_null_character=Fals
 
 
 class DBMAsyncJob(object):
-    # Set an arbitrary high limit so that dbm async jobs (which aren't CPU bound) don't
-    # get artificially limited by the default max_workers count. Note that since threads are
-    # created lazily, it's safe to set a high maximum
+    # The shared ThreadPoolExecutor is the legacy threading backend. It is retained for
+    # backwards compatibility; integrations should migrate to use_direct_thread=True which
+    # spawns a dedicated non-daemon thread per job that is cleaned up when the job exits.
     executor = ThreadPoolExecutor(100000)
 
     """
@@ -302,6 +302,7 @@ class DBMAsyncJob(object):
         # Defaults to [None] during init so that if no features are specified there will
         # still be health events submitted for the job
         features=None,
+        use_direct_thread=False,
     ):
         self._check = check
         self._config_host = config_host
@@ -311,6 +312,8 @@ class DBMAsyncJob(object):
         # map[dbname -> psycopg connection]
         self._log = get_check_logger()
         self._job_loop_future = None
+        self._job_loop_thread = None
+        self._use_direct_thread = use_direct_thread
         self._cancel_event = threading.Event()
         self._tags = None
         self._tags_no_db = None
@@ -336,6 +339,38 @@ class DBMAsyncJob(object):
         """
         self._cancel_event.set()
 
+    def join(self, timeout: float | None = None) -> None:
+        """Block until the job loop thread exits or timeout expires.
+
+        Safe to call when no job loop is running (returns immediately).
+        """
+        if self._use_direct_thread:
+            if self._job_loop_thread is not None and self._job_loop_thread.is_alive():
+                self._job_loop_thread.join(timeout=timeout)
+                if self._job_loop_thread.is_alive():
+                    self._log.warning(
+                        "[%s] Timed out waiting for job loop thread to stop after %ss",
+                        self._job_name,
+                        timeout,
+                    )
+        else:
+            if self._job_loop_future is not None:
+                self._job_loop_future.result(timeout=timeout)
+
+    @property
+    def is_running(self) -> bool:
+        """Return True if the job loop is currently executing."""
+        if self._use_direct_thread:
+            return self._job_loop_thread is not None and self._job_loop_thread.is_alive()
+        return self._job_loop_future is not None and self._job_loop_future.running()
+
+    @property
+    def is_started(self) -> bool:
+        """Return True if a job loop has been started (may or may not still be running)."""
+        if self._use_direct_thread:
+            return self._job_loop_thread is not None
+        return self._job_loop_future is not None
+
     def run_job_loop(self, tags):
         """
         :param tags:
@@ -354,8 +389,15 @@ class DBMAsyncJob(object):
         if self._run_sync or is_affirmative(os.environ.get('DBM_THREADED_JOB_RUN_SYNC', "false")):
             self._log.debug("Running threaded job synchronously. job=%s", self._job_name)
             self._run_sync_job_rate_limited()
-        elif self._job_loop_future is None or not self._job_loop_future.running():
-            self._job_loop_future = DBMAsyncJob.executor.submit(self._job_loop)
+        elif not self.is_running:
+            if self._use_direct_thread:
+                self._job_loop_thread = threading.Thread(
+                    target=self._job_loop,
+                    name="dbm-{}-{}".format(self._dbms, self._job_name),
+                )
+                self._job_loop_thread.start()
+            else:
+                self._job_loop_future = DBMAsyncJob.executor.submit(self._job_loop)
         else:
             if (
                 hasattr(self._check, 'health')

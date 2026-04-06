@@ -161,15 +161,15 @@ class UnexpectedExceptionForTests(Exception):
 
 @pytest.mark.parametrize("exception_expected", [True, False])
 @pytest.mark.parametrize("enable_health", [True, False])
-def test_dbm_async_job_unknown_error(aggregator, exception_expected, enable_health):
+def test_dbm_async_job_unknown_error(aggregator, exception_expected, enable_health, use_direct_thread):
     check = AgentCheck()
     if enable_health:
         check.health = Health(check)
     exception = DBExceptionForTests() if exception_expected else UnexpectedExceptionForTests()
-    job = JobForTesting(check, exception=exception)
+    job = JobForTesting(check, exception=exception, use_direct_thread=use_direct_thread)
     try:
         job.run_job_loop(["hello:there"])
-        job._job_loop_future.result(timeout=10)
+        job.join(timeout=10)
         job.cancel()
     except Exception as e:
         assert isinstance(e, type(exception))
@@ -312,6 +312,7 @@ class JobForTesting(DBMAsyncJob):
         job_execution_time=0,
         max_sleep_chunk_s=5,
         exception=None,
+        use_direct_thread=False,
     ):
         super(JobForTesting, self).__init__(
             check,
@@ -325,6 +326,7 @@ class JobForTesting(DBMAsyncJob):
             max_sleep_chunk_s=max_sleep_chunk_s,
             job_name="test-job",
             shutdown_callback=self.test_shutdown,
+            use_direct_thread=use_direct_thread,
         )
         self._job_execution_time = job_execution_time
         self.count_executed = 0
@@ -353,26 +355,31 @@ def stop_orphaned_threads():
     DBMAsyncJob.executor = ThreadPoolExecutor()
 
 
+@pytest.fixture(params=[False, True], ids=["executor", "direct-thread"])
+def use_direct_thread(request):
+    return request.param
+
+
 @pytest.mark.parametrize("enabled", [True, False])
-def test_dbm_async_job_enabled(enabled):
+def test_dbm_async_job_enabled(enabled, use_direct_thread):
     check = AgentCheck()
-    job = JobForTesting(check, enabled=enabled)
+    job = JobForTesting(check, enabled=enabled, use_direct_thread=use_direct_thread)
     job.run_job_loop([])
     if enabled:
-        assert job._job_loop_future is not None
+        assert job.is_started
         job.cancel()
-        job._job_loop_future.result()
+        job.join(timeout=10)
     else:
-        assert job._job_loop_future is None
+        assert not job.is_started
 
 
-def test_dbm_async_job_cancel(aggregator):
-    job = JobForTesting(AgentCheck())
+def test_dbm_async_job_cancel(aggregator, use_direct_thread):
+    job = JobForTesting(AgentCheck(), use_direct_thread=use_direct_thread)
     tags = ["hello:there"]
     job.run_job_loop(tags)
     job.cancel()
-    job._job_loop_future.result()
-    assert not job._job_loop_future.running(), "thread should be stopped"
+    job.join(timeout=10)
+    assert not job.is_running, "thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
     expected_tags = tags + ['job:test-job']
@@ -380,16 +387,16 @@ def test_dbm_async_job_cancel(aggregator):
     aggregator.assert_metric("dbm.async_job_test.shutdown")
 
 
-def test_dbm_async_job_cancel_returns_early_on_long_sleep():
+def test_dbm_async_job_cancel_returns_early_on_long_sleep(use_direct_thread):
     # Configure a very low rate so the sleep interval would be ~60s without cancellation
-    job = JobForTesting(AgentCheck(), rate_limit=1 / 60.0, max_sleep_chunk_s=0.1)
+    job = JobForTesting(AgentCheck(), rate_limit=1 / 60.0, max_sleep_chunk_s=0.1, use_direct_thread=use_direct_thread)
     job.run_job_loop([])
     # Allow the thread to start and enter the sleep window
     time.sleep(0.2)
     start = time.time()
     job.cancel()
     # Should finish well before the full ~10s timeout and 60s rate-limiter interval
-    job._job_loop_future.result(timeout=10)
+    job.join(timeout=10)
     elapsed = time.time() - start
     assert elapsed < 10, "Job did not cancel before the full sleep interval"
 
@@ -397,7 +404,7 @@ def test_dbm_async_job_cancel_returns_early_on_long_sleep():
 def test_dbm_async_job_run_sync(aggregator):
     job = JobForTesting(AgentCheck(), run_sync=True)
     job.run_job_loop([])
-    assert job._job_loop_future is None
+    assert not job.is_started
     aggregator.assert_metric("dbm.async_job_test.run_job")
 
 
@@ -424,13 +431,13 @@ def test_dbm_sync_long_job_rate_limit(aggregator):
     assert job.count_executed == 2
 
 
-def test_dbm_async_job_rate_limit(aggregator):
+def test_dbm_async_job_rate_limit(aggregator, use_direct_thread):
     # test the main collection loop rate limit
     rate_limit = 10
     limit_time = 1.0
     sleep_time = 0.9  # just below what the rate limit should hit to buffer before cancelling the loop
 
-    job = JobForTesting(AgentCheck(), rate_limit=rate_limit)
+    job = JobForTesting(AgentCheck(), rate_limit=rate_limit, use_direct_thread=use_direct_thread)
     job.run_job_loop([])
 
     time.sleep(sleep_time)
@@ -441,11 +448,34 @@ def test_dbm_async_job_rate_limit(aggregator):
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 
 
-def test_dbm_async_job_inactive_stop(aggregator):
-    job = JobForTesting(AgentCheck(), rate_limit=10, min_collection_interval=1)
+def test_dbm_async_job_inactive_stop(aggregator, use_direct_thread):
+    job = JobForTesting(AgentCheck(), rate_limit=10, min_collection_interval=1, use_direct_thread=use_direct_thread)
     job.run_job_loop([])
-    job._job_loop_future.result()
+    job.join(timeout=10)
     aggregator.assert_metric("dd.test-dbms.async_job.inactive_stop", tags=['job:test-job'])
+
+
+def test_dbm_direct_thread_cleanup_after_cancel():
+    """Verify that direct-thread mode cleans up the thread after cancel (no lingering idle threads)."""
+    job = JobForTesting(AgentCheck(), use_direct_thread=True)
+    job.run_job_loop([])
+    assert job.is_running
+    thread = job._job_loop_thread
+    assert thread.is_alive()
+    job.cancel()
+    job.join(timeout=10)
+    assert not thread.is_alive(), "thread should be fully terminated after cancel"
+    assert not job.is_running
+
+
+def test_dbm_direct_thread_cleanup_after_inactive_stop():
+    """Verify that direct-thread mode cleans up the thread after inactivity stop."""
+    job = JobForTesting(AgentCheck(), rate_limit=10, min_collection_interval=1, use_direct_thread=True)
+    job.run_job_loop([])
+    thread = job._job_loop_thread
+    assert thread.is_alive()
+    job.join(timeout=10)
+    assert not thread.is_alive(), "thread should be fully terminated after inactivity stop"
 
 
 @pytest.mark.parametrize(
