@@ -588,7 +588,7 @@
             "id": 8701257412207113,
             "definition": {
               "type": "note",
-              "content": "AWS GPU instances include the **GPU instance** and **Machine Learning ASIC Instances** families (p3, p4, p5, g4, g5, g6, inf1, inf2, trn1, dl1, etc.). Coverage shows On-Demand vs committed spend. OD% tracks how much GPU spend is at on-demand rates.",
+              "content": "AWS GPU instances include the **GPU instance** and **Machine Learning ASIC Instances** families (p3, p4, p5, g4, g5, g6, inf1, inf2, trn1, dl1, etc.). Coverage shows On-Demand vs committed spend. On-demand % tracks how much GPU spend is at on-demand rates.",
               "background_color": "green",
               "font_size": "14",
               "text_align": "left",
@@ -971,7 +971,7 @@
             "id": 3669468623318367,
             "definition": {
               "type": "note",
-              "content": "Azure GPU VMs are identified by **N-series** meter subcategories (NC, ND, NV families). Coverage is broken down by pricing term: On-Demand, Savings Plan, and Spot. OD% tracks the proportion of GPU spend at on-demand pricing.",
+              "content": "Azure GPU VMs are identified by **N-series** meter subcategories (NC, ND, NV families). Coverage is broken down by pricing term: On-Demand, Savings Plan, and Spot. On-demand % tracks the proportion of GPU spend at on-demand pricing.",
               "background_color": "green",
               "font_size": "14",
               "text_align": "left",
@@ -1938,7 +1938,7 @@
           {
             "id": 7986461429137076,
             "definition": {
-              "title": "Total Cost of Unused GPUs (Monthly)",
+              "title": "Total Cost of Unused GPU (Monthly)",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
