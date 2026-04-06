@@ -1,0 +1,408 @@
+{
+  "title": "Azure GPU Cost Overview",
+  "description": "Monitor Azure GPU compute spend including N-series VM breakdowns, pricing term coverage, and cost trends.",
+  "widgets": [
+    {
+      "id": 5720001287453536,
+      "definition": {
+        "title": "Azure GPU Spend",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7908004665252821,
+            "definition": {
+              "title": "Azure GPU Spend",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $availability-zone AND $team AND $kube_cluster_name}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 3669468623318367,
+            "definition": {
+              "type": "note",
+              "content": "Azure GPU VMs are identified by **N-series** meter subcategories (NC, ND, NV families). Coverage is broken down by pricing term: On-Demand, Savings Plan, and Spot. On-demand % tracks the proportion of GPU spend at on-demand pricing.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "has_padding": true
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 2
+            }
+          },
+          {
+            "id": 7055660677339134,
+            "definition": {
+              "title": "Azure GPU Spend by Coverage Type (Daily)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $availability-zone AND $team AND $kube_cluster_name} by {azure_pricing_term}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "color_order": "shuffled",
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7163297225224222,
+            "definition": {
+              "title": "Azure On-Demand % of GPU Spend",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "On-Demand %",
+                      "formula": "100 * (query2 / query1)",
+                      "style": {
+                        "palette": "blue",
+                        "palette_index": 4
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND azure_pricing_term:OnDemand AND $availability-zone AND $team AND $kube_cluster_name}.rollup(sum, daily)"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $availability-zone AND $team AND $kube_cluster_name}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1817636670988685,
+            "definition": {
+              "title": "Azure GPU Spend by Instance Type",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND azure_pricing_term:OnDemand AND $availability-zone AND $team AND $kube_cluster_name} by {metersubcategory,azure_instance_type}.rollup(sum, daily)"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND azure_pricing_term:SavingsPlan AND $availability-zone AND $team AND $kube_cluster_name} by {metersubcategory,azure_instance_type}.rollup(sum, daily)"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query3",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND azure_pricing_term:Spot AND $availability-zone AND $team AND $kube_cluster_name} by {metersubcategory,azure_instance_type}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 3,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "On-Demand",
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Savings Plan",
+                      "cell_display_mode": "bar",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Spot",
+                      "cell_display_mode": "bar",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Total",
+                      "formula": "query1 + query2 + query3"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4376959826596106,
+            "definition": {
+              "title": "Azure GPU Spend by Machine Type (Daily)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $availability-zone AND $team AND $kube_cluster_name} by {metersubcategory}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "color_order": "shuffled",
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 5,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4930542959919560,
+            "definition": {
+              "title": "Azure GPU Spend by Team (Monthly)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "type": "live",
+                "unit": "year",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $availability-zone AND $team AND $kube_cluster_name} by {team}.rollup(sum, monthly)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "color_order": "shuffled",
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 12,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 23,
+        "width": 12,
+        "height": 13
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "availability-zone",
+      "prefix": "availability-zone",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "team",
+      "prefix": "team",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "kube_cluster_name",
+      "prefix": "kube_cluster_name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
