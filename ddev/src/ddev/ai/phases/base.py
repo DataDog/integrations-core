@@ -15,7 +15,7 @@ from ddev.ai.phases.messages import (
     make_phase_complete_type,
 )
 from ddev.ai.phases.template import render_prompt
-from ddev.ai.react.process import ReActProcess, ReActResult
+from ddev.ai.react.process import ReActCallback, ReActProcess, ReActResult
 from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.event_bus.orchestrator import AsyncProcessor
 
@@ -44,10 +44,12 @@ class Phase(AsyncProcessor[PipelineStartMessage | PhaseCompleteMessage]):
         self,
         config: PhaseConfig,
         agent_factory: AgentFactory,
+        callbacks: list[ReActCallback] | None = None,
     ) -> None:
         super().__init__(name=config.name)
         self._config = config
         self._agent_factory = agent_factory
+        self._callbacks: list[ReActCallback] = callbacks or []
         self._checkpoint_path: Path | None = None
         self._metadata: dict[str, Any] = {}
 
@@ -77,6 +79,7 @@ class Phase(AsyncProcessor[PipelineStartMessage | PhaseCompleteMessage]):
             agent=agent,
             tool_registry=tool_registry,
             max_iterations=self._config.react.max_iterations,
+            callbacks=self._callbacks,
         )
 
         last_result: ReActResult | None = None

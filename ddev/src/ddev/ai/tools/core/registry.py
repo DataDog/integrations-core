@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from __future__ import annotations
-
 from anthropic.types import ToolParam
 
 from ddev.ai.tools.fs.file_registry import FileRegistry
@@ -18,7 +16,7 @@ class ToolRegistry:
         self._tools: dict[str, ToolProtocol] = {tool.name: tool for tool in tools}
 
     @classmethod
-    def from_names(cls, tool_names: list[str]) -> ToolRegistry:
+    def from_names(cls, tool_names: list[str]) -> "ToolRegistry":
         """Create a ToolRegistry from a list of tool name strings.
 
         All fs tools within the same registry share a single FileRegistry instance.

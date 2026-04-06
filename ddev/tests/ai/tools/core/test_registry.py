@@ -125,3 +125,33 @@ async def test_empty_registry_always_returns_unknown_error():
     result = await registry.run("anything", {})
     assert result.success is False
     assert result.error is not None
+
+
+# ---------------------------------------------------------------------------
+# ToolRegistry.from_names
+# ---------------------------------------------------------------------------
+
+
+def test_from_names_empty_list_creates_empty_registry():
+    registry = ToolRegistry.from_names([])
+    assert registry.definitions == []
+
+
+def test_from_names_creates_registry_with_correct_tool_names():
+    registry = ToolRegistry.from_names(["read_file", "http_get"])
+    names = {d["name"] for d in registry.definitions}
+    assert names == {"read_file", "http_get"}
+
+
+def test_from_names_unknown_tool_raises():
+    with pytest.raises(ValueError, match="Unknown tool: 'does_not_exist'"):
+        ToolRegistry.from_names(["does_not_exist"])
+
+
+def test_from_names_fs_tools_share_file_registry():
+    # fs tools in the same registry must share a FileRegistry so that
+    # hash-based consistency checks work across tool calls within a phase.
+    registry = ToolRegistry.from_names(["create_file", "read_file"])
+    create_tool = registry._tools["create_file"]
+    read_tool = registry._tools["read_file"]
+    assert create_tool._registry is read_tool._registry
