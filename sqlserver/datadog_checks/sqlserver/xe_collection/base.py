@@ -24,7 +24,6 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import is_azure_sql_database
-from .xml_tools import extract_int_value, extract_value
 
 from .xml_tools import extract_int_value, extract_value
 
