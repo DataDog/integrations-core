@@ -41,9 +41,13 @@ files:
         - <HOST>:<PORT>
         anyOf:
           - type: string
+            formats:
+              - url
           - type: array
             items:
               type: string
+              formats:
+                - url
     - name: username
       description: |
         The username to use for authentication.
