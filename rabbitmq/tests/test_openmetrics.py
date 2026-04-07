@@ -10,7 +10,7 @@ from packaging import version
 
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.types import ServiceCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 
@@ -203,7 +203,7 @@ def mock_http_responses(url, **_params):
         ): 'detailed-only-metrics.txt',
     }[parsed.path + (f"?{parsed.query}" if parsed.query else "")]
     with open(os.path.join(OM_RESPONSE_FIXTURES, fname)) as fh:
-        return MockResponse(content=fh.read())
+        return MockHTTPResponse(content=fh.read())
 
 
 @pytest.mark.parametrize(

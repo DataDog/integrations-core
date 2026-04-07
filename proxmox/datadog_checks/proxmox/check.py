@@ -4,6 +4,8 @@
 
 import re
 
+from json import JSONDecodeError as StdJSONDecodeError
+
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout
 
 from datadog_checks.base import AgentCheck
@@ -160,6 +162,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             ConnectionError,
             Timeout,
             JSONDecodeError,
+            StdJSONDecodeError,
             AttributeError,
             HTTPStatusError,
             HTTPInvalidURLError,
@@ -411,6 +414,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             ConnectionError,
             Timeout,
             JSONDecodeError,
+            StdJSONDecodeError,
             HTTPStatusError,
             HTTPInvalidURLError,
             AgentHTTPConnectionError,

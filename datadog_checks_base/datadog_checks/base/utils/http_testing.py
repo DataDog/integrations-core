@@ -119,6 +119,32 @@ class MockHTTPResponse:
     def reason(self) -> str:
         return http_responses.get(self.status_code, '')
 
+    @property
+    def links(self) -> dict[str, dict[str, str]]:
+        """Parse Link header into a dict keyed by rel, matching requests.Response.links."""
+        header = self.headers.get('link', '')
+        result: dict[str, dict[str, str]] = {}
+        if not header:
+            return result
+        # Strip outer "Link: " prefix if present (some tests include it in the value)
+        for val in header.split(','):
+            val = val.strip()
+            if not val:
+                continue
+            parts = val.split(';')
+            url_part = parts[0].strip()
+            if url_part.startswith('<') and url_part.endswith('>'):
+                url_part = url_part[1:-1]
+            params: dict[str, str] = {'url': url_part}
+            for part in parts[1:]:
+                part = part.strip()
+                if '=' in part:
+                    key, value = part.split('=', 1)
+                    params[key.strip()] = value.strip().strip('"')
+            if 'rel' in params:
+                result[params['rel']] = params
+        return result
+
     def json(self, **kwargs: Any) -> Any:
         return json.loads(self.text, **kwargs)
 

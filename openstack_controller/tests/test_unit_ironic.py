@@ -11,7 +11,7 @@ import pytest
 
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 from tests.metrics import (
@@ -677,12 +677,12 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
     ('mock_http_get', 'instance'),
     [
         pytest.param(
-            {'http_error': {'/baremetal': MockResponse(status_code=500)}},
+            {'http_error': {'/baremetal': MockHTTPResponse(status_code=500)}},
             configs.REST,
             id='api rest',
         ),
         pytest.param(
-            {'http_error': {'/baremetal': MockResponse(status_code=500)}},
+            {'http_error': {'/baremetal': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             id='api sdk',
         ),
@@ -758,7 +758,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     ('mock_http_get', 'connection_baremetal', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/baremetal/v1/nodes/detail': MockResponse(status_code=500)}},
+            {'http_error': {'/baremetal/v1/nodes/detail': MockHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -766,7 +766,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         ),
         pytest.param(
             None,
-            {'http_error': {'nodes': MockResponse(status_code=500)}},
+            {'http_error': {'nodes': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1220,7 +1220,7 @@ def test_pagination_invalid_no_exception(aggregator, openstack_controller_check,
     ('mock_http_get', 'connection_baremetal', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/baremetal/v1/conductors': MockResponse(status_code=500)}},
+            {'http_error': {'/baremetal/v1/conductors': MockHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -1228,7 +1228,7 @@ def test_pagination_invalid_no_exception(aggregator, openstack_controller_check,
         ),
         pytest.param(
             None,
-            {'http_error': {'conductors': MockResponse(status_code=500)}},
+            {'http_error': {'conductors': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
