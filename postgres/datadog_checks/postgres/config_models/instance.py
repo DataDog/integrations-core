@@ -20,9 +20,6 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-SECURE_FIELD_NAMES = frozenset(['ssl_cert', 'ssl_key', 'ssl_root_cert'])
-
-
 class ManagedAuthentication(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -71,6 +68,7 @@ class CollectColumnStats(BaseModel):
     enabled: Optional[bool] = None
     exclude_tables: Optional[tuple[str, ...]] = None
     include_tables: Optional[tuple[str, ...]] = None
+    max_query_duration: Optional[float] = None
     max_tables: Optional[float] = None
     run_sync: Optional[bool] = None
 
@@ -285,7 +283,6 @@ class InstanceConfig(BaseModel):
     dbstrict: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
-    enable_legacy_tags_normalization: Optional[bool] = None
     exclude_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
     host: Optional[str] = None
@@ -335,11 +332,6 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-            if info.field_name in SECURE_FIELD_NAMES:
-                validation.security.check_field_trusted_provider(
-                    info.field_name, value, info.context.get('security_config')
-                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

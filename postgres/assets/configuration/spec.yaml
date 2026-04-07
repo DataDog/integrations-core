@@ -979,6 +979,13 @@ files:
               type: string
             example:
               - "temp_.*"
+        - name: max_query_duration
+          fleet_configurable: true
+          description: |
+            Maximum duration of the column statistics query in seconds.
+          value:
+            type: number
+            display_default: 60
         - name: run_sync
           hidden: true
           description: |

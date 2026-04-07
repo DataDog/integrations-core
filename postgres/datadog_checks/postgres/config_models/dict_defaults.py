@@ -105,6 +105,7 @@ def instance_collect_column_stats():
         enabled=True,
         collection_interval=14400,
         max_tables=500,
+        max_query_duration=60,
         include_tables=[],
         exclude_tables=[],
         run_sync=False,
