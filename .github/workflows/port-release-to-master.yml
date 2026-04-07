@@ -50,16 +50,19 @@ jobs:
 
           git checkout -b "$BRANCH"
 
-          # Generate a diff of the merged PR excluding in-toto files, then apply it
-          if ! git diff "${MERGE_SHA}^1".."${MERGE_SHA}" -- ':!.in-toto' | git apply --index; then
-            echo "::error::Failed to apply changes cleanly. Manual porting may be required."
-            exit 1
-          fi
+          # Generate a diff of the merged PR excluding in-toto files
+          PATCH=$(git diff "${MERGE_SHA}^1".."${MERGE_SHA}" -- ':!.in-toto')
 
-          # Only create a PR if there are actual changes
-          if git diff --cached --quiet; then
+          # Nothing to port if the only changes were in-toto files
+          if [ -z "$PATCH" ]; then
             echo "No changes to port (all changes were in-toto files)."
             exit 0
+          fi
+
+          # Apply the patch
+          if ! echo "$PATCH" | git apply --index; then
+            echo "::error::Failed to apply changes cleanly. Manual porting may be required."
+            exit 1
           fi
 
           git commit -m "Port release to master"
