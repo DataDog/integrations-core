@@ -1,0 +1,84 @@
+name: Port Release to Master
+
+on:
+  pull_request_target:
+    types:
+      - closed
+    branches:
+      - "[0-9]+.[0-9]+.x"
+
+permissions: {}
+
+jobs:
+  port-release:
+    name: Port Release to Master
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC token federation with dd-octo-sts
+      contents: write
+    if: github.event.pull_request.merged
+    env:
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Get GitHub token via dd-octo-sts
+        uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80 # v1.0.3
+        id: octo-sts
+        with:
+          scope: DataDog/integrations-core
+          policy: self.port-release.pull-request-target
+
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: master
+          fetch-depth: 0
+          token: ${{ steps.octo-sts.outputs.token }}
+          persist-credentials: true
+
+      - name: Port changes to master
+        env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+          MERGED_BY: ${{ github.event.pull_request.merged_by.login }}
+        run: |
+          BRANCH="port-${MERGE_SHA}-to-master"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "$BRANCH"
+
+          python .github/workflows/scripts/port_release_to_master.py "$MERGE_SHA"
+          EXIT_CODE=$?
+          if [ $EXIT_CODE -eq 2 ]; then
+            echo "No changes to port."
+            exit 0
+          elif [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Failed to port changes. Manual porting may be required."
+            exit 1
+          fi
+
+          git add -A
+          git commit -m "Port release to master"
+          git push origin "$BRANCH"
+
+          gh pr create \
+            --base master \
+            --head "$BRANCH" \
+            --title "[${BASE_BRANCH}] Port release to master" \
+            --body "Port ${MERGE_SHA} from #${PR_NUMBER}." \
+            --label "changelog/no-changelog" \
+            --assignee "$MERGED_BY"
+
+      - name: Comment on PR on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body "⚠️ Failed to automatically port this release to master. Manual porting may be required.
+
+          [View workflow run](${RUN_URL})"
