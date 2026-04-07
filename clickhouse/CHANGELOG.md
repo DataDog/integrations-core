@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.5.0 / 2026-04-01
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
 ## 6.4.1 / 2026-03-24
 
 ***Fixed***:
