@@ -22,9 +22,6 @@ from pathlib import Path
 
 log = logging.getLogger("port-release")
 
-# ---------------------------------------------------------------------------
-# Version helpers
-# ---------------------------------------------------------------------------
 
 VERSION_RE = re.compile(r"__version__\s*=\s*(['\"])(.+?)\1")
 CHANGELOG_HEADING_RE = re.compile(r"^## (\d+\.\d+\.\d+)\s+/")
@@ -42,11 +39,6 @@ def parse_version(version: str) -> tuple[int, ...]:
 def version_gt(a: str, b: str) -> bool:
     """Return True if version *a* is strictly greater than *b*."""
     return parse_version(a) > parse_version(b)
-
-
-# ---------------------------------------------------------------------------
-# Git helpers (read-only)
-# ---------------------------------------------------------------------------
 
 
 def get_changed_files(merge_sha: str) -> list[str]:
@@ -73,11 +65,6 @@ def read_file_at_commit(merge_sha: str, path: str) -> str | None:
     if result.returncode != 0:
         return None
     return result.stdout
-
-
-# ---------------------------------------------------------------------------
-# Categorisation
-# ---------------------------------------------------------------------------
 
 
 def categorize_changes(
@@ -108,9 +95,7 @@ def categorize_changes(
             continue
 
         integration = parts[0]
-        bucket = integrations.setdefault(
-            integration, {"changelogs": [], "abouts": [], "fragments": []}
-        )
+        bucket = integrations.setdefault(integration, {"changelogs": [], "abouts": [], "fragments": []})
 
         if parts[-1] == "CHANGELOG.md":
             bucket["changelogs"].append(path)
@@ -120,11 +105,6 @@ def categorize_changes(
             bucket["fragments"].append(path)
 
     return integrations, has_requirements
-
-
-# ---------------------------------------------------------------------------
-# Changelog processing
-# ---------------------------------------------------------------------------
 
 
 def extract_version_block(content: str, version: str) -> str | None:
@@ -185,9 +165,7 @@ def process_changelog(integration: str, merge_sha: str) -> bool:
     master_content = changelog_path.read_text()
 
     # Duplicate check
-    if re.search(
-        rf"^## {re.escape(release_version)}\s+/", master_content, re.MULTILINE
-    ):
+    if re.search(rf"^## {re.escape(release_version)}\s+/", master_content, re.MULTILINE):
         log.info(
             "%s: version %s already in master changelog — skipping",
             integration,
@@ -198,9 +176,7 @@ def process_changelog(integration: str, merge_sha: str) -> bool:
     # Extract the version block from the release changelog
     block = extract_version_block(release_content, release_version)
     if block is None:
-        log.warning(
-            "%s: could not extract block for %s", integration, release_version
-        )
+        log.warning("%s: could not extract block for %s", integration, release_version)
         return False
 
     # Find insertion point in master's changelog
@@ -224,9 +200,7 @@ def process_changelog(integration: str, merge_sha: str) -> bool:
                 break
 
     if insertion_idx is None:
-        log.warning(
-            "%s: could not find insertion point in master CHANGELOG.md", integration
-        )
+        log.warning("%s: could not find insertion point in master CHANGELOG.md", integration)
         return False
 
     # Insert with a blank line separator
@@ -236,11 +210,6 @@ def process_changelog(integration: str, merge_sha: str) -> bool:
     changelog_path.write_text("".join(master_lines))
     log.info("%s: inserted changelog entry for %s", integration, release_version)
     return True
-
-
-# ---------------------------------------------------------------------------
-# __about__.py processing
-# ---------------------------------------------------------------------------
 
 
 def extract_about_version(content: str) -> tuple[str, str] | None:
@@ -307,11 +276,6 @@ def process_about(integration: str, about_paths: list[str], merge_sha: str) -> b
     return False
 
 
-# ---------------------------------------------------------------------------
-# changelog.d fragment processing
-# ---------------------------------------------------------------------------
-
-
 def process_fragments(integration: str, fragment_paths: list[str]) -> bool:
     """Delete changelog fragments that were consumed by the release.
 
@@ -328,10 +292,6 @@ def process_fragments(integration: str, fragment_paths: list[str]) -> bool:
             log.debug("%s: fragment %s already absent on master", integration, frag)
     return deleted
 
-
-# ---------------------------------------------------------------------------
-# requirements-agent-release.txt processing
-# ---------------------------------------------------------------------------
 
 REQUIREMENT_RE = re.compile(r"^(datadog-[\w-]+)==([\d.]+)(.*)")
 
@@ -427,11 +387,6 @@ def process_requirements(merge_sha: str) -> bool:
         req_path.write_text("\n".join(header_lines + pkg_lines) + "\n")
 
     return modified
-
-
-# ---------------------------------------------------------------------------
-# Orchestration
-# ---------------------------------------------------------------------------
 
 
 def main() -> int:
