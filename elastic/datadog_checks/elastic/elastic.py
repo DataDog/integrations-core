@@ -11,6 +11,7 @@ from urllib.parse import urljoin, urlparse
 import requests
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
+from datadog_checks.base.utils.http_exceptions import HTTPError as AgentHTTPError
 from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 
 from .config import from_instance
@@ -276,7 +277,7 @@ class ESCheck(AgentCheck):
     def _get_template_metrics(self, admin_forwarder, base_tags):
         try:
             template_resp = self._get_data(self._join_url('/_cat/templates?format=json', admin_forwarder))
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException, AgentHTTPError) as e:
             self.log.debug("Error reading templates info from servers (%s) - template metrics will be missing", e)
             return
 

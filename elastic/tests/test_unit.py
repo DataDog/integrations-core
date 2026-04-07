@@ -174,7 +174,7 @@ def test__get_data_creates_critical_service_alert(aggregator, instance):
             check.SERVICE_CHECK_CONNECT_NAME,
             status=check.CRITICAL,
             tags=check._config.service_check_tags,
-            message="Error 500 Server Error: None for url: None when hitting test.com",
+            message="Error 500 Server Error when hitting test.com",
         )
 
 
@@ -210,7 +210,7 @@ def test_disable_legacy_sc_tags(aggregator, es_instance):
             check.SERVICE_CHECK_CONNECT_NAME,
             status=check.CRITICAL,
             tags=expected_tags,
-            message="Error 500 Server Error: None for url: None when hitting test.com",
+            message="Error 500 Server Error when hitting test.com",
         )
 
 
