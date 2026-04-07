@@ -63,7 +63,7 @@ on:
       dd-sts-policy:
         description: "dd-sts policy name matching the calling repo's GitHub identity"
         required: false
-        default: integrations-core
+        default: integrations-core-api
         type: string
 
 jobs:
