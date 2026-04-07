@@ -11,7 +11,7 @@ import pytest
 
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 from tests.metrics import (
@@ -104,12 +104,12 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
     ('mock_http_get', 'instance'),
     [
         pytest.param(
-            {'http_error': {'/heat-api': MockResponse(status_code=500)}},
+            {'http_error': {'/heat-api': MockHTTPResponse(status_code=500)}},
             configs.REST,
             id='api rest',
         ),
         pytest.param(
-            {'http_error': {'/heat-api': MockResponse(status_code=500)}},
+            {'http_error': {'/heat-api': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             id='api sdk',
         ),
@@ -187,8 +187,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         pytest.param(
             {
                 'http_error': {
-                    '/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks': MockResponse(status_code=500),
-                    '/heat-api/v1/6e39099cccde4f809b003d9e0dd09304/stacks': MockResponse(status_code=500),
+                    '/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks': MockHTTPResponse(status_code=500),
+                    '/heat-api/v1/6e39099cccde4f809b003d9e0dd09304/stacks': MockHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -201,8 +201,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
             {
                 'http_error': {
                     'stacks': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
                     }
                 }
             },

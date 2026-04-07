@@ -9,7 +9,7 @@ import mock
 from pyVmomi import vim, vmodl
 
 from datadog_checks.base.utils.time import get_current_datetime
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -1091,7 +1091,7 @@ class MockHttpV6:
 
     def get(self, url, *args, **kwargs):
         if '/api/' in url:
-            return MockResponse({}, 404)
+            return MockHTTPResponse(json_data={}, status_code=404)
         parsed_url = urlparse(url)
         path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
         path_parts = path_and_args.split('/')
@@ -1101,7 +1101,7 @@ class MockHttpV6:
         if re.match(r'.*/category/id:.*$', url):
             parts = url.split('_')
             num = parts[len(parts) - 1]
-            return MockResponse(
+            return MockHTTPResponse(
                 json_data={
                     "value": {
                         "name": "my_cat_name_{}".format(num),
@@ -1116,7 +1116,7 @@ class MockHttpV6:
         elif re.match(r'.*/tagging/tag/id:.*$', url):
             parts = url.split('_')
             num = parts[len(parts) - 1]
-            return MockResponse(
+            return MockHTTPResponse(
                 json_data={
                     "value": {
                         "category_id": "cat_id_{}".format(num),
@@ -1132,7 +1132,7 @@ class MockHttpV6:
 
     def post(self, url, *args, **kwargs):
         if '/api/' in url:
-            return MockResponse({}, 404)
+            return MockHTTPResponse(json_data={}, status_code=404)
         assert kwargs['headers']['Content-Type'] == 'application/json'
         parsed_url = urlparse(url)
         path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
@@ -1141,12 +1141,12 @@ class MockHttpV6:
         if subpath in self.exceptions:
             raise self.exceptions[subpath]
         if re.match(r'.*/session$', url):
-            return MockResponse(
+            return MockHTTPResponse(
                 json_data={"value": "dummy-token"},
                 status_code=200,
             )
         elif re.match(r'.*/tagging/tag-association\?~action=list-attached-tags-on-objects$', url):
-            return MockResponse(
+            return MockHTTPResponse(
                 json_data={
                     "value": [
                         {"object_id": {"id": "vm1", "type": "VirtualMachine"}, "tag_ids": ["tag_id_1", "tag_id_2"]},
@@ -1173,7 +1173,7 @@ class MockHttpV7:
         if re.match(r'.*/category/.*$', url):
             parts = url.split('_')
             num = parts[len(parts) - 1]
-            return MockResponse(
+            return MockHTTPResponse(
                 json_data={
                     'name': 'my_cat_name_{}'.format(num),
                     'description': 'VM category description',
@@ -1186,7 +1186,7 @@ class MockHttpV7:
         elif re.match(r'.*/tagging/tag/.*$', url):
             parts = url.split('_')
             num = parts[len(parts) - 1]
-            return MockResponse(
+            return MockHTTPResponse(
                 json_data={
                     'category_id': 'cat_id_{}'.format(num),
                     'name': 'my_tag_name_{}'.format(num),
@@ -1207,12 +1207,12 @@ class MockHttpV7:
         if subpath in self.exceptions:
             raise self.exceptions[subpath]
         if re.match(r'.*/session$', url):
-            return MockResponse(
+            return MockHTTPResponse(
                 json_data="dummy-token",
                 status_code=200,
             )
         elif re.match(r'.*/tagging/tag-association\?action=list-attached-tags-on-objects$', url):
-            return MockResponse(
+            return MockHTTPResponse(
                 json_data=[
                     {'tag_ids': ['tag_id_1', 'tag_id_2'], 'object_id': {'id': 'vm1', 'type': 'VirtualMachine'}},
                     {'tag_ids': ['tag_id_2'], 'object_id': {'id': 'ds1', 'type': 'Datastore'}},

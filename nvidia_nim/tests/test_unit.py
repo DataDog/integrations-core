@@ -7,7 +7,7 @@ from unittest import mock
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nvidia_nim import NvidiaNIMCheck
 
@@ -20,8 +20,8 @@ def test_check_nvidia_nim(dd_run_check, aggregator, datadog_agent, instance):
     with mock.patch(
         'requests.Session.get',
         side_effect=[
-            MockResponse(file_path=get_fixture_path("nim_metrics.txt")),
-            MockResponse(file_path=get_fixture_path("nim_version.json")),
+            MockHTTPResponse(file_path=get_fixture_path("nim_metrics.txt")),
+            MockHTTPResponse(file_path=get_fixture_path("nim_version.json")),
         ],
     ):
         dd_run_check(check)

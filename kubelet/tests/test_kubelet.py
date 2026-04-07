@@ -15,7 +15,7 @@ import requests_mock
 from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials
 from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.utils.date import parse_rfc3339
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.kubelet import KubeletCheck, PodListUtils
 
 # Skip the whole tests module on Windows
@@ -857,7 +857,7 @@ def test_report_container_state_metrics(monkeypatch, tagger):
     monkeypatch.setattr(
         check,
         'perform_kubelet_query',
-        mock.Mock(return_value=MockResponse(file_path=os.path.join(HERE, 'fixtures', 'pods_crashed.json'))),
+        mock.Mock(return_value=MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', 'pods_crashed.json'))),
     )
     monkeypatch.setattr(check, 'compute_pod_expiration_datetime', mock.Mock(return_value=None))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
@@ -1010,7 +1010,7 @@ def test_pod_expiration(monkeypatch, aggregator, tagger):
     monkeypatch.setattr(
         check,
         'perform_kubelet_query',
-        mock.Mock(return_value=MockResponse(file_path=os.path.join(HERE, 'fixtures', 'pods_expired.json'))),
+        mock.Mock(return_value=MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', 'pods_expired.json'))),
     )
     monkeypatch.setattr(
         check, 'compute_pod_expiration_datetime', mock.Mock(return_value=parse_rfc3339("2019-02-18T16:00:06Z"))
