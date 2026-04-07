@@ -45,6 +45,9 @@ excluded_paths = [
 
   # --- Botocore ---
   "botocore/data/*",
+  # Top-level JSON files (endpoints.json, partitions.json, _retry.json, etc.)
+  # are required by botocore to resolve AWS endpoints and handle retries.
+  "!botocore/data/*.json",
   # We use sts in several integrations for assuming roles:
   # - amazon_msk
   # - postres

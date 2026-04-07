@@ -524,5 +524,29 @@ class TestConsumeMessagesStartTimestamp:
             assert call_kwargs['start_timestamp'] == 1700000000000
 
 
+class TestConsumeMessagesEarlyReturn:
+    """Test that consume_messages returns early on None poll or partition EOF."""
+
+    def test_none_poll_breaks_immediately(self):
+        from unittest.mock import MagicMock
+
+        consumer = MagicMock()
+        metadata = MagicMock()
+        metadata.topics = {'t': MagicMock(partitions={0: MagicMock()})}
+        consumer.list_topics.return_value = metadata
+        consumer.poll.side_effect = [MockKafkaMessage(key=b'k', value=b'v', partition=0, offset=0), None]
+
+        import logging
+
+        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
+
+        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
+        with patch.object(client, 'get_consumer', return_value=consumer):
+            result = list(client.consume_messages(topic='t', start_offset=0, max_messages=1000, timeout_ms=30000))
+
+        assert len(result) == 1
+        assert consumer.poll.call_count == 2
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-vv'])

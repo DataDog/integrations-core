@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 8.7.0 / 2026-04-01
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 8.6.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707))
+* Add CLUSTER INFO metrics: cluster state, slot coverage, node count, cluster size, and current epoch. ([#22917](https://github.com/DataDog/integrations-core/pull/22917))
+
 ## 8.5.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

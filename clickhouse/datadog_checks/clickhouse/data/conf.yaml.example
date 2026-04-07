@@ -41,7 +41,7 @@ instances:
     #
     # username: default
 
-    ## @param password - string - optional
+    ## @param password - string - optional - default: 
     ## The password of `username`.
     #
     # password: <PASSWORD>

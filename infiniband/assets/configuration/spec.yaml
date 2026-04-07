@@ -16,6 +16,7 @@ files:
             value:
               example: "/sys/class/infiniband"
               type: string
+              require_trusted_provider: true
               display_default: "/sys/class/infiniband"
           - name: exclude_devices
             description: |

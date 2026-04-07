@@ -5,7 +5,7 @@ services:
     image: caddy:2.7
     container_name: caddy
     ports:
-      - "8000:8000"
+      - "8080:8080"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ../fixtures/karpenter_metrics.txt:/metrics/metrics

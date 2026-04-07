@@ -27,7 +27,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=37.24.0",
+    "datadog-checks-base>=37.33.0",
 ]
 dynamic = [
     "version",
@@ -36,9 +36,9 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "pyasn1==0.4.8",
+    "pyasn1==0.6.3",
     "pysnmp-mibs==0.1.6",
-    "pysnmp==5.1.0",
+    "pysnmp==7.1.22",
 ]
 
 [project.urls]
