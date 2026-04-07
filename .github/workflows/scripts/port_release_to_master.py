@@ -45,8 +45,14 @@ def _diff_base(merge_sha: str, commit_count: int) -> str:
     """Compute the correct diff base for all merge strategies.
 
     - Merge commit (two parents): ``sha^1`` is the base branch before merge.
-    - Squash merge (one parent, one commit): ``sha^1`` is the base branch.
-    - Rebase merge (one parent, N commits): ``sha~N`` reaches the base branch.
+    - Squash merge (one parent, any commit count): ``sha^1`` is the base branch.
+      GitHub reports the original PR commit count, but the result is one commit.
+    - Rebase merge (one parent, N commits on the branch): ``sha~N`` reaches
+      the base branch.
+
+    We distinguish squash from rebase by counting how many commits exist
+    between ``sha~N`` and ``sha``.  A squash produces exactly one commit
+    regardless of the reported *commit_count*.
     """
     is_merge = (
         subprocess.run(
@@ -57,7 +63,18 @@ def _diff_base(merge_sha: str, commit_count: int) -> str:
     )
     if is_merge or commit_count <= 1:
         return f"{merge_sha}^1"
-    return f"{merge_sha}~{commit_count}"
+
+    # Count actual commits between sha~N and sha to distinguish squash vs rebase.
+    result = subprocess.run(
+        ["git", "rev-list", "--count", f"{merge_sha}~{commit_count}..{merge_sha}"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0 and result.stdout.strip() == str(commit_count):
+        return f"{merge_sha}~{commit_count}"
+
+    # Squash merge or rev-list failed — sha^1 is always safe
+    return f"{merge_sha}^1"
 
 
 def get_changed_files(merge_sha: str, commit_count: int) -> list[str]:
