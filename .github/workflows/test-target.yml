@@ -89,6 +89,11 @@ on:
         required: false
         default: 60
         type: number
+      dd-sts-policy:
+        description: "dd-sts policy name matching the calling repo's GitHub identity"
+        required: false
+        default: integrations-core
+        type: string
 
 defaults:
   run:
@@ -151,7 +156,7 @@ jobs:
       id: dd-sts
       uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
       with:
-        policy: integrations-core
+        policy: ${{ inputs.dd-sts-policy }}
 
     - name: Set environment variables
       # This step sets the following environment variables for the entire workflow via setup-test-env.sh:
