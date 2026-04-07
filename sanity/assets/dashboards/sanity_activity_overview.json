@@ -8,7 +8,7 @@
         "type": "image",
         "url": "https://static.datadoghq.com/static/images/logos/sanity_large.svg",
         "url_dark_theme": "https://static.datadoghq.com/static/images/logos/sanity_reversed_large.svg",
-        "sizing": "fill",
+        "sizing": "contain",
         "margin": "md",
         "has_background": false,
         "has_border": false,
