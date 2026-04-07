@@ -131,6 +131,28 @@ def test_mock_response_headers_update_and_setdefault():
     assert response.headers['x-iter'] == 'iter_val'
 
 
+def test_mock_response_headers_update_with_non_dict_mapping():
+    from collections.abc import Mapping
+
+    class CustomHeaders(Mapping):
+        def __init__(self, d):
+            self._d = d
+
+        def __getitem__(self, key):
+            return self._d[key]
+
+        def __iter__(self):
+            return iter(self._d)
+
+        def __len__(self):
+            return len(self._d)
+
+    response = MockHTTPResponse(headers={'A': '1'})
+    response.headers.update(CustomHeaders({'B': '2'}))
+    assert response.headers['b'] == '2'
+    assert response.headers['a'] == '1'
+
+
 def test_mock_response_url():
     assert MockHTTPResponse(url='http://example.com').url == 'http://example.com'
     assert MockHTTPResponse().url == ''
