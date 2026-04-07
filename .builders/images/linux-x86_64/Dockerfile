@@ -19,8 +19,8 @@ ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN' -Wl,--strip-debug"
 RUN yum install -y perl-IPC-Cmd perl-CPANPLUS perl-core && \
  cpanp -i List::Util 1.66 && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
- VERSION="3.6.1" \
- SHA256="b1bfedcd5b289ff22aee87c9d600f515767ebf45f77168cb6d64f231f518a82e" \
+ VERSION="3.6.2" \
+ SHA256="aaf51a1fe064384f811daeaeb4ec4dce7340ec8bd893027eee676af31e83a04f" \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \
