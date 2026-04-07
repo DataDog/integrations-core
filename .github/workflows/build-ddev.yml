@@ -143,6 +143,7 @@ jobs:
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         fetch-depth: 0
+
     - name: Get Datadog credentials
       id: dd-sts
       uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
@@ -319,13 +320,20 @@ jobs:
     - define-tags
     - binaries
     runs-on: windows-2022
-
+    permissions:
+      # needed for dd-sts
+      id-token: write
     env:
       VERSION: ${{ needs.binaries.outputs.version }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Get Datadog credentials
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-core
 
     - name: Tag Job
       uses: ./.github/actions/tag-job
@@ -682,6 +690,12 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Get Datadog credentials
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-core
 
     - name: Tag Job
       uses: ./.github/actions/tag-job
