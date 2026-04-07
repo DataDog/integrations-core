@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
-
 from json import JSONDecodeError as StdJSONDecodeError
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout

@@ -8,8 +8,8 @@ import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev import get_here
 from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev import get_here
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.twistlock import TwistlockCheck
 

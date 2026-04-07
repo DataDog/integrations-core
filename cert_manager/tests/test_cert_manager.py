@@ -6,8 +6,8 @@ import os
 import mock
 import pytest
 
-from datadog_checks.cert_manager import CertManagerCheck
 from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.cert_manager import CertManagerCheck
 
 from .common import ACME_METRICS, CERT_METRICS, CONTROLLER_METRICS, MOCK_INSTANCE
 
