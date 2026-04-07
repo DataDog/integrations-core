@@ -1,0 +1,1 @@
+Add option to fallback to database host instead of agent host when resolving a database host name. This is useful for agents that are monitoring remote databases that may not have DNS resolvable names at the time the agent launches.

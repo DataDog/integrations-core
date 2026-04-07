@@ -70,6 +70,12 @@ instances:
     #
     # exclude_hostname: false
 
+    ## @param fallback_hostname_to_agent - boolean - optional - default: true
+    ## Set to `true` to fallback to the agent hostname for the resolved hostname value if the database host cannot
+    ## be resolved. If set to `false`, the provided database host will be used as the resolved hostname value.
+    #
+    # fallback_hostname_to_agent: true
+
     ## Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
     ## billable instance.
     ##
