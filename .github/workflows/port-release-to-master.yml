@@ -1,0 +1,74 @@
+name: Port Release to Master
+
+on:
+  pull_request_target:
+    types:
+      - closed
+    branches:
+      - "[0-9]+.[0-9]+.x"
+
+permissions: {}
+
+jobs:
+  port-release:
+    name: Port Release to Master
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC token federation with dd-octo-sts
+      contents: write
+    if: github.event.pull_request.merged
+    env:
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Get GitHub token via dd-octo-sts
+        uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80 # v1.0.3
+        id: octo-sts
+        with:
+          scope: DataDog/integrations-core
+          policy: self.port-release.pull-request-target
+
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: master
+          fetch-depth: 0
+          token: ${{ steps.octo-sts.outputs.token }}
+          persist-credentials: true
+
+      - name: Port changes to master
+        env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+          MERGED_BY: ${{ github.event.pull_request.merged_by.login }}
+        run: |
+          BRANCH="port-${MERGE_SHA}-to-master"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "$BRANCH"
+
+          # Generate a diff of the merged PR excluding in-toto files, then apply it
+          if ! git diff "${MERGE_SHA}^1".."${MERGE_SHA}" -- ':!.in-toto' | git apply --index; then
+            echo "::error::Failed to apply changes cleanly. Manual porting may be required."
+            exit 1
+          fi
+
+          # Only create a PR if there are actual changes
+          if git diff --cached --quiet; then
+            echo "No changes to port (all changes were in-toto files)."
+            exit 0
+          fi
+
+          git commit -m "Port release to master"
+          git push origin "$BRANCH"
+
+          gh pr create \
+            --base master \
+            --head "$BRANCH" \
+            --title "[${BASE_BRANCH}] Port release to master" \
+            --body "Port ${MERGE_SHA} from #${PR_NUMBER}." \
+            --label "changelog/no-changelog" \
+            --assignee "$MERGED_BY"
