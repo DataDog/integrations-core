@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from concurrent.futures.thread import ThreadPoolExecutor
+from unittest.mock import patch
 
 import pytest
 
@@ -296,3 +297,29 @@ def test_collect_column_stats_respects_interval(integration_check, dbm_instance,
     assert second_count == first_count, (
         f"Expected no new events on second run (interval not elapsed), got {second_count - first_count} new"
     )
+
+
+@patch('datadog_checks.postgres.column_stats.PAYLOAD_MAX_COLUMNS', 5)
+def test_collect_column_stats_payload_chunking(integration_check, dbm_instance, pg_instance, aggregator):
+    """Test that large collections are split into multiple payloads."""
+    _analyze_tables(pg_instance)
+    check = integration_check(dbm_instance)
+    run_one_check(check)
+
+    events = aggregator.get_event_platform_events("dbm-column-stats")
+    assert len(events) > 1, f"Expected multiple payloads with low chunk threshold, got {len(events)}"
+
+    # Every event should have valid structure
+    for event in events:
+        assert event['dbm_type'] == 'column_stats'
+        assert isinstance(event['column_stats'], list)
+        assert len(event['column_stats']) > 0
+
+    # All 3 tables should appear across the payloads
+    all_tables = set()
+    for event in events:
+        for entry in event['column_stats']:
+            all_tables.add(entry['table'])
+    assert 'persons' in all_tables
+    assert 'cities' in all_tables
+    assert 'pgtable' in all_tables
