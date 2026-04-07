@@ -27,21 +27,19 @@ from .health import PostgresHealthEvent
 from .util import payload_pg_version
 
 COLUMN_STATS_QUERY = """\
-WITH changed AS (
+WITH tables AS (
     SELECT c.oid AS relid, n.nspname AS schemaname, c.relname AS tablename
     FROM pg_class c
     JOIN pg_namespace n ON n.oid = c.relnamespace
-    JOIN pg_stat_all_tables s ON s.relid = c.oid
     WHERE n.nspname NOT IN ('pg_catalog', 'information_schema')
       AND c.relkind = 'r'
-      AND GREATEST(s.last_analyze, s.last_autoanalyze) > NOW() - INTERVAL '{collection_interval} seconds'
-    ORDER BY GREATEST(s.last_analyze, s.last_autoanalyze) DESC NULLS LAST
+    ORDER BY n.nspname, c.relname
     LIMIT {max_tables}
 ),
 column_data AS (
     SELECT
-        ch.schemaname,
-        ch.tablename,
+        t.schemaname,
+        t.tablename,
         json_build_object(
             'name', s.attname,
             'avg_width', s.avg_width,
@@ -54,8 +52,8 @@ column_data AS (
         EXTRACT(EPOCH FROM (NOW() - st.last_autovacuum))::bigint AS last_autovacuum_age,
         EXTRACT(EPOCH FROM (NOW() - GREATEST(st.last_analyze, st.last_autoanalyze)))::bigint AS stats_age
     FROM datadog.column_stats() s
-    JOIN changed ch ON ch.schemaname = s.schemaname AND ch.tablename = s.tablename
-    JOIN pg_stat_all_tables st ON st.schemaname = ch.schemaname AND st.relname = ch.tablename
+    JOIN tables t ON t.schemaname = s.schemaname AND t.tablename = s.tablename
+    JOIN pg_stat_all_tables st ON st.schemaname = t.schemaname AND st.relname = t.tablename
 )
 SELECT
     schemaname,
@@ -141,7 +139,6 @@ class PostgresColumnStatsCollector:
             with self._check._get_main_db() as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     query = COLUMN_STATS_QUERY.format(
-                        collection_interval=int(self._config.collection_interval),
                         max_tables=self._config.max_tables,
                     )
                     self._log.debug("Running column stats query")
