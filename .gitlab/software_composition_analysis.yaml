@@ -12,16 +12,21 @@ datadog-sca-ci:
     DD_STS_OIDC_TOKEN:
       aud: integrations-core-gitlab
   script:
-    # Disabling tracing to avoid leaking secrets.
-    # See https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin:
-    # "Using ‘+’ rather than ‘-’ causes these options to be turned off"
-    - set +o xtrace
-    - >-
-      DD_STS_RESPONSE=$(curl -sS
-      -H "Authorization: Bearer ${DD_STS_OIDC_TOKEN}"
-      "https://dd-sts.us1.ddbuild.io/sts/datadog/exchange?policy=integrations-core-gitlab")
-    - export DD_API_KEY=$(echo "$DD_STS_RESPONSE" | jq -re '.api_key')
-    - export DD_APP_KEY=$(echo "$DD_STS_RESPONSE" | jq -re '.application_key')
-    - set -o xtrace
+    - |
+      set +o xtrace
+      DD_STS_RESPONSE=$(curl -sS -w "\n%{http_code}" \
+        -H "Authorization: Bearer ${DD_STS_OIDC_TOKEN}" \
+        "https://dd-sts.us1.ddbuild.io/sts/datadog/exchange?policy=integrations-core-gitlab")
+      HTTP_CODE=$(echo "$DD_STS_RESPONSE" | tail -n1)
+      RESPONSE_BODY=$(echo "$DD_STS_RESPONSE" | head -n -1)
+      if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+        echo "STS token exchange successful"
+      else
+        echo "ERROR: STS token exchange failed (HTTP ${HTTP_CODE}): $RESPONSE_BODY"
+        exit 1
+      fi
+      export DD_API_KEY=$(echo "$RESPONSE_BODY" | jq -re ".api_key")
+      export DD_APP_KEY=$(echo "$RESPONSE_BODY" | jq -re ".application_key")
+      set -o xtrace
     - osv-scanner --skip-git --recursive --experimental-only-packages --format=cyclonedx-1-4 --output=/tmp/sbom.json .
     - datadog-ci sbom upload --service integrations-core --env ci /tmp/sbom.json
