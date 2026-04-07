@@ -15,3 +15,8 @@ matrix.version.env-vars = [
 [envs.latest.env-vars]
 CLOUD_ENV = "false"
 REDIS_VERSION = "latest"
+
+[envs.default]
+extra-dependencies = [
+  "google-auth>=2.0.0",
+]
