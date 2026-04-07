@@ -160,7 +160,10 @@ jobs:
       run: pip install -e . --no-deps
 
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@086dfa4efe372cfb6b375460a56e26a62a873d2e # 1.93.1 Latest rust stable version as of 2026-01-27 (https://forge.rust-lang.org/)
+      # This action must be pinned to a commit reachable from the master branch — any other commit
+      # will eventually be garbage-collected and break the workflow. See:
+      # https://github.com/dtolnay/rust-toolchain#choice-of-full-length-commit-sha
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # master
       with:
         targets: ${{ matrix.job.target }}
 

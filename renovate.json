@@ -12,6 +12,9 @@
         ".github/workflows/**",
         ".github/actions/tag-job/**"
       ],
+      "matchPackageNames": [
+        "!dtolnay/rust-toolchain"
+      ],
       "groupName": "actions",
       "schedule": [
         "before 6am on Monday"
@@ -21,6 +24,22 @@
         "qa/skip-qa"
       ],
       "minimumReleaseAge": "7 days"
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "dtolnay/rust-toolchain"
+      ],
+      "groupName": "actions",
+      "schedule": [
+        "before 6am on Monday"
+      ],
+      "labels": [
+        "renovate/actions",
+        "qa/skip-qa"
+      ]
     }
   ]
 }
