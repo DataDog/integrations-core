@@ -6,8 +6,8 @@
       "id": 8471328527126146,
       "definition": {
         "type": "image",
-        "url": "https://camo.githubusercontent.com/c8b0163592ce794b9d9b10240a9ff190c41583db3c528127db1feeaac06da661/68747470733a2f2f63646e2e73616e6974792e696f2f696d616765732f33646f383277686d2f6e6578742f316466636539646465376136326363616138653833373732353461316539313966366330376164332d313238783132382e737667",
-        "url_dark_theme": "https://camo.githubusercontent.com/c8b0163592ce794b9d9b10240a9ff190c41583db3c528127db1feeaac06da661/68747470733a2f2f63646e2e73616e6974792e696f2f696d616765732f33646f383277686d2f6e6578742f316466636539646465376136326363616138653833373732353461316539313966366330376164332d313238783132382e737667",
+        "url": "https://static.datadoghq.com/static/images/logos/sanity_large.svg",
+        "url_dark_theme": "https://static.datadoghq.com/static/images/logos/sanity_reversed_large.svg",
         "sizing": "fill",
         "margin": "md",
         "has_background": false,
