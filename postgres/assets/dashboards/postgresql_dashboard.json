@@ -19,7 +19,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:postgresql.rows_fetched{$scope}"
+                                "query": "avg:postgresql.rows_fetched{$scope}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -34,7 +35,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:postgresql.rows_returned{$scope}"
+                                "query": "avg:postgresql.rows_returned{$scope}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -49,7 +51,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:postgresql.rows_inserted{$scope}"
+                                "query": "avg:postgresql.rows_inserted{$scope}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -64,7 +67,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:postgresql.rows_updated{$scope}"
+                                "query": "avg:postgresql.rows_updated{$scope}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -87,7 +91,8 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:postgresql.connections{$scope} by {db}"
+                                "query": "avg:postgresql.connections{$scope} by {db}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [
@@ -110,17 +115,20 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "postgresql.rows_inserted{$scope}"
+                                "query": "postgresql.rows_inserted{$scope}",
+                                "semantic_mode": "combined"
                             },
                             {
                                 "data_source": "metrics",
                                 "name": "query2",
-                                "query": "postgresql.rows_deleted{$scope}"
+                                "query": "postgresql.rows_deleted{$scope}",
+                                "semantic_mode": "combined"
                             },
                             {
                                 "data_source": "metrics",
                                 "name": "query3",
-                                "query": "postgresql.rows_updated{$scope}"
+                                "query": "postgresql.rows_updated{$scope}",
+                                "semantic_mode": "combined"
                             }
                         ],
                         "formulas": [

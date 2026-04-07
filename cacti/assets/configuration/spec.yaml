@@ -50,6 +50,7 @@ files:
             value:
               example: <CACTI_RRA_PATH>
               type: string
+              require_trusted_provider: true
           - name: field_names
             description: |
               The `field_names` specifies which field_names should be used
@@ -83,6 +84,7 @@ files:
             value:
               example: <RRD_WHITELIST_FILE_PATH>
               type: string
+              require_trusted_provider: true
           - template: instances/default
       - template: logs
         example:

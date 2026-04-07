@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: intercom
 metric_id: intercom
 backend_only: false

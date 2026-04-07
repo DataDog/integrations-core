@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: powerdns
 metric_id: powerdns
 backend_only: false
