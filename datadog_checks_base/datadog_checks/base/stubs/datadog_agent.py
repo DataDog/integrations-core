@@ -95,7 +95,7 @@ class DatadogAgentStub(object):
 
     def set_hostname(self, hostname):
         self._hostname = hostname
-    
+
     def set_hostname_err(self, error):
         self._hostname_error = error
 

@@ -2,13 +2,12 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from collections.abc import Buffer
 import datetime
 import decimal
+import socket
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from ipaddress import IPv4Address
-import socket
 
 import mock
 import pytest
@@ -38,7 +37,12 @@ from datadog_checks.base.utils.format import json
         ("localhost", "agent_hostname", None, "agent_hostname"),
         ("127.0.0.1", "agent_hostname", None, "agent_hostname"),
         ("192.0.2.1", "agent_hostname", None, "192.0.2.1"),
-        ("greater-than-or-equal-to-64-characters-causes-unicode-error-----", "agent_hostname", UnicodeDecodeError("", bytes([]), 0, 0, ""), "greater-than-or-equal-to-64-characters-causes-unicode-error-----"),
+        (
+            "greater-than-or-equal-to-64-characters-causes-unicode-error-----",
+            "agent_hostname",
+            UnicodeDecodeError("", bytes([]), 0, 0, ""),
+            "greater-than-or-equal-to-64-characters-causes-unicode-error-----",
+        ),
         ("192.0.2.1", "socket.gaierror", socket.gaierror(), "192.0.2.1"),
         ("192.0.2.1", "greater-than-or-equal-to-64-characters-causes-unicode-error-----", None, "192.0.2.1"),
         ("192.0.2.1", "192.0.2.1", None, "192.0.2.1"),
