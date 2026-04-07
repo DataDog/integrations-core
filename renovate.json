@@ -17,7 +17,7 @@
         "before 6am on Monday"
       ],
       "labels": [
-        "dependabot/actions",
+        "renovate/actions",
         "qa/skip-qa"
       ],
       "minimumReleaseAge": "7 days"
