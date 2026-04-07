@@ -4,9 +4,6 @@ name: Datadog Static Analysis
 
 jobs:
   static-analysis:
-    permissions:
-      # needed for dd-sts
-      id-token: write
     # Dependabot PRs don't have access to the required secrets
     if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
@@ -14,17 +11,12 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Get Datadog credentials
-      id: dd-sts
-      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
-      with:
-        policy: integrations-core
     - name: Check code meets quality and security standards
       id: datadog-static-analysis
       uses: DataDog/datadog-static-analyzer-github-action@c0e10d1c37e5b306b85e5bcf29b06bb233a71dc8 # v3.0.0
       with:
-        dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
-        dd_app_key: ${{ steps.dd-sts.outputs.app_key }}
+        dd_api_key: ${{ secrets.DD_API_KEY }}
+        dd_app_key: ${{ secrets.DD_STATIC_ANALYSIS_APP_KEY }}
         dd_service: integration-core
         dd_env: ci
         dd_site: datadoghq.com
