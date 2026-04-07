@@ -72,3 +72,20 @@ jobs:
             --body "Port ${MERGE_SHA} from #${PR_NUMBER}." \
             --label "changelog/no-changelog" \
             --assignee "$MERGED_BY"
+
+      - name: Notify Slack on failure
+        if: failure()
+        env:
+          SLACK_API_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_REVIEWS }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+        run: |
+          curl -sf -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer ${SLACK_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"channel\": \"${SLACK_CHANNEL}\",
+              \"text\": \":alert: Failed to port release from \`${BASE_BRANCH}\` to master (PR #${PR_NUMBER}).\n<${RUN_URL}|View workflow run>\"
+            }"
