@@ -1,11 +1,11 @@
 # Use a separate image to build ddev from source so the final image doesn't need git
-FROM python:3.13 AS ddev-python
+FROM registry.ddbuild.io/images/mirror/python:3.13.0 AS ddev-python
 COPY . /home
 RUN python -m pip install build
 RUN python -m build -s ./home/ddev
 RUN mv ./home/ddev/dist/*.tar.gz ddev.tar.gz
 
-FROM registry.ddbuild.io/images/mirror/ubuntu:22.04
+FROM registry.ddbuild.io/images/mirror/ubuntu:25.04
 
 # Update sources and install required packages
 RUN apt-get update \
@@ -47,6 +47,6 @@ COPY --from=ddev-python ddev.tar.gz /
 
 # Install pip and ddev for release tagging
 # Install awscli for access to the key used for signing in integrations-extras and marketplace
-RUN curl -sSL https://bootstrap.pypa.io/get-pip.py | python3 \
- && pip3 install --no-cache-dir awscli==1.29.7 \
- && pip3 install --no-cache-dir ddev.tar.gz
+RUN curl -sSL https://bootstrap.pypa.io/get-pip.py | python3 - --break-system-packages \
+ && pip3 install --no-cache-dir --break-system-packages awscli==1.29.7 \
+ && pip3 install --no-cache-dir --break-system-packages ddev.tar.gz

@@ -1,0 +1,1 @@
+Add _get_package_dir utility method to AgentCheck for locating package data files
