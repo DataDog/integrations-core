@@ -16,9 +16,12 @@ datadog-sca-ci:
     # See https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin:
     # "Using ‘+’ rather than ‘-’ causes these options to be turned off"
     - set +o xtrace
-    - 'STS_RESPONSE=$(curl -s -H "Authorization: Bearer $DD_STS_OIDC_TOKEN" "https://dd-sts.us1.ddbuild.io/sts/datadog/exchange?policy=integrations-core-gitlab")'
-    - export DD_API_KEY=$(echo "$STS_RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get(‘api_key’))")
-    - export DD_APP_KEY=$(echo "$STS_RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get(‘app_key’))")
+    - >-
+      DD_STS_RESPONSE=$(curl -sS
+      -H "Authorization: Bearer ${DD_STS_OIDC_TOKEN}"
+      "https://dd-sts.us1.ddbuild.io/sts/datadog/exchange?policy=integrations-core-gitlab")
+    - export DD_API_KEY=$(echo "$DD_STS_RESPONSE" | jq -re '.api_key')
+    - export DD_APP_KEY=$(echo "$DD_STS_RESPONSE" | jq -re '.application_key')
     - set -o xtrace
     - osv-scanner --skip-git --recursive --experimental-only-packages --format=cyclonedx-1-4 --output=/tmp/sbom.json .
     - datadog-ci sbom upload --service integrations-core --env ci /tmp/sbom.json
