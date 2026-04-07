@@ -20,26 +20,19 @@ on:
       packages:
         description: >-
           Packages to release. JSON array (e.g. '["postgres","datadog_checks_base"]'),
-          'all' to release every Python package in the repo, or omit to auto-detect from new tags.
+          or omit to auto-detect from tags pointing at the specified ref.
         required: false
         type: string
       source-repo-ref:
         description: "Commit SHA or ref to build from"
         required: true
         type: string
-      target:
-        description: "Target environment (dev or prod)"
-        required: false
-        type: choice
-        options:
-          - dev
-          - prod
-        default: dev
       dry-run:
         description: "Print what would be released without pushing tags or starting builds"
         required: false
         type: boolean
-        default: false
+        # TODO: flip back to false once agent-integration-wheels-release is updated to handle the new payload
+        default: true
       ddev-version:
         description: "ddev version, pinned by default."
         required: false
@@ -70,8 +63,7 @@ jobs:
       source-repo: integrations-core
       packages: ${{ inputs.packages || '' }}
       source-repo-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.source-repo-ref || github.sha }}
-      target: ${{ inputs.target || 'dev' }}
-      dry-run: ${{ inputs.dry-run || false }}
+      dry-run: ${{ inputs.dry-run || true }}  # TODO: flip back to false
       ddev-version: ${{ inputs.ddev-version || '' }}
       is-stable-release: ${{ needs.context.outputs.is-stable-release }}
     permissions:

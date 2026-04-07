@@ -33,7 +33,6 @@ def build_summary(
     mode: str,
     source_repo: str,
     ref: str,
-    target: str,
     dry_run: bool,
     was_dispatched: bool,
     footer: str = "",
@@ -46,7 +45,6 @@ def build_summary(
         mode:          Human-readable detection mode string.
         source_repo:   Repository name (e.g. ``integrations-core``).
         ref:           Commit SHA or ref used as the build source.
-        target:        Deployment target (``dev`` or ``prod``).
         dry_run:       Whether this was a dry run.
         was_dispatched: Whether wheel-build events were actually dispatched.
         footer:        Optional extra paragraph appended after the package table.
@@ -76,7 +74,6 @@ def build_summary(
         "| | |\n|---|---|\n"
         f"| **Mode** | {mode} |\n"
         f"| **Source** | {_source_link(source_repo, ref)} |\n"
-        f"| **Target** | {target} S3 |\n"
         f"| **Dry run** | {'Yes' if dry_run else 'No'} |\n\n"
         "| Package | Version | Status |\n"
         "|---------|---------|--------|\n"

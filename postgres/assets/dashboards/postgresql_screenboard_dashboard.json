@@ -142,13 +142,15 @@
                       "query": "sum:postgresql.rows_fetched{$scope,$host}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:postgresql.rows_returned{$scope,$host}",
                       "data_source": "metrics",
                       "name": "query2",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -212,7 +214,8 @@
                     {
                       "query": "sum:postgresql.dead_rows{$scope,$db,$table,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -284,19 +287,22 @@
                       "query": "avg:postgresql.index_scans{$scope,$db,$table,$host} by {table}",
                       "data_source": "metrics",
                       "name": "query2",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:postgresql.live_rows{$scope,$db,$table,$host} by {table}",
                       "data_source": "metrics",
                       "name": "query3",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:postgresql.dead_rows{$scope,$db,$table,$host} by {table}",
                       "data_source": "metrics",
                       "name": "query4",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -339,7 +345,8 @@
                     {
                       "query": "sum:postgresql.temp_bytes{$scope,$db,$table,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -388,7 +395,8 @@
                       "query": "avg:postgresql.index_scans{$scope,$db,$host} by {index}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -425,7 +433,8 @@
                       "query": "avg:postgresql.index_scans{$scope,$db,$host} by {index}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -499,7 +508,8 @@
                       "query": "avg:postgresql.live_rows{$scope,$table,$host} by {table}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -554,7 +564,8 @@
                     {
                       "query": "sum:postgresql.locks{$scope,$host} by {lock_mode,table}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -603,7 +614,8 @@
                       "query": "sum:postgresql.locks{$scope,$host} by {lock_mode,table}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "max"
+                      "aggregator": "max",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -645,7 +657,8 @@
                     {
                       "query": "max:postgresql.deadlocks.count{$scope,$host} by {db}.as_count()",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -711,7 +724,8 @@
                     {
                       "query": "avg:postgresql.rows_inserted{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
-                      "name": "query3"
+                      "name": "query3",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -765,7 +779,8 @@
                     {
                       "query": "avg:postgresql.rows_updated{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -826,19 +841,22 @@
                       "query": "avg:postgresql.rows_inserted{$db,$scope,$host} by {db}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:postgresql.rows_updated{$db,$scope,$host} by {db}",
                       "data_source": "metrics",
                       "name": "query2",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:postgresql.rows_deleted{$db,$scope,$host} by {db}",
                       "data_source": "metrics",
                       "name": "query3",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -881,7 +899,8 @@
                     {
                       "query": "avg:postgresql.rows_deleted{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -935,7 +954,8 @@
                     {
                       "query": "avg:postgresql.rows_hot_updated{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1003,7 +1023,8 @@
                     {
                       "query": "avg:postgresql.connections{$scope,$db,$host} by {db}.rollup(max)",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1024,7 +1045,8 @@
                     {
                       "query": "min:postgresql.max_connections{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1071,7 +1093,8 @@
                       "query": "max:postgresql.connections{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -1159,12 +1182,14 @@
                     {
                       "query": "avg:postgresql.index_scans{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:postgresql.seq_scans{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1220,13 +1245,15 @@
                       "query": "avg:postgresql.index_scans{$scope,$db,$table,$host} by {db}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:postgresql.seq_scans{$scope,$db,$table,$host} by {db}",
                       "data_source": "metrics",
                       "name": "query2",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -1270,7 +1297,8 @@
                     {
                       "query": "sum:postgresql.seq_scans{$scope,$db,$table,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1291,7 +1319,8 @@
                     {
                       "query": "sum:postgresql.seq_scans{$scope,$db,$table,$host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1341,7 +1370,8 @@
                       "query": "avg:postgresql.function.calls{$scope,$db,$table,$host} by {function}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -1395,7 +1425,8 @@
                     {
                       "query": "sum:postgresql.replication_delay_bytes{$scope,$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1502,12 +1533,14 @@
                     {
                       "query": "sum:postgresql.bgwriter.checkpoints_timed{$scope,$db,$host}.as_count()",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:postgresql.bgwriter.checkpoints_requested{$scope,$db,$host}.as_count()",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1527,7 +1560,8 @@
                     {
                       "query": "sum:postgresql.bgwriter.checkpoints_requested{$scope,$db,$host}.as_count()",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {

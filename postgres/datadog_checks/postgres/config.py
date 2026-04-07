@@ -390,12 +390,6 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
             '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
         )
 
-    if config.empty_default_hostname:
-        validation_result.add_warning(
-            'The `empty_default_hostname` option has no effect in the Postgres check. '
-            'Use the `exclude_hostname` option instead.'
-        )
-
     # Validate dbname is not excluded when using autodiscovery
     # Only validate when dbname was NOT explicitly set by the user (auto-defaulted)
     # If user explicitly set dbname, they may intentionally want to connect to an excluded database
