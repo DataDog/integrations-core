@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 from mock import MagicMock
+
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.base.utils.http_testing import MockHTTPResponse
@@ -65,7 +66,9 @@ def test_api__make_paginated_get_request(harbor_api):
     paginated_result = [[expected_result[i], expected_result[i + 1]] for i in range(0, len(expected_result) - 1, 2)]
     values = []
     for r in paginated_result:
-        values.append(MockHTTPResponse(json_data=r, headers={'link': 'Link: <unused_url>; rel=next; type="text/plain"'}))
+        values.append(
+            MockHTTPResponse(json_data=r, headers={'link': 'Link: <unused_url>; rel=next; type="text/plain"'})
+        )
     values[-1].headers.pop('link')
 
     harbor_api.http = MagicMock()
