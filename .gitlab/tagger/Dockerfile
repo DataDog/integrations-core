@@ -47,6 +47,6 @@ COPY --from=ddev-python ddev.tar.gz /
 
 # Install pip and ddev for release tagging
 # Install awscli for access to the key used for signing in integrations-extras and marketplace
-RUN curl -sSL https://bootstrap.pypa.io/get-pip.py | python3 -- --break-system-packages \
+RUN curl -sSL https://bootstrap.pypa.io/get-pip.py | python3 - --break-system-packages \
  && pip3 install --no-cache-dir --break-system-packages awscli==1.29.7 \
  && pip3 install --no-cache-dir --break-system-packages ddev.tar.gz
