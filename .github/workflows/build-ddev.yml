@@ -124,7 +124,7 @@ jobs:
       CARGO: cargo
       CARGO_BUILD_TARGET: ${{ matrix.job.target }}
       PYAPP_REPO: pyapp
-      PYAPP_VERSION: "0.24.0"
+      PYAPP_VERSION: "0.15.1"
       PYAPP_PIP_EXTERNAL: "1"
 
     steps:
