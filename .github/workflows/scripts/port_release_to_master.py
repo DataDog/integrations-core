@@ -473,16 +473,18 @@ def main() -> int:
     for integration, buckets in sorted(integrations.items()):
         log.info("--- %s ---", integration)
 
-        if buckets["fragments"]:
-            if process_fragments(integration, buckets["fragments"]):
-                any_change = True
-
         if buckets["changelogs"]:
             if process_changelog(integration, merge_sha):
                 any_change = True
 
+        version_updated = False
         if buckets["abouts"]:
-            if process_about(integration, buckets["abouts"], merge_sha):
+            version_updated = process_about(integration, buckets["abouts"], merge_sha)
+            if version_updated:
+                any_change = True
+
+        if buckets["fragments"] and version_updated:
+            if process_fragments(integration, buckets["fragments"]):
                 any_change = True
 
     # 4. Process requirements (root-level file)
