@@ -73,19 +73,13 @@ jobs:
             --label "changelog/no-changelog" \
             --assignee "$MERGED_BY"
 
-      - name: Notify Slack on failure
+      - name: Comment on PR on failure
         if: failure()
         env:
-          SLACK_API_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
-          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_REVIEWS }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          curl -sf -X POST https://slack.com/api/chat.postMessage \
-            -H "Authorization: Bearer ${SLACK_API_TOKEN}" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"channel\": \"${SLACK_CHANNEL}\",
-              \"text\": \":alert: Failed to port release from \`${BASE_BRANCH}\` to master (PR #${PR_NUMBER}).\n<${RUN_URL}|View workflow run>\"
-            }"
+          gh pr comment "$PR_NUMBER" --body "⚠️ Failed to automatically port this release to master. Manual porting may be required.
+
+          [View workflow run](${RUN_URL})"
