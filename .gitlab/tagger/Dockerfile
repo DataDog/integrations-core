@@ -1,5 +1,5 @@
 # Use a separate image to build ddev from source so the final image doesn't need git
-FROM registry.ddbuild.io/images/mirror/python:3.13 AS ddev-python
+FROM registry.ddbuild.io/images/mirror/python:3.13.0 AS ddev-python
 COPY . /home
 RUN python -m pip install build
 RUN python -m build -s ./home/ddev
