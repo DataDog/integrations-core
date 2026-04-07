@@ -41,10 +41,30 @@ def version_gt(a: str, b: str) -> bool:
     return parse_version(a) > parse_version(b)
 
 
-def get_changed_files(merge_sha: str) -> list[str]:
-    """Return the list of files changed by *merge_sha* relative to its first parent."""
+def _diff_base(merge_sha: str, commit_count: int) -> str:
+    """Compute the correct diff base for all merge strategies.
+
+    - Merge commit (two parents): ``sha^1`` is the base branch before merge.
+    - Squash merge (one parent, one commit): ``sha^1`` is the base branch.
+    - Rebase merge (one parent, N commits): ``sha~N`` reaches the base branch.
+    """
+    is_merge = (
+        subprocess.run(
+            ["git", "rev-parse", "--verify", f"{merge_sha}^2"],
+            capture_output=True,
+        ).returncode
+        == 0
+    )
+    if is_merge or commit_count <= 1:
+        return f"{merge_sha}^1"
+    return f"{merge_sha}~{commit_count}"
+
+
+def get_changed_files(merge_sha: str, commit_count: int) -> list[str]:
+    """Return the list of files changed by the PR that produced *merge_sha*."""
+    base = _diff_base(merge_sha, commit_count)
     result = subprocess.run(
-        ["git", "diff", "--name-only", f"{merge_sha}^1", merge_sha],
+        ["git", "diff", "--name-only", base, merge_sha],
         capture_output=True,
         text=True,
         check=True,
@@ -226,8 +246,9 @@ def extract_about_version(content: str) -> tuple[str, str] | None:
 def process_about(integration: str, about_paths: list[str], merge_sha: str) -> bool:
     """Update ``__about__.py`` only when the release version is greater.
 
-    Returns ``True`` if the file was modified.
+    Returns ``True`` if any file was modified.
     """
+    modified = False
     for about_path in about_paths:
         release_content = read_file_at_commit(merge_sha, about_path)
         if release_content is None:
@@ -274,9 +295,9 @@ def process_about(integration: str, about_paths: list[str], merge_sha: str) -> b
             master_version,
             release_version,
         )
-        return True
+        modified = True
 
-    return False
+    return modified
 
 
 def process_fragments(integration: str, fragment_paths: list[str]) -> bool:
@@ -400,13 +421,20 @@ def main() -> int:
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("merge_sha", help="Merge commit SHA from the release PR")
+    parser.add_argument(
+        "--commits",
+        type=int,
+        default=1,
+        help="Number of commits in the PR (needed for rebase merges)",
+    )
     args = parser.parse_args()
 
     merge_sha: str = args.merge_sha
+    commit_count: int = args.commits
 
     # 1. Get changed files
     try:
-        changed_files = get_changed_files(merge_sha)
+        changed_files = get_changed_files(merge_sha, commit_count)
     except subprocess.CalledProcessError as exc:
         log.error("Failed to read merge commit %s: %s", merge_sha, exc)
         return 1

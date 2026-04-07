@@ -39,6 +39,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
           MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          COMMIT_COUNT: ${{ github.event.pull_request.commits }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
           MERGED_BY: ${{ github.event.pull_request.merged_by.login }}
@@ -51,7 +52,7 @@ jobs:
           git checkout -b "$BRANCH"
 
           EXIT_CODE=0
-          python .github/workflows/scripts/port_release_to_master.py "$MERGE_SHA" || EXIT_CODE=$?
+          python .github/workflows/scripts/port_release_to_master.py "$MERGE_SHA" --commits "$COMMIT_COUNT" || EXIT_CODE=$?
           if [ $EXIT_CODE -eq 2 ]; then
             echo "No changes to port."
             exit 0
