@@ -5,7 +5,7 @@ RUN python -m pip install build
 RUN python -m build -s ./home/ddev
 RUN mv ./home/ddev/dist/*.tar.gz ddev.tar.gz
 
-FROM registry.ddbuild.io/images/mirror/ubuntu:22.04
+FROM registry.ddbuild.io/images/mirror/ubuntu:25.04
 
 # Update sources and install required packages
 RUN apt-get update \
