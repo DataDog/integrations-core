@@ -114,7 +114,8 @@ EOSQL
 done
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" dogs_nofunc <<-'EOSQL'
-    DROP FUNCTION datadog.explain_statement(l_query text, out explain JSON)
+    DROP FUNCTION datadog.explain_statement(l_query text, out explain JSON);
+    DROP FUNCTION datadog.column_stats();
 EOSQL
 
 # Somehow, on old postgres version (11 and 12), wal_level is incorrectly set despite

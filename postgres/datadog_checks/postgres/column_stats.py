@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import json
 import re
 import time
 
@@ -20,12 +19,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
-from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.postgres.config_models import InstanceConfig
+from datadog_checks.base.utils.db.health import HealthStatus
+from datadog_checks.base.utils.db.utils import default_json_event_encoding
+from datadog_checks.base.utils.serialization import json
 
+from .health import PostgresHealthEvent
 from .util import payload_pg_version
-
 
 COLUMN_STATS_QUERY = """\
 WITH changed AS (
@@ -58,57 +57,61 @@ ORDER BY ch.schemaname, ch.tablename, s.attname
 """
 
 
-def agent_check_getter(self):
-    return self._check
+class PostgresColumnStatsCollectorConfig:
+    def __init__(self):
+        self.collection_interval = 14400
+        self.max_tables = 500
+        self.include_tables: list[str] = []
+        self.exclude_tables: list[str] = []
 
 
-class ColumnStatsCollector(DBMAsyncJob):
-    """
-    Collects column statistics from pg_stats via the datadog.column_stats() function.
-    Results are grouped by table and submitted as column_stats events.
-    """
+class PostgresColumnStatsCollector:
+    """Collects column statistics from pg_stats via the datadog.column_stats() function."""
 
-    def __init__(self, check: PostgreSql, config: InstanceConfig):
-        self.collection_interval = config.collect_column_stats.collection_interval
-        self.max_tables = config.collect_column_stats.max_tables
-        self.include_tables = list(config.collect_column_stats.include_tables or [])
-        self.exclude_tables = list(config.collect_column_stats.exclude_tables or [])
-        self._compiled_patterns = {}
-
-        super(ColumnStatsCollector, self).__init__(
-            check,
-            rate_limit=1 / float(self.collection_interval),
-            run_sync=config.collect_column_stats.run_sync,
-            enabled=config.collect_column_stats.enabled,
-            dbms="postgres",
-            min_collection_interval=config.min_collection_interval,
-            expected_db_exceptions=(psycopg.errors.DatabaseError,),
-            job_name="column-stats",
-        )
+    def __init__(self, check: PostgreSql, cancel_event):
         self._check = check
-        self._config = config
-        self._tags_no_db = None
-        self.tags = None
+        self._log = check.log
+        self._cancel_event = cancel_event
+        self._config = PostgresColumnStatsCollectorConfig()
+        self._config.collection_interval = check._config.collect_column_stats.collection_interval
+        self._config.max_tables = check._config.collect_column_stats.max_tables
+        self._config.include_tables = list(check._config.collect_column_stats.include_tables or [])
+        self._config.exclude_tables = list(check._config.collect_column_stats.exclude_tables or [])
+        self._compiled_patterns: dict[str, re.Pattern] = {}
+        self._function_not_found = False
+        self._insufficient_privilege = False
 
-    def _get_compiled_pattern(self, pattern_str):
+    def _get_compiled_pattern(self, pattern_str: str) -> re.Pattern:
         if pattern_str not in self._compiled_patterns:
             self._compiled_patterns[pattern_str] = re.compile(pattern_str)
         return self._compiled_patterns[pattern_str]
 
-    def run_job(self):
-        self.tags = [t for t in self._tags if not t.startswith("dd.internal")]
-        self._tags_no_db = [t for t in self.tags if not t.startswith("db:")]
-        self.collect_column_stats()
-
-    @tracked_method(agent_check_getter=agent_check_getter)
-    def collect_column_stats(self):
-        """Collect column statistics and submit as events."""
+    def collect_column_stats(self, tags_no_db: list[str]) -> bool:
+        """Collect column statistics and submit as events. Returns True if collection ran."""
         rows = self._query_column_stats()
+        if rows is None:
+            return True
+
+        if self._function_not_found:
+            self._function_not_found = False
+            self._log.info("datadog.column_stats() function is now available, resuming collection")
+            self._check.health.submit_health_event(
+                name=PostgresHealthEvent.COLUMN_STATS_FUNCTION_NOT_FOUND,
+                status=HealthStatus.OK,
+            )
+
+        if self._insufficient_privilege:
+            self._insufficient_privilege = False
+            self._log.info("datadog.column_stats() privileges restored, resuming collection")
+            self._check.health.submit_health_event(
+                name=PostgresHealthEvent.COLUMN_STATS_INSUFFICIENT_PRIVILEGE,
+                status=HealthStatus.OK,
+            )
+
         if not rows:
             self._log.debug("No column stats rows returned")
-            return
+            return True
 
-        # Group rows by (schema, table)
         tables = {}
         for row in rows:
             key = (row['schemaname'], row['tablename'])
@@ -123,17 +126,17 @@ class ColumnStatsCollector(DBMAsyncJob):
                     'stats_age': row.get('stats_age'),
                     'columns': [],
                 }
-            tables[key]['columns'].append({
-                'name': row['attname'],
-                'avg_width': row.get('avg_width', 0),
-                'n_distinct': row.get('n_distinct', 0),
-                'null_frac': row.get('null_frac', 0),
-            })
+            tables[key]['columns'].append(
+                {
+                    'name': row['attname'],
+                    'avg_width': row.get('avg_width', 0),
+                    'n_distinct': row.get('n_distinct', 0),
+                    'null_frac': row.get('null_frac', 0),
+                }
+            )
 
-        # Apply include/exclude filters
         filtered_tables = self._apply_table_filters(tables)
 
-        # Build column_stats list with version
         column_stats = []
         for table_data in filtered_tables.values():
             table_data['version'] = 1
@@ -141,7 +144,7 @@ class ColumnStatsCollector(DBMAsyncJob):
 
         if not column_stats:
             self._log.debug("No column stats after filtering")
-            return
+            return True
 
         event = {
             "host": self._check.reported_hostname,
@@ -149,70 +152,76 @@ class ColumnStatsCollector(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "dbms": "postgres",
             "dbms_version": payload_pg_version(self._check.version),
-            "tags": self._tags_no_db,
+            "tags": tags_no_db,
             "cloud_metadata": self._check.cloud_metadata,
             "timestamp": time.time() * 1000,
             "dbm_type": "column_stats",
-            "collection_interval": self.collection_interval,
+            "collection_interval": self._config.collection_interval,
             "column_stats": column_stats,
         }
-        self._check.database_monitoring_column_stats(
-            json.dumps(event, default=default_json_event_encoding)
-        )
+        self._check.database_monitoring_column_stats(json.dumps(event, default=default_json_event_encoding))
         self._log.debug("Submitted column stats event with %d tables", len(column_stats))
+        return True
 
     def _query_column_stats(self):
-        """Execute column stats query and return rows."""
+        """Execute column stats query. Returns rows on success, None on error."""
         if self._cancel_event.is_set():
             self._log.debug("Column stats collection cancelled")
-            return []
+            return None
         try:
             with self._check._get_main_db() as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     query = COLUMN_STATS_QUERY.format(
-                        collection_interval=int(self.collection_interval),
-                        max_tables=self.max_tables,
+                        collection_interval=int(self._config.collection_interval),
+                        max_tables=self._config.max_tables,
                     )
                     self._log.debug("Running column stats query")
                     cursor.execute(query)
                     return cursor.fetchall()
         except psycopg.errors.UndefinedFunction:
-            self._log.warning(
-                "datadog.column_stats() function not found. "
-                "Please create the function as described in the documentation: "
-                "https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-            )
-            return []
+            if not self._function_not_found:
+                self._function_not_found = True
+                self._log.warning(
+                    "datadog.column_stats() function not found. "
+                    "Please create the function as described in the documentation: "
+                    "https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                )
+                self._check.health.submit_health_event(
+                    name=PostgresHealthEvent.COLUMN_STATS_FUNCTION_NOT_FOUND,
+                    status=HealthStatus.WARNING,
+                )
+            return None
         except psycopg.errors.InsufficientPrivilege:
-            self._log.warning(
-                "Insufficient privileges to execute datadog.column_stats(). "
-                "Please check the function permissions."
-            )
-            return []
+            if not self._insufficient_privilege:
+                self._insufficient_privilege = True
+                self._log.warning(
+                    "Insufficient privileges to execute datadog.column_stats(). Please check the function permissions."
+                )
+                self._check.health.submit_health_event(
+                    name=PostgresHealthEvent.COLUMN_STATS_INSUFFICIENT_PRIVILEGE,
+                    status=HealthStatus.WARNING,
+                )
+            return None
 
     def _apply_table_filters(self, tables):
-        """Apply include/exclude regex filters to tables."""
-        if not self.include_tables and not self.exclude_tables:
+        if not self._config.include_tables and not self._config.exclude_tables:
             return tables
 
         filtered = {}
         for key, table_data in tables.items():
             table_name = table_data['table']
 
-            # Check exclude patterns first
             excluded = False
-            for pattern in self.exclude_tables:
+            for pattern in self._config.exclude_tables:
                 if self._get_compiled_pattern(pattern).search(table_name):
                     excluded = True
                     break
-
             if excluded:
                 continue
 
-            # Check include patterns (if any specified, table must match at least one)
-            if self.include_tables:
+            if self._config.include_tables:
                 included = False
-                for pattern in self.include_tables:
+                for pattern in self._config.include_tables:
                     if self._get_compiled_pattern(pattern).search(table_name):
                         included = True
                         break
@@ -220,5 +229,4 @@ class ColumnStatsCollector(DBMAsyncJob):
                     continue
 
             filtered[key] = table_data
-
         return filtered
