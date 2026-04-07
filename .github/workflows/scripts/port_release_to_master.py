@@ -24,7 +24,7 @@ log = logging.getLogger("port-release")
 
 
 VERSION_RE = re.compile(r"__version__\s*=\s*(['\"])(.+?)\1")
-CHANGELOG_HEADING_RE = re.compile(r"^## (\d+\.\d+\.\d+)\s+/")
+CHANGELOG_HEADING_RE = re.compile(r"^## (\d+\.\d+\.\d+)\s+/", re.MULTILINE)
 TOWNCRIER_MARKER = "<!-- towncrier release notes start -->"
 
 
@@ -203,9 +203,12 @@ def process_changelog(integration: str, merge_sha: str) -> bool:
         log.warning("%s: could not find insertion point in master CHANGELOG.md", integration)
         return False
 
-    # Insert with a blank line separator
-    block_with_separator = "\n" + block + "\n"
-    master_lines.insert(insertion_idx, block_with_separator)
+    # Insert with blank line separators, avoiding doubled blank lines
+    preceding_is_blank = (
+        insertion_idx > 0 and not master_lines[insertion_idx - 1].strip()
+    )
+    prefix = "" if preceding_is_blank else "\n"
+    master_lines.insert(insertion_idx, prefix + block + "\n")
 
     changelog_path.write_text("".join(master_lines))
     log.info("%s: inserted changelog entry for %s", integration, release_version)
