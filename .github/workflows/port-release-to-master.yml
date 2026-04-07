@@ -50,8 +50,8 @@ jobs:
 
           git checkout -b "$BRANCH"
 
-          python .github/workflows/scripts/port_release_to_master.py "$MERGE_SHA"
-          EXIT_CODE=$?
+          EXIT_CODE=0
+          python .github/workflows/scripts/port_release_to_master.py "$MERGE_SHA" || EXIT_CODE=$?
           if [ $EXIT_CODE -eq 2 ]; then
             echo "No changes to port."
             exit 0

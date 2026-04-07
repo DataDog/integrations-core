@@ -35,8 +35,8 @@ def parse_version(version: str) -> tuple[int, ...]:
     """Parse a dotted version string into a comparable tuple."""
     try:
         return tuple(int(x) for x in version.split("."))
-    except ValueError:
-        raise ValueError(f"Cannot parse version: {version!r}")
+    except ValueError as exc:
+        raise ValueError(f"Cannot parse version: {version!r}") from exc
 
 
 def version_gt(a: str, b: str) -> bool:
@@ -355,6 +355,9 @@ def process_requirements(merge_sha: str) -> bool:
     - if it exists on master with a lower version, update it
     - if it doesn't exist on master, insert it in sorted position
 
+    Rebuilds the file from a merged dict to avoid index-shift bugs when
+    both insertions and updates happen in the same run.
+
     Returns ``True`` if the file was modified.
     """
     req_path = Path("requirements-agent-release.txt")
@@ -370,7 +373,7 @@ def process_requirements(merge_sha: str) -> bool:
 
     master_content = req_path.read_text()
 
-    # Build lookup of release packages
+    # Build lookup of release packages: {pkg: (version, rest)}
     release_packages: dict[str, tuple[str, str]] = {}
     for line in release_content.splitlines():
         parsed = parse_requirement_line(line)
@@ -378,23 +381,28 @@ def process_requirements(merge_sha: str) -> bool:
             pkg, ver, rest = parsed
             release_packages[pkg] = (ver, rest)
 
-    # Build lookup of master packages (preserve line index)
+    # Build lookup of master packages: {pkg: (version, rest)}
+    # Also collect header lines (comments, --no-index) separately
     master_lines = master_content.splitlines()
-    master_packages: dict[str, tuple[int, str, str]] = {}
-    for i, line in enumerate(master_lines):
+    header_lines: list[str] = []
+    master_packages: dict[str, tuple[str, str]] = {}
+    for line in master_lines:
         parsed = parse_requirement_line(line)
         if parsed:
             pkg, ver, rest = parsed
-            master_packages[pkg] = (i, ver, rest)
+            master_packages[pkg] = (ver, rest)
+        else:
+            header_lines.append(line)
 
+    # Merge: for each release package, update master only when release > master
     modified = False
+    merged = dict(master_packages)
 
     for pkg, (release_ver, release_rest) in release_packages.items():
         if pkg in master_packages:
-            idx, master_ver, master_rest = master_packages[pkg]
+            master_ver, master_rest = master_packages[pkg]
             if version_gt(release_ver, master_ver):
-                # Update in-place, preserving master's platform marker
-                master_lines[idx] = f"{pkg}=={release_ver}{master_rest}"
+                merged[pkg] = (release_ver, master_rest)
                 log.info(
                     "requirements: updated %s %s → %s",
                     pkg,
@@ -403,29 +411,20 @@ def process_requirements(merge_sha: str) -> bool:
                 )
                 modified = True
             else:
-                log.info(
+                log.debug(
                     "requirements: master %s %s >= release %s — skipping",
                     pkg,
                     master_ver,
                     release_ver,
                 )
         else:
-            # New package — insert in sorted position
-            new_line = f"{pkg}=={release_ver}{release_rest}"
-            inserted = False
-            for i, line in enumerate(master_lines):
-                m_parsed = parse_requirement_line(line)
-                if m_parsed and m_parsed[0] > pkg:
-                    master_lines.insert(i, new_line)
-                    inserted = True
-                    break
-            if not inserted:
-                master_lines.append(new_line)
+            merged[pkg] = (release_ver, release_rest)
             log.info("requirements: added %s==%s", pkg, release_ver)
             modified = True
 
     if modified:
-        req_path.write_text("\n".join(master_lines) + "\n")
+        pkg_lines = sorted(f"{p}=={v}{r}" for p, (v, r) in merged.items())
+        req_path.write_text("\n".join(header_lines + pkg_lines) + "\n")
 
     return modified
 
