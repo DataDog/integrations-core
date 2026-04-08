@@ -4,10 +4,10 @@
 
 import asyncio
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Any, Protocol
 
+from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.exceptions import AgentError
-from ddev.ai.agent.protocol import AgentProtocol
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, ToolCall, ToolResultMessage
 from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
@@ -55,13 +55,13 @@ class ReActProcess:
 
     def __init__(
         self,
-        agent: AgentProtocol,
+        agent: BaseAgent[Any],
         tool_registry: ToolRegistry,
         callbacks: list[ReActCallback] | None = None,
     ) -> None:
         """
         Args:
-            agent: Satisfies AgentProtocol (e.g. AnthropicAgent).
+            agent: A BaseAgent subclass (e.g. AnthropicAgent).
             tool_registry: Registry of tools available in this loop.
             callbacks: Optional observers. Empty list means no events are fired.
         """

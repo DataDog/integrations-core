@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from copy import deepcopy
 from typing import Final
 
 import anthropic
 from anthropic.types import MessageParam, ToolParam, ToolResultBlockParam
 
+from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentError, AgentRateLimitError
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
 from ddev.ai.tools.core.registry import ToolRegistry
@@ -17,7 +17,7 @@ DEFAULT_MAX_TOKENS: Final[int] = 8192  # max tokens per response
 ALLOWED_TOOL_CALLERS: Final = ["code_execution_20260120"]
 
 
-class AnthropicAgent:
+class AnthropicAgent(BaseAgent[MessageParam]):
     """A wrapper around the Anthropic API that provides a simple interface for interacting with agents."""
 
     def __init__(
@@ -41,6 +41,7 @@ class AnthropicAgent:
             programmatic_tool_calling: Whether to allow programmatic tool calling.
         """
 
+        super().__init__()
         self._client = client
         self._tools = tools
         self._system_prompt = system_prompt
@@ -48,17 +49,7 @@ class AnthropicAgent:
         self._model = model
         self._max_tokens = max_tokens
         self._programmatic_tool_calling = programmatic_tool_calling
-        self._history: list[MessageParam] = []
         self._context_window: int | None = None
-
-    @property
-    def history(self) -> list[MessageParam]:
-        """Read-only snapshot of the conversation history."""
-        return deepcopy(self._history)
-
-    def reset(self) -> None:
-        """Clear conversation history to start a new conversation."""
-        self._history = []
 
     async def _get_context_window(self) -> int:
         if self._context_window is None:

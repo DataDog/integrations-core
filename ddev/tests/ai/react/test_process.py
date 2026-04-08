@@ -7,6 +7,7 @@ from typing import Any
 
 import pytest
 
+from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.exceptions import AgentConnectionError
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
 from ddev.ai.react.process import ReActCallback, ReActProcess, ReActResult
@@ -17,10 +18,11 @@ from ddev.ai.tools.core.types import ToolResult
 # ---------------------------------------------------------------------------
 
 
-class MockAgent:
-    """Minimal AgentProtocol implementation that replays a fixed list of responses."""
+class MockAgent(BaseAgent[Any]):
+    """Minimal BaseAgent implementation that replays a fixed list of responses."""
 
     def __init__(self, responses: list[AgentResponse]) -> None:
+        super().__init__()
         self._responses = iter(responses)
         self.send_calls: list[str | list[ToolResultMessage]] = []
 
@@ -31,9 +33,6 @@ class MockAgent:
     ) -> AgentResponse:
         self.send_calls.append(content)
         return next(self._responses)
-
-    def reset(self) -> None:
-        pass
 
 
 class MockToolRegistry:
@@ -347,14 +346,11 @@ async def test_callbacks_invoked_correct_counts() -> None:
 # ---------------------------------------------------------------------------
 
 
-class ErrorAgent:
+class ErrorAgent(BaseAgent[Any]):
     async def send(
         self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
     ) -> AgentResponse:
         raise AgentConnectionError("network down")
-
-    def reset(self) -> None:
-        pass
 
 
 async def test_agent_error_notifies_and_reraises() -> None:
@@ -374,14 +370,11 @@ async def test_agent_error_notifies_and_reraises() -> None:
     assert len(callback.agent_responses) == 0
 
 
-class InterruptAgent:
+class InterruptAgent(BaseAgent[Any]):
     async def send(
         self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
     ) -> AgentResponse:
         raise KeyboardInterrupt
-
-    def reset(self) -> None:
-        pass
 
 
 async def test_keyboard_interrupt_notifies_and_reraises() -> None:
@@ -401,14 +394,11 @@ async def test_keyboard_interrupt_notifies_and_reraises() -> None:
 
 
 async def test_cancelled_error_notifies_and_reraises() -> None:
-    class CancelledAgent:
+    class CancelledAgent(BaseAgent[Any]):
         async def send(
             self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
         ) -> AgentResponse:
             raise asyncio.CancelledError
-
-        def reset(self) -> None:
-            pass
 
     callback = MockCallback()
     process = ReActProcess(
