@@ -363,7 +363,7 @@ class TestMessageDeserializer:
 
         result = json.loads(result_str)
         assert result['id'] == 42
-        assert result['amount'] == 99.95
+        assert result['amount'] == '99.9500'
         assert '2024-06-15' in result['created_at']
         assert result['due_date'] == '2024-07-01'
         assert result['due_time'] == '14:30:00'

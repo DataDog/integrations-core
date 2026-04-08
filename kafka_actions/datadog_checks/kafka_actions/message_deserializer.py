@@ -25,7 +25,7 @@ class _AvroJSONEncoder(json.JSONEncoder):
 
     def default(self, obj):
         if isinstance(obj, decimal.Decimal):
-            return float(obj)
+            return str(obj)
         if isinstance(obj, datetime.datetime):
             return obj.isoformat()
         if isinstance(obj, datetime.date):
