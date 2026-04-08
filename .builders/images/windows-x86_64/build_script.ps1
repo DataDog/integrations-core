@@ -43,7 +43,7 @@ Set-Location "$librdkafka_dir"
 python C:\update_librdkafka_manifest.py vcpkg.json --set-version openssl:${Env:OPENSSL_VERSION} --set-version curl:${Env:CURL_VERSION}
 
 C:\vcpkg\vcpkg integrate install
-C:\vcpkg\vcpkg --feature-flags=versions install --triplet $triplet
+C:\vcpkg\vcpkg --feature-flags=versions install --triplet $triplet --overlay-ports=C:\vcpkg_overlay
 # Build
 & .\win32\msbuild.ps1 -platform x64
 

@@ -162,6 +162,7 @@ RUN python -m pip install --no-warn-script-location -r C:\runner_dependencies.tx
 
 COPY build_script.ps1 C:\build_script.ps1
 COPY update_librdkafka_manifest.py C:\update_librdkafka_manifest.py
+COPY vcpkg_overlay C:\vcpkg_overlay
 ENV DD_BUILD_COMMAND="pwsh C:\build_script.ps1"
 
 # Python packages that we want to build regardless of whether prebuilt versions exist on PyPI
