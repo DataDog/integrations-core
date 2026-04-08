@@ -24,7 +24,6 @@ on:
     - 'pyproject.toml'
   schedule:
     - cron: '0 2 * * *'
-  workflow_dispatch:  # temporary — remove after verification
 
 jobs:
   cache:
