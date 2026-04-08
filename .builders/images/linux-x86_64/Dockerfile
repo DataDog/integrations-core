@@ -129,6 +129,9 @@ RUN \
  # This is the folder where unixODBC searches for driver config and where we ask customers to copy their config to
  --sysconfdir=/opt/datadog-agent/embedded/etc
 
+# zstd for librdkafka compression support
+RUN yum install -y epel-release && yum install -y libzstd-devel
+
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 RUN \
  DOWNLOAD_URL="https://github.com/LMDB/lmdb/archive/LMDB_{{version}}.tar.gz" \
