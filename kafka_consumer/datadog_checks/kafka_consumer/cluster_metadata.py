@@ -203,6 +203,11 @@ class ClusterMetadataCollector:
         except Exception as e:
             self.log.error("Error collecting schema registry info: %s", e)
 
+        try:
+            self._collect_log_dir_metadata(shared_metadata)
+        except Exception as e:
+            self.log.error("Error collecting log dir metadata: %s", e)
+
     def _get_items_to_fetch(self, cache_key_prefix: str, item_keys: list[str]) -> list[str]:
         """
         Check which items need fetching based on cache expiration.
@@ -1181,6 +1186,45 @@ class ClusterMetadataCollector:
             selected_configs.append((key, remaining[key]))
 
         return dict(selected_configs)
+
+    def _collect_log_dir_metadata(self, metadata=None):
+        """Collect disk size metrics from DescribeLogDirs API."""
+        cluster_id = self.config._kafka_cluster_id_override or (
+            metadata.cluster_id if metadata and hasattr(metadata, 'cluster_id') else 'unknown'
+        )
+
+        try:
+            broker_log_dirs = self.client.describe_log_dirs()
+        except Exception as e:
+            self.log.error("Error calling describe_log_dirs: %s", e)
+            return
+
+        for broker_id, log_dirs in broker_log_dirs.items():
+            for logdir in log_dirs:
+                if logdir.error is not None:
+                    self.log.warning(
+                        "Error for log dir %s on broker %s: %s", logdir.log_dir, broker_id, logdir.error
+                    )
+                    continue
+
+                for topic_desc in logdir.topics:
+                    topic_size = 0
+                    for part in topic_desc.partitions:
+                        partition_tags = self._get_tags(cluster_id) + [
+                            f'topic:{topic_desc.topic}',
+                            f'partition:{part.partition}',
+                            f'broker_id:{broker_id}',
+                            f'log_dir:{logdir.log_dir}',
+                        ]
+                        self.check.gauge('partition.disk_size', part.size, tags=partition_tags)
+                        topic_size += part.size
+
+                    topic_tags = self._get_tags(cluster_id) + [
+                        f'topic:{topic_desc.topic}',
+                        f'broker_id:{broker_id}',
+                        f'log_dir:{logdir.log_dir}',
+                    ]
+                    self.check.gauge('topic.disk_size', topic_size, tags=topic_tags)
 
     def _get_tags(self, cluster_id: str | None = None) -> list[str]:
         tags = list(self.config._custom_tags)

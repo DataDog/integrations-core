@@ -32,3 +32,5 @@ kafka.topic.count,gauge,,item,,Total number of topics in the cluster.,0,kafka_co
 kafka.topic.message_rate,gauge,,message,second,Message production rate for this topic.,0,kafka_consumer,message rate,,
 kafka.topic.partitions,gauge,,item,,Number of partitions for this topic.,0,kafka_consumer,topic partitions,,
 kafka.topic.size,gauge,,message,,Total number of messages in the topic.,0,kafka_consumer,topic size,,
+kafka.topic.disk_size,gauge,,byte,,Total disk size of the topic across all partitions on this log directory.,0,kafka_consumer,topic disk size,,
+kafka.partition.disk_size,gauge,,byte,,Disk size of the partition on this log directory.,0,kafka_consumer,partition disk size,,
