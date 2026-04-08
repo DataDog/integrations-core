@@ -271,6 +271,7 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
 
                 result_row = {
                     'normalized_query_hash': str(normalized_query_hash),
+                    'server_node': str(server_node) if server_node else '',
                     'query': str(query_text) if query_text else '',
                     'user': str(query_user) if query_user else '',
                     'query_type': str(query_type) if query_type else '',
@@ -313,13 +314,17 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
         """
         Merge per-(query, node) rows into per-query rows.
 
+        Rows are grouped by (normalized_query_hash, server_node) so that the same
+        query running on different nodes produces separate merged rows, preserving
+        per-node attribution in cluster mode.
+
         Summable metrics (count, total_time, …) are summed.
         peak_memory_usage takes the max.
         Non-metric fields are taken from the node with the highest execution count.
         """
         groups = {}
         for row in node_rows:
-            key = row['normalized_query_hash']
+            key = (row['normalized_query_hash'], row.get('server_node', ''))
             if key not in groups:
                 groups[key] = []
             groups[key].append(row)

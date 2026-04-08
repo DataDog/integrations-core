@@ -66,7 +66,8 @@ SELECT
     port,
     client_hostname,
     is_cancelled,
-    http_user_agent
+    http_user_agent,
+    hostName() as server_node
 FROM {processes_table}
 WHERE query NOT LIKE '%system.processes%'
   AND query NOT LIKE '%system.query_log%'
@@ -239,6 +240,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 client_hostname,
                 is_cancelled,
                 http_user_agent,
+                server_node,
             ) = row
 
             normalized_row = {
@@ -268,6 +270,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 'client_hostname': str(client_hostname) if client_hostname else None,
                 'is_cancelled': bool(is_cancelled) if is_cancelled is not None else False,
                 'http_user_agent': str(http_user_agent) if http_user_agent else None,
+                'server_node': str(server_node) if server_node else None,
             }
 
             return self._obfuscate_query(normalized_row)
