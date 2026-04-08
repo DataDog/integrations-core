@@ -274,13 +274,10 @@ jobs:
       run: |
         ddev validate ci --sync || true
         ddev validate config $TARGET --sync || true
-        ddev validate dashboards $TARGET --fix || true
         ddev validate labeler --sync || true
         ddev validate license-headers $TARGET --fix || true
         ddev validate metadata $TARGET --sync || true
         ddev validate models $TARGET --sync || true
-        ddev validate service-checks $TARGET --sync || true
-        ddev validate typos $TARGET --fix || true
 
     - name: Push auto-fixes
       id: push-fixes
