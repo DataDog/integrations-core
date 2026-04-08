@@ -93,3 +93,18 @@ def mock_metrics():
         ),
     ):
         yield
+
+
+@pytest.fixture()
+def mock_seconds_metrics():
+    """Mock metrics fixture using _seconds suffix."""
+    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_seconds.txt')
+    with open(f_name, 'r') as f:
+        text_data = f.read()
+    with mock.patch(
+        'requests.Session.get',
+        return_value=mock.MagicMock(
+            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
+        ),
+    ):
+        yield
