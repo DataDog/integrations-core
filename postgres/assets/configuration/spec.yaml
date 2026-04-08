@@ -17,6 +17,10 @@ files:
     - template: init_config/default
   - template: instances
     options:
+    - name: broken_test_option
+      description: This is a deliberately broken option for CI testing.
+      value:
+        type: INVALID_TYPE
     - name: host
       description: |
         The hostname to connect to. To connect to a Unix socket, specify the full path to the socket directory,

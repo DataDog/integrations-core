@@ -12,6 +12,10 @@ def shared_propagate_agent_tags():
     return False
 
 
+def instance_broken_test_option():
+    return 'this_makes_models_out_of_sync'
+
+
 def instance_activity_metrics_excluded_aggregations():
     return []
 
