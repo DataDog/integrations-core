@@ -761,6 +761,28 @@ jmx_metrics:
           bean_name: kafka.server:type=KafkaServer,name=ClusterId
           attribute: Value
     - include:
+        domain: 'kafka.controller'
+        bean: 'kafka.controller:type=KafkaController,name=FencedBrokerCount'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.controller.fenced_broker_count
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean_name: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
+    - include:
+        domain: 'kafka.controller'
+        bean: 'kafka.controller:type=KafkaController,name=ActiveBrokerCount'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.controller.active_broker_count
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean_name: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
+    - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=ReplicaManager,name=PartitionCount'
         attribute:
@@ -852,6 +874,138 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.session.zookeeper.sync.rate
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean_name: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
+
+    #
+    # KRaft (Kafka Raft) stats
+    #
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=raft-metrics'
+        attribute:
+          current-leader:
+            metric_type: gauge
+            alias: kafka.kraft.current_leader
+          current-vote:
+            metric_type: gauge
+            alias: kafka.kraft.current_vote
+          current-epoch:
+            metric_type: gauge
+            alias: kafka.kraft.current_epoch
+          high-watermark:
+            metric_type: gauge
+            alias: kafka.kraft.high_watermark
+          log-end-offset:
+            metric_type: gauge
+            alias: kafka.kraft.log_end_offset
+          log-end-epoch:
+            metric_type: gauge
+            alias: kafka.kraft.log_end_epoch
+          append-records-rate:
+            metric_type: gauge
+            alias: kafka.kraft.append_records_rate
+          fetch-records-rate:
+            metric_type: gauge
+            alias: kafka.kraft.fetch_records_rate
+          commit-latency-avg:
+            metric_type: gauge
+            alias: kafka.kraft.commit_latency_avg
+          commit-latency-max:
+            metric_type: gauge
+            alias: kafka.kraft.commit_latency_max
+          election-latency-avg:
+            metric_type: gauge
+            alias: kafka.kraft.election_latency_avg
+          election-latency-max:
+            metric_type: gauge
+            alias: kafka.kraft.election_latency_max
+          poll-idle-ratio-avg:
+            metric_type: gauge
+            alias: kafka.kraft.poll_idle_ratio_avg
+          number-unknown-voter-connections:
+            metric_type: gauge
+            alias: kafka.kraft.unknown_voter_connections
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean_name: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=broker-metadata-metrics'
+        attribute:
+          last-applied-record-offset:
+            metric_type: gauge
+            alias: kafka.kraft.broker_metadata.last_applied_record_offset
+          last-applied-record-timestamp:
+            metric_type: gauge
+            alias: kafka.kraft.broker_metadata.last_applied_record_timestamp
+          last-applied-record-lag-ms:
+            metric_type: gauge
+            alias: kafka.kraft.broker_metadata.last_applied_record_lag_ms
+          metadata-load-error-count:
+            metric_type: monotonic_count
+            alias: kafka.kraft.broker_metadata.metadata_load_error_count
+          metadata-apply-error-count:
+            metric_type: monotonic_count
+            alias: kafka.kraft.broker_metadata.metadata_apply_error_count
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean_name: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=MetadataLoader,name=CurrentMetadataVersion'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.kraft.metadata_loader.current_metadata_version
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean_name: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=MetadataLoader,name=CurrentControllerId'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.kraft.metadata_loader.current_controller_id
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean_name: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=MetadataLoader,name=HandleLoadSnapshotCount'
+        attribute:
+          Value:
+            metric_type: monotonic_count
+            alias: kafka.kraft.metadata_loader.handle_load_snapshot_count
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean_name: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=SnapshotEmitter,name=LatestSnapshotGeneratedAgeMs'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.kraft.snapshot_emitter.latest_snapshot_generated_age_ms
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean_name: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=SnapshotEmitter,name=LatestSnapshotGeneratedBytes'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.kraft.snapshot_emitter.latest_snapshot_generated_bytes
       dynamic_tags:
         - tag_name: kafka_cluster_id
           bean_name: kafka.server:type=KafkaServer,name=ClusterId

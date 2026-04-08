@@ -3,12 +3,21 @@
 [[envs.default.matrix]]
 python = ["3.13"]
 kafka_version = ["3.3"]
+compose-file = ["docker-compose.yml"]
+
+[[envs.default.matrix]]
+python = ["3.13"]
+kafka_version = ["3.7"]
+compose-file = ["kraft.yml"]
 
 [envs.default.overrides]
 # See mappings between kafka version and confluent versions here: https://docs.confluent.io/platform/current/installation/versions-interoperability.html
 matrix.kafka_version.env-vars = [
   { key = "CONFLUENT_VERSION", value = "7.3.0", if = ["3.3"] },
+  { key = "CONFLUENT_VERSION", value = "7.7.0", if = ["3.7"] },
 ]
+matrix.compose-file.env-vars = "COMPOSE_FILE"
 
 [envs.latest.env-vars]
 CONFLUENT_VERSION = "latest"
+COMPOSE_FILE = "kraft.yml"
