@@ -126,8 +126,15 @@ class PostgresColumnStatsCollector:
             "collection_interval": self._config.collection_interval,
         }
 
+    def _get_databases(self):
+        if self._check.autodiscovery:
+            autodiscovery_databases = self._check.autodiscovery.get_items()
+            if autodiscovery_databases:
+                return list(autodiscovery_databases)
+        return [self._check._config.dbname]
+
     def collect_column_stats(self, tags_no_db: list[str]) -> bool:
-        """Collect column statistics and submit as events. Returns True if collection ran."""
+        """Collect column statistics across all discovered databases."""
         status = "success"
         try:
             self._collection_started_at = time.time() * 1000
@@ -136,60 +143,25 @@ class PostgresColumnStatsCollector:
                 self._log.debug("Column stats collection cancelled")
                 return True
 
-            with self._check._get_main_db() as conn:
-                with conn.cursor(row_factory=dict_row) as cursor:
-                    query = COLUMN_STATS_QUERY.format(
-                        max_tables=self._config.max_tables,
-                    )
-                    self._log.debug("Running column stats query")
-                    cursor.execute(f"SET statement_timeout = '{self._config.max_query_duration}s'")
-                    cursor.execute(query)
+            databases = self._get_databases()
+            self._log.debug("Collecting column stats for %d databases", len(databases))
 
-                    self._handle_recovery()
+            for db_name in databases:
+                if self._cancel_event.is_set():
+                    self._log.debug("Column stats collection cancelled")
+                    break
+                self._collect_for_database(db_name, tags_no_db)
 
-                    row = cursor.fetchone()
-                    while row:
-                        table_data = self._map_row(row)
-                        if self._table_matches_filters(table_data['table']):
-                            table_data['version'] = 1
-                            num_columns = len(table_data['columns'])
-                            self._queued_tables.append(table_data)
-                            self._queued_columns_count += num_columns
-                            self._total_tables_count += 1
-                            self._total_columns_count += num_columns
-                        row = cursor.fetchone()
-                        self._maybe_flush(tags_no_db, is_last=row is None)
+            if self._queued_tables:
+                self._flush(tags_no_db)
 
             self._log.debug(
-                "Submitted column stats: %d tables, %d columns, %d payloads",
+                "Submitted column stats: %d tables, %d columns, %d payloads across %d databases",
                 self._total_tables_count,
                 self._total_columns_count,
                 self._payloads_count,
+                len(databases),
             )
-            return True
-        except psycopg.errors.UndefinedFunction:
-            if not self._function_not_found:
-                self._function_not_found = True
-                self._log.warning(
-                    "datadog.column_stats() function not found. "
-                    "Please create the function as described in the documentation: "
-                    "https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-                )
-                self._check.health.submit_health_event(
-                    name=PostgresHealthEvent.COLUMN_STATS_FUNCTION_NOT_FOUND,
-                    status=HealthStatus.WARNING,
-                )
-            return True
-        except psycopg.errors.InsufficientPrivilege:
-            if not self._insufficient_privilege:
-                self._insufficient_privilege = True
-                self._log.warning(
-                    "Insufficient privileges to execute datadog.column_stats(). Please check the function permissions."
-                )
-                self._check.health.submit_health_event(
-                    name=PostgresHealthEvent.COLUMN_STATS_INSUFFICIENT_PRIVILEGE,
-                    status=HealthStatus.WARNING,
-                )
             return True
         except Exception as e:
             status = "error"
@@ -228,6 +200,60 @@ class PostgresColumnStatsCollector:
             )
             self._reset()
 
+    def _collect_for_database(self, db_name: str, tags_no_db: list[str]):
+        try:
+            with self._check.db_pool.get_connection(db_name) as conn:
+                with conn.cursor(row_factory=dict_row) as cursor:
+                    query = COLUMN_STATS_QUERY.format(
+                        max_tables=self._config.max_tables,
+                    )
+                    cursor.execute(f"SET statement_timeout = '{self._config.max_query_duration}s'")
+                    cursor.execute(query)
+
+                    self._handle_recovery()
+
+                    row = cursor.fetchone()
+                    while row:
+                        table_data = self._map_row(db_name, row)
+                        if self._table_matches_filters(table_data['table']):
+                            table_data['version'] = 1
+                            num_columns = len(table_data['columns'])
+                            self._queued_tables.append(table_data)
+                            self._queued_columns_count += num_columns
+                            self._total_tables_count += 1
+                            self._total_columns_count += num_columns
+                        row = cursor.fetchone()
+                        if self._queued_columns_count >= PAYLOAD_MAX_COLUMNS:
+                            self._flush(tags_no_db)
+
+        except psycopg.errors.UndefinedFunction:
+            if not self._function_not_found:
+                self._function_not_found = True
+                self._log.warning(
+                    "datadog.column_stats() function not found in database '%s'. "
+                    "Please create the function as described in the documentation: "
+                    "https://docs.datadoghq.com/database_monitoring/setup_postgres/",
+                    db_name,
+                )
+                self._check.health.submit_health_event(
+                    name=PostgresHealthEvent.COLUMN_STATS_FUNCTION_NOT_FOUND,
+                    status=HealthStatus.WARNING,
+                )
+        except psycopg.errors.InsufficientPrivilege:
+            if not self._insufficient_privilege:
+                self._insufficient_privilege = True
+                self._log.warning(
+                    "Insufficient privileges to execute datadog.column_stats() in database '%s'. "
+                    "Please check the function permissions.",
+                    db_name,
+                )
+                self._check.health.submit_health_event(
+                    name=PostgresHealthEvent.COLUMN_STATS_INSUFFICIENT_PRIVILEGE,
+                    status=HealthStatus.WARNING,
+                )
+        except Exception:
+            self._log.exception("Error collecting column stats for database '%s'", db_name)
+
     def _handle_recovery(self):
         if self._function_not_found:
             self._function_not_found = False
@@ -244,9 +270,9 @@ class PostgresColumnStatsCollector:
                 status=HealthStatus.OK,
             )
 
-    def _map_row(self, row):
+    def _map_row(self, db_name: str, row):
         return {
-            'db': self._check._config.dbname,
+            'db': db_name,
             'schema': row['schemaname'],
             'table': row['tablename'],
             'last_analyze_age': row.get('last_analyze_age'),
@@ -257,17 +283,16 @@ class PostgresColumnStatsCollector:
             'columns': row.get('columns') or [],
         }
 
-    def _maybe_flush(self, tags_no_db: list[str], is_last: bool):
-        if is_last or self._queued_columns_count >= PAYLOAD_MAX_COLUMNS:
-            if self._queued_tables:
-                event = self._base_event
-                event["tags"] = tags_no_db
-                event["timestamp"] = time.time() * 1000
-                event["column_stats"] = self._queued_tables
-                self._payloads_count += 1
-                self._check.database_monitoring_column_stats(json.dumps(event, default=default_json_event_encoding))
-                self._queued_tables = []
-                self._queued_columns_count = 0
+    def _flush(self, tags_no_db: list[str]):
+        if self._queued_tables:
+            event = self._base_event
+            event["tags"] = tags_no_db
+            event["timestamp"] = time.time() * 1000
+            event["column_stats"] = self._queued_tables
+            self._payloads_count += 1
+            self._check.database_monitoring_column_stats(json.dumps(event, default=default_json_event_encoding))
+            self._queued_tables = []
+            self._queued_columns_count = 0
 
     def _table_matches_filters(self, table_name: str) -> bool:
         if not self._config.include_tables and not self._config.exclude_tables:
