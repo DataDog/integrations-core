@@ -1,0 +1,1 @@
+Widen JSONDecodeError except clause to catch stdlib json.JSONDecodeError in addition to requests-specific variant

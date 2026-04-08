@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+from json import JSONDecodeError as StdJSONDecodeError
 from typing import TYPE_CHECKING, Any, Dict, List  # noqa: F401
 from xmlrpc.client import ServerProxy
 
@@ -25,7 +26,7 @@ def _safely_process_metrics_response(data: ResponseWrapper) -> dict[str, dict]:
     # See https://github.com/yaml/pyyaml/issues/443
     try:
         return data.json()
-    except requests.exceptions.JSONDecodeError:
+    except (requests.exceptions.JSONDecodeError, StdJSONDecodeError):
         return yaml.load(data.content, Loader=yaml.SafeLoader)
 
 
