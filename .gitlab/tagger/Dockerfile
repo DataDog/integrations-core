@@ -1,16 +1,7 @@
-ARG BASE_IMAGE=registry.ddbuild.io/images/mirror/ubuntu:25.04
+FROM registry.ddbuild.io/images/mirror/ubuntu:25.04
 
-# Install ddev via pipx so the final image doesn't need hatchling/hatch-vcs
-FROM $BASE_IMAGE AS ddev-build
-RUN apt-get update \
- && apt-get -y install --no-install-recommends git pipx python3-dev \
- && rm -rf /var/lib/apt/lists/*
-ENV PIPX_HOME=/opt/pipx
-ENV PIPX_BIN_DIR=/opt/pipx-bin
-COPY . /home
-RUN pipx install /home/ddev
-
-FROM $BASE_IMAGE
+# Get uv — manages Python installations on demand, no system Python pinning needed
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 # Update sources and install required packages
 RUN apt-get update \
@@ -25,7 +16,6 @@ RUN apt-get update \
       libssl-dev \
       moreutils \
       openssh-client \
-      pipx \
       python3-dev \
  # Clean up
  && apt-get -y autoremove \
@@ -47,12 +37,13 @@ COPY --from=registry.ddbuild.io/dd-octo-sts:v1.10.4@sha256:20edc79b3fc3f9cd58eb0
 # Locales are required to be set to use click
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
-ENV PIPX_HOME=/opt/pipx
-ENV PIPX_BIN_DIR=/usr/local/bin
+ENV UV_TOOL_BIN_DIR=/usr/local/bin
 
-# Copy ddev's pre-built pipx venv from the build stage
-COPY --from=ddev-build /opt/pipx /opt/pipx
-COPY --from=ddev-build /opt/pipx-bin/ /usr/local/bin/
-
-# Install awscli for signing integrations-extras and marketplace packages
-RUN pipx install awscli==1.29.7
+# Mount the build context (including .git for hatch-vcs) without adding it to the image.
+# Copy to a writable location since hatch-vcs writes the version file during build.
+# Both the copy and the removal happen in one RUN so the source never lands in the image.
+RUN --mount=type=bind,source=.,target=/src \
+    cp -r /src /tmp/repo \
+ && uv tool install /tmp/repo/ddev \
+ && uv tool install 'awscli==1.29.7' \
+ && rm -rf /tmp/repo
