@@ -30,7 +30,7 @@ files:
       port: 4422
       service: access_logs
       source: cisco-secure-web-appliance
-    - type: file
+    - type: tcp
       port: 5422
       service: access_logs
       source: cisco-secure-web-appliance
