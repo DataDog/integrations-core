@@ -11,8 +11,8 @@ import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException, ConfigurationError
-from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 from datadog_checks.base.utils.headers import headers
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 from datadog_checks.couch import errors
 
 
