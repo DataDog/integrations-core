@@ -41,47 +41,17 @@ def version_gt(a: str, b: str) -> bool:
     return parse_version(a) > parse_version(b)
 
 
-def _diff_base(merge_sha: str, commit_count: int) -> str:
-    """Compute the correct diff base for all merge strategies.
+def get_changed_files(merge_sha: str) -> list[str]:
+    """Return the list of files changed by the PR that produced *merge_sha*.
 
-    - Merge commit (two parents): ``sha^1`` is the base branch before merge.
-    - Squash merge (one parent, any commit count): ``sha^1`` is the base branch.
-      GitHub reports the original PR commit count, but the result is one commit.
-    - Rebase merge (one parent, N commits on the branch): ``sha~N`` reaches
-      the base branch.
-
-    We distinguish squash from rebase by counting how many commits exist
-    between ``sha~N`` and ``sha``.  A squash produces exactly one commit
-    regardless of the reported *commit_count*.
+    Uses ``sha^1`` as the diff base, which is correct for merge commits
+    (first parent is the base branch) and squash merges (parent is the base
+    branch).  Rebase merges are not supported — they would require external
+    context to identify the correct base.  If the workflow encounters one,
+    the diff will be incomplete and the failure-comment step will notify.
     """
-    is_merge = (
-        subprocess.run(
-            ["git", "rev-parse", "--verify", f"{merge_sha}^2"],
-            capture_output=True,
-        ).returncode
-        == 0
-    )
-    if is_merge or commit_count <= 1:
-        return f"{merge_sha}^1"
-
-    # Count actual commits between sha~N and sha to distinguish squash vs rebase.
     result = subprocess.run(
-        ["git", "rev-list", "--count", f"{merge_sha}~{commit_count}..{merge_sha}"],
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode == 0 and result.stdout.strip() == str(commit_count):
-        return f"{merge_sha}~{commit_count}"
-
-    # Squash merge or rev-list failed — sha^1 is always safe
-    return f"{merge_sha}^1"
-
-
-def get_changed_files(merge_sha: str, commit_count: int) -> list[str]:
-    """Return the list of files changed by the PR that produced *merge_sha*."""
-    base = _diff_base(merge_sha, commit_count)
-    result = subprocess.run(
-        ["git", "diff", "--name-only", base, merge_sha],
+        ["git", "diff", "--name-only", f"{merge_sha}^1", merge_sha],
         capture_output=True,
         text=True,
         check=True,
@@ -438,20 +408,13 @@ def main() -> int:
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("merge_sha", help="Merge commit SHA from the release PR")
-    parser.add_argument(
-        "--commits",
-        type=int,
-        default=1,
-        help="Number of commits in the PR (needed for rebase merges)",
-    )
     args = parser.parse_args()
 
     merge_sha: str = args.merge_sha
-    commit_count: int = args.commits
 
     # 1. Get changed files
     try:
-        changed_files = get_changed_files(merge_sha, commit_count)
+        changed_files = get_changed_files(merge_sha)
     except subprocess.CalledProcessError as exc:
         log.error("Failed to read merge commit %s: %s", merge_sha, exc)
         return 1
