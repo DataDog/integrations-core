@@ -260,9 +260,11 @@ jobs:
         ref: ${{ github.event.pull_request.head.ref }}
         fetch-depth: "0"
 
-    - name: Re-configure ddev for auto-fix
+    - name: Re-install and configure ddev for auto-fix
       if: ${{ failure() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
       run: |
+        pip install -e ./datadog_checks_dev[cli]
+        pip install -e ./ddev
         ddev config set upgrade_check false
         ddev config set repos.${{ inputs.repo }} .
         ddev config set repo ${{ inputs.repo }}
