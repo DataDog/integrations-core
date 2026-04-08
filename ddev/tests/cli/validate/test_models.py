@@ -1,0 +1,47 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+from datadog_checks.dev.tooling.constants import set_root
+
+
+@pytest.fixture(autouse=True)
+def reset_legacy_root():
+    set_root('')
+    try:
+        yield
+    finally:
+        set_root('')
+
+
+@pytest.mark.parametrize('use_here', [True, False])
+def test_validate_models_preserves_core_license_headers(ddev, repository_as_cwd, use_here):
+    args = ['validate', 'models', 'zk', '-s']
+    if use_here:
+        args = ['--here'] + args
+
+    result = ddev(*args)
+
+    assert result.exit_code == 0, result.output
+    assert 'All 5 data model files are in sync!' in result.output
+
+    instance = (repository_as_cwd.path / 'zk' / 'datadog_checks' / 'zk' / 'config_models' / 'instance.py').read_text()
+    assert instance.startswith('# (C) Datadog, Inc.')
+
+
+def test_validate_models_here_with_ddev_root_env_var(ddev, repository_as_cwd):
+    result = ddev(
+        '--here',
+        'validate',
+        'models',
+        'zk',
+        env={'DDEV_ROOT': str(repository_as_cwd.path)},
+    )
+
+    # This validates the DDEV_ROOT + --here code path without writing model files.
+    assert result.exit_code in (0, 1), result.output
+    assert 'Validating data models for' in result.output
+    assert (
+        'All 5 data model files are in sync!' in result.output
+        or 'is not in sync, run "ddev validate models zk -s"' in result.output
+    )
