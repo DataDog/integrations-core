@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import warnings
+
 import click
 
 from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, echo_info, echo_success
@@ -54,6 +56,11 @@ def all(ctx, check):
     If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
     checks, an 'all' or empty `check` value will validate all README files.
     """
+    warnings.warn(
+        'This command has moved to ddev.cli.validate.all and will be removed in a future release.',
+        DeprecationWarning,
+        stacklevel=1,
+    )
     repo_choice = ctx.obj['repo_choice']
     echo_info(f'Running validations for {repo_choice} repo ...')
 
