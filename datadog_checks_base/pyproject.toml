@@ -36,7 +36,7 @@ db = [
 deps = [
     "binary==1.0.2",
     "cachetools==7.0.5",
-    "cryptography==46.0.5",
+    "cryptography==46.0.6",
     "ddtrace==3.19.5",
     "jellyfish==1.2.1",
     "lazy-loader==0.5",
@@ -48,7 +48,7 @@ deps = [
     "pyyaml==6.0.3",
     "requests-toolbelt==1.0.0",
     "requests-unixsocket2==1.0.1",
-    "requests==2.32.5",
+    "requests==2.33.0",
     "simplejson==3.20.2",
     "urllib3==2.6.3",
     "wrapt==2.1.2",
