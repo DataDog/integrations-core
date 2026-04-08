@@ -1,8 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-postgresql.fake_bad_metric,INVALID_TYPE,,,,This is a deliberately broken metric for CI testing,0,postgres,bad metric,,
+postgresql.activity.backend_xid_age,gauge,,transaction,,"The age of the oldest backend's xid relative to latest stable xid. This metric (by default) is tagged with db, app, user.",-1,postgres,activity xid,,
 postgresql.active_queries,gauge,,,,"Enabled with `collect_activity_metrics`. The number of active queries in this database. This metric (by default) is tagged with db, app, user.",0,postgres,active queries,,
 postgresql.active_waiting_queries,gauge,,,,"Enabled with `collect_activity_metrics`. The number of waiting queries in this database in state active. This metric (by default) is tagged with db, app, user.",0,postgres,transactions active_waiting queries,,
-postgresql.activity.backend_xid_age,gauge,,transaction,,"The age of the oldest backend's xid relative to latest stable xid. This metric (by default) is tagged with db, app, user.",-1,postgres,activity xid,,
 postgresql.activity.backend_xmin_age,gauge,,transaction,,"The age of the oldest backend's xmin horizon relative to latest stable xid. This metric (by default) is tagged with db, app, user.",-1,postgres,activity xmin,,
 postgresql.activity.wait_event,gauge,,,,"The number of wait events at the time of the check. This metric is tagged by user. This metric is tagged by user, db, app and backend_type",0,postgres,wait_event,,
 postgresql.activity.xact_start_age,gauge,,second,,"The age of the oldest active transactions. This metric (by default) is tagged with db, app, user.",-1,postgres,activity xact,,
