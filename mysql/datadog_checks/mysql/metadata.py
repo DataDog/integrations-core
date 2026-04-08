@@ -20,9 +20,7 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
-    default_json_event_encoding,
 )
-from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
 # default pg_settings collection interval in seconds
@@ -190,4 +188,4 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
             "cloud_metadata": self._config.cloud_metadata,
             "metadata": settings,
         }
-        self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+        self._check.database_monitoring_metadata(event)

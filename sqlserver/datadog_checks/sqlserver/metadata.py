@@ -6,9 +6,7 @@ import time
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
-    default_json_event_encoding,
 )
-from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import (
@@ -158,7 +156,7 @@ class SqlserverMetadata(DBMAsyncJob):
                     "cloud_metadata": self._check.cloud_metadata,
                     "metadata": settings_rows,
                 }
-                self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+                self._check.database_monitoring_metadata(event)
         self.collect_schemas()
 
     def collect_schemas(self):
