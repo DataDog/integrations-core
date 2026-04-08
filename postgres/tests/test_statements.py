@@ -1479,6 +1479,37 @@ def test_async_job_enabled(
         assert check.statement_metrics._job_loop_future is None
 
 
+def test_async_job_wait_for_completion(aggregator, dbm_check, dbm_instance):
+    """
+    Demonstrates using dbm_check fixture with wait_for_completion for deterministic testing.
+
+    This test shows how to wait for a specific number of job completions rather than
+    using time.sleep() with guessed execution counts, eliminating timing-based flakiness.
+    """
+    # Configure jobs to run async
+    dbm_instance['query_metrics']['enabled'] = True
+    dbm_instance['query_metrics']['run_sync'] = False
+    dbm_instance['query_metrics']['collection_interval'] = 0.1
+    # Disable other jobs to simplify the test
+    dbm_instance['query_samples']['enabled'] = False
+    dbm_instance['query_activity']['enabled'] = False
+
+    # dbm_check enables test mode automatically
+    check = dbm_check(dbm_instance)
+    check._connect()
+
+    # First check starts the async job
+    check.run()
+
+    # Wait for exactly 2 job completions - no sleep, no guessing
+    check.statement_metrics.wait_for_completion(count=2, timeout=10)
+
+    # Now we can make deterministic assertions
+    metrics = aggregator.metrics("dd.postgres.collect_statement_metrics.time")
+    # We waited for 2 completions, so we should have at least 2 metrics
+    assert len(metrics) >= 2
+
+
 @pytest.mark.parametrize("db_user", ["datadog", "datadog_no_catalog"])
 def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
     dbm_instance["username"] = db_user
