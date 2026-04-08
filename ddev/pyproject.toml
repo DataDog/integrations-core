@@ -41,7 +41,7 @@ dependencies = [
     "tomli-w",
     "tomlkit",
     "tqdm",
-    "requests>=2.33.0",
+    "requests==2.33.0",
     "matplotlib",
     "squarify",
     "datadog",
