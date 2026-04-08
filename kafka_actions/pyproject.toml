@@ -39,7 +39,7 @@ dynamic = [
 deps = [
     "confluent-kafka==2.13.2",
     "fastavro==1.12.1",
-    "protobuf==7.34.0",
+    "protobuf==7.34.1",
     "pymongo[srv]==4.8.0; python_version >= '3.9'",
 ]
 
