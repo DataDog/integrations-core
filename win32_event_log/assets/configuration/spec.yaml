@@ -46,6 +46,7 @@ files:
         Options available are `low` or `normal`.
 
         This has no effect if `legacy_mode` is set to `false`. Use `event_priority` instead.
+      legacy: true
       value:
         type: string
         example: normal
@@ -60,6 +61,7 @@ files:
 
         Setting this option to `false` is only supported on Agent versions 7 and above.
       enabled: true
+      legacy: true
       value:
         type: boolean
         display_default: true
@@ -70,6 +72,7 @@ files:
         Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
 
         When set to `true`, the Python Event Log API is used to collect events.
+      legacy: true
       value:
         type: boolean
         example: false
