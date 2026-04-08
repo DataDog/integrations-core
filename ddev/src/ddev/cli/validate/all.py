@@ -35,44 +35,46 @@ from ddev.cli.validate.version import version
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
-# Each entry: (command_func, applicable_repos, arg_mode)
+# Each entry: (command_func, applicable_repos, arg_mode, fix_param)
 #   applicable_repos: tuple of repo names where this validator applies, or None for all repos
 #   arg_mode:
 #     'check'        — legacy validators that take a single `check` string argument
 #     'integrations' — ddev validators that take an `integrations` tuple argument
 #     'repo'         — repo-level validators that take no check/integration argument
-VALIDATORS: tuple[tuple[click.BaseCommand, tuple[str, ...] | None, str], ...] = (
-    (agent_reqs, ('core',), 'check'),
-    (ci, None, 'repo'),
-    (codeowners, ('extras',), 'repo'),
-    (config, None, 'check'),
-    (dashboards, None, 'check'),
-    (dep, ('core',), 'repo'),
-    (eula, ('marketplace',), 'check'),
-    (http, None, 'integrations'),
-    (imports, None, 'check'),
-    (integration_style, None, 'check'),
-    (jmx_metrics, None, 'check'),
-    (labeler, ('core',), 'repo'),
-    (legacy_signature, None, 'check'),
-    (license_headers, None, 'check'),
-    (licenses, ('core',), 'repo'),
-    (metadata, None, 'integrations'),
-    (models, None, 'check'),
-    (openmetrics, None, 'integrations'),
-    (package, None, 'check'),
-    (readmes, None, 'check'),
-    (saved_views, None, 'check'),
-    (service_checks, None, 'check'),
-    (typos, None, 'check'),
-    (version, ('core',), 'integrations'),
+#   fix_param: the keyword argument name for auto-fixing ('sync', 'fix'), or None if not supported
+VALIDATORS: tuple[tuple[click.BaseCommand, tuple[str, ...] | None, str, str | None], ...] = (
+    (agent_reqs, ('core',), 'check', None),
+    (ci, None, 'repo', 'sync'),
+    (codeowners, ('extras',), 'repo', None),
+    (config, None, 'check', 'sync'),
+    (dashboards, None, 'check', 'fix'),
+    (dep, ('core',), 'repo', None),
+    (eula, ('marketplace',), 'check', None),
+    (http, None, 'integrations', None),
+    (imports, None, 'check', None),
+    (integration_style, None, 'check', None),
+    (jmx_metrics, None, 'check', None),
+    (labeler, ('core',), 'repo', 'sync'),
+    (legacy_signature, None, 'check', None),
+    (license_headers, None, 'check', 'fix'),
+    (licenses, ('core',), 'repo', 'sync'),
+    (metadata, None, 'integrations', 'sync'),
+    (models, None, 'check', 'sync'),
+    (openmetrics, None, 'integrations', None),
+    (package, None, 'check', None),
+    (readmes, None, 'check', None),
+    (saved_views, None, 'check', None),
+    (service_checks, None, 'check', 'sync'),
+    (typos, None, 'check', 'fix'),
+    (version, ('core',), 'integrations', None),
 )
 
 
 @click.command(short_help='Run all CI validations for a repo')
 @click.argument('check', required=False)
+@click.option('--sync', '-s', is_flag=True, help='Auto-fix issues where supported (passes --sync or --fix to each validator)')
 @click.pass_context
-def all(ctx: click.Context, check: str | None) -> None:
+def all(ctx: click.Context, check: str | None, sync: bool) -> None:
     """Run all CI validations for a repo.
 
     If `check` is specified, only that check will be validated.
@@ -86,7 +88,7 @@ def all(ctx: click.Context, check: str | None) -> None:
 
     failed = []
 
-    for func, repos, arg_mode in VALIDATORS:
+    for func, repos, arg_mode, fix_param in VALIDATORS:
         app.display_info('---')
 
         if repos is not None and repo_name not in repos:
@@ -95,13 +97,17 @@ def all(ctx: click.Context, check: str | None) -> None:
 
         app.display_info(f'Executing validation {func.name}')
 
+        kwargs: dict[str, object] = {}
+        if arg_mode == 'check':
+            kwargs['check'] = check
+        elif arg_mode == 'integrations':
+            kwargs['integrations'] = (check,) if check else ()
+
+        if sync and fix_param is not None:
+            kwargs[fix_param] = True
+
         try:
-            if arg_mode == 'repo':
-                ctx.invoke(func)
-            elif arg_mode == 'integrations':
-                ctx.invoke(func, integrations=(check,) if check else ())
-            else:
-                ctx.invoke(func, check=check)
+            ctx.invoke(func, **kwargs)
         except SystemExit as e:
             if e.code:
                 failed.append(func.name)

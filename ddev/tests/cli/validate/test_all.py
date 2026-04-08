@@ -26,7 +26,7 @@ def _workflow_validator_names() -> set[str]:
 
 def _registry_command_names() -> set[str]:
     """Return the set of Click command names from the VALIDATORS registry."""
-    return {func.name for func, _, _ in VALIDATORS}
+    return {func.name for func, _, _, _ in VALIDATORS}
 
 
 def test_validators_match_ci_workflow():
