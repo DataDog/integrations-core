@@ -8,6 +8,7 @@ import requests
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 
 from .common import get_gitlab_version, get_tags
 from .gitlab_v2 import GitlabCheckV2
@@ -152,7 +153,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
             else:
                 r.raise_for_status()
 
-        except requests.exceptions.Timeout:
+        except (requests.exceptions.Timeout, HTTPTimeoutError):
             # If there's a timeout
             self.service_check(
                 service_check_name,

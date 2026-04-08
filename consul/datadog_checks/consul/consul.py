@@ -16,6 +16,7 @@ from cachetools import TTLCache
 from requests import HTTPError
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 from datadog_checks.base.utils.serialization import json
 
 from .common import (
@@ -152,7 +153,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
             resp.raise_for_status()
 
-        except requests.exceptions.Timeout as e:
+        except (requests.exceptions.Timeout, HTTPTimeoutError) as e:
             msg = 'Consul request to {} timed out'.format(url)
             self.log.exception(msg)
             self.service_check(
