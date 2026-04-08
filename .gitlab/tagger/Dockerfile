@@ -1,5 +1,7 @@
+ARG BASE_IMAGE=registry.ddbuild.io/images/mirror/ubuntu:25.04
+
 # Install ddev via pipx so the final image doesn't need hatchling/hatch-vcs
-FROM registry.ddbuild.io/images/mirror/ubuntu:25.04 AS ddev-build
+FROM $BASE_IMAGE AS ddev-build
 RUN apt-get update \
  && apt-get -y install --no-install-recommends git pipx python3-dev \
  && rm -rf /var/lib/apt/lists/*
@@ -8,7 +10,7 @@ ENV PIPX_BIN_DIR=/opt/pipx-bin
 COPY . /home
 RUN pipx install /home/ddev
 
-FROM registry.ddbuild.io/images/mirror/ubuntu:25.04
+FROM $BASE_IMAGE
 
 # Update sources and install required packages
 RUN apt-get update \
