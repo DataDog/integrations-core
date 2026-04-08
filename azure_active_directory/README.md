@@ -9,11 +9,39 @@ This integration allows you to forward your [Microsoft Entra ID][1] audit and si
 
 ### Installation
 
-This integration forwards logs to Datadog using Azure with Event Hubs. Configure Entra ID to forward activity logs to the event hub.
+This integration forwards logs to Datadog using either [Azure Automated Log Forwarding](https://docs.datadoghq.com/logs/guide/azure-automated-log-forwarding/) (recommended) or [Azure with Event Hubs](https://docs.datadoghq.com/logs/guide/azure-event-hub-log-forwarding/). Datadog recommends using the automated solution for ease of configuration and maintenance. 
 
 ### Configuration
 
-1. Set up the log forwarding pipeline from Azure to Datadog using Event Hubs by following the [Send Azure Logs to Datadog][2] guide.
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Automated Log Forwarding" xxx -->
+
+1. Set up the log forwarding pipeline from Azure to Datadog by following the [Azure Automated Log Forwarding Setup](https://docs.datadoghq.com/logs/guide/azure-automated-log-forwarding/) guide.
+
+2. In Azure portal, select _Microsoft Entra ID > Monitoring > Audit logs_.
+   
+3. Select **Export Data Settings**.
+
+4. In the Diagnostics settings pane, do one of the following:
+
+   - To change existing settings, select **Edit setting**.
+   - To add new settings, select **Add diagnostics setting**. You can have up to three settings.
+
+5. Select the **Archive to a storage account** check box.
+
+6. Select any storage account that begins with `ddlogstorage`. These are all managed by the automated log forwarding infrastructure deployed by the ARM template, and any of them will forward logs successfully.
+
+7. Do one or both of the following. Datadog recommends selecting both.
+
+   - To send audit logs, select the **AuditLogs** check box.
+   - To send sign-in logs, select the **SignInLogs** check box.
+  
+8. Select **Save**.
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "Azure with Event Hubs" xxx -->
+
+1. Set up the log forwarding pipeline from Azure to Datadog using Event Hubs by following the [Send Azure Logs to Datadog from an Event Hub](https://docs.datadoghq.com/logs/guide/azure-event-hub-log-forwarding/) guide.
 
 2. In Azure portal, select _Microsoft Entra ID > Monitoring > Audit logs_.
    
@@ -34,6 +62,9 @@ This integration forwards logs to Datadog using Azure with Event Hubs. Configure
    - To send sign-in logs, select the **SignInLogs** check box.
   
 8. Select **Save**.
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 Logs should start coming into Datadog within 15 minutes.
 For more details on the setup, see the [Azure tutorial][3].
