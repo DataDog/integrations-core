@@ -152,7 +152,7 @@ def make_process(
 async def test_stop_reason_single_response(stop_reason: StopReason) -> None:
     agent = MockAgent([make_response(stop_reason)])
 
-    result = await make_process(agent, max_iterations=max_iterations).start("Hi")
+    result = await make_process(agent).start("Hi")
 
     assert result.final_response.stop_reason == stop_reason
     assert result.iterations == 1
@@ -430,6 +430,57 @@ async def test_cancelled_error_notifies_and_reraises() -> None:
     assert len(recorder.errors) == 1
     assert isinstance(recorder.errors[0], asyncio.CancelledError)
     assert len(recorder.complete_results) == 0
+
+
+class InterruptAgent:
+    async def send(
+        self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
+    ) -> AgentResponse:
+        raise KeyboardInterrupt
+
+    def reset(self) -> None:
+        pass
+
+
+async def test_keyboard_interrupt_notifies_and_reraises() -> None:
+    callback = MockCallback()
+    process = ReActProcess(
+        agent=InterruptAgent(),
+        tool_registry=MockToolRegistry(),
+        callbacks=[callback],
+    )
+
+    with pytest.raises(KeyboardInterrupt):
+        await process.start("Anything")
+
+    assert len(callback.errors) == 1
+    assert isinstance(callback.errors[0], KeyboardInterrupt)
+    assert len(callback.complete_results) == 0
+
+
+async def test_cancelled_error_notifies_and_reraises() -> None:
+    class CancelledAgent:
+        async def send(
+            self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
+        ) -> AgentResponse:
+            raise asyncio.CancelledError
+
+        def reset(self) -> None:
+            pass
+
+    callback = MockCallback()
+    process = ReActProcess(
+        agent=CancelledAgent(),
+        tool_registry=MockToolRegistry(),
+        callbacks=[callback],
+    )
+
+    with pytest.raises(asyncio.CancelledError):
+        await process.start("Anything")
+
+    assert len(callback.errors) == 1
+    assert isinstance(callback.errors[0], asyncio.CancelledError)
+    assert len(callback.complete_results) == 0
 
 
 # ---------------------------------------------------------------------------
