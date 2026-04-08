@@ -23,7 +23,7 @@ E2E_METADATA = {
 
 def _check_task_runs_available(prefect_url: str):
     """Verify that the Prefect API has task runs and task-run events queryable."""
-    resp = requests.post(f"{prefect_url}/task_runs/filter", json={})
+    resp = requests.post(f"{prefect_url}/task_runs/filter", json={}, timeout=10)
     resp.raise_for_status()
     task_runs = resp.json()
     assert task_runs, "No task runs available in Prefect API yet"
@@ -31,6 +31,7 @@ def _check_task_runs_available(prefect_url: str):
     resp = requests.post(
         f"{prefect_url}/events/filter",
         json={"filter": {"event": {"prefix": ["prefect.task-run"]}}},
+        timeout=10,
     )
     resp.raise_for_status()
     events = resp.json().get("events", [])
