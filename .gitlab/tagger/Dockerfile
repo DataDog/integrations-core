@@ -1,9 +1,12 @@
-# Build ddev sdist so the final image doesn't need hatchling/hatch-vcs
-FROM registry.ddbuild.io/images/mirror/python:3.13.0 AS ddev-python
+# Install ddev via pipx so the final image doesn't need hatchling/hatch-vcs
+FROM registry.ddbuild.io/images/mirror/ubuntu:25.04 AS ddev-build
+RUN apt-get update \
+ && apt-get -y install --no-install-recommends git pipx python3-dev \
+ && rm -rf /var/lib/apt/lists/*
+ENV PIPX_HOME=/opt/pipx
+ENV PIPX_BIN_DIR=/opt/pipx-bin
 COPY . /home
-RUN python -m pip install build \
- && python -m build -s /home/ddev \
- && mv /home/ddev/dist/*.tar.gz /ddev.tar.gz
+RUN pipx install /home/ddev
 
 FROM registry.ddbuild.io/images/mirror/ubuntu:25.04
 
@@ -45,8 +48,9 @@ ENV LANG=C.UTF-8
 ENV PIPX_HOME=/opt/pipx
 ENV PIPX_BIN_DIR=/usr/local/bin
 
-COPY --from=ddev-python /ddev.tar.gz /
+# Copy ddev's pre-built pipx venv from the build stage
+COPY --from=ddev-build /opt/pipx /opt/pipx
+COPY --from=ddev-build /opt/pipx-bin/ /usr/local/bin/
 
-# Install ddev for release tagging and awscli for signing integrations-extras and marketplace packages
-RUN pipx install awscli==1.29.7 \
- && pipx install /ddev.tar.gz
+# Install awscli for signing integrations-extras and marketplace packages
+RUN pipx install awscli==1.29.7
