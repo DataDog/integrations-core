@@ -432,14 +432,11 @@ async def test_cancelled_error_notifies_and_reraises() -> None:
     assert len(recorder.complete_results) == 0
 
 
-class InterruptAgent:
+class InterruptAgent(BaseAgent[Any]):
     async def send(
         self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
     ) -> AgentResponse:
         raise KeyboardInterrupt
-
-    def reset(self) -> None:
-        pass
 
 
 async def test_keyboard_interrupt_notifies_and_reraises() -> None:
@@ -459,14 +456,11 @@ async def test_keyboard_interrupt_notifies_and_reraises() -> None:
 
 
 async def test_cancelled_error_notifies_and_reraises() -> None:
-    class CancelledAgent:
+    class CancelledAgent(BaseAgent[Any]):
         async def send(
             self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
         ) -> AgentResponse:
             raise asyncio.CancelledError
-
-        def reset(self) -> None:
-            pass
 
     callback = MockCallback()
     process = ReActProcess(
