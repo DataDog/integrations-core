@@ -4,7 +4,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import datetime
 import decimal
-import socket
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from ipaddress import IPv4Address
@@ -31,26 +30,22 @@ from datadog_checks.base.utils.format import json
 
 
 @pytest.mark.parametrize(
-    "db_host, agent_hostname, hostname_error, want",
+    "db_host, agent_hostname, want",
     [
-        (None, "agent_hostname", None, "agent_hostname"),
-        ("localhost", "agent_hostname", None, "agent_hostname"),
-        ("127.0.0.1", "agent_hostname", None, "agent_hostname"),
-        ("192.0.2.1", "agent_hostname", None, "192.0.2.1"),
-        (
-            "greater-than-or-equal-to-64-characters-causes-unicode-error-----",
-            "agent_hostname",
-            UnicodeDecodeError("", bytes([]), 0, 0, ""),
-            "greater-than-or-equal-to-64-characters-causes-unicode-error-----",
-        ),
-        ("192.0.2.1", "socket.gaierror", socket.gaierror(), "192.0.2.1"),
-        ("192.0.2.1", "greater-than-or-equal-to-64-characters-causes-unicode-error-----", None, "192.0.2.1"),
-        ("192.0.2.1", "192.0.2.1", None, "192.0.2.1"),
-        ("192.0.2.1", "192.0.2.254", None, "192.0.2.1"),
-        ("postgres.svc.local", "some-pod", None, "postgres.svc.local"),
+        (None, "agent_hostname", "agent_hostname"),
+        ("localhost", "agent_hostname", "agent_hostname"),
+        ("127.0.0.1", "agent_hostname", "agent_hostname"),
+        ("192.0.2.1", "agent_hostname", "192.0.2.1"),
+        ("socket.gaierror", "agent_hostname", "socket.gaierror"),
+        ("greater-than-or-equal-to-64-characters-causes-unicode-error-----", "agent_hostname", "greater-than-or-equal-to-64-characters-causes-unicode-error-----"),
+        ("192.0.2.1", "socket.gaierror", "192.0.2.1"),
+        ("192.0.2.1", "greater-than-or-equal-to-64-characters-causes-unicode-error-----", "192.0.2.1"),
+        ("192.0.2.1", "192.0.2.1", "192.0.2.1"),
+        ("192.0.2.1", "192.0.2.254", "192.0.2.1"),
+        ("postgres.svc.local", "some-pod", "postgres.svc.local"),
     ],
 )
-def test_resolve_db_host(db_host, agent_hostname, hostname_error, want):
+def test_resolve_db_host(db_host, agent_hostname, want):
     datadog_agent.set_hostname(agent_hostname)
     assert resolve_db_host(db_host) == want
     datadog_agent.reset_hostname()

@@ -23,7 +23,6 @@ class DatadogAgentStub(object):
         self._cache = {}
         self._config = self.get_default_config()
         self._hostname = 'stubbed.hostname'
-        self._hostname_error = None
         self._process_start_time = 0
         self._external_tags = []
         self._host_tags = "{}"
@@ -37,7 +36,6 @@ class DatadogAgentStub(object):
         self._metadata.clear()
         self._cache.clear()
         self._config = self.get_default_config()
-        self._hostname_error = None
         self._process_start_time = 0
         self._external_tags = []
         self._host_tags = "{}"
@@ -96,12 +94,7 @@ class DatadogAgentStub(object):
     def set_hostname(self, hostname):
         self._hostname = hostname
 
-    def set_hostname_err(self, error):
-        self._hostname_error = error
-
     def reset_hostname(self):
-        if self._hostname_error:
-            raise self._hostname_error
         self._hostname = 'stubbed.hostname'
 
     def get_host_tags(self):
