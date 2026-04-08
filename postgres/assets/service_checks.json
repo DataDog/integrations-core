@@ -2,6 +2,11 @@
     {
         "agent_version": "5.1.0",
         "integration": "Postgres",
+        "check": "postgres.totally_fake_check",
+    },
+    {
+        "agent_version": "5.1.0",
+        "integration": "Postgres",
         "check": "postgres.can_connect",
         "statuses": [
             "ok",

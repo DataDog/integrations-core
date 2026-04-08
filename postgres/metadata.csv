@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+postgresql.fake_bad_metric,INVALID_TYPE,,,,This is a deliberately broken metric for CI testing,0,postgres,bad metric,,
 postgresql.active_queries,gauge,,,,"Enabled with `collect_activity_metrics`. The number of active queries in this database. This metric (by default) is tagged with db, app, user.",0,postgres,active queries,,
 postgresql.active_waiting_queries,gauge,,,,"Enabled with `collect_activity_metrics`. The number of waiting queries in this database in state active. This metric (by default) is tagged with db, app, user.",0,postgres,transactions active_waiting queries,,
 postgresql.activity.backend_xid_age,gauge,,transaction,,"The age of the oldest backend's xid relative to latest stable xid. This metric (by default) is tagged with db, app, user.",-1,postgres,activity xid,,
