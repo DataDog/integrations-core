@@ -1,9 +1,9 @@
-# Use a separate image to build ddev from source so the final image doesn't need git
+# Build ddev sdist so the final image doesn't need hatchling/hatch-vcs
 FROM registry.ddbuild.io/images/mirror/python:3.13.0 AS ddev-python
 COPY . /home
-RUN python -m pip install build
-RUN python -m build -s ./home/ddev
-RUN mv ./home/ddev/dist/*.tar.gz ddev.tar.gz
+RUN python -m pip install build \
+ && python -m build -s /home/ddev \
+ && mv /home/ddev/dist/*.tar.gz /ddev.tar.gz
 
 FROM registry.ddbuild.io/images/mirror/ubuntu:25.04
 
@@ -20,6 +20,7 @@ RUN apt-get update \
       libssl-dev \
       moreutils \
       openssh-client \
+      pipx \
       python3-dev \
  # Clean up
  && apt-get -y autoremove \
@@ -41,12 +42,11 @@ COPY --from=registry.ddbuild.io/dd-octo-sts:v1.10.4@sha256:20edc79b3fc3f9cd58eb0
 # Locales are required to be set to use click
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
+ENV PIPX_HOME=/opt/pipx
+ENV PIPX_BIN_DIR=/usr/local/bin
 
-# Copy in ddev.tar.gz from the other image
-COPY --from=ddev-python ddev.tar.gz /
+COPY --from=ddev-python /ddev.tar.gz /
 
-# Install pip and ddev for release tagging
-# Install awscli for access to the key used for signing in integrations-extras and marketplace
-RUN curl -sSL https://bootstrap.pypa.io/get-pip.py | python3 - --break-system-packages \
- && pip3 install --no-cache-dir --break-system-packages awscli==1.29.7 \
- && pip3 install --no-cache-dir --break-system-packages ddev.tar.gz
+# Install ddev for release tagging and awscli for signing integrations-extras and marketplace packages
+RUN pipx install awscli==1.29.7 \
+ && pipx install /ddev.tar.gz
