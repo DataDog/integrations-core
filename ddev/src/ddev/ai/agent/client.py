@@ -8,18 +8,8 @@ from typing import Final
 import anthropic
 from anthropic.types import MessageParam, ToolParam, ToolResultBlockParam
 
-from ddev.ai.agent.types import (
-    AgentAPIError,
-    AgentConnectionError,
-    AgentError,
-    AgentRateLimitError,
-    AgentResponse,
-    ContextUsage,
-    StopReason,
-    TokenUsage,
-    ToolCall,
-    ToolResultMessage,
-)
+from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentError, AgentRateLimitError
+from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
 from ddev.ai.tools.core.registry import ToolRegistry
 
 DEFAULT_MODEL: Final[str] = "claude-sonnet-4-6"
@@ -72,7 +62,17 @@ class AnthropicAgent:
 
     async def _get_context_window(self) -> int:
         if self._context_window is None:
-            info = await self._client.models.retrieve(self._model)
+            try:
+                info = await self._client.models.retrieve(self._model)
+            except anthropic.APIConnectionError as e:
+                raise AgentConnectionError(f"Connection failed: {e}") from e
+            except anthropic.RateLimitError as e:
+                raise AgentRateLimitError(f"Rate limit exceeded: {e}") from e
+            except anthropic.APIStatusError as e:
+                raise AgentAPIError(e.status_code, e.message) from e
+            except anthropic.APIResponseValidationError as e:
+                raise AgentError(f"Response validation failed: {e}") from e
+
             self._context_window = info.max_input_tokens
         return self._context_window
 
@@ -90,7 +90,7 @@ class AnthropicAgent:
         """Map a raw Anthropic stop_reason string to the generic StopReason enum."""
         # pause_turn gets an explicit check to provide a more informative message than "Unknown stop_reason"
         if raw == "pause_turn":
-            raise AgentError("pause_turn is not supported in batch mode")
+            raise AgentError("pause_turn is not supported in batch mode") from None
         mapping = {
             "end_turn": StopReason.END_TURN,
             "tool_use": StopReason.TOOL_USE,
@@ -108,8 +108,14 @@ class AnthropicAgent:
             {
                 "type": "tool_result",
                 "tool_use_id": msg.tool_call_id,
-                "content": msg.result.data if msg.result.success else (msg.result.error or "(unknown error)"),
                 "is_error": not msg.result.success,
+                **(
+                    {"content": msg.result.data}
+                    if msg.result.data is not None
+                    else {"content": msg.result.error or "(unknown error)"}
+                    if not msg.result.success
+                    else {}
+                ),
             }
             for msg in messages
         ]

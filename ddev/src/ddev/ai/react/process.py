@@ -4,37 +4,21 @@
 
 import asyncio
 from dataclasses import dataclass
-from enum import StrEnum
 from typing import Protocol
 
-from ddev.ai.agent.types import (
-    AgentError,
-    AgentProtocol,
-    AgentResponse,
-    ContextUsage,
-    StopReason,
-    ToolCall,
-    ToolResultMessage,
-)
+from ddev.ai.agent.exceptions import AgentError
+from ddev.ai.agent.protocol import AgentProtocol
+from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, ToolCall, ToolResultMessage
 from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
-
-
-class TerminationReason(StrEnum):
-    """Describes why a ReActProcess loop stopped."""
-
-    END_TURN = "end_turn"
-    MAX_ITERATIONS = "max_iterations"
-    MAX_TOKENS = "max_tokens"
 
 
 @dataclass(frozen=True)
 class ReActResult:
     """Immutable summary of a completed ReAct loop run."""
 
-    final_response: AgentResponse  # if MAX_ITERATIONS, tool_calls here were requested but not executed
+    final_response: AgentResponse
     iterations: int
-    termination_reason: TerminationReason
     total_input_tokens: int  # sum across all iterations
     total_output_tokens: int  # sum across all iterations
     context_usage: ContextUsage | None  # promoted from final_response.usage.context_usage
@@ -55,24 +39,10 @@ class ReActCallback(Protocol):
         """Called when the loop exits cleanly with a ReActResult."""
         ...
 
-    async def on_error(self, error: Exception) -> None:
-        """Called when an AgentError is raised. The exception is re-raised after this returns."""
+    async def on_error(self, error: BaseException) -> None:
+        """Called when the loop aborts — covers AgentError, KeyboardInterrupt, and CancelledError.
+        The exception is always re-raised after this returns."""
         ...
-
-
-def _derive_termination_reason(
-    stop_reason: StopReason,
-    iterations: int,
-    max_iterations: int,
-) -> TerminationReason:
-    """Map loop exit state to a TerminationReason."""
-    if stop_reason == StopReason.TOOL_USE and iterations >= max_iterations:
-        return TerminationReason.MAX_ITERATIONS
-    if stop_reason == StopReason.MAX_TOKENS:
-        return TerminationReason.MAX_TOKENS
-    # StopReason.OTHER (refusal, stop_sequence) maps to END_TURN by design.
-    # Callers needing the distinction can inspect result.final_response.stop_reason.
-    return TerminationReason.END_TURN
 
 
 class ReActProcess:
@@ -80,27 +50,23 @@ class ReActProcess:
     Manages the ReAct (Reason + Act) loop for a single task.
 
     Sends a prompt to an agent, executes any tool calls in parallel,
-    feeds results back, and repeats until the agent stops requesting
-    tools or a guard condition is reached.
+    feeds results back, and repeats until the agent stops requesting tools.
     """
 
     def __init__(
         self,
         agent: AgentProtocol,
         tool_registry: ToolRegistry,
-        max_iterations: int = 50,
         callbacks: list[ReActCallback] | None = None,
     ) -> None:
         """
         Args:
             agent: Satisfies AgentProtocol (e.g. AnthropicAgent).
             tool_registry: Registry of tools available in this loop.
-            max_iterations: Safety cap — loop exits with MAX_ITERATIONS if hit.
             callbacks: Optional observers. Empty list means no events are fired.
         """
         self._agent = agent
         self._tool_registry = tool_registry
-        self._max_iterations = max_iterations
         self._callbacks: list[ReActCallback] = callbacks or []
 
     async def start(self, prompt: str, allowed_tools: list[str] | None = None) -> ReActResult:
@@ -112,11 +78,10 @@ class ReActProcess:
             allowed_tools: Optional subset of tools the agent may call in this run. None means all.
 
         Returns:
-            A ReActResult summarising the final response, token counts,
-            iteration count, and termination reason.
+            A ReActResult summarising the final response, token counts, and iteration count.
 
         Raises:
-            AgentError: Any error from the agent is forwarded after notifying callbacks.
+            Every exception is forwarded after notifying callbacks.
         """
         try:
             response = await self._agent.send(prompt, allowed_tools)
@@ -130,7 +95,8 @@ class ReActProcess:
                 except Exception:
                     pass  # in the future we should log this error
 
-            while response.stop_reason == StopReason.TOOL_USE and iterations < self._max_iterations:
+            # No iteration cap — this is an interactive CLI tool; the user can Ctrl+C to stop.
+            while response.stop_reason == StopReason.TOOL_USE:
                 if not response.tool_calls:
                     raise AgentError("Agent returned stop_reason=TOOL_USE with no tool calls")
 
@@ -139,7 +105,8 @@ class ReActProcess:
                     return_exceptions=True,
                 )
                 tool_results: list[ToolResult] = [
-                    r if isinstance(r, ToolResult) else ToolResult(success=False, error=str(r)) for r in raw_results
+                    r if isinstance(r, ToolResult) else ToolResult(success=False, error=f"{type(r).__name__}: {r}")
+                    for r in raw_results
                 ]
 
                 tool_call_results = list(zip(response.tool_calls, tool_results, strict=True))
@@ -164,11 +131,9 @@ class ReActProcess:
                     except Exception:
                         pass
 
-            termination = _derive_termination_reason(response.stop_reason, iterations, self._max_iterations)
             react_result = ReActResult(
                 final_response=response,
                 iterations=iterations,
-                termination_reason=termination,
                 total_input_tokens=total_input,
                 total_output_tokens=total_output,
                 context_usage=response.usage.context_usage,
@@ -182,7 +147,7 @@ class ReActProcess:
 
             return react_result
 
-        except AgentError as e:
+        except BaseException as e:
             for cb in self._callbacks:
                 try:
                     await cb.on_error(e)
