@@ -63,11 +63,12 @@ This integration forwards logs to Datadog using either [Azure Automated Log Forw
   
 8. Select **Save**.
 
+For more details on the setup, see Microsoft's [Azure tutorial][4] on streaming Entra ID logs to an Event Hub.
+
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 Logs should start coming into Datadog within 15 minutes.
-For more details on the setup, see the [Azure tutorial][4].
 
 ## Data Collected
 
