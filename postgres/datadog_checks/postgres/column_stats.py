@@ -246,6 +246,7 @@ class PostgresColumnStatsCollector:
 
     def _map_row(self, row):
         return {
+            'db': self._check._config.dbname,
             'schema': row['schemaname'],
             'table': row['tablename'],
             'last_analyze_age': row.get('last_analyze_age'),
