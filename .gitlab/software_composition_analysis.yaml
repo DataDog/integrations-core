@@ -10,7 +10,7 @@ datadog-sca-ci:
   needs: []
   id_tokens:
     DD_STS_OIDC_TOKEN:
-      aud: integrations-core-gitlab
+      aud: rapid-seceng-sit
   script:
     - |
       set +o xtrace
