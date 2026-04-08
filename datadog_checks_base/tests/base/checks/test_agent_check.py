@@ -7,7 +7,10 @@ import json
 import logging
 import os
 import re
+import types
+from pathlib import Path
 from typing import Any  # noqa: F401
+from unittest.mock import patch
 
 import mock
 import pytest
@@ -39,6 +42,47 @@ def test_check_version():
     check = AgentCheck()
 
     assert check.check_version == base_package_version
+
+
+@pytest.fixture
+def fresh_check():
+    """Return an AgentCheck with no cached _package_dir."""
+    check = AgentCheck()
+    if hasattr(check, '_package_dir'):
+        del check._package_dir
+    return check
+
+
+def test_get_package_dir_returns_existing_directory(fresh_check):
+    result = fresh_check._get_package_dir()
+    assert isinstance(result, Path)
+    assert result.is_dir()
+
+
+def test_get_package_dir_is_cached(fresh_check):
+    first = fresh_check._get_package_dir()
+    second = fresh_check._get_package_dir()
+    assert first is second
+
+
+def test_get_package_dir_namespace_package_fallback(fresh_check, tmp_path):
+    namespace_pkg = types.ModuleType('datadog_checks.fake_ns')
+    namespace_pkg.__file__ = None
+    namespace_pkg.__path__ = [str(tmp_path)]
+
+    with patch('importlib.import_module', return_value=namespace_pkg):
+        result = fresh_check._get_package_dir()
+
+    assert result == tmp_path
+
+
+def test_get_package_dir_raises_when_no_file_or_path(fresh_check):
+    broken_pkg = types.ModuleType('datadog_checks.broken')
+    broken_pkg.__file__ = None
+
+    with patch('importlib.import_module', return_value=broken_pkg):
+        with pytest.raises(RuntimeError, match="Cannot determine package directory"):
+            fresh_check._get_package_dir()
 
 
 def test_persistent_cache(datadog_agent):
