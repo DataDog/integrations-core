@@ -1,4 +1,5 @@
 name: sonatype_nexus
+fleet_configurable: true
 files:
   - name: sonatype_nexus.yaml
     options:
@@ -9,12 +10,14 @@ files:
       - template: instances
         options:
           - name: username
+            fleet_configurable: true
             required: true
             description: "The username of your Sonatype Nexus account."
             value:
               type: string
               example: test_username
           - name: password
+            fleet_configurable: true
             required: true
             description: "The password of your Sonatype Nexus account."
             secret: true
@@ -22,6 +25,8 @@ files:
               type: string
               example: test_password
           - name: server_url
+            fleet_configurable: true
+            formats: ["url"]
             required: true
             description: "The Server URL of your Sonatype Nexus account."
             value:

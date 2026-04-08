@@ -21,6 +21,19 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+SECURE_FIELD_NAMES = frozenset(
+    [
+        'auth_token',
+        'bearer_token_path',
+        'kerberos_cache',
+        'kerberos_keytab',
+        'tls_ca_cert',
+        'tls_cert',
+        'tls_private_key',
+    ]
+)
+
+
 class AuthToken(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -118,6 +131,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_health_service_check: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     exclude_labels: Optional[tuple[str, ...]] = None
     exclude_metrics: Optional[tuple[str, ...]] = None
     exclude_metrics_by_labels: Optional[MappingProxyType[str, Union[bool, tuple[str, ...]]]] = None
@@ -134,6 +148,7 @@ class InstanceConfig(BaseModel):
     ignore_tags: Optional[tuple[str, ...]] = None
     include_labels: Optional[tuple[str, ...]] = None
     istio_mesh_endpoint: Optional[str] = None
+    istio_mode: Optional[str] = None
     istiod_endpoint: Optional[str] = None
     kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
     kerberos_cache: Optional[str] = None
@@ -190,6 +205,8 @@ class InstanceConfig(BaseModel):
     use_openmetrics: Optional[bool] = None
     use_process_start_time: Optional[bool] = None
     username: Optional[str] = None
+    waypoint_endpoint: Optional[str] = None
+    ztunnel_endpoint: Optional[str] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
@@ -201,6 +218,11 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+
+            if info.field_name in SECURE_FIELD_NAMES:
+                validation.security.check_field_trusted_provider(
+                    info.field_name, value, info.context.get('security_config')
+                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

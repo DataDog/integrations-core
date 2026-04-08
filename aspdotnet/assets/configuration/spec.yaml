@@ -1,4 +1,5 @@
 name: ASP.NET
+fleet_configurable: true
 files:
 - name: aspdotnet.yaml
   options:

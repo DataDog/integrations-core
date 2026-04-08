@@ -204,18 +204,6 @@ If you see a **Permission denied** error while port binding in the Agent logs:
 
 Ensure firewall settings allow traffic through the configured port.
 
-### Port already in use
-
-On systems running Syslog, the Agent may fail to bind to port 514 and display the following error: 
-   
-    `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`
-
-This error occurs because Syslog uses port 514 by default. 
-
-To resolve:
-  - Disable Syslog, OR
-  - Configure the Agent to listen on a different, available port.
-
 ## Support
 
 For further assistance, contact [Datadog support][4].

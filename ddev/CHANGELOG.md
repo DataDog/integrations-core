@@ -2,6 +2,52 @@
 
 <!-- towncrier release notes start -->
 
+## 14.4.0 / 2026-03-27
+
+***Added***:
+
+* Add GitHub Actions workflow to automatically create a PR updating `.gitlab/build_agent.yaml` to point to the release branch once it exists in datadog-agent. ([#22799](https://github.com/DataDog/integrations-core/pull/22799))
+* Add release branch suggestion for `ddev release branch create`. ([#22824](https://github.com/DataDog/integrations-core/pull/22824))
+* Added `--report` and `--report-type` options to `ddev dep updates`:
+    - Pass `--report PATH` to write a dependency update report to a file (JSON or Markdown via `--report-type`).
+    - Pass `--report` without a path to print the report as a Rich table directly in the terminal. ([#22855](https://github.com/DataDog/integrations-core/pull/22855))
+* Added support for custom integration tags in the labeler to handle cases where integration names exceed GitHub’s label length limit. ([#22936](https://github.com/DataDog/integrations-core/pull/22936))
+
+***Fixed***:
+
+* Migrate integrations-core tests to the new Datadog Docker registry ([#22202](https://github.com/DataDog/integrations-core/pull/22202))
+* Improve error reporting and test coverage for macOS Python Build Standalone (PBS) upgrade logic. ([#22816](https://github.com/DataDog/integrations-core/pull/22816))
+* Fixed `ddev size` ignore filtering to correctly interpret gitignore entries, ensuring excluded files are omitted from size calculations. ([#22838](https://github.com/DataDog/integrations-core/pull/22838))
+* Adds validation to detect duplicate entries when running `ddev validate labeler`. ([#22965](https://github.com/DataDog/integrations-core/pull/22965))
+
+## 14.3.2 / 2026-03-03
+
+***Fixed***:
+
+* Changelog check ignores the builders folder. We don't need a changelog for it. ([#22737](https://github.com/DataDog/integrations-core/pull/22737))
+
+## 14.3.1 / 2026-02-20
+
+***Fixed***:
+
+* Stop writing the GitHub username and token to the config file. Read them directly from environment variables instead. ([#22691](https://github.com/DataDog/integrations-core/pull/22691))
+
+## 14.3.0 / 2026-02-13
+
+***Added***:
+
+* Add EventBusOrchestrator to ddev toolset ([#22394](https://github.com/DataDog/integrations-core/pull/22394))
+* Add --recreate/-r flag to ddev env test command to recreate environments from scratch before running tests ([#22521](https://github.com/DataDog/integrations-core/pull/22521))
+* Update datadog_checks_dev pin ([#22637](https://github.com/DataDog/integrations-core/pull/22637))
+
+***Fixed***:
+
+* Ignore upgrade check in dev versions and also fix windows cache location ([#22359](https://github.com/DataDog/integrations-core/pull/22359))
+* Update ddev build commands ([#22414](https://github.com/DataDog/integrations-core/pull/22414))
+* Fix type checking in `ddev test -s` by analyzing all files when none are explicitly specified. ([#22421](https://github.com/DataDog/integrations-core/pull/22421))
+* Ignore deleted news fragments during release when validating changelog in PRs ([#22506](https://github.com/DataDog/integrations-core/pull/22506))
+* Improve license parsing in validation ([#22559](https://github.com/DataDog/integrations-core/pull/22559))
+
 ## 14.2.0 / 2026-01-28
 
 ***Added***:

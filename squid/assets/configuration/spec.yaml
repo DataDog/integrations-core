@@ -1,4 +1,5 @@
 name: Squid
+fleet_configurable: true
 
 files:
   - name: squid.yaml
@@ -10,17 +11,20 @@ files:
     - template: instances
       options:
         - name: name
+          fleet_configurable: true
           required: true
           description: Name of your squid instance.
           value:
             type: string
         - name: host
           description: The hostname or ip address of the squid server.
+          fleet_configurable: true
           value:
             example: localhost
             type: string
         - name: port
           description: The port where the squid server is listening.
+          fleet_configurable: true
           value:
             example: 3128
             type: integer

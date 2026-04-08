@@ -1,0 +1,37 @@
+# HELP ci_runner_version_info A metric with a constant '1' value labeled by different build stats fields
+# TYPE ci_runner_version_info gauge
+ci_runner_version_info{architecture="amd64",branch="main",built_at="2023-01-01T00:00:00+0000",go_version="go1.20",name="gitlab-runner",os="linux",revision="abc123",version="10.8.0"} 1
+# HELP ci_runner_errors The number of caught errors
+# TYPE ci_runner_errors counter
+ci_runner_errors{level="warning"} 2
+# HELP process_max_fds Maximum number of open file descriptors
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP process_open_fds Number of open file descriptors
+# TYPE process_open_fds gauge
+process_open_fds 12
+# HELP process_resident_memory_bytes Resident memory size in bytes
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 2.7394048e+07
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.67281956837e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 7.61856e+08
+# HELP gitlab_runner_job_queue_duration_seconds Histogram of the time in seconds a job is queued before being picked up by a runner
+# TYPE gitlab_runner_job_queue_duration_seconds histogram
+gitlab_runner_job_queue_duration_seconds_bucket{runner="test-runner",le="0.3"} 5
+gitlab_runner_job_queue_duration_seconds_bucket{runner="test-runner",le="0.6"} 8
+gitlab_runner_job_queue_duration_seconds_bucket{runner="test-runner",le="1"} 10
+gitlab_runner_job_queue_duration_seconds_bucket{runner="test-runner",le="5"} 12
+gitlab_runner_job_queue_duration_seconds_bucket{runner="test-runner",le="10"} 14
+gitlab_runner_job_queue_duration_seconds_bucket{runner="test-runner",le="30"} 15
+gitlab_runner_job_queue_duration_seconds_bucket{runner="test-runner",le="60"} 15
+gitlab_runner_job_queue_duration_seconds_bucket{runner="test-runner",le="300"} 15
+gitlab_runner_job_queue_duration_seconds_bucket{runner="test-runner",le="600"} 15
+gitlab_runner_job_queue_duration_seconds_bucket{runner="test-runner",le="1800"} 15
+gitlab_runner_job_queue_duration_seconds_bucket{runner="test-runner",le="3600"} 15
+gitlab_runner_job_queue_duration_seconds_bucket{runner="test-runner",le="+Inf"} 15
+gitlab_runner_job_queue_duration_seconds_sum{runner="test-runner"} 45.5
+gitlab_runner_job_queue_duration_seconds_count{runner="test-runner"} 15

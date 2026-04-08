@@ -1,4 +1,5 @@
 name: IBM Db2
+fleet_configurable: true
 files:
 - name: ibm_db2.yaml
   options:
@@ -16,28 +17,33 @@ files:
     options:
       - name: db
         description: The name of the database to establish a connection with.
+        fleet_configurable: true
         required: True
         value:
           type: string
           example: <DATABASE_NAME>
       - name: username
         description: The database user to authenticate as.
+        fleet_configurable: true
         required: True
         value:
           type: string
       - name: password
         description: The password of `username`.
+        fleet_configurable: true
         required: True
         secret: true
         value:
           type: string
       - name: host
         description: The hostname used to connect to a remote or uncataloged database.
+        fleet_configurable: true
         value:
           type: string
           example: <HOSTNAME>
       - name: port
         description: The port used to connect to a remote or uncataloged database.
+        fleet_configurable: true
         value:
           type: integer
           example: 50000
@@ -45,6 +51,7 @@ files:
         description: |
           Set this parameter to `ssl` to use the SSL protocol for a connection to the database server using the default
           certificate from the ibm-db driver package. Specifying `tls_cert` is not required when using this option.
+        fleet_configurable: true
         value:
           type: string
           example: none
@@ -55,11 +62,13 @@ files:
         description: |
           The path to a SSL certificate to use, when connecting to a database in a secure fashion. It
           has to be accessible and readable by the agent user.
+        fleet_configurable: true
         value:
           type: string
       - name: connection_timeout
         description: |
           Connection timeout in seconds
+        fleet_configurable: true
         value:
           type: integer
           example: 10

@@ -23,7 +23,6 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")
 
 
 @requires_over_10
-@pytest.mark.flaky
 def test_physical_replication_slots(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     # It seemingly can take a small amount of time for the pg_replication_slots to be saturated
@@ -35,9 +34,9 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
     conn = psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g")
     with conn.cursor() as cur:
         cur.execute("select pg_wal_lsn_diff(pg_current_wal_lsn(), redo_lsn) from pg_control_checkpoint();")
-        redo_lsn_age = int(cur.fetchall()[0][0])
-        cur.execute("select age(xmin) FROM pg_replication_slots;")
-        bound = cur.fetchall()[0][0]
+        redo_lsn_age = int(cur.fetchone()[0])
+        cur.execute("select age(xmin) FROM pg_replication_slots WHERE slot_name = 'replication_slot';")
+        bound = cur.fetchone()[0]
         xmin_age_higher_bound += int(bound) if bound is not None else 0
 
         cur.execute("select * from pg_create_physical_replication_slot('phys_1');")
@@ -105,8 +104,11 @@ def test_logical_replication_slots(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn) FROM pg_replication_slots;")
-            restart_age = cur.fetchall()[0][0]
+            cur.execute(
+                "SELECT pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn) FROM pg_replication_slots"
+                " WHERE slot_name = 'logical_slot';"
+            )
+            restart_age = cur.fetchone()[0]
 
     check.check(pg_instance)
 

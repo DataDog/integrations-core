@@ -96,8 +96,8 @@ def test_get_available_query_metrics_columns(dbm_instance, expected_columns, ava
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.initialize_connection()
     _conn_key_prefix = "dbm-"
-    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+    with check.connection.open_managed_default_connection(_conn_key_prefix):
+        with check.connection.get_managed_cursor(_conn_key_prefix) as cursor:
             result_available_columns = check.statement_metrics._get_available_query_metrics_columns(
                 cursor, expected_columns
             )
@@ -111,8 +111,8 @@ def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.initialize_connection()
     _conn_key_prefix = "dbm-"
-    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+    with check.connection.open_managed_default_connection(_conn_key_prefix):
+        with check.connection.get_managed_cursor(_conn_key_prefix) as cursor:
             for _ in range(3):
                 query = check.statement_metrics._get_statement_metrics_query_cached(cursor)
                 assert query, "query should be non-empty"
@@ -393,8 +393,8 @@ def test_statement_metrics_and_plans(
         dd_run_check(check, cancel=False)
 
     _conn_key_prefix = "dbm-"
-    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+    with check.connection.open_managed_default_connection(_conn_key_prefix):
+        with check.connection.get_managed_cursor(_conn_key_prefix) as cursor:
             available_query_metrics_columns = check.statement_metrics._get_available_query_metrics_columns(
                 cursor, SQL_SERVER_QUERY_METRICS_COLUMNS
             )
@@ -804,8 +804,8 @@ def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.initialize_connection()
     _conn_key_prefix = "dbm-"
-    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+    with check.connection.open_managed_default_connection(_conn_key_prefix):
+        with check.connection.get_managed_cursor(_conn_key_prefix) as cursor:
             statement_metrics_query = check.statement_metrics._get_statement_metrics_query_cached(cursor)
 
     # this test ensures that we're able to run the basic STATEMENT_METRICS_QUERY without error
@@ -1137,6 +1137,99 @@ def test_metrics_lookback_window_config(instance_docker):
 
     check.statement_metrics._load_raw_query_metrics_rows(mock_cursor)
     mock_cursor.execute.assert_called_with(ANY, (86400,))
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "procedure_name,sproc_object_id,expected_is_proc,expected_procedure_name",
+    [
+        pytest.param(
+            None,
+            12345,
+            True,
+            "myproc",
+            id="no_procedure_name_with_sproc_object_id_extracts_from_metadata",
+        ),
+        pytest.param(
+            "myproc",
+            12345,
+            True,
+            "dbo.myproc",
+            id="procedure_name_present_with_sproc_object_id_uses_original",
+        ),
+        pytest.param(
+            None,
+            None,
+            False,
+            None,
+            id="no_procedure_name_no_sproc_object_id_not_a_proc",
+        ),
+        pytest.param(
+            None,
+            0,
+            False,
+            None,
+            id="no_procedure_name_zero_sproc_object_id_not_a_proc",
+        ),
+    ],
+)
+def test_normalize_queries_procedure_name_fallback(
+    instance_docker, datadog_agent, procedure_name, sproc_object_id, expected_is_proc, expected_procedure_name
+):
+    """Test that _normalize_queries extracts procedure_name from obfuscator metadata
+    when OBJECT_NAME() returns NULL (procedure_name is None) but sproc_object_id is set,
+    which happens when the monitoring user lacks CONNECT on the user database."""
+    instance_docker['dbm'] = True
+    instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+
+    statement_text = "SELECT * FROM ϑings WHERE id = @P1"
+    procedure_text = "CREATE PROCEDURE dbo.myProc AS BEGIN SELECT * FROM ϑings WHERE id = @P1 END;"
+
+    def _obfuscate_sql(sql_query, options=None):
+        return json.dumps(
+            {
+                'query': sql_query,
+                'metadata': {
+                    'tables_csv': 'ϑings',
+                    'commands': ['SELECT'],
+                    'comments': [],
+                    'procedures': ['myProc'],
+                },
+            }
+        )
+
+    row = {
+        'statement_text': statement_text,
+        'text': procedure_text,
+        'procedure_name': procedure_name,
+        'schema_name': 'dbo' if procedure_name else None,
+        'sproc_object_id': sproc_object_id,
+        'query_hash': b'\x01\x02\x03\x04',
+        'query_plan_hash': b'\x05\x06\x07\x08',
+        'plan_handle': b'\x09\x0a\x0b\x0c',
+        'execution_count': 1,
+        'total_worker_time': 100,
+    }
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        result = check.statement_metrics._normalize_queries([row])
+
+    assert len(result) == 1
+    result_row = result[0]
+    assert result_row['is_proc'] is expected_is_proc
+    if expected_procedure_name:
+        assert result_row['procedure_name'] == expected_procedure_name
+    else:
+        assert not result_row.get('procedure_name')
+
+    if expected_is_proc:
+        assert result_row.get('procedure_signature'), "should have a procedure signature"
+        assert result_row.get('procedure_text'), "should have obfuscated procedure text"
+    else:
+        assert not result_row.get('procedure_signature')
+        assert not result_row.get('procedure_text')
 
 
 @pytest.mark.flaky

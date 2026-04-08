@@ -1,0 +1,37 @@
+# Trust policy for the backport workflow in DataDog/integrations-core
+#
+# This policy grants the tibdex/backport action permission to create
+# backport pull requests when a merged PR has a backport label.
+#
+# Naming convention:
+#   self:                 Only this repository (DataDog/integrations-core) can use this policy
+#   backport:             Grants permissions to create backport pull requests
+#   pull-request-target:  Intended for workflows triggered by pull_request_target events
+#
+# Security model:
+#   - Workflow runs on pull_request_target (closed/labeled) events
+#   - Workflow file must be committed to master
+#
+# Permissions granted:
+#   - pull_requests: write  - Create and update pull requests
+#
+# Usage in workflows:
+#   - uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80 # v1.0.3
+#     with:
+#       scope: DataDog/integrations-core
+#       policy: self.backport.pull-request-target
+
+issuer: https://token.actions.githubusercontent.com
+
+subject: repo:DataDog/integrations-core:pull_request
+
+claim_pattern:
+  ref: refs/heads/(master|\d+\.\d+\.x)
+  ref_protected: "true"
+  job_workflow_ref: DataDog/integrations-core/.github/workflows/backport-pr\.yml@refs/heads/master
+  event_name: pull_request_target
+
+permissions:
+  pull_requests: write
+  workflows: write
+  contents: write

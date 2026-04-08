@@ -92,8 +92,8 @@ def test_get_available_procedure_metrics_columns(dbm_instance, expected_columns,
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.initialize_connection()
     _conn_key_prefix = "dbm-test-procedures"
-    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+    with check.connection.open_managed_default_connection(_conn_key_prefix):
+        with check.connection.get_managed_cursor(_conn_key_prefix) as cursor:
             result_available_columns = check.procedure_metrics._get_available_procedure_metrics_columns(
                 cursor, expected_columns
             )
@@ -107,8 +107,8 @@ def test_get_procedure_metrics_query_cached(aggregator, dbm_instance, caplog):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.initialize_connection()
     _conn_key_prefix = "dbm-test-procedures"
-    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+    with check.connection.open_managed_default_connection(_conn_key_prefix):
+        with check.connection.get_managed_cursor(_conn_key_prefix) as cursor:
             for _ in range(3):
                 query = check.procedure_metrics._get_procedure_metrics_query_cached(cursor)
                 assert query, "query should be non-empty"
@@ -253,8 +253,8 @@ def test_procedure_metrics(
     dd_run_check(check)
 
     _conn_key_prefix = "dbm-test-procedures"
-    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+    with check.connection.open_managed_default_connection(_conn_key_prefix):
+        with check.connection.get_managed_cursor(_conn_key_prefix) as cursor:
             available_procedure_metrics_columns = check.procedure_metrics._get_available_procedure_metrics_columns(
                 cursor, SQL_SERVER_PROCEDURE_METRICS_COLUMNS
             )

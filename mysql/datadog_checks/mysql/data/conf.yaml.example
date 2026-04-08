@@ -93,7 +93,7 @@ instances:
 
     ## @param sock - string - optional
     ## Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
-    ## If you specify a socket you dont need to specify a host.
+    ## If you specify a socket you don't need to specify a host.
     #
     # sock: <SOCK>
 
@@ -379,7 +379,7 @@ instances:
         # extra_performance_metrics: false
 
     ## @param dbm - boolean - optional - default: false
-    ## Set to `true` enable Database Monitoring.
+    ## Set to `true` to enable Database Monitoring.
     #
     # dbm: false
 

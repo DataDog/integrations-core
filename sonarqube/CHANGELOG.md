@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 5.6.0 / 2026-04-01
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 5.5.1 / 2026-02-19 / Agent 7.77.0
+
+***Fixed***:
+
+* Update conf.yaml to display 'default' field defined in spec.yaml ([#21744](https://github.com/DataDog/integrations-core/pull/21744))
+
 ## 5.5.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:

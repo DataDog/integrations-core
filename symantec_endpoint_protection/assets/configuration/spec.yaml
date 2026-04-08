@@ -1,4 +1,5 @@
 name: Symantec Endpoint Protection
+fleet_configurable: true
 files:
 - name: symantec_endpoint_protection.yaml
   options:

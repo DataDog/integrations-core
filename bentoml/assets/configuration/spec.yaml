@@ -1,4 +1,5 @@
 name: BentoML
+fleet_configurable: true
 files:
 - name: bentoml.yaml
   options:

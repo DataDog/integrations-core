@@ -1,4 +1,5 @@
 name: Mesos Master
+fleet_configurable: true
 
 files:
   - name: mesos_master.yaml
@@ -11,6 +12,8 @@ files:
         options:
           - name: url
             description: URL used to connect to the Mesos Master instance.
+            fleet_configurable: true
+            formats: ["url"]
             required: true
             value:
               type: string

@@ -26,8 +26,14 @@ ALLOWED_OPTION_FIELDS = {
     'template',
     'overrides',
     'fleet_configurable',
+    'formats',
 }
-ALLOWED_VALUE_FIELDS = OPENAPI_SCHEMA_PROPERTIES | {'example', 'display_default', 'compact_example'}
+ALLOWED_VALUE_FIELDS = OPENAPI_SCHEMA_PROPERTIES | {
+    'example',
+    'display_default',
+    'compact_example',
+    'require_trusted_provider',
+}
 DESCRIPTION_LINE_LENGTH_LIMIT = 120
 
 

@@ -1,4 +1,5 @@
 name: IBM Spectrum LSF
+fleet_configurable: true
 files:
 - name: ibm_spectrum_lsf.yaml
   options:
@@ -8,6 +9,7 @@ files:
   - template: instances
     options:
     - name: cluster_name
+      fleet_configurable: true
       required: true
       description: The exact name of the IBM cluster to monitor.
       value:
@@ -27,6 +29,7 @@ files:
         recommend monitoring it with a higher `min_collection_interval` like 60. The `bhist_details` command involves
         running `bhist -l` for each completed job, so we recommend monitoring it with a higher `min_collection_interval`
         along with `bhist`.
+      fleet_configurable: true
       value:
         type: array
         default:
@@ -52,6 +55,7 @@ files:
         items:
           type: string
     - name: badmin_perfmon_auto
+      fleet_configurable: true
       required: false
       description: |
         Whether or not to call `badmin perfmon start` when starting badmin perfmon metrics collection and
@@ -64,3 +68,19 @@ files:
         display_default: true
         example: false
     - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      source: ibm_spectrum_lsf
+      tags:
+        - "log_type:job"
+      path:
+        - <PATH_TO_JOB_LOGS>/*.out
+        - <PATH_TO_SYSTEM_LOGS>/*.err
+      service: <SERVICE_NAME>
+    - type: file
+      source: ibm_spectrum_lsf
+      tags:
+        - "log_type:system"
+      path: <LSF_TOP_DIR>/log/*
+      service: <SERVICE_NAME>

@@ -1,4 +1,5 @@
 name: Nfsstat
+fleet_configurable: true
 files:
 - name: nfsstat.yaml
   options:
@@ -9,14 +10,17 @@ files:
         A version of nfsiostat is shipped with the Agent binary.
         If you are using a source install, specify the location of nfsiostat
         with the nfsiostat_path parameter.
+      fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /usr/local/sbin/nfsiostat
         display_default: null
     - name: autofs_enabled
       description: |
         If your environment uses AutoFS, enable this option to only log DEBUG-level messages when there are no mounts.
         See more information on AutoFS here: https://help.ubuntu.com/community/Autofs
+      fleet_configurable: true
       value:
         type: boolean
         example: false
@@ -24,6 +28,7 @@ files:
   - template: instances
     options:
     - name: disable_missing_mountpoints_warning
+      fleet_configurable: true
       required: false
       description: |
         If true, no warning is logged if host has check enabled but no NFS mount point is found.

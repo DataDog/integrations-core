@@ -40,6 +40,7 @@
     Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
     The default metrics to be collected are kept in metrics.yaml, but you can still
     add your own metrics here.
+  fleet_configurable: true
   value:
     example:
      - include:

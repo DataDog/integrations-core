@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import fnmatch
 import json
 import os
 import re
@@ -160,7 +161,7 @@ def is_valid_integration_file(
         included_folder = "datadog_checks" + os.sep
 
     if git_ignore is None:
-        git_ignore = get_gitignore_files(repo_path)
+        git_ignore = get_gitignore_files(Path(repo_path))
     # It is not an integration
     if path.startswith("."):
         return False
@@ -171,20 +172,34 @@ def is_valid_integration_file(
     elif any(ignore in path for ignore in ignored_files):
         return False
     # This file is contained in .gitignore
-    elif any(ignore in path for ignore in git_ignore):
+    elif _matches_gitignore(path, git_ignore):
         return False
     else:
         return True
 
 
-def get_gitignore_files(repo_path: str | Path) -> list[str]:
-    gitignore_path = os.path.join(repo_path, ".gitignore")
-    with open(gitignore_path, "r", encoding="utf-8") as file:
-        gitignore_content = file.read()
-        ignored_patterns = [
-            line.strip() for line in gitignore_content.splitlines() if line.strip() and not line.startswith("#")
-        ]
-        return ignored_patterns
+def _matches_gitignore(path: str, patterns: list[str]) -> bool:
+    parts = path.replace(os.sep, "/").split("/")
+    for pattern in patterns:
+        norm = pattern.rstrip("/")
+        if fnmatch.fnmatch(path, norm):
+            return True
+        if fnmatch.fnmatch(os.path.basename(path), norm):
+            return True
+        if any(fnmatch.fnmatch(part, norm) for part in parts):
+            return True
+    return False
+
+
+def get_gitignore_files(repo_path: Path) -> list[str]:
+    gitignore_path = repo_path / ".gitignore"
+    if not gitignore_path.is_file():
+        return []
+
+    with gitignore_path.open(mode="r", encoding="utf-8") as f:
+        lines = [line.strip() for line in f.read().splitlines() if line.strip() and not line.startswith("#")]
+
+    return lines
 
 
 def convert_to_human_readable_size(size_bytes: float) -> str:

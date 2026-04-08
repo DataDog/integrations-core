@@ -1,4 +1,5 @@
 name: ArangoDB
+fleet_configurable: true
 files:
 - name: arangodb.yaml
   options:

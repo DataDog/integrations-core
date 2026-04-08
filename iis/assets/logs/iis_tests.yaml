@@ -63,6 +63,7 @@ tests:
         src_endpoint:
           ip: "123.123.123.123"
           os:
+            name: "Windows"
             type: "Windows"
             type_id: 100
         status: "Success"

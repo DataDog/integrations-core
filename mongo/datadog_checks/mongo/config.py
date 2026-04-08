@@ -6,6 +6,7 @@ import certifi
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import exclude_undefined_keys
+from datadog_checks.base.utils.db.utils import get_agent_host_tags
 from datadog_checks.mongo.common import DEFAULT_TIMEOUT
 from datadog_checks.mongo.utils import build_connection_string, parse_mongo_uri
 
@@ -100,6 +101,15 @@ class MongoConfig(object):
         self.free_storage_metrics = is_affirmative(instance.get('free_storage_metrics', True))
 
         self._base_tags = list(set(instance.get('tags', [])))
+        self._propagate_agent_tags = self._should_propagate_agent_tags(instance, init_config)
+        if self._propagate_agent_tags:
+            try:
+                agent_tags = get_agent_host_tags()
+                self._base_tags.extend(agent_tags)
+            except Exception as e:
+                raise ConfigurationError(
+                    'propagate_agent_tags enabled but there was an error fetching agent tags {}'.format(e)
+                )
 
         # DBM config options
         self.dbm_enabled = is_affirmative(instance.get('dbm', False))
@@ -110,6 +120,7 @@ class MongoConfig(object):
         self._slow_operations_config = instance.get('slow_operations', {})
         # Backward compatibility: check new names first, then fall back to old names
         self._schemas_config = instance.get('collect_schemas', instance.get('schemas', {}))
+        self._query_metrics_config = instance.get('query_metrics', {})
 
         if self.dbm_enabled and not self.cluster_name:
             raise ConfigurationError('`cluster_name` must be set when `dbm` is enabled')
@@ -229,6 +240,25 @@ class MongoConfig(object):
             'collect_search_indexes': is_affirmative(self._schemas_config.get('collect_search_indexes', False)),
         }
 
+    @property
+    def query_metrics(self):
+        # Query metrics requires MongoDB 8.0+ and uses $queryStats aggregation pipeline
+        # Disabled by default - must be explicitly enabled unlike other DBM features
+        enabled = False
+        if self.dbm_enabled is True and is_affirmative(self._query_metrics_config.get('enabled', False)):
+            enabled = True
+        return {
+            'enabled': enabled,
+            'collection_interval': self._query_metrics_config.get('collection_interval', 10),
+            'run_sync': is_affirmative(self._query_metrics_config.get('run_sync', False)),
+            'full_statement_text_cache_max_size': int(
+                self._query_metrics_config.get('full_statement_text_cache_max_size', 10000)
+            ),
+            'full_statement_text_samples_per_hour_per_query': int(
+                self._query_metrics_config.get('full_statement_text_samples_per_hour_per_query', 1)
+            ),
+        }
+
     def _get_database_autodiscovery_config(self, instance):
         database_autodiscovery_config = instance.get('database_autodiscovery', {"enabled": False})
         if database_autodiscovery_config['enabled']:
@@ -279,3 +309,17 @@ class MongoConfig(object):
             'db_stats': int(self._metrics_collection_interval.get('db_stats', self.min_collection_interval)),
             'session_stats': int(self._metrics_collection_interval.get('session_stats', self.min_collection_interval)),
         }
+
+    @staticmethod
+    def _should_propagate_agent_tags(instance, init_config) -> bool:
+        '''
+        return True if the agent tags should be propagated to the check
+        '''
+        instance_propagate_agent_tags = instance.get('propagate_agent_tags')
+        init_config_propagate_agent_tags = init_config.get('propagate_agent_tags')
+
+        if instance_propagate_agent_tags is not None:
+            return is_affirmative(instance_propagate_agent_tags)
+        if init_config_propagate_agent_tags is not None:
+            return is_affirmative(init_config_propagate_agent_tags)
+        return False

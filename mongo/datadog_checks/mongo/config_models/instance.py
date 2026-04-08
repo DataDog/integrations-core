@@ -20,6 +20,9 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, deprecations, validators
 
 
+SECURE_FIELD_NAMES = frozenset(['tls_ca_file', 'tls_certificate_key_file'])
+
+
 class Aws(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -108,6 +111,17 @@ class OperationSamples(BaseModel):
     explain_verbosity: Optional[str] = None
 
 
+class QueryMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    full_statement_text_cache_max_size: Optional[float] = None
+    full_statement_text_samples_per_hour_per_query: Optional[float] = None
+
+
 class Schemas(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -155,6 +169,7 @@ class InstanceConfig(BaseModel):
     dbstats_tag_dbname: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
     free_storage_metrics: Optional[bool] = None
     hosts: Optional[Union[str, tuple[str, ...]]] = None
     metric_patterns: Optional[MetricPatterns] = None
@@ -163,6 +178,8 @@ class InstanceConfig(BaseModel):
     operation_samples: Optional[OperationSamples] = None
     options: Optional[MappingProxyType[str, Any]] = None
     password: Optional[str] = None
+    propagate_agent_tags: Optional[bool] = None
+    query_metrics: Optional[QueryMetrics] = None
     replica_check: Optional[bool] = None
     reported_database_hostname: Optional[str] = None
     schemas: Optional[Schemas] = None
@@ -195,6 +212,11 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+
+            if info.field_name in SECURE_FIELD_NAMES:
+                validation.security.check_field_trusted_provider(
+                    info.field_name, value, info.context.get('security_config')
+                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

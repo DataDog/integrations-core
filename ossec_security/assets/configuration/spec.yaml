@@ -1,4 +1,5 @@
 name: ossec-security
+fleet_configurable: true
 files:
 - name: ossec_security.yaml
   options:

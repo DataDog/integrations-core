@@ -2,6 +2,83 @@
 
 <!-- towncrier release notes start -->
 
+## 37.34.1 / 2026-04-02
+
+***Fixed***:
+
+* Fix logging when using process_isolation parameter. ([#23136](https://github.com/DataDog/integrations-core/pull/23136))
+* Improve compile-time error messages for invalid syntax in DB query extras expressions ([#23140](https://github.com/DataDog/integrations-core/pull/23140))
+
+## 37.34.0 / 2026-04-01
+
+***Added***:
+
+* Add support for timeout paramter to use with process_isolation. ([#22975](https://github.com/DataDog/integrations-core/pull/22975))
+* Update dependencies ([#22996](https://github.com/DataDog/integrations-core/pull/22996))
+
+***Fixed***:
+
+* Fix schema collection silently dropping all collected metadata when the last discovered database has no tables. ([#22880](https://github.com/DataDog/integrations-core/pull/22880))
+* Fix process_isolation parameter to handle log formats and external tags. ([#22973](https://github.com/DataDog/integrations-core/pull/22973))
+* Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place. ([#23075](https://github.com/DataDog/integrations-core/pull/23075))
+
+## 37.33.2 / 2026-04-03
+
+***Fixed***:
+
+* Improve compile-time error messages for invalid syntax in DB query extras expressions ([#23140](https://github.com/DataDog/integrations-core/pull/23140))
+
+## 37.33.1 / 2026-03-27
+
+***Fixed***:
+
+* Bump PyJWT to 2.12.1 to address CVE-2026-32597. ([#23065](https://github.com/DataDog/integrations-core/pull/23065))
+
+## 37.33.0 / 2026-03-20
+
+***Added***:
+
+* Add support for require_trusted_provider security validation ([#22226](https://github.com/DataDog/integrations-core/pull/22226))
+
+## 37.32.0 / 2026-03-18
+
+***Added***:
+
+* Update dependencies ([#22707](https://github.com/DataDog/integrations-core/pull/22707)), ([#22777](https://github.com/DataDog/integrations-core/pull/22777))
+
+## 37.31.0 / 2026-02-19 / Agent 7.77.0
+
+***Security***:
+
+* Bump `orjson` to 3.11.7 to address CVE ([#22556](https://github.com/DataDog/integrations-core/pull/22556))
+
+***Added***:
+
+* Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
+* Bump ddtrace to version 3.19.5 ([#22482](https://github.com/DataDog/integrations-core/pull/22482))
+
+## 37.30.0 / 2026-02-11 / Agent 7.76.0
+
+***Security***:
+
+* Bump `cryptography` to 46.0.5 ([#22607](https://github.com/DataDog/integrations-core/pull/22607))
+
+***Added***:
+
+* Bump `pyOpenSSL` to 25.3.0 ([#22607](https://github.com/DataDog/integrations-core/pull/22607))
+
+## 37.29.0 / 2026-02-04
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
+## 37.28.0 / 2026-02-04 / Agent 7.75.3
+
+***Security***:
+
+* Bump protobuf version to 6.33.5 ([#22522](https://github.com/DataDog/integrations-core/pull/22522))
+
 ## 37.27.1 / 2026-01-20
 
 ***Fixed***:

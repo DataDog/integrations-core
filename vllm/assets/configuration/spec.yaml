@@ -1,4 +1,5 @@
 name: vLLM
+fleet_configurable: true
 files:
 - name: vllm.yaml
   options:
