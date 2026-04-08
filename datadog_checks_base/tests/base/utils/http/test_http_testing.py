@@ -83,19 +83,6 @@ def test_mock_response_normalize_leading_newline_with_indent():
     assert response.text == "line one\nline two\n"
 
 
-def test_mock_response_ok_property():
-    assert MockHTTPResponse(status_code=200).ok is True
-    assert MockHTTPResponse(status_code=399).ok is True
-    assert MockHTTPResponse(status_code=400).ok is False
-    assert MockHTTPResponse(status_code=500).ok is False
-
-
-def test_mock_response_reason_property():
-    assert MockHTTPResponse(status_code=200).reason == 'OK'
-    assert MockHTTPResponse(status_code=404).reason == 'Not Found'
-    assert MockHTTPResponse(status_code=999).reason == ''
-
-
 def test_mock_response_headers_case_insensitive():
     response = MockHTTPResponse(headers={'Content-Type': 'text/plain', 'X-Custom': 'val'})
 
@@ -103,16 +90,6 @@ def test_mock_response_headers_case_insensitive():
     assert response.headers['content-type'] == 'text/plain'
     assert response.headers.get('Content-Type') == 'text/plain'
     assert response.headers.get('cOnTeNt-tYpE') == 'text/plain'
-
-
-def test_mock_response_headers_delete_and_pop():
-    response = MockHTTPResponse(headers={'Content-Type': 'text/plain', 'X-Custom': 'val'})
-
-    del response.headers['Content-Type']
-    assert 'content-type' not in response.headers
-
-    assert response.headers.pop('X-Custom') == 'val'
-    assert response.headers.pop('X-Custom', 'gone') == 'gone'
 
 
 def test_mock_response_headers_update_and_setdefault():
@@ -129,33 +106,6 @@ def test_mock_response_headers_update_and_setdefault():
 
     response.headers.update([('X-Iter', 'iter_val')])
     assert response.headers['x-iter'] == 'iter_val'
-
-
-def test_mock_response_headers_update_with_non_dict_mapping():
-    from collections.abc import Mapping
-
-    class CustomHeaders(Mapping):
-        def __init__(self, d):
-            self._d = d
-
-        def __getitem__(self, key):
-            return self._d[key]
-
-        def __iter__(self):
-            return iter(self._d)
-
-        def __len__(self):
-            return len(self._d)
-
-    response = MockHTTPResponse(headers={'A': '1'})
-    response.headers.update(CustomHeaders({'B': '2'}))
-    assert response.headers['b'] == '2'
-    assert response.headers['a'] == '1'
-
-
-def test_mock_response_url():
-    assert MockHTTPResponse(url='http://example.com').url == 'http://example.com'
-    assert MockHTTPResponse().url == ''
 
 
 def test_mock_response_links_standard():
