@@ -30,6 +30,8 @@ class _AvroJSONEncoder(json.JSONEncoder):
             return obj.isoformat()
         if isinstance(obj, datetime.date):
             return obj.isoformat()
+        if isinstance(obj, datetime.time):
+            return obj.isoformat()
         if isinstance(obj, uuid.UUID):
             return str(obj)
         if isinstance(obj, bytes):
