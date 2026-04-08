@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 15.0.0 / 2026-04-07
+
+***Changed***:
+
+* Bump datadog_checks_dev requirement ([#23100](https://github.com/DataDog/integrations-core/pull/23100))
+* Drop support for Python versions older than 3.13 by setting requires-python to >=3.13. ([#23206](https://github.com/DataDog/integrations-core/pull/23206))
+
+***Added***:
+
+* Bump datadog_checks_dev requirement. ([#23195](https://github.com/DataDog/integrations-core/pull/23195))
+
 ## 14.4.0 / 2026-03-27
 
 ***Added***:
