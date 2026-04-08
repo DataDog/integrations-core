@@ -27,10 +27,10 @@ files:
       service: l4tm_logs
       source: cisco-secure-web-appliance
     - type: udp
-      port: <PORT>
+      port: 4422
       service: access_logs
       source: cisco-secure-web-appliance
     - type: file
-      port: <Path to Directory Where access log would Get Stored>
+      port: 5422
       service: access_logs
       source: cisco-secure-web-appliance
