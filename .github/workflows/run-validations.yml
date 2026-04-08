@@ -258,5 +258,10 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
-          github.rest.issues.createComment({ issue_number, owner, repo, body: "The `validations` job has failed; please review the `Files changed` tab for possible suggestions to resolve." });
+          const { issue: { number: issue_number }, repo: { owner, repo } } = context;
+          const isSameRepo = context.payload.pull_request.head.repo.full_name === `${owner}/${repo}`;
+          const fixHint = isSameRepo
+            ? '\n\nA maintainer can comment `/fix-validations` to auto-fix issues that support `--sync` or `--fix`.'
+            : '';
+          const body = `The \`validations\` job has failed; please review the \`Files changed\` tab for possible suggestions to resolve.${fixHint}`;
+          github.rest.issues.createComment({ issue_number, owner, repo, body });
