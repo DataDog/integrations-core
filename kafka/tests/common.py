@@ -71,4 +71,6 @@ KAFKA_E2E_METRICS = [
     "kafka.server.socket.connection_count",
     # Broker
     "kafka.broker.start_time",
+    # Log directory
+    "kafka.log.directory.offline",
 ]
