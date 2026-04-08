@@ -72,7 +72,9 @@ VALIDATORS: tuple[tuple[click.BaseCommand, tuple[str, ...] | None, str, str | No
 
 @click.command(short_help='Run all CI validations for a repo')
 @click.argument('check', required=False)
-@click.option('--sync', '-s', is_flag=True, help='Auto-fix issues where supported (passes --sync or --fix to each validator)')
+@click.option(
+    '--sync', '-s', is_flag=True, help='Auto-fix issues where supported (passes --sync or --fix to each validator)'
+)
 @click.pass_context
 def all(ctx: click.Context, check: str | None, sync: bool) -> None:
     """Run all CI validations for a repo.
