@@ -158,6 +158,44 @@ def test_mock_response_url():
     assert MockHTTPResponse().url == ''
 
 
+def test_mock_response_links_standard():
+    response = MockHTTPResponse(headers={'link': '<http://example.com/page2>; rel=next; type="text/plain"'})
+    assert 'next' in response.links
+    assert response.links['next']['url'] == 'http://example.com/page2'
+    assert response.links['next']['type'] == 'text/plain'
+
+
+def test_mock_response_links_multiple():
+    response = MockHTTPResponse(
+        headers={'link': '<http://example.com/page2>; rel=next, <http://example.com/page1>; rel=prev'}
+    )
+    assert len(response.links) == 2
+    assert response.links['next']['url'] == 'http://example.com/page2'
+    assert response.links['prev']['url'] == 'http://example.com/page1'
+
+
+def test_mock_response_links_empty():
+    assert MockHTTPResponse().links == {}
+    assert MockHTTPResponse(headers={'link': ''}).links == {}
+
+
+def test_mock_response_links_no_rel_keys_by_url():
+    response = MockHTTPResponse(headers={'link': '<http://example.com/page2>; type="text/plain"'})
+    assert 'http://example.com/page2' in response.links
+
+
+def test_mock_response_links_url_with_comma():
+    response = MockHTTPResponse(headers={'link': '<http://example.com/path?a=1,2>; rel=next'})
+    assert response.links['next']['url'] == 'http://example.com/path?a=1,2'
+
+
+def test_mock_response_links_cleared_after_header_pop():
+    response = MockHTTPResponse(headers={'link': '<http://example.com>; rel=next'})
+    assert 'next' in response.links
+    response.headers.pop('link')
+    assert response.links == {}
+
+
 def test_mock_response_raw_readable():
     response = MockHTTPResponse(json_data={'key': 'value'})
     assert json.load(response.raw) == {'key': 'value'}
