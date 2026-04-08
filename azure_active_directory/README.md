@@ -9,7 +9,7 @@ This integration allows you to forward your [Microsoft Entra ID][1] audit and si
 
 ### Installation
 
-This integration forwards logs to Datadog using either [Azure Automated Log Forwarding][2] (recommended) or [Azure with Event Hubs][3]. Datadog recommends using the automated solution for ease of configuration and maintenance. 
+This integration forwards logs to Datadog using either [Azure Automated Log Forwarding][2] (recommended) or [Azure with Event Hubs][3]. Datadog recommends using the automated solution because it requires less configuration and maintenance.
 
 ### Configuration
 
