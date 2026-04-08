@@ -330,19 +330,24 @@ class TestMessageDeserializer:
         log = MagicMock()
         deserializer = MessageDeserializer(log)
 
-        avro_schema = json.dumps({
-            "type": "record",
-            "name": "Payment",
-            "fields": [
-                {"name": "id", "type": "long"},
-                {"name": "amount", "type": {"type": "bytes", "logicalType": "decimal", "precision": 18, "scale": 4}},
-                {"name": "created_at", "type": {"type": "long", "logicalType": "timestamp-millis"}},
-                {"name": "due_date", "type": {"type": "int", "logicalType": "date"}},
-                {"name": "due_time", "type": {"type": "int", "logicalType": "time-millis"}},
-                {"name": "tx_id", "type": {"type": "string", "logicalType": "uuid"}},
-                {"name": "memo", "type": "string"},
-            ],
-        })
+        avro_schema = json.dumps(
+            {
+                "type": "record",
+                "name": "Payment",
+                "fields": [
+                    {"name": "id", "type": "long"},
+                    {
+                        "name": "amount",
+                        "type": {"type": "bytes", "logicalType": "decimal", "precision": 18, "scale": 4},
+                    },
+                    {"name": "created_at", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+                    {"name": "due_date", "type": {"type": "int", "logicalType": "date"}},
+                    {"name": "due_time", "type": {"type": "int", "logicalType": "time-millis"}},
+                    {"name": "tx_id", "type": {"type": "string", "logicalType": "uuid"}},
+                    {"name": "memo", "type": "string"},
+                ],
+            }
+        )
 
         # Payment: id=42, amount=99.9500, created_at=2024-06-15T12:00:00Z, due_date=2024-07-01,
         #          due_time=14:30:00, tx_id=550e8400-e29b-41d4-a716-446655440000, memo="Test payment"
