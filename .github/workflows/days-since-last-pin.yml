@@ -1,0 +1,41 @@
+name: Days Since Last Pin
+
+on:
+  schedule:
+    - cron: "42 9 * * *"
+  workflow_dispatch:
+
+jobs:
+  compute-days-since-last-pin:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80 # v1.0.3
+        id: octo-sts
+        with:
+          scope: DataDog/datadog-agent
+          policy: integrations-core.github.read-release-json.schedule
+
+      - name: Compute days since last pin
+        id: compute
+        env:
+          GITHUB_TOKEN: ${{ steps.octo-sts.outputs.token }}
+        run: python3 .github/workflows/scripts/days_since_last_pin.py
+
+      - name: Submit metric to Datadog
+        env:
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          DAYS: ${{ steps.compute.outputs.days }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, time, urllib.request
+          days = int(os.environ["DAYS"])
+          payload = json.dumps({"series": [{"metric": "integrations_core.days_since_last_pin", "type": 3, "points": [{"timestamp": int(time.time()), "value": days}], "tags": ["team:agent-integrations"]}]}).encode()
+          req = urllib.request.Request("https://api.datadoghq.com/api/v2/series", data=payload, headers={"DD-API-KEY": os.environ["DD_API_KEY"], "Content-Type": "application/json"}, method="POST")
+          with urllib.request.urlopen(req) as resp:
+              print(f"Datadog API response: {json.loads(resp.read().decode())}")
+          EOF
