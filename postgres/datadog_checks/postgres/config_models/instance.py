@@ -308,6 +308,7 @@ class InstanceConfig(BaseModel):
     table_count_limit: Optional[int] = None
     tag_replication_role: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
+    test_sync_option: Optional[bool] = None
     use_global_custom_queries: Optional[str] = None
     username: Optional[str] = None
 

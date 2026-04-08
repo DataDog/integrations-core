@@ -32,6 +32,11 @@ init_config:
 instances:
 
   -
+    ## @param test_sync_option - boolean - optional - default: false
+    ## This option tests that models --sync can regenerate config models.
+    #
+    # test_sync_option: false
+
     ## @param host - string - optional - default: localhost
     ## The hostname to connect to. To connect to a Unix socket, specify the full path to the socket directory,
     ## e.g. `/var/run/postgresql`.
