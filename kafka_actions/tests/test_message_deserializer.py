@@ -325,6 +325,43 @@ class TestMessageDeserializer:
         assert deserialized_msg_sr.value['title'] == 'The Go Programming Language'
         assert deserialized_msg_sr.value_schema_id == 350
 
+    def test_avro_logical_types_decimal_timestamp_uuid(self):
+        """Test that Avro messages with logical types (decimal, timestamp-millis, date, uuid) deserialize correctly."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        avro_schema = json.dumps({
+            "type": "record",
+            "name": "Payment",
+            "fields": [
+                {"name": "id", "type": "long"},
+                {"name": "amount", "type": {"type": "bytes", "logicalType": "decimal", "precision": 18, "scale": 4}},
+                {"name": "created_at", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+                {"name": "due_date", "type": {"type": "int", "logicalType": "date"}},
+                {"name": "tx_id", "type": {"type": "string", "logicalType": "uuid"}},
+                {"name": "memo", "type": "string"},
+            ],
+        })
+
+        # Payment: id=42, amount=99.9500, created_at=2024-06-15T12:00:00Z, due_date=2024-07-01,
+        #          tx_id=550e8400-e29b-41d4-a716-446655440000, memo="Test payment"
+        avro_message = (
+            b'T\x06\x0f@L\x80\xa8\xa6\xbc\x83d\x82\xb7\x02'
+            b'H550e8400-e29b-41d4-a716-446655440000\x18Test payment'
+        )
+
+        result_str, schema_id = deserializer.deserialize_message(avro_message, 'avro', avro_schema, False)
+        assert result_str is not None
+        assert schema_id is None
+
+        result = json.loads(result_str)
+        assert result['id'] == 42
+        assert result['amount'] == 99.95
+        assert '2024-06-15' in result['created_at']
+        assert result['due_date'] == '2024-07-01'
+        assert result['tx_id'] == '550e8400-e29b-41d4-a716-446655440000'
+        assert result['memo'] == 'Test payment'
+
     def test_protobuf_explicit_schema_registry_configuration(self):
         """Test that explicit Protobuf schema registry configuration is enforced."""
         log = MagicMock()
