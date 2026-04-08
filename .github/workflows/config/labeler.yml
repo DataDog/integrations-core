@@ -1326,10 +1326,6 @@ integration/snmp_netapp:
 - changed-files:
   - any-glob-to-any-file:
     - snmp_netapp/**/*
-integration/snowflake:
-- changed-files:
-  - any-glob-to-any-file:
-    - snowflake/**/*
 integration/solarwinds:
 - changed-files:
   - any-glob-to-any-file:
