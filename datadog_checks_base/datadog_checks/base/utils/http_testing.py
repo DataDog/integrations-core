@@ -140,8 +140,9 @@ class MockHTTPResponse:
                 except ValueError:
                     break
                 link[key.strip(" '\"")] = value.strip(" '\"")
-            if 'rel' in link:
-                result[link['rel']] = link
+            key = link.get('rel') or link.get('url')
+            if key:
+                result[key] = link
         return result
 
     def json(self, **kwargs: Any) -> Any:
