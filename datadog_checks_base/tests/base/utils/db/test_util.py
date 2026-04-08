@@ -37,7 +37,11 @@ from datadog_checks.base.utils.format import json
         ("127.0.0.1", "agent_hostname", "agent_hostname"),
         ("192.0.2.1", "agent_hostname", "192.0.2.1"),
         ("socket.gaierror", "agent_hostname", "socket.gaierror"),
-        ("greater-than-or-equal-to-64-characters-causes-unicode-error-----", "agent_hostname", "greater-than-or-equal-to-64-characters-causes-unicode-error-----"),
+        (
+            "greater-than-or-equal-to-64-characters-causes-unicode-error-----",
+            "agent_hostname",
+            "greater-than-or-equal-to-64-characters-causes-unicode-error-----",
+        ),
         ("192.0.2.1", "socket.gaierror", "192.0.2.1"),
         ("192.0.2.1", "greater-than-or-equal-to-64-characters-causes-unicode-error-----", "192.0.2.1"),
         ("192.0.2.1", "192.0.2.1", "192.0.2.1"),
