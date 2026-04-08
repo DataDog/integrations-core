@@ -39,9 +39,10 @@ ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 ENV UV_TOOL_BIN_DIR=/usr/local/bin
 
-# Mount the build context (including .git for hatch-vcs) without adding it to the image.
-# Copy to a writable location since hatch-vcs writes the version file during build.
-# Both the copy and the removal happen in one RUN so the source never lands in the image.
+# Mount the build context without adding it to the image.
+# Copy to a writable location because hatch-vcs writes src/ddev/_version.py during build,
+# which fails on the read-only bind mount. Both the copy and removal are in one RUN
+# so the source never lands in the final image.
 RUN --mount=type=bind,source=.,target=/src \
     cp -r /src /tmp/repo \
  && uv tool install /tmp/repo/ddev \
