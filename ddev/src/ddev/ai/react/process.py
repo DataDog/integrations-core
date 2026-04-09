@@ -3,46 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import asyncio
-from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any
 
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.exceptions import AgentError
-from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, ToolCall, ToolResultMessage
+from ddev.ai.agent.types import StopReason, ToolResultMessage
+from ddev.ai.react.callbacks import CallbackSet
+from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
-
-
-@dataclass(frozen=True)
-class ReActResult:
-    """Immutable summary of a completed ReAct loop run."""
-
-    final_response: AgentResponse
-    iterations: int
-    total_input_tokens: int  # sum across all iterations
-    total_output_tokens: int  # sum across all iterations
-    context_usage: ContextUsage | None  # promoted from final_response.usage.context_usage
-
-
-class ReActCallback(Protocol):
-    """Observer interface for ReActProcess lifecycle events."""
-
-    async def on_agent_response(self, response: AgentResponse, iteration: int) -> None:
-        """Called after every agent.send() returns, including the first."""
-        ...
-
-    async def on_tool_call(self, tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
-        """Called once per (tool_call, result) pair after all tools in a batch execute."""
-        ...
-
-    async def on_complete(self, result: ReActResult) -> None:
-        """Called when the loop exits cleanly with a ReActResult."""
-        ...
-
-    async def on_error(self, error: BaseException) -> None:
-        """Called when the loop aborts — covers AgentError, KeyboardInterrupt, and CancelledError.
-        The exception is always re-raised after this returns."""
-        ...
 
 
 class ReActProcess:
@@ -57,17 +26,17 @@ class ReActProcess:
         self,
         agent: BaseAgent[Any],
         tool_registry: ToolRegistry,
-        callbacks: list[ReActCallback] | None = None,
+        callback_sets: list[CallbackSet] | None = None,
     ) -> None:
         """
         Args:
             agent: A BaseAgent subclass (e.g. AnthropicAgent).
             tool_registry: Registry of tools available in this loop.
-            callbacks: Optional observers. Empty list means no events are fired.
+            callback_sets: Optional CallbackSet instances to observe loop events.
         """
         self._agent = agent
         self._tool_registry = tool_registry
-        self._callbacks: list[ReActCallback] = callbacks or []
+        self._callback_sets: list[CallbackSet] = callback_sets or []
 
     async def start(self, prompt: str, allowed_tools: list[str] | None = None) -> ReActResult:
         """
@@ -89,11 +58,8 @@ class ReActProcess:
             total_input = response.usage.input_tokens
             total_output = response.usage.output_tokens
 
-            for cb in self._callbacks:
-                try:
-                    await cb.on_agent_response(response, iterations)
-                except Exception:
-                    pass  # in the future we should log this error
+            for cb_set in self._callback_sets:
+                await cb_set.fire_agent_response(response, iterations)
 
             # No iteration cap — this is an interactive CLI tool; the user can Ctrl+C to stop.
             while response.stop_reason == StopReason.TOOL_USE:
@@ -112,11 +78,8 @@ class ReActProcess:
                 tool_call_results = list(zip(response.tool_calls, tool_results, strict=True))
 
                 for tc, result in tool_call_results:
-                    for cb in self._callbacks:
-                        try:
-                            await cb.on_tool_call(tc, result, iterations)
-                        except Exception:
-                            pass
+                    for cb_set in self._callback_sets:
+                        await cb_set.fire_tool_call(tc, result, iterations)
 
                 messages = [ToolResultMessage(tool_call_id=tc.id, result=result) for tc, result in tool_call_results]
 
@@ -125,11 +88,8 @@ class ReActProcess:
                 total_input += response.usage.input_tokens
                 total_output += response.usage.output_tokens
 
-                for cb in self._callbacks:
-                    try:
-                        await cb.on_agent_response(response, iterations)
-                    except Exception:
-                        pass
+                for cb_set in self._callback_sets:
+                    await cb_set.fire_agent_response(response, iterations)
 
             react_result = ReActResult(
                 final_response=response,
@@ -139,18 +99,12 @@ class ReActProcess:
                 context_usage=response.usage.context_usage,
             )
 
-            for cb in self._callbacks:
-                try:
-                    await cb.on_complete(react_result)
-                except Exception:
-                    pass
+            for cb_set in self._callback_sets:
+                await cb_set.fire_complete(react_result)
 
             return react_result
 
         except BaseException as e:
-            for cb in self._callbacks:
-                try:
-                    await cb.on_error(e)
-                except Exception:
-                    pass
+            for cb_set in self._callback_sets:
+                await cb_set.fire_error(e)
             raise

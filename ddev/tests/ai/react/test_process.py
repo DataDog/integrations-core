@@ -10,7 +10,9 @@ import pytest
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.exceptions import AgentConnectionError
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
-from ddev.ai.react.process import ReActCallback, ReActProcess, ReActResult
+from ddev.ai.react.callbacks import CallbackSet
+from ddev.ai.react.process import ReActProcess
+from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
 
 # ---------------------------------------------------------------------------
@@ -74,26 +76,32 @@ class PerToolRegistry:
         return behavior
 
 
-class MockCallback:
-    """Records all lifecycle events emitted by ReActProcess."""
+class CallbackRecorder:
+    """Test helper that wires a CallbackSet to record all lifecycle events."""
 
     def __init__(self) -> None:
         self.agent_responses: list[tuple[AgentResponse, int]] = []
         self.tool_calls_seen: list[tuple[ToolCall, ToolResult, int]] = []
         self.complete_results: list[ReActResult] = []
-        self.errors: list[Exception] = []
+        self.errors: list[BaseException] = []
 
-    async def on_agent_response(self, response: AgentResponse, iteration: int) -> None:
-        self.agent_responses.append((response, iteration))
+        self.callback_set = CallbackSet()
 
-    async def on_tool_call(self, tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
-        self.tool_calls_seen.append((tool_call, result, iteration))
+        @self.callback_set.on_agent_response
+        async def _record_response(response: AgentResponse, iteration: int) -> None:
+            self.agent_responses.append((response, iteration))
 
-    async def on_complete(self, result: ReActResult) -> None:
-        self.complete_results.append(result)
+        @self.callback_set.on_tool_call
+        async def _record_tool_call(tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
+            self.tool_calls_seen.append((tool_call, result, iteration))
 
-    async def on_error(self, error: Exception) -> None:
-        self.errors.append(error)
+        @self.callback_set.on_complete
+        async def _record_complete(result: ReActResult) -> None:
+            self.complete_results.append(result)
+
+        @self.callback_set.on_error
+        async def _record_error(error: BaseException) -> None:
+            self.errors.append(error)
 
 
 def make_response(
@@ -126,12 +134,12 @@ def make_tool_call(
 def make_process(
     agent: MockAgent,
     registry: MockToolRegistry | None = None,
-    callbacks: list[ReActCallback] | None = None,
+    callback_sets: list[CallbackSet] | None = None,
 ) -> ReActProcess:
     return ReActProcess(
         agent=agent,
         tool_registry=registry or MockToolRegistry(),
-        callbacks=callbacks,
+        callback_sets=callback_sets,
     )
 
 
@@ -240,16 +248,16 @@ async def test_tool_exception_on_tool_call_callback_fires_with_error_result() ->
             make_response(StopReason.END_TURN),
         ]
     )
-    callback = MockCallback()
+    recorder = CallbackRecorder()
 
     await ReActProcess(
         agent=agent,
         tool_registry=RaisingToolRegistry(ValueError("oops")),
-        callbacks=[callback],
+        callback_sets=[recorder.callback_set],
     ).start("x")
 
-    assert len(callback.tool_calls_seen) == 1
-    _, error_result, _ = callback.tool_calls_seen[0]
+    assert len(recorder.tool_calls_seen) == 1
+    _, error_result, _ = recorder.tool_calls_seen[0]
     assert error_result.success is False
 
 
@@ -322,23 +330,23 @@ async def test_callbacks_invoked_correct_counts() -> None:
     ]
     expected_result = ToolResult(success=True, data="ok")
     registry = MockToolRegistry(result=expected_result)
-    callback = MockCallback()
+    recorder = CallbackRecorder()
     agent = MockAgent(responses)
 
-    result = await make_process(agent, registry=registry, callbacks=[callback]).start("Run tools")
+    result = await make_process(agent, registry=registry, callback_sets=[recorder.callback_set]).start("Run tools")
 
-    assert len(callback.agent_responses) == 2
-    assert callback.agent_responses[0][1] == 1
-    assert callback.agent_responses[1][1] == 2
-    assert len(callback.tool_calls_seen) == 2
-    assert all(iteration == 1 for _, _, iteration in callback.tool_calls_seen)
-    assert callback.tool_calls_seen[0][0] is tool_calls[0]
-    assert callback.tool_calls_seen[1][0] is tool_calls[1]
-    assert callback.tool_calls_seen[0][1] is expected_result
-    assert callback.tool_calls_seen[1][1] is expected_result
-    assert len(callback.complete_results) == 1
-    assert callback.complete_results[0] is result
-    assert len(callback.errors) == 0
+    assert len(recorder.agent_responses) == 2
+    assert recorder.agent_responses[0][1] == 1
+    assert recorder.agent_responses[1][1] == 2
+    assert len(recorder.tool_calls_seen) == 2
+    assert all(iteration == 1 for _, _, iteration in recorder.tool_calls_seen)
+    assert recorder.tool_calls_seen[0][0] is tool_calls[0]
+    assert recorder.tool_calls_seen[1][0] is tool_calls[1]
+    assert recorder.tool_calls_seen[0][1] is expected_result
+    assert recorder.tool_calls_seen[1][1] is expected_result
+    assert len(recorder.complete_results) == 1
+    assert recorder.complete_results[0] is result
+    assert len(recorder.errors) == 0
 
 
 # ---------------------------------------------------------------------------
@@ -354,20 +362,20 @@ class ErrorAgent(BaseAgent[Any]):
 
 
 async def test_agent_error_notifies_and_reraises() -> None:
-    callback = MockCallback()
+    recorder = CallbackRecorder()
     process = ReActProcess(
         agent=ErrorAgent(),
         tool_registry=MockToolRegistry(),
-        callbacks=[callback],
+        callback_sets=[recorder.callback_set],
     )
 
     with pytest.raises(AgentConnectionError):
         await process.start("Anything")
 
-    assert len(callback.errors) == 1
-    assert isinstance(callback.errors[0], AgentConnectionError)
-    assert len(callback.complete_results) == 0
-    assert len(callback.agent_responses) == 0
+    assert len(recorder.errors) == 1
+    assert isinstance(recorder.errors[0], AgentConnectionError)
+    assert len(recorder.complete_results) == 0
+    assert len(recorder.agent_responses) == 0
 
 
 class InterruptAgent(BaseAgent[Any]):
@@ -378,19 +386,19 @@ class InterruptAgent(BaseAgent[Any]):
 
 
 async def test_keyboard_interrupt_notifies_and_reraises() -> None:
-    callback = MockCallback()
+    recorder = CallbackRecorder()
     process = ReActProcess(
         agent=InterruptAgent(),
         tool_registry=MockToolRegistry(),
-        callbacks=[callback],
+        callback_sets=[recorder.callback_set],
     )
 
     with pytest.raises(KeyboardInterrupt):
         await process.start("Anything")
 
-    assert len(callback.errors) == 1
-    assert isinstance(callback.errors[0], KeyboardInterrupt)
-    assert len(callback.complete_results) == 0
+    assert len(recorder.errors) == 1
+    assert isinstance(recorder.errors[0], KeyboardInterrupt)
+    assert len(recorder.complete_results) == 0
 
 
 async def test_cancelled_error_notifies_and_reraises() -> None:
@@ -400,19 +408,19 @@ async def test_cancelled_error_notifies_and_reraises() -> None:
         ) -> AgentResponse:
             raise asyncio.CancelledError
 
-    callback = MockCallback()
+    recorder = CallbackRecorder()
     process = ReActProcess(
         agent=CancelledAgent(),
         tool_registry=MockToolRegistry(),
-        callbacks=[callback],
+        callback_sets=[recorder.callback_set],
     )
 
     with pytest.raises(asyncio.CancelledError):
         await process.start("Anything")
 
-    assert len(callback.errors) == 1
-    assert isinstance(callback.errors[0], asyncio.CancelledError)
-    assert len(callback.complete_results) == 0
+    assert len(recorder.errors) == 1
+    assert isinstance(recorder.errors[0], asyncio.CancelledError)
+    assert len(recorder.complete_results) == 0
 
 
 # ---------------------------------------------------------------------------
