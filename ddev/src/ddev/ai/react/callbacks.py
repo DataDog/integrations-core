@@ -28,8 +28,7 @@ class OnCompleteCallback(Protocol):
 
 
 class OnErrorCallback(Protocol):
-    """Called when the loop aborts.
-    The exception is always re-raised after this returns."""
+    """Called when the loop aborts. The exception is always re-raised after this returns."""
 
     async def __call__(self, error: BaseException) -> None: ...
 
@@ -52,8 +51,6 @@ class CallbackSet:
         self._on_complete: list[OnCompleteCallback] = []
         self._on_error: list[OnErrorCallback] = []
 
-    # --- Registration ---
-
     def on_agent_response(self, func: OnAgentResponseCallback) -> OnAgentResponseCallback:
         """Register a handler fired after every agent response."""
         self._on_agent_response.append(func)
@@ -73,8 +70,6 @@ class CallbackSet:
         """Register a handler fired when the loop aborts."""
         self._on_error.append(func)
         return func
-
-    # --- Dispatch ---
 
     async def fire_agent_response(self, response: AgentResponse, iteration: int) -> None:
         for handler in self._on_agent_response:
