@@ -101,7 +101,7 @@ Category tags use the Nutanix category key as the tag name (e.g., `Environment:P
 
 ### Cluster capacity planning
 
-Cluster-level capacity metrics (`cluster.cpu.total_cores`, `cluster.cpu.vcpus_allocated`, `cluster.memory.allocated_bytes`, etc.) aggregate resources from all hosts and VMs. By default, all resources contribute regardless of `resource_filters`, giving a complete view of provisioned capacity. Set `exclude_filtered_resources_from_cluster_capacity: true` to only count resources that pass filter checks.
+Cluster-level capacity metrics (such as `cluster.cpu.total_cores`, `cluster.cpu.vcpus_allocated`, `cluster.memory.allocated_bytes`) aggregate resources from all hosts and VMs. By default, all resources contribute regardless of `resource_filters`. This gives a complete view of provisioned capacity. Set `exclude_filtered_resources_from_cluster_capacity: true` to count only resources that pass filter checks.
 
 ### Duplicate hostnames
 
