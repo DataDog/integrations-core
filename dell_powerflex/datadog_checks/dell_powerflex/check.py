@@ -7,6 +7,7 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck
 
+from .api import PowerFlexAPI
 from .config_models import ConfigMixin
 from .constants import (
     SYSTEM_MDM_CLUSTER_SIMPLE_METRICS,
@@ -23,10 +24,12 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
     def __init__(self, name, init_config, instances):
         super(DellPowerflexCheck, self).__init__(name, init_config, instances)
         self._base_tags: list[str] = []
+        self._api: PowerFlexAPI | None = None
         self.check_initializations.append(self._parse_config)
 
     def _parse_config(self) -> None:
         self._base_tags = [f'powerflex_gateway_url:{self.config.powerflex_gateway_url}']
+        self._api = PowerFlexAPI(self.http, self.config.powerflex_gateway_url)
 
     def check(self, _: Any) -> None:
         try:
@@ -37,10 +40,11 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self.gauge('api.can_connect', 0, tags=self._base_tags)
 
     def _collect_systems(self) -> None:
-        response = self.http.get(f"{self.config.powerflex_gateway_url}/api/types/System/instances")
-        response.raise_for_status()
-        for system in response.json():
-            self._collect_system(system)
+        for system in self._api.get_systems():
+            try:
+                self._collect_system(system)
+            except Exception as e:
+                self.log.warning('Failed to collect metrics for system %s: %s', system.get('id'), e)
 
     def _collect_system(self, system: dict) -> None:
         tags = self._base_tags + [f"system_id:{system['id']}"]
@@ -58,10 +62,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         self._collect_system_statistics(system['id'], tags)
 
     def _collect_system_statistics(self, system_id: str, tags: list[str]) -> None:
-        url = f"{self.config.powerflex_gateway_url}/api/instances/System::{system_id}/relationships/Statistics"
-        response = self.http.get(url)
-        response.raise_for_status()
-        stats = response.json()
+        stats = self._api.get_system_statistics(system_id)
         for api_field, metric_suffix in SYSTEM_STATS_SIMPLE_METRICS:
             self.gauge(f'{SYSTEM_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
         for api_field, metric_suffix in SYSTEM_STATS_BWC_METRICS:
