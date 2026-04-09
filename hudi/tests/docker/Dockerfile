@@ -1,3 +1,5 @@
+ARG SPARK_VERSION
+
 # First build the Scala application
 FROM amazoncorretto:8-alpine-jdk AS builder
 
@@ -13,7 +15,7 @@ COPY . /usr/src/app/
 RUN cd /usr/src/app && sbt update && sbt clean assembly && sbt package
 
 # Then setup the runtime environment
-FROM apache/spark:v3.2.4
+FROM apache/spark:v${SPARK_VERSION}
 
 USER root
 
