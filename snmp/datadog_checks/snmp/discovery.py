@@ -42,12 +42,14 @@ def discover_instances(config, interval, check_ref):
                 if check is None or not check._running:
                     return
 
-                host_config = check._build_autodiscovery_config(config.instance, host)
-
                 # Create a fresh event loop per host so that close_dispatcher() cleanup
                 # from one host cannot contaminate the next host's SNMP session.
+                # The loop must be set before _build_autodiscovery_config because
+                # pysnmp 7.x's SnmpEngine captures the event loop at construction time.
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
+
+                host_config = check._build_autodiscovery_config(config.instance, host)
                 try:
                     sys_object_oid = check.fetch_sysobject_oid(host_config)
                 except Exception as e:
