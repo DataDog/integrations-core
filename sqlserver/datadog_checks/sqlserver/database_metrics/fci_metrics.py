@@ -21,12 +21,12 @@ QUERY_FAILOVER_CLUSTER_INSTANCE = {
         -- `sys.dm_hadr_cluster` does not have a related column to join on, this cross join will add the
         -- `cluster_name` column to every row by multiplying all the rows in the left table against
         -- all the rows in the right table. Note, there will only be one row from `sys.dm_hadr_cluster`.
-        CROSS JOIN (SELECT TOP 1 cluster_name FROM sys.dm_hadr_cluster) AS FC
+        OUTER APPLY (SELECT TOP 1 cluster_name FROM sys.dm_hadr_cluster) AS FC
     """.strip(),
     "columns": [
         {"name": "node_name", "type": "tag"},
         {"name": "status", "type": "tag"},
-        {"name": "failover_cluster", "type": "tag"},
+        {"name": "failover_cluster", "type": "tag_not_null"},
         {"name": "fci.status", "type": "gauge"},
         {"name": "fci.is_current_owner", "type": "gauge"},
     ],
