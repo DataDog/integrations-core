@@ -140,3 +140,15 @@ jobs:
         use_oidc: true
         files: "${{ inputs.target || 'tls' }}/coverage.xml"
         flags: "${{ inputs.target || 'tls' }}"
+
+    - name: Upload coverage to Datadog
+      if: >
+        !github.event.repository.private &&
+        always()
+      continue-on-error: true
+      uses: DataDog/coverage-upload-github-action@9bbbf86d16f7db1b14c5b885e61cf0d96053686a # v1.0.0
+      with:
+        api_key: ${{ secrets.DD_API_KEY }}
+        files: "${{ inputs.target || 'tls' }}/coverage.xml"
+        format: cobertura
+        flags: "${{ inputs.target || 'tls' }}"
