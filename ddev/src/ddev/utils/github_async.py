@@ -4,9 +4,7 @@ import re
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from typing import Any
-from typing import Literal
-
+from typing import Any, Literal, Self
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
@@ -32,7 +30,7 @@ class PaginationData:
     last: str | None = None
 
     @classmethod
-    def from_header(cls, header: str | None) -> PaginationData:
+    def from_header(cls, header: str | None) -> Self:
         """Parse a Link header value and return a PaginationData instance."""
         if not header:
             return cls()
