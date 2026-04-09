@@ -1,14 +1,14 @@
 {
   "version": 2,
   "created_at": "2020-09-15",
-  "last_updated_at": "2025-06-12",
+  "last_updated_at": "2026-04-09",
   "title": "Pod is in an ImagePullBackOff state",
   "tags": [
     "integration:kubernetes"
   ],
   "description": "The status ImagePullBackOff means that a container could not start because Kubernetes could not pull a container image. This monitor tracks when a pod is in an ImagePullBackOff state for your Kubernetes integration.",
   "definition": {
-    "message": "{{#is_alert}}\n\n## What's happening?\nAt least one container in pod {{pod_name.name}} on namespace {{kube_namespace.name}} is in a waiting state due to an ImagePullBackOff error in the last 10 minutes.\n\n{{/is_alert}}\n\n This could happen for several reasons, for example a bad image path or tag or if the credentials for pulling images are not configured properly.",
+    "message": "{{#is_alert}}\n\n## What's happening?\nAt least one container in pod {{pod_name.name}} on namespace {{kube_namespace.name}} is in a waiting state due to an ImagePullBackOff error in the last 10 minutes.\n\n## Related Links\n\n- [Logs](/logs?query=kube_cluster_name:{{kube_cluster_name.name}}+kube_namespace:{{kube_namespace.name}}+pod_name:{{pod_name.name}}+reason:imagepullbackoff)\n- [Infrastructure](/infrastructure?filters=kube_cluster_name:{{kube_cluster_name.name}},kube_namespace:{{kube_namespace.name}},pod_name:{{pod_name.name}},reason:imagepullbackoff)\n- [Metrics Explorer (kubernetes_state.container.status_report.count.waiting)](/metric/explorer?exp_metric=kubernetes_state.container.status_report.count.waiting&exp_scope=kube_cluster_name:{{kube_cluster_name.name}},kube_namespace:{{kube_namespace.name}},pod_name:{{pod_name.name}},reason:imagepullbackoff&exp_agg=avg&exp_type=line)\n\n{{/is_alert}}\n\n This could happen for several reasons, for example a bad image path or tag or if the credentials for pulling images are not configured properly.",
     "name": "[Kubernetes] Pod {{pod_name.name}} is ImagePullBackOff on namespace {{kube_namespace.name}}",
     "options": {
       "escalation_message": "",
