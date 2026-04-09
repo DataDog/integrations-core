@@ -33,8 +33,6 @@ def discover_instances(config, interval, check_ref):
         _prev_loop = asyncio.get_event_loop()
     except RuntimeError:
         _prev_loop = None
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
 
     try:
         while True:
@@ -46,6 +44,10 @@ def discover_instances(config, interval, check_ref):
 
                 host_config = check._build_autodiscovery_config(config.instance, host)
 
+                # Create a fresh event loop per host so that close_dispatcher() cleanup
+                # from one host cannot contaminate the next host's SNMP session.
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
                 try:
                     sys_object_oid = check.fetch_sysobject_oid(host_config)
                 except Exception as e:
@@ -53,14 +55,13 @@ def discover_instances(config, interval, check_ref):
                     del check
                     continue
                 finally:
-                    # Close the host's transport dispatcher to release its UDP socket FD, then
-                    # drain any leftover handle_timeout tasks so they don't stop the next host's loop.
                     host_config._snmp_engine.transport_dispatcher.close_dispatcher()
                     _pending = asyncio.all_tasks(loop)
                     for _t in _pending:
                         _t.cancel()
                     if _pending:
                         loop.run_until_complete(asyncio.gather(*_pending, return_exceptions=True))
+                    loop.close()
 
                 try:
                     profile = check._profile_for_sysobject_oid(sys_object_oid)
@@ -89,11 +90,4 @@ def discover_instances(config, interval, check_ref):
             if interval - time_elapsed > 0:
                 time.sleep(interval - time_elapsed)
     finally:
-        # Cancel pending pysnmp tasks and close the loop to release file descriptors.
-        pending = asyncio.all_tasks(loop)
-        for task in pending:
-            task.cancel()
-        if pending:
-            loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
-        loop.close()
         asyncio.set_event_loop(_prev_loop)
