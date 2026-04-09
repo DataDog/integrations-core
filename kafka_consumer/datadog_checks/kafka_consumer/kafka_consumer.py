@@ -411,12 +411,6 @@ class KafkaCheck(AgentCheck):
         try:
             cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
 
-            self.log.debug(
-                'Querying %s %s offsets',
-                len(topic_partitions_to_check),
-                'highwater' if mode == HIGH_WATERMARK else 'lowwater',
-            )
-
             result = {}
             for topic, partition, offset in self.client.consumer_offsets_for_times(
                 partitions=topic_partitions_to_check, offset=mode
