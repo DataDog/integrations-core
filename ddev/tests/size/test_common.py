@@ -7,7 +7,9 @@ from unittest.mock import MagicMock, mock_open, patch
 import pytest
 
 from ddev.cli.size.utils.common_funcs import (
+    METRIC_VERSION,
     _matches_gitignore,
+    build_metrics,
     check_python_version,
     compress,
     convert_to_human_readable_size,
@@ -436,6 +438,177 @@ def test_parse_sizes_json(tmp_path):
     result = parse_sizes_json(compressed_json_path, "linux-x86_64", "3.12", True)
 
     assert result == expected_output
+
+
+def test_build_metrics():
+    modules = [
+        {
+            "Name": "datadog_checks_base",
+            "Type": "Integration",
+            "Size_Bytes": 1000,
+            "Version": "1.0.0",
+            "Platform": "linux-x86_64",
+            "Python_Version": "3.12",
+        },
+        {
+            "Name": "requests",
+            "Type": "Dependency",
+            "Size_Bytes": 500,
+            "Version": "2.31.0",
+            "Platform": "linux-x86_64",
+            "Python_Version": "3.12",
+        },
+        {
+            "Name": "other_check",
+            "Type": "Integration",
+            "Size_Bytes": 2000,
+            "Version": "0.5.0",
+            "Platform": "macos-x86_64",
+            "Python_Version": "3.12",
+        },
+    ]
+
+    fake_timestamp = 1700000000
+    fake_message = "INTG-123 add new check (#9999)"
+    fake_tickets = ["INTG-123"]
+    fake_prs = ["9999"]
+
+    with patch(
+        "ddev.cli.size.utils.common_funcs.get_commit_data",
+        return_value=(fake_timestamp, fake_message, fake_tickets, fake_prs),
+    ):
+        result = build_metrics(
+            commit="abc123",
+            modules=modules,
+            compressed=True,
+            branch="main",
+            size_source="declared",
+        )
+
+    common_size_tags = [
+        "team:agent-integrations",
+        "compression:compressed",
+        f"metrics_version:{METRIC_VERSION}",
+        "jira_ticket:INTG-123",
+        "pr_number:9999",
+        f"commit_message:{fake_message}",
+        "branch:main",
+        "size_source:declared",
+    ]
+
+    assert result["size"] == [
+        {
+            "metric": "datadog.agent_integrations.size",
+            "type": "gauge",
+            "points": [(fake_timestamp, 1000)],
+            "tags": [
+                "name:datadog_checks_base",
+                "type:Integration",
+                "name_type:Integration(datadog_checks_base)",
+                "python_version:3.12",
+                "module_version:1.0.0",
+                "platform:linux-x86_64",
+                *common_size_tags,
+            ],
+        },
+        {
+            "metric": "datadog.agent_integrations.size",
+            "type": "gauge",
+            "points": [(fake_timestamp, 500)],
+            "tags": [
+                "name:requests",
+                "type:Dependency",
+                "name_type:Dependency(requests)",
+                "python_version:3.12",
+                "module_version:2.31.0",
+                "platform:linux-x86_64",
+                *common_size_tags,
+            ],
+        },
+        {
+            "metric": "datadog.agent_integrations.size",
+            "type": "gauge",
+            "points": [(fake_timestamp, 2000)],
+            "tags": [
+                "name:other_check",
+                "type:Integration",
+                "name_type:Integration(other_check)",
+                "python_version:3.12",
+                "module_version:0.5.0",
+                "platform:macos-x86_64",
+                *common_size_tags,
+            ],
+        },
+    ]
+
+    linux_common_tags = [
+        "platform:linux-x86_64",
+        "python_version:3.12",
+        "team:agent-integrations",
+        "compression:compressed",
+        f"metrics_version:{METRIC_VERSION}",
+        "branch:main",
+        "size_source:declared",
+    ]
+    macos_common_tags = [
+        "platform:macos-x86_64",
+        "python_version:3.12",
+        "team:agent-integrations",
+        "compression:compressed",
+        f"metrics_version:{METRIC_VERSION}",
+        "branch:main",
+        "size_source:declared",
+    ]
+
+    assert result["integration_count"] == [
+        {
+            "metric": "datadog.agent_integrations.integration_count",
+            "type": "gauge",
+            "points": [(fake_timestamp, 1)],
+            "tags": linux_common_tags,
+        },
+        {
+            "metric": "datadog.agent_integrations.integration_count",
+            "type": "gauge",
+            "points": [(fake_timestamp, 1)],
+            "tags": macos_common_tags,
+        },
+    ]
+
+    assert result["dependency_count"] == [
+        {
+            "metric": "datadog.agent_integrations.dependency_count",
+            "type": "gauge",
+            "points": [(fake_timestamp, 1)],
+            "tags": linux_common_tags,
+        },
+        {
+            "metric": "datadog.agent_integrations.dependency_count",
+            "type": "gauge",
+            "points": [(fake_timestamp, 0)],
+            "tags": macos_common_tags,
+        },
+    ]
+
+    assert result["total_size"] == [
+        {
+            "metric": "datadog.agent_integrations.total_size",
+            "type": "gauge",
+            "points": [(fake_timestamp, 1500)],
+            "tags": linux_common_tags,
+        },
+        {
+            "metric": "datadog.agent_integrations.total_size",
+            "type": "gauge",
+            "points": [(fake_timestamp, 2000)],
+            "tags": macos_common_tags,
+        },
+    ]
+
+    assert result["sizes"] == {
+        "linux-x86_64": {"3.12": 1500},
+        "macos-x86_64": {"3.12": 2000},
+    }
 
 
 def test_get_dependencies_from_json():

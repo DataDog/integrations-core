@@ -48,6 +48,14 @@ class FileDataEntryPlatformVersion(FileDataEntry):
     Python_Version: str  # Target Python version (e.g. 3.12)
 
 
+class MetricBatches(TypedDict):
+    size: list[dict]
+    integration_count: list[dict]
+    dependency_count: list[dict]
+    total_size: list[dict]
+    sizes: dict[str, dict[str, int]]
+
+
 class CommitEntry(TypedDict):
     Size_Bytes: int  # Total size in bytes at commit
     Version: str  # Version of the Integration/Dependency at commit
@@ -850,37 +858,30 @@ def draw_treemap_rects_with_labels(
             )
 
 
-def send_metrics_to_dd(
-    app: Application,
+def build_metrics(
     commit: str,
     modules: list[FileDataEntryPlatformVersion],
-    org: str | None,
-    key: str | None,
     compressed: bool,
-) -> None:
+    branch: str,
+    size_source: str,
+) -> MetricBatches:
+    """Build size, integration count, dependency count, and total size metrics from module data."""
     metric_name = "datadog.agent_integrations"
     size_type = "compressed" if compressed else "uncompressed"
 
-    config_file_info = app.config.orgs.get(org, {}) if org else {'api_key': key, 'site': 'datadoghq.com'}
-
-    if "api_key" not in config_file_info:
-        raise RuntimeError("No API key found in config file")
-    if "site" not in config_file_info:
-        raise RuntimeError("No site found in config file")
-
     timestamp, message, tickets, prs = get_commit_data(commit)
 
-    metrics = []
+    size_metrics = []
     n_integrations_metrics = []
     n_dependencies_metrics = []
+    total_size_metrics = []
 
     n_integrations: dict[tuple[str, str], int] = {}
     n_dependencies: dict[tuple[str, str], int] = {}
-
     sizes: dict[str, dict[str, int]] = {}
 
     for item in modules:
-        metrics.append(
+        size_metrics.append(
             {
                 "metric": f"{metric_name}.size",
                 "type": "gauge",
@@ -898,27 +899,33 @@ def send_metrics_to_dd(
                     f"jira_ticket:{tickets[0]}",
                     f"pr_number:{prs[-1]}",
                     f"commit_message:{message}",
+                    f"branch:{branch}",
+                    f"size_source:{size_source}",
                 ],
             }
         )
 
-        # Creating variables for debugging
-        if item['Platform'] not in sizes:
-            sizes[item['Platform']] = {}
-        if item['Python_Version'] not in sizes[item['Platform']]:
-            sizes[item['Platform']][item['Python_Version']] = 0
-
+        sizes.setdefault(item['Platform'], {}).setdefault(item['Python_Version'], 0)
         sizes[item['Platform']][item['Python_Version']] += item['Size_Bytes']
 
         key_count = (item['Platform'], item['Python_Version'])
-        if key_count not in n_integrations:
-            n_integrations[key_count] = 0
-        if key_count not in n_dependencies:
-            n_dependencies[key_count] = 0
+        n_integrations.setdefault(key_count, 0)
+        n_dependencies.setdefault(key_count, 0)
         if item['Type'] == 'Integration':
             n_integrations[key_count] += 1
         elif item['Type'] == 'Dependency':
             n_dependencies[key_count] += 1
+
+    def common_tags_for(platform: str, py_version: str) -> list[str]:
+        return [
+            f"platform:{platform}",
+            f"python_version:{py_version}",
+            "team:agent-integrations",
+            f"compression:{size_type}",
+            f"metrics_version:{METRIC_VERSION}",
+            f"branch:{branch}",
+            f"size_source:{size_source}",
+        ]
 
     for (platform, py_version), count in n_integrations.items():
         n_integrations_metrics.append(
@@ -926,12 +933,7 @@ def send_metrics_to_dd(
                 "metric": f"{metric_name}.integration_count",
                 "type": "gauge",
                 "points": [(timestamp, count)],
-                "tags": [
-                    f"platform:{platform}",
-                    f"python_version:{py_version}",
-                    "team:agent-integrations",
-                    f"metrics_version:{METRIC_VERSION}",
-                ],
+                "tags": common_tags_for(platform, py_version),
             }
         )
     for (platform, py_version), count in n_dependencies.items():
@@ -940,49 +942,100 @@ def send_metrics_to_dd(
                 "metric": f"{metric_name}.dependency_count",
                 "type": "gauge",
                 "points": [(timestamp, count)],
-                "tags": [
-                    f"platform:{platform}",
-                    f"python_version:{py_version}",
-                    "team:agent-integrations",
-                    f"metrics_version:{METRIC_VERSION}",
-                ],
+                "tags": common_tags_for(platform, py_version),
             }
         )
+    for platform, py_versions in sizes.items():
+        for py_version, total_bytes in py_versions.items():
+            total_size_metrics.append(
+                {
+                    "metric": f"{metric_name}.total_size",
+                    "type": "gauge",
+                    "points": [(timestamp, total_bytes)],
+                    "tags": common_tags_for(platform, py_version),
+                }
+            )
+
+    return MetricBatches(
+        size=size_metrics,
+        integration_count=n_integrations_metrics,
+        dependency_count=n_dependencies_metrics,
+        total_size=total_size_metrics,
+        sizes=sizes,
+    )
+
+
+def dispatch_metrics(
+    app: Application,
+    metrics: list[dict],
+    label: str,
+) -> None:
+    """Send a batch of metrics to Datadog."""
+    app.display_debug(f"Sending {label}: {metrics}")
+    result = api.Metric.send(metrics=metrics)
+    if result.get("status") != "ok":
+        raise RuntimeError(f"Failed to send {label}: {result}")
+
+
+def send_metrics_to_dd(
+    app: Application,
+    commit: str,
+    modules: list[FileDataEntryPlatformVersion],
+    org: str | None,
+    api_key: str | None,
+    compressed: bool,
+    branch: str,
+    size_source: str,
+) -> None:
+    config_file_info = app.config.orgs.get(org, {}) if org else {'api_key': api_key, 'site': 'datadoghq.com'}
+
+    if "api_key" not in config_file_info:
+        raise RuntimeError("No API key found in config file")
+    if "site" not in config_file_info:
+        raise RuntimeError("No site found in config file")
 
     initialize(
         api_key=config_file_info["api_key"],
         api_host=f"https://api.{config_file_info['site']}",
     )
 
-    # Format the sizes dictionary into a human-readable summary
-    summary_lines = []
-    for platform, py_versions in sizes.items():
-        for py_version, size_bytes in py_versions.items():
-            summary_lines.append(
-                f"Platform: {platform}, Python: {py_version}, Size: "
-                f"{convert_to_human_readable_size(size_bytes)} ({size_bytes} bytes)"
-            )
-    summary = "\n".join(summary_lines)
+    metrics = build_metrics(commit, modules, compressed, branch, size_source)
 
-    total_metrics = len(metrics) + len(n_integrations_metrics) + len(n_dependencies_metrics)
-    app.display(f"Sending {total_metrics} metrics to Datadog...")
+    summary_lines = [
+        f"Platform: {platform}, Python: {py_version}, Size: "
+        f"{convert_to_human_readable_size(size_bytes)} ({size_bytes} bytes)"
+        for platform, py_versions in metrics["sizes"].items()
+        for py_version, size_bytes in py_versions.items()
+    ]
 
+    total_metrics_count = (
+        len(metrics["size"])
+        + len(metrics["integration_count"])
+        + len(metrics["dependency_count"])
+        + len(metrics["total_size"])
+    )
+    app.display(f"Sending {total_metrics_count} metrics to Datadog...")
     app.display("\nMetric summary:")
-    app.display(summary)
+    app.display("\n".join(summary_lines))
+    app.display_debug(f"Branch: {branch}")
+    app.display_debug(f"Size source: {size_source}")
 
-    app.display_debug(f"Sending Metrics: {metrics}")
-    api.Metric.send(metrics=metrics)
-
-    app.display_debug(f"Sending N integrations metrics: {n_integrations_metrics}")
-    api.Metric.send(metrics=n_integrations_metrics)
-
-    app.display_debug(f"Sending N dependencies metrics: {n_dependencies_metrics}")
-    api.Metric.send(metrics=n_dependencies_metrics)
+    batches = [
+        (metrics["size"], "Metrics"),
+        (metrics["integration_count"], "N integrations metrics"),
+        (metrics["dependency_count"], "N dependencies metrics"),
+        (metrics["total_size"], "Total size metrics"),
+    ]
+    for batch, label in batches:
+        try:
+            dispatch_metrics(app, batch, label)
+        except Exception:
+            app.display_warning(f"Failed to send {label}")
 
 
 def get_commit_data(commit: str) -> tuple[int, str, list[str], list[str]]:
     '''
-    Gets the timestamp, message, tickets and PRs of a given commit. If no commit is provided, it uses the last commit.
+    Gets the timestamp, message, tickets and PRs of a given commit.
     '''
     result = subprocess.run(
         ["git", "show", "-s", "--format=%ct,%s", commit],
