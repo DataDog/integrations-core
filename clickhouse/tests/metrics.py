@@ -142,6 +142,8 @@ OPTIONAL_METRICS = [
     'clickhouse.lock.context.wait_time.total',
     'clickhouse.lock.read.rwlock.acquired.time',
     'clickhouse.table.mergetree.partslock.wait.time',
+    'clickhouse.zk.sync.count',
+    'clickhouse.zk.sync.total',
     'clickhouse.memory.arena.bytes.count',
     'clickhouse.memory.arena.bytes.total',
     'clickhouse.memory.arena.chunks.count',
@@ -425,8 +427,6 @@ V_23_METRICS = [
     'clickhouse.threads.storage_s3.total',
     'clickhouse.threads.system_replicas.active',
     'clickhouse.threads.system_replicas.total',
-    'clickhouse.zk.sync.count',
-    'clickhouse.zk.sync.total',
 ]
 
 V_24_METRICS = [
