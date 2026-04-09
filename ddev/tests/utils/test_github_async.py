@@ -9,9 +9,9 @@ import httpx
 import pytest
 
 from ddev.utils.github_async import (
+    GITHUB_API_VERSION,
     ArtifactsList,
     AsyncGitHubClient,
-    GITHUB_API_VERSION,
     GitHubResponse,
     IssueComment,
     PaginationData,
@@ -92,6 +92,7 @@ def _pr_review_comment_payload() -> dict[str, Any]:
 
 _BASE = "https://api.github.com"
 
+
 @pytest.mark.parametrize(
     ("header", "expected"),
     [
@@ -104,7 +105,8 @@ _BASE = "https://api.github.com"
             PaginationData(next=f"{_BASE}/page2", last=f"{_BASE}/page5"),
         ),
         (
-            f'<{_BASE}/page1>; rel="first", <{_BASE}/page1>; rel="prev", <{_BASE}/page3>; rel="next", <{_BASE}/page5>; rel="last"',
+            f'<{_BASE}/page1>; rel="first", <{_BASE}/page1>; rel="prev",'
+            f' <{_BASE}/page3>; rel="next", <{_BASE}/page5>; rel="last"',
             PaginationData(first=f"{_BASE}/page1", prev=f"{_BASE}/page1", next=f"{_BASE}/page3", last=f"{_BASE}/page5"),
         ),
         (
@@ -120,6 +122,7 @@ def test_pagination_data_from_header(header: str | None, expected: PaginationDat
     for field, value in expected.items():
         assert getattr(p, field) == value
 
+
 # ---------------------------------------------------------------------------
 # AsyncGitHubClient construction
 # ---------------------------------------------------------------------------
@@ -133,7 +136,7 @@ def test_client_empty_token_raises() -> None:
 def test_client_valid_token_builds_client() -> None:
     client = AsyncGitHubClient(token=TOKEN)
     assert isinstance(client._client, httpx.AsyncClient)
-    assert "Bearer ghp_test_token" in client._client.headers.get("authorization", "") # must not raise
+    assert "Bearer ghp_test_token" in client._client.headers.get("authorization", "")  # must not raise
 
 
 @pytest.mark.asyncio
