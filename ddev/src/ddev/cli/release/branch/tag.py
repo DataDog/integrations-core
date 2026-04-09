@@ -21,7 +21,7 @@ from .create import BRANCH_NAME_REGEX
     help='Skip checking GitHub for open PRs targeting this release branch before tagging.',
 )
 @click.pass_obj
-def tag(app, final, skip_open_pr_check):
+def tag(app, final: bool, skip_open_pr_check: bool):
     """
     Tag the release branch either as release candidate or final release.
     """
@@ -77,8 +77,16 @@ def tag(app, final, skip_open_pr_check):
                 app.abort('Did not get confirmation, aborting. Did not create or push the tag.')
 
     prs = []
-    if not skip_open_pr_check and app.config.github.user and app.config.github.token:
-        prs = app.github.list_open_pull_requests_targeting_base(branch_name)
+    if skip_open_pr_check:
+        pass
+    elif not app.config.github.user or not app.config.github.token:
+        click.secho('Warning: GitHub credentials not configured; skipping open PR check.', fg='yellow')
+    else:
+        try:
+            prs = app.github.list_open_pull_requests_targeting_base(branch_name)
+        except Exception as e:
+            click.secho(f'Warning: unable to check for open PRs: {e}', fg='yellow')
+
         if prs:
             click.secho('!!! WARNING !!!')
             click.echo(f'Found {len(prs)} open PR(s) targeting base branch {branch_name}:')
@@ -89,7 +97,7 @@ def tag(app, final, skip_open_pr_check):
 
     prompt = f'Create and push this tag: {new_tag}?'
     if prs:
-        prompt = f'Open PRs found targeting {branch_name}. Create and push this tag anyway: {new_tag}? [y/n]'
+        prompt = f'Open PRs found targeting {branch_name}. Create and push this tag anyway: {new_tag}?'
 
     if not click.confirm(prompt):
         app.abort('Did not get confirmation, aborting. Did not create or push the tag.')

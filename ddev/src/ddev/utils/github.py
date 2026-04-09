@@ -114,20 +114,21 @@ class GitHubManager:
             return []
 
         prs: list[PullRequest] = []
-        per_page = 100
+        max_per_page = 100
         page = 1
 
         # https://docs.github.com/en/search-github/searching-on-github/searching-issues-and-pull-requests
         query = f'repo:{self.repo_id} is:pull-request is:open base:{base_branch}'
 
         while len(prs) < limit:
+            requested_count = min(max_per_page, limit - len(prs))
             response = self.__api_get(
                 self.ISSUE_SEARCH_API,
                 params={
                     'q': query,
                     'sort': 'updated',
                     'order': 'desc',
-                    'per_page': min(per_page, limit - len(prs)),
+                    'per_page': requested_count,
                     'page': page,
                 },
             )
@@ -137,12 +138,12 @@ class GitHubManager:
                 break
 
             prs.extend(PullRequest(item) for item in items)
-            if len(items) < per_page:
+            if len(items) < requested_count:
                 break
 
             page += 1
 
-        return prs
+        return prs[:limit]
 
     def get_pull_request_by_number(self, number: str) -> PullRequest | None:
         response = self.__api_get(
