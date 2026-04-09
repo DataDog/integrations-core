@@ -638,6 +638,66 @@ def test_sqlserver_fci_metrics(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_sqlserver_fci_metrics_without_cluster_name(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+):
+    """When sys.dm_hadr_cluster has no rows, cluster_name is NULL.
+    Metrics should still be collected, and the failover_cluster tag should be omitted."""
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['database_metrics'] = {
+        'fci_metrics': {'enabled': True},
+    }
+
+    mocked_results = [
+        ('node1', 'up', None, 0, 1),
+        ('node2', 'down', None, 1, 0),
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(query, db=None):
+        return mocked_results
+
+    fci_metrics = SqlserverFciMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+    )
+
+    sqlserver_check._database_metrics = [fci_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    base_tags = sqlserver_check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
+    ]
+    for result in mocked_results:
+        node_name, status, _cluster_name, *metric_values = result
+        metrics = zip(fci_metrics.metric_names()[0], metric_values)
+        expected_tags = [
+            f'node_name:{node_name}',
+            f'status:{status}',
+        ] + base_tags
+        for metric_name, metric_value in metrics:
+            aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+        # Ensure failover_cluster tag is NOT present
+        for metric_name, metric_value in zip(fci_metrics.metric_names()[0], metric_values):
+            for metric_stub in aggregator.metrics(metric_name):
+                if f'node_name:{node_name}' in metric_stub.tags:
+                    assert all(
+                        not tag.startswith('failover_cluster:') for tag in metric_stub.tags
+                    ), f"failover_cluster tag should not be present when cluster_name is NULL"
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize('include_primary_log_shipping_metrics', [True, False])
 def test_sqlserver_primary_log_shipping_metrics(
     aggregator,
