@@ -1,20 +1,27 @@
-FROM amazoncorretto:8-alpine-jdk
+# First build the Scala application
+FROM amazoncorretto:8-alpine-jdk AS builder
 
 ARG SPARK_VERSION
-ARG HADOOP_VERSION
 ARG HUDI_VERSION
 
-# adapted from https://github.com/big-data-europe/docker-spark/blob/master/template/scala/Dockerfile
-RUN apk add --no-cache curl bash \
-      && wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz \
-      && tar -xvzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz \
-      && mv spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} spark \
-      && rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz \
-      && cd /
+RUN apk add --no-cache bash \
+      && wget -O - https://github.com/sbt/sbt/releases/download/v1.9.8/sbt-1.9.8.tgz | gunzip | tar -x -C /usr/local
 
-RUN wget -O - https://github.com/sbt/sbt/releases/download/v1.9.8/sbt-1.9.8.tgz | gunzip | tar -x -C /usr/local
-
-ENV PATH /usr/local/sbt/bin:${PATH}
+ENV PATH=/usr/local/sbt/bin:${PATH}
 
 COPY . /usr/src/app/
 RUN cd /usr/src/app && sbt update && sbt clean assembly && sbt package
+
+# Then setup the runtime environment
+FROM apache/spark:v3.2.4
+
+USER root
+
+ARG HUDI_VERSION
+ARG SPARK_VERSION
+
+RUN $SPARK_HOME/bin/spark-submit \
+    --packages "org.apache.hudi:hudi-spark3-bundle_2.12:${HUDI_VERSION},org.apache.spark:spark-avro_2.12:${SPARK_VERSION}" \
+    --class placeholder /dev/null 2>&1 || true
+
+COPY --from=builder /usr/src/app/target/scala-2.12/app_2.12-0.1.0-SNAPSHOT.jar /usr/src/app/target/scala-2.12/app_2.12-0.1.0-SNAPSHOT.jar
