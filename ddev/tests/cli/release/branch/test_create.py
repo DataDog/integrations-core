@@ -193,11 +193,13 @@ def test_update_release_json(tmp_path):
 
 def test_update_release_json_file_not_found(tmp_path):
     release_json = Path(tmp_path / 'release.json')
+    assert not release_json.exists()
 
     update_release_json(release_json, '7.80.0')
 
+    assert release_json.exists()
     data = json.loads(release_json.read_text())
-    assert data['current_milestone'] == '7.80.0'
+    assert data == {'current_milestone': '7.80.0'}
 
 
 def test_create_branch_creates_milestone_and_updates_release_json(ddev, mocker):
