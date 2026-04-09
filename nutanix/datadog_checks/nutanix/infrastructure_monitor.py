@@ -65,6 +65,10 @@ class InfrastructureMonitor:
         self.cluster_metrics_count = 0
         self.host_metrics_count = 0
         self.vm_metrics_count = 0
+        # Entity counters
+        self.cluster_count = 0
+        self.host_count = 0
+        self.vm_count = 0
         # Cluster capacity accumulator
         self._cluster_capacity = ClusterCapacity()
         self._vms_by_host: dict[str, list[dict]] = {}
@@ -79,6 +83,9 @@ class InfrastructureMonitor:
         self.cluster_metrics_count = 0
         self.host_metrics_count = 0
         self.vm_metrics_count = 0
+        self.cluster_count = 0
+        self.host_count = 0
+        self.vm_count = 0
         self._cluster_capacity.reset()
         self._vms_by_host = {}
 
@@ -133,6 +140,7 @@ class InfrastructureMonitor:
 
             if self._is_prism_central_cluster(cluster):
                 self.check.log.info("[%s] Skipping Prism Central cluster: %s", pc_label, cluster_name)
+                self._collect_pc_version_metadata(cluster)
                 skipped += 1
                 continue
 
@@ -164,6 +172,7 @@ class InfrastructureMonitor:
                 cluster_tags = self.check.base_tags + self._extract_cluster_tags(cluster)
                 self._report_cluster_capacity_metrics(cluster_tags)
 
+                self.cluster_count += 1
                 processed += 1
             except Exception:
                 self.check.log.exception(
@@ -182,6 +191,18 @@ class InfrastructureMonitor:
         """Check if cluster is a Prism Central cluster (should be skipped)."""
         cluster_function = get_nested(cluster, "config/clusterFunction") or []
         return "PRISM_CENTRAL" in cluster_function
+
+    def _collect_pc_version_metadata(self, pc_cluster: dict) -> None:
+        """Collect and report version metadata from the Prism Central cluster."""
+        version = get_nested(pc_cluster, "config/buildInfo/version")
+        if version:
+            self.check.set_metadata(
+                'version',
+                version,
+                scheme='regex',
+                pattern=r'(?P<major>\d+)\.(?P<minor>\d+)',
+                final_scheme='semver',
+            )
 
     def _process_cluster(self, cluster: dict, pc_label: str) -> None:
         """Process and report metrics for a single cluster."""
@@ -331,6 +352,8 @@ class InfrastructureMonitor:
             for host in hosts
         )
 
+        self.host_count += len(hosts)
+        self.vm_count += total_vms
         self.check.log.info("[%s][%s] Processed %d hosts and %d VMs", pc_label, cluster_name, len(hosts), total_vms)
 
     def _process_single_host(

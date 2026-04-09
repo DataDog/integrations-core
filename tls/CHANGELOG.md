@@ -2,13 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 5.5.0 / 2026-02-19
+## 5.6.0 / 2026-04-01
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 5.5.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 
 * Add `enable_legacy_tags_normalization` option to preserve hyphens in tag values when set to false. ([#22303](https://github.com/DataDog/integrations-core/pull/22303))
 
-## 5.4.0 / 2026-02-11
+## 5.4.0 / 2026-02-11 / Agent 7.76.0
 
 ***Security***:
 

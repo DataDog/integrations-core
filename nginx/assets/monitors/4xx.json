@@ -1,14 +1,14 @@
 {
   "version": 2,
   "created_at": "2020-09-16",
-  "last_updated_at": "2020-10-21",
+  "last_updated_at": "2026-03-09",
   "title": "Upstream 4xx errors are high",
   "tags": [
     "integration:nginx"
   ],
   "description": "NGINX sends requests to upstream peers that can fail eventually. This monitor tracks the count of 4xx HTTP responses to identify issues in the communication between NGINX and the backend servers.",
   "definition": {
-    "message": "{{#is_alert}}\n\n## What's happening?\nAn anomaly has been detected in the number of 4xx responses from NGINX upstream peers over the last hour, with a value of {{value}}.\n\n{{/is_alert}}",
+    "message": "{{#is_alert}}\n## 🚨 What's happening\n\nAn anomaly has been detected in the number of 4xx HTTP responses from NGINX upstream **{{upstream.name}}** (anomaly score: `{{value}}`, threshold: `{{threshold}}`). The 4xx response rate is significantly higher than normal, indicating that a notable portion of incoming requests are being rejected with client-side error codes.\n\nFirst triggered at **{{first_triggered_at}}**, active for **{{triggered_duration_sec}}** seconds.\n{{/is_alert}}{{#is_recovery}}\n## ✅ Recovered\n\nThe 4xx anomaly for upstream **{{upstream.name}}** has resolved. Current value: `{{value}}`.\n{{/is_recovery}}\n{{^is_recovery}}\n***\n\n## 📈 Impact\n\nElevated 4xx error rates can result in failed requests for end users and may expose misconfigurations or broken routes. Services and clients relying on this NGINX upstream may experience partial or complete degradation of functionality.\n\n***\n\n## Runbook\n\n### Initial Troubleshooting Steps\n\n1. **Identify the affected upstream** from the alert (`{{upstream.name}}`).\n2. Open [**Metrics Explorer**](/metric/explorer) and inspect `nginx.upstream.peers.responses.4xx` broken down by `upstream`.\n3. Review NGINX access logs for specific endpoints and status codes:\n   ```bash\n   tail -f /var/log/nginx/access.log | grep \" 4[0-9][0-9] \"\n   ```\n4. Correlate the spike with recent configuration changes, upstream deployments, or traffic shifts.\n\n### Cause and Resolution\n\n| Cause | Resolution |\n| ----- | ---------- |\n| Invalid or removed request paths (404) | Verify routes in NGINX configuration; update upstream routing rules to reflect the current backend state. |\n| Authentication or authorization failures (401/403) | Review auth configuration; check if credentials or access tokens have expired or been revoked. |\n| Malformed client requests (400) | Inspect incoming request headers and payloads; check client-side request construction. |\n| Rate limiting triggered (429) | Review rate limit thresholds; consider scaling upstream services or relaxing limits. |\n| Upstream endpoints renamed or removed | Update NGINX upstream configuration to reflect the current backend service endpoints. |\n\n### Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/nginx/)\n* [Metrics Explorer](/metric/explorer)\n* [Log Explorer](/logs?query=source%3Anginx)\n\n### Who should be notified?\n\nAssign the appropriate notification handle for this alert (e.g., `@slack-infra`, `@pagerduty-nginx`):\n`@your-team-handle`\n{{/is_recovery}}",
     "name": "[NGINX] 4xx Errors higher than usual",
     "options": {
       "escalation_message": "",

@@ -1,0 +1,9 @@
+provides:
+  - id: etcd-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: etcd-logs
+    always_on: false
+    data_type: logs
+    direction: inbound

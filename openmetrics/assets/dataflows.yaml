@@ -1,0 +1,5 @@
+provides:
+  - id: openmetrics-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound

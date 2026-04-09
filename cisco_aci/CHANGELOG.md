@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 4.13.0 / 2026-02-19
+## 4.14.0 / 2026-04-01
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
+## 4.13.1 / 2026-03-18
+
+***Fixed***:
+
+* Fix NDM tagging: use only device_id in device id_tags to prevent collisions when devices are unreachable, and add interface:{name} tag to interface metrics for proper metadata-to-metrics linking ([#22645](https://github.com/DataDog/integrations-core/pull/22645))
+
+## 4.13.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
 
@@ -12,7 +24,7 @@
 
 * Cisco ACI: Bypass OOB IP comparison when building topology ([#22572](https://github.com/DataDog/integrations-core/pull/22572))
 
-## 4.12.0 / 2026-02-11
+## 4.12.0 / 2026-02-11 / Agent 7.76.0
 
 ***Security***:
 

@@ -170,9 +170,9 @@ class NutanixCheck(AgentCheck):
         self.log.info(
             "[PC:%s] Check completed: %d clusters, %d hosts, %d VMs, %d events, %d tasks, %d audits, %d alerts",
             self.pc_ip,
-            self.infrastructure_monitor.cluster_metrics_count,
-            self.infrastructure_monitor.host_metrics_count,
-            self.infrastructure_monitor.vm_metrics_count,
+            self.infrastructure_monitor.cluster_count,
+            self.infrastructure_monitor.host_count,
+            self.infrastructure_monitor.vm_count,
             events_count,
             tasks_count,
             audits_count,
