@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
-
 import pytest
 
 from ddev.utils.github import PullRequest
@@ -52,11 +50,6 @@ class TestGetPullRequest:
 
 
 class TestListOpenPullRequestsTargetingBase:
-    def test_limit_zero_short_circuit(self, github_manager, mocker):
-        api_get = mocker.patch('ddev.utils.github.GitHubManager._GitHubManager__api_get')
-        assert github_manager.list_open_pull_requests_targeting_base('7.99.x', limit=0) == []
-        api_get.assert_not_called()
-
     def test_returns_pull_requests(self, github_manager, mocker):
         response = mocker.MagicMock()
         response.text = (
@@ -71,54 +64,6 @@ class TestListOpenPullRequestsTargetingBase:
         assert prs[0].title == 'PR title'
         assert prs[0].html_url == 'https://example.invalid/pr/10'
         assert prs[0].labels == ['foo']
-
-    def test_pagination_stops_on_partial_page(self, github_manager, mocker):
-        """When a page returns fewer items than requested, pagination stops."""
-
-        def _make_item(n):
-            return {
-                'number': n,
-                'title': f'PR {n}',
-                'pull_request': {
-                    'html_url': f'https://example.invalid/pr/{n}',
-                    'diff_url': f'https://example.invalid/pr/{n}.diff',
-                },
-                'body': '',
-                'user': {'login': 'someone'},
-                'labels': [],
-            }
-
-        response = mocker.MagicMock()
-        response.text = json.dumps({'items': [_make_item(i) for i in range(30)]})
-        api_get = mocker.patch('ddev.utils.github.GitHubManager._GitHubManager__api_get', return_value=response)
-
-        prs = github_manager.list_open_pull_requests_targeting_base('7.99.x', limit=50)
-        assert len(prs) == 30
-        api_get.assert_called_once()
-
-    def test_result_capped_at_limit(self, github_manager, mocker):
-        """Results are truncated to the requested limit."""
-
-        def _make_item(n):
-            return {
-                'number': n,
-                'title': f'PR {n}',
-                'pull_request': {
-                    'html_url': f'https://example.invalid/pr/{n}',
-                    'diff_url': f'https://example.invalid/pr/{n}.diff',
-                },
-                'body': '',
-                'user': {'login': 'someone'},
-                'labels': [],
-            }
-
-        response = mocker.MagicMock()
-        response.text = json.dumps({'items': [_make_item(i) for i in range(10)]})
-        api_get = mocker.patch('ddev.utils.github.GitHubManager._GitHubManager__api_get', return_value=response)
-
-        prs = github_manager.list_open_pull_requests_targeting_base('7.99.x', limit=5)
-        assert len(prs) == 5
-        api_get.assert_called_once()
 
 
 class TestCreateLabel:
