@@ -688,12 +688,12 @@ def test_sqlserver_fci_metrics_without_cluster_name(
         for metric_name, metric_value in metrics:
             aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
         # Ensure failover_cluster tag is NOT present
-        for metric_name, metric_value in zip(fci_metrics.metric_names()[0], metric_values):
+        for metric_name in fci_metrics.metric_names()[0]:
             for metric_stub in aggregator.metrics(metric_name):
                 if f'node_name:{node_name}' in metric_stub.tags:
-                    assert all(
-                        not tag.startswith('failover_cluster:') for tag in metric_stub.tags
-                    ), f"failover_cluster tag should not be present when cluster_name is NULL"
+                    assert all(not tag.startswith('failover_cluster:') for tag in metric_stub.tags), (
+                        "failover_cluster tag should not be present when cluster_name is NULL"
+                    )
 
 
 @pytest.mark.integration
