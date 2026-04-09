@@ -17,6 +17,7 @@ excluded_paths = [
 
   # --- Tests ---
 
+  "tests/",
   "idlelib/idle_test/",
   "bs4/tests/",
   "Cryptodome/SelfTest/",
