@@ -8,6 +8,7 @@ from copy import deepcopy
 
 import pytest
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nifi import NifiCheck
 
@@ -31,7 +32,7 @@ class TestIntegration:
         """Full check run against real NiFi emits expected metrics."""
         dd_run_check(check)
 
-        aggregator.assert_metric('nifi.can_connect', value=1)
+        aggregator.assert_service_check('nifi.can_connect', AgentCheck.OK)
 
         # System diagnostics
         aggregator.assert_metric('nifi.system.jvm.heap_used')
@@ -71,7 +72,7 @@ class TestIntegration:
         with pytest.raises(Exception):
             dd_run_check(check)
 
-        aggregator.assert_metric('nifi.can_connect', value=0)
+        aggregator.assert_service_check('nifi.can_connect', AgentCheck.CRITICAL)
 
     def test_metadata_metrics(self, dd_run_check, aggregator, instance):
         """All emitted metrics are declared in metadata.csv."""

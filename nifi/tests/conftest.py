@@ -54,7 +54,7 @@ def dd_environment():
             WaitFor(setup_test_flows, attempts=10, wait=5),
         ],
     ):
-        yield common.CHECK_CONFIG
+        yield common.E2E_CHECK_CONFIG
 
 
 @pytest.fixture

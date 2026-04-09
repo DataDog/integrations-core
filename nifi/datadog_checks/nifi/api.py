@@ -25,7 +25,6 @@ class NiFiApi:
         self._username = username
         self._password = password
         self._token = None
-        self._version = None
 
     def _authenticate(self):
         """Obtain a bearer token via POST /access/token (expects HTTP 201)."""
@@ -64,11 +63,9 @@ class NiFiApi:
         return resp.json()
 
     def get_about(self):
-        """GET /flow/about — returns version info. Cached after first call."""
-        if self._version is None:
-            data = self._request(ABOUT_ENDPOINT)
-            self._version = data.get('about', {}).get('version', 'unknown')
-        return self._version
+        """GET /flow/about — returns the NiFi version string."""
+        data = self._request(ABOUT_ENDPOINT)
+        return data.get('about', {}).get('version', 'unknown')
 
     def get_cluster_summary(self):
         """GET /flow/cluster/summary — returns cluster health info."""

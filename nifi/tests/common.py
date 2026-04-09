@@ -28,3 +28,14 @@ CHECK_CONFIG = {
     'init_config': {},
     'instances': [INSTANCE],
 }
+
+E2E_INSTANCE = {
+    **INSTANCE,
+    'collect_connection_metrics': True,
+    'collect_processor_metrics': True,
+}
+
+E2E_CHECK_CONFIG = {
+    'init_config': {},
+    'instances': [E2E_INSTANCE],
+}

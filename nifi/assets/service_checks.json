@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "agent_version": "7.0.0",
+    "integration": "nifi",
+    "check": "nifi.can_connect",
+    "statuses": ["ok", "critical"],
+    "groups": ["nifi_version"],
+    "name": "NiFi Connectivity",
+    "description": "Returns CRITICAL if the check cannot reach or authenticate with the NiFi API, OK otherwise."
+  }
+]

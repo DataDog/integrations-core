@@ -10,6 +10,7 @@ import pytest
 from requests.exceptions import ConnectionError as RequestsConnectionError
 from requests.exceptions import HTTPError
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.nifi import NifiCheck
 
 
@@ -256,7 +257,7 @@ class TestCanConnect:
         with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
             dd_run_check(check)
 
-        aggregator.assert_metric('nifi.can_connect', value=1, tags=['nifi_version:2.8.0'])
+        aggregator.assert_service_check('nifi.can_connect', AgentCheck.OK, tags=['nifi_version:2.8.0'])
 
     def test_can_connect_failure(self, dd_run_check, aggregator):
         """Connection error emits can_connect=0."""
@@ -266,7 +267,7 @@ class TestCanConnect:
             with pytest.raises(Exception):
                 dd_run_check(check)
 
-        aggregator.assert_metric('nifi.can_connect', value=0)
+        aggregator.assert_service_check('nifi.can_connect', AgentCheck.CRITICAL)
 
     def test_no_auth_mode(self, dd_run_check, aggregator):
         """Check works without credentials when NiFi has no auth configured."""
@@ -284,7 +285,7 @@ class TestCanConnect:
         with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
             dd_run_check(check)
 
-        aggregator.assert_metric('nifi.can_connect', value=1, tags=['nifi_version:2.8.0'])
+        aggregator.assert_service_check('nifi.can_connect', AgentCheck.OK, tags=['nifi_version:2.8.0'])
 
 
 class TestClusterHealth:
@@ -323,7 +324,7 @@ class TestClusterHealth:
         with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
             dd_run_check(check)
 
-        aggregator.assert_metric('nifi.can_connect', value=1)
+        aggregator.assert_service_check('nifi.can_connect', AgentCheck.OK)
         assert not aggregator.metrics('nifi.cluster.connected_node_count')
 
 
@@ -647,6 +648,17 @@ class TestConnectionMetrics:
         aggregator.assert_metric('nifi.connection.flowfiles_in', value=10, tags=conn_tags)
         aggregator.assert_metric('nifi.connection.flowfiles_out', value=5, tags=conn_tags)
 
+    def test_truncation_warning(self, dd_run_check, aggregator, caplog):
+        """Truncation warning is logged when connections exceed max_connections."""
+        responses = _standard_responses()
+        responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
+        check = NifiCheck('nifi', {}, [_make_instance(collect_connection_metrics=True, max_connections=0)])
+
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
+            dd_run_check(check)
+
+        assert 'Truncated connections from 1 to 0' in caplog.text
+
 
 class TestProcessorMetrics:
     def test_disabled_by_default(self, dd_run_check, aggregator):
@@ -684,6 +696,17 @@ class TestProcessorMetrics:
         aggregator.assert_metric('nifi.processor.active_threads', value=1, tags=proc_tags)
         aggregator.assert_metric('nifi.processor.run_status', value=1, tags=proc_tags)
 
+    def test_truncation_warning(self, dd_run_check, aggregator, caplog):
+        """Truncation warning is logged when processors exceed max_processors."""
+        responses = _standard_responses()
+        responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
+        check = NifiCheck('nifi', {}, [_make_instance(collect_processor_metrics=True, max_processors=0)])
+
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
+            dd_run_check(check)
+
+        assert 'Truncated processors from 1 to 0' in caplog.text
+
 
 class TestBulletins:
     @staticmethod
@@ -713,7 +736,31 @@ class TestBulletins:
         assert aggregator.events[0]['alert_type'] == 'error'
         assert aggregator.events[1]['msg_title'] == 'NiFi Bulletin: Fail Writer [WARNING]'
         assert aggregator.events[1]['alert_type'] == 'warning'
-        assert cache['last_bulletin_id'] == '1'
+
+    def test_info_bulletin_alert_type(self, dd_run_check, aggregator):
+        """INFO bulletins get alert_type 'info', not 'warning'."""
+        info_bulletins = {
+            'bulletinBoard': {
+                'bulletins': [
+                    {
+                        'id': 0,
+                        'canRead': True,
+                        'bulletin': {
+                            'id': 0,
+                            'sourceName': 'Info Source',
+                            'level': 'INFO',
+                            'message': 'Informational message',
+                            'sourceType': 'PROCESSOR',
+                        },
+                    },
+                ]
+            }
+        }
+        responses = _standard_responses(bulletins=info_bulletins)
+        _, cache = self._run_bulletin_check(dd_run_check, responses, bulletin_min_level='INFO')
+        assert len(aggregator.events) == 1
+        assert aggregator.events[0]['alert_type'] == 'info'
+        assert cache['last_bulletin_id'] == '0'
 
     def test_dedup_by_cached_id(self, dd_run_check, aggregator):
         """Bulletins with id <= cached last_bulletin_id are skipped."""
