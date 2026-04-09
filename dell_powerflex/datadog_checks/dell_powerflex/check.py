@@ -8,6 +8,13 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from datadog_checks.base import AgentCheck
 
 from .config_models import ConfigMixin
+from .constants import (
+    SYSTEM_MDM_CLUSTER_SIMPLE_METRICS,
+    SYSTEM_MDM_CLUSTER_STATE_METRICS,
+    SYSTEM_METRIC_PREFIX,
+    SYSTEM_STATS_BWC_METRICS,
+    SYSTEM_STATS_SIMPLE_METRICS,
+)
 
 
 class DellPowerflexCheck(AgentCheck, ConfigMixin):
@@ -23,9 +30,43 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
 
     def check(self, _: Any) -> None:
         try:
-            response = self.http.get(self.config.powerflex_gateway_url)
-            response.raise_for_status()
+            self._collect_systems()
             self.gauge('api.can_connect', 1, tags=self._base_tags)
         except (ConnectionError, HTTPError, InvalidURL, Timeout) as e:
             self.log.warning('Could not connect to PowerFlex Gateway: %s', e)
             self.gauge('api.can_connect', 0, tags=self._base_tags)
+
+    def _collect_systems(self) -> None:
+        response = self.http.get(f"{self.config.powerflex_gateway_url}/api/types/System/instances")
+        response.raise_for_status()
+        for system in response.json():
+            self._collect_system(system)
+
+    def _collect_system(self, system: dict) -> None:
+        tags = self._base_tags + [f"system_id:{system['id']}"]
+        if system.get('name'):
+            tags = tags + [f"system_name:{system['name']}"]
+        mdm_cluster = system.get('mdmCluster', {})
+        for api_field, metric_suffix in SYSTEM_MDM_CLUSTER_SIMPLE_METRICS:
+            self.gauge(f'{SYSTEM_METRIC_PREFIX}.{metric_suffix}', mdm_cluster.get(api_field), tags=tags)
+        for api_field, metric_suffix, tag_key in SYSTEM_MDM_CLUSTER_STATE_METRICS:
+            self.gauge(
+                f'{SYSTEM_METRIC_PREFIX}.{metric_suffix}',
+                1,
+                tags=tags + [f"{tag_key}:{mdm_cluster.get(api_field)}"],
+            )
+        self._collect_system_statistics(system['id'], tags)
+
+    def _collect_system_statistics(self, system_id: str, tags: list[str]) -> None:
+        url = f"{self.config.powerflex_gateway_url}/api/instances/System::{system_id}/relationships/Statistics"
+        response = self.http.get(url)
+        response.raise_for_status()
+        stats = response.json()
+        for api_field, metric_suffix in SYSTEM_STATS_SIMPLE_METRICS:
+            self.gauge(f'{SYSTEM_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
+        for api_field, metric_suffix in SYSTEM_STATS_BWC_METRICS:
+            bwc = stats.get(api_field, {})
+            prefix = f'{SYSTEM_METRIC_PREFIX}.{metric_suffix}'
+            self.gauge(f'{prefix}.num_seconds', bwc.get('numSeconds'), tags=tags)
+            self.gauge(f'{prefix}.total_weight_in_kb', bwc.get('totalWeightInKb'), tags=tags)
+            self.gauge(f'{prefix}.num_occured', bwc.get('numOccured'), tags=tags)
