@@ -107,7 +107,10 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     check = ClickhouseCheck('clickhouse', {}, [dbm_instance])
     client = _get_clickhouse_client(dbm_instance)
 
-    client.query(query)
+    # Use client.command() instead of client.query() to avoid clickhouse_connect appending
+    # "FORMAT Native" to the HTTP body — which ClickHouse stores verbatim in system.query_log
+    # and causes the SQL obfuscator to return None for dd_commands.
+    client.command(query)
     client.command('SYSTEM FLUSH LOGS')
 
     dd_run_check(check)
@@ -180,7 +183,7 @@ def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check)
     client = _get_clickhouse_client(dbm_instance)
 
     query = "SELECT name, engine FROM system.databases ORDER BY name"
-    client.query(query)
+    client.command(query)
     client.command('SYSTEM FLUSH LOGS')
 
     dd_run_check(check)
