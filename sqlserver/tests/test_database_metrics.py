@@ -644,13 +644,15 @@ def test_sqlserver_fci_metrics_without_cluster_name(
     init_config,
     instance_docker_metrics,
 ):
-    """When sys.dm_hadr_cluster has no rows, cluster_name is NULL.
-    Metrics should still be collected, and the failover_cluster tag should be omitted."""
+    """When sys.dm_hadr_cluster has no rows (HADR not configured), the OUTER APPLY returns NULL
+    for cluster_name. FCI metrics should still be collected, and the failover_cluster tag should
+    be omitted thanks to the tag_not_null column type."""
     instance_docker_metrics['database_autodiscovery'] = True
     instance_docker_metrics['database_metrics'] = {
         'fci_metrics': {'enabled': True},
     }
 
+    # Columns: (node_name, status_description, cluster_name, status, is_current_owner)
     mocked_results = [
         ('node1', 'up', None, 0, 1),
         ('node2', 'down', None, 1, 0),
@@ -678,17 +680,21 @@ def test_sqlserver_fci_metrics_without_cluster_name(
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
         "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
-    for result in mocked_results:
-        node_name, status, _cluster_name, *metric_values = result
-        metrics = zip(fci_metrics.metric_names()[0], metric_values)
+
+    metric_names = fci_metrics.metric_names()[0]
+
+    for node_name, status, _cluster_name, *metric_values in mocked_results:
+        # Metrics should still be emitted with node_name and status tags, but without failover_cluster
         expected_tags = [
             f'node_name:{node_name}',
             f'status:{status}',
         ] + base_tags
-        for metric_name, metric_value in metrics:
+
+        for metric_name, metric_value in zip(metric_names, metric_values):
             aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
-        # Ensure failover_cluster tag is NOT present
-        for metric_name in fci_metrics.metric_names()[0]:
+
+        # Verify that no failover_cluster tag was emitted (tag_not_null skips NULL values)
+        for metric_name in metric_names:
             for metric_stub in aggregator.metrics(metric_name):
                 if f'node_name:{node_name}' in metric_stub.tags:
                     assert all(not tag.startswith('failover_cluster:') for tag in metric_stub.tags), (
