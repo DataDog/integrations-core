@@ -273,7 +273,9 @@ files:
         - name: value_format
           type: string
           description: |
-            Message value format:
+            Message value format.
+
+            Supported formats:
             - json: JSON data (strict validation, fails if not valid JSON)
             - bson: BSON (Binary JSON) data
             - string: Plain UTF-8 text (use for non-JSON text messages)
@@ -293,7 +295,9 @@ files:
         - name: key_format
           type: string
           description: |
-            Message key format:
+            Message key format.
+
+            Supported formats:
             - string: Plain UTF-8 text (most common for keys)
             - json: JSON data (strict validation, fails if not valid JSON)
             - bson: BSON (Binary JSON) data
@@ -624,6 +628,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /path/to/ca_cert.pem
     - name: schema_registry_tls_cert
       description: |
@@ -632,6 +637,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /path/to/client_cert.pem
     - name: schema_registry_tls_key
       description: |
@@ -640,6 +646,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /path/to/client_key.pem
     - name: schema_registry_oauth_token_provider
       description: |

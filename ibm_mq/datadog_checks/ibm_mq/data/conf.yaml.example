@@ -157,7 +157,9 @@ instances:
     # auto_discover_queues_via_names: false
 
     ## @param collect_statistics_metrics - boolean - optional - default: false
-    ## Collect metrics from Statistics Messages. Statistics collected are:
+    ## Collect metrics from Statistics Messages.
+    ##
+    ## Statistics collected are:
     ##   - channel statistics (MQCMD_STATISTICS_CHANNEL)
     ##   - queue statistics (MQCMD_STATISTICS_Q)
     #

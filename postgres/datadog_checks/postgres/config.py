@@ -373,7 +373,6 @@ def apply_deprecation_warnings(instance: dict, validation_result: ValidationResu
         ['deep_database_monitoring', 'dbm'],
         ['managed_identity', 'azure.managed_authentication'],
         ['statement_samples', 'query_samples'],
-        ['collect_default_database', 'postgres'],
     ]
 
     for deprecation in deprecations:
@@ -389,12 +388,6 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
     if config.relations and not (config.dbname or config.database_autodiscovery.enabled):
         validation_result.add_error(
             '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
-        )
-
-    if config.empty_default_hostname:
-        validation_result.add_warning(
-            'The `empty_default_hostname` option has no effect in the Postgres check. '
-            'Use the `exclude_hostname` option instead.'
         )
 
     # Validate dbname is not excluded when using autodiscovery

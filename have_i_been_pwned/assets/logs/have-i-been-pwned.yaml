@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: have-i-been-pwned
 metric_id: have-i-been-pwned
 backend_only: false

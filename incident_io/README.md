@@ -8,28 +8,29 @@ Integrate your incident.io account with Datadog to gain insights into incident-r
 
 ## Setup
 
-Follow the instructions below to configure this integration for incident.io incident events through a Webhook.
+Follow the instructions on the Datadog tile to configure this integration for incident.io incident events through a Webhook.
 
 ### Configuration
 
-#### Webhook configuration
 Configure the Datadog endpoint to forward events of incident.io incidents as logs to Datadog. For more details, see the incident.io [webhooks][2] documentation.
 
-1. Select an existing API key or create a new one by clicking one of the buttons below: <!-- UI Component to be added by Datadog team -->
-2. Log in to your [incident.io account][3] as org owner.
+1. Select an existing API key or create a new one in Datadog.
+2. Log in to your [incident.io account][3] as an organization owner.
 3. Go to **Settings > Webhooks**.
 4. Click **Add Endpoint**.
-5. Fill in the webhook URL that you generated in step 1.
+5. Paste the webhook URL generated in Step 1.
 6. Select the type of incident events that you want to push to Datadog under the **Subscribe to events** section.
 7. Click **Create**.
 
 ## Data Collected
 
 ### Logs
+
 The incident.io integration ingests the following logs:
+
 - Public incident event logs
 - Private incident event logs
-- Action and follow up event logs 
+- Action and follow up event logs
 
 ### Metrics
 

@@ -1,1 +1,0 @@
-Fixed `ddev size` ignore filtering to correctly interpret gitignore entries, ensuring excluded files are omitted from size calculations.

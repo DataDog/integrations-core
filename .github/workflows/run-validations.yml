@@ -152,103 +152,103 @@ jobs:
         ddev config set org ci
 
     - name: Validate Agent integration version requirements
-      if: inputs.agent-reqs
+      if: ${{ !cancelled() && inputs.agent-reqs }}
       run: ddev validate agent-reqs $TARGET
 
     - name: Validate CI configuration
-      if: inputs.ci
+      if: ${{ !cancelled() && inputs.ci }}
       run: ddev validate ci
 
     - name: Validate default configuration files
-      if: inputs.config
+      if: ${{ !cancelled() && inputs.config }}
       run: ddev validate config $TARGET
 
     - name: Validate dashboards
-      if: inputs.dashboards
+      if: ${{ !cancelled() && inputs.dashboards }}
       run: ddev validate dashboards $TARGET
 
     - name: Validate dependencies
-      if: inputs.dep
+      if: ${{ !cancelled() && inputs.dep }}
       run: ddev validate dep
 
     - name: Validate EULA files
-      if: inputs.eula
+      if: ${{ !cancelled() && inputs.eula }}
       run: ddev validate eula $TARGET
 
     - name: Validate usage of HTTP(S) utilities
-      if: inputs.http
+      if: ${{ !cancelled() && inputs.http }}
       run: ddev validate http $TARGET
 
     - name: Validate proper modern importing of core packages
-      if: inputs.imports
+      if: ${{ !cancelled() && inputs.imports }}
       run: ddev validate imports $TARGET
 
     - name: Validate coding conventions
-      if: inputs.integration-style
+      if: ${{ !cancelled() && inputs.integration-style }}
       run: ddev validate integration-style $TARGET
 
     - name: Validate default JMX metric files
-      if: inputs.jmx-metrics
+      if: ${{ !cancelled() && inputs.jmx-metrics }}
       run: ddev validate jmx-metrics $TARGET
 
     - name: Validate signatures of check classes
-      if: inputs.legacy-signature
+      if: ${{ !cancelled() && inputs.legacy-signature }}
       run: ddev validate legacy-signature $TARGET
 
     - name: Validate all shipped files have license headers
-      if: inputs.license-headers
+      if: ${{ !cancelled() && inputs.license-headers }}
       run: ddev validate license-headers $TARGET
 
     - name: Validate metric metadata
-      if: inputs.metadata
+      if: ${{ !cancelled() && inputs.metadata }}
       run: ddev validate metadata $TARGET
 
     - name: Validate configuration models
-      if: inputs.models
+      if: ${{ !cancelled() && inputs.models }}
       run: ddev validate models $TARGET
 
     - name: Validate openmetrics metric limit
-      if: inputs.openmetrics
+      if: ${{ !cancelled() && inputs.openmetrics }}
       run: ddev validate openmetrics $TARGET
 
     - name: Validate Python project metadata
-      if: inputs.package
+      if: ${{ !cancelled() && inputs.package }}
       run: ddev validate package $TARGET
 
     - name: Validate README files
-      if: inputs.readmes
+      if: ${{ !cancelled() && inputs.readmes }}
       run: ddev validate readmes $TARGET
 
     - name: Validate saved views
-      if: inputs.saved-views
+      if: ${{ !cancelled() && inputs.saved-views }}
       run: ddev validate saved-views $TARGET
 
     - name: Validate service check metadata
-      if: inputs.service-checks
+      if: ${{ !cancelled() && inputs.service-checks }}
       run: ddev validate service-checks $TARGET
 
     - name: Validate spelling
-      if: inputs.typos
+      if: ${{ !cancelled() && inputs.typos }}
       run: ddev validate typos $TARGET
 
     - name: Validate labeler configuration
-      if: inputs.labeler
+      if: ${{ !cancelled() && inputs.labeler }}
       run: ddev validate labeler
 
     - name: Validate target version
-      if: inputs.version
+      if: ${{ !cancelled() && inputs.version }}
       run: ddev validate version $TARGET
 
     # Every validation below here is sorted by increasing runtime rather than alphabetically
     - name: Validate third-party license metadata
-      if: inputs.licenses
+      if: ${{ !cancelled() && inputs.licenses }}
       env:
         DD_GITHUB_USER: "${{ github.actor }}"
         DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: ddev validate licenses
 
     - name: Validate the CODEOWNERS file
-      if: inputs.codeowners
+      if: ${{ !cancelled() && inputs.codeowners }}
       run: ddev validate codeowners
 
     - name: Comment PR on failure

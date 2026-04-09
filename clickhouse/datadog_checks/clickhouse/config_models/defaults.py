@@ -40,6 +40,10 @@ def instance_only_custom_queries():
     return False
 
 
+def instance_password():
+    return ''
+
+
 def instance_port():
     return 8123
 

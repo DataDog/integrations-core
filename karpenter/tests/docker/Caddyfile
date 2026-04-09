@@ -1,4 +1,4 @@
-:8000 {
+:8080 {
   root * /metrics
   file_server
 }
