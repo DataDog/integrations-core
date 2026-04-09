@@ -202,27 +202,81 @@ def test_update_release_json_file_not_found(tmp_path):
     assert data == {'current_milestone': '7.80.0'}
 
 
-def test_create_branch_creates_milestone_and_updates_release_json(ddev, mocker):
+def test_create_branch_creates_milestone_and_pr(ddev, mocker):
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
-    create_milestone_mock = mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    create_pr_mock = mocker.patch(
-        'ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1'
-    )
+    mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
+    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
-    update_release_json_mock = mocker.patch('ddev.cli.release.branch.create.update_release_json')
+    mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
 
     result = ddev('release', 'branch', 'create', '7.79.x')
 
     assert result.exit_code == 0, result.output
-    create_milestone_mock.assert_called_once_with('7.80.0')
-    update_release_json_mock.assert_called_once()
-    assert update_release_json_mock.call_args.args[1] == '7.80.0'
-    create_pr_mock.assert_called_once_with(
-        title='Update current_milestone to 7.80.0',
-        head='release/bump-milestone-7.80.0',
-        base='master',
-        body='Updates `current_milestone` in `release.json` to `7.80.0` after cutting the `7.79.x` release branch.',
-    )
+    assert 'Creating the `7.80.0` milestone' in result.output
+    assert 'Updating release.json with new milestone `7.80.0`' in result.output
     assert 'Pull request created' in result.output
+    assert 'All done' in result.output
+
+
+def test_create_branch_milestone_already_exists(ddev, mocker):
+    from httpx import HTTPStatusError, Request, Response
+
+    mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.utils.github.GitHubManager.create_milestone').side_effect = HTTPStatusError(
+        'Validation Failed',
+        request=Request('POST', 'https://api.github.com/repos/test/milestones'),
+        response=Response(422),
+    )
+    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
+    mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('ddev.cli.release.branch.create.update_release_json')
+    mocker.patch('click.confirm', return_value=True)
+
+    result = ddev('release', 'branch', 'create', '7.79.x')
+
+    assert result.exit_code == 0, result.output
+    assert 'already exists' in result.output
+    assert 'Pull request created' in result.output
+    assert 'All done' in result.output
+
+
+def test_create_branch_push_failure(ddev, mocker):
+    def push_fails(*args):
+        if args == ('push', 'origin', 'release/bump-milestone-7.80.0'):
+            raise OSError('push failed')
+
+    mocker.patch('ddev.utils.git.GitRepository.run', side_effect=push_fails)
+    mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
+    create_pr_mock = mocker.patch(
+        'ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1'
+    )
+    mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('ddev.cli.release.branch.create.update_release_json')
+    mocker.patch('click.confirm', return_value=True)
+
+    result = ddev('release', 'branch', 'create', '7.79.x')
+
+    assert result.exit_code == 0, result.output
+    assert 'Failed to push the branch' in result.output
+    assert 'git push origin release/bump-milestone-7.80.0' in result.output
+    create_pr_mock.assert_not_called()
+
+
+def test_create_branch_pr_creation_failure(ddev, mocker):
+    mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
+    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', side_effect=Exception('API error'))
+    mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('ddev.cli.release.branch.create.update_release_json')
+    mocker.patch('click.confirm', return_value=True)
+
+    result = ddev('release', 'branch', 'create', '7.79.x')
+
+    assert result.exit_code == 0, result.output
+    assert 'Failed to create the pull request' in result.output
+    assert 'All done' in result.output
