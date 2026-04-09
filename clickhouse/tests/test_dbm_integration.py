@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import deepcopy
@@ -168,15 +169,10 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     assert fqt_event['ddagentversion'] == datadog_agent.get_version()
 
 
-def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check):
+def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check, datadog_agent):
     """
     Verify that query metadata (tables, commands) is correctly extracted and present
     in both metrics rows and FQT events.
-
-    The test stub for obfuscate_sql always returns empty metadata (commands extraction
-    requires the real Go agent). We patch obfuscate_sql_with_metadata to inject known
-    metadata so we can verify it flows through the collection pipeline to both
-    dbm-metrics rows and dbm-samples FQT events.
     """
     check = ClickhouseCheck('clickhouse', {}, [dbm_instance])
     client = _get_clickhouse_client(dbm_instance)
@@ -185,24 +181,17 @@ def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check)
     client.command(query)
     client.command('SYSTEM FLUSH LOGS')
 
-    # Patch the obfuscator used inside the check to return realistic metadata.
-    # The stub returns metadata:{}, so without this we can't test metadata propagation.
-    _real_obfuscate = obfuscate_sql_with_metadata
-
-    def _obfuscate_with_commands(q, options=None, **kwargs):
-        result = _real_obfuscate(q, options, **kwargs)
-        result['metadata']['commands'] = ['SELECT']
-        result['metadata']['tables'] = ['databases']
-        return result
-
-    with mock.patch(
-        'datadog_checks.clickhouse.query_log_job.obfuscate_sql_with_metadata',
-        side_effect=_obfuscate_with_commands,
-    ):
-        dd_run_check(check)
-        dd_run_check(check)
-
     expected_obfuscated = obfuscate_sql_with_metadata(query, check.statement_metrics._obfuscate_options)['query']
+
+    def obfuscate_sql(q, options=None):
+        if 'system.databases' in q:
+            return json.dumps({'query': expected_obfuscated, 'metadata': {'commands': ['SELECT'], 'tables': ['databases']}})
+        return json.dumps({'query': q, 'metadata': {}})
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        dd_run_check(check)
+        dd_run_check(check)
 
     # Verify metadata in metrics row
     events = aggregator.get_event_platform_events("dbm-metrics")
