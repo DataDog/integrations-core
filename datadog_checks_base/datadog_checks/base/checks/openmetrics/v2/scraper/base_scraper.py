@@ -25,6 +25,8 @@ from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
 from datadog_checks.base.utils.http import RequestsWrapper
 
+from .aggregator import aggregate_sample_data, should_aggregate
+
 
 class OpenMetricsScraper:
     """
@@ -108,6 +110,9 @@ class OpenMetricsScraper:
                 raise ConfigurationError(f'Entry #{i} of setting `exclude_labels` must be a string')
 
             self.exclude_labels.add(entry)
+
+        self._aggregate_on_label_exclusion = is_affirmative(config.get('aggregate_metrics_on_label_exclusion', False))
+        self._should_aggregate = self._aggregate_on_label_exclusion and should_aggregate(self.exclude_labels)
 
         include_labels = config.get('include_labels', [])
         if not isinstance(include_labels, list):
@@ -244,7 +249,10 @@ class OpenMetricsScraper:
             if transformer is None:
                 continue
 
-            transformer(metric, self.generate_sample_data(metric), runtime_data)
+            sample_data = self.generate_sample_data(metric)
+            if self._should_aggregate:
+                sample_data = aggregate_sample_data(sample_data, metric.type)
+            transformer(metric, sample_data, runtime_data)
 
     def yield_metrics(self, runtime_data: dict) -> Generator[Metric]:
         if self.target_info:
@@ -363,6 +371,8 @@ class OpenMetricsScraper:
         """
         label_normalizer = get_label_normalizer(metric.type)
 
+        skip_label_exclusion = self._aggregate_on_label_exclusion and metric.type in ('histogram', 'summary')
+
         for sample in metric.samples:
             value = sample.value
             if isnan(value) or isinf(value):
@@ -380,7 +390,7 @@ class OpenMetricsScraper:
                 if sample_excluder is not None and sample_excluder(label_value):
                     skip_sample = True
                     break
-                elif label_name in self.exclude_labels:
+                elif not skip_label_exclusion and label_name in self.exclude_labels:
                     continue
                 elif self.include_labels and label_name not in self.include_labels:
                     continue
