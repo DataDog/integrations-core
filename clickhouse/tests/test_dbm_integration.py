@@ -22,8 +22,6 @@ from .common import CLICKHOUSE_VERSION
 # 22.7 is excluded because query_kind column in system.processes is not available in all builds
 UNSUPPORTED_DBM_VERSIONS = {'18', '19', '20', '21.8', '22.7'}
 
-CLOSE_TO_ZERO_INTERVAL = 0.0000001
-
 SAMPLE_QUERIES = [
     "SELECT count() FROM system.tables WHERE database = 'default'",
     "SELECT name, engine FROM system.databases ORDER BY name",
@@ -66,7 +64,7 @@ def dbm_instance(instance):
     instance['query_metrics'] = {
         'enabled': True,
         'run_sync': True,
-        'collection_interval': CLOSE_TO_ZERO_INTERVAL,
+        'collection_interval': 60,
     }
     instance['query_samples'] = {
         'enabled': True,
@@ -105,7 +103,7 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     client = _get_clickhouse_client(dbm_instance)
 
     client.query(query)
-    time.sleep(2)
+    client.command('SYSTEM FLUSH LOGS')
 
     dd_run_check(check)
     dd_run_check(check)
@@ -174,7 +172,7 @@ def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check)
 
     query = "SELECT name, engine FROM system.databases ORDER BY name"
     client.query(query)
-    time.sleep(2)
+    client.command('SYSTEM FLUSH LOGS')
 
     dd_run_check(check)
     dd_run_check(check)
