@@ -14,8 +14,8 @@ Integrate BlueCat Integrity with Datadog's pre-built dashboard visualizations to
 
 Configure the Datadog endpoint to forward BlueCat Integrity DHCP activity events as logs to Datadog.
 
-1. Copy the generated URL inside the **Configuration** tab on the Datadog [BlueCat Integrity][2] tile.
-2. Sign in to BlueCat Integrity Portal.
+1. On the Datadog [BlueCat Integrity][2] tile, on the **Configuration** tab, copy the generated webhook URL.
+2. Sign in to the BlueCat Integrity Portal.
 3. Click the **Servers** tab in the sidebar, then choose **Servers**.
 4. From the list, click the name of the server to configure the log collection.
 5. Open the **Services** tab.
@@ -26,17 +26,16 @@ Configure the Datadog endpoint to forward BlueCat Integrity DHCP activity events
    - **DHCPv6 enabled**: Select this check box to collect DHCPv6 activity events.
 8. On the **Destination tab**, set the following parameters:
    - **Sink type**: Select HTTP.
-   - On selecting HTTP, the following fields appear:
-      - Output URI: Enter the webhook URL generated in step 1.
-9. On the **Certificate** tab, under CA certificate, export the public SSL certificate for *.datadoghq.com from your browser's certificate viewer (the certificate presented when accessing Datadog over HTTPS) and upload it here.
+   - After you select HTTP, the **Output URI** field appears. Enter the webhook URL you copied in step 1.
+9. On the **Certificate** tab, under **CA certificate**, export the public SSL certificate for *.datadoghq.com from your browser's certificate viewer (the certificate presented when accessing Datadog over HTTPS) and upload it here.
 10. Click **Save**.
-11. Perform steps 5-10 on every server from which logs need to be collected.
+11. Perform steps 5-10 on every server you want to collect logs from.
 
 
 Configure the Datadog endpoint to forward BlueCat Integrity DNS activity events as logs to Datadog.
 
-1. Copy the generated URL inside the **Configuration** tab on the Datadog [BlueCat Integrity][2] tile.
-2. Sign in to BlueCat Integrity Portal.
+1. On the Datadog [BlueCat Integrity][2] tile, on the **Configuration** tab, copy the generated webhook URL.
+2. Sign in to the BlueCat Integrity Portal.
 3. Click the **Servers** tab in the sidebar, then choose **Servers**.
 4. From the list, click the name of the server to configure the log collection.
 5. Open the **Services** tab.
@@ -44,12 +43,11 @@ Configure the Datadog endpoint to forward BlueCat Integrity DNS activity events 
 7. Under **General**, set the following parameters:
    - **Enabled**: Select this check box to enable the service.
 8. On the **Destination tab**, set the following parameters:
-   - **Sink type**: Select HTTP
-   - On selecting HTTP, the following fields appear:
-      - **Output URI**: Enter the webhook URL generated in step 1.
-9. On the **Certificate** tab, under CA certificate, export the public SSL certificate for *.datadoghq.com from your browser's certificate viewer (the certificate presented when accessing Datadog over HTTPS) and upload it here.
+   - **Sink type**: Select HTTP.
+   - After you select HTTP, the **Output URI** field appears. Enter the webhook URL you copied in step 1.
+9. On the **Certificate** tab, under **CA certificate**, export the public SSL certificate for *.datadoghq.com from your browser's certificate viewer (the certificate presented when accessing Datadog over HTTPS) and upload it here.
 10. Click **Save**.
-11. Perform steps 5-10 on every server from which logs need to be collected.
+11. Perform steps 5-10 on every server you want to collect logs from.
 
 
 ## Data Collected
