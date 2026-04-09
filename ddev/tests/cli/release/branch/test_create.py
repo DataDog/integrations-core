@@ -39,6 +39,7 @@ def test_create_branch(ddev, mocker, yaml_updated):
     run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
+    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=yaml_updated)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
@@ -58,7 +59,8 @@ def test_create_branch(ddev, mocker, yaml_updated):
     assert (yaml_commit in run_mock.call_args_list) is yaml_updated
 
     # Milestone bump workflow
-    run_mock.assert_any_call('checkout', '-b', 'release/bump-milestone-5.6.0')
+    run_mock.assert_any_call('fetch', 'origin', 'master')
+    run_mock.assert_any_call('checkout', '-B', 'release/bump-milestone-5.6.0', 'origin/master')
     run_mock.assert_any_call('add', 'release.json')
     run_mock.assert_any_call('commit', '-m', 'Update current_milestone to 5.6.0')
     run_mock.assert_any_call('push', 'origin', 'release/bump-milestone-5.6.0')
@@ -121,6 +123,7 @@ def test_create_branch_confirmation_required(ddev, mocker):
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
+    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=False)
@@ -136,6 +139,7 @@ def test_create_branch_with_suggestion(ddev, mocker):
     mocker.patch('ddev.utils.git.GitRepository.capture', return_value='  origin/7.77.x\n  origin/7.76.x\n')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
+    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.prompt', return_value='7.78.x')
@@ -152,6 +156,7 @@ def test_create_branch_with_gap_suggests_missing_branch(ddev, mocker):
     mocker.patch('ddev.utils.git.GitRepository.capture', return_value='  origin/7.62.x\n  origin/7.60.x\n')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
+    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.prompt', return_value='7.61.x')
@@ -177,8 +182,17 @@ def test_compute_next_milestone(branch_name, expected_milestone):
 
 
 def test_update_release_json(tmp_path):
-    release_json = tmp_path / 'release.json'
+    release_json = Path(tmp_path / 'release.json')
     release_json.write_text('{\n\t"current_milestone": "7.79.0"\n}\n')
+
+    update_release_json(release_json, '7.80.0')
+
+    data = json.loads(release_json.read_text())
+    assert data['current_milestone'] == '7.80.0'
+
+
+def test_update_release_json_file_not_found(tmp_path):
+    release_json = Path(tmp_path / 'release.json')
 
     update_release_json(release_json, '7.80.0')
 
@@ -190,6 +204,9 @@ def test_create_branch_creates_milestone_and_updates_release_json(ddev, mocker):
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     create_milestone_mock = mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
+    create_pr_mock = mocker.patch(
+        'ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1'
+    )
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     update_release_json_mock = mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
@@ -200,4 +217,10 @@ def test_create_branch_creates_milestone_and_updates_release_json(ddev, mocker):
     create_milestone_mock.assert_called_once_with('7.80.0')
     update_release_json_mock.assert_called_once()
     assert update_release_json_mock.call_args.args[1] == '7.80.0'
-    assert 'Please create a PR' in result.output
+    create_pr_mock.assert_called_once_with(
+        title='Update current_milestone to 7.80.0',
+        head='release/bump-milestone-7.80.0',
+        base='master',
+        body='Updates `current_milestone` in `release.json` to `7.80.0` after cutting the `7.79.x` release branch.',
+    )
+    assert 'Pull request created' in result.output

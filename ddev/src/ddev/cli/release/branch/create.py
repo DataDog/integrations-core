@@ -82,29 +82,49 @@ def create(app: Application, branch_name: str | None):
     next_milestone = compute_next_milestone(branch_name)
 
     app.display_waiting(f"Creating the `{next_milestone}` milestone on GitHub...")
-    app.github.create_milestone(next_milestone)
-    app.display_success("Done.")
+    try:
+        app.github.create_milestone(next_milestone)
+        app.display_success("Done.")
+    except Exception as e:
+        from httpx import HTTPStatusError
 
-    app.display_waiting("Checking out master to update release.json...")
-    app.repo.git.run('checkout', 'master')
-    app.display_success("Done.")
+        if isinstance(e, HTTPStatusError) and e.response.status_code == 422:  # noqa: PLR2004
+            app.display_warning(f"Milestone `{next_milestone}` already exists, skipping creation.")
+        else:
+            raise
 
     bump_branch = f'release/bump-milestone-{next_milestone}'
-    app.repo.git.run('checkout', '-b', bump_branch)
 
     app.display_waiting(f"Updating release.json with new milestone `{next_milestone}`...")
+    app.repo.git.run('fetch', 'origin', 'master')
+    app.repo.git.run('checkout', '-B', bump_branch, 'origin/master')
     update_release_json(app.repo.path / 'release.json', next_milestone)
     app.repo.git.run('add', 'release.json')
     app.repo.git.run('commit', '-m', f'Update current_milestone to {next_milestone}')
     app.display_success("Done.")
 
-    app.display_waiting(f"Pushing the `{bump_branch}` branch...")
-    app.repo.git.run('push', 'origin', bump_branch)
-    app.display_success("Done.")
+    try:
+        app.display_waiting(f"Pushing the `{bump_branch}` branch...")
+        app.repo.git.run('push', 'origin', bump_branch)
+        app.display_success("Done.")
+    except OSError:
+        app.display_warning(f'Failed to push the branch. You can push it manually with: git push origin {bump_branch}')
+        return
 
-    app.display_info(
-        f'Please create a PR from `{bump_branch}` to `master` to update the current milestone to `{next_milestone}`.'
-    )
+    app.display_waiting("Creating a pull request...")
+    try:
+        pr_url = app.github.create_pull_request(
+            title=f'Update current_milestone to {next_milestone}',
+            head=bump_branch,
+            base='master',
+            body=f'Updates `current_milestone` in `release.json` to `{next_milestone}` '
+            f'after cutting the `{branch_name}` release branch.',
+        )
+        app.display_success(f'Pull request created: {pr_url}')
+    except Exception:
+        app.display_warning(
+            f'Failed to create the pull request. Please create one manually from `{bump_branch}` to `master`.'
+        )
 
     app.display_success("All done.")
 
@@ -114,13 +134,10 @@ def compute_next_milestone(branch_name: str) -> str:
     return f'{version.major}.{version.minor + 1}.0'
 
 
-def update_release_json(path: str | Path, milestone: str) -> None:
-    with open(path) as f:
-        data = json.load(f)
+def update_release_json(path: Path, milestone: str) -> None:
+    data = json.loads(path.read_text()) if path.exists() else {}
     data['current_milestone'] = milestone
-    with open(path, 'w') as f:
-        json.dump(data, f, indent='\t')
-        f.write('\n')
+    path.write_text(f"{json.dumps(data, indent='\t')}\n")
 
 
 def suggest_next_branch(app: Application) -> str:
