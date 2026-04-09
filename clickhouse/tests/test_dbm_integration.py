@@ -9,7 +9,6 @@ from unittest import mock
 import clickhouse_connect
 import pytest
 
-from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_metadata
 from datadog_checks.clickhouse import ClickhouseCheck
 
@@ -108,8 +107,7 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     dd_run_check(check)
     dd_run_check(check)
 
-    obfuscated = obfuscate_sql_with_metadata(query, check.statement_metrics._obfuscate_options)
-    query_signature = compute_sql_signature(obfuscated['query'])
+    expected_obfuscated = obfuscate_sql_with_metadata(query, check.statement_metrics._obfuscate_options)['query']
 
     # -- Verify dbm-metrics --
     events = aggregator.get_event_platform_events("dbm-metrics")
@@ -127,13 +125,18 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     for e in events:
         all_rows.extend(e.get('clickhouse_rows', []))
 
-    matching_rows = [r for r in all_rows if r['query_signature'] == query_signature]
+    # Match by obfuscated query text (strip both sides to handle trailing whitespace
+    # that ClickHouse may store from the HTTP transport layer)
+    matching_rows = [r for r in all_rows if r.get('query', '').strip() == expected_obfuscated]
     assert len(matching_rows) == 1, (
-        f"Expected exactly 1 metrics row with query_signature={query_signature} for query: {query!r}.\n"
-        f"Found {len(matching_rows)}. Available signatures: {[r['query_signature'] for r in all_rows]}"
+        f"Expected exactly 1 metrics row for query: {query!r}.\n"
+        f"Expected obfuscated query: {expected_obfuscated!r}\n"
+        f"Found {len(matching_rows)}.\n"
+        f"Available queries: {[r.get('query', '<no query>') for r in all_rows]}"
     )
 
     row = matching_rows[0]
+    query_signature = row['query_signature']  # read actual signature from the captured row
     assert row['count'] > 0
     for col in METRICS_COLUMNS:
         assert col in row, f"Missing metric column {col!r} in metrics row"
@@ -177,8 +180,7 @@ def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check)
     dd_run_check(check)
     dd_run_check(check)
 
-    obfuscated = obfuscate_sql_with_metadata(query, check.statement_metrics._obfuscate_options)
-    query_signature = compute_sql_signature(obfuscated['query'])
+    expected_obfuscated = obfuscate_sql_with_metadata(query, check.statement_metrics._obfuscate_options)['query']
 
     # Verify metadata in metrics row
     events = aggregator.get_event_platform_events("dbm-metrics")
@@ -186,9 +188,10 @@ def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check)
     for e in events:
         all_rows.extend(e.get('clickhouse_rows', []))
 
-    matching = [r for r in all_rows if r['query_signature'] == query_signature]
+    matching = [r for r in all_rows if r.get('query', '').strip() == expected_obfuscated]
     assert len(matching) >= 1
     row = matching[0]
+    query_signature = row['query_signature']  # read actual signature from the captured row
     assert row.get('dd_commands') is not None
     assert 'SELECT' in row['dd_commands']
 

@@ -424,6 +424,7 @@ OPTIONAL_METRICS = [
     'clickhouse.threads.system_replicas.total',
     'clickhouse.zk.sync.count',
     'clickhouse.zk.sync.total',
+    'clickhouse.table.mergetree.partslock.wait.time',
 ]
 
 V_18_19_METRICS = [
