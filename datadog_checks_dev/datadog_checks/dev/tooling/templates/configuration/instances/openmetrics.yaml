@@ -309,6 +309,30 @@
   value:
     example: false
     type: boolean
+- name: histogram_percentiles
+  description: |
+    A list of percentile values to estimate from histogram bucket data using linear interpolation.
+    Each entry must be one of: 50, 75, 90, 95, 99, 100, or "avg". Numeric values produce a gauge
+    named `{metric_name}.percentile` tagged with `percentile:p<value>` (e.g. `percentile:p95`).
+    "avg" produces the same metric tagged `percentile:avg` and is computed as sum/count.
+
+    Example:
+      histogram_percentiles:
+        - 50
+        - 95
+        - 99
+        - "avg"
+  fleet_configurable: true
+  value:
+    type: array
+    items:
+      anyOf:
+      - type: number
+      - type: string
+    example:
+      - 50
+      - 95
+      - 99
 - name: use_process_start_time
   description: |
     Whether to enable a heuristic for reporting counter values on the first scrape. When true,
