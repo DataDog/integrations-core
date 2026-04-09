@@ -1,12 +1,12 @@
 """Async GitHub API client for triggering and monitoring GitHub Actions workflows."""
 
-from __future__ import annotations
-
 import re
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import Any
+from typing import Literal
+
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
@@ -176,7 +176,10 @@ class AsyncGitHubClient:
         **kwargs: Any,
     ) -> httpx.Response:
         effective_timeout = timeout if timeout is not None else self._default_timeout
-        response = await self._client.request(method, endpoint, timeout=effective_timeout, **kwargs)
+        try:
+            response = await self._client.request(method, endpoint, timeout=effective_timeout, **kwargs)
+        except httpx.TransportError as exc:
+            raise type(exc)(f"{method} {endpoint}: {exc}") from exc
         response.raise_for_status()
         return response
 
@@ -200,6 +203,13 @@ class AsyncGitHubClient:
             yield response
             pagination = PaginationData.from_header(response.headers.get("link"))
             url = pagination.next
+
+    @staticmethod
+    def _parse_response[T: BaseModel](response: httpx.Response, model: type[T]) -> GitHubResponse[T]:
+        """Validate the response body against *model* and wrap it in a GitHubResponse."""
+        return GitHubResponse[T].model_validate(
+            {"data": model.model_validate(response.json()), "headers": dict(response.headers)}
+        )
 
     # ------------------------------------------------------------------
     # Endpoint methods
@@ -265,9 +275,7 @@ class AsyncGitHubClient:
             GitHubResponse[WorkflowRun]: The validated workflow run data and headers.
         """
         response = await self._request("GET", f"/repos/{owner}/{repo}/actions/runs/{run_id}", timeout=timeout)
-        return GitHubResponse[WorkflowRun].model_validate(
-            {"data": WorkflowRun.model_validate(response.json()), "headers": dict(response.headers)}
-        )
+        return self._parse_response(response, WorkflowRun)
 
     async def list_workflow_run_artifacts(
         self,
@@ -295,13 +303,7 @@ class AsyncGitHubClient:
         """
         endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"
         async for response in self._paginated_request("GET", endpoint, timeout=timeout, params={"per_page": per_page}):
-            body = response.json()
-            yield GitHubResponse[ArtifactsList].model_validate(
-                {
-                    "data": ArtifactsList.model_validate(body),
-                    "headers": dict(response.headers),
-                }
-            )
+            yield self._parse_response(response, ArtifactsList)
 
     async def create_issue_comment(
         self,
@@ -333,9 +335,7 @@ class AsyncGitHubClient:
             timeout=timeout,
             json={"body": body},
         )
-        return GitHubResponse[IssueComment].model_validate(
-            {"data": IssueComment.model_validate(response.json()), "headers": dict(response.headers)}
-        )
+        return self._parse_response(response, IssueComment)
 
     async def create_pr_review_comment(
         self,
@@ -347,7 +347,7 @@ class AsyncGitHubClient:
         path: str,
         position: int | None = None,
         line: int | None = None,
-        side: str | None = None,
+        side: Literal["LEFT", "RIGHT"] | None = None,
         timeout: float | None = None,
     ) -> GitHubResponse[PullRequestReviewComment]:
         """
@@ -384,9 +384,7 @@ class AsyncGitHubClient:
             timeout=timeout,
             json=payload,
         )
-        return GitHubResponse[PullRequestReviewComment].model_validate(
-            {"data": PullRequestReviewComment.model_validate(response.json()), "headers": dict(response.headers)}
-        )
+        return self._parse_response(response, PullRequestReviewComment)
 
 
 # ---------------------------------------------------------------------------
