@@ -2,87 +2,22 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from copy import deepcopy
-from dataclasses import dataclass
-from enum import StrEnum
-from typing import Any, Final
+from typing import Final
 
 import anthropic
 from anthropic.types import MessageParam, ToolParam, ToolResultBlockParam
 
+from ddev.ai.agent.base import BaseAgent
+from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentError, AgentRateLimitError
+from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
 from ddev.ai.tools.core.registry import ToolRegistry
-
-from .exceptions import (
-    AgentAPIError,
-    AgentConnectionError,
-    AgentError,
-    AgentRateLimitError,
-)
 
 DEFAULT_MODEL: Final[str] = "claude-sonnet-4-6"
 DEFAULT_MAX_TOKENS: Final[int] = 8192  # max tokens per response
 ALLOWED_TOOL_CALLERS: Final = ["code_execution_20260120"]
 
 
-class StopReason(StrEnum):
-    """Maps Anthropic API stop_reason strings to a typed enum."""
-
-    END_TURN = "end_turn"
-    MAX_TOKENS = "max_tokens"
-    STOP_SEQUENCE = "stop_sequence"
-    TOOL_USE = "tool_use"
-    PAUSE_TURN = "pause_turn"
-    REFUSAL = "refusal"
-
-
-@dataclass(frozen=True)
-class ToolCall:
-    """A single tool invocation requested by the model."""
-
-    id: str
-    name: str
-    input: dict[str, Any]
-
-
-@dataclass(frozen=True)
-class ContextUsage:
-    """Context window accounting for a single API call."""
-
-    window_size: int
-    used_tokens: int
-
-    @property
-    def context_pct(self) -> float:
-        return self.used_tokens / self.window_size * 100
-
-    @property
-    def remaining_tokens(self) -> int:
-        return self.window_size - self.used_tokens
-
-
-@dataclass(frozen=True)
-class TokenUsage:
-    """Token accounting from a single API call."""
-
-    input_tokens: int  # tokens sent to the model (system_prompt + history)
-    output_tokens: int  # tokens the model generated
-    cache_read_input_tokens: int  # tokens read from prompt cache
-    cache_creation_input_tokens: int  # tokens written to prompt cache
-    context: ContextUsage
-
-
-@dataclass(frozen=True)
-class AgentResponse:
-    """The complete response from a single AnthropicAgent.send() call.
-    Adds useful metadata to the response of the Anthropic API."""
-
-    stop_reason: StopReason
-    text: str
-    tool_calls: list[ToolCall]
-    usage: TokenUsage
-
-
-class AnthropicAgent:
+class AnthropicAgent(BaseAgent[MessageParam]):
     """A wrapper around the Anthropic API that provides a simple interface for interacting with agents."""
 
     def __init__(
@@ -106,6 +41,7 @@ class AnthropicAgent:
             programmatic_tool_calling: Whether to allow programmatic tool calling.
         """
 
+        super().__init__()
         self._client = client
         self._tools = tools
         self._system_prompt = system_prompt
@@ -113,21 +49,21 @@ class AnthropicAgent:
         self._model = model
         self._max_tokens = max_tokens
         self._programmatic_tool_calling = programmatic_tool_calling
-        self._history: list[MessageParam] = []
         self._context_window: int | None = None
-
-    @property
-    def history(self) -> list[MessageParam]:
-        """Read-only snapshot of the conversation history."""
-        return deepcopy(self._history)
-
-    def reset(self) -> None:
-        """Clear conversation history to start a new conversation."""
-        self._history = []
 
     async def _get_context_window(self) -> int:
         if self._context_window is None:
-            info = await self._client.models.retrieve(self._model)
+            try:
+                info = await self._client.models.retrieve(self._model)
+            except anthropic.APIConnectionError as e:
+                raise AgentConnectionError(f"Connection failed: {e}") from e
+            except anthropic.RateLimitError as e:
+                raise AgentRateLimitError(f"Rate limit exceeded: {e}") from e
+            except anthropic.APIStatusError as e:
+                raise AgentAPIError(e.status_code, e.message) from e
+            except anthropic.APIResponseValidationError as e:
+                raise AgentError(f"Response validation failed: {e}") from e
+
             self._context_window = info.max_input_tokens
         return self._context_window
 
@@ -141,9 +77,43 @@ class AnthropicAgent:
             definitions = [{**d, "allowed_callers": ALLOWED_TOOL_CALLERS} for d in definitions]
         return definitions
 
+    def _map_stop_reason(self, raw: str) -> StopReason:
+        """Map a raw Anthropic stop_reason string to the generic StopReason enum."""
+        # pause_turn gets an explicit check to provide a more informative message than "Unknown stop_reason"
+        if raw == "pause_turn":
+            raise AgentError("pause_turn is not supported in batch mode") from None
+        mapping = {
+            "end_turn": StopReason.END_TURN,
+            "tool_use": StopReason.TOOL_USE,
+            "max_tokens": StopReason.MAX_TOKENS,
+            "stop_sequence": StopReason.OTHER,
+            "refusal": StopReason.OTHER,
+        }
+        if raw not in mapping:
+            raise AgentError(f"Unknown stop_reason: {raw!r}") from None
+        return mapping[raw]
+
+    def _to_tool_result_params(self, messages: list[ToolResultMessage]) -> list[ToolResultBlockParam]:
+        """Convert model-agnostic ToolResultMessages to Anthropic SDK ToolResultBlockParams."""
+        return [
+            {
+                "type": "tool_result",
+                "tool_use_id": msg.tool_call_id,
+                "is_error": not msg.result.success,
+                **(
+                    {"content": msg.result.data}
+                    if msg.result.data is not None
+                    else {"content": msg.result.error or "(unknown error)"}
+                    if not msg.result.success
+                    else {}
+                ),
+            }
+            for msg in messages
+        ]
+
     async def send(
         self,
-        content: str | list[ToolResultBlockParam],
+        content: str | list[ToolResultMessage],
         allowed_tools: list[str] | None = None,
     ) -> AgentResponse:
         """Send a message to the agent and return the response.
@@ -155,7 +125,10 @@ class AnthropicAgent:
         """
         tool_defs = self._get_tool_definitions(allowed_tools)
 
-        user_msg: MessageParam = {"role": "user", "content": content}
+        api_content: str | list[ToolResultBlockParam] = (
+            self._to_tool_result_params(content) if isinstance(content, list) else content
+        )
+        user_msg: MessageParam = {"role": "user", "content": api_content}
         messages = [*self._history, user_msg]
 
         try:
@@ -179,10 +152,7 @@ class AnthropicAgent:
         if response.stop_reason is None:
             raise AgentError("Received null stop_reason from API")
 
-        try:
-            stop_reason = StopReason(response.stop_reason)
-        except ValueError as e:
-            raise AgentError(f"Unknown stop_reason: {response.stop_reason!r}") from e
+        stop_reason = self._map_stop_reason(response.stop_reason)
 
         text_parts: list[str] = []
         tool_calls: list[ToolCall] = []
@@ -203,7 +173,7 @@ class AnthropicAgent:
             output_tokens=response.usage.output_tokens,
             cache_read_input_tokens=cache_read,
             cache_creation_input_tokens=cache_creation,
-            context=ContextUsage(window_size=await self._get_context_window(), used_tokens=used_tokens),
+            context_usage=ContextUsage(window_size=await self._get_context_window(), used_tokens=used_tokens),
         )
 
         agent_response = AgentResponse(

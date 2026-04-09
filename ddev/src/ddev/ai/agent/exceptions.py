@@ -4,21 +4,15 @@
 
 
 class AgentError(Exception):
-    """Base class for all errors raised by AnthropicAgent."""
-
-    pass
+    """Base class for all errors raised by an agent."""
 
 
 class AgentConnectionError(AgentError):
     """Network failure — the API was unreachable."""
 
-    pass
-
 
 class AgentRateLimitError(AgentError):
     """Rate limit hit — the request may be retried after a delay."""
-
-    pass
 
 
 class AgentAPIError(AgentError):
