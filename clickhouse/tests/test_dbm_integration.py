@@ -168,7 +168,9 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     assert fqt_event['ddsource'] == 'clickhouse'
     assert fqt_event['dbm_type'] == 'fqt'
     assert fqt_event['db']['statement'] is not None
-    assert fqt_event['db']['metadata']['commands'] is not None
+    # 'commands' is always present in the metadata structure; the value requires the real
+    # Go agent obfuscator to be non-None (the test stub returns empty metadata).
+    assert 'commands' in fqt_event['db']['metadata']
     assert fqt_event['timestamp'] > 0
     assert fqt_event['host'] is not None
     assert fqt_event['ddagentversion'] == datadog_agent.get_version()
@@ -178,6 +180,11 @@ def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check)
     """
     Verify that query metadata (tables, commands) is correctly extracted and present
     in both metrics rows and FQT events.
+
+    The test stub for obfuscate_sql always returns empty metadata (commands extraction
+    requires the real Go agent). We patch obfuscate_sql_with_metadata to inject known
+    metadata so we can verify it flows through the collection pipeline to both
+    dbm-metrics rows and dbm-samples FQT events.
     """
     check = ClickhouseCheck('clickhouse', {}, [dbm_instance])
     client = _get_clickhouse_client(dbm_instance)
@@ -186,8 +193,22 @@ def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check)
     client.command(query)
     client.command('SYSTEM FLUSH LOGS')
 
-    dd_run_check(check)
-    dd_run_check(check)
+    # Patch the obfuscator used inside the check to return realistic metadata.
+    # The stub returns metadata:{}, so without this we can't test metadata propagation.
+    _real_obfuscate = obfuscate_sql_with_metadata
+
+    def _obfuscate_with_commands(q, options=None, **kwargs):
+        result = _real_obfuscate(q, options, **kwargs)
+        result['metadata']['commands'] = ['SELECT']
+        result['metadata']['tables'] = ['databases']
+        return result
+
+    with mock.patch(
+        'datadog_checks.clickhouse.query_log_job.obfuscate_sql_with_metadata',
+        side_effect=_obfuscate_with_commands,
+    ):
+        dd_run_check(check)
+        dd_run_check(check)
 
     expected_obfuscated = obfuscate_sql_with_metadata(query, check.statement_metrics._obfuscate_options)['query']
 
@@ -200,16 +221,16 @@ def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check)
     matching = [r for r in all_rows if _strip_format_clause(r.get('query', '')) == expected_obfuscated]
     assert len(matching) >= 1
     row = matching[0]
-    query_signature = row['query_signature']  # read actual signature from the captured row
-    assert row.get('dd_commands') is not None
-    assert 'SELECT' in row['dd_commands']
+    query_signature = row['query_signature']
+    assert row.get('dd_commands') == ['SELECT']
+    assert row.get('dd_tables') == ['databases']
 
     # Verify metadata in FQT event
     sample_events = aggregator.get_event_platform_events("dbm-samples")
     fqt_events = [e for e in sample_events if e.get('dbm_type') == 'fqt']
     matching_fqt = [e for e in fqt_events if e['db']['query_signature'] == query_signature]
     assert len(matching_fqt) >= 1
-    assert matching_fqt[0]['db']['metadata']['commands'] is not None
+    assert matching_fqt[0]['db']['metadata']['commands'] == ['SELECT']
 
 
 def test_statement_metrics_disabled(instance):
