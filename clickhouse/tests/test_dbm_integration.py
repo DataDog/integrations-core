@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import deepcopy
@@ -39,6 +40,11 @@ METRICS_COLUMNS = {
     'memory_usage',
     'peak_memory_usage',
 }
+
+
+def _strip_format_clause(query: str) -> str:
+    """Remove FORMAT specifier appended by clickhouse_connect to HTTP query bodies."""
+    return re.sub(r'\s+FORMAT\s+\w+\s*$', '', query.strip())
 
 
 def _is_dbm_supported():
@@ -125,9 +131,9 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     for e in events:
         all_rows.extend(e.get('clickhouse_rows', []))
 
-    # Match by obfuscated query text (strip both sides to handle trailing whitespace
-    # that ClickHouse may store from the HTTP transport layer)
-    matching_rows = [r for r in all_rows if r.get('query', '').strip() == expected_obfuscated]
+    # clickhouse_connect appends "FORMAT Native" to queries sent via HTTP; ClickHouse stores
+    # this verbatim in system.query_log. Strip it before comparing to the expected obfuscated text.
+    matching_rows = [r for r in all_rows if _strip_format_clause(r.get('query', '')) == expected_obfuscated]
     assert len(matching_rows) == 1, (
         f"Expected exactly 1 metrics row for query: {query!r}.\n"
         f"Expected obfuscated query: {expected_obfuscated!r}\n"
@@ -188,7 +194,7 @@ def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check)
     for e in events:
         all_rows.extend(e.get('clickhouse_rows', []))
 
-    matching = [r for r in all_rows if r.get('query', '').strip() == expected_obfuscated]
+    matching = [r for r in all_rows if _strip_format_clause(r.get('query', '')) == expected_obfuscated]
     assert len(matching) >= 1
     row = matching[0]
     query_signature = row['query_signature']  # read actual signature from the captured row
