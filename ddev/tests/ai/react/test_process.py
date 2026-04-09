@@ -149,7 +149,7 @@ def make_process(
 
 
 @pytest.mark.parametrize("stop_reason", [StopReason.END_TURN, StopReason.MAX_TOKENS, StopReason.OTHER])
-async def test_stop_reason_single_response(stop_reason) -> None:
+async def test_stop_reason_single_response(stop_reason: StopReason) -> None:
     agent = MockAgent([make_response(stop_reason)])
 
     result = await make_process(agent).start("Hi")
@@ -349,6 +349,14 @@ async def test_callbacks_invoked_correct_counts() -> None:
     assert len(recorder.errors) == 0
 
 
+async def test_two_callback_sets_both_notified() -> None:
+    agent = MockAgent([make_response(StopReason.END_TURN)])
+    rec_a, rec_b = CallbackRecorder(), CallbackRecorder()
+    await make_process(agent, callback_sets=[rec_a.callback_set, rec_b.callback_set]).start("x")
+    assert len(rec_a.complete_results) == 1
+    assert len(rec_b.complete_results) == 1
+
+
 # ---------------------------------------------------------------------------
 # Error path
 # ---------------------------------------------------------------------------
@@ -401,13 +409,14 @@ async def test_keyboard_interrupt_notifies_and_reraises() -> None:
     assert len(recorder.complete_results) == 0
 
 
-async def test_cancelled_error_notifies_and_reraises() -> None:
-    class CancelledAgent(BaseAgent[Any]):
-        async def send(
-            self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
-        ) -> AgentResponse:
-            raise asyncio.CancelledError
+class CancelledAgent(BaseAgent[Any]):
+    async def send(
+        self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
+    ) -> AgentResponse:
+        raise asyncio.CancelledError
 
+
+async def test_cancelled_error_notifies_and_reraises() -> None:
     recorder = CallbackRecorder()
     process = ReActProcess(
         agent=CancelledAgent(),
