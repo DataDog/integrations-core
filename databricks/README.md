@@ -31,22 +31,20 @@ First, [connect a new Databricks workspace](#connect-to-a-new-databricks-workspa
 <!-- xxx tabs xxx -->
 
 <!-- xxx tab "Use a Service Principal for OAuth" xxx -->
-<div class="alert alert-warning">New workspaces must authenticate using OAuth. Workspaces integrated with a Personal Access Token continue to function and can switch to OAuth at any time. After a workspace starts using OAuth, it cannot revert to a Personal Access Token.</div>
+<div class="alert alert-warning">New workspace integrations must authenticate using OAuth. Workspaces already integrated with a Personal Access Token continue to function and can switch to OAuth at any time. After a workspace starts using OAuth, it cannot revert to a Personal Access Token.</div>
 
-<div class="alert alert-info">The following steps must be performed by a Databricks account admin. A workspace admin alone does not have sufficient permissions to create service principals at the account level.</div>
-
-1. In your Databricks account console, click **User Management** in the left menu. Then, under the **Service principals** tab, click **Add service principal**.
-2. Under the **Credentials & secrets** tab, click **Generate secret**. Set **Lifetime (days)** to the maximum value allowed (730), then click **Generate**. Take note of your client ID and client secret. Also take note of your account ID, which can be found by clicking on your profile in the upper-right corner. (You must be in the account console to retrieve the account ID. The ID will not display inside a workspace.)
-3. Click **Workspaces** in the left menu, then select the name of your workspace.
-4. Go to the **Permissions** tab and click **Add permissions**.
-5. Search for the service principal you created and assign it the **Admin** permission.
+1. As a **Databricks workspace admin**, go to **Settings** by clicking on your profile in the upper-right corner from within a workspace.
+2. Under the **Identity and access** tab, click **Manage** next to **Service principals**. Click **Add service principal**, then **Add new**. Enter a name, then click **Add**.
+3. Click on the name of your new service principal. Under the **Secrets** tab, click **Generate secret**. Set **Lifetime (days)** to the maximum value allowed (730), then click **Generate**. Take note of your client ID and client secret.
+4. Under the **Permissions** tab, click **Grant access**. Search for the new service principal and grant it the **Manage** permission. Click **Save**.
+5. Go back to the **Identity and access** tab and click **Manage** next to **Groups**. Click the **admins** group and add the new service principal by clicking **Add members**.
 6. In Datadog, open the Databricks integration tile.
 7. On the **Configure** tab, click **Add Databricks Workspace**.
-9. Enter a workspace name, your Databricks workspace URL, account ID, and the client ID and secret you generated.
+8. Enter a workspace name, your Databricks workspace URL, and the client ID and secret you generated.
 <!-- xxz tab xxx -->
 
 <!-- xxx tab "Use a Personal Access Token (Legacy)" xxx -->
-<div class="alert alert-warning">This option is only available for workspaces created before July 7, 2025. New workspaces must authenticate using OAuth.</div>
+<div class="alert alert-warning">This option is only available for workspace integrations created before July 7, 2025. New workspace integrations must authenticate using OAuth.</div>
 
 1. In your Databricks workspace, click on your profile in the top right corner and go to **Settings**. Select **Developer** in the left side bar. Next to **Access tokens**, click **Manage**.
 2. Click **Generate new token**, enter "Datadog Integration" in the **Comment** field, remove the default value in **Lifetime (days)**, and click **Generate**. Take note of your token.

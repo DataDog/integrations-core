@@ -27,6 +27,7 @@ files:
       description: Connect through a unix socket instead of using a `host` and `port`.
       value:
         type: string
+        require_trusted_provider: true
         example: /var/run/redis/redis.sock
         display_default: null
       fleet_configurable: true
@@ -75,18 +76,21 @@ files:
       description: The path to the client-side private keyfile.
       value:
         type: string
+        require_trusted_provider: true
         example: "<CERT_KEY_PATH>"
       fleet_configurable: true
     - name: ssl_certfile
       description: The path to the client-side certificate file.
       value:
         type: string
+        require_trusted_provider: true
         example: "<CERT_PEM_PATH>"
       fleet_configurable: true
     - name: ssl_ca_certs
       description:  The path to the CA certs file.
       value:
         type: string
+        require_trusted_provider: true
         example: "<CERT_PATH>"
       fleet_configurable: true
     - name: ssl_cert_reqs

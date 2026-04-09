@@ -1,0 +1,1 @@
+Bump pyOpenSSL to >=26.0.0 to address CVE-2026-27459 (VULN-59209, Critical 9.8) and CVE-2026-27448 (VULN-59208, Medium 5.3).

@@ -41,7 +41,7 @@ files:
     options:
     - name: directory
       description: |
-        Path to the postfix directory. The directory option is required if `postqueue: false` is set. For more 
+        Path to the postfix directory. The directory option is required if `postqueue: false` is set. For more
         information see https://docs.datadoghq.com/integrations/postfix/#using-sudo.
       fleet_configurable: true
       enabled: true
@@ -49,6 +49,7 @@ files:
         display_default: null
         example: /var/spool/postfix
         type: string
+        require_trusted_provider: true
     - name: queues
       description: List of queues to monitor.
       fleet_configurable: true
@@ -69,6 +70,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /etc/postfix
 
     - template: instances/default

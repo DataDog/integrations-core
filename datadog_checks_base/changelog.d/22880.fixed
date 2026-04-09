@@ -1,1 +1,0 @@
-Fix schema collection silently dropping all collected metadata when the last discovered database has no tables.
