@@ -160,6 +160,27 @@ files:
         type: boolean
         example: false
       fleet_configurable: true
+    - name: gcp
+      description: |
+        Configuration for Google Cloud Platform managed authentication.
+        Used with GCP Memorystore Redis and Valkey instances.
+        Requires the google-auth package: pip install datadog-checks-redisdb[gcp]
+      value:
+        type: object
+        properties:
+          - name: managed_authentication
+            type: object
+            properties:
+              - name: enabled
+                type: boolean
+                example: false
+              - name: service_account
+                type: string
+                example: "datadog@my-project.iam.gserviceaccount.com"
+        example:
+          managed_authentication:
+            enabled: true
+            service_account: "datadog@my-project.iam.gserviceaccount.com"
     - template: instances/default
 
   - template: logs
