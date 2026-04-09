@@ -26,7 +26,7 @@
             "id": 7661804533108844,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides a comprehensive summary of DHCP insights.\n\nFor more information, see the [BlueCat Integrity Integration Documentation](https://docs.datadoghq.com/integrations/bluecat_integrity/).\n\n**Tips**\n- Use the time frame selector in the upper-right corner of the dashboard to change the default time frame.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "content": "This dashboard provides a comprehensive summary of DHCP insights.\n\nFor more information, see the [BlueCat Integrity Integration Documentation](https://docs.datadoghq.com/integrations/bluecat_integrity/).\n\n**Tips**\n- Use the selector in the upper-right corner of the dashboard to change the default time frame.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
