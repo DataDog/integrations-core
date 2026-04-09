@@ -1,0 +1,1 @@
+Add kafka.log.directory.offline metric to track log directory health status.
