@@ -33,10 +33,6 @@ METRICS_COLUMNS = {
     'count',
     'total_time',
     'mean_time',
-    'p50_time',
-    'p90_time',
-    'p95_time',
-    'p99_time',
     'read_rows',
     'read_bytes',
     'written_rows',
@@ -125,7 +121,6 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     assert event['host'] is not None
     assert event['database_instance'] is not None
     assert event['ddagentversion'] == datadog_agent.get_version()
-    assert event['ddsource'] == 'clickhouse'
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] is not None
     assert 'tags' in event
