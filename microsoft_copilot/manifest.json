@@ -13,13 +13,18 @@
     "title": "Microsoft Copilot",
     "media": [
       {
-        "caption": "Microsoft Copilot Usage",
-        "image_url": "images/microsoft_copilot_usage_reports_only_page1.png",
+        "caption": "Microsoft Copilot Usage (Page 1)",
+        "image_url": "images/microsoft_copilot_usage_with_webhooks_page1.png",
         "media_type": "image"
       },
       {
-        "caption": "Microsoft Copilot Usage (Continued)",
-        "image_url": "images/microsoft_copilot_usage_reports_only_page2.png",
+        "caption": "Microsoft Copilot Usage (Page 2)",
+        "image_url": "images/microsoft_copilot_usage_with_webhooks_page2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft Copilot Usage (Page 3)",
+        "image_url": "images/microsoft_copilot_usage_with_webhooks_page3.png",
         "media_type": "image"
       }
     ],
@@ -79,7 +84,8 @@
         "source": "microsoft-copilot"
     },
     "monitors": {
-      "Low Percentage of Active Microsoft 365 Copilot Users" : "assets/monitors/low_percentage_of_microsoft_copilot_usage.json"
+      "Low Percentage of Active Microsoft 365 Copilot Users" : "assets/monitors/low_percentage_of_microsoft_copilot_usage.json",
+      "Spike in Microsoft 365 Copilot Guardrail Responses" : "assets/monitors/spike_in_microsoft_copilot_guardrail_responses.json"
     }
   },
   "author": {
