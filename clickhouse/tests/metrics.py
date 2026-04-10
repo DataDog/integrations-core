@@ -337,8 +337,6 @@ OPTIONAL_METRICS = [
 ]
 
 V_23_METRICS = [
-    'clickhouse.aggregator.threads',
-    'clickhouse.aggregator.threads.active',
     'clickhouse.background_pool.buffer_flush_schedule.task.limit',
     'clickhouse.background_pool.common.task.limit',
     'clickhouse.background_pool.distributed.task.limit',
@@ -469,6 +467,8 @@ V_23_METRICS = [
 
 V_24_METRICS = [
     'clickhouse.addresses.active',
+    'clickhouse.aggregator.threads',
+    'clickhouse.aggregator.threads.active',
     'clickhouse.aggregator.threads.scheduled',
     'clickhouse.attached.database',
     'clickhouse.attached.table',
