@@ -1,5 +1,5 @@
 diff --git a/src/rdkafka_admin.c b/src/rdkafka_admin.c
-index 7986371afe..71eac0eee7 100644
+index 7986371a..552c10c0 100644
 --- a/src/rdkafka_admin.c
 +++ b/src/rdkafka_admin.c
 @@ -480,7 +480,6 @@ rd_kafka_admin_coord_request(rd_kafka_broker_t *rkb,
@@ -13,7 +13,7 @@ index 7986371afe..71eac0eee7 100644
 @@ -499,13 +498,17 @@ rd_kafka_admin_coord_request(rd_kafka_broker_t *rkb,
              &rko->rko_u.admin_request.options, errstr, sizeof(errstr), replyq,
              rd_kafka_admin_handle_response, eonce);
-
+ 
 -        if (err) {
 -                rd_kafka_admin_result_fail(
 -                    rko, err, "%s worker failed to send request: %s",
@@ -31,6 +31,43 @@ index 7986371afe..71eac0eee7 100644
 +         * Calling worker_destroy() here would free the eonce while the
 +         * caller still holds a reference to it, leading to a
 +         * use-after-free / assertion failure in
-+         * rd_kafka_enq_once_del_source_return(). See #4605, #3663. */
++         * rd_kafka_enq_once_del_source_return(). */
          return err;
  }
+ 
+diff --git a/src/rdkafka_coord.c b/src/rdkafka_coord.c
+index a880f23a..e57b3ef7 100644
+--- a/src/rdkafka_coord.c
++++ b/src/rdkafka_coord.c
+@@ -316,6 +316,14 @@ static void rd_kafka_coord_req_fail(rd_kafka_t *rk,
+         rd_kafka_op_t *reply;
+         rd_kafka_buf_t *rkbuf;
+ 
++        if (!creq->creq_reply_opaque) {
++                /* The admin operation has already timed out and been
++                 * destroyed.  The eonce (creq_reply_opaque) may be
++                 * freed.  Do not enqueue a response referencing it. */
++                rd_kafka_coord_req_destroy(rk, creq, rd_true /*done*/);
++                return;
++        }
++
+         reply         = rd_kafka_op_new(RD_KAFKA_OP_RECV_BUF);
+         reply->rko_rk = rk; /* Set rk since the rkbuf will not have a rkb
+                              * to reach it. */
+@@ -495,7 +503,15 @@ static void rd_kafka_coord_req_fsm(rd_kafka_t *rk, rd_kafka_coord_req_t *creq) {
+                                                      replyq, creq->creq_resp_cb,
+                                                      creq->creq_reply_opaque);
+ 
+-                        if (err) {
++                        if (err == RD_KAFKA_RESP_ERR__DESTROY) {
++                                /* Admin op already timed out.  Clear
++                                 * opaque to prevent coord_req_fail from
++                                 * using freed eonce. */
++                                creq->creq_reply_opaque = NULL;
++                                rd_kafka_replyq_destroy(&replyq);
++                                rd_kafka_coord_req_destroy(rk, creq,
++                                                           rd_true /*done*/);
++                        } else if (err) {
+                                 /* Permanent error, e.g., request not
+                                  *  supported by broker. */
+                                 rd_kafka_replyq_destroy(&replyq);
