@@ -172,6 +172,7 @@ unsorted = [
 [overrides.validate.metadata.integration]
 ecs_fargate = "amazon_fargate"
 kube_scheduler = "kube_scheduler"
+nifi = "nifi"
 nginx_ingress_controller = "nginx-ingress-controller"
 
 
