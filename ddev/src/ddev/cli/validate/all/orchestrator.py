@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import logging
 import os
 import subprocess
 import sys
@@ -193,35 +194,35 @@ class ValidationOrchestrator(EventBusOrchestrator):
         body = self._build_report_body(exception)
         write_step_summary(body)
 
-        self._app.display_info(f"PR number: {self._pr_number}")
-        self._app.display_info(f"GitHub token configured: {bool(self._app.config.github.token)}")
+        self._app.logger.debug("PR number: %s", self._pr_number)
+        self._app.logger.debug("GitHub token configured: %s", bool(self._app.config.github.token))
 
         if self._pr_number is None:
-            self._app.display_info("No PR number — skipping PR comment.")
+            self._app.logger.debug("No PR number — skipping PR comment.")
             return
         if not self._app.config.github.token:
-            self._app.display_info("No GitHub token — skipping PR comment.")
+            self._app.logger.debug("No GitHub token — skipping PR comment.")
             return
 
+        httpx_logger = logging.getLogger("httpx")
+        previous_level = httpx_logger.level
+        httpx_logger.setLevel(logging.WARNING)
         try:
-            self._app.display_info(f"Deleting previous validation comments on PR #{self._pr_number}...")
+            self._app.logger.debug("Deleting previous validation comments on PR #%s...", self._pr_number)
             self._delete_previous_comments(self._pr_number)
-            self._app.display_info(f"Posting validation comment on PR #{self._pr_number}...")
+            self._app.logger.debug("Posting validation comment on PR #%s...", self._pr_number)
             self._app.github.post_pull_request_comment(self._pr_number, body)
-            self._app.display_info("Comment posted successfully.")
+            self._app.logger.debug("Comment posted successfully.")
         except Exception as exc:
             self._app.display_warning(f"Failed to post PR comment: {exc}")
             write_step_summary(f"\n> Failed to post PR comment: {exc}")
+        finally:
+            httpx_logger.setLevel(previous_level)
 
     def _print_console_output(self) -> None:
         failures = {name for name, r in self._results.items() if not r.success}
         passed = len(self._results) - len(failures)
         incomplete = len(self._validations) - len(self._results)
-
-        self._app.display_info("")
-        for name in sorted(self._results):
-            status = "❌" if name in failures else "✅"
-            self._app.display_info(f"  {status} {name}")
 
         self._app.display_info("")
         if incomplete:
