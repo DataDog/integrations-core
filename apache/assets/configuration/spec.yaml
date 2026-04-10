@@ -12,7 +12,7 @@ files:
     - name: apache_status_url
       fleet_configurable: true
       required: true
-      display_priority: 2
+      display_priority: 1
       description: Status URL of your Apache server.
       formats: ["url"]
       value:
