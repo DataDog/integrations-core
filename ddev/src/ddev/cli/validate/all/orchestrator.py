@@ -231,7 +231,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
         if failures:
             for name, result in sorted(failures.items()):
                 self._app.console.print(Rule(title=name, style="red"))
-                output = result.stdout or result.stderr
+                output = "\n".join(filter(None, [result.stdout, result.stderr]))
                 if output:
                     self._app.console.print(output.rstrip())
                 config = VALIDATIONS.get(name, ValidationConfig())

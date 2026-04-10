@@ -45,6 +45,20 @@ def test_all_command_aborts_on_failure_with_details(ddev):
     assert "Run `ddev validate all --fix` to attempt to auto-fix supported validations." in result.output
 
 
+def test_all_command_shows_both_stdout_and_stderr_on_failure(ddev):
+    def fake_run(cmd, **kwargs):
+        if "config" in cmd:
+            return completed_process(returncode=1, stdout="stdout output", stderr="stderr output")
+        return completed_process(returncode=0, stdout="ok")
+
+    with patch("subprocess.run", side_effect=fake_run):
+        result = ddev("validate", "all", *FAST_ORCHESTRATOR_OPTS)
+
+    assert result.exit_code != 0
+    assert "stdout output" in result.output
+    assert "stderr output" in result.output
+
+
 def test_all_command_passes_target_to_per_integration_validations(ddev):
     captured: dict[str, list[str]] = {}
 
