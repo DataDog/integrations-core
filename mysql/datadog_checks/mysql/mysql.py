@@ -444,6 +444,10 @@ class MySql(DatabaseCheck):
         self._statement_metrics.cancel()
         self._query_activity.cancel()
         self._mysql_metadata.cancel()
+        self._statement_samples = None
+        self._statement_metrics = None
+        self._query_activity = None
+        self._mysql_metadata = None
 
     def _new_query_executor(self, queries):
         return QueryExecutor(
