@@ -112,12 +112,18 @@ def test_get_pr_number_warns_when_no_source_available(mock_app, monkeypatch):
 # --- format_pr_comment ---
 
 
-def test_format_pr_comment_all_passed():
+def test_format_pr_comment_all_passed(helpers):
     results = {
         "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
         "ci": ValidationResult(name="ci", success=True, stdout="ok", stderr="", duration=2.0),
     }
-    expected = "## Validation Report\n\nAll **2** validations passed."
+    expected = helpers.dedent("""
+        ## Validation Report
+
+        | Validation | Status |
+        |---|---|
+        | `ci` | ✅ |
+        | `config` | ✅ |""")
     assert format_pr_comment(results, target="changed") == expected
 
 
@@ -129,57 +135,13 @@ def test_format_pr_comment_one_failure_with_target(helpers):
     expected = helpers.dedent("""
         ## Validation Report
 
-        **1 validation(s) failed** — 1 passed.
-
-        <details>
-        <summary><code>config</code></summary>
-
-        ```
-        error output
-        ```
-
-        **Fix locally:**
-        ```shell
-        ddev validate config changed
-        ```
-        </details>
-
-        <details>
-        <summary>Passed (1)</summary>
-
-        - `ci`
-        </details>
+        | Validation | Status |
+        |---|---|
+        | `ci` | ✅ |
+        | `config` | ❌ |
 
         Run `ddev validate all changed --fix` to attempt to auto-fix supported validations.""")
     assert format_pr_comment(results, target="changed") == expected
-
-
-def test_format_pr_comment_stderr_fallback():
-    results = {
-        "config": ValidationResult(name="config", success=False, stdout="", stderr="stderr output", duration=1.0),
-    }
-    comment = format_pr_comment(results, target=None)
-    assert "stderr output" in comment
-
-
-def test_format_pr_comment_long_output_trimmed():
-    long_output = "\n".join(f"line {i}" for i in range(200))
-    results = {
-        "config": ValidationResult(name="config", success=False, stdout=long_output, stderr="", duration=1.0),
-    }
-    comment = format_pr_comment(results, target=None)
-    assert "trimmed to last 100 lines" in comment
-    assert "line 199" in comment
-    assert "line 0" not in comment
-
-
-def test_format_pr_comment_failure_without_output():
-    results = {
-        "config": ValidationResult(name="config", success=False, stdout="", stderr="", duration=1.0),
-    }
-    comment = format_pr_comment(results, target=None)
-    assert "<code>config</code>" in comment
-    assert "```\n\n```" not in comment
 
 
 def test_format_pr_comment_no_target():
@@ -187,7 +149,15 @@ def test_format_pr_comment_no_target():
         "config": ValidationResult(name="config", success=False, stdout="fail", stderr="", duration=1.0),
     }
     comment = format_pr_comment(results, target=None)
-    assert "ddev validate config\n" in comment
+    assert "ddev validate all --fix" in comment
+
+
+def test_format_pr_comment_no_fix_command_when_all_pass():
+    results = {
+        "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
+    }
+    comment = format_pr_comment(results, target=None)
+    assert "ddev validate all" not in comment
 
 
 def test_format_pr_comment_with_error_and_warning(helpers):
@@ -201,20 +171,9 @@ def test_format_pr_comment_with_error_and_warning(helpers):
 
         > **Warning:** Could not determine PR number
 
-        **1 validation(s) failed** — 0 passed.
-
-        <details>
-        <summary><code>config</code></summary>
-
-        ```
-        bad
-        ```
-
-        **Fix locally:**
-        ```shell
-        ddev validate config
-        ```
-        </details>
+        | Validation | Status |
+        |---|---|
+        | `config` | ❌ |
 
         Run `ddev validate all --fix` to attempt to auto-fix supported validations.""")
     assert (

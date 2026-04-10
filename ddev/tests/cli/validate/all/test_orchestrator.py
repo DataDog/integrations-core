@@ -212,7 +212,26 @@ def test_on_finalize_posts_pr_comment_on_failure(mock_app):
     mock_app.github.post_pull_request_comment.assert_called_once()
     body = mock_app.github.post_pull_request_comment.call_args[0][1]
     assert "Validation Report" in body
+    assert "| Validation | Status |" in body
+    assert "| `config` | ❌ |" in body
     assert "[View full run](https://github.com/DataDog/integrations-core/actions/runs/12345)" in body
+
+
+def test_on_finalize_posts_pr_comment_on_success(mock_app):
+    mock_app.config.github.token = "fake-token"
+
+    orch = ValidationOrchestrator(app=mock_app, validations=["config", "ci"], target=None, pr_number=42)
+    orch._results = {
+        "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
+        "ci": ValidationResult(name="ci", success=True, stdout="ok", stderr="", duration=2.0),
+    }
+    asyncio.run(orch.on_finalize(exception=None))
+
+    mock_app.github.post_pull_request_comment.assert_called_once()
+    body = mock_app.github.post_pull_request_comment.call_args[0][1]
+    assert "| Validation | Status |" in body
+    assert "| `ci` | ✅ |" in body
+    assert "| `config` | ✅ |" in body
 
 
 def test_on_finalize_deletes_previous_validation_comments(mock_app):
@@ -224,10 +243,9 @@ def test_on_finalize_deletes_previous_validation_comments(mock_app):
 
     orch = ValidationOrchestrator(app=mock_app, validations=["config"], target=None, pr_number=42)
     orch._results = {
-        "config": ValidationResult(name="config", success=False, stdout="err", stderr="", duration=1.0),
+        "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
     }
-    with pytest.raises(SystemExit):
-        asyncio.run(orch.on_finalize(exception=None))
+    asyncio.run(orch.on_finalize(exception=None))
 
     mock_app.github.delete_comment.assert_called_once_with(100)
     mock_app.github.post_pull_request_comment.assert_called_once()

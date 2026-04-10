@@ -193,21 +193,14 @@ class ValidationOrchestrator(EventBusOrchestrator):
         body = self._build_report_body(exception)
         write_step_summary(body)
 
-        any_failed = any(not r.success for r in self._results.values())
-        should_comment = any_failed or exception is not None
-
         self._app.display_info(f"PR number: {self._pr_number}")
         self._app.display_info(f"GitHub token configured: {bool(self._app.config.github.token)}")
-        self._app.display_info(f"Any failed: {any_failed}, exception: {exception is not None}")
 
         if self._pr_number is None:
             self._app.display_info("No PR number — skipping PR comment.")
             return
         if not self._app.config.github.token:
             self._app.display_info("No GitHub token — skipping PR comment.")
-            return
-        if not should_comment:
-            self._app.display_info("All validations passed — skipping PR comment.")
             return
 
         try:
@@ -221,24 +214,14 @@ class ValidationOrchestrator(EventBusOrchestrator):
             write_step_summary(f"\n> Failed to post PR comment: {exc}")
 
     def _print_console_output(self) -> None:
-        failures = {name: r for name, r in self._results.items() if not r.success}
+        failures = {name for name, r in self._results.items() if not r.success}
         passed = len(self._results) - len(failures)
         incomplete = len(self._validations) - len(self._results)
 
-        if failures:
-            self._app.display_info("")
-            for name, result in sorted(failures.items()):
-                config = VALIDATIONS.get(name, ValidationConfig())
-                output = result.stdout or result.stderr
-                self._app.display_error(f"── {name} {'─' * (60 - len(name))}")
-                if output:
-                    self._app.display_info(output.rstrip())
-                fix_cmd = f"ddev validate {name}"
-                if self._target and not config.repo_wide:
-                    fix_cmd += f" {self._target}"
-                if config.fix_flag:
-                    fix_cmd += f" {config.fix_flag}"
-                self._app.display_info(f"Fix: {fix_cmd}")
+        self._app.display_info("")
+        for name in sorted(self._results):
+            status = "❌" if name in failures else "✅"
+            self._app.display_info(f"  {status} {name}")
 
         self._app.display_info("")
         if incomplete:
