@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import pytest
+
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.react.callbacks import CallbackSet
 from ddev.ai.react.types import ReActResult
@@ -12,7 +14,8 @@ from ddev.ai.tools.core.types import ToolResult
 # ---------------------------------------------------------------------------
 
 
-def make_response() -> AgentResponse:
+@pytest.fixture
+def response() -> AgentResponse:
     return AgentResponse(
         stop_reason=StopReason.END_TURN,
         text="",
@@ -21,13 +24,15 @@ def make_response() -> AgentResponse:
     )
 
 
-def make_tool_call() -> ToolCall:
+@pytest.fixture
+def tool_call() -> ToolCall:
     return ToolCall(id="tc_01", name="read_file", input={})
 
 
-def make_result() -> ReActResult:
+@pytest.fixture
+def react_result(response: AgentResponse) -> ReActResult:
     return ReActResult(
-        final_response=make_response(),
+        final_response=response,
         iterations=1,
         total_input_tokens=10,
         total_output_tokens=5,
@@ -66,15 +71,17 @@ async def test_decorator_registers_handler_in_internal_list() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_empty_callback_set_is_noop() -> None:
+async def test_empty_callback_set_is_noop(
+    response: AgentResponse, tool_call: ToolCall, react_result: ReActResult
+) -> None:
     cb = CallbackSet()
-    await cb.fire_agent_response(make_response(), 1)
-    await cb.fire_tool_call(make_tool_call(), ToolResult(success=True, data="ok"), 1)
-    await cb.fire_complete(make_result())
+    await cb.fire_agent_response(response, 1)
+    await cb.fire_tool_call(tool_call, ToolResult(success=True, data="ok"), 1)
+    await cb.fire_complete(react_result)
     await cb.fire_error(RuntimeError("boom"))
 
 
-async def test_multiple_handlers_same_event_all_fire() -> None:
+async def test_multiple_handlers_same_event_all_fire(response: AgentResponse) -> None:
     cb = CallbackSet()
     fired: list[int] = []
 
@@ -90,12 +97,12 @@ async def test_multiple_handlers_same_event_all_fire() -> None:
     async def third(response: AgentResponse, iteration: int) -> None:
         fired.append(3)
 
-    await cb.fire_agent_response(make_response(), 5)
+    await cb.fire_agent_response(response, 5)
 
     assert fired == [1, 2, 3]
 
 
-async def test_handlers_receive_correct_arguments() -> None:
+async def test_handlers_receive_correct_arguments(response: AgentResponse) -> None:
     cb = CallbackSet()
     received: list[tuple] = []
 
@@ -103,7 +110,6 @@ async def test_handlers_receive_correct_arguments() -> None:
     async def h(response: AgentResponse, iteration: int) -> None:
         received.append((response, iteration))
 
-    response = make_response()
     await cb.fire_agent_response(response, 7)
 
     assert received == [(response, 7)]
@@ -114,7 +120,7 @@ async def test_handlers_receive_correct_arguments() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_fire_swallows_handler_exception() -> None:
+async def test_fire_swallows_handler_exception(response: AgentResponse) -> None:
     cb = CallbackSet()
     fired: list[int] = []
 
@@ -126,11 +132,11 @@ async def test_fire_swallows_handler_exception() -> None:
     async def good(response: AgentResponse, iteration: int) -> None:
         fired.append(iteration)
 
-    await cb.fire_agent_response(make_response(), 1)
+    await cb.fire_agent_response(response, 1)
     assert fired == [1]
 
 
-async def test_fire_tool_call_swallows_handler_exception() -> None:
+async def test_fire_tool_call_swallows_handler_exception(tool_call: ToolCall) -> None:
     cb = CallbackSet()
     fired: list[bool] = []
 
@@ -142,11 +148,11 @@ async def test_fire_tool_call_swallows_handler_exception() -> None:
     async def good(tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
         fired.append(True)
 
-    await cb.fire_tool_call(make_tool_call(), ToolResult(success=True, data="ok"), 1)
+    await cb.fire_tool_call(tool_call, ToolResult(success=True, data="ok"), 1)
     assert fired == [True]
 
 
-async def test_fire_complete_swallows_handler_exception() -> None:
+async def test_fire_complete_swallows_handler_exception(react_result: ReActResult) -> None:
     cb = CallbackSet()
     fired: list[bool] = []
 
@@ -158,7 +164,7 @@ async def test_fire_complete_swallows_handler_exception() -> None:
     async def good(result: ReActResult) -> None:
         fired.append(True)
 
-    await cb.fire_complete(make_result())
+    await cb.fire_complete(react_result)
     assert fired == [True]
 
 
