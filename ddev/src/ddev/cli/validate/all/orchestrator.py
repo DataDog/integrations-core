@@ -194,13 +194,31 @@ class ValidationOrchestrator(EventBusOrchestrator):
         write_step_summary(body)
 
         any_failed = any(not r.success for r in self._results.values())
-        if self._pr_number is not None and self._app.config.github.token and (any_failed or exception):
-            try:
-                self._delete_previous_comments(self._pr_number)
-                self._app.github.post_pull_request_comment(self._pr_number, body)
-            except Exception as exc:
-                self._app.display_warning(f"Failed to post PR comment: {exc}")
-                write_step_summary(f"\n> Failed to post PR comment: {exc}")
+        should_comment = any_failed or exception is not None
+
+        self._app.display_info(f"PR number: {self._pr_number}")
+        self._app.display_info(f"GitHub token configured: {bool(self._app.config.github.token)}")
+        self._app.display_info(f"Any failed: {any_failed}, exception: {exception is not None}")
+
+        if self._pr_number is None:
+            self._app.display_info("No PR number — skipping PR comment.")
+            return
+        if not self._app.config.github.token:
+            self._app.display_info("No GitHub token — skipping PR comment.")
+            return
+        if not should_comment:
+            self._app.display_info("All validations passed — skipping PR comment.")
+            return
+
+        try:
+            self._app.display_info(f"Deleting previous validation comments on PR #{self._pr_number}...")
+            self._delete_previous_comments(self._pr_number)
+            self._app.display_info(f"Posting validation comment on PR #{self._pr_number}...")
+            self._app.github.post_pull_request_comment(self._pr_number, body)
+            self._app.display_info("Comment posted successfully.")
+        except Exception as exc:
+            self._app.display_warning(f"Failed to post PR comment: {exc}")
+            write_step_summary(f"\n> Failed to post PR comment: {exc}")
 
     def _print_console_output(self) -> None:
         failures = {name: r for name, r in self._results.items() if not r.success}
