@@ -129,6 +129,7 @@ class InfrastructureMonitor:
 
             if self._is_prism_central_cluster(cluster):
                 self.check.log.info("[%s] Skipping Prism Central cluster: %s", self._pc_label, cluster_name)
+                self._collect_pc_version_metadata(cluster)
                 skipped += 1
                 continue
 
@@ -170,12 +171,26 @@ class InfrastructureMonitor:
         cluster_function = get_nested(cluster, "config/clusterFunction") or []
         return "PRISM_CENTRAL" in cluster_function
 
+    def _collect_pc_version_metadata(self, pc_cluster: dict) -> None:
+        """Collect and report version metadata from the Prism Central cluster."""
+        version = get_nested(pc_cluster, "config/buildInfo/version")
+        if version:
+            self.check.set_metadata(
+                'version',
+                version,
+                scheme='regex',
+                pattern=r'(?P<major>\d+)\.(?P<minor>\d+)',
+                final_scheme='semver',
+            )
+      
     def _report_cluster_metrics(
         self, cluster_id: str, cluster_name: str, cluster: dict, cluster_tags: list[str]
     ) -> None:
         """Report basic metrics and time-series stats for a cluster."""
         self._report_cluster_basic_metrics(cluster, cluster_tags)
         self._report_cluster_stats(cluster_name, cluster_id, cluster_tags)
+
+
 
     def _process_vm(self, vm: dict, vm_stats_dict: dict[str, list[dict]], cluster_name: str) -> bool:
         """Report metrics for a single VM if it passes filters."""

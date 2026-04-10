@@ -588,6 +588,29 @@ GROUP BY application_name, datname, usename, backend_type, wait_event
 """.strip(),
 }
 
+CONNECTION_METRICS_BY_DB = {
+    'descriptors': [('database_name', 'db')],
+    'metrics': {
+        'connections': ('database_connections', AgentCheck.gauge),
+        'pct_connections': ('percent_database_usage_connections', AgentCheck.gauge),
+    },
+    'relation': False,
+    'query': """
+WITH max_con AS (
+    SELECT setting::float
+    FROM pg_settings
+    WHERE name = 'max_connections'
+)
+SELECT datname,
+    numbackends,
+    SUM(numbackends)/MAX(setting)
+    FROM pg_stat_database, max_con
+WHERE datname IS NOT NULL {ignore_database_filter}
+GROUP BY datname, numbackends
+""",
+    'name': 'connections_by_database',
+}
+
 CONNECTION_METRICS = {
     'descriptors': [],
     'metrics': {

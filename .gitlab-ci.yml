@@ -90,6 +90,9 @@ release-manual:
 tagger-image-builder:
   stage: build
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:24.0.4-gbi-focal
+  id_tokens:
+    DDSIGN_ID_TOKEN:
+      aud: image-integrity
   rules:
     - if: $CI_PIPELINE_SOURCE == 'schedule'
       when: never
@@ -104,5 +107,7 @@ tagger-image-builder:
     - when: manual
       allow_failure: true
   script:
-    - docker buildx build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile . --push
+    - METADATA_FILE=$(mktemp)
+    - docker buildx build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile . --push --metadata-file ${METADATA_FILE}
+    - ddsign sign $TAGGER_IMAGE --docker-metadata-file ${METADATA_FILE}
   tags: [ "arch:amd64" ]

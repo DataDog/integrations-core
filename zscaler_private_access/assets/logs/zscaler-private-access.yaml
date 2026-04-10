@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: zscaler-private-access
 metric_id: zscaler-private-access
 backend_only: false
