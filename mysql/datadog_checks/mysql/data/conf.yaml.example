@@ -30,27 +30,27 @@ init_config:
 #
 instances:
 
-    ## @param username - string - optional
-    ## Username used to connect to MySQL.
-    #
-  - username: datadog
-
-    ## @param password - string - optional
-    ## Password associated to the MySQL user.
-    #
-    password: <PASSWORD>
-
     ## @param host - string - optional
     ## MySQL host to connect to.
     ## NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
     ## provide a value for the sock key (below).
     #
-    host: localhost
+  - host: localhost
 
     ## @param port - number - optional - default: 3306
     ## Port to use when connecting to MySQL.
     #
     port: 3306
+
+    ## @param username - string - optional
+    ## Username used to connect to MySQL.
+    #
+    username: datadog
+
+    ## @param password - string - optional
+    ## Password associated to the MySQL user.
+    #
+    password: <PASSWORD>
 
     ## @param dbm - boolean - optional - default: false
     ## Set to `true` to enable Database Monitoring.

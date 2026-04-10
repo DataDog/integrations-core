@@ -25,7 +25,7 @@ files:
       - template: instances
         options:
           - name: host
-            display_priority: 3
+            display_priority: 5
             description: |
               MySQL host to connect to.
               NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
@@ -38,7 +38,7 @@ files:
               display_default: null
 
           - name: username
-            display_priority: 5
+            display_priority: 3
             description: |
               Username used to connect to MySQL.
             fleet_configurable: true
@@ -49,7 +49,7 @@ files:
               display_default: null
 
           - name: password
-            display_priority: 4
+            display_priority: 2
             description: |
               Password associated to the MySQL user.
             fleet_configurable: true
@@ -59,7 +59,7 @@ files:
               type: string
 
           - name: port
-            display_priority: 2
+            display_priority: 4
             description: |
               Port to use when connecting to MySQL.
             fleet_configurable: true
