@@ -83,6 +83,52 @@ Now, the `.ddev.toml` file in the `issue_XYZ` directory modifies where the `core
 
 If we go back to our `integrations-core` directory and execute any `ddev` command, this override won't take effect.
 
+## Trusting local `*_fetch_command` fields
+
+Because `.ddev.toml` is local to the working directory, command-backed secret fields (`*_fetch_command`) in this
+file are trust-gated.
+
+When `ddev` loads overrides, local command-backed fields are handled in one of these states:
+
+- **`allowed`**: command fields are kept and executed normally.
+- **`denied`**: command fields are stripped from `.ddev.toml` silently.
+- **`unknown`**: command fields are stripped and a warning is shown.
+
+For `unknown` files, `ddev` shows a warning similar to:
+
+```
+Ignored untrusted `_fetch_command` field(s) from .ddev.toml: github.user_fetch_command. Run `ddev config allow` to trust this file.
+```
+
+### `ddev config allow`
+
+Trust the currently discovered `.ddev.toml` so its `*_fetch_command` fields are executed:
+
+```bash
+ddev config allow
+```
+
+This stores the current file hash in `trusted_overrides.json` (in the same config directory as your global
+`config.toml`).
+
+### `ddev config deny`
+
+Explicitly mark the currently discovered `.ddev.toml` as untrusted and silence warnings:
+
+```bash
+ddev config deny
+```
+
+In this state, `*_fetch_command` fields are stripped silently.
+
+### Trust is hash-based
+
+Trust applies to both path and content hash. If the `.ddev.toml` file changes after being allowed, it returns to
+`unknown` state and `*_fetch_command` fields are stripped again until you re-run:
+
+```bash
+ddev config allow
+```
 
 ## Command Behavior with Overrides
 
