@@ -30,27 +30,32 @@ init_config:
 #
 instances:
 
-    ## @param host - string - optional
-    ## MySQL host to connect to.
-    ## NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
-    ## provide a value for the sock key (below).
-    #
-  - host: localhost
-
     ## @param username - string - optional
     ## Username used to connect to MySQL.
     #
-    username: datadog
+  - username: datadog
+
+    ## @param port - number - optional - default: 3306
+    ## Port to use when connecting to MySQL.
+    #
+    port: 3306
 
     ## @param password - string - optional
     ## Password associated to the MySQL user.
     #
     password: <PASSWORD>
 
-    ## @param port - number - optional - default: 3306
-    ## Port to use when connecting to MySQL.
+    ## @param host - string - optional
+    ## MySQL host to connect to.
+    ## NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
+    ## provide a value for the sock key (below).
     #
-    port: 3306
+    host: localhost
+
+    ## @param dbm - boolean - optional - default: false
+    ## Set to `true` to enable Database Monitoring.
+    #
+    # dbm: false
 
     ## @param propagate_agent_tags - boolean - optional - default: false
     ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
@@ -377,11 +382,6 @@ instances:
         ## MySQL integration tile in the Datadog Web UI for further instructions.
         #
         # extra_performance_metrics: false
-
-    ## @param dbm - boolean - optional - default: false
-    ## Set to `true` to enable Database Monitoring.
-    #
-    # dbm: false
 
     ## Configure collection of performance_schema.global_variables.
     #
