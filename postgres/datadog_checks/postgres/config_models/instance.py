@@ -111,6 +111,16 @@ class CustomQuery(BaseModel):
     tags: Optional[tuple[str, ...]] = None
 
 
+class DataObservability(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = Field(None, examples=[600])
+    enabled: Optional[bool] = Field(None, examples=[False])
+    run_sync: Optional[bool] = Field(None, examples=[False])
+
+
 class DatabaseAutodiscovery(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -263,6 +273,7 @@ class InstanceConfig(BaseModel):
     custom_metrics: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     data_directory: Optional[str] = None
+    data_observability: Optional[DataObservability] = None
     database_autodiscovery: Optional[DatabaseAutodiscovery] = None
     database_identifier: Optional[DatabaseIdentifier] = None
     database_instance_collection_interval: Optional[float] = None
