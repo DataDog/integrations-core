@@ -1,5 +1,5 @@
 {
-    "title": "Checkpoint Quantum Firewall - Identity Awareness",
+    "title": "Check Point Quantum Firewall - Identity Awareness",
     "description": "- This dashboard gives insights about identity awareness related logs.",
     "widgets": [
         {
@@ -89,7 +89,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Checkpoint_Server $Identity-Source $Identity-Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Check_Point_Server $Identity-Source $Identity-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -143,7 +143,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Checkpoint_Server $Identity-Source $Identity-Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Check_Point_Server $Identity-Source $Identity-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -203,7 +203,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Checkpoint_Server $Identity-Source $Identity-Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Check_Point_Server $Identity-Source $Identity-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -264,7 +264,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Checkpoint_Server $Identity-Source $Identity-Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Check_Point_Server $Identity-Source $Identity-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -325,7 +325,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Checkpoint_Server $Identity-Source $Identity-Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Check_Point_Server $Identity-Source $Identity-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -386,7 +386,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Checkpoint_Server $Identity-Source $Identity-Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Check_Point_Server $Identity-Source $Identity-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -448,7 +448,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Checkpoint_Server $Identity-Source $Identity-Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Check_Point_Server $Identity-Source $Identity-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -509,7 +509,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Checkpoint_Server $Identity-Source $Identity-Type"
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Check_Point_Server $Identity-Source $Identity-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -548,7 +548,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Checkpoint_Server $Identity-Source $Identity-Type",
+                            "query_string": "source:checkpoint-quantum-firewall @product:\"Identity Awareness\" $Check_Point_Server $Identity-Source $Identity-Type",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -604,7 +604,7 @@
     ],
     "template_variables": [
         {
-            "name": "Checkpoint_Server",
+            "name": "Check_Point_Server",
             "prefix": "@origin",
             "available_values": [],
             "default": "*"

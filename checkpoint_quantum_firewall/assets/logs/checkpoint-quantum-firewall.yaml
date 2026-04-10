@@ -172,7 +172,7 @@ facets:
       name: byte
 pipeline:
   type: pipeline
-  name: Checkpoint Quantum Firewall
+  name: Check Point Quantum Firewall
   enabled: true
   filter:
     query: "source:checkpoint-quantum-firewall"
