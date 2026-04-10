@@ -316,6 +316,8 @@ OPTIONAL_METRICS = [
     'clickhouse.connections.alive.total',
     'clickhouse.connections.outstanding.total',
     'clickhouse.filesystem.cache.buffers.active',
+    'clickhouse.filesystem.cache.elements',
+    'clickhouse.filesystem.cache.size',
     'clickhouse.inserts.async.flush.pending',
     'clickhouse.kafka.background.reads',
     'clickhouse.kafka.consumers.active',
