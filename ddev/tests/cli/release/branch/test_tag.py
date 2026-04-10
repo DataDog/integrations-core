@@ -7,6 +7,59 @@ import pytest
 
 from ddev.utils.git import GitRepository
 
+
+def test_tag_check_open_prs_warns_and_allows_continue(ddev, git, mocker, config_file):
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+
+    mock_pr = mocker.MagicMock()
+    mock_pr.number = 1234
+    mock_pr.title = 'Fix thing'
+    mock_pr.html_url = 'https://example.invalid/pr/1234'
+    list_prs = mocker.patch(
+        'ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base',
+        return_value=[mock_pr],
+    )
+
+    result = ddev('release', 'branch', 'tag', '--final', input='y\n')
+
+    assert result.exit_code == 0, result.output
+    assert git.method_calls[-2:] == [
+        c.tag('7.56.0', message='7.56.0'),
+        c.push('7.56.0'),
+    ]
+    assert 'Found 1 open PR(s) targeting base branch 7.56.x' in result.output
+    assert '#1234 Fix thing' in result.output
+    list_prs.assert_called_once_with('7.56.x')
+
+
+def test_tag_skip_open_pr_check(ddev, git, mocker, config_file):
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+
+    list_prs = mocker.patch('ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base')
+
+    result = ddev('release', 'branch', 'tag', '--final', '--skip-open-pr-check', input='y\n')
+
+    _assert_tag_pushed(git, result, '7.56.0')
+    list_prs.assert_not_called()
+
+
+def test_tag_github_api_error_degrades_gracefully(ddev, git, mocker, config_file):
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+
+    mocker.patch(
+        'ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base',
+        side_effect=Exception('API error'),
+    )
+
+    result = ddev('release', 'branch', 'tag', '--final', input='y\n')
+
+    _assert_tag_pushed(git, result, '7.56.0')
+    assert 'unable to check for open PRs' in result.output
+
+
 NO_CONFIRMATION_SO_ABORT = 'Did not get confirmation, aborting. Did not create or push the tag.'
 RC_NUMBER_PROMPT = 'What RC number are we tagging? (hit ENTER to accept suggestion) [{}]'
 

@@ -106,6 +106,45 @@ class GitHubManager:
 
         return PullRequest(data['items'][0])
 
+    def list_open_pull_requests_targeting_base(self, base_branch: str, *, limit: int = 100) -> list[PullRequest]:
+        """
+        List open pull requests targeting the given base branch. Limit to 100 by default.
+        """
+        if limit < 1:
+            return []
+
+        prs: list[PullRequest] = []
+        max_per_page = 100
+        page = 1
+
+        # https://docs.github.com/en/search-github/searching-on-github/searching-issues-and-pull-requests
+        query = f'repo:{self.repo_id} is:pull-request is:open base:{base_branch}'
+
+        while len(prs) < limit:
+            requested_count = min(max_per_page, limit - len(prs))
+            response = self.__api_get(
+                self.ISSUE_SEARCH_API,
+                params={
+                    'q': query,
+                    'sort': 'updated',
+                    'order': 'desc',
+                    'per_page': requested_count,
+                    'page': page,
+                },
+            )
+            data = json.loads(response.text)
+            items = data.get('items', [])
+            if not items:
+                break
+
+            prs.extend(PullRequest(item) for item in items)
+            if len(items) < requested_count:
+                break
+
+            page += 1
+
+        return prs[:limit]
+
     def get_pull_request_by_number(self, number: str) -> PullRequest | None:
         response = self.__api_get(
             self.ISSUE_SEARCH_API,
