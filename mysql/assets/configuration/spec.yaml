@@ -37,6 +37,17 @@ files:
               example: localhost
               display_default: null
 
+          - name: port
+            display_priority: 4
+            description: |
+              Port to use when connecting to MySQL.
+            fleet_configurable: true
+            enabled: true
+            formats: ["port"]
+            value:
+              type: number
+              example: 3306
+
           - name: username
             display_priority: 3
             description: |
@@ -58,17 +69,16 @@ files:
             value:
               type: string
 
-          - name: port
-            display_priority: 4
-            description: |
-              Port to use when connecting to MySQL.
+          - name: dbm
+            display_priority: 1
             fleet_configurable: true
-            enabled: true
-            formats: ["port"]
+            description: |
+              Set to `true` to enable Database Monitoring.
+            enabled: false
             value:
-              type: number
-              example: 3306
-
+              type: boolean
+              example: false
+              display_default: false
           - name: propagate_agent_tags
             display_priority: 0
             description: |
@@ -196,18 +206,6 @@ files:
                 cert: <CERT_FILE_PATH>
                 ca: <CA_PATH_FILE>
                 check_hostname: true
-          - template: instances/db
-            overrides:
-              custom_queries.value.example:
-                - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
-                  columns:
-                    - name: foo
-                      type: tag
-                    - name: event.total
-                      type: gauge
-                  tags:
-                    - test:mysql
-                  metric_prefix: mysql
           - name: additional_status
             display_priority: 0
             description: |
@@ -419,16 +417,6 @@ files:
                   type: boolean
                   example: false
 
-          - name: dbm
-            display_priority: 1
-            fleet_configurable: true
-            description: |
-              Set to `true` to enable Database Monitoring.
-            enabled: false
-            value:
-              type: boolean
-              example: false
-              display_default: false
           - name: collect_settings
             display_priority: 0
             description: Configure collection of performance_schema.global_variables.
@@ -956,6 +944,18 @@ files:
               type: number
               example: 1800
               display_default: false
+          - template: instances/db
+            overrides:
+              custom_queries.value.example:
+                - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
+                  columns:
+                    - name: foo
+                      type: tag
+                    - name: event.total
+                      type: gauge
+                  tags:
+                    - test:mysql
+                  metric_prefix: mysql
           - template: instances/default
             overrides:
               disable_generic_tags.hidden: false
