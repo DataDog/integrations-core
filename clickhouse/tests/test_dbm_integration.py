@@ -395,7 +395,9 @@ def test_query_samples_data(aggregator, instance, dd_run_check):
 
     # Run a slow query in the background so it appears in system.processes
     # during the samples collection window.
-    slow_query = "SELECT sleep(5)"
+    # sleep(2) stays under ClickHouse 25.3's max_function_sleep_timeout of 3s,
+    # while being long enough to still be running when the check collects at T=1s.
+    slow_query = "SELECT sleep(2)"
     thread = threading.Thread(target=client.command, args=(slow_query,), daemon=True)
     thread.start()
 
@@ -404,7 +406,7 @@ def test_query_samples_data(aggregator, instance, dd_run_check):
 
     dd_run_check(check)
 
-    thread.join(timeout=10)
+    thread.join(timeout=5)
 
     activity_events = aggregator.get_event_platform_events("dbm-activity")
     sample_events = [e for e in activity_events if e.get('dbm_type') == 'activity']
