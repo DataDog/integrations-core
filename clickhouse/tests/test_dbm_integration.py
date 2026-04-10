@@ -185,7 +185,9 @@ def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check,
 
     def obfuscate_sql(q, options=None):
         if 'system.databases' in q:
-            return json.dumps({'query': expected_obfuscated, 'metadata': {'commands': ['SELECT'], 'tables': ['databases']}})
+            return json.dumps(
+                {'query': expected_obfuscated, 'metadata': {'commands': ['SELECT'], 'tables': ['databases']}}
+            )
         return json.dumps({'query': q, 'metadata': {}})
 
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
