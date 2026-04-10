@@ -25,6 +25,19 @@ files:
         type: integer
         example: 6379
       fleet_configurable: true
+    - name: username
+      display_priority: 2
+      description: The username for the connection. Redis 6+ only.
+      value:
+          type: string
+      fleet_configurable: true
+    - name: password
+      display_priority: 1
+      description: The password for the connection.
+      secret: true
+      value:
+        type: string
+      fleet_configurable: true
     - name: unix_socket_path
       display_priority: 0
       description: Connect through a unix socket instead of using a `host` and `port`.
@@ -44,19 +57,6 @@ files:
       value:
         type: integer
         example: 0
-      fleet_configurable: true
-    - name: username
-      display_priority: 2
-      description: The username for the connection. Redis 6+ only.
-      value:
-          type: string
-      fleet_configurable: true
-    - name: password
-      display_priority: 1
-      description: The password for the connection.
-      secret: true
-      value:
-        type: string
       fleet_configurable: true
     - name: collect_client_metrics
       display_priority: 0
