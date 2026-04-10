@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from ddev.cli.validate.all.github import (
+    COMMENT_HEADING,
     format_pr_comment,
     get_workflow_run_url,
     write_step_summary,
@@ -179,6 +180,15 @@ class ValidationOrchestrator(EventBusOrchestrator):
             body += f"\n\n[View full run]({run_url})"
         return body
 
+    def _delete_previous_comments(self) -> None:
+        try:
+            comments = self._app.github.get_pull_request_comments(self._pr_number)
+            for comment in comments:
+                if comment.get("body", "").startswith(COMMENT_HEADING):
+                    self._app.github.delete_comment(comment["id"])
+        except Exception as exc:
+            self._app.display_warning(f"Failed to clean up previous validation comments: {exc}")
+
     def _post_pr_comment(self, exception: Exception | None) -> None:
         body = self._build_report_body(exception)
         write_step_summary(body)
@@ -186,6 +196,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
         any_failed = any(not r.success for r in self._results.values())
         if self._pr_number is not None and self._app.config.github.token and (any_failed or exception):
             try:
+                self._delete_previous_comments()
                 self._app.github.post_pull_request_comment(self._pr_number, body)
             except Exception as exc:
                 self._app.display_warning(f"Failed to post PR comment: {exc}")

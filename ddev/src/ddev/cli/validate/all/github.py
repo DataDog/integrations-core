@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from ddev.cli.validate.all.orchestrator import ValidationResult
 
 MAX_OUTPUT_LINES = 100
+COMMENT_HEADING = "## Validation Report"
 
 FAILURE_DETAIL_TEMPLATE = Template("""\
 <details>
@@ -117,7 +118,7 @@ def format_pr_comment(
     for name, result in results.items():
         (successes if result.success else failures)[name] = result
 
-    parts = ["## Validation Report\n"]
+    parts = [f"{COMMENT_HEADING}\n"]
     if error:
         parts.append(f"> **Error:** {error}\n")
     if warning:
