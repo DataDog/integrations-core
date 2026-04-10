@@ -43,5 +43,5 @@ class SharedConfig(BaseModel):
         return validation.utils.make_immutable(value)
 
     @model_validator(mode='after')
-    def _final_validation(cls, model):
-        return validation.core.check_model(getattr(validators, 'check_shared', identity)(model))
+    def _final_validation(self):
+        return validation.core.check_model(getattr(validators, 'check_shared', identity)(self))

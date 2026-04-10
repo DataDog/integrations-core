@@ -349,6 +349,7 @@ OPTIONAL_METRICS = [
 ]
 
 V_23_8_METRICS = [
+    'clickhouse.filesystem.cache.cleanup.queue',
     'clickhouse.backups.threads.active',
     'clickhouse.backups.threads.total',
     'clickhouse.backups_io.threads.active',
@@ -427,7 +428,6 @@ V_23_8_METRICS = [
 
 V_23_METRICS = [
     'clickhouse.cache.async.insert',
-    'clickhouse.filesystem.cache.cleanup.queue',
     'clickhouse.filesystem.cache.download.queue',
     'clickhouse.filesystem.cache.elements',
     'clickhouse.filesystem.cache.limit',
