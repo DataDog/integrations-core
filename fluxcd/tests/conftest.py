@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from contextlib import ExitStack
-from unittest import mock
 
 import pytest
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
@@ -69,36 +69,22 @@ def check(instance):
 
 
 @pytest.fixture()
-def mock_metrics_v1():
+def mock_metrics_v1(mock_http):
     fixture_file = os.path.join(os.path.dirname(__file__), "fixtures", "metrics-v1.txt")
 
     with open(fixture_file, "r") as f:
         content = f.read()
 
-    with mock.patch(
-        "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: content.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
-    ):
-        yield
+    mock_http.get.return_value = MockHTTPResponse(content=content, headers={"Content-Type": "text/plain"})
+    yield
 
 
 @pytest.fixture()
-def mock_metrics_v2():
+def mock_metrics_v2(mock_http):
     fixture_file = os.path.join(os.path.dirname(__file__), "fixtures", "metrics-v2.txt")
 
     with open(fixture_file, "r") as f:
         content = f.read()
 
-    with mock.patch(
-        "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: content.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
-    ):
-        yield
+    mock_http.get.return_value = MockHTTPResponse(content=content, headers={"Content-Type": "text/plain"})
+    yield
