@@ -143,6 +143,8 @@ class KafkaCheck(AgentCheck):
         return sum(len(offsets) for offsets in consumer_offsets.values())
 
     def _send_cluster_monitoring_heartbeat(self, total_contexts: int, cluster_id: str) -> None:
+        if not cluster_id and self.client._cluster_metadata:
+            cluster_id = self.client._cluster_metadata.cluster_id or ""
         payload = {
             'collection_timestamp': int(time() * 1000),
             'kafka_cluster_id': cluster_id,
