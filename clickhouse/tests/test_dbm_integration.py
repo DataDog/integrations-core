@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import deepcopy
@@ -311,3 +312,118 @@ def test_samples_event_structure(instance):
     assert 'timestamp' in event
     assert 'clickhouse_activity' in event
     assert 'clickhouse_connections' in event
+
+
+def test_query_completions_data(aggregator, instance, dd_run_check, datadog_agent):
+    """
+    Run a known query, then verify the completions pipeline collects it:
+    1. A dbm-activity event with dbm_type='query_completion' is emitted
+    2. The payload contains a completion record matching the known query
+    3. Key fields (query_signature, duration_ms, username, read_rows,
+       event_time_microseconds) are populated
+    """
+    instance_config = deepcopy(instance)
+    instance_config['dbm'] = True
+    instance_config['query_metrics'] = {'enabled': False}
+    instance_config['query_samples'] = {'enabled': False}
+    instance_config['query_completions'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': 10,
+    }
+
+    check = ClickhouseCheck('clickhouse', {}, [instance_config])
+    client = _get_clickhouse_client(instance_config)
+
+    query = "SELECT name, engine FROM system.databases ORDER BY name"
+    client.command(query)
+    client.command('SYSTEM FLUSH LOGS')
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    events = aggregator.get_event_platform_events("dbm-activity")
+    completion_events = [e for e in events if e.get('dbm_type') == 'query_completion']
+    assert len(completion_events) > 0, "Expected at least one query_completion event"
+
+    all_completions = []
+    for e in completion_events:
+        all_completions.extend(e.get('clickhouse_query_completions', []))
+
+    assert len(all_completions) > 0, "Expected at least one completion record in payload"
+
+    expected_obfuscated = obfuscate_sql_with_metadata(query, check.query_completions._obfuscate_options)['query']
+    matching = [
+        c for c in all_completions
+        if c.get('query_details', {}).get('statement') == expected_obfuscated
+    ]
+    assert len(matching) >= 1, (
+        f"Expected at least 1 completion record for query: {query!r}.\n"
+        f"Expected obfuscated: {expected_obfuscated!r}\n"
+        f"Available statements: {[c.get('query_details', {}).get('statement', '<none>') for c in all_completions]}"
+    )
+
+    details = matching[0]['query_details']
+    assert details['query_signature'] is not None
+    assert details['duration_ms'] >= 0
+    assert details['username'] is not None
+    assert details['read_rows'] >= 0
+    assert details['event_time_microseconds'] > 0
+
+
+def test_query_samples_data(aggregator, instance, dd_run_check):
+    """
+    Start a long-running query in the background so it appears in system.processes,
+    then verify the samples pipeline actually captures active query rows:
+    1. A dbm-activity event with dbm_type='activity' is emitted
+    2. clickhouse_activity contains at least one row (not empty)
+    3. The slow query is present in the captured activity
+
+    This test specifically guards against regressions on versions that lack
+    query_kind in system.processes — on those versions the query silently fails
+    and clickhouse_activity is empty.
+    """
+    instance_config = deepcopy(instance)
+    instance_config['dbm'] = True
+    instance_config['query_metrics'] = {'enabled': False}
+    instance_config['query_samples'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': 1,
+    }
+    instance_config['query_completions'] = {'enabled': False}
+
+    check = ClickhouseCheck('clickhouse', {}, [instance_config])
+    client = _get_clickhouse_client(instance_config)
+
+    # Run a slow query in the background so it appears in system.processes
+    # during the samples collection window.
+    slow_query = "SELECT sleep(5)"
+    thread = threading.Thread(target=client.command, args=(slow_query,), daemon=True)
+    thread.start()
+
+    # Give the query time to appear in system.processes before collecting
+    time.sleep(1)
+
+    dd_run_check(check)
+
+    thread.join(timeout=10)
+
+    activity_events = aggregator.get_event_platform_events("dbm-activity")
+    sample_events = [e for e in activity_events if e.get('dbm_type') == 'activity']
+    assert len(sample_events) > 0, "Expected at least one activity event"
+
+    all_activity = []
+    for e in sample_events:
+        all_activity.extend(e.get('clickhouse_activity', []))
+
+    assert len(all_activity) > 0, (
+        "Expected clickhouse_activity to contain active query rows but it was empty. "
+        "This likely means the query_kind column is missing in system.processes."
+    )
+
+    statements = [row.get('statement', '') for row in all_activity]
+    assert any('sleep' in s for s in statements), (
+        f"Expected to find the slow 'sleep' query in activity rows.\n"
+        f"Captured statements: {statements}"
+    )
