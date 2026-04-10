@@ -69,6 +69,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
     """Collects failed query samples from system.query_log"""
 
     CHECKPOINT_CACHE_KEY = "query_errors_last_checkpoint_microseconds"
+    MAX_PAYLOAD_BYTES = 19e6
 
     def __init__(self, check: ClickhouseCheck, config):
         super().__init__(
@@ -83,6 +84,10 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
         )
 
         self._max_samples_per_collection = int(config.max_samples_per_collection)
+
+    @staticmethod
+    def _get_estimated_row_size_bytes(row):
+        return len(str(row))
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_and_submit(self):
@@ -151,6 +156,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
             )
 
             max_event_time = 0
+            estimated_size = 0
 
             result_rows = []
             for row in rows:
@@ -225,6 +231,12 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
 
                 obfuscated_row = self._normalize_query(row_dict)
                 if obfuscated_row:
+                    estimated_size += self._get_estimated_row_size_bytes(obfuscated_row)
+                    if estimated_size > ClickhouseQueryErrors.MAX_PAYLOAD_BYTES:
+                        self._log.warning(
+                            "Query errors payload too large, truncating at %d rows", len(result_rows)
+                        )
+                        break
                     result_rows.append(obfuscated_row)
 
             self._set_checkpoint_from_event_time(max_event_time)
