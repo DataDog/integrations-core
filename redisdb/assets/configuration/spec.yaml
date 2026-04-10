@@ -9,7 +9,7 @@ files:
   - template: instances
     options:
     - name: host
-      display_priority: 3
+      display_priority: 4
       required: true
       description: Enter the host to connect to.
       value:
@@ -17,7 +17,7 @@ files:
         example: localhost
       fleet_configurable: true
     - name: port
-      display_priority: 2
+      display_priority: 3
       required: true
       description: Enter the port of the host to connect to.
       formats: ["port"]
@@ -46,7 +46,7 @@ files:
         example: 0
       fleet_configurable: true
     - name: username
-      display_priority: 0
+      display_priority: 2
       description: The username for the connection. Redis 6+ only.
       value:
           type: string

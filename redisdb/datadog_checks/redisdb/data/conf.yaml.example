@@ -23,6 +23,11 @@ instances:
     #
     port: 6379
 
+    ## @param username - string - optional
+    ## The username for the connection. Redis 6+ only.
+    #
+    # username: <USERNAME>
+
     ## @param password - string - optional
     ## The password for the connection.
     #
@@ -40,11 +45,6 @@ instances:
     ## used as in rc.
     #
     # db: 0
-
-    ## @param username - string - optional
-    ## The username for the connection. Redis 6+ only.
-    #
-    # username: <USERNAME>
 
     ## @param collect_client_metrics - boolean - optional - default: false
     ## Collects metrics using the `CLIENT` command.
