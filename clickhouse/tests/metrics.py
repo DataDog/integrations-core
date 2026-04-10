@@ -321,6 +321,7 @@ OPTIONAL_METRICS = [
     'clickhouse.cache.file_segments',
     'clickhouse.cache.opened_file.misses.count',
     'clickhouse.cache.opened_file.misses.total',
+    'clickhouse.cache.opened_file.time',
     'clickhouse.cache_file_segments.detached',
     'clickhouse.configuration.main.reloaded.count',
     'clickhouse.configuration.main.reloaded.total',
@@ -356,7 +357,6 @@ V_23_8_METRICS = [
 
 V_23_METRICS = [
     'clickhouse.cache.async.insert',
-    'clickhouse.cache.opened_file.time',
     'clickhouse.cache_dictionary.threads.active',
     'clickhouse.cache_dictionary.threads.total',
     'clickhouse.filesystem.cache.cleanup.queue',
