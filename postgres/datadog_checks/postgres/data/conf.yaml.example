@@ -59,125 +59,10 @@ instances:
     #
     # dbname: <DBNAME>
 
-    ## @param reported_hostname - string - optional
-    ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
-    ## and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+    ## @param dbm - boolean - optional - default: false
+    ## Set to `true` to enable Database Monitoring.
     #
-    # reported_hostname: <REPORTED_HOSTNAME>
-
-    ## @param exclude_hostname - boolean - optional - default: false
-    ## Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
-    #
-    # exclude_hostname: false
-
-    ## Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
-    ## billable instance.
-    ##
-    ## The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
-    ##
-    ## This value will be used as-is for the display name of the instance but will be normalized
-    ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
-    ## for more details on Datadog tag normalization.
-    #
-    # database_identifier:
-
-        ## @param template - string - optional - default: $resolved_hostname
-        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
-        ## You can use the following variables, prefixed by `$` in the template:
-        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
-        ## - host: The provided host of the instance.
-        ## - port: The port number of the instance.
-        ## In addition, you can use any key from the `tags` section of the configuration.
-        #
-        # template: $env-$resolved_hostname:$port
-
-    ## @param dbstrict - boolean - optional - default: false
-    ## Whether to restrict the scope of the check to just the database in question.
-    ## Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
-    #
-    # dbstrict: false
-
-    ## @param ignore_databases - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
-    ## A list of databases to ignore. No metrics or statement samples will be collected for these databases.
-    ## Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
-    ## set collect_default_database to false in addition to adding it to this array.
-    ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
-    #
-    # ignore_databases:
-    #   - template0
-    #   - template1
-    #   - rdsadmin
-    #   - azure_maintenance
-    #   - cloudsqladmin
-    #   - alloydbadmin
-    #   - alloydbmetadata
-
-    ## @param ignore_schemas_owned_by - list of strings - optional - default: ['rds_superuser', 'rdsadmin']
-    ## A list of database users which own schemas to ignore.
-    ## No metrics will be collected for these schemas.
-    ## Each value can be a plain string or a Postgres pattern.
-    #
-    # ignore_schemas_owned_by:
-    #   - rds_superuser
-    #   - rdsadmin
-    #   - user123
-    #   - dev_%_owner
-
-    ## @param ssl - string - optional - default: allow
-    ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
-    ## is negotiated with the server.
-    ##
-    ## There are six modes:
-    ## - `disable`: Only tries a non-SSL connection.
-    ## - `allow`: First tries a non-SSL connection; if it fails, tries an SSL connection.
-    ## - `prefer`: First tries an SSL connection; if it fails, tries a non-SSL connection.
-    ## - `require`: Only tries an SSL connection. If a root CA file is present, verifies the certificate in
-    ##              the same way as if verify-ca was specified.
-    ## - `verify-ca`: Only tries an SSL connection, and verifies that the server certificate is issued by a
-    ##                trusted certificate authority (CA).
-    ## - `verify-full`: Only tries an SSL connection and verifies that the server certificate is issued by a
-    ##                  trusted CA and that the requested server host name matches the one in the certificate.
-    ##
-    ## For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
-    #
-    # ssl: allow
-
-    ## @param ssl_root_cert - string - optional
-    ## The path to the ssl root certificate.
-    ##
-    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
-    #
-    # ssl_root_cert: <SSL_ROOT_CERT>
-
-    ## @param ssl_cert - string - optional
-    ## The path to the ssl certificate.
-    ##
-    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
-    #
-    # ssl_cert: <SSL_CERT>
-
-    ## @param ssl_key - string - optional
-    ## The path to the ssl client key.
-    ##
-    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
-    #
-    # ssl_key: <SSL_KEY>
-
-    ## @param ssl_password - string - optional
-    ## The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
-    ## in encrypted form on disk.
-    ##
-    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
-    #
-    # ssl_password: <SSL_PASSWORD>
-
-    ## @param query_timeout - integer - optional - default: 5000
-    ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
-    ## to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
-    ## starting from the time the command arrives at the server from the client. A value of zero turns this off.
-    ## Cancelled queries won't log any metrics.
-    #
-    # query_timeout: 5000
+    # dbm: false
 
     ## @param relations - (list of string or mapping) - optional - default: []
     ## The list of relations/tables must be specified here to track per-relation (table, index, view, etc.) metrics.
@@ -216,15 +101,135 @@ instances:
     #     - r
     #     - p
 
+    ## @param collect_function_metrics - boolean - optional - default: false
+    ## If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions.
+    #
+    # collect_function_metrics: false
+
     ## @param max_relations - integer - optional - default: 300
     ## Determines the maximum number of relations to fetch.
     #
     # max_relations: 300
 
-    ## @param collect_function_metrics - boolean - optional - default: false
-    ## If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions.
+    ## @param ssl - string - optional - default: allow
+    ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
+    ## is negotiated with the server.
+    ##
+    ## There are six modes:
+    ## - `disable`: Only tries a non-SSL connection.
+    ## - `allow`: First tries a non-SSL connection; if it fails, tries an SSL connection.
+    ## - `prefer`: First tries an SSL connection; if it fails, tries a non-SSL connection.
+    ## - `require`: Only tries an SSL connection. If a root CA file is present, verifies the certificate in
+    ##              the same way as if verify-ca was specified.
+    ## - `verify-ca`: Only tries an SSL connection, and verifies that the server certificate is issued by a
+    ##                trusted certificate authority (CA).
+    ## - `verify-full`: Only tries an SSL connection and verifies that the server certificate is issued by a
+    ##                  trusted CA and that the requested server host name matches the one in the certificate.
+    ##
+    ## For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
-    # collect_function_metrics: false
+    # ssl: allow
+
+    ## @param query_timeout - integer - optional - default: 5000
+    ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
+    ## to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
+    ## starting from the time the command arrives at the server from the client. A value of zero turns this off.
+    ## Cancelled queries won't log any metrics.
+    #
+    # query_timeout: 5000
+
+    ## @param reported_hostname - string - optional
+    ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+    ## and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+    #
+    # reported_hostname: <REPORTED_HOSTNAME>
+
+    ## @param ignore_databases - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
+    ## A list of databases to ignore. No metrics or statement samples will be collected for these databases.
+    ## Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
+    ## set collect_default_database to false in addition to adding it to this array.
+    ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
+    #
+    # ignore_databases:
+    #   - template0
+    #   - template1
+    #   - rdsadmin
+    #   - azure_maintenance
+    #   - cloudsqladmin
+    #   - alloydbadmin
+    #   - alloydbmetadata
+
+    ## @param exclude_hostname - boolean - optional - default: false
+    ## Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
+    #
+    # exclude_hostname: false
+
+    ## Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+    ## billable instance.
+    ##
+    ## The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
+    ##
+    ## This value will be used as-is for the display name of the instance but will be normalized
+    ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
+    ## for more details on Datadog tag normalization.
+    #
+    # database_identifier:
+
+        ## @param template - string - optional - default: $resolved_hostname
+        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
+        ## You can use the following variables, prefixed by `$` in the template:
+        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+        ## - host: The provided host of the instance.
+        ## - port: The port number of the instance.
+        ## In addition, you can use any key from the `tags` section of the configuration.
+        #
+        # template: $env-$resolved_hostname:$port
+
+    ## @param dbstrict - boolean - optional - default: false
+    ## Whether to restrict the scope of the check to just the database in question.
+    ## Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
+    #
+    # dbstrict: false
+
+    ## @param ignore_schemas_owned_by - list of strings - optional - default: ['rds_superuser', 'rdsadmin']
+    ## A list of database users which own schemas to ignore.
+    ## No metrics will be collected for these schemas.
+    ## Each value can be a plain string or a Postgres pattern.
+    #
+    # ignore_schemas_owned_by:
+    #   - rds_superuser
+    #   - rdsadmin
+    #   - user123
+    #   - dev_%_owner
+
+    ## @param ssl_root_cert - string - optional
+    ## The path to the ssl root certificate.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_root_cert: <SSL_ROOT_CERT>
+
+    ## @param ssl_cert - string - optional
+    ## The path to the ssl certificate.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_cert: <SSL_CERT>
+
+    ## @param ssl_key - string - optional
+    ## The path to the ssl client key.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_key: <SSL_KEY>
+
+    ## @param ssl_password - string - optional
+    ## The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
+    ## in encrypted form on disk.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_password: <SSL_PASSWORD>
 
     ## @param collect_count_metrics - boolean - optional - default: true
     ## Collect count of user tables from pg_class.
@@ -428,11 +433,6 @@ instances:
     ## The name is displayed in the pg_stat_activity view and included in CSV log entries.
     #
     # application_name: datadog-agent
-
-    ## @param dbm - boolean - optional - default: false
-    ## Set to `true` to enable Database Monitoring.
-    #
-    # dbm: false
 
     ## @param pg_stat_statements_view - string - optional - default: pg_stat_statements
     ## Set this value if you want to define a custom view or function to allow the datadog user to query the
