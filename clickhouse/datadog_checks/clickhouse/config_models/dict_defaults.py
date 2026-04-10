@@ -42,3 +42,14 @@ def instance_query_completions():
         max_samples_per_collection=1000,
         run_sync=False,
     )
+
+
+def instance_query_errors():
+    return instance.QueryErrors(
+        enabled=True,
+        collection_interval=10,
+        samples_per_hour_per_query=60,
+        seen_samples_cache_maxsize=10000,
+        max_samples_per_collection=1000,
+        run_sync=False,
+    )

@@ -299,6 +299,62 @@ def test_checkpoint_persistence(mock_agent, check_with_dbm):
     assert int(loaded_checkpoint) == test_checkpoint
 
 
+def test_collect_completed_queries_tables_are_strings(check_with_dbm):
+    """
+    Test that table names in the collected row_dict are plain Python str, even when
+    clickhouse-connect returns Array(LowCardinality(String)) elements as non-str types.
+    """
+    query_completions = check_with_dbm.query_completions
+
+    # Simulate a string-like type that clickhouse-connect may return for LowCardinality(String)
+    class LowCardinalityStr(str):
+        pass
+
+    mock_row = (
+        12345678901234567890,           # normalized_query_hash (int / UInt64)
+        'node-1',                       # server_node
+        'SELECT * FROM orders',         # query_text
+        'default',                      # user
+        'QueryFinish',                  # query_type
+        ['default'],                    # databases
+        [LowCardinalityStr('orders'), LowCardinalityStr('users')],  # tables as LowCardinality
+        100.5,                          # query_duration_ms
+        1000,                           # read_rows
+        102400,                         # read_bytes
+        0,                              # written_rows
+        0,                              # written_bytes
+        100,                            # result_rows_count
+        10240,                          # result_bytes
+        5242880,                        # memory_usage
+        1746205423000000,               # query_start_time_microseconds
+        1746205423150500,               # event_time_microseconds
+        'query-id-123',                 # query_id
+        'query-id-123',                 # initial_query_id
+        'Select',                       # query_kind
+        True,                           # is_initial_query
+    )
+
+    with (
+        mock.patch.object(query_completions, '_execute_query', return_value=[mock_row]),
+        mock.patch.object(query_completions._check, 'get_system_table', return_value='system.query_log'),
+        mock.patch.object(
+            query_completions,
+            '_build_per_node_checkpoint_filter',
+            return_value=('1=1', 0, {}),
+        ),
+        mock.patch.object(query_completions, '_set_checkpoint_from_event_time'),
+    ):
+        result_rows = query_completions._collect_completed_queries()
+
+    assert result_rows is not None
+    assert len(result_rows) == 1
+    tables = result_rows[0]['tables']
+    assert isinstance(tables, list)
+    for t in tables:
+        assert type(t) is str, f"Expected str, got {type(t)}: {t!r}"
+    assert tables == ['orders', 'users']
+
+
 def test_default_config_values():
     """Test that default configuration values are applied correctly"""
     instance = {
