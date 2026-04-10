@@ -43,7 +43,7 @@ jobs:
       DD_TRACE_ANALYTICS_ENABLED: "true"
 
     permissions:
-       # needed for dd-sts and codecov in test-target.yml, allows the action to get a JWT signed by Github
+       # needed for dd-sts
        id-token: write
        # needed for compute-matrix in test-target.yml
        contents: read
@@ -135,16 +135,6 @@ jobs:
       with:
         name: "test-results-${{ inputs.target || 'tls' }}"
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
-
-    - name: Upload coverage data
-      if: >
-        !github.event.repository.private &&
-        always()
-      uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
-      with:
-        use_oidc: true
-        files: "${{ inputs.target || 'tls' }}/coverage.xml"
-        flags: "${{ inputs.target || 'tls' }}"
 
     - name: Upload coverage to Datadog
       if: >
