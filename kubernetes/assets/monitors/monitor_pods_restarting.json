@@ -1,14 +1,14 @@
 {
   "version": 2,
   "created_at": "2020-07-28",
-  "last_updated_at": "2025-06-12",
+  "last_updated_at": "2026-04-09",
   "title": "Pods are restarting",
   "tags": [
     "integration:kubernetes"
   ],
   "description": "Kubernetes pods restart according to the restart policy. A restarting container can indicate problems with memory, CPU usage, or an application exiting prematurely. This monitor tracks when pods are restarting multiple times.",
   "definition": {
-    "message": "{{#is_alert}}\n\n## What's happening?\nThere has been an increase of more than 5 container restarts in the pod {{pod_name.name}} in the last 5 minutes.\n\n{{/is_alert}}",
+    "message": "{{#is_alert}}\n\n## What's happening?\nThere has been an increase of more than 5 container restarts in the pod {{pod_name.name}} in the last 5 minutes.\n\n## Related Links\n\n- [Logs](/logs?query=kube_cluster_name:{{kube_cluster_name.name}}+pod_name:{{pod_name.name}})\n- [Infrastructure](/infrastructure?filters=kube_cluster_name:{{kube_cluster_name.name}},pod_name:{{pod_name.name}})\n- [Metrics Explorer (kubernetes.containers.restarts)](/metric/explorer?exp_metric=kubernetes.containers.restarts&exp_scope=kube_cluster_name:{{kube_cluster_name.name}},pod_name:{{pod_name.name}}&exp_agg=avg&exp_type=line)\n\n{{/is_alert}}",
     "name": "[Kubernetes] Monitor Kubernetes Pods Restarting",
     "options": {
       "escalation_message": "",

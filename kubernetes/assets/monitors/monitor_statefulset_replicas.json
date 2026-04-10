@@ -1,14 +1,14 @@
 {
   "version": 2,
   "created_at": "2020-07-28",
-  "last_updated_at": "2025-06-12",
+  "last_updated_at": "2026-04-09",
   "title": "Kubernetes Statefulset Replicas are failing",
   "tags": [
     "integration:kubernetes"
   ],
   "description": "Kubernetes replicas are clones that facilitate self-healing for pods. Each pod has a desired number of replica Pods that should be running at any given time. This monitor tracks when the number of replicas per statefulset is falling.",
   "definition": {
-    "message": "{{#is_alert}}\n\n## What's happening?\nThere are at least 2 desired replicas that are not ready for {{kube_namespace.name}}/{{kube_stateful_set.name}} StatefulSet over the last 15 minutes.\n\n{{/is_alert}}\n\n This might present an unsafe situation for any further manual operations, such as killing other pods.",
+    "message": "{{#is_alert}}\n\n## What's happening?\nThere are at least 2 desired replicas that are not ready for {{kube_namespace.name}}/{{kube_stateful_set.name}} StatefulSet over the last 15 minutes.\n\n## Related Links\n\n- [Logs](/logs?query=kube_cluster_name:{{kube_cluster_name.name}}+kube_namespace:{{kube_namespace.name}}+kube_stateful_set:{{kube_stateful_set.name}})\n- [Infrastructure](/infrastructure?filters=kube_cluster_name:{{kube_cluster_name.name}},kube_namespace:{{kube_namespace.name}},kube_stateful_set:{{kube_stateful_set.name}})\n- [Metrics Explorer (kubernetes_state.statefulset.replicas_desired)](/metric/explorer?exp_metric=kubernetes_state.statefulset.replicas_desired&exp_scope=kube_cluster_name:{{kube_cluster_name.name}},kube_namespace:{{kube_namespace.name}},kube_stateful_set:{{kube_stateful_set.name}}&exp_agg=avg&exp_type=line)\n- [Metrics Explorer (kubernetes_state.statefulset.replicas_ready)](/metric/explorer?exp_metric=kubernetes_state.statefulset.replicas_ready&exp_scope=kube_cluster_name:{{kube_cluster_name.name}},kube_namespace:{{kube_namespace.name}},kube_stateful_set:{{kube_stateful_set.name}}&exp_agg=avg&exp_type=line)\n\n{{/is_alert}}\n\n This might present an unsafe situation for any further manual operations, such as killing other pods.",
     "name": "[Kubernetes] Monitor Kubernetes Statefulset Replicas",
     "options": {
       "escalation_message": "",
