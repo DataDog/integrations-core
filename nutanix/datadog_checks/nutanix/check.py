@@ -144,12 +144,12 @@ class NutanixCheck(AgentCheck):
     def check(self, _):
         self.log.info("Starting check for Prism Central: %s:%s", self.pc_ip, self.pc_port)
 
+        self.infrastructure_monitor.reset_state()
+        self.activity_monitor.reset_state()
+
         if not self._check_health():
             self.log.error("[PC:%s:%s] Health check failed, aborting", self.pc_ip, self.pc_port)
             return
-
-        self.infrastructure_monitor.reset_state()
-        self.activity_monitor.reset_state()
         self.infrastructure_monitor.init_collection_time_window()
         start_time, end_time = self.infrastructure_monitor.collection_time_window
         window_seconds = (datetime.fromisoformat(end_time) - datetime.fromisoformat(start_time)).total_seconds()

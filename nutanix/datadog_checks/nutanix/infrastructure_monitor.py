@@ -182,15 +182,13 @@ class InfrastructureMonitor:
                 pattern=r'(?P<major>\d+)\.(?P<minor>\d+)',
                 final_scheme='semver',
             )
-      
+
     def _report_cluster_metrics(
         self, cluster_id: str, cluster_name: str, cluster: dict, cluster_tags: list[str]
     ) -> None:
         """Report basic metrics and time-series stats for a cluster."""
         self._report_cluster_basic_metrics(cluster, cluster_tags)
         self._report_cluster_stats(cluster_name, cluster_id, cluster_tags)
-
-
 
     def _process_vm(self, vm: dict, vm_stats_dict: dict[str, list[dict]], cluster_name: str) -> bool:
         """Report metrics for a single VM if it passes filters."""
@@ -221,19 +219,19 @@ class InfrastructureMonitor:
 
         self._report_vm_capacity_metrics(vm, hostname, vm_tags)
 
-    def _extract_vm_capacity(self, vm: dict) -> tuple[int, int]:
-        """Return (vcpus_allocated, memory_bytes) for a VM."""
-        num_sockets = int(vm.get("numSockets") or 0)
-        num_cores_per_socket = int(vm.get("numCoresPerSocket") or 0)
-        memory_bytes = int(vm.get("memorySizeBytes") or 0)
-        return num_sockets * num_cores_per_socket, memory_bytes
-
-    def _report_vm_capacity_metrics(self, vm: dict, hostname: str, vm_tags: list[str]) -> None:
-        """Report VM capacity metrics (CPU and memory allocation)."""
+    def _extract_vm_capacity(self, vm: dict) -> tuple[int, int, int, int, int]:
+        """Return (sockets, cores_per_socket, threads_per_core, vcpus_allocated, memory_bytes) for a VM."""
         num_sockets = int(vm.get("numSockets") or 0)
         num_cores_per_socket = int(vm.get("numCoresPerSocket") or 0)
         num_threads_per_core = int(vm.get("numThreadsPerCore") or 0)
-        vcpus_allocated, memory_bytes = self._extract_vm_capacity(vm)
+        memory_bytes = int(vm.get("memorySizeBytes") or 0)
+        return num_sockets, num_cores_per_socket, num_threads_per_core, num_sockets * num_cores_per_socket, memory_bytes
+
+    def _report_vm_capacity_metrics(self, vm: dict, hostname: str, vm_tags: list[str]) -> None:
+        """Report VM capacity metrics (CPU and memory allocation)."""
+        num_sockets, num_cores_per_socket, num_threads_per_core, vcpus_allocated, memory_bytes = (
+            self._extract_vm_capacity(vm)
+        )
 
         self.check.gauge("vm.cpu.sockets", num_sockets, hostname=hostname, tags=vm_tags)
         self.check.gauge("vm.cpu.cores_per_socket", num_cores_per_socket, hostname=hostname, tags=vm_tags)
@@ -278,7 +276,7 @@ class InfrastructureMonitor:
                     continue
                 if exclude_filtered and not self._should_collect_vm(vm):
                     continue
-                vcpus, memory = self._extract_vm_capacity(vm)
+                _, _, _, vcpus, memory = self._extract_vm_capacity(vm)
                 self._cluster_capacity.add_vm(vcpus, memory)
 
         cap = self._cluster_capacity
