@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' ]; then
-  builder_changed="false"
+  builder_changed="true"  # hardcoded: this branch always needs a builder rebuild
   should_run_build="true"
 else
 
