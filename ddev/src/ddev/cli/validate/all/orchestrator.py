@@ -22,34 +22,39 @@ from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator, SyncP
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
-REPO_WIDE_VALIDATIONS: frozenset[str] = frozenset({"ci", "codeowners", "dep", "labeler", "licenses"})
+
+@dataclass(frozen=True)
+class ValidationConfig:
+    repo_wide: bool = False
+    fix_flag: str | None = None
+
 
 # This is a subset of the available validations. Some validations still live
 # in datadog-checks-dev and are not yet migrated to ddev. Once all validations
 # are migrated, we can improve the command structure so each validation
-# auto-registers itself with this list instead of maintaining it manually.
-ALL_CORE_VALIDATIONS: list[str] = [
-    "agent-reqs",
-    "ci",
-    "codeowners",
-    "config",
-    "dep",
-    "http",
-    "imports",
-    "integration-style",
-    "jmx-metrics",
-    "labeler",
-    "legacy-signature",
-    "license-headers",
-    "licenses",
-    "metadata",
-    "models",
-    "openmetrics",
-    "package",
-    "readmes",
-    "saved-views",
-    "version",
-]
+# auto-registers itself instead of maintaining this manually.
+VALIDATIONS: dict[str, ValidationConfig] = {
+    "agent-reqs": ValidationConfig(),
+    "ci": ValidationConfig(repo_wide=True, fix_flag="--sync"),
+    "codeowners": ValidationConfig(repo_wide=True),
+    "config": ValidationConfig(fix_flag="--sync"),
+    "dep": ValidationConfig(repo_wide=True),
+    "http": ValidationConfig(),
+    "imports": ValidationConfig(),
+    "integration-style": ValidationConfig(),
+    "jmx-metrics": ValidationConfig(),
+    "labeler": ValidationConfig(repo_wide=True, fix_flag="--sync"),
+    "legacy-signature": ValidationConfig(),
+    "license-headers": ValidationConfig(fix_flag="--fix"),
+    "licenses": ValidationConfig(repo_wide=True, fix_flag="--sync"),
+    "metadata": ValidationConfig(fix_flag="--sync"),
+    "models": ValidationConfig(fix_flag="--sync"),
+    "openmetrics": ValidationConfig(),
+    "package": ValidationConfig(),
+    "readmes": ValidationConfig(),
+    "saved-views": ValidationConfig(),
+    "version": ValidationConfig(),
+}
 
 SUBPROCESS_TIMEOUT = 580
 
@@ -116,12 +121,13 @@ class ValidationOrchestrator(EventBusOrchestrator):
         app: Application,
         target: str | None,
         validations: list[str] | None = None,
+        fix: bool = False,
         pr_number: int | None = None,
         grace_period: float = 5,
         max_timeout: float = 600,
         subprocess_timeout: float = SUBPROCESS_TIMEOUT,
     ):
-        validations = validations if validations is not None else list(ALL_CORE_VALIDATIONS)
+        validations = validations if validations is not None else list(VALIDATIONS)
         super().__init__(
             logger=app.logger,
             max_timeout=max_timeout,
@@ -131,6 +137,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
         self._app = app
         self._validations = validations
         self._target = target
+        self._fix = fix
         self._pr_number = pr_number
         self._results: dict[str, ValidationResult] = {}
 
@@ -141,10 +148,12 @@ class ValidationOrchestrator(EventBusOrchestrator):
 
     async def on_initialize(self) -> None:
         for name in self._validations:
-            # Repo-wide validations (ci, codeowners, etc.) always run without a
-            # target because they check the entire repository. Per-integration
-            # validations receive the target (e.g. "changed") to scope their check.
-            args: list[str] = [] if name in REPO_WIDE_VALIDATIONS else ([self._target] if self._target else [])
+            config = VALIDATIONS.get(name, ValidationConfig())
+            args: list[str] = []
+            if not config.repo_wide and self._target:
+                args.append(self._target)
+            if self._fix and config.fix_flag:
+                args.append(config.fix_flag)
             self.submit_message(ValidationMessage(id=name, args=args))
 
     async def on_message_received(self, message: BaseMessage) -> None:
@@ -183,15 +192,34 @@ class ValidationOrchestrator(EventBusOrchestrator):
                 write_step_summary(f"\n> Failed to post PR comment: {exc}")
 
     def _print_console_output(self) -> None:
-        passed = sum(bool(r.success) for r in self._results.values())
-        failed = sum(not r.success for r in self._results.values())
+        failures = {name: r for name, r in self._results.items() if not r.success}
+        passed = len(self._results) - len(failures)
         incomplete = len(self._validations) - len(self._results)
+
+        if failures:
+            self._app.display_info("")
+            for name, result in sorted(failures.items()):
+                config = VALIDATIONS.get(name, ValidationConfig())
+                output = result.stdout or result.stderr
+                self._app.display_error(f"── {name} {'─' * (60 - len(name))}")
+                if output:
+                    self._app.display_info(output.rstrip())
+                fix_cmd = f"ddev validate {name}"
+                if self._target and not config.repo_wide:
+                    fix_cmd += f" {self._target}"
+                if config.fix_flag:
+                    fix_cmd += f" {config.fix_flag}"
+                self._app.display_info(f"Fix: {fix_cmd}")
 
         self._app.display_info("")
         if incomplete:
             self._app.display_warning(f"{incomplete} validation(s) did not complete")
-        if failed or incomplete:
-            self._app.display_error(f"{failed} failed, {passed} passed")
+        if failures or incomplete:
+            self._app.display_error(f"{len(failures)} failed, {passed} passed")
+            fix_all_cmd = "ddev validate all --fix"
+            if self._target:
+                fix_all_cmd = f"ddev validate all {self._target} --fix"
+            self._app.display_info(f"\nRun `{fix_all_cmd}` to attempt to auto-fix supported validations.")
             self._app.abort()
         else:
             self._app.display_success(f"All {passed} validations passed")

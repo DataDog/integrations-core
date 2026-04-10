@@ -18,14 +18,16 @@ from ddev.cli.validate.all.github import (
     write_step_summary,
 )
 from ddev.cli.validate.all.orchestrator import (
-    ALL_CORE_VALIDATIONS,
-    REPO_WIDE_VALIDATIONS,
+    VALIDATIONS,
     ValidationMessage,
     ValidationOrchestrator,
     ValidationProcessor,
     ValidationResult,
 )
 from ddev.event_bus.orchestrator import BaseMessage
+
+ALL_NAMES = list(VALIDATIONS)
+REPO_WIDE_NAMES = {name for name, cfg in VALIDATIONS.items() if cfg.repo_wide}
 
 
 @pytest.fixture(autouse=True)
@@ -142,7 +144,7 @@ class CapturingOrchestrator(ValidationOrchestrator):
     [
         ("config", "changed", ["changed"]),
         ("metadata", "changed", ["changed"]),
-        *[pytest.param(name, "changed", [], id=f"repo-wide-{name}") for name in sorted(REPO_WIDE_VALIDATIONS)],
+        *[pytest.param(name, "changed", [], id=f"repo-wide-{name}") for name in sorted(REPO_WIDE_NAMES)],
         ("config", None, []),
         ("ci", None, []),
     ],
@@ -157,11 +159,11 @@ def test_on_initialize_message_args(mock_app, validation: str, target: str | Non
 
 
 def test_on_initialize_submits_one_message_per_validation(mock_app):
-    orch = CapturingOrchestrator(app=mock_app, validations=ALL_CORE_VALIDATIONS, target=None)
+    orch = CapturingOrchestrator(app=mock_app, validations=ALL_NAMES, target=None)
     asyncio.run(orch.on_initialize())
 
-    assert len(orch.submitted) == len(ALL_CORE_VALIDATIONS)
-    assert {m.id for m in orch.submitted} == set(ALL_CORE_VALIDATIONS)
+    assert len(orch.submitted) == len(ALL_NAMES)
+    assert {m.id for m in orch.submitted} == set(ALL_NAMES)
 
 
 # --- ValidationOrchestrator exit code logic ---
@@ -410,7 +412,9 @@ def testformat_pr_comment_one_failure_with_target(helpers):
         <summary>Passed (1)</summary>
 
         - `ci`
-        </details>""")
+        </details>
+
+        Run `ddev validate all changed --fix` to attempt to auto-fix supported validations.""")
     assert format_pr_comment(results, target="changed") == expected
 
 
@@ -475,7 +479,8 @@ def testformat_pr_comment_with_error_and_warning(helpers):
         ddev validate config
         ```
         </details>
-        """)
+
+        Run `ddev validate all --fix` to attempt to auto-fix supported validations.""")
     assert (
         format_pr_comment(
             results, target=None, error="Error running validations: boom", warning="Could not determine PR number"
@@ -556,13 +561,13 @@ def test_all_command_passes_when_all_validations_succeed(ddev):
         result = ddev("validate", "all", *FAST_ORCHESTRATOR_OPTS)
 
     assert result.exit_code == 0, result.output
-    assert set(invoked) == set(ALL_CORE_VALIDATIONS)
+    assert set(invoked) == set(ALL_NAMES)
 
 
-def test_all_command_aborts_on_failure(ddev):
+def test_all_command_aborts_on_failure_with_details(ddev):
     def fake_run(cmd, **kwargs):
-        if cmd[-1] == "config":
-            return _completed_process(returncode=1, stderr="bad config")
+        if "config" in cmd:
+            return _completed_process(returncode=1, stdout="invalid config found")
         return _completed_process(returncode=0, stdout="ok")
 
     with patch("subprocess.run", side_effect=fake_run):
@@ -570,6 +575,10 @@ def test_all_command_aborts_on_failure(ddev):
 
     assert result.exit_code != 0
     assert "1 failed" in result.output
+    assert "── config" in result.output
+    assert "invalid config found" in result.output
+    assert "Fix: ddev validate config --sync" in result.output
+    assert "Run `ddev validate all --fix` to attempt to auto-fix supported validations." in result.output
 
 
 def test_all_command_passes_target_to_per_integration_validations(ddev):
@@ -583,9 +592,31 @@ def test_all_command_passes_target_to_per_integration_validations(ddev):
         result = ddev("validate", "all", "changed", *FAST_ORCHESTRATOR_OPTS)
 
     assert result.exit_code == 0, result.output
-    for name in ALL_CORE_VALIDATIONS:
+    for name in ALL_NAMES:
         assert name in captured
-        if name not in REPO_WIDE_VALIDATIONS:
+        if name not in REPO_WIDE_NAMES:
             assert "changed" in captured[name]
         else:
             assert "changed" not in captured[name]
+
+
+def test_all_command_fix_passes_correct_flags(ddev):
+    captured: dict[str, list[str]] = {}
+
+    def fake_run(cmd, **kwargs):
+        name = cmd[4]
+        captured[name] = list(cmd)
+        return _completed_process(returncode=0, stdout="ok")
+
+    with patch("subprocess.run", side_effect=fake_run):
+        result = ddev("validate", "all", "--fix", *FAST_ORCHESTRATOR_OPTS)
+
+    assert result.exit_code == 0, result.output
+    for name, config in VALIDATIONS.items():
+        assert name in captured
+        if config.fix_flag:
+            assert config.fix_flag in captured[name], f"{name} should have {config.fix_flag}"
+        else:
+            assert "--fix" not in captured[name] and "--sync" not in captured[name], (
+                f"{name} should not have a fix flag"
+            )

@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 @click.command(short_help="Run all validations in parallel")
 @click.argument("target", required=False)
+@click.option("--fix", is_flag=True, help="Attempt to auto-fix issues (passes --sync/--fix to each validation).")
 @click.option("--grace-period", type=float, default=5, help="Seconds to wait for stragglers after first completion.")
 @click.option("--max-timeout", type=float, default=600, help="Maximum total seconds before the orchestrator stops.")
 @click.option(
@@ -20,7 +21,12 @@ if TYPE_CHECKING:
 )
 @click.pass_obj
 def all(
-    app: Application, target: str | None, grace_period: float, max_timeout: float, subprocess_timeout: float
+    app: Application,
+    target: str | None,
+    fix: bool,
+    grace_period: float,
+    max_timeout: float,
+    subprocess_timeout: float,
 ) -> None:
     """Run all validations in parallel.
 
@@ -34,6 +40,7 @@ def all(
     orchestrator = ValidationOrchestrator(
         app=app,
         target=target,
+        fix=fix,
         pr_number=pr_number,
         grace_period=grace_period,
         max_timeout=max_timeout,

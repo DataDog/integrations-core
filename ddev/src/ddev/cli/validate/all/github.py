@@ -141,4 +141,8 @@ def format_pr_comment(
         items = "\n".join(f"- `{name}`" for name in sorted(successes))
         parts.append(PASSED_SECTION_TEMPLATE.substitute(count=len(successes), items=items))
 
-    return "\n".join(parts)
+    fix_all_cmd = f"ddev validate all{fix_target} --fix"
+    body = "\n".join(parts).rstrip()
+    body += f"\n\nRun `{fix_all_cmd}` to attempt to auto-fix supported validations."
+
+    return body
