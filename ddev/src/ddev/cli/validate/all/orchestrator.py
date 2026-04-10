@@ -220,11 +220,22 @@ class ValidationOrchestrator(EventBusOrchestrator):
             httpx_logger.setLevel(previous_level)
 
     def _print_console_output(self) -> None:
-        failures = {name for name, r in self._results.items() if not r.success}
+        from rich.rule import Rule
+
+        failures = {name: r for name, r in self._results.items() if not r.success}
         passed = len(self._results) - len(failures)
         incomplete = len(self._validations) - len(self._results)
 
         self._app.display_info("")
+
+        if failures:
+            for name, result in sorted(failures.items()):
+                self._app.console.print(Rule(title=name, style="red"))
+                output = result.stdout or result.stderr
+                if output:
+                    self._app.console.print(output.rstrip())
+                self._app.console.print()
+
         if incomplete:
             self._app.display_warning(f"{incomplete} validation(s) did not complete")
         if failures or incomplete:

@@ -90,8 +90,7 @@ def format_pr_comment(
     if warning:
         parts.append(f"> **Warning:** {warning}\n")
 
-    parts.append("| Validation | Status |")
-    parts.append("|---|---|")
+    parts.extend(("| Validation | Status |", "|---|---|"))
     for name in sorted(results):
         status = "❌" if name in failures else "✅"
         parts.append(f"| `{name}` | {status} |")

@@ -144,12 +144,19 @@ def test_format_pr_comment_one_failure_with_target(helpers):
     assert format_pr_comment(results, target="changed") == expected
 
 
-def test_format_pr_comment_no_target():
+def test_format_pr_comment_no_target(helpers):
     results = {
         "config": ValidationResult(name="config", success=False, stdout="fail", stderr="", duration=1.0),
     }
-    comment = format_pr_comment(results, target=None)
-    assert "ddev validate all --fix" in comment
+    expected = helpers.dedent("""
+        ## Validation Report
+
+        | Validation | Status |
+        |---|---|
+        | `config` | ❌ |
+
+        Run `ddev validate all --fix` to attempt to auto-fix supported validations.""")
+    assert format_pr_comment(results, target=None) == expected
 
 
 def test_format_pr_comment_no_fix_command_when_all_pass():
@@ -182,6 +189,14 @@ def test_format_pr_comment_with_error_and_warning(helpers):
         )
         == expected
     )
+
+
+def test_format_pr_comment_does_not_include_output():
+    results = {
+        "config": ValidationResult(name="config", success=False, stdout="secret error output", stderr="", duration=1.0),
+    }
+    comment = format_pr_comment(results, target=None)
+    assert "secret error output" not in comment
 
 
 # --- get_workflow_run_url ---
