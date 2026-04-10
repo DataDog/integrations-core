@@ -7,10 +7,10 @@ import os
 from pathlib import Path
 from urllib.parse import urlparse
 
-import mock
 import pytest
-import requests
 
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev.fs import get_here
 
 from .common import INSTANCE
@@ -83,17 +83,13 @@ def mock_http_call(mock_responses):
         response = mock_responses(method, url, file=file, headers=headers, params=params)
         if response is not None:
             return response
-        http_response = requests.models.Response()
-        http_response.status_code = 404
-        http_response.reason = "Not Found"
-        http_response.url = url
-        raise requests.exceptions.HTTPError(response=http_response)
+        raise HTTPStatusError('404 Client Error', response=MockHTTPResponse(status_code=404, url=url))
 
     yield call
 
 
 @pytest.fixture
-def mock_http_get(request, monkeypatch, mock_http_call):
+def mock_http_get(request, mock_http, mock_http_call):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.pop('http_error', {})
 
@@ -102,12 +98,10 @@ def mock_http_get(request, monkeypatch, mock_http_call):
         url = get_url_path(url)
         if http_error and url in http_error:
             return http_error[url]
-        mock_status_code = mock.MagicMock(return_value=200)
         headers = kwargs.get('headers')
         params = kwargs.get('params')
-        mock_json = mock.MagicMock(return_value=mock_http_call(method, url, headers=headers, params=params))
-        return mock.MagicMock(json=mock_json, status_code=mock_status_code)
+        json_data = mock_http_call(method, url, headers=headers, params=params)
+        return MockHTTPResponse(json_data=json_data)
 
-    mock_get = mock.MagicMock(side_effect=get)
-    monkeypatch.setattr('requests.Session.get', mock_get)
-    return mock_get
+    mock_http.get.side_effect = get
+    return mock_http.get
