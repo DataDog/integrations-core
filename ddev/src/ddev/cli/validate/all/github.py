@@ -71,7 +71,7 @@ def get_workflow_run_url() -> str | None:
 def write_step_summary(content: str) -> None:
     if summary_path := os.environ.get("GITHUB_STEP_SUMMARY"):
         with contextlib.suppress(OSError):
-            with open(summary_path, "a") as f:
+            with open(summary_path, "a", encoding="utf-8") as f:
                 f.write(content + "\n")
 
 
