@@ -145,8 +145,9 @@ class KafkaCheck(AgentCheck):
     def _send_cluster_monitoring_heartbeat(self, total_contexts: int) -> None:
         cluster_id = self.config._kafka_cluster_id_override or ""
         auto_detected_id = ""
-        if self.client._cluster_metadata:
-            auto_detected_id = self.client._cluster_metadata.cluster_id or ""
+        cluster_metadata = getattr(self.client, '_cluster_metadata', None)
+        if cluster_metadata:
+            auto_detected_id = cluster_metadata.cluster_id or ""
         if not cluster_id:
             cluster_id = auto_detected_id
         payload = {
