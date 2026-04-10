@@ -471,6 +471,8 @@ jmx_metrics:
         bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=Produce(?:,version=.*)?'
         exclude_tags:
           - version
+        tags:
+          request_version: $version
         attribute:
           Count:
             metric_type: rate
@@ -498,6 +500,8 @@ jmx_metrics:
         bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchConsumer(?:,version=.*)?'
         exclude_tags:
           - version
+        tags:
+          request_version: $version
         attribute:
           Count:
             metric_type: rate
@@ -511,6 +515,8 @@ jmx_metrics:
         bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchFollower(?:,version=.*)?'
         exclude_tags:
           - version
+        tags:
+          request_version: $version
         attribute:
           Count:
             metric_type: rate
