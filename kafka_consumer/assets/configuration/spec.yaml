@@ -134,14 +134,15 @@ files:
           example: 1024
       - name: close_admin_client
         description: |
-          Release AdminClient at the end of execution for garbage collection. Originally, we kept the same AdminClient 
-          running over the entire life of the check. By deallocating the AdminClient after the check run, we should free 
-          up any memory used in the client, although the performance of the check run would be slower (since we will 
-          need to reconnect with a new client). Set this config option to false to improve performance.
+          Release AdminClient at the end of execution for garbage collection. When enabled, the AdminClient is
+          destroyed after each check run, freeing memory but requiring reconnection on the next run. When disabled
+          (default), the AdminClient is reused across check runs, which improves performance and avoids a known
+          librdkafka crash (assertion failure in rd_kafka_enq_once_del_source_return) that can occur when the
+          AdminClient is destroyed while coordinator requests are timing out.
         fleet_configurable: true
         value:
           type: boolean
-          example: true
+          example: false
       - name: monitor_all_broker_highwatermarks
         description: |
           Setting monitor_all_broker_highwatermarks to `true` tells the check to

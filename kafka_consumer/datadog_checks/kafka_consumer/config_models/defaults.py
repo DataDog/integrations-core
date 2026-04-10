@@ -13,7 +13,7 @@ def shared_kafka_timeout():
 
 
 def instance_close_admin_client():
-    return True
+    return False
 
 
 def instance_collect_consumer_group_state():
