@@ -6,6 +6,7 @@ files:
   - template: init_config
     options:
     - name: propagate_agent_tags
+      display_priority: 0
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
         When set to `true`, the tags from the agent host are added to the check's tags for all instances.
@@ -18,6 +19,7 @@ files:
   - template: instances
     options:
     - name: host
+      display_priority: 19
       description: |
         The hostname to connect to. To connect to a Unix socket, specify the full path to the socket directory,
         e.g. `/var/run/postgresql`.
@@ -26,6 +28,7 @@ files:
         type: string
         display_default: "localhost"
     - name: port
+      display_priority: 17
       description: The port to use when connecting to PostgreSQL.
       fleet_configurable: true
       formats: ["port"]
@@ -33,18 +36,21 @@ files:
         type: integer
         display_default: 5432
     - name: username
+      display_priority: 18
       description: The Datadog username created to connect to PostgreSQL.
       fleet_configurable: true
       value:
         type: string
         display_default: "datadog"
     - name: password
+      display_priority: 16
       description: The password associated with the Datadog user.
       fleet_configurable: true
       secret: true
       value:
         type: string
     - name: dbname
+      display_priority: 15
       description: |
         The name of the PostgreSQL database to monitor.
         Note: If omitted, the default system Postgres database is queried.
@@ -53,6 +59,7 @@ files:
         type: string
         display_default: postgres
     - name: reported_hostname
+      display_priority: 2
       description: |
         Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
         and can be useful to set a custom hostname when connecting to a remote database through a proxy.
@@ -61,12 +68,14 @@ files:
         type: string
         default: null
     - name: exclude_hostname
+      display_priority: 0
       description: |
         Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
       value:
         type: boolean
         example: false
     - name: database_identifier
+      display_priority: 0
       description: |
         Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
         billable instance.
@@ -90,6 +99,7 @@ files:
             - port: The port number of the instance.
             In addition, you can use any key from the `tags` section of the configuration.
     - name: dbstrict
+      display_priority: 0
       fleet_configurable: true
       description: |
         Whether to restrict the scope of the check to just the database in question.
@@ -99,6 +109,7 @@ files:
         display_default: false
         example: false
     - name: ignore_databases
+      display_priority: 1
       fleet_configurable: true
       description: |
         A list of databases to ignore. No metrics or statement samples will be collected for these databases.
@@ -126,6 +137,7 @@ files:
           - alloydbadmin
           - alloydbmetadata
     - name: ignore_schemas_owned_by
+      display_priority: 0
       fleet_configurable: true
       description: |
         A list of database users which own schemas to ignore.
@@ -144,6 +156,7 @@ files:
           - rds_superuser
           - rdsadmin
     - name: ssl
+      display_priority: 5
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
         is negotiated with the server.
@@ -166,6 +179,7 @@ files:
         example: 'allow'
         default: 'allow'
     - name: ssl_root_cert
+      display_priority: 0
       description: |
         The path to the ssl root certificate.
 
@@ -176,6 +190,7 @@ files:
         require_trusted_provider: true
         default: null
     - name: ssl_cert
+      display_priority: 0
       description: |
         The path to the ssl certificate.
 
@@ -186,6 +201,7 @@ files:
         require_trusted_provider: true
         default: null
     - name: ssl_key
+      display_priority: 0
       description: |
         The path to the ssl client key.
 
@@ -195,6 +211,7 @@ files:
         require_trusted_provider: true
         default: null
     - name: ssl_password
+      display_priority: 0
       description: |
         The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
         in encrypted form on disk.
@@ -205,6 +222,7 @@ files:
         type: string
         default: null
     - name: query_timeout
+      display_priority: 3
       fleet_configurable: true
       description: |
         Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
@@ -215,6 +233,7 @@ files:
         type: integer
         example: 5000
     - name: idle_connection_timeout
+      display_priority: 0
       fleet_configurable: true
       description: |
         Sets the timeout (in ms) a connection used in the connection pool will be idle until it is closed by the pooler.
@@ -225,6 +244,7 @@ files:
         type: integer
         example: 60000
     - name: max_connections
+      display_priority: 0
       hidden: true
       description: |
         Sets the upper bound limit on the number of concurrent connections the Agent can have on the database server.
@@ -237,6 +257,7 @@ files:
         example: 30
         display_default: 30
     - name: relations
+      display_priority: 13
       fleet_configurable: true
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index, view, etc.) metrics.
@@ -296,12 +317,14 @@ files:
               - r
               - p
     - name: max_relations
+      display_priority: 6
       fleet_configurable: true
       description: Determines the maximum number of relations to fetch.
       value:
         type: integer
         example: 300
     - name: collect_function_metrics
+      display_priority: 11
       fleet_configurable: true
       description: |
         If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions.
@@ -442,6 +465,7 @@ files:
               - test:postgresql
             metric_prefix: postgresql
     - name: custom_metrics
+      display_priority: 0
       description: This option is deprecated. Use `custom_queries` instead.
       hidden: true
       value:
@@ -449,6 +473,7 @@ files:
         items:
           type: object
     - name: database_autodiscovery
+      display_priority: 0
       fleet_configurable: true
       description: |
         Define the configuration for database autodiscovery.
@@ -527,6 +552,7 @@ files:
             example: 600
             display_default: 600
     - name: application_name
+      display_priority: 0
       fleet_configurable: true
       description: |
         The application_name can be any string of less than NAMEDATALEN characters (64 characters in a standard build).
@@ -536,6 +562,7 @@ files:
         type: string
         example: "datadog-agent"
     - name: dbm
+      display_priority: 14
       fleet_configurable: true
       description: |
         Set to `true` to enable Database Monitoring.
@@ -544,6 +571,7 @@ files:
         example: false
         display_default: false
     - name: pg_stat_statements_view
+      display_priority: 0
       description: |
         Set this value if you want to define a custom view or function to allow the datadog user to query the
         `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.
@@ -553,6 +581,7 @@ files:
         example: show_pg_stat_statements()
         display_default: pg_stat_statements
     - name: pg_stat_activity_view
+      display_priority: 0
       hidden: true
       description: |
         Set this value if you want to define a custom view or function to allow the datadog user to query the
@@ -562,6 +591,7 @@ files:
         type: string
         display_default: pg_stat_activity
     - name: query_encodings
+      display_priority: 0
       description: |
         Set this value if your database is encoded in SQL_ASCII and you have clients that use encodings other than UTF-8.
         When attempting to decode stored query text for query metrics, samples and activity, the agent will use these
@@ -579,6 +609,7 @@ files:
         display_default:
           - utf8
     - name: query_metrics
+      display_priority: 0
       fleet_configurable: true
       description: Configure collection of query metrics
       options:
@@ -655,6 +686,7 @@ files:
             type: integer
             example: 20_000_000
     - name: query_samples
+      display_priority: 0
       fleet_configurable: true
       description: Configure collection of explain plan samples
       options:
