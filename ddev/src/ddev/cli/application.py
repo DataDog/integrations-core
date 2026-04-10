@@ -17,7 +17,7 @@ from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
 
 
-class _AppLoggingHandler(logging.Handler):
+class AppLoggingHandler(logging.Handler):
     """Routes Python logging through the Application display methods."""
 
     def __init__(self, app: Application):
@@ -68,8 +68,9 @@ class Application(Terminal):
     @cached_property
     def logger(self) -> logging.Logger:
         logger = logging.getLogger("ddev.app")
-        logger.addHandler(_AppLoggingHandler(self))
-        logger.setLevel(logging.WARNING)
+        if not any(isinstance(h, AppLoggingHandler) for h in logger.handlers):
+            logger.addHandler(AppLoggingHandler(self))
+            logger.setLevel(logging.WARNING)
         return logger
 
     @property
