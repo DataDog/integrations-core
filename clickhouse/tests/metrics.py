@@ -347,11 +347,14 @@ OPTIONAL_METRICS = [
     'clickhouse.zk.watch.total',
 ]
 
-V_23_METRICS = [
+V_23_8_METRICS = [
     'clickhouse.backups.threads.active',
     'clickhouse.backups.threads.total',
     'clickhouse.backups_io.threads.active',
     'clickhouse.backups_io.threads.total',
+]
+
+V_23_METRICS = [
     'clickhouse.cache.async.insert',
     'clickhouse.cache.opened_file.time',
     'clickhouse.cache_dictionary.threads.active',
@@ -617,12 +620,16 @@ version_mapper = {
     '20': V_20_METRICS,
     '21': V_21_METRICS,
     '22': V_22_METRICS,
-    # 23+ uses cumulative lists: each version includes all metrics from prior versions
+    # 23.2 does not include backup thread metrics (added in 23.8+)
     '23': V_23_METRICS,
-    '24': V_23_METRICS + V_24_METRICS,
-    '25': V_23_METRICS + V_24_METRICS + V_25_METRICS,
+    '23.2': V_23_METRICS,
+    '23.8': V_23_METRICS + V_23_8_METRICS,
+    '24': V_23_METRICS + V_23_8_METRICS + V_24_METRICS,
+    '25': V_23_METRICS + V_23_8_METRICS + V_24_METRICS + V_25_METRICS,
 }
 
 
 def get_metrics(version):
-    return BASE_METRICS + version_mapper.get(version.split(".")[0], [])
+    # Try exact match (e.g. "23.2", "23.8") before falling back to major version (e.g. "23")
+    metrics = version_mapper.get(version, version_mapper.get(version.split(".")[0], []))
+    return BASE_METRICS + metrics
