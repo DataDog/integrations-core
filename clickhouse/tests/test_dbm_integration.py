@@ -353,10 +353,7 @@ def test_query_completions_data(aggregator, instance, dd_run_check, datadog_agen
     assert len(all_completions) > 0, "Expected at least one completion record in payload"
 
     expected_obfuscated = obfuscate_sql_with_metadata(query, check.query_completions._obfuscate_options)['query']
-    matching = [
-        c for c in all_completions
-        if c.get('query_details', {}).get('statement') == expected_obfuscated
-    ]
+    matching = [c for c in all_completions if c.get('query_details', {}).get('statement') == expected_obfuscated]
     assert len(matching) >= 1, (
         f"Expected at least 1 completion record for query: {query!r}.\n"
         f"Expected obfuscated: {expected_obfuscated!r}\n"
@@ -424,6 +421,5 @@ def test_query_samples_data(aggregator, instance, dd_run_check):
 
     statements = [row.get('statement', '') for row in all_activity]
     assert any('sleep' in s for s in statements), (
-        f"Expected to find the slow 'sleep' query in activity rows.\n"
-        f"Captured statements: {statements}"
+        f"Expected to find the slow 'sleep' query in activity rows.\nCaptured statements: {statements}"
     )
