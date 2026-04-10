@@ -6,7 +6,7 @@ import os
 import mock
 import requests
 
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 
 from .common import HERE
 from .metrics import WEB_METRICS
@@ -27,10 +27,10 @@ def test_service_check_critical(aggregator, dd_run_check, sonarqube_check, web_i
 def test_service_check_ok_version_empty(aggregator, dd_run_check, sonarqube_check, web_instance):
     with mock.patch('datadog_checks.sonarqube.check.SonarqubeCheck.http') as mock_http:
         mock_http.get.side_effect = [
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'version_empty')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'version_empty')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
         ]
         check = sonarqube_check(web_instance)
         global_tags = ['endpoint:{}'.format(web_instance['web_endpoint'])]
@@ -44,10 +44,10 @@ def test_service_check_ok_version_empty(aggregator, dd_run_check, sonarqube_chec
 def test_service_check_ok(aggregator, dd_run_check, sonarqube_check, web_instance):
     with mock.patch('datadog_checks.sonarqube.check.SonarqubeCheck.http') as mock_http:
         mock_http.get.side_effect = [
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
         ]
         check = sonarqube_check(web_instance)
         global_tags = ['endpoint:{}'.format(web_instance['web_endpoint'])]
@@ -61,10 +61,10 @@ def test_service_check_ok(aggregator, dd_run_check, sonarqube_check, web_instanc
 def test_service_check_ok_and_config_none(aggregator, dd_run_check, sonarqube_check, web_instance_config_none):
     with mock.patch('datadog_checks.sonarqube.check.SonarqubeCheck.http') as mock_http:
         mock_http.get.side_effect = [
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
         ]
         check = sonarqube_check(web_instance_config_none)
         global_tags = ['endpoint:{}'.format(web_instance_config_none['web_endpoint'])]
@@ -80,10 +80,10 @@ def test_service_check_ok_and_exclude_metrics(
 ):
     with mock.patch('datadog_checks.sonarqube.check.SonarqubeCheck.http') as mock_http:
         mock_http.get.side_effect = [
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
         ]
         check = sonarqube_check(web_instance_and_exclude_metrics)
         global_tags = ['endpoint:{}'.format(web_instance_and_exclude_metrics['web_endpoint'])]
@@ -99,11 +99,11 @@ def test_service_check_ok_with_autodiscovery_only_include(
 ):
     with mock.patch('datadog_checks.sonarqube.check.SonarqubeCheck.http') as mock_http:
         mock_http.get.side_effect = [
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
         ]
         check = sonarqube_check(web_instance_with_autodiscovery_only_include)
         global_tags = ['endpoint:{}'.format(web_instance_with_autodiscovery_only_include['web_endpoint'])]
@@ -119,10 +119,10 @@ def test_service_check_ok_with_autodiscovery_only_include_metrics_empty(
 ):
     with mock.patch('datadog_checks.sonarqube.check.SonarqubeCheck.http') as mock_http:
         mock_http.get.side_effect = [
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_empty')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component_empty')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_empty')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component_empty')),
         ]
         check = sonarqube_check(web_instance_with_autodiscovery_only_include)
         global_tags = ['endpoint:{}'.format(web_instance_with_autodiscovery_only_include['web_endpoint'])]
@@ -138,12 +138,12 @@ def test_service_check_ok_with_autodiscovery_include_all_and_exclude(
 ):
     with mock.patch('datadog_checks.sonarqube.check.SonarqubeCheck.http') as mock_http:
         mock_http.get.side_effect = [
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search_with_tmp_p1')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search_with_tmp_p2')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search_with_tmp_p1')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search_with_tmp_p2')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
         ]
         check = sonarqube_check(web_instance_with_autodiscovery_include_all_and_exclude)
         global_tags = ['endpoint:{}'.format(web_instance_with_autodiscovery_include_all_and_exclude['web_endpoint'])]
@@ -162,12 +162,12 @@ def test_service_check_ok_with_autodiscovery_include_all_and_limit(
 ):
     with mock.patch('datadog_checks.sonarqube.check.SonarqubeCheck.http') as mock_http:
         mock_http.get.side_effect = [
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search_with_tmp_p1')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search_with_tmp_p2')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search_with_tmp_p1')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search_with_tmp_p2')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
         ]
         check = sonarqube_check(web_instance_with_autodiscovery_include_all_and_limit)
         global_tags = ['endpoint:{}'.format(web_instance_with_autodiscovery_include_all_and_limit['web_endpoint'])]
@@ -184,12 +184,12 @@ def test_service_check_ok_with_component_and_autodiscovery(
 ):
     with mock.patch('datadog_checks.sonarqube.check.SonarqubeCheck.http') as mock_http:
         mock_http.get.side_effect = [
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
         ]
         check = sonarqube_check(web_instance_with_component_and_autodiscovery)
         global_tags = ['endpoint:{}'.format(web_instance_with_component_and_autodiscovery['web_endpoint'])]
@@ -206,11 +206,11 @@ def test_service_check_ok_with_autodiscovery_config_none(
 ):
     with mock.patch('datadog_checks.sonarqube.check.SonarqubeCheck.http') as mock_http:
         mock_http.get.side_effect = [
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search')),
+            MockHTTPResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
         ]
         check = sonarqube_check(web_instance_with_autodiscovery_config_none)
         global_tags = ['endpoint:{}'.format(web_instance_with_autodiscovery_config_none['web_endpoint'])]

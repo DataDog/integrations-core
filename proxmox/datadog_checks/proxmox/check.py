@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
+from json import JSONDecodeError as StdJSONDecodeError
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout
 
@@ -160,6 +161,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             ConnectionError,
             Timeout,
             JSONDecodeError,
+            StdJSONDecodeError,
             AttributeError,
             HTTPStatusError,
             HTTPInvalidURLError,
@@ -411,6 +413,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             ConnectionError,
             Timeout,
             JSONDecodeError,
+            StdJSONDecodeError,
             HTTPStatusError,
             HTTPInvalidURLError,
             AgentHTTPConnectionError,

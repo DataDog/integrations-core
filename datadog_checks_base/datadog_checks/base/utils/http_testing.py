@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import re
 from collections.abc import Mapping
 from datetime import timedelta
 from http.client import responses as http_responses
@@ -118,6 +119,31 @@ class MockHTTPResponse:
     @property
     def reason(self) -> str:
         return http_responses.get(self.status_code, '')
+
+    @property
+    def links(self) -> dict[str, dict[str, str]]:
+        """Parse Link header into a dict keyed by rel, matching requests.Response.links."""
+        header = self.headers.get('link', '').strip().strip("'\"")
+        result: dict[str, dict[str, str]] = {}
+        if not header:
+            return result
+        # Split on ", <" to avoid breaking URLs that contain commas (matches requests behavior)
+        for val in re.split(', *<', header):
+            try:
+                url, params_str = val.split(';', 1)
+            except ValueError:
+                url, params_str = val, ''
+            link: dict[str, str] = {'url': url.strip("<> '\"")}
+            for param in params_str.split(';'):
+                try:
+                    key, value = param.split('=')
+                except ValueError:
+                    break
+                link[key.strip(" '\"")] = value.strip(" '\"")
+            key = link.get('rel') or link.get('url')
+            if key:
+                result[key] = link
+        return result
 
     def json(self, **kwargs: Any) -> Any:
         return json.loads(self.text, **kwargs)
