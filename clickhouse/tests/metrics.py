@@ -156,6 +156,8 @@ OPTIONAL_METRICS = [
     'clickhouse.connections.http.preserved.total',
     'clickhouse.connections.http.reset.count',
     'clickhouse.connections.http.reset.total',
+    'clickhouse.connections.http.reused.count',
+    'clickhouse.connections.http.reused.total',
     'clickhouse.http_connection.addresses.faulty.count',
     'clickhouse.http_connection.addresses.faulty.total',
     'clickhouse.http_connection.addresses.new.count',
