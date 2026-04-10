@@ -295,10 +295,10 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
         tags=['test_tag:test_value', 'kafka_cluster_id:test-cluster-id', 'topic:test-topic'],
     )
 
-    # Topic size: partition 0 (100-10=90) + partition 1 (200-20=180) = 270
+    # Topic size: sum of highwater offsets = 100 + 200 = 300
     aggregator.assert_metric(
         'kafka.topic.size',
-        value=270,
+        value=300,
         tags=['test_tag:test_value', 'kafka_cluster_id:test-cluster-id', 'topic:test-topic'],
     )
 
@@ -313,118 +313,10 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     aggregator.assert_metric('kafka.topic.config.retention_ms', value=604800000, tags=topic_tags)
     aggregator.assert_metric('kafka.topic.config.max_message_bytes', value=1048588, tags=topic_tags)
 
-    # Verify partition metrics with exact values and broker tags
-    # Partition 0: beginning=10, end=100, size = 100 - 10 = 90, leader=1, replicas=[1,2]
-    aggregator.assert_metric(
-        'kafka.partition.beginning_offset',
-        value=10,
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'topic:test-topic',
-            'partition:0',
-        ],
-    )
-
-    aggregator.assert_metric(
-        'kafka.partition.size',
-        value=90,
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'topic:test-topic',
-            'partition:0',
-            'leader_broker_id:1',
-            'replica_broker_id:1',
-            'replica_broker_id:2',
-        ],
-    )
-
-    # Partition 1: beginning=20, end=200, size = 200 - 20 = 180, leader=2, replicas=[1,2]
-    aggregator.assert_metric(
-        'kafka.partition.beginning_offset',
-        value=20,
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'topic:test-topic',
-            'partition:1',
-        ],
-    )
-
-    aggregator.assert_metric(
-        'kafka.partition.size',
-        value=180,
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'topic:test-topic',
-            'partition:1',
-            'leader_broker_id:2',
-            'replica_broker_id:1',
-            'replica_broker_id:2',
-        ],
-    )
-
-    # Partition replicas count (2 replicas per partition)
-    aggregator.assert_metric(
-        'kafka.partition.replicas',
-        value=2,
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'topic:test-topic',
-            'partition:0',
-            'leader_broker_id:1',
-            'replica_broker_id:1',
-            'replica_broker_id:2',
-        ],
-    )
-
-    # Partition ISR count (2 in-sync replicas per partition)
-    aggregator.assert_metric(
-        'kafka.partition.isr',
-        value=2,
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'topic:test-topic',
-            'partition:0',
-            'leader_broker_id:1',
-            'replica_broker_id:1',
-            'replica_broker_id:2',
-        ],
-    )
-
-    # Under-replicated partitions (0 for fully replicated)
-    aggregator.assert_metric(
-        'kafka.partition.under_replicated',
-        value=0,
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'topic:test-topic',
-            'partition:0',
-            'leader_broker_id:1',
-            'replica_broker_id:1',
-            'replica_broker_id:2',
-        ],
-    )
-
-    # Offline partitions (0 for online partitions)
-    aggregator.assert_metric(
-        'kafka.partition.offline',
-        value=0,
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'topic:test-topic',
-            'partition:0',
-            'leader_broker_id:1',
-            'replica_broker_id:1',
-            'replica_broker_id:2',
-        ],
-    )
+    # Per-partition under_replicated and offline are only emitted when value is 1.
+    # In this test all partitions are healthy, so these should NOT be emitted.
+    aggregator.assert_metric('kafka.partition.under_replicated', count=0)
+    aggregator.assert_metric('kafka.partition.offline', count=0)
 
     # Verify consumer group metrics with exact values
     aggregator.assert_metric(

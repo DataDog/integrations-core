@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import base64
+import gc
 import json
 import time
 
@@ -87,6 +88,11 @@ class KafkaActionsCheck(AgentCheck):
         self.log.debug(
             "Kafka Actions check initialized - Action: %s, Remote Config ID: %s", self.action, self.remote_config_id
         )
+
+    def cancel(self):
+        """Clean up native librdkafka resources when the check is unscheduled by the CLC."""
+        self.kafka_client.close_non_blocking()
+        gc.collect()
 
     def check(self, _):
         """Execute the configured action once."""

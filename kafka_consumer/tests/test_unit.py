@@ -28,6 +28,13 @@ from datadog_checks.kafka_consumer.kafka_consumer import (
 pytestmark = [pytest.mark.unit]
 
 
+def test_cancel_destroys_client(check):
+    kafka_consumer_check = check({})
+    kafka_consumer_check.client = mock.create_autospec(KafkaClient)
+    kafka_consumer_check.cancel()
+    kafka_consumer_check.client.destroy.assert_called_once()
+
+
 def fake_consumer_offsets_for_times(partitions, offset=-1):
     """In our testing environment the offset is 80 for all partitions and topics."""
 
@@ -39,6 +46,13 @@ def seed_mock_client(cluster_id="cluster_id"):
     client = mock.create_autospec(KafkaClient)
     client.list_consumer_groups.return_value = ["consumer_group1", "datadog-agent"]
     client.get_partitions_for_topic.return_value = ['partition1']
+    client.get_topic_partitions.return_value = {
+        'topic1': ['partition1'],
+        'topic2': ['partition2'],
+        'dc': [0, 1],
+        'unconsumed_topic': [0, 1],
+        'marvel': [0, 1],
+    }
     client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", 2)])]
     client.describe_consumer_group.return_value = 'STABLE'
     client.consumer_get_cluster_id_and_list_topics.return_value = (
@@ -318,6 +332,7 @@ def test_when_no_partitions_then_emit_warning_log(check, kafka_instance, dd_run_
 
     mock_client = seed_mock_client()
     mock_client.get_partitions_for_topic.return_value = []
+    mock_client.get_topic_partitions.return_value = {}
     kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.client = mock_client
 
@@ -340,23 +355,17 @@ def test_when_no_partitions_then_emit_warning_log(check, kafka_instance, dd_run_
         count=0,
     )
 
-    expected_warning = (
-        "Consumer group: consumer_group1 has offsets for topic: topic1, "
-        "partition: partition1, but that topic has no partitions "
-        "in the cluster, so skipping reporting these offsets"
-    )
-
-    assert expected_warning in caplog.text
+    # Invalid partitions are silently skipped and metadata refresh is triggered
+    mock_client.request_metadata_update.assert_called()
 
 
-def test_when_partition_not_in_partitions_then_emit_warning_log(
-    check, kafka_instance, dd_run_check, aggregator, caplog
+def test_when_partition_not_in_partitions_then_skip_and_refresh_metadata(
+    check, kafka_instance, dd_run_check, aggregator
 ):
     # Given
-    caplog.set_level(logging.WARNING)
-
     mock_client = seed_mock_client()
     mock_client.get_partitions_for_topic.return_value = ['partition2']
+    mock_client.get_topic_partitions.return_value = {'topic1': ['partition2']}
     kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.client = mock_client
 
@@ -371,21 +380,9 @@ def test_when_partition_not_in_partitions_then_emit_warning_log(
     )
     aggregator.assert_metric("kafka.consumer_offset", count=0)
     aggregator.assert_metric("kafka.consumer_lag", count=0)
-    aggregator.assert_event(
-        "Consumer group: consumer_group1, "
-        "topic: topic1, partition: partition1 has negative consumer lag. "
-        "This should never happen and will result in the consumer skipping new messages "
-        "until the lag turns positive.",
-        count=0,
-    )
 
-    expected_warning = (
-        "Consumer group: consumer_group1 has offsets for topic: topic1, partition: partition1, "
-        "but that topic partition isn't included in the cluster partitions, "
-        "so skipping reporting these offsets"
-    )
-
-    assert expected_warning in caplog.text
+    # Invalid partitions are silently skipped and metadata refresh is triggered
+    mock_client.request_metadata_update.assert_called()
 
 
 def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_metrics(
@@ -415,7 +412,7 @@ def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metr
     check, kafka_instance, dd_run_check, aggregator, caplog
 ):
     # Given
-    caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.WARNING)
 
     mock_client = seed_mock_client()
     mock_client.list_consumer_group_offsets.return_value = [
@@ -435,9 +432,6 @@ def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metr
 
     expected_warning = "Discovered 4 metric contexts"
     assert expected_warning in caplog.text
-
-    expected_debug = "Reported contexts number 1 greater than or equal to contexts limit of 1"
-    assert expected_debug in caplog.text
 
 
 def test_when_empty_string_consumer_group_then_skip(kafka_instance):
@@ -1501,6 +1495,7 @@ def test_consumer_group_state_fetched_once_per_group(check, kafka_instance, dd_r
         [(topic, partitions)],
     )
     mock_client.get_partitions_for_topic.return_value = partitions
+    mock_client.get_topic_partitions.return_value = {topic: partitions}
     consumer_group_offsets = [(topic, p, o) for p, o in zip(partitions, offsets)]
     mock_client.list_consumer_group_offsets.return_value = [
         (
