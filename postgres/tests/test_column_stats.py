@@ -323,3 +323,71 @@ def test_collect_column_stats_payload_chunking(integration_check, dbm_instance, 
     assert 'persons' in all_tables
     assert 'cities' in all_tables
     assert 'pgtable' in all_tables
+
+
+def test_collect_column_stats_multi_database(integration_check, dbm_instance, pg_instance, aggregator):
+    """Test that column stats are collected from multiple databases when autodiscovery is active."""
+    from .common import PASSWORD_ADMIN, USER_ADMIN
+    from .utils import _get_conn
+
+    _analyze_tables(pg_instance)
+    # Analyze tables in dogs database
+    dogs_conn = _get_conn(pg_instance, dbname='dogs', user=USER_ADMIN, password=PASSWORD_ADMIN)
+    with dogs_conn.cursor() as cur:
+        cur.execute("ANALYZE breed")
+        cur.execute("ANALYZE kennel")
+    dogs_conn.close()
+
+    check = integration_check(dbm_instance)
+    check.run()
+
+    try:
+        collector = check.metadata_samples._column_stats_collector
+        collector._get_databases = lambda: ['datadog_test', 'dogs']
+        collector.collect_column_stats([])
+
+        events = aggregator.get_event_platform_events("dbm-column-stats")
+        assert len(events) > 0, "Expected column stats events"
+
+        dbs_seen = set()
+        for event in events:
+            for entry in event['column_stats']:
+                dbs_seen.add(entry['db'])
+        assert 'datadog_test' in dbs_seen, f"Expected datadog_test in collected dbs, got {dbs_seen}"
+        assert 'dogs' in dbs_seen, f"Expected dogs in collected dbs, got {dbs_seen}"
+    finally:
+        check.cancel()
+        if check.metadata_samples._job_loop_future is not None:
+            check.metadata_samples._job_loop_future.result()
+
+
+def test_collect_column_stats_multi_database_error_isolation(integration_check, dbm_instance, pg_instance, aggregator):
+    """Test that a missing function in one database doesn't block collection from others."""
+    _analyze_tables(pg_instance)
+    check = integration_check(dbm_instance)
+    check.run()
+
+    try:
+        collector = check.metadata_samples._column_stats_collector
+        collector._get_databases = lambda: ['datadog_test', 'dogs_nofunc']
+        collector.collect_column_stats([])
+
+        # Should still get events from datadog_test
+        events = aggregator.get_event_platform_events("dbm-column-stats")
+        assert len(events) > 0, "Expected column stats events from working database"
+
+        dbs_seen = set()
+        for event in events:
+            for entry in event['column_stats']:
+                dbs_seen.add(entry['db'])
+        assert 'datadog_test' in dbs_seen, "Expected datadog_test results despite dogs_nofunc failure"
+        assert 'dogs_nofunc' not in dbs_seen, "Should not have results from dogs_nofunc"
+
+        # Should have emitted a health warning for the missing function
+        health_events = aggregator.get_event_platform_events("dbm-health")
+        function_not_found_events = [e for e in health_events if e['name'] == 'column_stats_function_not_found']
+        assert len(function_not_found_events) == 1
+    finally:
+        check.cancel()
+        if check.metadata_samples._job_loop_future is not None:
+            check.metadata_samples._job_loop_future.result()

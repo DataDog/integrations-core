@@ -226,31 +226,34 @@ class PostgresColumnStatsCollector:
                         if self._queued_columns_count >= PAYLOAD_MAX_COLUMNS:
                             self._flush(tags_no_db)
 
-        except psycopg.errors.UndefinedFunction:
-            if not self._function_not_found:
-                self._function_not_found = True
-                self._log.warning(
-                    "datadog.column_stats() function not found in database '%s'. "
-                    "Please create the function as described in the documentation: "
-                    "https://docs.datadoghq.com/database_monitoring/setup_postgres/",
-                    db_name,
-                )
-                self._check.health.submit_health_event(
-                    name=PostgresHealthEvent.COLUMN_STATS_FUNCTION_NOT_FOUND,
-                    status=HealthStatus.WARNING,
-                )
-        except psycopg.errors.InsufficientPrivilege:
-            if not self._insufficient_privilege:
-                self._insufficient_privilege = True
-                self._log.warning(
-                    "Insufficient privileges to execute datadog.column_stats() in database '%s'. "
-                    "Please check the function permissions.",
-                    db_name,
-                )
-                self._check.health.submit_health_event(
-                    name=PostgresHealthEvent.COLUMN_STATS_INSUFFICIENT_PRIVILEGE,
-                    status=HealthStatus.WARNING,
-                )
+        except psycopg.errors.DatabaseError as e:
+            if isinstance(e, psycopg.errors.UndefinedFunction):
+                if not self._function_not_found:
+                    self._function_not_found = True
+                    self._log.warning(
+                        "datadog.column_stats() function not found in database '%s'. "
+                        "Please create the function as described in the documentation: "
+                        "https://docs.datadoghq.com/database_monitoring/setup_postgres/",
+                        db_name,
+                    )
+                    self._check.health.submit_health_event(
+                        name=PostgresHealthEvent.COLUMN_STATS_FUNCTION_NOT_FOUND,
+                        status=HealthStatus.WARNING,
+                    )
+            elif isinstance(e, psycopg.errors.InsufficientPrivilege):
+                if not self._insufficient_privilege:
+                    self._insufficient_privilege = True
+                    self._log.warning(
+                        "Insufficient privileges to execute datadog.column_stats() in database '%s'. "
+                        "Please check the function permissions.",
+                        db_name,
+                    )
+                    self._check.health.submit_health_event(
+                        name=PostgresHealthEvent.COLUMN_STATS_INSUFFICIENT_PRIVILEGE,
+                        status=HealthStatus.WARNING,
+                    )
+            else:
+                self._log.exception("Error collecting column stats for database '%s'", db_name)
         except Exception:
             self._log.exception("Error collecting column stats for database '%s'", db_name)
 
