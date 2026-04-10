@@ -1,0 +1,1241 @@
+{
+  "title": "GPU Cost Overview",
+  "description": "Monitor GPU compute spend across AWS, Azure, and GCP including spend breakdowns by instance type and team, pricing coverage, unused capacity, and cost attribution.",
+  "widgets": [
+    {
+      "id": 6079930088570001,
+      "definition": {
+        "title": "Total GPU Spend",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1 + query2 + query3",
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "dollar"
+                  }
+                }
+              }
+            ],
+            "queries": [
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\")) AND $availability-zone AND $team AND $kube_cluster_name}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query2",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $availability-zone AND $team AND $kube_cluster_name}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query3",
+                "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name}"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 6079930088570002,
+      "definition": {
+        "title": "Total GPU Spend (past 30d)",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "type": "live",
+          "unit": "month",
+          "value": 1,
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1 + query2 + query3",
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "dollar"
+                  }
+                }
+              }
+            ],
+            "queries": [
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\")) AND $availability-zone AND $team AND $kube_cluster_name}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query2",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $availability-zone AND $team AND $kube_cluster_name}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query3",
+                "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name}"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 3,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 6079930088570003,
+      "definition": {
+        "title": "Total GPU Spend (30d prior)",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "type": "live",
+          "unit": "month",
+          "value": 1,
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "timeshift(query1, -2592000) + timeshift(query2, -2592000) + timeshift(query3, -2592000)",
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "dollar"
+                  }
+                }
+              }
+            ],
+            "queries": [
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\")) AND $availability-zone AND $team AND $kube_cluster_name}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query2",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $availability-zone AND $team AND $kube_cluster_name}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query3",
+                "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name}"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 6079930088570004,
+      "definition": {
+        "title": "MoM Change",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "type": "live",
+          "unit": "month",
+          "value": 1,
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "percent"
+                  }
+                },
+                "formula": "((query1 + query2 + query3) - (timeshift(query4, -2592000) + timeshift(query5, -2592000) + timeshift(query6, -2592000))) / (timeshift(query4, -2592000) + timeshift(query5, -2592000) + timeshift(query6, -2592000)) * 100"
+              }
+            ],
+            "queries": [
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\")) AND $availability-zone AND $team AND $kube_cluster_name}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query2",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $availability-zone AND $team AND $kube_cluster_name}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query3",
+                "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query4",
+                "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\")) AND $availability-zone AND $team AND $kube_cluster_name}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query5",
+                "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $availability-zone AND $team AND $kube_cluster_name}"
+              },
+              {
+                "aggregator": "sum",
+                "data_source": "cloud_cost",
+                "name": "query6",
+                "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name}"
+              }
+            ],
+            "response_format": "scalar",
+            "conditional_formats": [
+              {
+                "comparator": "<",
+                "value": 1,
+                "palette": "black_on_light_green"
+              },
+              {
+                "comparator": "<",
+                "value": 10,
+                "palette": "black_on_light_yellow"
+              },
+              {
+                "comparator": "<",
+                "value": 100,
+                "palette": "black_on_light_red"
+              },
+              {
+                "comparator": ">=",
+                "value": 100,
+                "palette": "white_on_red"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "yaxis": {
+            "include_zero": true
+          },
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 9,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 1050736273930266,
+      "definition": {
+        "title": "GPU Spend - All Providers",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3142879253972691,
+            "definition": {
+              "title": "AWS GPU Spend",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\")) AND $availability-zone AND $team AND $kube_cluster_name}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 7350031899029669,
+            "definition": {
+              "title": "Azure GPU Spend",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $availability-zone AND $team AND $kube_cluster_name}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2899018280624192,
+            "definition": {
+              "title": "GCP GPU Spend",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2937782131983032,
+            "definition": {
+              "title": "Total GPU Spend by Cloud Provider",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "AWS",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Azure",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "GCP",
+                      "formula": "query3"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\")) AND $availability-zone AND $team AND $kube_cluster_name}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $availability-zone AND $team AND $kube_cluster_name}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query3",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 12,
+        "height": 7
+      }
+    },
+    {
+      "id": 4870940906334069,
+      "definition": {
+        "title": "Cost of Unused GPU",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8998298117813549,
+            "definition": {
+              "type": "note",
+              "content": "Unused GPU Spend **includes**:\n- Cluster idle cost (unallocated GPU capacity)\n- Workload idle cost (allocated but underutilized)\n- Unused On-Demand Capacity Reservations (AWS)",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 5548338680663049,
+            "definition": {
+              "title": "Total Cost of Unused GPU",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{allocated_spend_type IN (cluster_idle,workload_idle) AND allocated_resource:gpu AND $availability-zone AND $team AND $kube_cluster_name}"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND aws_usage_type:*Unused* AND $availability-zone AND $team AND $kube_cluster_name}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 518871954469655,
+            "definition": {
+              "title": "% of GPU Spend Unused",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query5 / (query1 + query2 + query3) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query5",
+                      "query": "sum:all.cost{((allocated_resource:gpu AND allocated_spend_type IN (cluster_idle,workload_idle)) OR (aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND aws_usage_type:*Unused*)) AND $availability-zone AND $team AND $kube_cluster_name}"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND $availability-zone AND $team AND $kube_cluster_name}"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $availability-zone AND $team AND $kube_cluster_name}"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query3",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 30,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 15,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "<=",
+                      "value": 15,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "precision": 1,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 7319329847932256,
+            "definition": {
+              "title": "Idle GPU Cost Breakdown",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{allocated_resource:gpu,allocated_spend_type:cluster_idle,$availability-zone,$team,$kube_cluster_name}"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:all.cost{allocated_resource:gpu,allocated_spend_type:workload_idle,$availability-zone,$team,$kube_cluster_name}"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query3",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND aws_usage_type:*Unused* AND $availability-zone AND $team AND $kube_cluster_name}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 3,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Cluster Idle",
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Workload Idle",
+                      "cell_display_mode": "bar",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Unused ODCR",
+                      "cell_display_mode": "bar",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Total",
+                      "formula": "query1 + query2 + query3"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 7857560613554392,
+            "definition": {
+              "title": "Workload Idle GPU Cost by Namespace",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{allocated_resource:gpu,allocated_spend_type:workload_idle,$availability-zone,$team,$kube_cluster_name} by {kube_namespace}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Workload Idle Cost",
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 7986461429137076,
+            "definition": {
+              "title": "Total Cost of Unused GPU (Monthly)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 6
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{allocated_spend_type IN (cluster_idle,workload_idle) AND allocated_resource:gpu AND $availability-zone AND $team AND $kube_cluster_name}.rollup(sum, monthly)"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND aws_usage_type:*Unused* AND $availability-zone AND $team AND $kube_cluster_name}.rollup(sum, monthly)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "markers": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4842701638544752,
+            "definition": {
+              "title": "% of GPU Spend Unused (Daily)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query5 / (query1 + query2 + query3) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query5",
+                      "query": "sum:all.cost{((allocated_resource:gpu AND allocated_spend_type IN (cluster_idle,workload_idle)) OR (aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND aws_usage_type:*Unused*)) AND $availability-zone AND $team AND $kube_cluster_name}.rollup(sum, daily)"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND $availability-zone AND $team AND $kube_cluster_name}.rollup(sum, daily)"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $availability-zone AND $team AND $kube_cluster_name}.rollup(sum, daily)"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query3",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "markers": [
+                {
+                  "label": "High unused threshold",
+                  "value": "y = 30",
+                  "display_type": "error dashed"
+                },
+                {
+                  "label": "Moderate unused threshold",
+                  "value": "y = 15",
+                  "display_type": "warning dashed"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 12,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 50,
+        "width": 12,
+        "height": 10
+      }
+    },
+    {
+      "id": 8118165145589912,
+      "definition": {
+        "title": "Cost Attribution",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1674347731424636,
+            "definition": {
+              "type": "note",
+              "content": "Allocated GPU Spend **excludes**:\n- Unused On-Demand Capacity Reservations\n- Cluster idle costs\n\nCost allocation works with Kubernetes and GPU monitoring data.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 8493736427104982,
+            "definition": {
+              "title": "Total Allocated GPU Spend",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{allocated_resource:gpu,!allocated_spend_type:cluster_idle,$availability-zone,$team,$kube_cluster_name}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 4375743928151237,
+            "definition": {
+              "title": "% of GPU Spend Allocated to Workloads",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query5 / (query1 + query2 + query3) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query5",
+                      "query": "sum:all.cost{allocated_resource:gpu,!allocated_spend_type:cluster_idle,$availability-zone,$team,$kube_cluster_name}"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\")) AND $availability-zone AND $team AND $kube_cluster_name}"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:azure.cost.amortized.shared.resources.allocated{chargetype IN (Usage) AND azure_product:VirtualMachines AND metersubcategory:*N* AND $availability-zone AND $team AND $kube_cluster_name}"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query3",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": false,
+              "precision": 1,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 7061719789182905,
+            "definition": {
+              "title": "Allocated GPU Cost by Namespace",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{allocated_resource:gpu,!allocated_spend_type:cluster_idle,$availability-zone,$team,$kube_cluster_name} by {kube_namespace}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Allocated GPU Cost",
+                      "cell_display_mode": "bar",
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 4800253520089215,
+            "definition": {
+              "title": "Allocated GPU Cost by Namespace (Daily)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{allocated_resource:gpu,!allocated_spend_type:cluster_idle,$availability-zone,$team,$kube_cluster_name} by {kube_namespace}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 60,
+        "width": 12,
+        "height": 7
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "availability-zone",
+      "prefix": "availability-zone",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "team",
+      "prefix": "team",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "kube_cluster_name",
+      "prefix": "kube_cluster_name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

@@ -1,0 +1,384 @@
+{
+  "title": "GCP GPU Cost Overview",
+  "description": "Monitor GCP GPU compute spend including machine spec breakdowns, commitment coverage, and cost trends.",
+  "widgets": [
+    {
+      "id": 86266938490582,
+      "definition": {
+        "title": "GCP GPU Spend",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 451149432202282,
+            "definition": {
+              "title": "GCP GPU Spend",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 6319145973082921,
+            "definition": {
+              "type": "note",
+              "content": "GCP GPU spend covers **GPU usage types** and GPU-accelerated machine specs (**a2, g2, a3** families). Promotional credits are excluded. Coverage is shown by consumption model (Default = On-Demand, CUD = Committed Use Discount).",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "has_padding": true
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 2
+            }
+          },
+          {
+            "id": 4853624516047954,
+            "definition": {
+              "title": "GCP GPU Spend by Machine Spec",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name} by {compute.googleapis.com/machine_spec}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "color_order": "monotonic",
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1757585486409348,
+            "definition": {
+              "title": "GCP GPU Spend by Usage Type",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name} by {google_usage_type}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "color_order": "monotonic",
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 23055904670847,
+            "definition": {
+              "title": "GCP GPU Spend by Machine Type",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name} by {compute.googleapis.com/machine_spec}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Total",
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 8018270029565740,
+            "definition": {
+              "title": "GCP On-Demand % of GPU Spend",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "On-Demand %",
+                      "formula": "100 * (query2 / query1)",
+                      "style": {
+                        "palette": "blue",
+                        "palette_index": 4
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*a3*) AND NOT google_usage_type:*Commitment* AND $availability-zone AND $team AND $kube_cluster_name}"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:gcp.cost.amortized.shared.resources.allocated{NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "color_order": "monotonic",
+                    "order_by": "values",
+                    "order_reverse": false,
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 5,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4189842747127479,
+            "definition": {
+              "title": "GCP GPU Spend by Team (Monthly)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "type": "live",
+                "unit": "year",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername IN (gcp) AND NOT credits_type:PROMOTION AND NOT google_usage_type:*PD* AND NOT google_usage_type:*Transfer* AND (google_usage_type:*GPU* OR compute.googleapis.com/machine_spec:*a2* OR compute.googleapis.com/machine_spec:*g2* OR compute.googleapis.com/machine_spec:*a3*) AND $availability-zone AND $team AND $kube_cluster_name} by {team}.rollup(sum, monthly)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "color_order": "shuffled",
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 36,
+        "width": 12,
+        "height": 14
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "availability-zone",
+      "prefix": "availability-zone",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "team",
+      "prefix": "team",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "kube_cluster_name",
+      "prefix": "kube_cluster_name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
