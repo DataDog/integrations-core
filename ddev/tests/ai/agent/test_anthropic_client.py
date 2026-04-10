@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock
 import anthropic
 import pytest
 
-from ddev.ai.agent.client import AnthropicAgent
+from ddev.ai.agent.anthropic_client import AnthropicAgent
 from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentError, AgentRateLimitError
 from ddev.ai.agent.types import StopReason, ToolResultMessage
 from ddev.ai.tools.core.registry import ToolRegistry
