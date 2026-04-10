@@ -8,6 +8,14 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError as AgentHTTPConnectionError,
+)
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPInvalidURLError,
+    HTTPStatusError,
+    HTTPTimeoutError,
+)
 
 from .constants import (
     APPLICATION_STATES,
@@ -442,7 +450,7 @@ class SparkCheck(AgentCheck):
                 )
                 if response is None:
                     continue
-            except HTTPError:
+            except (HTTPError, HTTPStatusError):
                 self.log.debug("Got an error collecting %s", property, exc_info=True)
                 continue
             try:
@@ -583,7 +591,7 @@ class SparkCheck(AgentCheck):
                             )
 
                     self._set_metric(metric_name, submission_type, value, tags=tags)
-            except HTTPError as e:
+            except (HTTPError, HTTPStatusError) as e:
                 self.log.debug("No structured streaming metrics to collect from app %s. %s", app_name, e, exc_info=True)
                 pass
 
@@ -666,7 +674,7 @@ class SparkCheck(AgentCheck):
                 response = self.http.get(proxy_redirect_url, cookies=self.proxy_redirect_cookies)
                 response.raise_for_status()
 
-        except Timeout as e:
+        except (Timeout, HTTPTimeoutError) as e:
             self.service_check(
                 service_name,
                 AgentCheck.CRITICAL,
@@ -675,8 +683,17 @@ class SparkCheck(AgentCheck):
             )
             raise
 
-        except (HTTPError, InvalidURL, ConnectionError) as e:
-            if isinstance(e, ConnectionError) and self._should_suppress_connection_error(e, tags):
+        except (
+            HTTPError,
+            InvalidURL,
+            ConnectionError,
+            HTTPStatusError,
+            HTTPInvalidURLError,
+            AgentHTTPConnectionError,
+        ) as e:
+            if isinstance(e, (ConnectionError, AgentHTTPConnectionError)) and self._should_suppress_connection_error(
+                e, tags
+            ):
                 return None
 
             self.service_check(
