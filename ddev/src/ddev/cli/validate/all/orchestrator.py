@@ -234,6 +234,10 @@ class ValidationOrchestrator(EventBusOrchestrator):
                 output = result.stdout or result.stderr
                 if output:
                     self._app.console.print(output.rstrip())
+                config = VALIDATIONS.get(name, ValidationConfig())
+                if config.fix_flag:
+                    fix_cmd = f"ddev validate {name} {config.fix_flag}"
+                    self._app.display_info(f"Fix: {fix_cmd}")
                 self._app.console.print()
 
         if incomplete:
