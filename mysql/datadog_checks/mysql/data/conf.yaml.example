@@ -35,11 +35,6 @@ instances:
     #
   - username: datadog
 
-    ## @param port - number - optional - default: 3306
-    ## Port to use when connecting to MySQL.
-    #
-    port: 3306
-
     ## @param password - string - optional
     ## Password associated to the MySQL user.
     #
@@ -51,6 +46,11 @@ instances:
     ## provide a value for the sock key (below).
     #
     host: localhost
+
+    ## @param port - number - optional - default: 3306
+    ## Port to use when connecting to MySQL.
+    #
+    port: 3306
 
     ## @param dbm - boolean - optional - default: false
     ## Set to `true` to enable Database Monitoring.
