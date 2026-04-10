@@ -37,6 +37,11 @@ instances:
     #
   - host: localhost
 
+    ## @param port - number - optional - default: 3306
+    ## Port to use when connecting to MySQL.
+    #
+    port: 3306
+
     ## @param username - string - optional
     ## Username used to connect to MySQL.
     #
@@ -47,10 +52,10 @@ instances:
     #
     password: <PASSWORD>
 
-    ## @param port - number - optional - default: 3306
-    ## Port to use when connecting to MySQL.
+    ## @param dbm - boolean - optional - default: false
+    ## Set to `true` to enable Database Monitoring.
     #
-    port: 3306
+    # dbm: false
 
     ## @param propagate_agent_tags - boolean - optional - default: false
     ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
@@ -377,11 +382,6 @@ instances:
         ## MySQL integration tile in the Datadog Web UI for further instructions.
         #
         # extra_performance_metrics: false
-
-    ## @param dbm - boolean - optional - default: false
-    ## Set to `true` to enable Database Monitoring.
-    #
-    # dbm: false
 
     ## Configure collection of performance_schema.global_variables.
     #
