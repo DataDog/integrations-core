@@ -17,8 +17,7 @@ if TYPE_CHECKING:
 
 EVENT_TRACK_TYPE = 'do-query-results'
 
-# Cap the number of rows returned per query to prevent unbounded memory usage.
-# Applied both at the database level (subquery LIMIT) and as a Python-side safety net.
+# Cap the number of rows fetched per query to prevent unbounded memory usage.
 MAX_RESULT_ROWS = 10_000
 
 
@@ -65,16 +64,13 @@ class PostgresDataObservability(DBMAsyncJob):
 
     def _execute_single_query(self, conn: Any, query_spec: Query) -> dict[str, Any]:
         """Execute a query, catching DatabaseError per-query so the loop continues."""
-        sql = query_spec.query.rstrip('; \t\n')
         monitor_id = query_spec.monitor_id
-        # Wrap in a subquery to apply the row cap at the database level.
-        limited_sql = f"SELECT * FROM ({sql}) _dd_row_limit LIMIT {MAX_RESULT_ROWS}"
         start = time.time()
         try:
             if self._cancel_event.is_set():
                 raise Exception("Job loop cancelled. Aborting query.")
             with conn.cursor() as cursor:
-                cursor.execute(limited_sql)
+                cursor.execute(query_spec.query)
                 columns = [desc[0] for desc in cursor.description]
                 rows = [list(row) for row in cursor.fetchmany(MAX_RESULT_ROWS)]
             duration = time.time() - start
@@ -98,7 +94,7 @@ class PostgresDataObservability(DBMAsyncJob):
                 monitor_id,
                 duration,
                 e,
-                sql,
+                query_spec.query,
             )
             return {
                 'status': 'error',
