@@ -73,8 +73,12 @@ def test_cluster_capacity_metrics(dd_run_check, aggregator, mock_instance, mock_
     aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=55834574848, tags=CLUSTER_TAGS)
 
 
-def test_hostless_vcpus_not_overcounted_across_clusters(dd_run_check, aggregator, mock_instance, mock_http_get):
+@pytest.mark.parametrize("batch_vm_collection", [True, False])
+def test_hostless_vcpus_not_overcounted_across_clusters(
+    dd_run_check, aggregator, mock_instance, mock_http_get, batch_vm_collection
+):
     """Each cluster should only count hostless VMs that belong to it."""
+    mock_instance["batch_vm_collection"] = batch_vm_collection
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
@@ -103,9 +107,11 @@ def test_exclude_filtered_resources_from_cluster_capacity(
     aggregator.assert_metric("nutanix.cluster.memory.allocated_bytes", value=17179869184, tags=SECOND_CLUSTER_TAGS)
 
 
+@pytest.mark.parametrize("batch_vm_collection", [True, False])
 def test_default_includes_filtered_resources_in_cluster_capacity(
-    dd_run_check, aggregator, mock_instance, mock_http_get
+    dd_run_check, aggregator, mock_instance, mock_http_get, batch_vm_collection
 ):
+    mock_instance["batch_vm_collection"] = batch_vm_collection
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
@@ -115,8 +121,12 @@ def test_default_includes_filtered_resources_in_cluster_capacity(
     aggregator.assert_metric("nutanix.cluster.cpu.vcpus_allocated", value=12, tags=SECOND_CLUSTER_TAGS)
 
 
-def test_hostless_memory_not_overcounted_across_clusters(dd_run_check, aggregator, mock_instance, mock_http_get):
+@pytest.mark.parametrize("batch_vm_collection", [True, False])
+def test_hostless_memory_not_overcounted_across_clusters(
+    dd_run_check, aggregator, mock_instance, mock_http_get, batch_vm_collection
+):
     """Each cluster should only count hostless VM memory that belongs to it."""
+    mock_instance["batch_vm_collection"] = batch_vm_collection
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 

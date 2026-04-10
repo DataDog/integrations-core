@@ -65,9 +65,9 @@ class InfrastructureMonitor:
         self.vm_count = 0
         # Cluster capacity accumulator
         self._cluster_capacity = ClusterCapacity()
-        # VM cache keyed by host ID. Populated either up-front by _build_vms_by_host_cache
+        # VM cache keyed by host ID. Populated up-front by _build_vms_by_host_cache
         # (batch mode) or lazily per-host by _get_vms_for_host (non-batch mode).
-        # In batch mode the "" key holds hostless VMs (no host assignment).
+        # The "" key holds hostless VMs, populated by _get_hostless_vms on first access.
         self._vms_by_host: dict[str, list[dict]] = {}
 
     def reset_state(self) -> None:
@@ -254,11 +254,7 @@ class InfrastructureMonitor:
         self.check.gauge("cluster.vm.inefficient_count", inefficient_vm_count, tags=cluster_tags)
 
     def _report_cluster_capacity_metrics(self, hosts: list[dict], cluster_id: str, cluster_tags: list[str]) -> None:
-        """Aggregate host and VM capacity for the cluster and report metrics.
-
-        VM data comes from _vms_by_host, which is populated by either collection
-        mode. Hostless VMs (the "" key) are only present in batch mode.
-        """
+        """Aggregate host and VM capacity for the cluster and report metrics."""
         self._cluster_capacity.reset()
         exclude_filtered = self.check.exclude_filtered_resources_from_cluster_capacity
 
@@ -275,16 +271,22 @@ class InfrastructureMonitor:
             cores, threads, memory = self._extract_host_capacity(host)
             self._cluster_capacity.add_host(cores, threads, memory)
 
-        for key, vms in self._vms_by_host.items():
-            if key and key not in host_ids:
-                continue
-            for vm in vms:
-                if not key and get_nested(vm, "cluster/extId") != cluster_id:
-                    continue
+        # Hosted VMs: iterate only hosts belonging to this cluster
+        for host_id in host_ids:
+            for vm in self._vms_by_host.get(host_id, []):
                 if exclude_filtered and not self._should_collect_vm(vm):
                     continue
                 _, _, _, vcpus, memory = self._extract_vm_capacity(vm)
                 self._cluster_capacity.add_vm(vcpus, memory)
+
+        # Hostless VMs: filter by cluster assignment
+        for vm in self._get_hostless_vms():
+            if get_nested(vm, "cluster/extId") != cluster_id:
+                continue
+            if exclude_filtered and not self._should_collect_vm(vm):
+                continue
+            _, _, _, vcpus, memory = self._extract_vm_capacity(vm)
+            self._cluster_capacity.add_vm(vcpus, memory)
 
         cap = self._cluster_capacity
         self.check.gauge("cluster.cpu.total_cores", cap.total_cores, tags=cluster_tags)
@@ -541,6 +543,12 @@ class InfrastructureMonitor:
         if host_id not in self._vms_by_host:
             self._vms_by_host[host_id] = self._list_vms(host_id)
         return self._vms_by_host[host_id]
+
+    def _get_hostless_vms(self) -> list[dict]:
+        """Return hostless VMs, fetching and caching on first access."""
+        if "" not in self._vms_by_host:
+            self._vms_by_host[""] = [vm for vm in self._list_vms() if not get_nested(vm, "host/extId")]
+        return self._vms_by_host[""]
 
     def _build_vms_by_host_cache(self) -> None:
         """Fetch all VMs and group them by host. Hostless VMs are stored under the "" key."""
