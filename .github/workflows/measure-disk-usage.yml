@@ -1,17 +1,21 @@
 name: Measure Disk Usage
-run-name: "Measure Disk Usage [${{ github.event.workflow_run.head_sha }}]"
+run-name: "Measure Disk Usage [${{ github.event.pull_request.head.sha }}]"
 
 on:
-  workflow_run:
-    workflows: ['Resolve Dependencies and Build Wheels']
-    types:
-      - completed
+  pull_request:
+    branches: 
+      - master
+  # workflow_run:
+  #   workflows: ['Resolve Dependencies and Build Wheels']
+  #   types:
+      # - completed 
 env:
   PYTHON_VERSION: "3.13"
 
 jobs:
 
   measure-disk-usage:
+    name: Other Name
     runs-on: ubuntu-22.04
     permissions:
         contents: read
