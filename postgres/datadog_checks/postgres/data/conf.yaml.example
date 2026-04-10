@@ -38,15 +38,15 @@ instances:
     #
     # host: <HOST>
 
-    ## @param username - string - optional - default: datadog
-    ## The Datadog username created to connect to PostgreSQL.
-    #
-    # username: <USERNAME>
-
     ## @param port - integer - optional - default: 5432
     ## The port to use when connecting to PostgreSQL.
     #
     # port: <PORT>
+
+    ## @param username - string - optional - default: datadog
+    ## The Datadog username created to connect to PostgreSQL.
+    #
+    # username: <USERNAME>
 
     ## @param password - string - optional
     ## The password associated with the Datadog user.

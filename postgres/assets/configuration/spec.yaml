@@ -28,7 +28,7 @@ files:
         type: string
         display_default: "localhost"
     - name: port
-      display_priority: 17
+      display_priority: 18
       description: The port to use when connecting to PostgreSQL.
       fleet_configurable: true
       formats: ["port"]
@@ -36,7 +36,7 @@ files:
         type: integer
         display_default: 5432
     - name: username
-      display_priority: 18
+      display_priority: 17
       description: The Datadog username created to connect to PostgreSQL.
       fleet_configurable: true
       value:
