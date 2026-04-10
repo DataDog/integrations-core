@@ -1,12 +1,12 @@
 {
-    "title": "Trend Micro Vision One XDR - Workbench Alerts",
-    "description": "This dashboard provides the insights into the Alerts generated in Trend Micro Vision One XDR.",
+    "title": "TrendAI Vision One XDR - Workbench Alerts",
+    "description": "This dashboard provides the insights into the Alerts generated in TrendAI Vision One XDR.",
     "widgets": [
         {
             "id": 8442478561211794,
             "definition": {
                 "title": "New group",
-                "banner_img": "https://www.trendmicro.com/content/dam/trendmicro/global/en/global/logo/trend-micro-logo.png",
+                "banner_img": "https://static.datadoghq.com/static/images/logos/trend-micro-vision-one-xdr_large.svg",
                 "show_title": false,
                 "type": "group",
                 "layout_type": "ordered",
@@ -15,7 +15,7 @@
                         "id": 661152336132838,
                         "definition": {
                             "type": "note",
-                            "content": " Workbench alerts in a Datadog dashboard provide a centralized, real-time alerts generated in Trend Micro Vision One XDR. These alerts aggregate and offering insights into security incidents.  \n\nThis holistic approach enhances visibility, improves incident response times, and supports proactive system management, ensuring robust and reliable application performance.\n\nFor more information, see the [Trend Micro Vision One XDR Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_vision_one_xdr).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                            "content": " Workbench alerts in a Datadog dashboard provide a centralized, real-time alerts generated in TrendAI Vision One XDR. These alerts aggregate and offering insights into security incidents.  \n\nThis holistic approach enhances visibility, improves incident response times, and supports proactive system management, ensuring robust and reliable application performance.\n\nFor more information, see the [TrendAI Vision One XDR Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_vision_one_xdr).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                             "background_color": "white",
                             "font_size": "14",
                             "text_align": "left",
@@ -1066,7 +1066,7 @@
                             "has_search_bar": "auto",
                             "custom_links": [
                                 {
-                                    "label": "Trend Micro Workbench Alert",
+                                    "label": "TrendAI Workbench Alert",
                                     "link": "{{@workbenchLink.value}}"
                                 }
                             ]

@@ -1,16 +1,16 @@
 {
-    "title": "Trend Micro Vision One Endpoint Security - Data Loss Prevention",
+    "title": "TrendAI Vision One Endpoint Security - Data Loss Prevention",
     "description": "This dashboard provides monitoring for potential data breaches, unauthorized data access, and policy violations, helping you protect sensitive information and ensure data security.",
     "widgets": [
         {
             "id": 5780490506620942,
             "definition": {
                 "type": "image",
-                "url": "https://www.trendmicro.com/content/dam/trendmicro/global/en/global/logo/trend-micro-logo.png",
-                "url_dark_theme": "https://www.trendmicro.com/content/dam/trendmicro/global/en/core/images/logos/tm-logo-red-white-t.svg",
+                "url": "https://static.datadoghq.com/static/images/logos/trend-micro-vision-one-endpoint-security_large.svg",
+                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/trend-micro-vision-one-endpoint-security_reversed_large.svg",
                 "sizing": "contain",
                 "has_background": false,
-                "has_border": true,
+                "has_border": false,
                 "vertical_align": "center",
                 "horizontal_align": "center"
             },
@@ -25,7 +25,7 @@
             "id": 661152336132838,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides monitoring for potential data breaches, unauthorized data access, and policy violations, helping you protect sensitive information and ensure data security.\n\nThis holistic approach enhances your ability to monitor and mitigate data loss risks, ensuring that sensitive information remains secure and compliant with regulatory requirements.\n\nFor more information, see the [Trend Micro Vision One Endpoint Security Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_vision_one_endpoint_security).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "content": "This dashboard provides monitoring for potential data breaches, unauthorized data access, and policy violations, helping you protect sensitive information and ensure data security.\n\nThis holistic approach enhances your ability to monitor and mitigate data loss risks, ensuring that sensitive information remains secure and compliant with regulatory requirements.\n\nFor more information, see the [TrendAI Vision One Endpoint Security Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_vision_one_endpoint_security).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
