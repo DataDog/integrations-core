@@ -65,7 +65,10 @@ class InfrastructureMonitor:
         self.vm_count = 0
         # Cluster capacity accumulator
         self._cluster_capacity = ClusterCapacity()
-        self._vms_by_host: dict[str, list[dict]] = {}  # "" key holds hostless VMs (no host assignment)
+        # VM cache keyed by host ID. Populated either up-front by _build_vms_by_host_cache
+        # (batch mode) or lazily per-host by _get_vms_for_host (non-batch mode).
+        # In batch mode the "" key holds hostless VMs (no host assignment).
+        self._vms_by_host: dict[str, list[dict]] = {}
 
     def reset_state(self) -> None:
         """Reset all caches and counters for a new collection run."""
@@ -251,7 +254,11 @@ class InfrastructureMonitor:
         self.check.gauge("cluster.vm.inefficient_count", inefficient_vm_count, tags=cluster_tags)
 
     def _report_cluster_capacity_metrics(self, hosts: list[dict], cluster_id: str, cluster_tags: list[str]) -> None:
-        """Aggregate host and VM capacity for the cluster and report metrics."""
+        """Aggregate host and VM capacity for the cluster and report metrics.
+
+        VM data comes from _vms_by_host, which is populated by either collection
+        mode. Hostless VMs (the "" key) are only present in batch mode.
+        """
         self._cluster_capacity.reset()
         exclude_filtered = self.check.exclude_filtered_resources_from_cluster_capacity
 
@@ -530,7 +537,7 @@ class InfrastructureMonitor:
         return True
 
     def _get_vms_for_host(self, host_id: str) -> list[dict]:
-        """Return VMs assigned to this host, fetching and caching on first access."""
+        """Return VMs for a host from the cache, fetching on first access in non-batch mode."""
         if host_id not in self._vms_by_host:
             self._vms_by_host[host_id] = self._list_vms(host_id)
         return self._vms_by_host[host_id]
