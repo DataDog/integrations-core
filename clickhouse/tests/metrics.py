@@ -428,7 +428,6 @@ V_23_8_METRICS = [
 
 V_23_METRICS = [
     'clickhouse.cache.async.insert',
-    'clickhouse.filesystem.cache.download.queue',
     'clickhouse.filesystem.cache.elements',
     'clickhouse.filesystem.cache.limit',
     'clickhouse.filesystem.cache.size',
