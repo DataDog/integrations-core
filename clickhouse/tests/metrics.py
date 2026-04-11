@@ -405,12 +405,9 @@ V_23_8_METRICS = [
     'clickhouse.query.timers.active',
     'clickhouse.remote_reader.total',
     'clickhouse.server.startup.time',
-    'clickhouse.sqe.io_uring.inflight',
-    'clickhouse.sqe.io_uring.waiting',
     'clickhouse.table.distributed.bytes.insert.broken',
     'clickhouse.table.distributed.bytes.insert.pending',
     'clickhouse.table.mergetree.partslock.hold.time',
-    'clickhouse.task.requests.callback',
     'clickhouse.temporary_files.aggregation.total',
     'clickhouse.temporary_files.join.total',
     'clickhouse.temporary_files.sort.total',
@@ -440,7 +437,6 @@ V_23_8_METRICS = [
     'clickhouse.threads.hashed_dictionary.total',
     'clickhouse.threads.idisk.copier.active',
     'clickhouse.threads.idisk.copier.total',
-    'clickhouse.threads.in_overcommit_tracker.total',
     'clickhouse.threads.io.active',
     'clickhouse.threads.io.total',
     'clickhouse.threads.io_prefetch.active',
@@ -497,6 +493,10 @@ V_23_METRICS = [
     'clickhouse.filesystem.cache.size',
     'clickhouse.parts.active',
     'clickhouse.parts.pre_active',
+    'clickhouse.sqe.io_uring.inflight',
+    'clickhouse.sqe.io_uring.waiting',
+    'clickhouse.task.requests.callback',
+    'clickhouse.threads.in_overcommit_tracker.total',
 ]
 
 V_24_METRICS = [
