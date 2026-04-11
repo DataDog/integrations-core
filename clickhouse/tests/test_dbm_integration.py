@@ -10,6 +10,7 @@ from unittest import mock
 
 import clickhouse_connect
 import pytest
+
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_metadata
 from datadog_checks.clickhouse import ClickhouseCheck
 
