@@ -17,6 +17,7 @@ except ImportError:
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.clickhouse.explain_plans import ClickhouseExplainPlans
 from datadog_checks.clickhouse.query_log_job import ClickhouseQueryLogJob, agent_check_getter
 
 # Query to fetch individual completed queries from system.query_log.
@@ -85,6 +86,8 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         # Maximum number of samples to collect per run
         self._max_samples_per_collection = int(config.max_samples_per_collection)
 
+        self._explain_plans = ClickhouseExplainPlans(check, config, self._execute_query)
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_and_submit(self):
         """
@@ -105,14 +108,22 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                 self._log.debug("No new completed queries")
                 return
 
-            # Step 2: Apply rate limiting and create payload
+            # Step 2: Collect and submit explain plans (independent of completion rate limiting)
+            try:
+                for plan_event in self._explain_plans._collect_plans(rows, self._tags_no_db or []):
+                    plan_data = json.dumps(plan_event, default=default_json_event_encoding)
+                    self._check.database_monitoring_query_sample(plan_data)
+            except Exception:
+                self._log.exception("Failed to collect explain plans")
+
+            # Step 3: Apply rate limiting and create payload
             payload = self._create_batched_payload(rows)
 
             if not payload or not payload.get('clickhouse_query_completions'):
                 self._log.debug("No query completions after rate limiting")
                 return
 
-            # Step 3: Submit payload
+            # Step 4: Submit payload
             payload_data = json.dumps(payload, default=default_json_event_encoding)
             num_completions = len(payload.get('clickhouse_query_completions', []))
             self._log.info(
