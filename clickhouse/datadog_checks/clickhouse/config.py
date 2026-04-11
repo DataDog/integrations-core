@@ -234,6 +234,11 @@ def _apply_features(config: InstanceConfig, validation_result: ValidationResult)
         config.query_completions.enabled and config.dbm,
         None if config.dbm else "Requires `dbm: true`",
     )
+    validation_result.add_feature(
+        FeatureKey.EXPLAIN_PLANS,
+        config.query_completions.enabled and config.dbm,
+        None if config.dbm else "Requires `dbm: true`",
+    )
     validation_result.add_feature(FeatureKey.SINGLE_ENDPOINT_MODE, config.single_endpoint_mode)
 
 
