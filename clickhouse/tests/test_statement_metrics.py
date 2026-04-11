@@ -7,7 +7,9 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.clickhouse import ClickhouseCheck
+from datadog_checks.clickhouse.query_log_job import INTERNAL_CLOUD_USERS
 from datadog_checks.clickhouse.statements import ClickhouseStatementMetrics, _row_key
+from datadog_checks.clickhouse.utils import get_internal_user_filter
 
 pytestmark = pytest.mark.unit
 
@@ -306,13 +308,9 @@ def test_fqt_events_caching(check_with_dbm):
     assert len(events2) == 0
 
 
-def test_get_internal_user_filter(check_with_dbm):
-    """Test internal user filter generation"""
-    metrics = check_with_dbm.statement_metrics
+def test_get_internal_user_filter():
+    filter_str = get_internal_user_filter(INTERNAL_CLOUD_USERS)
 
-    filter_str = metrics._get_internal_user_filter()
-
-    # Should always filter out users ending with '-internal'
     assert "user NOT LIKE '%-internal'" in filter_str
     assert filter_str.startswith("AND ")
 

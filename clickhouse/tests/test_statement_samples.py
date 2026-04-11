@@ -6,7 +6,9 @@ from unittest import mock
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
+from datadog_checks.clickhouse.query_log_job import INTERNAL_CLOUD_USERS
 from datadog_checks.clickhouse.statement_samples import ClickhouseStatementSamples
+from datadog_checks.clickhouse.utils import get_internal_user_filter
 
 pytestmark = pytest.mark.unit
 
@@ -316,3 +318,60 @@ def test_defaults_applied():
     assert check.statement_samples._config.collection_interval == 1
     assert check.statement_samples._config.payload_row_limit == 1000
     assert check.statement_samples._config.run_sync is False
+
+
+class TestInternalUserFilter:
+    def test_queries_include_filter_placeholder(self):
+        from datadog_checks.clickhouse.statement_samples import (
+            ACTIVE_CONNECTIONS_QUERY,
+            ACTIVE_QUERIES_QUERY,
+        )
+
+        assert '{internal_user_filter}' in ACTIVE_QUERIES_QUERY
+        assert '{internal_user_filter}' in ACTIVE_CONNECTIONS_QUERY
+
+    def test_filter_excludes_internal_suffix(self):
+        assert "user NOT LIKE '%-internal'" in get_internal_user_filter(INTERNAL_CLOUD_USERS)
+
+    def test_filter_starts_with_and(self):
+        assert get_internal_user_filter(INTERNAL_CLOUD_USERS).startswith('AND ')
+
+    def test_filter_excludes_named_cloud_users(self):
+        user_filter = get_internal_user_filter(frozenset({'cloud-svc-user', 'datadog-internal'}))
+        assert 'user NOT IN' in user_filter
+        assert "'cloud-svc-user'" in user_filter
+        assert "'datadog-internal'" in user_filter
+
+    def test_filter_omits_not_in_when_cloud_users_empty(self):
+        assert 'user NOT IN' not in get_internal_user_filter(frozenset())
+
+    def test_active_queries_query_includes_filter(self, check_with_dbm):
+        samples = check_with_dbm.statement_samples
+        mock_result = mock.MagicMock()
+        mock_result.result_rows = []
+        samples._db_client = mock.MagicMock()
+        samples._db_client.query.return_value = mock_result
+        samples.tags = []
+        samples._tags_no_db = []
+
+        with mock.patch.object(samples._check, 'get_system_table', return_value='system.processes'):
+            with mock.patch.object(samples._check, 'histogram'):
+                samples._get_active_queries()
+
+        executed_query = samples._db_client.query.call_args[0][0]
+        assert get_internal_user_filter(INTERNAL_CLOUD_USERS) in executed_query
+        assert '{internal_user_filter}' not in executed_query
+
+    def test_active_connections_query_includes_filter(self, check_with_dbm):
+        samples = check_with_dbm.statement_samples
+        mock_result = mock.MagicMock()
+        mock_result.result_rows = []
+        samples._db_client = mock.MagicMock()
+        samples._db_client.query.return_value = mock_result
+
+        with mock.patch.object(samples._check, 'get_system_table', return_value='system.processes'):
+            samples._get_active_connections()
+
+        executed_query = samples._db_client.query.call_args[0][0]
+        assert get_internal_user_filter(INTERNAL_CLOUD_USERS) in executed_query
+        assert '{internal_user_filter}' not in executed_query

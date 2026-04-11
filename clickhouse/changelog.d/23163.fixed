@@ -1,0 +1,1 @@
+Exclude internal Cloud users from ClickHouse activity samples collected via system.processes
