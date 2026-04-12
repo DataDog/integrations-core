@@ -7,15 +7,95 @@ from unittest import mock
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
-from datadog_checks.clickhouse.explain_plans import ClickhouseExplainPlans, DBExplainError
+from datadog_checks.clickhouse.explain_plans import ClickhouseExplainPlans, DBExplainError, _normalize_clickhouse_plan
 
 pytestmark = pytest.mark.unit
 
 SAMPLE_PLAN = {
     "Plan": {
         "Node Type": "Expression",
-        "Description": "",
-        "Plans": [{"Node Type": "ReadFromStorage", "Description": "SystemTables"}],
+        "Node Id": "Expression_1",
+        "Description": "Project names + Projection",
+        "Plans": [
+            {
+                "Node Type": "Expression",
+                "Node Id": "Expression_0",
+                "Description": "WHERE + Change column names to column identifiers",
+                "Plans": [
+                    {
+                        "Node Type": "ReadFromMergeTree",
+                        "Node Id": "ReadFromMergeTree_0",
+                        "Description": "default.inventory_items",
+                    }
+                ],
+            }
+        ],
+    }
+}
+
+SAMPLE_PLAN_WITH_INDEXES = {
+    "Plan": {
+        "Node Type": "Expression",
+        "Node Id": "Expression_1",
+        "Description": "Project names + Projection",
+        "Plans": [
+            {
+                "Node Type": "ReadFromMergeTree",
+                "Node Id": "ReadFromMergeTree_0",
+                "Description": "default.orders",
+                "Indexes": [
+                    {
+                        "Type": "PrimaryKey",
+                        "Keys": ["order_date"],
+                        "Condition": "(order_date in [2024-01-01, +Inf))",
+                        "Parts": 3,
+                        "Granules": 12,
+                    }
+                ],
+            }
+        ],
+    }
+}
+
+SAMPLE_PLAN_WITH_ACTIONS = {
+    "Plan": {
+        "Node Type": "Expression",
+        "Node Id": "Expression_1",
+        "Description": "Project names + Projection",
+        "Actions": {
+            "Inputs": [{"Name": "order_id", "Type": "UInt64"}, {"Name": "amount", "Type": "Float64"}],
+            "Actions": [
+                {"Type": "INPUT", "Result Name": "order_id", "Result Type": "UInt64", "Arguments": []},
+                {"Type": "INPUT", "Result Name": "amount", "Result Type": "Float64", "Arguments": []},
+            ],
+            "Outputs": [{"Name": "order_id", "Type": "UInt64"}, {"Name": "amount", "Type": "Float64"}],
+        },
+        "Plans": [
+            {
+                "Node Type": "ReadFromMergeTree",
+                "Node Id": "ReadFromMergeTree_0",
+                "Description": "default.orders",
+            }
+        ],
+    }
+}
+
+SAMPLE_PLAN_WITH_STATS = {
+    "Plan": {
+        "Node Type": "Expression",
+        "Node Id": "Expression_1",
+        "Description": "Project names + Projection",
+        "Estimated Rows": 1000,
+        "Estimated Cost": 42.5,
+        "Plans": [
+            {
+                "Node Type": "ReadFromMergeTree",
+                "Node Id": "ReadFromMergeTree_0",
+                "Description": "default.inventory_items",
+                "Estimated Rows": 1000,
+                "Estimated Total Rows": 50000,
+            }
+        ],
     }
 }
 
@@ -35,7 +115,7 @@ def instance_with_dbm():
             'samples_per_hour_per_query': 15,
             'seen_samples_cache_maxsize': 10000,
             'max_samples_per_collection': 1000,
-            'explained_queries_per_hour_per_query': 1,
+            'explained_queries_per_hour_per_query': 60,
             'explained_queries_cache_maxsize': 5000,
             'run_sync': False,
         },
@@ -66,7 +146,7 @@ def test_explain_plans_initialized(check_with_dbm):
     [
         ("SELECT * FROM users", True),
         ("select count() FROM system.tables", True),
-        ("INSERT INTO events VALUES (?)", True),
+        ("INSERT INTO events VALUES (?)", False),
         ("WITH cte AS (SELECT 1) SELECT * FROM cte", True),
         ("UPDATE users SET name = ?", False),
         ("DELETE FROM users WHERE id = 1", False),
@@ -122,6 +202,21 @@ def test_run_explain_safe_success(explain_plans):
     assert error_msg is None
 
 
+def test_run_explain_safe_success_array_wrapped(explain_plans):
+    """Some ClickHouse versions wrap the plan in a top-level JSON array; it is unwrapped."""
+    explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps([SAMPLE_PLAN]),)])
+
+    row = {
+        'query': 'SELECT * FROM system.tables',
+        'statement': 'SELECT * FROM system.tables',
+        'query_signature': 'abc123',
+    }
+    plan_dict, error_code, error_msg = explain_plans._run_explain_safe(row)
+    assert plan_dict == SAMPLE_PLAN
+    assert error_code is None
+    assert error_msg is None
+
+
 def test_collect_plan_for_statement_no_plans_possible(explain_plans):
     """Statements that cannot be explained return None."""
     row = {
@@ -137,7 +232,6 @@ def test_collect_plan_for_statement_no_plans_possible(explain_plans):
 def test_plan_event_structure(mock_agent, explain_plans):
     """A successful plan event has the required fields and correct dbm_type."""
     mock_agent.get_version.return_value = '7.64.0'
-    mock_agent.obfuscate_sql_exec_plan.return_value = json.dumps(SAMPLE_PLAN)
 
     explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
 
@@ -182,7 +276,6 @@ def test_plan_event_structure(mock_agent, explain_plans):
 def test_collect_plans_rate_limiting(mock_agent, explain_plans):
     """The same query_signature is only explained once within the rate-limit TTL."""
     mock_agent.get_version.return_value = '7.64.0'
-    mock_agent.obfuscate_sql_exec_plan.return_value = json.dumps(SAMPLE_PLAN)
 
     explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
 
@@ -273,6 +366,212 @@ def test_collect_plans_error_event(mock_agent, explain_plans):
     assert errors[0]['code'] == DBExplainError.database_error.value
 
 
+@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
+def test_collect_plans_unsupported_statements_skip_rate_limiter(mock_agent, explain_plans):
+    """Unsupported statements are skipped before acquiring a rate limit slot."""
+    mock_agent.get_version.return_value = '7.64.0'
+    explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
+
+    # Fill the cache with DDL queries up to maxsize so any further acquire would fail
+    maxsize = explain_plans._explained_statements_ratelimiter.maxsize
+    for i in range(maxsize):
+        explain_plans._explained_statements_ratelimiter.acquire(('db', f'ddl_sig_{i}'))
+
+    rows = [
+        {
+            'query': 'SELECT * FROM system.tables',
+            'statement': 'SELECT * FROM system.tables',
+            'query_signature': 'select_sig',
+            'databases': 'default',
+            'user': 'default',
+            'query_kind': 'Select',
+            'query_duration_ms': 10.0,
+            'event_time_microseconds': 1746205423150500,
+            'dd_tables': [],
+            'dd_commands': ['SELECT'],
+        },
+        {
+            'query': 'DELETE FROM users WHERE id = 1',
+            'statement': 'DELETE FROM users WHERE id = ?',
+            'query_signature': 'delete_sig',
+            'databases': 'default',
+            'user': 'default',
+            'query_kind': 'Delete',
+            'query_duration_ms': 5.0,
+            'event_time_microseconds': 1746205423160000,
+            'dd_tables': [],
+            'dd_commands': ['DELETE'],
+        },
+    ]
+
+    plans = list(explain_plans._collect_plans(rows, ['test:tag']))
+
+    # The DDL row is skipped before touching the rate limiter; SELECT is also blocked since cache is full
+    assert len(plans) == 0
+    # EXPLAIN was never called for the DDL row
+    explain_plans._execute_query_fn.assert_not_called()
+
+
+@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
+def test_collect_plans_different_databases_explained_separately(mock_agent, explain_plans):
+    """Same query_signature in different databases each get an EXPLAIN."""
+    mock_agent.get_version.return_value = '7.64.0'
+    explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
+
+    rows = [
+        {
+            'query': 'SELECT * FROM system.tables',
+            'statement': 'SELECT * FROM system.tables',
+            'query_signature': 'same_sig',
+            'databases': 'db_a',
+            'user': 'default',
+            'query_kind': 'Select',
+            'query_duration_ms': 10.0,
+            'event_time_microseconds': 1746205423150500,
+            'dd_tables': [],
+            'dd_commands': ['SELECT'],
+        },
+        {
+            'query': 'SELECT * FROM system.tables',
+            'statement': 'SELECT * FROM system.tables',
+            'query_signature': 'same_sig',
+            'databases': 'db_b',
+            'user': 'default',
+            'query_kind': 'Select',
+            'query_duration_ms': 10.0,
+            'event_time_microseconds': 1746205423160000,
+            'dd_tables': [],
+            'dd_commands': ['SELECT'],
+        },
+    ]
+
+    plans = list(explain_plans._collect_plans(rows, ['test:tag']))
+
+    assert len(plans) == 2
+    assert explain_plans._execute_query_fn.call_count == 2
+
+
+def test_run_explain_uses_indexes_and_actions(explain_plans):
+    """EXPLAIN query includes json=1, indexes=1, and actions=1."""
+    explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
+
+    explain_plans._run_explain("SELECT * FROM orders")
+
+    call_args = explain_plans._execute_query_fn.call_args[0][0]
+    assert "json = 1" in call_args
+    assert "indexes = 1" in call_args
+    assert "actions = 1" in call_args
+
+
+@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
+def test_plan_definition_preserves_indexes(mock_agent, explain_plans):
+    """Plan definition keeps Indexes fields intact."""
+    mock_agent.get_version.return_value = '7.64.0'
+    explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN_WITH_INDEXES),)])
+
+    row = {
+        'query': 'SELECT * FROM orders WHERE order_date > ?',
+        'statement': 'SELECT * FROM orders WHERE order_date > ?',
+        'query_signature': 'idx_sig',
+        'databases': 'default',
+        'user': 'default',
+        'query_kind': 'Select',
+        'query_duration_ms': 5.0,
+        'event_time_microseconds': 1746205423150500,
+        'dd_tables': ['orders'],
+        'dd_commands': ['SELECT'],
+    }
+    event = explain_plans._collect_plan_for_statement(row, ['test:tag'])
+
+    assert event is not None
+    definition = json.loads(event['db']['plan']['definition'])
+    read_node = definition['Plan']['Plans'][0]
+    assert 'Indexes' in read_node
+    assert read_node['Indexes'][0]['Type'] == 'PrimaryKey'
+    assert read_node['Indexes'][0]['Keys'] == ['order_date']
+
+
+@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
+def test_plan_definition_preserves_actions(mock_agent, explain_plans):
+    """Plan definition keeps Actions fields intact."""
+    mock_agent.get_version.return_value = '7.64.0'
+    explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN_WITH_ACTIONS),)])
+
+    row = {
+        'query': 'SELECT order_id, amount FROM orders',
+        'statement': 'SELECT order_id, amount FROM orders',
+        'query_signature': 'act_sig',
+        'databases': 'default',
+        'user': 'default',
+        'query_kind': 'Select',
+        'query_duration_ms': 5.0,
+        'event_time_microseconds': 1746205423150500,
+        'dd_tables': ['orders'],
+        'dd_commands': ['SELECT'],
+    }
+    event = explain_plans._collect_plan_for_statement(row, ['test:tag'])
+
+    assert event is not None
+    definition = json.loads(event['db']['plan']['definition'])
+    top_plan = definition['Plan']
+    assert 'Actions' in top_plan
+    assert top_plan['Actions']['Inputs'][0]['Name'] == 'order_id'
+    assert top_plan['Actions']['Outputs'][1]['Name'] == 'amount'
+
+
+def test_normalize_clickhouse_plan_preserves_indexes_and_actions():
+    """_normalize_clickhouse_plan does not strip Indexes or Actions — they are structural."""
+    normalized_with_indexes = _normalize_clickhouse_plan(SAMPLE_PLAN_WITH_INDEXES)
+    read_node = normalized_with_indexes['Plan']['Plans'][0]
+    assert 'Indexes' in read_node
+    assert read_node['Indexes'][0]['Type'] == 'PrimaryKey'
+
+    normalized_with_actions = _normalize_clickhouse_plan(SAMPLE_PLAN_WITH_ACTIONS)
+    assert 'Actions' in normalized_with_actions['Plan']
+    assert normalized_with_actions['Plan']['Actions']['Inputs'][0]['Name'] == 'order_id'
+
+
+def test_normalize_clickhouse_plan_strips_stats():
+    """_normalize_clickhouse_plan removes cost/stats keys but keeps structural fields."""
+    normalized = _normalize_clickhouse_plan(SAMPLE_PLAN_WITH_STATS)
+    plan = normalized['Plan']
+    assert 'Estimated Rows' not in plan
+    assert 'Estimated Cost' not in plan
+    assert plan['Description'] == 'Project names + Projection'
+    child = plan['Plans'][0]
+    assert 'Estimated Rows' not in child
+    assert 'Estimated Total Rows' not in child
+    assert child['Description'] == 'default.inventory_items'
+
+
+@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
+def test_plan_definition_preserves_descriptions(mock_agent, explain_plans):
+    """Plan definition keeps ClickHouse Description fields intact (not replaced with '?')."""
+    mock_agent.get_version.return_value = '7.64.0'
+    explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
+
+    row = {
+        'query': 'SELECT * FROM inventory_items WHERE sku = ?',
+        'statement': 'SELECT * FROM inventory_items WHERE sku = ?',
+        'query_signature': 'desc_sig',
+        'databases': 'default',
+        'user': 'default',
+        'query_kind': 'Select',
+        'query_duration_ms': 5.0,
+        'event_time_microseconds': 1746205423150500,
+        'dd_tables': ['inventory_items'],
+        'dd_commands': ['SELECT'],
+    }
+    event = explain_plans._collect_plan_for_statement(row, ['test:tag'])
+
+    assert event is not None
+    definition = json.loads(event['db']['plan']['definition'])
+    top_plan = definition['Plan']
+    assert top_plan['Description'] == 'Project names + Projection'
+    assert top_plan['Plans'][0]['Description'] == 'WHERE + Change column names to column identifiers'
+    assert top_plan['Plans'][0]['Plans'][0]['Description'] == 'default.inventory_items'
+
+
 def test_default_config_values(instance_with_dbm):
     """Default config values for explain plans are applied correctly."""
     instance = {
@@ -288,5 +587,5 @@ def test_default_config_values(instance_with_dbm):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     cfg = check._config.query_completions
 
-    assert cfg.explained_queries_per_hour_per_query == 1
+    assert cfg.explained_queries_per_hour_per_query == 60
     assert cfg.explained_queries_cache_maxsize == 5000

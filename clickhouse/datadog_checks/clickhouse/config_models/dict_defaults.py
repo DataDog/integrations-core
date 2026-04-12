@@ -40,7 +40,7 @@ def instance_query_completions():
         samples_per_hour_per_query=15,
         seen_samples_cache_maxsize=10000,
         max_samples_per_collection=1000,
-        explained_queries_per_hour_per_query=1,
+        explained_queries_per_hour_per_query=60,
         explained_queries_cache_maxsize=5000,
         run_sync=False,
     )

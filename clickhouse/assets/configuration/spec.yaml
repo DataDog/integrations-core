@@ -236,7 +236,7 @@ files:
             This rate limits EXPLAIN PLAN execution to avoid overhead on frequently executed queries.
           value:
             type: number
-            default: 1
+            default: 60
         - name: explained_queries_cache_maxsize
           hidden: true
           description: |

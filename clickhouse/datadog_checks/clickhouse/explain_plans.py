@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json as stdlib_json
+import re
 from enum import Enum
 from typing import TYPE_CHECKING, Callable, Iterator
 
@@ -19,7 +20,27 @@ from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache
 from datadog_checks.base.utils.serialization import json
 
-SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'insert', 'with'})
+SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'with'})
+
+_CLICKHOUSE_PLAN_STATS_KEYS = frozenset(
+    {
+        'Estimated Rows',
+        'Estimated Cost',
+        'Estimated Total Rows',
+    }
+)
+
+
+def _normalize_clickhouse_plan(node: object) -> object:
+    """Recursively strip cost/stats fields from a ClickHouse plan node."""
+    if isinstance(node, dict):
+        return {k: _normalize_clickhouse_plan(v) for k, v in node.items() if k not in _CLICKHOUSE_PLAN_STATS_KEYS}
+    if isinstance(node, list):
+        return [_normalize_clickhouse_plan(item) for item in node]
+    return node
+
+
+_FORMAT_SUFFIX_RE = re.compile(r'\s+FORMAT\s+\w+\s*$', re.IGNORECASE)
 
 _SECONDS_PER_HOUR = 60 * 60
 
@@ -44,12 +65,10 @@ class ClickhouseExplainPlans:
 
         plan_ttl = _SECONDS_PER_HOUR / float(config.explained_queries_per_hour_per_query)
 
-        # Gates EXPLAIN execution per query_signature
         self._explained_statements_ratelimiter = RateLimitingTTLCache(
             maxsize=int(config.explained_queries_cache_maxsize),
             ttl=plan_ttl,
         )
-        # Deduplicates per (query_signature, plan_signature) to avoid re-emitting unchanged plans
         self._seen_samples_ratelimiter = RateLimitingTTLCache(
             maxsize=int(config.seen_samples_cache_maxsize),
             ttl=plan_ttl,
@@ -62,15 +81,25 @@ class ClickhouseExplainPlans:
         first_token = statement.strip().split()[0].lower()
         return first_token in SUPPORTED_EXPLAIN_STATEMENTS
 
+    @staticmethod
+    def _strip_format_clause(query: str) -> str:
+        """Strip trailing FORMAT clause that clickhouse_connect appends to queries."""
+        return _FORMAT_SUFFIX_RE.sub('', query)
+
     def _run_explain(self, statement: str) -> dict:
         """Execute EXPLAIN PLAN json = 1 and return the parsed plan as a dict."""
-        explain_query = "EXPLAIN PLAN json = 1 " + statement
+        statement = self._strip_format_clause(statement)
+        explain_query = "EXPLAIN PLAN json = 1, indexes = 1, actions = 1 " + statement
         rows = self._execute_query_fn(explain_query)
         if not rows:
             raise ValueError("EXPLAIN PLAN returned no rows")
-        # ClickHouse returns the JSON plan across one or more text rows; join and parse
         plan_text = '\n'.join(str(row[0]) for row in rows if row)
-        return stdlib_json.loads(plan_text)
+        result = stdlib_json.loads(plan_text)
+        if isinstance(result, list):
+            if not result:
+                raise ValueError("EXPLAIN PLAN returned empty JSON array")
+            return result[0]
+        return result
 
     def _run_explain_safe(self, row: dict) -> tuple[dict | None, DBExplainError | None, str | None]:
         """
@@ -110,21 +139,22 @@ class ClickhouseExplainPlans:
         plan_signature: str | None = None
 
         if plan_dict is not None:
-            raw_plan = json.dumps(plan_dict)
-            if isinstance(raw_plan, bytes):
-                raw_plan = raw_plan.decode('utf-8')
             try:
-                obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(raw_plan)
-                normalized_plan = datadog_agent.obfuscate_sql_exec_plan(raw_plan, normalize=True)
+                obfuscated_plan = json.dumps(plan_dict)
+                if isinstance(obfuscated_plan, bytes):
+                    obfuscated_plan = obfuscated_plan.decode('utf-8')
+                normalized_plan = json.dumps(_normalize_clickhouse_plan(plan_dict))
+                if isinstance(normalized_plan, bytes):
+                    normalized_plan = normalized_plan.decode('utf-8')
                 plan_signature = compute_exec_plan_signature(normalized_plan)
             except Exception as e:
-                self._log.debug("Failed to obfuscate explain plan: %s", e)
+                self._log.debug("Failed to serialize explain plan: %s", e)
                 collection_errors.append({'code': DBExplainError.invalid_result.value, 'message': str(e)})
         elif error_code is not None:
             collection_errors.append({'code': error_code.value, 'message': error_msg or ''})
 
         if plan_signature:
-            statement_plan_sig = (row.get('query_signature', ''), plan_signature)
+            statement_plan_sig = (row.get('databases', ''), row.get('query_signature', ''), plan_signature)
             if not self._seen_samples_ratelimiter.acquire(statement_plan_sig):
                 return None
 
@@ -162,14 +192,17 @@ class ClickhouseExplainPlans:
         Yield plan events for rows that pass rate limiting.
 
         Uses two caches:
-        - _explained_statements_ratelimiter: limits EXPLAIN execution per query_signature
-        - _seen_samples_ratelimiter: deduplicates per (query_signature, plan_signature)
+        - _explained_statements_ratelimiter: limits EXPLAIN execution per (databases, query_signature)
+        - _seen_samples_ratelimiter: deduplicates per (databases, query_signature, plan_signature)
         """
         for row in rows:
             query_signature = row.get('query_signature', '')
             if not query_signature:
                 continue
-            if not self._explained_statements_ratelimiter.acquire(query_signature):
+            if not self._can_explain_statement(row.get('statement', '')):
+                continue
+            rate_limit_key = (row.get('databases', ''), query_signature)
+            if not self._explained_statements_ratelimiter.acquire(rate_limit_key):
                 continue
 
             plan_event = self._collect_plan_for_statement(row, tags_no_db)
