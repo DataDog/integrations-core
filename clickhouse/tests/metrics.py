@@ -220,6 +220,9 @@ OPTIONAL_METRICS = [
     'clickhouse.table.mergetree.insert.write.size.compressed.total',
     'clickhouse.table.mergetree.insert.write.size.uncompressed.count',
     'clickhouse.table.mergetree.insert.write.size.uncompressed.total',
+    # Previously emitted by SystemParts; now replaced by table.parts.* metrics.
+    # Kept here so assert_all_metrics_covered() does not fail if an older agent
+    # version is running in a mixed environment.
     'clickhouse.table.mergetree.part.current',
     'clickhouse.table.mergetree.replicated.fetch.replica.count',
     'clickhouse.table.mergetree.replicated.fetch.replica.fail.count',
@@ -291,6 +294,77 @@ OPTIONAL_METRICS = [
     'clickhouse.zk.ddl_entry.max',
     'clickhouse.zk.watch.count',
     'clickhouse.zk.watch.total',
+    # Parts / merges / MV Phase 1 metrics
+    'clickhouse.merges.active',
+    'clickhouse.merges.active_mutations',
+    'clickhouse.merges.avg_progress',
+    'clickhouse.merges.max_elapsed_seconds',
+    'clickhouse.merges.stalled',
+    'clickhouse.merges.total_bytes',
+    'clickhouse.mutations.failing',
+    'clickhouse.mutations.in_progress',
+    'clickhouse.mutations.oldest_age_seconds',
+    'clickhouse.mutations.parts_remaining',
+    'clickhouse.table.detached_parts.bytes',
+    'clickhouse.table.detached_parts.count',
+    'clickhouse.table.parts.active',
+    'clickhouse.table.parts.bytes_on_disk',
+    'clickhouse.table.parts.compact',
+    'clickhouse.table.parts.compressed_bytes',
+    'clickhouse.table.parts.level_zero',
+    'clickhouse.table.parts.rows',
+    'clickhouse.table.parts.uncompressed_bytes',
+    'clickhouse.table.parts.wide',
+    'clickhouse.view.bytes',
+    'clickhouse.view.refresh.count',
+    'clickhouse.view.refresh.duration_seconds',
+    'clickhouse.view.refresh.is_failing',
+    'clickhouse.view.refresh.seconds_since_success',
+    'clickhouse.view.rows',
+    'clickhouse.view.target.bytes',
+    'clickhouse.view.target.freshness_lag_seconds',
+    'clickhouse.view.target.rows',
+]
+
+# Metrics added in the parts/merges/MV Phase 1 feature.
+# All are optional because they require data to exist in the respective system tables.
+PARTS_MERGES_MV_METRICS = [
+    # Expanded system.parts metrics
+    'clickhouse.table.parts.active',
+    'clickhouse.table.parts.bytes_on_disk',
+    'clickhouse.table.parts.compact',
+    'clickhouse.table.parts.compressed_bytes',
+    'clickhouse.table.parts.level_zero',
+    'clickhouse.table.parts.rows',
+    'clickhouse.table.parts.uncompressed_bytes',
+    'clickhouse.table.parts.wide',
+    # system.merges (aggregated per table)
+    'clickhouse.merges.active',
+    'clickhouse.merges.active_mutations',
+    'clickhouse.merges.avg_progress',
+    'clickhouse.merges.max_elapsed_seconds',
+    'clickhouse.merges.stalled',
+    'clickhouse.merges.total_bytes',
+    # stall detection gauge (emitted by _detect_stalled_merges)
+    # system.mutations (aggregated per table)
+    'clickhouse.mutations.failing',
+    'clickhouse.mutations.in_progress',
+    'clickhouse.mutations.oldest_age_seconds',
+    'clickhouse.mutations.parts_remaining',
+    # system.detached_parts
+    'clickhouse.table.detached_parts.bytes',
+    'clickhouse.table.detached_parts.count',
+    # system.tables (materialized views)
+    'clickhouse.view.target.bytes',
+    'clickhouse.view.target.freshness_lag_seconds',
+    'clickhouse.view.target.rows',
+    # system.view_refreshes (ClickHouse >= 23.4)
+    'clickhouse.view.bytes',
+    'clickhouse.view.refresh.count',
+    'clickhouse.view.refresh.duration_seconds',
+    'clickhouse.view.refresh.is_failing',
+    'clickhouse.view.refresh.seconds_since_success',
+    'clickhouse.view.rows',
 ]
 
 V_18_19_METRICS = [
@@ -345,3 +419,7 @@ version_mapper = {
 
 def get_metrics(version):
     return BASE_METRICS + version_mapper.get(version.split(".")[0], [])
+
+
+def get_parts_merges_mv_metrics():
+    return PARTS_MERGES_MV_METRICS

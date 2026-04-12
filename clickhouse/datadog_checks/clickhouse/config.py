@@ -120,6 +120,15 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
                 **dict_defaults.instance_query_completions().model_dump(),
                 **(instance.get('query_completions', {})),
             },
+            # Parts/merges/MV monitoring configurations
+            "merges_monitoring": {
+                **dict_defaults.instance_merges_monitoring().model_dump(),
+                **(instance.get('merges_monitoring', {})),
+            },
+            "materialized_views_monitoring": {
+                **dict_defaults.instance_materialized_views_monitoring().model_dump(),
+                **(instance.get('materialized_views_monitoring', {})),
+            },
             # Tags - ensure we have a list, not None
             "tags": list(instance.get('tags', [])),
             # Other settings

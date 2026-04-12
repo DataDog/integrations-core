@@ -69,6 +69,18 @@ EXPECTED_DEFAULTS = {
     # === Agent standard fields ===
     'min_collection_interval': 15,
     'empty_default_hostname': False,
+    # === Parts / merges monitoring ===
+    'merges_monitoring': {
+        'enabled': True,
+        'stall_detection_threshold_seconds': 300,
+        'mutation_age_alert_hours': 24,
+    },
+    # === Materialized views monitoring ===
+    'materialized_views_monitoring': {
+        'enabled': True,
+        'trigger_mv_staleness_threshold_seconds': 600,
+        'excluded_databases': ('system', 'information_schema'),
+    },
     # === User-provided / no default ===
     'service': None,
     'metric_patterns': None,

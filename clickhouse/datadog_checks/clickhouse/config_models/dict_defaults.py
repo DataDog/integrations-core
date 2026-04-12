@@ -42,3 +42,19 @@ def instance_query_completions():
         max_samples_per_collection=1000,
         run_sync=False,
     )
+
+
+def instance_merges_monitoring():
+    return instance.MergesMonitoring(
+        enabled=True,
+        stall_detection_threshold_seconds=300,
+        mutation_age_alert_hours=24,
+    )
+
+
+def instance_materialized_views_monitoring():
+    return instance.MaterializedViewsMonitoring(
+        enabled=True,
+        trigger_mv_staleness_threshold_seconds=600,
+        excluded_databases=('system', 'information_schema'),
+    )

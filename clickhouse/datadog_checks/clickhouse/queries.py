@@ -1975,9 +1975,14 @@ SystemParts = {
             SELECT
               database,
               table,
-              sum(bytes_on_disk) AS bytes,
-              count() AS parts,
-              sum(rows) AS rows
+              count()                                     AS active_parts,
+              sum(rows)                                   AS total_rows,
+              sum(bytes_on_disk)                          AS bytes_on_disk,
+              sum(data_compressed_bytes)                  AS compressed_bytes,
+              sum(data_uncompressed_bytes)                AS uncompressed_bytes,
+              countIf(part_type = 'Wide')                 AS wide_parts,
+              countIf(part_type = 'Compact')              AS compact_parts,
+              countIf(level = 0)                          AS level_zero_parts
             FROM system.parts
             WHERE active = 1
             GROUP BY
@@ -1988,9 +1993,166 @@ SystemParts = {
     'columns': [
         {'name': 'database', 'type': 'tag'},
         {'name': 'table', 'type': 'tag'},
-        {'name': 'table.mergetree.size', 'type': 'gauge'},
-        {'name': 'table.mergetree.part.current', 'type': 'gauge'},
-        {'name': 'table.mergetree.row.current', 'type': 'gauge'},
+        {'name': 'table.parts.active', 'type': 'gauge'},
+        {'name': 'table.parts.rows', 'type': 'gauge'},
+        {'name': 'table.parts.bytes_on_disk', 'type': 'gauge'},
+        {'name': 'table.parts.compressed_bytes', 'type': 'gauge'},
+        {'name': 'table.parts.uncompressed_bytes', 'type': 'gauge'},
+        {'name': 'table.parts.wide', 'type': 'gauge'},
+        {'name': 'table.parts.compact', 'type': 'gauge'},
+        {'name': 'table.parts.level_zero', 'type': 'gauge'},
+    ],
+}
+
+
+# https://clickhouse.com/docs/en/operations/system-tables/merges
+SystemMerges = {
+    'name': 'system.merges',
+    'query': compact_query(
+        """
+            SELECT
+              database,
+              table,
+              count()                                        AS active_merges,
+              countIf(is_mutation = 1)                       AS active_mutations,
+              avg(progress)                                  AS avg_progress,
+              max(elapsed)                                   AS max_elapsed_seconds,
+              sum(total_size_bytes_compressed)               AS total_merge_bytes,
+              countIf(elapsed > 3600)                        AS stalled_merges
+            FROM system.merges
+            GROUP BY database, table
+            """
+    ),
+    'columns': [
+        {'name': 'database', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'merges.active', 'type': 'gauge'},
+        {'name': 'merges.active_mutations', 'type': 'gauge'},
+        {'name': 'merges.avg_progress', 'type': 'gauge'},
+        {'name': 'merges.max_elapsed_seconds', 'type': 'gauge'},
+        {'name': 'merges.total_bytes', 'type': 'gauge'},
+        {'name': 'merges.stalled', 'type': 'gauge'},
+    ],
+}
+
+
+# https://clickhouse.com/docs/en/operations/system-tables/mutations
+SystemMutations = {
+    'name': 'system.mutations',
+    'query': compact_query(
+        """
+            SELECT
+              database,
+              table,
+              countIf(is_done = 0)                            AS mutations_in_progress,
+              countIf(is_done = 0 AND latest_fail_time > 0)   AS mutations_failing,
+              sum(if(is_done = 0, parts_to_do, 0))            AS total_parts_remaining,
+              max(if(is_done = 0, now() - create_time, 0))    AS oldest_mutation_age_seconds
+            FROM system.mutations
+            WHERE create_time > now() - INTERVAL 24 HOUR
+            GROUP BY database, table
+            """
+    ),
+    'columns': [
+        {'name': 'database', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'mutations.in_progress', 'type': 'gauge'},
+        {'name': 'mutations.failing', 'type': 'gauge'},
+        {'name': 'mutations.parts_remaining', 'type': 'gauge'},
+        {'name': 'mutations.oldest_age_seconds', 'type': 'gauge'},
+    ],
+}
+
+
+# https://clickhouse.com/docs/en/operations/system-tables/detached_parts
+SystemDetachedParts = {
+    'name': 'system.detached_parts',
+    'query': compact_query(
+        """
+            SELECT
+              database,
+              table,
+              reason,
+              count()            AS detached_count,
+              sum(bytes_on_disk) AS detached_bytes
+            FROM system.detached_parts
+            GROUP BY database, table, reason
+            """
+    ),
+    'columns': [
+        {'name': 'database', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'reason', 'type': 'tag'},
+        {'name': 'table.detached_parts.count', 'type': 'gauge'},
+        {'name': 'table.detached_parts.bytes', 'type': 'gauge'},
+    ],
+}
+
+
+# https://clickhouse.com/docs/en/operations/system-tables/tables
+# Enumerates all materialized views and their target table sizes.
+# String columns (e.g. create_table_query) are intentionally excluded — they are
+# collected only in the Phase 2 metadata job and are not emitted as gauges here.
+SystemMaterializedViews = {
+    'name': 'system.tables (materialized_views)',
+    'query': compact_query(
+        """
+            SELECT
+              database,
+              name                                AS view_name,
+              'Trigger'                           AS mv_type,
+              dependencies_database[1]           AS source_database,
+              dependencies_table[1]              AS source_table,
+              total_bytes                        AS target_bytes,
+              total_rows                         AS target_rows
+            FROM system.tables
+            WHERE engine = 'MaterializedView'
+            """
+    ),
+    'columns': [
+        {'name': 'database', 'type': 'tag'},
+        {'name': 'view', 'type': 'tag'},
+        {'name': 'mv_type', 'type': 'tag'},
+        {'name': 'source_db', 'type': 'tag'},
+        {'name': 'source_table', 'type': 'tag'},
+        {'name': 'view.target.bytes', 'type': 'gauge'},
+        {'name': 'view.target.rows', 'type': 'gauge'},
+    ],
+}
+
+
+# https://clickhouse.com/docs/en/operations/system-tables/view_refreshes
+# Only populated for refreshable MVs (ClickHouse >= 23.4).
+# The check gates this query on server version — see ClickhouseCheck._collect_view_refreshes().
+SystemViewRefreshes = {
+    'name': 'system.view_refreshes',
+    'query': compact_query(
+        """
+            SELECT
+              database,
+              view,
+              'Refreshable'                                 AS mv_type,
+              status,
+              elapsed_ns / 1e9                              AS last_refresh_duration_seconds,
+              refresh_count,
+              written_rows,
+              written_bytes,
+              if(status = 'Failed', 1, 0)                   AS is_failing,
+              dateDiff('second', last_success_time, now())   AS seconds_since_last_success
+            FROM system.view_refreshes
+            """
+    ),
+    'columns': [
+        {'name': 'database', 'type': 'tag'},
+        {'name': 'view', 'type': 'tag'},
+        {'name': 'mv_type', 'type': 'tag'},
+        {'name': 'status', 'type': 'tag'},
+        {'name': 'view.refresh.duration_seconds', 'type': 'gauge'},
+        {'name': 'view.refresh.count', 'type': 'gauge'},
+        {'name': 'view.rows', 'type': 'gauge'},
+        {'name': 'view.bytes', 'type': 'gauge'},
+        {'name': 'view.refresh.is_failing', 'type': 'gauge'},
+        {'name': 'view.refresh.seconds_since_success', 'type': 'gauge'},
     ],
 }
 

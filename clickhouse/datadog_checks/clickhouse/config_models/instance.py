@@ -88,6 +88,26 @@ class QuerySamples(BaseModel):
     run_sync: Optional[bool] = None
 
 
+class MergesMonitoring(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+    mutation_age_alert_hours: Optional[int] = None
+    stall_detection_threshold_seconds: Optional[int] = None
+
+
+class MaterializedViewsMonitoring(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+    excluded_databases: Optional[tuple[str, ...]] = None
+    trigger_mv_staleness_threshold_seconds: Optional[int] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -103,6 +123,8 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
+    materialized_views_monitoring: Optional[MaterializedViewsMonitoring] = None
+    merges_monitoring: Optional[MergesMonitoring] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     only_custom_queries: Optional[bool] = None

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections import defaultdict
 from string import Template
 from time import time
 
@@ -89,6 +90,10 @@ class ClickhouseCheck(DatabaseCheck):
                 queries.SystemEvents,
                 queries.SystemAsynchronousMetrics,
                 queries.SystemParts,
+                queries.SystemMerges,
+                queries.SystemMutations,
+                queries.SystemDetachedParts,
+                queries.SystemMaterializedViews,
                 queries.SystemReplicas,
                 queries.SystemDictionaries,
             ],
@@ -96,6 +101,24 @@ class ClickhouseCheck(DatabaseCheck):
             error_handler=self._error_sanitizer.clean,
         )
         self.check_initializations.append(self._query_manager.compile_queries)
+
+        # Per-merge state for stall detection: (database, table, result_part_name) → {progress, elapsed}
+        self._previous_merges: dict = {}
+
+        # Whether system.view_refreshes is available (None = not yet determined)
+        self._view_refreshes_supported: bool | None = None
+
+        # Stall detection threshold — from config, defaults to 300 s
+        merges_cfg = getattr(self._config, 'merges_monitoring', None)
+        self.stall_threshold_seconds: int = (
+            getattr(merges_cfg, 'stall_detection_threshold_seconds', None) or 300
+        )
+
+        # MV staleness threshold — from config, defaults to 600 s
+        mv_cfg = getattr(self._config, 'materialized_views_monitoring', None)
+        self.trigger_staleness_threshold: int = (
+            getattr(mv_cfg, 'trigger_mv_staleness_threshold_seconds', None) or 600
+        )
 
         # Initialize DBM components if enabled
         self._init_dbm_components()
@@ -232,6 +255,20 @@ class ClickhouseCheck(DatabaseCheck):
         # Send database instance metadata
         self._send_database_instance_metadata()
 
+        # Parts/merges/MV health — run after QueryManager so version is known
+        current_merges = self._get_current_merges()
+        stalled = self._detect_stalled_merges(current_merges, self._previous_merges)
+        for (db, table), count in stalled.items():
+            self.gauge(
+                'merges.stalled',
+                count,
+                tags=self.tags + [f'database:{db}', f'table:{table}'],
+            )
+        self._previous_merges = current_merges
+
+        self._compute_mv_staleness()
+        self._collect_view_refreshes()
+
         # Run query metrics collection if DBM is enabled (from system.query_log)
         if self.statement_metrics:
             self.statement_metrics.run_job_loop(self.tags)
@@ -255,6 +292,171 @@ class ClickhouseCheck(DatabaseCheck):
 
     def execute_query_raw(self, query):
         return self._client.query(query).result_rows
+
+    # -------------------------------------------------------------------------
+    # Parts / merges / MV health helpers
+    # -------------------------------------------------------------------------
+
+    def _get_current_merges(self) -> dict:
+        """Return per-merge snapshot keyed on (database, table, result_part_name)."""
+        merges = {}
+        try:
+            rows = list(
+                self.execute_query_raw(
+                    'SELECT database, table, result_part_name, progress, elapsed FROM system.merges'
+                )
+            )
+            for db, table, result_part_name, progress, elapsed in rows:
+                key = (db, table, result_part_name)
+                merges[key] = {
+                    'progress': float(progress),
+                    'elapsed': float(elapsed),
+                    'database': db,
+                    'table': table,
+                }
+        except Exception as e:
+            self.log.debug("Failed to fetch per-merge data for stall detection: %s", e)
+        return merges
+
+    def _detect_stalled_merges(self, current_merges: dict, previous_merges: dict) -> dict:
+        """Compare two consecutive merge snapshots and return per-(database, table) stall counts.
+
+        A merge is considered stalled when its progress has advanced by less than 0.01
+        and its elapsed time already exceeds stall_threshold_seconds.
+        Entries that have disappeared from system.merges (completed merges) are
+        automatically dropped because they will not appear in current_merges.
+        """
+        stalled: dict = defaultdict(int)
+        for key, row in current_merges.items():
+            prev = previous_merges.get(key)
+            if prev is None:
+                continue
+            progress_delta = row['progress'] - prev['progress']
+            if progress_delta < 0.01 and row['elapsed'] > self.stall_threshold_seconds:
+                stalled[(row['database'], row['table'])] += 1
+        return stalled
+
+    def _fetch_newest_part_times(self) -> dict:
+        """Return the newest modification_time per (database, table) from system.parts."""
+        parts = {}
+        try:
+            rows = list(
+                self.execute_query_raw(
+                    'SELECT database, table, max(modification_time) AS newest_part_time'
+                    ' FROM system.parts WHERE active = 1 GROUP BY database, table'
+                )
+            )
+            for db, table, newest_time in rows:
+                parts[(db, table)] = newest_time
+        except Exception as e:
+            self.log.debug("Failed to fetch part modification times for MV staleness: %s", e)
+        return parts
+
+    def _fetch_mv_catalog(self) -> list[dict]:
+        """Return metadata rows for all trigger-based materialized views."""
+        catalog = []
+        try:
+            rows = list(
+                self.execute_query_raw(
+                    "SELECT database, name, dependencies_database[1], dependencies_table[1]"
+                    " FROM system.tables WHERE engine = 'MaterializedView'"
+                )
+            )
+            for db, view_name, source_db, source_table in rows:
+                catalog.append(
+                    {
+                        'database': db,
+                        'view_name': view_name,
+                        'source_database': source_db,
+                        'source_table': source_table,
+                    }
+                )
+        except Exception as e:
+            self.log.debug("Failed to fetch materialized view catalog for staleness computation: %s", e)
+        return catalog
+
+    def _compute_mv_staleness(self) -> None:
+        """Emit freshness_lag_seconds for trigger-based MVs by cross-referencing parts timestamps."""
+        mv_catalog = self._fetch_mv_catalog()
+        if not mv_catalog:
+            return
+
+        parts_snapshot = self._fetch_newest_part_times()
+        if not parts_snapshot:
+            return
+
+        for mv in mv_catalog:
+            source_key = (mv['source_database'], mv['source_table'])
+            # Inner MV tables are named `.inner_id.<view_name>` when no TO clause was used
+            target_key = (mv['database'], mv.get('target_table', '.inner_id.' + mv['view_name']))
+            source_time = parts_snapshot.get(source_key)
+            target_time = parts_snapshot.get(target_key)
+            if source_time is None or target_time is None:
+                continue
+            lag = (source_time - target_time).total_seconds()
+            if lag < 0:
+                lag = 0.0
+            tags = self.tags + [
+                f"database:{mv['database']}",
+                f"view:{mv['view_name']}",
+                f"source_db:{mv['source_database']}",
+                f"source_table:{mv['source_table']}",
+                'mv_type:Trigger',
+            ]
+            self.gauge('view.target.freshness_lag_seconds', lag, tags=tags)
+
+    def _is_version_supported(self, version: str, min_year: int, min_major: int) -> bool:
+        """Return True if the ClickHouse calver version is >= (min_year, min_major)."""
+        try:
+            parts = version.split('.')
+            year, major = int(parts[0]), int(parts[1])
+            return (year, major) >= (min_year, min_major)
+        except (ValueError, IndexError):
+            return False
+
+    def _collect_view_refreshes(self) -> None:
+        """Collect metrics from system.view_refreshes (ClickHouse >= 23.4 only).
+
+        On older versions the table does not exist; the method detects this on the
+        first call and skips silently on all subsequent calls.
+        """
+        if self._view_refreshes_supported is False:
+            return
+
+        if self._view_refreshes_supported is None:
+            version = self._dbms_version
+            if not version:
+                return
+            if not self._is_version_supported(version, min_year=23, min_major=4):
+                self.log.debug(
+                    "system.view_refreshes is not available on ClickHouse %s (requires >= 23.4); skipping",
+                    version,
+                )
+                self._view_refreshes_supported = False
+                return
+            self._view_refreshes_supported = True
+
+        try:
+            rows = list(self.execute_query_raw(queries.SystemViewRefreshes['query']))
+        except Exception as e:
+            self.log.debug("Failed to collect view refresh metrics: %s", e)
+            self._view_refreshes_supported = False
+            return
+
+        for row in rows:
+            db, view, mv_type, status, duration, count, written_rows, written_bytes, is_failing, seconds_since = row
+            tags = self.tags + [
+                f'database:{db}',
+                f'view:{view}',
+                f'mv_type:{mv_type}',
+                f'status:{status}',
+            ]
+            self.gauge('view.refresh.duration_seconds', float(duration), tags=tags)
+            self.gauge('view.refresh.count', int(count), tags=tags)
+            self.gauge('view.rows', int(written_rows), tags=tags)
+            self.gauge('view.bytes', int(written_bytes), tags=tags)
+            self.gauge('view.refresh.is_failing', int(is_failing), tags=tags)
+            self.gauge('view.refresh.seconds_since_success', float(seconds_since), tags=tags)
 
     def _get_debug_tags(self):
         """Return debug tags for metrics"""

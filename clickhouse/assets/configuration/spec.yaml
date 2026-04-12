@@ -236,6 +236,47 @@ files:
           value:
             type: boolean
             example: false
+    - name: merges_monitoring
+      description: Configure collection of merge operations, mutations, and detached parts health.
+      options:
+        - name: enabled
+          description: Enable merge/mutation/parts health collection.
+          value:
+            type: boolean
+            example: true
+        - name: stall_detection_threshold_seconds
+          description: Seconds after which a merge with no progress is flagged as stalled.
+          value:
+            type: integer
+            example: 300
+        - name: mutation_age_alert_hours
+          description: Alert threshold for mutations older than this many hours.
+          value:
+            type: integer
+            example: 24
+    - name: materialized_views_monitoring
+      description: Configure collection of materialized view health metrics.
+      options:
+        - name: enabled
+          description: Enable materialized view monitoring.
+          value:
+            type: boolean
+            example: true
+        - name: trigger_mv_staleness_threshold_seconds
+          description: |
+            Freshness lag threshold in seconds for trigger-based MV staleness detection.
+          value:
+            type: integer
+            example: 600
+        - name: excluded_databases
+          description: Databases to exclude from MV monitoring.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - system
+              - information_schema
     - template: instances/db
       overrides:
         custom_queries.value.example:

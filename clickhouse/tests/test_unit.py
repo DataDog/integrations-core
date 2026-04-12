@@ -237,3 +237,285 @@ def test_connect_no_password_uses_empty_string():
         check.connect()
         _, kwargs = m.call_args
         assert kwargs['password'] == '', "connect() must pass password='' not password=None to clickhouse_connect"
+
+
+# ---------------------------------------------------------------------------
+# _detect_stalled_merges unit tests
+# ---------------------------------------------------------------------------
+
+_INSTANCE = {'server': 'localhost', 'port': 8123}
+
+
+def _make_check():
+    return ClickhouseCheck('clickhouse', {}, [_INSTANCE])
+
+
+def test_detect_stalled_merges_progressing():
+    """A merge that has made progress is NOT flagged as stalled."""
+    check = _make_check()
+    check.stall_threshold_seconds = 300
+
+    key = ('db', 'tbl', 'part_1')
+    previous = {key: {'progress': 0.10, 'elapsed': 400.0, 'database': 'db', 'table': 'tbl'}}
+    current = {key: {'progress': 0.25, 'elapsed': 500.0, 'database': 'db', 'table': 'tbl'}}
+
+    stalled = check._detect_stalled_merges(current, previous)
+    assert stalled == {}
+
+
+def test_detect_stalled_merges_stalled():
+    """A merge with no meaningful progress beyond the threshold IS flagged."""
+    check = _make_check()
+    check.stall_threshold_seconds = 300
+
+    key = ('db', 'tbl', 'part_1')
+    previous = {key: {'progress': 0.10, 'elapsed': 350.0, 'database': 'db', 'table': 'tbl'}}
+    current = {key: {'progress': 0.105, 'elapsed': 410.0, 'database': 'db', 'table': 'tbl'}}
+
+    stalled = check._detect_stalled_merges(current, previous)
+    assert stalled[('db', 'tbl')] == 1
+
+
+def test_detect_stalled_merges_counts_multiple_stalled_parts():
+    """Multiple stalled merges on the same table are counted separately."""
+    check = _make_check()
+    check.stall_threshold_seconds = 300
+
+    previous = {
+        ('db', 'tbl', 'part_1'): {'progress': 0.10, 'elapsed': 400.0, 'database': 'db', 'table': 'tbl'},
+        ('db', 'tbl', 'part_2'): {'progress': 0.20, 'elapsed': 500.0, 'database': 'db', 'table': 'tbl'},
+    }
+    current = {
+        ('db', 'tbl', 'part_1'): {'progress': 0.101, 'elapsed': 460.0, 'database': 'db', 'table': 'tbl'},
+        ('db', 'tbl', 'part_2'): {'progress': 0.201, 'elapsed': 560.0, 'database': 'db', 'table': 'tbl'},
+    }
+
+    stalled = check._detect_stalled_merges(current, previous)
+    assert stalled[('db', 'tbl')] == 2
+
+
+def test_detect_stalled_merges_completed_merge_evicted():
+    """A completed merge (absent from current snapshot) is silently dropped."""
+    check = _make_check()
+    check.stall_threshold_seconds = 300
+
+    key = ('db', 'tbl', 'completed_part')
+    previous = {key: {'progress': 0.90, 'elapsed': 800.0, 'database': 'db', 'table': 'tbl'}}
+    current = {}  # merge completed — no longer in system.merges
+
+    stalled = check._detect_stalled_merges(current, previous)
+    assert stalled == {}
+
+
+def test_detect_stalled_merges_below_threshold():
+    """A merge with no progress but below the elapsed threshold is NOT stalled."""
+    check = _make_check()
+    check.stall_threshold_seconds = 300
+
+    key = ('db', 'tbl', 'part_1')
+    previous = {key: {'progress': 0.10, 'elapsed': 100.0, 'database': 'db', 'table': 'tbl'}}
+    current = {key: {'progress': 0.101, 'elapsed': 160.0, 'database': 'db', 'table': 'tbl'}}
+
+    stalled = check._detect_stalled_merges(current, previous)
+    assert stalled == {}
+
+
+def test_detect_stalled_merges_new_merge_not_stalled():
+    """A merge that has no previous snapshot (new this collection) is skipped."""
+    check = _make_check()
+    check.stall_threshold_seconds = 300
+
+    key = ('db', 'tbl', 'brand_new_part')
+    current = {key: {'progress': 0.0, 'elapsed': 400.0, 'database': 'db', 'table': 'tbl'}}
+
+    stalled = check._detect_stalled_merges(current, {})
+    assert stalled == {}
+
+
+# ---------------------------------------------------------------------------
+# _compute_mv_staleness unit tests
+# ---------------------------------------------------------------------------
+
+from datetime import datetime, timedelta  # noqa: E402
+
+
+def _clear_check_tags(check):
+    """Remove all instance tags so metric assertions are predictable."""
+    check.tag_manager.set_tags_from_list([], replace=True)
+
+
+def test_compute_mv_staleness_source_newer_than_target(aggregator):
+    """freshness_lag_seconds is emitted when source is newer than target."""
+    check = _make_check()
+    _clear_check_tags(check)
+
+    now = datetime.utcnow()
+    source_time = now
+    target_time = now - timedelta(seconds=120)
+
+    with mock.patch.object(check, '_fetch_mv_catalog', return_value=[
+        {'database': 'db', 'view_name': 'mv1', 'source_database': 'db', 'source_table': 'src'}
+    ]):
+        with mock.patch.object(check, '_fetch_newest_part_times', return_value={
+            ('db', 'src'): source_time,
+            ('db', '.inner_id.mv1'): target_time,
+        }):
+            check._compute_mv_staleness()
+
+    aggregator.assert_metric('clickhouse.view.target.freshness_lag_seconds', value=120.0, at_least=1)
+
+
+def test_compute_mv_staleness_source_absent(aggregator):
+    """No metric is emitted when source table has no parts."""
+    check = _make_check()
+    _clear_check_tags(check)
+
+    with mock.patch.object(check, '_fetch_mv_catalog', return_value=[
+        {'database': 'db', 'view_name': 'mv1', 'source_database': 'db', 'source_table': 'src'}
+    ]):
+        with mock.patch.object(check, '_fetch_newest_part_times', return_value={
+            # source key absent
+            ('db', '.inner_id.mv1'): datetime.utcnow(),
+        }):
+            check._compute_mv_staleness()
+
+    assert len(aggregator.metrics('clickhouse.view.target.freshness_lag_seconds')) == 0
+
+
+def test_compute_mv_staleness_target_absent(aggregator):
+    """No metric is emitted when target table has no parts."""
+    check = _make_check()
+    _clear_check_tags(check)
+
+    with mock.patch.object(check, '_fetch_mv_catalog', return_value=[
+        {'database': 'db', 'view_name': 'mv1', 'source_database': 'db', 'source_table': 'src'}
+    ]):
+        with mock.patch.object(check, '_fetch_newest_part_times', return_value={
+            ('db', 'src'): datetime.utcnow(),
+            # target key absent
+        }):
+            check._compute_mv_staleness()
+
+    assert len(aggregator.metrics('clickhouse.view.target.freshness_lag_seconds')) == 0
+
+
+def test_compute_mv_staleness_lag_clamped_to_zero(aggregator):
+    """Negative lag (target newer than source) is clamped to 0."""
+    check = _make_check()
+    _clear_check_tags(check)
+
+    now = datetime.utcnow()
+
+    with mock.patch.object(check, '_fetch_mv_catalog', return_value=[
+        {'database': 'db', 'view_name': 'mv1', 'source_database': 'db', 'source_table': 'src'}
+    ]):
+        with mock.patch.object(check, '_fetch_newest_part_times', return_value={
+            ('db', 'src'): now - timedelta(seconds=60),
+            ('db', '.inner_id.mv1'): now,  # target is newer
+        }):
+            check._compute_mv_staleness()
+
+    aggregator.assert_metric('clickhouse.view.target.freshness_lag_seconds', value=0.0, at_least=1)
+
+
+# ---------------------------------------------------------------------------
+# _collect_view_refreshes version gate unit tests
+# ---------------------------------------------------------------------------
+
+
+def test_view_refreshes_skipped_below_23_4(aggregator):
+    """_collect_view_refreshes emits nothing on ClickHouse < 23.4."""
+    check = _make_check()
+    _clear_check_tags(check)
+    check._dbms_version = '22.8.1.1'
+
+    with mock.patch.object(check, 'execute_query_raw') as mock_query:
+        check._collect_view_refreshes()
+
+    mock_query.assert_not_called()
+    assert check._view_refreshes_supported is False
+
+
+def test_view_refreshes_runs_on_23_4(aggregator):
+    """_collect_view_refreshes queries system.view_refreshes on ClickHouse >= 23.4."""
+    check = _make_check()
+    _clear_check_tags(check)
+    check._dbms_version = '23.4.2.1'
+
+    with mock.patch.object(check, 'execute_query_raw', return_value=[]):
+        check._collect_view_refreshes()
+
+    assert check._view_refreshes_supported is True
+
+
+def test_view_refreshes_marks_unsupported_on_error(aggregator):
+    """If system.view_refreshes raises an error, _view_refreshes_supported is set False."""
+    check = _make_check()
+    _clear_check_tags(check)
+    check._dbms_version = '23.5.0.0'
+    check._view_refreshes_supported = True  # pre-set to skip version check
+
+    with mock.patch.object(check, 'execute_query_raw', side_effect=Exception("table doesn't exist")):
+        check._collect_view_refreshes()
+
+    assert check._view_refreshes_supported is False
+
+
+def test_view_refreshes_emits_correct_metrics(aggregator):
+    """Verify all expected metrics are emitted for a single view_refreshes row."""
+    check = _make_check()
+    _clear_check_tags(check)
+    check._dbms_version = '24.1.0.0'
+    check._view_refreshes_supported = True
+
+    fake_row = ('mydb', 'mv_orders', 'Refreshable', 'Running', 2.5, 10, 5000, 1024000, 0, 30.0)
+
+    with mock.patch.object(check, 'execute_query_raw', return_value=[fake_row]):
+        check._collect_view_refreshes()
+
+    expected_tags = ['database:mydb', 'view:mv_orders', 'mv_type:Refreshable', 'status:Running']
+    aggregator.assert_metric('clickhouse.view.refresh.duration_seconds', value=2.5, tags=expected_tags)
+    aggregator.assert_metric('clickhouse.view.rows', value=5000, tags=expected_tags)
+    aggregator.assert_metric('clickhouse.view.bytes', value=1024000, tags=expected_tags)
+    aggregator.assert_metric('clickhouse.view.refresh.is_failing', value=0, tags=expected_tags)
+    aggregator.assert_metric('clickhouse.view.refresh.seconds_since_success', value=30.0, tags=expected_tags)
+
+
+# ---------------------------------------------------------------------------
+# Config: merges_monitoring and materialized_views_monitoring defaults
+# ---------------------------------------------------------------------------
+
+
+def test_merges_monitoring_defaults():
+    """merges_monitoring uses sensible defaults when not configured."""
+    check = _make_check()
+    assert check._config.merges_monitoring is not None
+    assert check._config.merges_monitoring.stall_detection_threshold_seconds == 300
+    assert check._config.merges_monitoring.mutation_age_alert_hours == 24
+    assert check.stall_threshold_seconds == 300
+
+
+def test_merges_monitoring_custom_threshold():
+    """stall_detection_threshold_seconds is propagated to the check."""
+    instance = {'server': 'localhost', 'port': 8123, 'merges_monitoring': {'stall_detection_threshold_seconds': 600}}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    assert check.stall_threshold_seconds == 600
+
+
+def test_materialized_views_monitoring_defaults():
+    """materialized_views_monitoring uses sensible defaults when not configured."""
+    check = _make_check()
+    assert check._config.materialized_views_monitoring is not None
+    assert check._config.materialized_views_monitoring.trigger_mv_staleness_threshold_seconds == 600
+    assert check.trigger_staleness_threshold == 600
+
+
+def test_is_version_supported():
+    """_is_version_supported correctly compares calver tuples."""
+    check = _make_check()
+    assert check._is_version_supported('23.4.0.0', min_year=23, min_major=4) is True
+    assert check._is_version_supported('23.5.0.0', min_year=23, min_major=4) is True
+    assert check._is_version_supported('24.1.0.0', min_year=23, min_major=4) is True
+    assert check._is_version_supported('23.3.9.9', min_year=23, min_major=4) is False
+    assert check._is_version_supported('22.8.0.0', min_year=23, min_major=4) is False
+    assert check._is_version_supported('bad.version', min_year=23, min_major=4) is False
