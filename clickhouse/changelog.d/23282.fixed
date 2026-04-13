@@ -1,0 +1,2 @@
+Bump `datadog-checks-base` to `>=37.34.1`. Notable changes:
+  - Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place. ([#23075](https://github.com/DataDog/integrations-core/pull/23075))
