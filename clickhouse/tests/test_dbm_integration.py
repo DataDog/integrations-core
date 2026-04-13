@@ -458,6 +458,7 @@ def test_query_errors_data(aggregator, instance, dd_run_check):
 
     details = all_errors[0]['query_details']
     assert details['query_signature'] is not None
-    assert details['exception'] != '', "Expected a non-empty exception message"
-    assert details['exception_code'] != 0, "Expected a non-zero exception code"
+    assert 'nonexistent_table_query_error_test' in details['exception']
+    assert 'UNKNOWN_TABLE' in details['exception']
+    assert details['exception_code'] == 60
     assert 'stack_trace' in details
