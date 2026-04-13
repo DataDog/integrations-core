@@ -71,6 +71,8 @@ class PostgresDataObservability(DBMAsyncJob):
                 raise Exception("Job loop cancelled. Aborting query.")
             with conn.cursor() as cursor:
                 cursor.execute(query_spec.query)
+                if cursor.description is None:
+                    raise psycopg.errors.ProgrammingError("Query returned no result set — only SELECT statements are supported")
                 columns = [desc[0] for desc in cursor.description]
                 rows = [list(row) for row in cursor.fetchmany(MAX_RESULT_ROWS)]
             duration = time.time() - start
@@ -116,7 +118,7 @@ class PostgresDataObservability(DBMAsyncJob):
             'timestamp': int(time.time() * 1000),
             'config_id': self._do_config.config_id or '',
             'db_type': 'postgres',
-            'db_host': self._config.host,
+            'db_host': self._check.reported_hostname,
             'db_port': self._config.port,
             'db_name': self._config.dbname,
             'monitor_id': query_spec.monitor_id,
@@ -136,40 +138,44 @@ class PostgresDataObservability(DBMAsyncJob):
 
         base_tags = self._build_base_tags()
 
-        with self._check._get_main_db() as conn:
-            now = time.time()
-            for q in due_queries:
-                tags = base_tags + [f'monitor_id:{q.monitor_id}']
+        for q in due_queries:
+            tags = base_tags + [f'monitor_id:{q.monitor_id}']
 
+            with self._check._get_main_db() as conn:
                 result = self._execute_single_query(conn, q)
 
-                # Update scheduling timestamp immediately after execution, before
-                # metric/event emission, so a serialization failure in the event
-                # path cannot cause infinite re-execution of the same query.
-                self._last_execution[q.monitor_id] = now
+            # Update scheduling timestamp immediately after execution, before
+            # metric/event emission, so a serialization failure in the event
+            # path cannot cause infinite re-execution of the same query.
+            self._last_execution[q.monitor_id] = time.time()
 
-                try:
-                    self._check.gauge(
-                        'dd.postgres.data_observability.query_execution_time',
-                        result['duration_s'],
-                        tags=tags,
-                        hostname=self._check.reported_hostname,
-                        raw=True,
-                    )
-                    self._check.count(
-                        'dd.postgres.data_observability.query_executions',
-                        1,
-                        tags=tags + [f'status:{result["status"]}'],
-                        hostname=self._check.reported_hostname,
-                        raw=True,
-                    )
+            try:
+                self._check.gauge(
+                    'dd.postgres.data_observability.query_execution_time',
+                    result['duration_s'],
+                    tags=tags,
+                    hostname=self._check.reported_hostname,
+                    raw=True,
+                )
+                self._check.count(
+                    'dd.postgres.data_observability.query_executions',
+                    1,
+                    tags=tags + [f'status:{result["status"]}'],
+                    hostname=self._check.reported_hostname,
+                    raw=True,
+                )
 
-                    payload = self._build_event_payload(q, result)
-                    raw_event = json.dumps(payload, default=default_json_event_encoding)
-                    self._log.debug("Query result for monitor_id=%d: %s", q.monitor_id, raw_event)
-                    self._check.event_platform_event(raw_event, EVENT_TRACK_TYPE)
-                except Exception:
-                    self._log.exception(
-                        "Failed to emit metrics/event for monitor_id=%d",
-                        q.monitor_id,
-                    )
+                payload = self._build_event_payload(q, result)
+                raw_event = json.dumps(payload, default=default_json_event_encoding)
+                self._log.debug(
+                    "Query result for monitor_id=%d: status=%s row_count=%d",
+                    q.monitor_id,
+                    result['status'],
+                    result['row_count'],
+                )
+                self._check.event_platform_event(raw_event, EVENT_TRACK_TYPE)
+            except Exception:
+                self._log.exception(
+                    "Failed to emit metrics/event for monitor_id=%d",
+                    q.monitor_id,
+                )

@@ -268,6 +268,26 @@ def test_query_failure_does_not_block_subsequent(aggregator, pg_instance):
     assert len(status_metrics) == 2
 
 
+def test_no_description_does_not_block_subsequent(aggregator, pg_instance):
+    """First query returns None description (non-SELECT), second query still runs."""
+    mock_conn, mock_cursor = _make_mock_conn()
+    call_count = 0
+
+    def execute_side_effect(sql, *args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        mock_cursor.description = None if call_count == 1 else [('count',)]
+
+    mock_cursor.execute = MagicMock(side_effect=execute_side_effect)
+
+    _setup_and_run(pg_instance, queries=deepcopy(MULTI_QUERIES), mock_conn=mock_conn, mock_cursor=mock_cursor)
+
+    status_metrics = aggregator.metrics('dd.postgres.data_observability.query_executions')
+    assert len(status_metrics) == 2
+    assert 'status:error' in status_metrics[0].tags
+    assert 'status:success' in status_metrics[1].tags
+
+
 def test_custom_sql_select_fields_in_payload(aggregator, pg_instance):
     query = deepcopy(BASE_QUERY)
     query['custom_sql_select_fields'] = {
@@ -322,8 +342,8 @@ def test_tags_include_monitor_id(aggregator, pg_instance):
     assert 'status:success' in exec_metrics[0].tags
 
 
-def test_query_with_no_description(pg_instance):
-    """If cursor.description is None (non-SELECT inside the wrapper), the query fails as a DatabaseError."""
+def test_query_with_no_description(aggregator, pg_instance):
+    """Non-SELECT queries (cursor.description is None) are caught per-query and emit an error result."""
     mock_conn, mock_cursor = _make_mock_conn()
 
     def execute_side_effect(sql, *args, **kwargs):
@@ -331,13 +351,19 @@ def test_query_with_no_description(pg_instance):
 
     mock_cursor.execute = MagicMock(side_effect=execute_side_effect)
 
-    check = _create_check(pg_instance)
-    check._get_main_db = _mock_get_main_db(mock_conn)
-
-    # TypeError from iterating None propagates as an uncaught exception (not DatabaseError),
-    # so it bubbles out of run_job() rather than being swallowed per-query.
-    with pytest.raises(TypeError):
+    with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
+        check = _create_check(pg_instance)
+        check._get_main_db = _mock_get_main_db(mock_conn)
         check.data_observability.run_job()
+
+        do_calls = _get_do_event_calls(mock_epe)
+        payload = json.loads(do_calls[0][0][0])
+
+    assert payload['status'] == 'error'
+    assert 'result set' in payload['error']
+    metrics = aggregator.metrics('dd.postgres.data_observability.query_executions')
+    assert len(metrics) == 1
+    assert 'status:error' in metrics[0].tags
 
 
 def test_collection_interval_none_uses_default(pg_instance):
