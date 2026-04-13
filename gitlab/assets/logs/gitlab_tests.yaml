@@ -1035,4 +1035,24 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
-
+ -
+  sample: "2026-03-08T15:08:33.635990Z 01E {\"event\": \"pikepdf C++ to Python logger bridge initialized\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:33.628330Z\", \"logger\": \"pikepdf._core\", \"file\": \"<frozen importlib._bootstrap>:488\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
+  result:
+    custom: {}
+    message: "2026-03-08T15:08:33.635990Z 01E {\"event\": \"pikepdf C++ to Python logger bridge initialized\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:33.628330Z\", \"logger\": \"pikepdf._core\", \"file\": \"<frozen importlib._bootstrap>:488\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "2026-03-08T15:08:37.699056Z 01E {\"event\": \"Creating database. Use `-v/--verbose` to see all logs\", \"logger\": \"app.cli\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:37.698374Z\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
+  result:
+    custom: {}
+    message: "2026-03-08T15:08:37.699056Z 01E {\"event\": \"Creating database. Use `-v/--verbose` to see all logs\", \"logger\": \"app.cli\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:37.698374Z\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: "2026-03-08T15:08:47.505749Z 01E {\"customer_fk_count\": 73, \"customer_col_count\": 49, \"customer_endpoint_count\": 251, \"event\": \"shared money stats\", \"pg_backend_pid\": 71, \"logger\": \"__main__\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:47.505258Z\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
+  result:
+    custom: {}
+    message: "2026-03-08T15:08:47.505749Z 01E {\"customer_fk_count\": 73, \"customer_col_count\": 49, \"customer_endpoint_count\": 251, \"event\": \"shared money stats\", \"pg_backend_pid\": 71, \"logger\": \"__main__\", \"level\": \"info\", \"timestamp\": \"2026-03-08T15:08:47.505258Z\", \"TraceId\": \"0\", \"SpanId\": \"0\", \"service_environment\": \"test-docker\"}"
+    tags:
+     - "source:LOGS_SOURCE"
