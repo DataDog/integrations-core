@@ -30,6 +30,15 @@
         "github-actions"
       ],
       "matchPackageNames": [
+        "python"
+      ],
+      "enabled": false
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
         "dtolnay/rust-toolchain"
       ],
       "groupName": "actions",
