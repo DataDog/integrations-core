@@ -72,7 +72,9 @@ class PostgresDataObservability(DBMAsyncJob):
             with conn.cursor() as cursor:
                 cursor.execute(query_spec.query)
                 if cursor.description is None:
-                    raise psycopg.errors.ProgrammingError("Query returned no result set — only SELECT statements are supported")
+                    raise psycopg.errors.ProgrammingError(
+                        "Query returned no result set — only SELECT statements are supported"
+                    )
                 columns = [desc[0] for desc in cursor.description]
                 rows = [list(row) for row in cursor.fetchmany(MAX_RESULT_ROWS)]
             duration = time.time() - start
