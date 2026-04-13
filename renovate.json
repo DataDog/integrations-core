@@ -29,7 +29,7 @@
       "matchManagers": [
         "github-actions"
       ],
-      "matchPackageNames": [
+      "matchDepNames": [
         "python"
       ],
       "enabled": false
