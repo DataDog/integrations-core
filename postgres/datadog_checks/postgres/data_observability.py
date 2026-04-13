@@ -71,6 +71,10 @@ class PostgresDataObservability(DBMAsyncJob):
                 raise Exception("Job loop cancelled. Aborting query.")
             with conn.cursor() as cursor:
                 cursor.execute(query_spec.query)
+                # cursor.description is None when the query produced no result set
+                # (e.g. INSERT, UPDATE, DELETE, or a syntax error that executed without
+                # raising). RC-delivered queries must be SELECTs; treat this as a
+                # per-query error so subsequent queries in the list still run.
                 if cursor.description is None:
                     raise psycopg.errors.ProgrammingError(
                         "Query returned no result set — only SELECT statements are supported"
