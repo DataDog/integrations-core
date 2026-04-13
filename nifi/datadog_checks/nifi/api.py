@@ -1,9 +1,9 @@
-# ABOUTME: REST API client for Apache NiFi.
-# ABOUTME: Handles token-based auth, request retries on 401, and endpoint access.
-
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+# ABOUTME: REST API client for Apache NiFi.
+# ABOUTME: Handles token-based auth, request retries on 401, and endpoint access.
 from requests.exceptions import HTTPError
 
 from .constants import (

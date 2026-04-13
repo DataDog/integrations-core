@@ -1,9 +1,9 @@
-# ABOUTME: Shared constants and instance configurations for NiFi tests.
-# ABOUTME: Provides Docker hostname, ports, credentials, and test instance configs.
-
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+# ABOUTME: Shared constants and instance configurations for NiFi tests.
+# ABOUTME: Provides Docker hostname, ports, credentials, and test instance configs.
 import os
 
 from datadog_checks.dev import get_docker_hostname, get_here

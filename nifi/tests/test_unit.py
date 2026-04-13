@@ -1,9 +1,9 @@
-# ABOUTME: Unit tests for the NiFi integration.
-# ABOUTME: Tests API auth, health metrics, system diagnostics, and cluster health.
-
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+# ABOUTME: Unit tests for the NiFi integration.
+# ABOUTME: Tests API auth, health metrics, system diagnostics, and cluster health.
 from unittest.mock import MagicMock, patch
 
 import pytest

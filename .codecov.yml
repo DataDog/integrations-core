@@ -54,6 +54,10 @@ coverage:
         target: 75
         flags:
         - apache
+      Apache_NiFi:
+        target: 75
+        flags:
+        - nifi
       Appgate_SDP:
         target: 75
         flags:
@@ -1514,6 +1518,11 @@ flags:
     paths:
     - nginx_ingress_controller/datadog_checks/nginx_ingress_controller
     - nginx_ingress_controller/tests
+  nifi:
+    carryforward: true
+    paths:
+    - nifi/datadog_checks/nifi
+    - nifi/tests
   nutanix:
     carryforward: true
     paths:

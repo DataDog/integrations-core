@@ -1,9 +1,9 @@
-# ABOUTME: Integration tests for the NiFi integration against a real Docker NiFi instance.
-# ABOUTME: Validates metric emission, auth, and metadata consistency with a running NiFi server.
-
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+# ABOUTME: Integration tests for the NiFi integration against a real Docker NiFi instance.
+# ABOUTME: Validates metric emission, auth, and metadata consistency with a running NiFi server.
 from copy import deepcopy
 
 import pytest

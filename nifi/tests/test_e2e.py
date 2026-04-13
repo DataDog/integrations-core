@@ -1,9 +1,9 @@
-# ABOUTME: End-to-end tests for the NiFi integration.
-# ABOUTME: Runs the check via the Datadog Agent container against a real NiFi instance.
-
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+# ABOUTME: End-to-end tests for the NiFi integration.
+# ABOUTME: Runs the check via the Datadog Agent container against a real NiFi instance.
 import pytest
 
 from datadog_checks.base import AgentCheck
