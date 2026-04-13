@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import base64
 import json
+import math
 from collections import defaultdict
 from io import BytesIO
 from time import time
@@ -20,7 +21,10 @@ from datadog_checks.kafka_consumer.config import KafkaConfig
 from datadog_checks.kafka_consumer.constants import (
     HIGH_WATERMARK,
     KAFKA_INTERNAL_TOPICS,
+    LOW_WATERMARK,
+    MAX_CONSUMER_OFFSET_ENTRIES,
     OFFSET_INVALID,
+    STAGGER_THRESHOLD,
 )
 
 MAX_TIMESTAMPS = 1000
@@ -46,45 +50,71 @@ class KafkaCheck(AgentCheck):
 
     def check(self, _):
         """The main entrypoint of the check."""
-        # Fetch Kafka consumer offsets
+        check_start = time()
+        timings = {}
 
         consumer_offsets = {}
 
+        t0 = time()
         try:
             self.client.request_metadata_update()
         except:
             raise Exception(
                 "Unable to connect to the AdminClient. This is likely due to an error in the configuration."
             )
+        timings['metadata_update'] = time() - t0
 
+        # In cluster monitoring mode, discover consumer groups first so we can
+        # adapt the partition chunk size, then compute staggered partitions so that
+        # consumer offsets and broker offsets are fetched for the same partition subset.
+        staggered_partitions = None
+        consumer_groups = self._get_consumer_groups()
+        if self.config._cluster_monitoring_enabled:
+            staggered_partitions = self._get_staggered_partitions(None, num_groups=len(consumer_groups))
+
+        t0 = time()
         try:
-            # Fetch consumer offsets
             # Expected format: {consumer_group: {(topic, partition): offset}}
-            consumer_offsets = self.get_consumer_offsets()
+            consumer_offsets = self._fetch_consumer_offsets(consumer_groups, staggered_partitions)
         except Exception:
             self.log.exception("There was a problem collecting consumer offsets from Kafka.")
             # don't raise because we might get valid broker offsets
+        timings['consumer_offsets'] = time() - t0
 
         # Fetch the broker highwater offsets
         highwater_offsets = {}
+        earliest_offsets = {}
         broker_timestamps = defaultdict(dict)
         cluster_id = ""
         persistent_cache_key = "broker_timestamps_"
         consumer_contexts_count = self.count_consumer_contexts(consumer_offsets)
         try:
             if consumer_contexts_count < self._context_limit:
-                # Fetch highwater offsets
-                # Build partitions list or use all if configured
-                # If cluster monitoring is enabled, always fetch all broker highwater marks
-                if self.config._cluster_monitoring_enabled or self.config._monitor_all_broker_highwatermarks:
-                    partitions = None
+                if self.config._cluster_monitoring_enabled:
+                    # Fetch watermarks for the same staggered partitions used for consumer offsets
+                    t0 = time()
+                    results, cluster_id = self.get_watermark_offsets_batched(
+                        [
+                            (staggered_partitions, HIGH_WATERMARK),
+                            (staggered_partitions, LOW_WATERMARK),
+                        ]
+                    )
+                    timings['watermark_offsets'] = time() - t0
+                    highwater_offsets = results[0]
+                    earliest_offsets = results[1]
                 else:
-                    partitions = set()
-                    for _, offsets in consumer_offsets.items():
-                        for topic, partition in offsets:
-                            partitions.add((topic, partition))
-                # Expected format: ({(topic, partition): offset}, cluster_id)
-                highwater_offsets, cluster_id = self.get_watermark_offsets(partitions, mode=HIGH_WATERMARK)
+                    # Non-cluster-monitoring: derive partitions from consumer offsets
+                    if self.config._monitor_all_broker_highwatermarks:
+                        partitions = None
+                    else:
+                        partitions = set()
+                        for _, offsets in consumer_offsets.items():
+                            for topic, partition in offsets:
+                                partitions.add((topic, partition))
+                    t0 = time()
+                    highwater_offsets, cluster_id = self.get_watermark_offsets(partitions, mode=HIGH_WATERMARK)
+                    timings['watermark_offsets'] = time() - t0
+
                 if self._data_streams_enabled:
                     broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
                     self._add_broker_timestamps(broker_timestamps, highwater_offsets)
@@ -118,7 +148,11 @@ class KafkaCheck(AgentCheck):
         if self.config._kafka_cluster_id_override:
             cluster_id = self.config._kafka_cluster_id_override
 
+        t0 = time()
         self.report_highwater_offsets(highwater_offsets, self._context_limit, cluster_id)
+        timings['report_highwater'] = time() - t0
+
+        t0 = time()
         self.report_consumer_offsets_and_lag(
             consumer_offsets,
             highwater_offsets,
@@ -126,21 +160,125 @@ class KafkaCheck(AgentCheck):
             broker_timestamps,
             cluster_id,
         )
+        timings['report_consumer_lag'] = time() - t0
+
+        t0 = time()
         self.data_streams_live_message(highwater_offsets or {}, cluster_id)
+        timings['data_streams'] = time() - t0
 
         # Collect cluster metadata if enabled
         if self.config._cluster_monitoring_enabled:
             self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id)
+            t0 = time()
             try:
-                self.metadata_collector.collect_all_metadata(highwater_offsets)
+                self.metadata_collector.collect_all_metadata(highwater_offsets, earliest_offsets, staggered_partitions)
             except Exception as e:
                 self.log.error("Error collecting cluster metadata: %s", e)
+            timings['cluster_metadata'] = time() - t0
 
         if self.config._close_admin_client:
             self.client.close_admin_client()
 
+        total_duration = time() - check_start
+        if total_duration > 1.0:
+            breakdown = ', '.join(f'{k}={v:.3f}s' for k, v in timings.items())
+            self.log.info("Slow check: %.2fs total (%s)", total_duration, breakdown)
+
     def count_consumer_contexts(self, consumer_offsets):
         return sum(len(offsets) for offsets in consumer_offsets.values())
+
+    def _get_staggered_partitions(self, partitions, num_groups=1):
+        """Return a subset of partitions for this check run, or None if no staggering needed.
+
+        The chunk size adapts to the number of consumer groups: it is capped at
+        min(STAGGER_THRESHOLD, MAX_CONSUMER_OFFSET_ENTRIES / num_groups) to keep the
+        total entries in consumer offset responses under ~1M (keeping deserialization
+        under ~6s).
+
+        Returns None when all partitions fit in a single chunk (no staggering).
+        """
+        # Build topic -> sorted partitions mapping from metadata
+        if partitions is None:
+            raw = self.client.get_topic_partitions()
+            topics_partitions = {
+                topic: sorted(parts) for topic, parts in raw.items() if topic not in KAFKA_INTERNAL_TOPICS
+            }
+        else:
+            topics_partitions = {}
+            for topic, partition in partitions:
+                if topic not in KAFKA_INTERNAL_TOPICS:
+                    topics_partitions.setdefault(topic, []).append(partition)
+            for topic in topics_partitions:
+                topics_partitions[topic].sort()
+
+        total = sum(len(parts) for parts in topics_partitions.values())
+
+        # Adaptive chunk size: cap at STAGGER_THRESHOLD or by total entry budget
+        chunk_size = min(STAGGER_THRESHOLD, MAX_CONSUMER_OFFSET_ENTRIES // max(num_groups, 1))
+        # Ensure chunk_size is at least 1 to avoid infinite chunks
+        chunk_size = max(chunk_size, 1)
+
+        if total <= chunk_size:
+            return None
+
+        self.log.debug(
+            "Partition stagger: %d total partitions, chunk_size=%d (num_groups=%d)",
+            total, chunk_size, num_groups,
+        )
+
+        # Distribute topics into chunks, keeping each topic's partitions together when possible.
+        current_total_chunks = math.ceil(total / chunk_size)
+        chunks: list[list[tuple[str, int]]] = [[] for _ in range(current_total_chunks)]
+
+        sorted_topics = sorted(topics_partitions.keys())
+        chunk_idx = 0
+        for topic in sorted_topics:
+            parts = topics_partitions[topic]
+            if len(chunks[chunk_idx]) + len(parts) <= chunk_size or not chunks[chunk_idx]:
+                chunks[chunk_idx].extend((topic, p) for p in parts)
+            else:
+                chunk_idx = min(chunk_idx + 1, current_total_chunks - 1)
+                chunks[chunk_idx].extend((topic, p) for p in parts)
+            if len(chunks[chunk_idx]) >= chunk_size:
+                chunk_idx = min(chunk_idx + 1, current_total_chunks - 1)
+
+        chunks = [c for c in chunks if c]
+        current_total_chunks = len(chunks)
+
+        # Read stagger state: [chunk_index, total_chunks]
+        cache_key = 'partition_stagger_state'
+        chunk_index = 0
+        stored_total_chunks = 0
+        try:
+            cached = self.read_persistent_cache(cache_key)
+            if cached:
+                state = json.loads(cached)
+                chunk_index = state[0]
+                stored_total_chunks = state[1]
+        except Exception:
+            self.log.debug("Could not read stagger state cache, starting from chunk 0")
+
+        if chunk_index == 0 or stored_total_chunks == 0:
+            stored_total_chunks = current_total_chunks
+
+        if chunk_index >= stored_total_chunks:
+            chunk_index = 0
+            stored_total_chunks = current_total_chunks
+
+        chunk = chunks[chunk_index] if chunk_index < len(chunks) else chunks[0]
+
+        self.log.debug(
+            "Staggering partition offsets: chunk %d/%d, %d partitions of %d total",
+            chunk_index + 1,
+            stored_total_chunks,
+            len(chunk),
+            total,
+        )
+
+        next_index = (chunk_index + 1) % stored_total_chunks
+        self.write_persistent_cache(cache_key, json.dumps([next_index, stored_total_chunks]))
+
+        return set(chunk)
 
     def _send_cluster_monitoring_heartbeat(self, total_contexts: int, cluster_id: str) -> None:
         payload = {
@@ -154,15 +292,13 @@ class KafkaCheck(AgentCheck):
             payload['original_kafka_cluster_id'] = self.config._auto_detected_cluster_id
         self.event_platform_event(json.dumps(payload), "data-streams-message")
 
-    def get_consumer_offsets(self):
-        # {(consumer_group, topic, partition): offset}
+    def _fetch_consumer_offsets(self, consumer_groups, staggered_partitions=None):
         self.log.debug('Getting consumer offsets')
         consumer_offsets = defaultdict(dict)
 
-        consumer_groups = self._get_consumer_groups()
         self.log.debug('Identified %s consumer groups', len(consumer_groups))
 
-        offsets = self._get_offsets_for_groups(consumer_groups)
+        offsets = self._get_offsets_for_groups(consumer_groups, staggered_partitions)
         self.log.debug('%s futures to be waited on', len(offsets))
 
         for consumer_group, topic_partitions in offsets:
@@ -193,20 +329,29 @@ class KafkaCheck(AgentCheck):
         else:
             return self.config._consumer_groups
 
-    def _get_offsets_for_groups(self, consumer_groups):
+    def _get_offsets_for_groups(self, consumer_groups, staggered_partitions=None):
         groups = []
+        # staggered_partitions is None when no partition staggering (<=10k partitions).
+        # When set, it's a subset of partitions — pass explicitly so Kafka scopes the response.
+        partition_filter = list(staggered_partitions) if staggered_partitions is not None else None
 
-        # If either monitoring all consumer groups or regex, return all consumer group offsets (can filter later)
         if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_compiled_regex:
+            limit = self.config._max_tracked_consumer_groups
+            if len(consumer_groups) > limit:
+                self.log.warning(
+                    "Discovered %d consumer groups, exceeding max_tracked_consumer_groups limit of %d. "
+                    "Only the first %d groups (sorted alphabetically) will be monitored.",
+                    len(consumer_groups), limit, limit,
+                )
+                consumer_groups = sorted(consumer_groups)[:limit]
             for consumer_group in consumer_groups:
-                groups.append((consumer_group, None))
+                groups.append((consumer_group, partition_filter))
             return self.client.list_consumer_group_offsets(groups)
 
         for consumer_group in consumer_groups:
-            # If topics are specified
             topics = consumer_groups.get(consumer_group)
             if not topics:
-                groups.append((consumer_group, None))
+                groups.append((consumer_group, partition_filter))
                 continue
 
             for topic, partitions in topics.items():
@@ -325,7 +470,7 @@ class KafkaCheck(AgentCheck):
                     reported_contexts += 1
 
                     if (topic, partition) not in highwater_offsets:
-                        self.log.warning(
+                        self.log.debug(
                             "Consumer group: %s has offsets for topic: %s partition: %s, "
                             "but no stored highwater offset (likely the partition is in the middle of leader failover) "
                             "so cannot calculate consumer lag.",
@@ -393,25 +538,34 @@ class KafkaCheck(AgentCheck):
         )
         return consumer_group_state
 
-    def get_watermark_offsets(self, partitions=None, mode=HIGH_WATERMARK):
-        self.log.debug('Getting %s offsets', 'highwater' if mode == HIGH_WATERMARK else 'lowwater')
-
-        # Build partitions set
-        topic_partitions_to_check = set()
+    def _resolve_partitions(self, partitions):
+        """Resolve a partition set: None means all non-internal partitions from metadata."""
         if partitions is None:
             all_topic_partitions = self.client.get_topic_partitions()
-            for topic in all_topic_partitions:
-                if topic in KAFKA_INTERNAL_TOPICS:
-                    self.log.debug("Skipping internal topic %s", topic)
-                    continue
-                for partition in all_topic_partitions[topic]:
-                    topic_partitions_to_check.add((topic, partition))
-        else:
-            for topic, partition in partitions:
-                if topic in KAFKA_INTERNAL_TOPICS:
-                    self.log.debug("Skipping internal topic %s", topic)
-                    continue
-                topic_partitions_to_check.add((topic, partition))
+            return {
+                (topic, partition)
+                for topic, parts in all_topic_partitions.items()
+                if topic not in KAFKA_INTERNAL_TOPICS
+                for partition in parts
+            }
+        return {(t, p) for t, p in partitions if t not in KAFKA_INTERNAL_TOPICS}
+
+    def _fetch_offsets_in_batches(self, partitions_set, mode):
+        """Call consumer_offsets_for_times in batches of STAGGER_THRESHOLD to avoid overwhelming brokers."""
+        partitions_list = list(partitions_set)
+        result = {}
+        for i in range(0, len(partitions_list), STAGGER_THRESHOLD):
+            batch = partitions_list[i : i + STAGGER_THRESHOLD]
+            for topic, partition, offset in self.client.consumer_offsets_for_times(partitions=batch, offset=mode):
+                result[(topic, partition)] = offset
+        return result
+
+    def get_watermark_offsets(self, partitions=None, mode=HIGH_WATERMARK):
+        """Fetch watermark offsets for partitions. Returns ({(topic, partition): offset}, cluster_id)."""
+        mode_name = 'highwater' if mode == HIGH_WATERMARK else 'lowwater'
+        self.log.debug('Getting %s offsets', mode_name)
+
+        topic_partitions_to_check = self._resolve_partitions(partitions)
 
         if not topic_partitions_to_check:
             self.log.debug('No partitions to check for offsets')
@@ -419,27 +573,53 @@ class KafkaCheck(AgentCheck):
 
         dd_consumer_group = "datadog-agent"
 
-        # Open consumer once for both cluster_id and offset fetching
         self.client.open_consumer(dd_consumer_group)
         try:
             cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
 
-            self.log.debug(
-                'Querying %s %s offsets',
-                len(topic_partitions_to_check),
-                'highwater' if mode == HIGH_WATERMARK else 'lowwater',
-            )
-
-            result = {}
-            for topic, partition, offset in self.client.consumer_offsets_for_times(
-                partitions=topic_partitions_to_check, offset=mode
-            ):
-                result[(topic, partition)] = offset
+            self.log.debug('Querying %s %s offsets', len(topic_partitions_to_check), mode_name)
+            result = self._fetch_offsets_in_batches(topic_partitions_to_check, mode)
         finally:
             self.client.close_consumer()
 
-        self.log.debug('Got %s %s offsets', len(result), 'highwater' if mode == HIGH_WATERMARK else 'lowwater')
+        self.log.debug('Got %s %s offsets', len(result), mode_name)
         return result, cluster_id
+
+    def get_watermark_offsets_batched(self, queries):
+        """Fetch multiple watermark offset queries in a single consumer session.
+
+        Args:
+            queries: list of (partitions, mode) tuples. partitions=None means all.
+
+        Returns:
+            (results, cluster_id) where results is a list of {(topic, partition): offset}
+            dicts, one per query in the same order.
+        """
+        resolved = [(self._resolve_partitions(p), m) for p, m in queries]
+
+        dd_consumer_group = "datadog-agent"
+        mode_names = {HIGH_WATERMARK: 'highwater', LOW_WATERMARK: 'lowwater'}
+
+        self.client.open_consumer(dd_consumer_group)
+        try:
+            cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
+
+            results = []
+            for partitions_set, mode in resolved:
+                mode_name = mode_names.get(mode, str(mode))
+                if not partitions_set:
+                    self.log.debug('No partitions to check for %s offsets', mode_name)
+                    results.append({})
+                    continue
+
+                self.log.debug('Querying %s %s offsets', len(partitions_set), mode_name)
+                result = self._fetch_offsets_in_batches(partitions_set, mode)
+                results.append(result)
+                self.log.debug('Got %s %s offsets', len(result), mode_name)
+        finally:
+            self.client.close_consumer()
+
+        return results, cluster_id
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""
