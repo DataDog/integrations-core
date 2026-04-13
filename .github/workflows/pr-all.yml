@@ -28,8 +28,6 @@ jobs:
     permissions:
        # needed for compute-matrix in test-target.yml
        contents: read
-       # needed for dd-sts in test-target.yml
-       id-token: write
 
     with:
       repo: core

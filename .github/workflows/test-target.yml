@@ -107,8 +107,6 @@ jobs:
     permissions:
        # needed for compute-matrix in test-target.yml
        contents: read
-       # needed for dd-sts
-       id-token: write
     steps:
 
     - name: Set up Windows
@@ -154,9 +152,18 @@ jobs:
 
     - name: Get Datadog credentials
       id: dd-sts
+      # Fork PRs cannot mint OIDC tokens, so skip dd-sts and run without CI visibility.
+      # Uses github.event context directly because INPUT_IS_FORK is not set until the next step.
+      # continue-on-error allows callers without id-token:write to proceed gracefully.
+      if: github.event.pull_request.head.repo.fork != true
+      continue-on-error: true
       uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
       with:
         policy: ${{ inputs.dd-sts-policy }}
+
+    - name: Verify dd-sts credentials
+      if: steps.dd-sts.outcome == 'failure' && github.event.pull_request.head.repo.fork != true
+      run: echo "::warning::dd-sts credential retrieval failed. CI Visibility will be unavailable for this run."
 
     - name: Set environment variables
       # This step sets the following environment variables for the entire workflow via setup-test-env.sh:
