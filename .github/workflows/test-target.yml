@@ -105,8 +105,9 @@ jobs:
     runs-on: ${{ fromJson(inputs.runner) }}
 
     permissions:
-       # needed for compute-matrix in test-target.yml
        contents: read
+       # needed for dd-sts OIDC token minting
+       id-token: write
     steps:
 
     - name: Set up Windows
