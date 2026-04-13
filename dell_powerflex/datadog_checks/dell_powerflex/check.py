@@ -16,6 +16,9 @@ from .constants import (
     SYSTEM_METRIC_PREFIX,
     SYSTEM_STATS_BWC_METRICS,
     SYSTEM_STATS_SIMPLE_METRICS,
+    STORAGE_POOL_METRIC_PREFIX,
+    STORAGE_POOL_STATS_BWC_METRICS,
+    STORAGE_POOL_STATS_SIMPLE_METRICS,
     VOLUME_METRIC_PREFIX,
     VOLUME_STATS_BWC_METRICS,
     VOLUME_STATS_SIMPLE_METRICS,
@@ -40,6 +43,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self._collect_systems()
             self.gauge('api.can_connect', 1, tags=self._base_tags)
             self._collect_volumes()
+            self._collect_storage_pools()
         except (ConnectionError, HTTPError, InvalidURL, Timeout) as e:
             self.log.warning('Could not connect to PowerFlex Gateway: %s', e)
             self.gauge('api.can_connect', 0, tags=self._base_tags)
@@ -85,6 +89,27 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         for sdc in volume.get('mappedSdcInfo') or []:
             tags = tags + [f"sdc_id:{sdc['sdcId']}"]
         self._collect_volume_statistics(volume['id'], tags)
+
+    def _collect_storage_pools(self) -> None:
+        for pool in self._api.get_storage_pools():
+            try:
+                self._collect_storage_pool(pool)
+            except Exception as e:
+                self.log.warning('Failed to collect metrics for storage pool %s: %s', pool.get('id'), e)
+
+    def _collect_storage_pool(self, pool: dict) -> None:
+        tags = self._base_tags + [
+            f"storage_pool_id:{pool['id']}",
+            f"storage_pool_name:{pool['name']}",
+            f"protection_domain_id:{pool['protectionDomainId']}",
+        ]
+        self._collect_storage_pool_statistics(pool['id'], tags)
+
+    def _collect_storage_pool_statistics(self, pool_id: str, tags: list[str]) -> None:
+        stats = self._api.get_storage_pool_statistics(pool_id)
+        for api_field, metric_suffix in STORAGE_POOL_STATS_SIMPLE_METRICS:
+            self.gauge(f'{STORAGE_POOL_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
+        self._collect_bwc_metrics(stats, STORAGE_POOL_METRIC_PREFIX, STORAGE_POOL_STATS_BWC_METRICS, tags)
 
     def _collect_bwc_metrics(
         self, stats: dict, metric_prefix: str, bwc_metrics: list[tuple[str, str]], tags: list[str]

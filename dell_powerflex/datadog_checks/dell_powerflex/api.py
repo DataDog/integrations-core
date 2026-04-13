@@ -24,3 +24,9 @@ class PowerFlexAPI:
 
     def get_volume_statistics(self, volume_id: str) -> dict:
         return self._get(f'/api/instances/Volume::{volume_id}/relationships/Statistics')
+
+    def get_storage_pools(self) -> list[dict]:
+        return self._get('/api/types/StoragePool/instances')
+
+    def get_storage_pool_statistics(self, pool_id: str) -> dict:
+        return self._get(f'/api/instances/StoragePool::{pool_id}/relationships/Statistics')

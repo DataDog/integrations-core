@@ -11,6 +11,8 @@ from datadog_checks.dell_powerflex import DellPowerflexCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
+    STORAGE_POOL_STATS_BWC_METRICS,
+    STORAGE_POOL_STATS_SIMPLE_METRICS,
     SYSTEM_MDM_CLUSTER_METRICS,
     SYSTEM_STATS_BWC_METRICS,
     SYSTEM_STATS_SIMPLE_METRICS,
@@ -96,6 +98,71 @@ def test_collect_volumes(dd_run_check, aggregator, instance, mock_http_get):
         aggregator.assert_metric(f'{metric_prefix}.num_seconds', value=0, tags=volume_tags)
         aggregator.assert_metric(f'{metric_prefix}.total_weight_in_kb', value=0, tags=volume_tags)
         aggregator.assert_metric(f'{metric_prefix}.num_occured', value=0, tags=volume_tags)
+
+    # bigvolume: ThinProvisioned, mapped to one SDC, no children
+    bigvolume_tags = base_tags + [
+        'volume_id:c58b06e800000001',
+        'volume_name:bigvolume',
+        'volume_type:ThinProvisioned',
+        'storage_pool_id:25155ba600000000',
+        'sdc_id:1b8659fd00000001',
+    ]
+    aggregator.assert_metric('dell_powerflex.volume.num_of_child_volumes', value=0, tags=bigvolume_tags)
+    aggregator.assert_metric('dell_powerflex.volume.num_of_mapped_sdcs', value=1, tags=bigvolume_tags)
+
+    # volumee-snap-01: Snapshot, no SDC mapping, has ancestor, 1 child
+    snap01_tags = base_tags + [
+        'volume_id:c58b06e900000002',
+        'volume_name:volumee-snap-01',
+        'volume_type:Snapshot',
+        'storage_pool_id:25155ba600000000',
+        'ancestor_volume_id:c58b06e700000000',
+    ]
+    aggregator.assert_metric('dell_powerflex.volume.num_of_child_volumes', value=1, tags=snap01_tags)
+    aggregator.assert_metric('dell_powerflex.volume.num_of_mapped_sdcs', value=0, tags=snap01_tags)
+
+    # volumee-snap-02: Snapshot, no SDC mapping, has ancestor, no children
+    snap02_tags = base_tags + [
+        'volume_id:c58b06ea00000003',
+        'volume_name:volumee-snap-02',
+        'volume_type:Snapshot',
+        'storage_pool_id:25155ba600000000',
+        'ancestor_volume_id:c58b06e900000002',
+    ]
+    aggregator.assert_metric('dell_powerflex.volume.num_of_child_volumes', value=0, tags=snap02_tags)
+    aggregator.assert_metric('dell_powerflex.volume.num_of_mapped_sdcs', value=0, tags=snap02_tags)
+
+
+def test_collect_storage_pools(dd_run_check, aggregator, instance, mock_http_get):
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+    pool_tags = base_tags + [
+        'storage_pool_id:25155ba600000000',
+        'storage_pool_name:pool1',
+        'protection_domain_id:68c139ee00000000',
+    ]
+    for metric in STORAGE_POOL_STATS_SIMPLE_METRICS:
+        aggregator.assert_metric(metric['name'], value=metric['value'], tags=pool_tags)
+    for metric_prefix in STORAGE_POOL_STATS_BWC_METRICS:
+        aggregator.assert_metric(f'{metric_prefix}.num_seconds', value=0, tags=pool_tags)
+        aggregator.assert_metric(f'{metric_prefix}.total_weight_in_kb', value=0, tags=pool_tags)
+        aggregator.assert_metric(f'{metric_prefix}.num_occured', value=0, tags=pool_tags)
+
+    # storagepool2: HDD, empty pool, no ActualNetCapacityInUseInKb
+    pool2_tags = base_tags + [
+        'storage_pool_id:2515d0d600000001',
+        'storage_pool_name:storagepool2',
+        'protection_domain_id:68c139ee00000000',
+    ]
+    aggregator.assert_metric('dell_powerflex.storage_pool.capacity.in_use_in_kb', value=0, tags=pool2_tags)
+    aggregator.assert_metric('dell_powerflex.storage_pool.max_capacity.in_kb', value=0, tags=pool2_tags)
+    aggregator.assert_metric('dell_powerflex.storage_pool.num_of_volumes', value=0, tags=pool2_tags)
+    for metric_prefix in STORAGE_POOL_STATS_BWC_METRICS:
+        aggregator.assert_metric(f'{metric_prefix}.num_seconds', value=0, tags=pool2_tags)
+        aggregator.assert_metric(f'{metric_prefix}.total_weight_in_kb', value=0, tags=pool2_tags)
+        aggregator.assert_metric(f'{metric_prefix}.num_occured', value=0, tags=pool2_tags)
 
 
 def test_collect_system_failure_continues(dd_run_check, aggregator, instance, mock_http_get, mocker, caplog):

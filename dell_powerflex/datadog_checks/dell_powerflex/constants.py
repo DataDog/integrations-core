@@ -74,3 +74,57 @@ VOLUME_STATS_SIMPLE_METRICS = [
 ]
 
 VOLUME_STATS_BWC_METRICS = list(_COMMON_BWC_METRICS)
+
+STORAGE_POOL_METRIC_PREFIX = 'storage_pool'
+
+STORAGE_POOL_STATS_SIMPLE_METRICS = [
+    ('capacityLimitInKb', 'capacity_limit.in_kb'),
+    ('maxCapacityInKb', 'max_capacity.in_kb'),
+    ('capacityInUseInKb', 'capacity.in_use_in_kb'),
+    ('thickCapacityInUseInKb', 'thick_capacity.in_use_in_kb'),
+    ('thinCapacityInUseInKb', 'thin_capacity.in_use_in_kb'),
+    ('snapCapacityInUseInKb', 'snap_capacity.in_use_in_kb'),
+    ('unreachableUnusedCapacityInKb', 'unreachable_unused_capacity.in_kb'),
+    ('unusedCapacityInKb', 'unused_capacity.in_kb'),
+    ('spareCapacityInKb', 'spare_capacity.in_kb'),
+    ('capacityAvailableForVolumeAllocationInKb', 'capacity_available_for_volume_allocation.in_kb'),
+    ('protectedCapacityInKb', 'protected_capacity.in_kb'),
+    ('failedCapacityInKb', 'failed_capacity.in_kb'),
+    ('inUseVacInKb', 'in_use_vac.in_kb'),
+    ('backgroundScanFixedReadErrorCount', 'fixed_read_error_count'),
+    ('numOfUnmappedVolumes', 'num_of_unmapped_volumes'),
+    ('numOfSnapshots', 'num_of_snapshots'),
+    ('numOfVolumes', 'num_of_volumes'),
+    ('rfcacheReadsReceived', 'rfcache.reads_received'),
+    ('rfcacheWritesReceived', 'rfcache.writes_received'),
+    ('rfacheReadHit', 'rfcache.read_hit'),
+    ('rfcacheReadMiss', 'rfcache.read_miss'),
+    ('rfacheWriteHit', 'rfcache.write_hit'),
+    ('rfcacheWriteMiss', 'rfcache.write_miss'),
+    ('userDataCapacityInKb', 'user_data.capacity_in_kb'),
+    ('snapshotCapacityInKb', 'snapshot.capacity_in_kb'),
+    ('overallUsageRatio', 'overall_usage_ratio'),
+    ('exposedCapacityInKb', 'exposed_capacity.in_kb'),
+    ('ActualNetCapacityInUseInKb', 'actual_net_capacity.in_use_in_kb'),
+]
+
+STORAGE_POOL_STATS_BWC_METRICS = [
+    ('primaryReadBwc', 'primary_read_bwc'),
+    ('primaryWriteBwc', 'primary_write_bwc'),
+    ('secondaryReadBwc', 'secondary_read_bwc'),
+    ('secondaryWriteBwc', 'secondary_write_bwc'),
+    ('rebalanceReadBwc', 'rebalance_read_bwc'),
+    ('rebalanceWriteBwc', 'rebalance_write_bwc'),
+    ('totalReadBwc', 'total_read_bwc'),
+    ('totalWriteBwc', 'total_write_bwc'),
+    ('userDataReadBwc', 'user_data_read_bwc'),
+    ('userDataWriteBwc', 'user_data_write_bwc'),
+    ('userDataSdcReadLatency', 'user_data_sdc_read_latency'),
+    ('userDataSdcWriteLatency', 'user_data_sdc_write_latency'),
+    ('userDataSdcTrimLatency', 'user_data_sdc_trim_latency'),
+    ('targetReadLatency', 'target_read_latency'),
+    ('targetWriteLatency', 'target_write_latency'),
+    ('fwdRebuildReadBwc', 'fwd_rebuild_read_bwc'),
+    ('bckRebuildReadBwc', 'bck_rebuild_read_bwc'),
+    ('normRebuildReadBwc', 'norm_rebuild_read_bwc'),
+]
