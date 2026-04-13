@@ -90,6 +90,12 @@ STORAGE_POOL_STATS_SIMPLE_METRICS = [
 ]
 
 STORAGE_POOL_STATS_BWC_METRICS = [
+    'dell_powerflex.storage_pool.user_data_read_bwc',
+    'dell_powerflex.storage_pool.user_data_write_bwc',
+    'dell_powerflex.storage_pool.user_data_trim_bwc',
+    'dell_powerflex.storage_pool.user_data_sdc_read_latency',
+    'dell_powerflex.storage_pool.user_data_sdc_write_latency',
+    'dell_powerflex.storage_pool.user_data_sdc_trim_latency',
     'dell_powerflex.storage_pool.primary_read_bwc',
     'dell_powerflex.storage_pool.primary_write_bwc',
     'dell_powerflex.storage_pool.secondary_read_bwc',
@@ -98,11 +104,6 @@ STORAGE_POOL_STATS_BWC_METRICS = [
     'dell_powerflex.storage_pool.rebalance_write_bwc',
     'dell_powerflex.storage_pool.total_read_bwc',
     'dell_powerflex.storage_pool.total_write_bwc',
-    'dell_powerflex.storage_pool.user_data_read_bwc',
-    'dell_powerflex.storage_pool.user_data_write_bwc',
-    'dell_powerflex.storage_pool.user_data_sdc_read_latency',
-    'dell_powerflex.storage_pool.user_data_sdc_write_latency',
-    'dell_powerflex.storage_pool.user_data_sdc_trim_latency',
     'dell_powerflex.storage_pool.target_read_latency',
     'dell_powerflex.storage_pool.target_write_latency',
     'dell_powerflex.storage_pool.fwd_rebuild_read_bwc',

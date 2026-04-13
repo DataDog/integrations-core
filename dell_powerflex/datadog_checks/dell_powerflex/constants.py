@@ -108,7 +108,7 @@ STORAGE_POOL_STATS_SIMPLE_METRICS = [
     ('ActualNetCapacityInUseInKb', 'actual_net_capacity.in_use_in_kb'),
 ]
 
-STORAGE_POOL_STATS_BWC_METRICS = [
+STORAGE_POOL_STATS_BWC_METRICS = _COMMON_BWC_METRICS + [
     ('primaryReadBwc', 'primary_read_bwc'),
     ('primaryWriteBwc', 'primary_write_bwc'),
     ('secondaryReadBwc', 'secondary_read_bwc'),
@@ -117,11 +117,6 @@ STORAGE_POOL_STATS_BWC_METRICS = [
     ('rebalanceWriteBwc', 'rebalance_write_bwc'),
     ('totalReadBwc', 'total_read_bwc'),
     ('totalWriteBwc', 'total_write_bwc'),
-    ('userDataReadBwc', 'user_data_read_bwc'),
-    ('userDataWriteBwc', 'user_data_write_bwc'),
-    ('userDataSdcReadLatency', 'user_data_sdc_read_latency'),
-    ('userDataSdcWriteLatency', 'user_data_sdc_write_latency'),
-    ('userDataSdcTrimLatency', 'user_data_sdc_trim_latency'),
     ('targetReadLatency', 'target_read_latency'),
     ('targetWriteLatency', 'target_write_latency'),
     ('fwdRebuildReadBwc', 'fwd_rebuild_read_bwc'),
