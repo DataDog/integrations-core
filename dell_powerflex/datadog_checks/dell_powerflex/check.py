@@ -11,14 +11,17 @@ from .api import PowerFlexAPI
 from .config_models import ConfigMixin
 from .constants import (
     BWC_SUB_FIELDS,
+    PROTECTION_DOMAIN_METRIC_PREFIX,
+    PROTECTION_DOMAIN_STATS_BWC_METRICS,
+    PROTECTION_DOMAIN_STATS_SIMPLE_METRICS,
+    STORAGE_POOL_METRIC_PREFIX,
+    STORAGE_POOL_STATS_BWC_METRICS,
+    STORAGE_POOL_STATS_SIMPLE_METRICS,
     SYSTEM_MDM_CLUSTER_SIMPLE_METRICS,
     SYSTEM_MDM_CLUSTER_STATE_METRICS,
     SYSTEM_METRIC_PREFIX,
     SYSTEM_STATS_BWC_METRICS,
     SYSTEM_STATS_SIMPLE_METRICS,
-    STORAGE_POOL_METRIC_PREFIX,
-    STORAGE_POOL_STATS_BWC_METRICS,
-    STORAGE_POOL_STATS_SIMPLE_METRICS,
     VOLUME_METRIC_PREFIX,
     VOLUME_STATS_BWC_METRICS,
     VOLUME_STATS_SIMPLE_METRICS,
@@ -44,6 +47,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self.gauge('api.can_connect', 1, tags=self._base_tags)
             self._collect_volumes()
             self._collect_storage_pools()
+            self._collect_protection_domains()
         except (ConnectionError, HTTPError, InvalidURL, Timeout) as e:
             self.log.warning('Could not connect to PowerFlex Gateway: %s', e)
             self.gauge('api.can_connect', 0, tags=self._base_tags)
@@ -110,6 +114,27 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         for api_field, metric_suffix in STORAGE_POOL_STATS_SIMPLE_METRICS:
             self.gauge(f'{STORAGE_POOL_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
         self._collect_bwc_metrics(stats, STORAGE_POOL_METRIC_PREFIX, STORAGE_POOL_STATS_BWC_METRICS, tags)
+
+    def _collect_protection_domains(self) -> None:
+        for pd in self._api.get_protection_domains():
+            try:
+                self._collect_protection_domain(pd)
+            except Exception as e:
+                self.log.warning('Failed to collect metrics for protection domain %s: %s', pd.get('id'), e)
+
+    def _collect_protection_domain(self, pd: dict) -> None:
+        tags = self._base_tags + [
+            f"protection_domain_id:{pd['id']}",
+            f"protection_domain_name:{pd['name']}",
+            f"system_id:{pd['systemId']}",
+        ]
+        self._collect_protection_domain_statistics(pd['id'], tags)
+
+    def _collect_protection_domain_statistics(self, pd_id: str, tags: list[str]) -> None:
+        stats = self._api.get_protection_domain_statistics(pd_id)
+        for api_field, metric_suffix in PROTECTION_DOMAIN_STATS_SIMPLE_METRICS:
+            self.gauge(f'{PROTECTION_DOMAIN_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
+        self._collect_bwc_metrics(stats, PROTECTION_DOMAIN_METRIC_PREFIX, PROTECTION_DOMAIN_STATS_BWC_METRICS, tags)
 
     def _collect_bwc_metrics(
         self, stats: dict, metric_prefix: str, bwc_metrics: list[tuple[str, str]], tags: list[str]

@@ -11,6 +11,8 @@ from datadog_checks.dell_powerflex import DellPowerflexCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
+    PROTECTION_DOMAIN_STATS_BWC_METRICS,
+    PROTECTION_DOMAIN_STATS_SIMPLE_METRICS,
     STORAGE_POOL_STATS_BWC_METRICS,
     STORAGE_POOL_STATS_SIMPLE_METRICS,
     SYSTEM_MDM_CLUSTER_METRICS,
@@ -160,6 +162,21 @@ def test_collect_storage_pools(dd_run_check, aggregator, instance, mock_http_get
     assert_bwc_metrics(aggregator, STORAGE_POOL_STATS_BWC_METRICS, pool2_tags)
 
 
+def test_collect_protection_domains(dd_run_check, aggregator, instance, mock_http_get):
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+    pd_tags = base_tags + [
+        'protection_domain_id:68c139ee00000000',
+        'protection_domain_name:domain1',
+        'system_id:1fcf40fc60c6520f',
+    ]
+    for metric in PROTECTION_DOMAIN_STATS_SIMPLE_METRICS:
+        aggregator.assert_metric(metric['name'], value=metric['value'], tags=pd_tags)
+    assert_bwc_metrics(aggregator, PROTECTION_DOMAIN_STATS_BWC_METRICS, pd_tags)
+
+
 def test_collect_system_failure_continues(dd_run_check, aggregator, instance, mock_http_get, mocker, caplog):
     mocker.patch(
         'datadog_checks.dell_powerflex.check.DellPowerflexCheck._collect_system',
@@ -182,6 +199,30 @@ def test_collect_volume_failure_continues(dd_run_check, aggregator, instance, mo
     dd_run_check(check)
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
     assert 'Failed to collect metrics for volume' in caplog.text
+
+
+def test_collect_storage_pool_failure_continues(dd_run_check, aggregator, instance, mock_http_get, mocker, caplog):
+    mocker.patch(
+        'datadog_checks.dell_powerflex.check.DellPowerflexCheck._collect_storage_pool',
+        side_effect=[Exception(), None],
+    )
+    caplog.set_level(logging.WARNING)
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
+    assert 'Failed to collect metrics for storage pool' in caplog.text
+
+
+def test_collect_protection_domain_failure_continues(dd_run_check, aggregator, instance, mock_http_get, mocker, caplog):
+    mocker.patch(
+        'datadog_checks.dell_powerflex.check.DellPowerflexCheck._collect_protection_domain',
+        side_effect=[Exception()],
+    )
+    caplog.set_level(logging.WARNING)
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
+    assert 'Failed to collect metrics for protection domain' in caplog.text
 
 
 def test_collect_system_with_name(dd_run_check, aggregator, instance, mocker):
