@@ -5,7 +5,7 @@
 import logging
 from unittest.mock import MagicMock
 
-from requests.exceptions import ConnectionError, HTTPError
+from requests.exceptions import ConnectionError
 
 from datadog_checks.dell_powerflex import DellPowerflexCheck
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -66,6 +66,7 @@ def test_collect_system(dd_run_check, aggregator, instance, mock_http_get):
         aggregator.assert_metric(f'{metric_prefix}.num_seconds', value=0, tags=system_tags)
         aggregator.assert_metric(f'{metric_prefix}.total_weight_in_kb', value=0, tags=system_tags)
         aggregator.assert_metric(f'{metric_prefix}.num_occured', value=0, tags=system_tags)
+
 
 def test_assert_all_metrics(dd_run_check, aggregator, instance, mock_http_get):
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
@@ -145,6 +146,10 @@ def test_collect_system_with_name(dd_run_check, aggregator, instance, mocker):
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
-    system_tags = ['powerflex_gateway_url:https://localhost:443', 'system_id:1fcf40fc60c6520f', 'system_name:my-powerflex']
+    system_tags = [
+        'powerflex_gateway_url:https://localhost:443',
+        'system_id:1fcf40fc60c6520f',
+        'system_name:my-powerflex',
+    ]
     aggregator.assert_metric('dell_powerflex.system.mdm_cluster.good_nodes', value=3, tags=system_tags)
     aggregator.assert_metric('dell_powerflex.system.mdm_cluster.good_replicas', value=2, tags=system_tags)

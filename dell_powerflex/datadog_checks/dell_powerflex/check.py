@@ -10,6 +10,7 @@ from datadog_checks.base import AgentCheck
 from .api import PowerFlexAPI
 from .config_models import ConfigMixin
 from .constants import (
+    BWC_SUB_FIELDS,
     SYSTEM_MDM_CLUSTER_SIMPLE_METRICS,
     SYSTEM_MDM_CLUSTER_STATE_METRICS,
     SYSTEM_METRIC_PREFIX,
@@ -81,28 +82,27 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         ]
         if volume.get('ancestorVolumeId'):
             tags = tags + [f"ancestor_volume_id:{volume['ancestorVolumeId']}"]
-        for sdc in (volume.get('mappedSdcInfo') or []):
+        for sdc in volume.get('mappedSdcInfo') or []:
             tags = tags + [f"sdc_id:{sdc['sdcId']}"]
         self._collect_volume_statistics(volume['id'], tags)
+
+    def _collect_bwc_metrics(
+        self, stats: dict, metric_prefix: str, bwc_metrics: list[tuple[str, str]], tags: list[str]
+    ) -> None:
+        for api_field, metric_suffix in bwc_metrics:
+            bwc = stats.get(api_field, {})
+            prefix = f'{metric_prefix}.{metric_suffix}'
+            for bwc_field, bwc_suffix in BWC_SUB_FIELDS:
+                self.gauge(f'{prefix}.{bwc_suffix}', bwc.get(bwc_field), tags=tags)
 
     def _collect_volume_statistics(self, volume_id: str, tags: list[str]) -> None:
         stats = self._api.get_volume_statistics(volume_id)
         for api_field, metric_suffix in VOLUME_STATS_SIMPLE_METRICS:
             self.gauge(f'{VOLUME_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
-        for api_field, metric_suffix in VOLUME_STATS_BWC_METRICS:
-            bwc = stats.get(api_field, {})
-            prefix = f'{VOLUME_METRIC_PREFIX}.{metric_suffix}'
-            self.gauge(f'{prefix}.num_seconds', bwc.get('numSeconds'), tags=tags)
-            self.gauge(f'{prefix}.total_weight_in_kb', bwc.get('totalWeightInKb'), tags=tags)
-            self.gauge(f'{prefix}.num_occured', bwc.get('numOccured'), tags=tags)
+        self._collect_bwc_metrics(stats, VOLUME_METRIC_PREFIX, VOLUME_STATS_BWC_METRICS, tags)
 
     def _collect_system_statistics(self, system_id: str, tags: list[str]) -> None:
         stats = self._api.get_system_statistics(system_id)
         for api_field, metric_suffix in SYSTEM_STATS_SIMPLE_METRICS:
             self.gauge(f'{SYSTEM_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
-        for api_field, metric_suffix in SYSTEM_STATS_BWC_METRICS:
-            bwc = stats.get(api_field, {})
-            prefix = f'{SYSTEM_METRIC_PREFIX}.{metric_suffix}'
-            self.gauge(f'{prefix}.num_seconds', bwc.get('numSeconds'), tags=tags)
-            self.gauge(f'{prefix}.total_weight_in_kb', bwc.get('totalWeightInKb'), tags=tags)
-            self.gauge(f'{prefix}.num_occured', bwc.get('numOccured'), tags=tags)
+        self._collect_bwc_metrics(stats, SYSTEM_METRIC_PREFIX, SYSTEM_STATS_BWC_METRICS, tags)

@@ -5,7 +5,11 @@
 SYSTEM_MDM_CLUSTER_METRICS = [
     {'name': 'dell_powerflex.system.mdm_cluster.good_nodes', 'value': 3},
     {'name': 'dell_powerflex.system.mdm_cluster.good_replicas', 'value': 2},
-    {'name': 'dell_powerflex.system.mdm_cluster.cluster_state', 'value': 1, 'extra_tags': ['cluster_state:ClusteredNormal']},
+    {
+        'name': 'dell_powerflex.system.mdm_cluster.cluster_state',
+        'value': 1,
+        'extra_tags': ['cluster_state:ClusteredNormal'],
+    },
     {'name': 'dell_powerflex.system.mdm_mode', 'value': 1, 'extra_tags': ['mdm_mode:ThreeNodes']},
 ]
 

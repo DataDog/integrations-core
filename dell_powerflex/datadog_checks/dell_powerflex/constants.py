@@ -43,13 +43,22 @@ SYSTEM_STATS_SIMPLE_METRICS = [
     ('numSdrSdcDisconnections', 'num_sdr_sdc_disconnections'),
 ]
 
-SYSTEM_STATS_BWC_METRICS = [
+BWC_SUB_FIELDS = [
+    ('numSeconds', 'num_seconds'),
+    ('totalWeightInKb', 'total_weight_in_kb'),
+    ('numOccured', 'num_occured'),
+]
+
+_COMMON_BWC_METRICS = [
     ('userDataReadBwc', 'user_data_read_bwc'),
     ('userDataWriteBwc', 'user_data_write_bwc'),
     ('userDataTrimBwc', 'user_data_trim_bwc'),
     ('userDataSdcReadLatency', 'user_data_sdc_read_latency'),
     ('userDataSdcWriteLatency', 'user_data_sdc_write_latency'),
     ('userDataSdcTrimLatency', 'user_data_sdc_trim_latency'),
+]
+
+SYSTEM_STATS_BWC_METRICS = _COMMON_BWC_METRICS + [
     ('journalerReadLatency', 'journaler_read_latency'),
     ('journalerWriteLatency', 'journaler_write_latency'),
     ('targetWriteLatency', 'target_write_latency'),
@@ -64,11 +73,4 @@ VOLUME_STATS_SIMPLE_METRICS = [
     ('rplUsedJournalCap', 'rpl_used_journal_cap'),
 ]
 
-VOLUME_STATS_BWC_METRICS = [
-    ('userDataReadBwc', 'user_data_read_bwc'),
-    ('userDataWriteBwc', 'user_data_write_bwc'),
-    ('userDataTrimBwc', 'user_data_trim_bwc'),
-    ('userDataSdcReadLatency', 'user_data_sdc_read_latency'),
-    ('userDataSdcWriteLatency', 'user_data_sdc_write_latency'),
-    ('userDataSdcTrimLatency', 'user_data_sdc_trim_latency'),
-]
+VOLUME_STATS_BWC_METRICS = list(_COMMON_BWC_METRICS)

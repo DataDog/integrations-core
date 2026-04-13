@@ -8,24 +8,19 @@ class PowerFlexAPI:
         self._http = http
         self._gateway_url = gateway_url
 
-    def get_systems(self) -> list[dict]:
-        response = self._http.get(f"{self._gateway_url}/api/types/System/instances")
+    def _get(self, path: str):
+        response = self._http.get(f"{self._gateway_url}{path}")
         response.raise_for_status()
         return response.json()
+
+    def get_systems(self) -> list[dict]:
+        return self._get('/api/types/System/instances')
 
     def get_system_statistics(self, system_id: str) -> dict:
-        url = f"{self._gateway_url}/api/instances/System::{system_id}/relationships/Statistics"
-        response = self._http.get(url)
-        response.raise_for_status()
-        return response.json()
+        return self._get(f'/api/instances/System::{system_id}/relationships/Statistics')
 
     def get_volumes(self) -> list[dict]:
-        response = self._http.get(f"{self._gateway_url}/api/types/Volume/instances")
-        response.raise_for_status()
-        return response.json()
+        return self._get('/api/types/Volume/instances')
 
     def get_volume_statistics(self, volume_id: str) -> dict:
-        url = f"{self._gateway_url}/api/instances/Volume::{volume_id}/relationships/Statistics"
-        response = self._http.get(url)
-        response.raise_for_status()
-        return response.json()
+        return self._get(f'/api/instances/Volume::{volume_id}/relationships/Statistics')
