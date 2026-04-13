@@ -7,66 +7,40 @@ from datetime import datetime
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.nutanix.activity_monitor import ActivityMonitor
+from datadog_checks.nutanix.config_models import ConfigMixin
 from datadog_checks.nutanix.infrastructure_monitor import InfrastructureMonitor
 from datadog_checks.nutanix.resource_filters import parse_resource_filters
 from datadog_checks.nutanix.utils import retry_on_rate_limit
 
 
-class NutanixCheck(AgentCheck):
+class NutanixCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'nutanix'
+    HTTP_CONFIG_REMAPPER = {'pc_username': {'name': 'username'}, 'pc_password': {'name': 'password'}}
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
-
-        self._parse_config()
-        self._initialize_check_attributes()
+        # Insert after load_configuration_models but before __initialize_persistent_cache_key_prefix
+        # so that ActivityMonitor reads persistent cache with an empty prefix (matching AgentCheck lifecycle)
+        self.check_initializations.insert(1, self._initialize_check_attributes)
+        self.check_initializations.insert(1, self._parse_config)
 
     def _parse_config(self):
-        # 120s proved reliable during testing — retrieves the majority of Cluster/VM stats
-        self.sampling_interval = self.instance.get("min_collection_interval", 120)
-        self.page_limit = self.instance.get("page_limit", 100)
-
-        # setup
-        self.pc_ip = self.instance.get("pc_ip")
-        if not self.pc_ip:
-            raise ConfigurationError("pc_ip is required")
-        self.pc_port = self.instance.get("pc_port")
-        if self.pc_ip and ":" in self.pc_ip:
+        self.pc_ip = self.config.pc_ip
+        self.pc_port = self.config.pc_port
+        if ":" in self.pc_ip:
             host, _, port = self.pc_ip.rpartition(":")
             if port.isdigit():
                 if "pc_port" in self.instance:
                     raise ConfigurationError(
-                        f"Conflicting port configuration between pc_ip ({port}) and pc_port ({self.pc_port})"
+                        f"Conflicting port configuration between pc_ip ({port}) and pc_port ({self.config.pc_port})"
                     )
                 self.pc_ip, self.pc_port = host, int(port)
-        self.pc_port = self.pc_port or 9440
 
-        # http auth
-        pc_username = self.instance.get("pc_username")
-        pc_password = self.instance.get("pc_password")
-
-        if pc_username and "username" not in self.instance:
-            self.instance["username"] = pc_username
-        if pc_password and "password" not in self.instance:
-            self.instance["password"] = pc_password
-
-        self.collect_events_enabled = is_affirmative(self.instance.get("collect_events", True))
-        self.collect_tasks_enabled = is_affirmative(self.instance.get("collect_tasks", True))
-        self.collect_audits_enabled = is_affirmative(self.instance.get("collect_audits", True))
-        self.collect_alerts_enabled = is_affirmative(self.instance.get("collect_alerts", True))
-        self.collect_subtasks_enabled = is_affirmative(self.instance.get("collect_subtasks", False))
-
-        self.batch_vm_collection = is_affirmative(self.instance.get("batch_vm_collection", True))
-
-        self.exclude_filtered_resources_from_cluster_capacity = is_affirmative(
-            self.instance.get("exclude_filtered_resources_from_cluster_capacity", False)
+        self.resource_filters = parse_resource_filters(
+            [rf.model_dump() for rf in (self.config.resource_filters or ())], self.log
         )
-
-        self.prefix_category_tags = is_affirmative(self.instance.get("prefix_category_tags", False))
-
-        self.resource_filters = parse_resource_filters(self.instance.get("resource_filters") or [], self.log)
 
     def _initialize_check_attributes(self):
         self.base_url = f"{self.pc_ip}:{self.pc_port}"
@@ -75,7 +49,7 @@ class NutanixCheck(AgentCheck):
 
         self.health_check_url = f"{self.base_url}/console"
 
-        self.base_tags = list(self.instance.get("tags", []))
+        self.base_tags = list(self.config.tags or ())
         self.base_tags.append("nutanix")
         self.base_tags.append(f"prism_central:{self.pc_ip}")
 
@@ -135,7 +109,7 @@ class NutanixCheck(AgentCheck):
                 value = category.get("value")
 
                 if key and value:
-                    if self.prefix_category_tags:
+                    if self.config.prefix_category_tags:
                         tags.append(f"ntnx_{key}:{value}")
                     else:
                         tags.append(f"{key}:{value}")
@@ -184,13 +158,13 @@ class NutanixCheck(AgentCheck):
 
     def _collect_activity(self) -> None:
         """Collect events, tasks, audits, and alerts if enabled."""
-        if self.collect_events_enabled:
+        if self.config.collect_events:
             self.activity_monitor.collect_events()
-        if self.collect_alerts_enabled:
+        if self.config.collect_alerts:
             self.activity_monitor.collect_alerts()
-        if self.collect_tasks_enabled:
+        if self.config.collect_tasks:
             self.activity_monitor.collect_tasks()
-        if self.collect_audits_enabled:
+        if self.config.collect_audits:
             self.activity_monitor.collect_audits()
 
     def _check_health(self):
@@ -281,7 +255,7 @@ class NutanixCheck(AgentCheck):
 
         # init pagination
         page = 0
-        limit = self.page_limit
+        limit = self.config.page_limit
 
         req_params = {} if params is None else params.copy()
         req_params["$page"] = page

@@ -118,7 +118,7 @@ class InfrastructureMonitor:
             if cluster_id and cluster_name:
                 self.cluster_names[cluster_id] = cluster_name
 
-        if self.check.batch_vm_collection:
+        if self.check.config.batch_vm_collection:
             try:
                 self._build_vms_by_host_cache()
                 self.check.log.info("[%s] Cached VMs for %d hosts", self._pc_label, len(self._vms_by_host))
@@ -256,7 +256,7 @@ class InfrastructureMonitor:
     def _report_cluster_capacity_metrics(self, hosts: list[dict], cluster_id: str, cluster_tags: list[str]) -> None:
         """Aggregate host and VM capacity for the cluster and report metrics."""
         self._cluster_capacity.reset()
-        exclude_filtered = self.check.exclude_filtered_resources_from_cluster_capacity
+        exclude_filtered = self.check.config.exclude_filtered_resources_from_cluster_capacity
 
         host_ids = set()
         for host in hosts:
@@ -568,7 +568,7 @@ class InfrastructureMonitor:
             "$startTime": start_time,
             "$endTime": end_time,
             "$statType": "AVG",
-            "$samplingInterval": self.check.sampling_interval,
+            "$samplingInterval": self.check.config.min_collection_interval,
         }
 
     def _get_stats(self, endpoint: str) -> dict:
@@ -602,6 +602,6 @@ class InfrastructureMonitor:
     def init_collection_time_window(self) -> None:
         """Calculate and set the collection time window for this check run."""
         now = datetime.now(timezone.utc)
-        end_time = now - timedelta(seconds=self.check.sampling_interval)
-        start_time = end_time - timedelta(seconds=self.check.sampling_interval)
+        end_time = now - timedelta(seconds=self.check.config.min_collection_interval)
+        start_time = end_time - timedelta(seconds=self.check.config.min_collection_interval)
         self.collection_time_window = start_time.isoformat(), end_time.isoformat()

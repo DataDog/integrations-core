@@ -35,7 +35,7 @@ def _validate_filter_structure(f: dict[str, Any]) -> bool:
         and 'resource' in f
         and 'property' in f
         and 'patterns' in f
-        and isinstance(f.get('patterns'), list)
+        and isinstance(f.get('patterns'), (list, tuple))
     )
 
 
