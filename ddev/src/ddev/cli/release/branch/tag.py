@@ -77,23 +77,22 @@ def tag(app, final: bool, skip_open_pr_check: bool):
                 app.abort('Did not get confirmation, aborting. Did not create or push the tag.')
 
     prs = []
-    if skip_open_pr_check:
-        pass
-    elif not app.config.github.user or not app.config.github.token:
-        click.secho('Warning: GitHub credentials not configured; skipping open PR check.', fg='yellow')
-    else:
-        try:
-            prs = app.github.list_open_pull_requests_targeting_base(branch_name)
-        except Exception as e:
-            click.secho(f'Warning: unable to check for open PRs: {e}', fg='yellow')
+    if not skip_open_pr_check:
+        if not app.config.github.user or not app.config.github.token:
+            click.secho('Warning: GitHub credentials not configured; skipping open PR check.', fg='yellow')
+        else:
+            try:
+                prs = app.github.list_open_pull_requests_targeting_base(branch_name)
+            except Exception as e:
+                click.secho(f'Warning: unable to check for open PRs: {e}', fg='yellow')
 
-        if prs:
-            click.secho('!!! WARNING !!!')
-            click.echo(f'Found {len(prs)} open PR(s) targeting base branch {branch_name}:')
-            for pr in prs[:20]:
-                click.echo(f'- #{pr.number} {pr.title} ({pr.html_url})')
-            if len(prs) > 20:
-                click.echo(f'... and {len(prs) - 20} more')
+            if prs:
+                click.secho('!!! WARNING !!!')
+                click.echo(f'Found {len(prs)} open PR(s) targeting base branch {branch_name}:')
+                for pr in prs[:20]:
+                    click.echo(f'- #{pr.number} {pr.title} ({pr.html_url})')
+                if len(prs) > 20:
+                    click.echo(f'... and {len(prs) - 20} more')
 
     prompt = f'Create and push this tag: {new_tag}?'
     if prs:

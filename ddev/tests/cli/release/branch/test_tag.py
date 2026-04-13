@@ -30,6 +30,7 @@ def test_tag_check_open_prs_warns_and_allows_continue(ddev, git, mocker, config_
     ]
     assert 'Found 1 open PR(s) targeting base branch 7.56.x' in result.output
     assert '#1234 Fix thing' in result.output
+    assert 'Open PRs found targeting 7.56.x' in result.output
     list_prs.assert_called_once_with('7.56.x')
 
 
@@ -42,6 +43,16 @@ def test_tag_skip_open_pr_check(ddev, git, mocker, config_file):
     result = ddev('release', 'branch', 'tag', '--final', '--skip-open-pr-check', input='y\n')
 
     _assert_tag_pushed(git, result, '7.56.0')
+    list_prs.assert_not_called()
+
+
+def test_tag_no_github_credentials_skips_check(ddev, git, mocker):
+    list_prs = mocker.patch('ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base')
+
+    result = ddev('release', 'branch', 'tag', '--final', input='y\n')
+
+    _assert_tag_pushed(git, result, '7.56.0')
+    assert 'GitHub credentials not configured' in result.output
     list_prs.assert_not_called()
 
 
@@ -230,7 +241,7 @@ def test_abort_valid_rc(ddev, git, no_confirm):
     """
     git.tags.return_value = []
 
-    result = ddev('release', 'branch', 'tag', input='\n{no_confirm}\n')
+    result = ddev('release', 'branch', 'tag', input=f'\n{no_confirm}\n')
 
     assert RC_NUMBER_PROMPT.format('1') in result.output
     assert result.exit_code == 1, result.output

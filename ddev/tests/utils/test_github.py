@@ -65,6 +65,14 @@ class TestListOpenPullRequestsTargetingBase:
         assert prs[0].html_url == 'https://example.invalid/pr/10'
         assert prs[0].labels == ['foo']
 
+    def test_returns_empty_list_when_no_results(self, github_manager, mocker):
+        response = mocker.MagicMock()
+        response.text = '{"items":[],"total_count":0}'
+        mocker.patch('ddev.utils.github.GitHubManager._GitHubManager__api_get', return_value=response)
+
+        prs = github_manager.list_open_pull_requests_targeting_base('7.99.x')
+        assert prs == []
+
 
 class TestCreateLabel:
     def test_create_label(self, network_replay, github_manager):
