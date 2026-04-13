@@ -44,7 +44,11 @@ def _assert_check(aggregator, rate_metric_count=2):
         aggregator.assert_metric('kyototycoon.{}'.format(mname), tags=TAGS + ['db:0'], count=2)
 
     for mname in ALL_RATES:
-        aggregator.assert_metric('kyototycoon.{}_per_s'.format(mname), tags=TAGS, count=rate_metric_count)
+        # serv_conn_count can decrease between check runs causing the agent to skip the rate
+        if mname == 'connections':
+            aggregator.assert_metric('kyototycoon.connections_per_s', tags=TAGS, at_least=0)
+        else:
+            aggregator.assert_metric('kyototycoon.{}_per_s'.format(mname), tags=TAGS, count=rate_metric_count)
 
     # service check
     aggregator.assert_service_check(KyotoTycoonCheck.SERVICE_CHECK_NAME, status=KyotoTycoonCheck.OK, tags=TAGS, count=2)
