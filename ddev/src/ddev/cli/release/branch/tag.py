@@ -1,3 +1,4 @@
+import logging
 import re
 
 import click
@@ -78,18 +79,23 @@ def tag(app, final: bool, skip_open_pr_check: bool):
 
     prs = []
     if not skip_open_pr_check:
+        httpx_logger = logging.getLogger('httpx')
+        previous_level = httpx_logger.level
+        httpx_logger.setLevel(logging.WARNING)
         try:
             prs = app.github.list_open_pull_requests_targeting_base(branch_name)
         except Exception as e:
             click.secho(f'Warning: unable to check for open PRs: {e}', fg='yellow')
+        finally:
+            httpx_logger.setLevel(previous_level)
 
         if prs:
-            click.secho('!!! WARNING !!!')
-            click.echo(f'Found {len(prs)} open PR(s) targeting base branch {branch_name}:')
+            click.secho('!!! WARNING !!!', fg='yellow')
+            click.secho(f'Found {len(prs)} open PR(s) targeting base branch {branch_name}:', fg='yellow')
             for pr in prs[:20]:
-                click.echo(f'- #{pr.number} {pr.title} ({pr.html_url})')
+                click.secho(f'  - #{pr.number} {pr.title} ({pr.html_url})', fg='yellow')
             if len(prs) > 20:
-                click.echo(f'... and {len(prs) - 20} more')
+                click.secho(f'  ... and {len(prs) - 20} more', fg='yellow')
 
     prompt = f'Create and push this tag: {new_tag}?'
     if prs:
