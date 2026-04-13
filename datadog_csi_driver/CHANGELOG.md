@@ -1,6 +1,10 @@
 # CHANGELOG - datadog_csi_driver
 
-<!-- towncrier release notes start -->
+## 1.6.0 / 2026-05-19
+
+***Removed***:
+
+* Remove the Python check implementation. The `datadog_csi_driver` check now lives in the [datadog-agent](https://github.com/DataDog/datadog-agent) repository as a Go core check.
 
 ## 1.5.0 / 2026-04-01
 
