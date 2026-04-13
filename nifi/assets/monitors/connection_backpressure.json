@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "created_at": "2026-04-13",
+  "last_updated_at": "2026-04-13",
+  "title": "Connection backpressure is high",
+  "tags": [
+    "integration:nifi"
+  ],
+  "description": "NiFi connections have configurable backpressure thresholds. When a connection reaches 100% of its threshold, the upstream processor is forced to stop producing data. This monitor alerts before that hard stop occurs. Requires `collect_connection_metrics: true` in the integration configuration.",
+  "definition": {
+    "message": "{{#is_alert}}\n\n## What's happening?\nConnection backpressure on NiFi host {{host.name}} has exceeded 80% for connection {{connection_name.name}}.\n\nAt 100%, the upstream processor will be forced to stop. Investigate:\n- Whether the downstream processor is running and healthy\n- Whether the backpressure threshold needs to be increased\n- Whether the downstream processor needs more concurrent tasks\n\n{{/is_alert}}\n\n{{#is_warning}}\nConnection backpressure on {{host.name}} for {{connection_name.name}} has exceeded 60%.\n{{/is_warning}}\n\n{{#is_recovery}}\nConnection backpressure on {{host.name}} for {{connection_name.name}} has returned to normal.\n{{/is_recovery}}",
+    "name": "[NiFi] Connection backpressure is high on {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 0.8,
+        "warning": 0.6
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_10m):max:nifi.connection.percent_use_count{*} by {host,connection_name} > 0.8",
+    "tags": [
+      "integration:nifi"
+    ],
+    "type": "query alert"
+  }
+}

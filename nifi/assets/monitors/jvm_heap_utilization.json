@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "created_at": "2026-04-13",
+  "last_updated_at": "2026-04-13",
+  "title": "JVM heap utilization is high",
+  "tags": [
+    "integration:nifi"
+  ],
+  "description": "NiFi runs on the JVM and heap exhaustion causes OutOfMemoryError crashes or severe garbage collection pauses that stall data flow processing. This monitor tracks JVM heap usage as a percentage of the configured maximum.",
+  "definition": {
+    "message": "{{#is_alert}}\n\n## What's happening?\nJVM heap utilization on NiFi host {{host.name}} has exceeded 85% over the last 15 minutes.\n\nSustained high heap usage can lead to long GC pauses, flow stalls, or an OutOfMemoryError crash. Consider:\n- Increasing the JVM heap size in `bootstrap.conf` (`java.arg.Xmx`)\n- Reducing flow concurrency or disabling unnecessary processors\n- Investigating processors with large FlowFile content in memory\n\n{{/is_alert}}\n\n{{#is_warning}}\nJVM heap utilization on NiFi host {{host.name}} has exceeded 75%.\n{{/is_warning}}\n\n{{#is_recovery}}\nJVM heap utilization on {{host.name}} has returned to normal.\n{{/is_recovery}}",
+    "name": "[NiFi] JVM heap utilization is high on {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 0.85,
+        "warning": 0.75
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_15m):avg:nifi.system.jvm.heap_utilization{*} by {host} > 0.85",
+    "tags": [
+      "integration:nifi"
+    ],
+    "type": "query alert"
+  }
+}

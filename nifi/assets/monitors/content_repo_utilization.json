@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "created_at": "2026-04-13",
+  "last_updated_at": "2026-04-13",
+  "title": "Content repository disk utilization is high",
+  "tags": [
+    "integration:nifi"
+  ],
+  "description": "The NiFi content repository stores FlowFile payloads on disk. When it reaches capacity, NiFi stops accepting new data and all flow processing halts. This monitor tracks disk utilization of the content repository.",
+  "definition": {
+    "message": "{{#is_alert}}\n\n## What's happening?\nContent repository utilization on NiFi host {{host.name}} has exceeded 85% over the last 15 minutes.\n\nWhen the content repository fills completely, NiFi stops accepting new data. Consider:\n- Clearing completed FlowFiles that are no longer needed\n- Adding additional content repository directories in `nifi.properties`\n- Investigating stuck flows that may be accumulating data\n\n{{/is_alert}}\n\n{{#is_warning}}\nContent repository utilization on NiFi host {{host.name}} has exceeded 75%.\n{{/is_warning}}\n\n{{#is_recovery}}\nContent repository utilization on {{host.name}} has returned to normal.\n{{/is_recovery}}",
+    "name": "[NiFi] Content repository disk utilization is high on {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 0.85,
+        "warning": 0.75
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_15m):avg:nifi.system.content_repo.utilization{*} by {host} > 0.85",
+    "tags": [
+      "integration:nifi"
+    ],
+    "type": "query alert"
+  }
+}

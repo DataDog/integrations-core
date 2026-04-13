@@ -52,7 +52,13 @@
     "dashboards": {
       "NiFi Overview": "assets/dashboards/nifi_overview.json"
     },
-    "monitors": {},
+    "monitors": {
+      "NiFi instance is unreachable": "assets/monitors/can_connect.json",
+      "JVM heap utilization is high": "assets/monitors/jvm_heap_utilization.json",
+      "Connection backpressure is high": "assets/monitors/connection_backpressure.json",
+      "Content repository disk utilization is high": "assets/monitors/content_repo_utilization.json",
+      "Invalid processors detected": "assets/monitors/invalid_processors.json"
+    },
     "saved_views": {}
   },
   "author": {

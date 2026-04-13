@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "created_at": "2026-04-13",
+  "last_updated_at": "2026-04-13",
+  "title": "Invalid processors detected",
+  "tags": [
+    "integration:nifi"
+  ],
+  "description": "NiFi processors enter an invalid state when they have missing or misconfigured properties, broken controller service references, or incompatible settings. Invalid processors cannot run and silently break data flows.",
+  "definition": {
+    "message": "{{#is_alert}}\n\n## What's happening?\nNiFi host {{host.name}} has one or more invalid processors.\n\nInvalid processors cannot process data and will break any flow that depends on them. Open the NiFi UI to identify the invalid processors and resolve their configuration issues.\n\n{{/is_alert}}\n\n{{#is_recovery}}\nAll processors on NiFi host {{host.name}} are now valid.\n{{/is_recovery}}",
+    "name": "[NiFi] Invalid processors detected on {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_5m):avg:nifi.flow.invalid_count{*} by {host} > 0",
+    "tags": [
+      "integration:nifi"
+    ],
+    "type": "query alert"
+  }
+}

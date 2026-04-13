@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "created_at": "2026-04-13",
+  "last_updated_at": "2026-04-13",
+  "title": "NiFi instance is unreachable",
+  "tags": [
+    "integration:nifi"
+  ],
+  "description": "The Datadog Agent cannot reach or authenticate with the NiFi REST API. When this check fails, all NiFi metrics stop flowing. This typically indicates NiFi is down, the API URL is misconfigured, or credentials have expired.",
+  "definition": {
+    "name": "[NiFi] Instance unreachable on {{host.name}}",
+    "type": "service check",
+    "query": "\"nifi.can_connect\".over(\"*\").by(\"host\").last(3).count_by_status()",
+    "message": "{{#is_alert}}\n\n## What's happening?\nThe NiFi instance on {{host.name}} has failed consecutive connectivity checks.\n\nAll NiFi metrics have stopped flowing. Verify that:\n- The NiFi process is running\n- The API URL is reachable from the Agent host\n- Credentials have not expired or been rotated\n\n{{/is_alert}}\n\n{{#is_recovery}}\nNiFi connectivity has been restored on {{host.name}}.\n{{/is_recovery}}",
+    "tags": [
+      "integration:nifi"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 2,
+        "ok": 1
+      },
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "timeout_h": 0,
+      "include_tags": true,
+      "new_group_delay": 30
+    },
+    "priority": null
+  }
+}
