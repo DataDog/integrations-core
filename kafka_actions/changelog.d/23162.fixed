@@ -1,0 +1,1 @@
+Fix filter type coercion for numeric comparisons on protobuf int64 fields
