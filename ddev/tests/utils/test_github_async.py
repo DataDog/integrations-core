@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import json
 from typing import Any
 
@@ -119,8 +120,8 @@ _BASE = "https://api.github.com"
 )
 def test_pagination_data_from_header(header: str | None, expected: PaginationData) -> None:
     p = PaginationData.from_header(header)
-    for field, value in expected.items():
-        assert getattr(p, field) == value
+    for f in dataclasses.fields(expected):
+        assert getattr(p, f.name) == getattr(expected, f.name)
 
 
 # ---------------------------------------------------------------------------
