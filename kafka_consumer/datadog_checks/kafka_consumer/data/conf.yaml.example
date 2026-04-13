@@ -128,6 +128,15 @@ instances:
     #
     # close_admin_client: true
 
+    ## @param max_tracked_consumer_groups - integer - optional - default: 1000
+    ## Maximum number of consumer groups to monitor when `monitor_unlisted_consumer_groups`
+    ## is enabled or when using `consumer_groups_regex`. When the number of discovered
+    ## consumer groups exceeds this limit, only the first N groups (sorted alphabetically)
+    ## are monitored. This prevents excessive API calls and memory usage on clusters with
+    ## many consumer groups.
+    #
+    # max_tracked_consumer_groups: 1000
+
     ## @param monitor_all_broker_highwatermarks - boolean - optional - default: false
     ## Setting monitor_all_broker_highwatermarks to `true` tells the check to
     ## discover and fetch the broker highwater mark offsets for all kafka topics in
