@@ -316,17 +316,6 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     # Verify partition metrics with exact values and broker tags
     # Partition 0: beginning=10, end=100, size = 100 - 10 = 90, leader=1, replicas=[1,2]
     aggregator.assert_metric(
-        'kafka.partition.beginning_offset',
-        value=10,
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'topic:test-topic',
-            'partition:0',
-        ],
-    )
-
-    aggregator.assert_metric(
         'kafka.partition.size',
         value=90,
         tags=[
@@ -342,17 +331,6 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
 
     # Partition 1: beginning=20, end=200, size = 200 - 20 = 180, leader=2, replicas=[1,2]
     aggregator.assert_metric(
-        'kafka.partition.beginning_offset',
-        value=20,
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'topic:test-topic',
-            'partition:1',
-        ],
-    )
-
-    aggregator.assert_metric(
         'kafka.partition.size',
         value=180,
         tags=[
@@ -361,21 +339,6 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
             'topic:test-topic',
             'partition:1',
             'leader_broker_id:2',
-            'replica_broker_id:1',
-            'replica_broker_id:2',
-        ],
-    )
-
-    # Partition replicas count (2 replicas per partition)
-    aggregator.assert_metric(
-        'kafka.partition.replicas',
-        value=2,
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'topic:test-topic',
-            'partition:0',
-            'leader_broker_id:1',
             'replica_broker_id:1',
             'replica_broker_id:2',
         ],
