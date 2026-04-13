@@ -175,6 +175,7 @@ def test_create_branch_with_gap_suggests_missing_branch(ddev, mocker):
         pytest.param('7.79.x', '7.80.0', id='standard_minor_bump'),
         pytest.param('7.0.x', '7.1.0', id='zero_minor'),
         pytest.param('8.5.x', '8.6.0', id='different_major'),
+        pytest.param('7.99.x', '7.100.0', id='large_minor_rollover'),
     ],
 )
 def test_compute_next_milestone(branch_name, expected_milestone):
@@ -183,12 +184,13 @@ def test_compute_next_milestone(branch_name, expected_milestone):
 
 def test_update_release_json(tmp_path):
     release_json = Path(tmp_path / 'release.json')
-    release_json.write_text('{\n\t"current_milestone": "7.79.0"\n}\n')
+    release_json.write_text('{\n\t"other_key": "value",\n\t"current_milestone": "7.79.0"\n}\n')
 
     update_release_json(release_json, '7.80.0')
 
     data = json.loads(release_json.read_text())
     assert data['current_milestone'] == '7.80.0'
+    assert data['other_key'] == 'value'
 
 
 def test_update_release_json_file_not_found(tmp_path):
@@ -241,6 +243,23 @@ def test_create_branch_milestone_already_exists(ddev, mocker):
     assert 'already exists' in result.output
     assert 'Pull request created' in result.output
     assert 'All done' in result.output
+
+
+def test_create_branch_milestone_server_error(ddev, mocker):
+    from httpx import HTTPStatusError, Request, Response
+
+    mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.utils.github.GitHubManager.create_milestone').side_effect = HTTPStatusError(
+        'Internal Server Error',
+        request=Request('POST', 'https://api.github.com/repos/test/milestones'),
+        response=Response(500),
+    )
+    mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('click.confirm', return_value=True)
+
+    with pytest.raises(HTTPStatusError):
+        ddev('release', 'branch', 'create', '7.79.x')
 
 
 def test_create_branch_push_failure(ddev, mocker):
