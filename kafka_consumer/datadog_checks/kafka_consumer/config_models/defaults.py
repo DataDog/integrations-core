@@ -48,6 +48,10 @@ def instance_kafka_configs_refresh_interval():
     return 180
 
 
+def instance_max_tracked_consumer_groups():
+    return 1000
+
+
 def instance_min_collection_interval():
     return 15
 

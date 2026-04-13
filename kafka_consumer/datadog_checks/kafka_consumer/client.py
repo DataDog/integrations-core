@@ -220,46 +220,52 @@ class KafkaClient:
             self.log.error("Failed to collect consumer groups: %s", e)
         return groups
 
-    def list_consumer_group_offsets(self, groups):
+    def list_consumer_group_offsets(self, groups, batch_size=50):
         """
         For every group and (optionally) its topics and partitions retrieve consumer offsets.
 
         As input expects a list of tuples: (consumer_group_id, topic_partitions).
         topic_partitions are either None to indicate we want all topics and partitions OR a list of (topic, partition).
 
+        Fires requests in batches of batch_size to avoid overwhelming brokers with concurrent futures.
+
         Returns a list of tuples with members:
         1. group id
         2. list of tuples: (topic, partition, offset)
         """
-        futures = []
-        for consumer_group, topic_partitions in groups:
-            topic_partitions = (
-                topic_partitions if topic_partitions is None else [TopicPartition(t, p) for t, p in topic_partitions]
-            )
-            futures.append(
-                self.kafka_client.list_consumer_group_offsets(
-                    [ConsumerGroupTopicPartitions(group_id=consumer_group, topic_partitions=topic_partitions)]
-                )[consumer_group]
-            )
         offsets = []
-        for completed in as_completed(futures):
-            try:
-                response_offset_info = completed.result()
-            except KafkaException as e:
-                self.log.debug("Failed to read consumer offsets for future %s: %s", completed, e)
-                continue
-            tpo = []
-            for tp in response_offset_info.topic_partitions:
-                if tp.error:
-                    self.log.debug(
-                        "Encountered error: %s. Occurred with topic: %s; partition: [%s]",
-                        tp.error.str(),
-                        tp.topic,
-                        str(tp.partition),
-                    )
+        for i in range(0, len(groups), batch_size):
+            batch = groups[i : i + batch_size]
+            futures = []
+            for consumer_group, topic_partitions in batch:
+                topic_partitions = (
+                    topic_partitions
+                    if topic_partitions is None
+                    else [TopicPartition(t, p) for t, p in topic_partitions]
+                )
+                futures.append(
+                    self.kafka_client.list_consumer_group_offsets(
+                        [ConsumerGroupTopicPartitions(group_id=consumer_group, topic_partitions=topic_partitions)]
+                    )[consumer_group]
+                )
+            for completed in as_completed(futures):
+                try:
+                    response_offset_info = completed.result()
+                except KafkaException as e:
+                    self.log.debug("Failed to read consumer offsets for future %s: %s", completed, e)
                     continue
-                tpo.append((tp.topic, tp.partition, tp.offset))
-            offsets.append((response_offset_info.group_id, tpo))
+                tpo = []
+                for tp in response_offset_info.topic_partitions:
+                    if tp.error:
+                        self.log.debug(
+                            "Encountered error: %s. Occurred with topic: %s; partition: [%s]",
+                            tp.error.str(),
+                            tp.topic,
+                            str(tp.partition),
+                        )
+                        continue
+                    tpo.append((tp.topic, tp.partition, tp.offset))
+                offsets.append((response_offset_info.group_id, tpo))
         return offsets
 
     def start_collecting_messages(self, start_offsets, consumer_group):

@@ -14,7 +14,7 @@ from urllib.parse import quote
 
 from confluent_kafka.admin import ConfigResource, ResourceType
 
-from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, LOW_WATERMARK
+from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
 
 class SchemaDefinition(TypedDict):
@@ -176,7 +176,7 @@ class ClusterMetadataCollector:
         response.raise_for_status()
         return response.json()
 
-    def collect_all_metadata(self, highwater_offsets):
+    def collect_all_metadata(self, highwater_offsets, earliest_offsets=None, staggered_partitions=None):
         try:
             shared_metadata = self.client.kafka_client.list_topics(timeout=self.config._request_timeout)
         except Exception as e:
@@ -189,7 +189,9 @@ class ClusterMetadataCollector:
             self.log.error("Error collecting broker metadata: %s", e)
 
         try:
-            self._collect_topic_metadata(shared_metadata, highwater_offsets)
+            self._collect_topic_metadata(
+                shared_metadata, highwater_offsets, earliest_offsets or {}, staggered_partitions
+            )
         except Exception as e:
             self.log.error("Error collecting topic metadata: %s", e)
 
@@ -503,7 +505,7 @@ class ClusterMetadataCollector:
                 "data-streams-message",
             )
 
-    def _collect_topic_metadata(self, metadata, highwater_offsets):
+    def _collect_topic_metadata(self, metadata, highwater_offsets, earliest_offsets, staggered_partitions=None):
         self.log.debug("Collecting topic metadata")
 
         topic_partitions = self.client.get_topic_partitions()
@@ -517,7 +519,9 @@ class ClusterMetadataCollector:
 
         self.check.gauge('topic.count', len(topic_partitions), tags=self._get_tags(cluster_id))
 
-        earliest_offsets, _ = self.check.get_watermark_offsets(None, mode=LOW_WATERMARK)
+        # staggered_partitions controls which partitions emit partition-level metrics.
+        # When None (no staggering), all partitions are emitted.
+        emit_all_partitions = staggered_partitions is None
 
         now_ts = time.time()
         prev_ts = None
@@ -545,23 +549,23 @@ class ClusterMetadataCollector:
 
             self.check.gauge('topic.partitions', len(partitions), tags=topic_tags)
 
-            total_messages = 0
             topic_metadata = all_topics_metadata.get(topic_name)
 
             if not topic_metadata:
                 self.log.warning("No metadata found for topic %s", topic_name)
                 continue
 
+            # Partition-level metrics: only for partitions in the staggered chunk
             for partition_id in partitions:
-                partition_tags = topic_tags + [f'partition:{partition_id}']
+                if not emit_all_partitions and (topic_name, partition_id) not in staggered_partitions:
+                    continue
 
+                partition_tags = topic_tags + [f'partition:{partition_id}']
                 partition_metadata = topic_metadata.partitions.get(partition_id)
                 latest = highwater_offsets.get((topic_name, partition_id), 0)
                 earliest = earliest_offsets.get((topic_name, partition_id), 0)
                 partition_size = max(0, latest - earliest)
-                total_messages += partition_size
 
-                self.check.gauge('partition.beginning_offset', earliest, tags=partition_tags)
                 if partition_metadata:
                     leader = partition_metadata.leader
                     replicas = partition_metadata.replicas
@@ -571,9 +575,7 @@ class ClusterMetadataCollector:
                     for replica in replicas:
                         partition_broker_tags.append(f'replica_broker_id:{replica}')
 
-                    self.check.gauge('partition.replicas', len(replicas), tags=partition_broker_tags)
                     self.check.gauge('partition.isr', len(isrs), tags=partition_broker_tags)
-
                     self.check.gauge('partition.size', partition_size, tags=partition_broker_tags)
 
                     is_under_replicated = len(isrs) < len(replicas)
@@ -587,6 +589,14 @@ class ClusterMetadataCollector:
                     self.check.gauge('partition.offline', 1 if is_offline else 0, tags=partition_broker_tags)
                 else:
                     self.check.gauge('partition.size', partition_size, tags=partition_tags)
+
+            # Topic-level aggregates: only partitions with fetched offsets contribute.
+            # When staggering, unfetched partitions default to 0 so topic.size is a partial sum.
+            total_messages = 0
+            for partition_id in partitions:
+                latest = highwater_offsets.get((topic_name, partition_id), 0)
+                earliest = earliest_offsets.get((topic_name, partition_id), 0)
+                total_messages += max(0, latest - earliest)
 
             self.check.gauge('topic.size', total_messages, tags=topic_tags)
 
@@ -738,6 +748,9 @@ class ClusterMetadataCollector:
         except Exception as e:
             self.log.debug("Could not write topic HWM cache: %s", e)
 
+    CONSUMER_GROUP_DESCRIBE_BATCH_SIZE = 50
+    CONSUMER_GROUP_DESCRIBE_CACHE_KEY = 'consumer_group_describe_cache'
+
     def _collect_consumer_group_metadata(self, metadata):
         self.log.debug("Collecting consumer group metadata")
         cluster_id = self.config._kafka_cluster_id_override or (
@@ -754,10 +767,30 @@ class ClusterMetadataCollector:
         self.log.debug("Found %s consumer groups", len(consumer_groups))
         self.check.gauge('consumer_group.count', len(consumer_groups), tags=self._get_tags(cluster_id))
 
-        group_ids = [group.group_id for group in consumer_groups]
-        if not group_ids:
+        all_group_ids = sorted(group.group_id for group in consumer_groups)
+        if not all_group_ids:
             return
-        describe_futures = self.client.kafka_client.describe_consumer_groups(group_ids)
+
+        # Apply hard limit to avoid overwhelming the broker on clusters with many groups
+        limit = self.config._max_tracked_consumer_groups
+        if len(all_group_ids) > limit:
+            all_group_ids = all_group_ids[:limit]
+
+        # Stagger: only describe a batch of groups per run, cycling through all
+        group_ids_to_describe = self._get_items_to_fetch(self.CONSUMER_GROUP_DESCRIBE_CACHE_KEY, all_group_ids)
+        group_ids_to_describe = group_ids_to_describe[: self.CONSUMER_GROUP_DESCRIBE_BATCH_SIZE]
+
+        if not group_ids_to_describe:
+            self.log.debug("All consumer groups recently described, skipping")
+            return
+
+        self.log.debug(
+            "Describing %d/%d consumer groups this run",
+            len(group_ids_to_describe),
+            len(all_group_ids),
+        )
+
+        describe_futures = self.client.kafka_client.describe_consumer_groups(group_ids_to_describe)
 
         group_id_to_info = {}
         for group_id, future in describe_futures.items():
@@ -765,6 +798,12 @@ class ClusterMetadataCollector:
                 group_id_to_info[group_id] = future.result(timeout=self.config._request_timeout)
             except Exception as e:
                 self.log.warning("Error getting consumer group details for %s: %s", group_id, e)
+
+        # Mark successfully described groups as fetched
+        self._mark_items_fetched(
+            self.CONSUMER_GROUP_DESCRIBE_CACHE_KEY,
+            list(group_id_to_info.keys()),
+        )
 
         for group_id, group_info in group_id_to_info.items():
             group_tags = self._get_tags(cluster_id) + [f'consumer_group:{group_id}']
