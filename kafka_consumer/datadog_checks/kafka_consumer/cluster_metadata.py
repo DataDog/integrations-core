@@ -777,9 +777,7 @@ class ClusterMetadataCollector:
             all_group_ids = all_group_ids[:limit]
 
         # Stagger: only describe a batch of groups per run, cycling through all
-        group_ids_to_describe = self._get_items_to_fetch(
-            self.CONSUMER_GROUP_DESCRIBE_CACHE_KEY, all_group_ids
-        )
+        group_ids_to_describe = self._get_items_to_fetch(self.CONSUMER_GROUP_DESCRIBE_CACHE_KEY, all_group_ids)
         group_ids_to_describe = group_ids_to_describe[: self.CONSUMER_GROUP_DESCRIBE_BATCH_SIZE]
 
         if not group_ids_to_describe:

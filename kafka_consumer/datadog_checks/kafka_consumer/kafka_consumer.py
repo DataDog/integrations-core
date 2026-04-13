@@ -223,7 +223,9 @@ class KafkaCheck(AgentCheck):
 
         self.log.debug(
             "Partition stagger: %d total partitions, chunk_size=%d (num_groups=%d)",
-            total, chunk_size, num_groups,
+            total,
+            chunk_size,
+            num_groups,
         )
 
         # Distribute topics into chunks, keeping each topic's partitions together when possible.
@@ -261,11 +263,12 @@ class KafkaCheck(AgentCheck):
         if chunk_index == 0 or stored_total_chunks == 0:
             stored_total_chunks = current_total_chunks
 
-        if chunk_index >= stored_total_chunks:
+        # Clamp if the cluster shrank or the chunk size changed between runs
+        if chunk_index >= stored_total_chunks or chunk_index >= current_total_chunks:
             chunk_index = 0
             stored_total_chunks = current_total_chunks
 
-        chunk = chunks[chunk_index] if chunk_index < len(chunks) else chunks[0]
+        chunk = chunks[chunk_index]
 
         self.log.debug(
             "Staggering partition offsets: chunk %d/%d, %d partitions of %d total",
@@ -330,24 +333,30 @@ class KafkaCheck(AgentCheck):
             return self.config._consumer_groups
 
     def _get_offsets_for_groups(self, consumer_groups, staggered_partitions=None):
+        """Fetch consumer group offsets, respecting the partition stagger and group limit.
+
+        When staggered_partitions is set (a subset of partitions), the explicit partition list
+        is passed to Kafka so responses are scoped. When None, Kafka returns only committed
+        offsets per group (faster for clusters with many groups tracking few partitions).
+        """
         groups = []
-        # staggered_partitions is None when no partition staggering (<=10k partitions).
-        # When set, it's a subset of partitions — pass explicitly so Kafka scopes the response.
         partition_filter = list(staggered_partitions) if staggered_partitions is not None else None
 
         if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_compiled_regex:
             limit = self.config._max_tracked_consumer_groups
             if len(consumer_groups) > limit:
-                self.log.warning(
-                    "Discovered %d consumer groups, exceeding max_tracked_consumer_groups limit of %d. "
-                    "Only the first %d groups (sorted alphabetically) will be monitored.",
-                    len(consumer_groups), limit, limit,
-                )
                 consumer_groups = sorted(consumer_groups)[:limit]
+                self.log.warning(
+                    "Discovered consumer groups exceeding max_tracked_consumer_groups limit of %d. "
+                    "Only the first %d groups (sorted alphabetically) will be monitored.",
+                    limit,
+                    limit,
+                )
             for consumer_group in consumer_groups:
                 groups.append((consumer_group, partition_filter))
             return self.client.list_consumer_group_offsets(groups)
 
+        # Explicit consumer_groups config (dict of {group: {topic: [partitions]}})
         for consumer_group in consumer_groups:
             topics = consumer_groups.get(consumer_group)
             if not topics:
@@ -361,7 +370,11 @@ class KafkaCheck(AgentCheck):
                     else:
                         partitions = self.topic_partition_cache[topic] = self.client.get_partitions_for_topic(topic)
                 topic_partitions = [(topic, p) for p in partitions]
-
+                # Intersect with staggered set when active
+                if staggered_partitions is not None:
+                    topic_partitions = [(t, p) for t, p in topic_partitions if (t, p) in staggered_partitions]
+                    if not topic_partitions:
+                        continue
                 groups.append((consumer_group, topic_partitions))
 
         return self.client.list_consumer_group_offsets(groups)

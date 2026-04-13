@@ -32,7 +32,6 @@ DEFAULT_MAX_TRACKED_CONSUMER_GROUPS = 1_000
 # deserialization under ~6s (~157k entries/s)
 MAX_CONSUMER_OFFSET_ENTRIES = 1_000_000
 
-
 # Watermark query sentinels for batched offsets_for_times
 HIGH_WATERMARK = -1  # latest offset
 LOW_WATERMARK = 0  # earliest offset (timestamp 0)
