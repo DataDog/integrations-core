@@ -596,6 +596,10 @@ def test_statement_metrics_limit(
 def test_statement_metadata(
     aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, metadata, expected_metadata_payload
 ):
+    # The near-zero collection_interval produces a ~1s lookback window (math.ceil(~0 * 2) = 1).
+    # Set an explicit lookback_window so the test query isn't missed when the check's preliminary
+    # steps take longer than 1 second (e.g. on SQL Server 2025).
+    dbm_instance['query_metrics']['lookback_window'] = 60
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     query = "select * from sys.databases /* service='datadog-agent' */"

@@ -1,3 +1,29 @@
+# Validations to run with `ddev validate all`.
+# Each entry must match a known validation name.
+# Remove an entry to skip that validation for this repo.
+validations = [
+    "agent-reqs",
+    "ci",
+    "codeowners",
+    "config",
+    "dep",
+    "http",
+    "imports",
+    "integration-style",
+    "jmx-metrics",
+    "labeler",
+    "legacy-signature",
+    "license-headers",
+    "licenses",
+    "metadata",
+    "models",
+    "openmetrics",
+    "package",
+    "readmes",
+    "saved-views",
+    "version",
+]
+
 [overrides.display-name]
 datadog_checks_base = "Datadog Checks Base"
 datadog_checks_dev = "Datadog Checks Dev"
@@ -124,7 +150,6 @@ redis = 'https://github.com/redis/redis-py'
 requests = 'https://github.com/psf/requests'
 requests-toolbelt = 'https://github.com/requests/toolbelt'
 service-identity = 'https://github.com/pyca/service-identity'
-snowflake-connector-python = 'https://github.com/snowflakedb/snowflake-connector-python'
 supervisor = 'https://github.com/Supervisor/supervisor'
 tuf = 'https://github.com/theupdateframework/python-tuf'
 
@@ -186,9 +211,7 @@ exclude = [
     'pyvmomi',      # 9+ has breaking changes
     'pymongo',      # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
     'foundationdb', # 7+ has a breaking changes
-    'snowflake-connector-python', # 4.3.0 causes a size bump of 35Mb
     'ddtrace', # 4.5.1 does not support MacOS 11, which is used by the Agent
-    'pyopenssl' # snowflake-connector-python requires pyopenssl<26.0.0, this override should be removed once snowflake-connector-python is removed
 
 ]
 

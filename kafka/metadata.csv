@@ -17,6 +17,7 @@ kafka.expires_sec,gauge,10,eviction,second,Rate of delayed producer request expi
 kafka.follower.expires_per_second,gauge,10,eviction,second,Rate of request expiration on followers.,-1,kafka,follow expire rate,,
 kafka.log.directory.offline,gauge,10,,,Whether a Kafka log directory is offline. 0 means healthy.,0,kafka,log dir offline,,
 kafka.log.flush_rate.rate,gauge,10,flush,second,Log flush rate.,0,kafka,log flush rate,memory,
+kafka.log.partition.size,gauge,10,byte,,The size in bytes of a topic partition log on disk.,0,kafka,partition size,,
 kafka.messages_in.rate,gauge,10,message,,Incoming message rate.,0,kafka,messages in,cpu,
 kafka.net.bytes_in.rate,gauge,10,byte,second,Incoming byte rate.,0,kafka,bytes in,cpu,
 kafka.net.bytes_out,gauge,,byte,second,Outgoing byte total.,0,kafka,bytes out total,,
