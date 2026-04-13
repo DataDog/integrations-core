@@ -9,6 +9,8 @@ from ddev.cli.validate.all.orchestrator import VALIDATIONS
 
 from .conftest import completed_process
 
+NO_VALIDATIONS_ERROR = "No validations are configured to run"
+
 ALL_NAMES = list(VALIDATIONS)
 REPO_WIDE_NAMES = {name for name, cfg in VALIDATIONS.items() if cfg.repo_wide}
 FAST_ORCHESTRATOR_OPTS = ("--grace-period", "0", "--max-timeout", "10", "--subprocess-timeout", "10")
@@ -98,3 +100,11 @@ def test_all_command_fix_passes_correct_flags(ddev):
             assert "--fix" not in captured[name] and "--sync" not in captured[name], (
                 f"{name} should not have a fix flag"
             )
+
+
+def test_all_command_aborts_when_no_validations_configured(ddev):
+    with patch("ddev.cli.validate.all._load_validations", return_value={}):
+        result = ddev("validate", "all", *FAST_ORCHESTRATOR_OPTS)
+
+    assert result.exit_code != 0
+    assert NO_VALIDATIONS_ERROR in result.output

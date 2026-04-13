@@ -9,6 +9,28 @@ import click
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
+    from ddev.cli.validate.all.orchestrator import ValidationConfig
+
+
+def _load_validations(app: Application) -> dict[str, ValidationConfig]:
+    """Read the selected validations from `.ddev/config.toml`.
+
+    If the `/validations` key is absent, all known validations are returned.
+    Unknown names are warned about and skipped.
+    """
+    from ddev.cli.validate.all.orchestrator import VALIDATIONS
+
+    selected: list[str] | None = app.repo.config.get('/validations', None)
+    if selected is None:
+        return VALIDATIONS
+
+    result: dict[str, ValidationConfig] = {}
+    for name in selected:
+        if name in VALIDATIONS:
+            result[name] = VALIDATIONS[name]
+        else:
+            app.display_warning(f"Unknown validation in .ddev/config.toml: {name!r}")
+    return result
 
 
 @click.command(short_help="Run all validations in parallel")
@@ -33,10 +55,19 @@ def all(
     If TARGET is provided (e.g. 'changed'), per-integration validations are
     scoped to that target. Repo-wide validations always run without a target.
     """
-    from ddev.cli.validate.all.github import get_pr_number
-    from ddev.cli.validate.all.orchestrator import ValidationOrchestrator, load_validations
+    from ddev.cli.validate.all.github import get_pr_number, write_step_summary
+    from ddev.cli.validate.all.orchestrator import ValidationOrchestrator
 
-    selected = load_validations(app)
+    selected = _load_validations(app)
+    if not selected:
+        msg = (
+            "No validations are configured to run for this repository.\n"
+            "Add entries to the `validations` list in `.ddev/config.toml` or remove the validation workflow."
+        )
+        app.display_error(msg)
+        write_step_summary(f"## Validation Report\n\n> **Error:** {msg}")
+        app.abort()
+
     pr_number = get_pr_number(app)
     orchestrator = ValidationOrchestrator(
         app=app,
