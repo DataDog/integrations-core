@@ -5,8 +5,14 @@ import json
 
 import pytest
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.base.utils.http_testing import MockHTTPResponse
+
+
+def test_mock_http_patches_agentcheck(mock_http):
+    check = AgentCheck('test', {}, [{}])
+    assert check.http is mock_http
 
 
 def test_mock_response_json_with_custom_headers():

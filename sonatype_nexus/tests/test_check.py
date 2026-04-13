@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sonatype_nexus import constants
 from datadog_checks.sonatype_nexus.check import SonatypeNexusCheck
@@ -12,25 +11,30 @@ from datadog_checks.sonatype_nexus.errors import EmptyResponseError
 from .conftest import instance
 
 
-@pytest.fixture
-def mock_http_response(mocker):
-    yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop("method", "requests.Session.get"), return_value=MockResponse(*args, **kwargs)
-    )
-
-
 def test_successful_metrics_collection(dd_run_check, mock_http_response, aggregator):
     status_metrics_response_data = {key: {"healthy": True} for key in constants.STATUS_METRICS_MAP.keys()}
+    status_metrics_response_data["gauges"] = {
+        "jvm.memory.heap.used": {"value": 123456789},
+        "nexus.analytics.bytes_transferred_by_format": {
+            "value": [{"maven": {"bytes_uploaded": 100, "bytes_downloaded": 200}}],
+        },
+        "nexus.analytics.blobstore_type_counts": {"value": {"file": 5}},
+    }
 
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=200,
-        json_data=status_metrics_response_data.update({"gauges": {"jvm.memory.heap.used": {"value": 123456789}}}),
+        json_data=status_metrics_response_data,
     )
 
     check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
     dd_run_check(check)
 
+    for metric_name in constants.STATUS_METRICS_MAP.values():
+        aggregator.assert_metric(f"sonatype_nexus.{metric_name}")
+    aggregator.assert_metric("sonatype_nexus.analytics.jvm.heap_memory_used")
+    aggregator.assert_metric("sonatype_nexus.analytics.uploaded_bytes_by_format")
+    aggregator.assert_metric("sonatype_nexus.analytics.downloaded_bytes_by_format")
+    aggregator.assert_metric("sonatype_nexus.analytics.blob_store.count_by_type")
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
@@ -83,7 +87,6 @@ def test_empty_instance(dd_run_check):
 
 def test_invalid_credentials(dd_run_check, mock_http_response):
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=401,
         json_data={"error": "Invalid credentials"},
     )
@@ -103,7 +106,6 @@ def test_invalid_credentials(dd_run_check, mock_http_response):
 
 def test_bad_request_error(dd_run_check, mock_http_response):
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=400,
         json_data={"error": "Bad request"},
     )
@@ -116,7 +118,6 @@ def test_bad_request_error(dd_run_check, mock_http_response):
 
 def test_license_expired_error(dd_run_check, mock_http_response):
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=402,
         json_data={"error": "License expired"},
     )
@@ -129,7 +130,6 @@ def test_license_expired_error(dd_run_check, mock_http_response):
 
 def test_insufficient_permission_error(dd_run_check, mock_http_response):
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=403,
         json_data={"error": "Insufficient permissions"},
     )
@@ -142,7 +142,6 @@ def test_insufficient_permission_error(dd_run_check, mock_http_response):
 
 def test_not_found_error(dd_run_check, mock_http_response):
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=404,
         json_data={"error": "Resource not found"},
     )
@@ -155,7 +154,6 @@ def test_not_found_error(dd_run_check, mock_http_response):
 
 def test_server_error(dd_run_check, mock_http_response):
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=500,
         json_data={"error": "Internal server error"},
     )
@@ -168,7 +166,6 @@ def test_server_error(dd_run_check, mock_http_response):
 
 def test_timeout_error(dd_run_check, mock_http_response):
     mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
         status_code=408,
         json_data={"error": "TimeoutError"},
     )
