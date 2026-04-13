@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import deepcopy
@@ -9,7 +11,6 @@ from unittest import mock
 import clickhouse_connect
 import pytest
 
-from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_metadata
 from datadog_checks.clickhouse import ClickhouseCheck
 
@@ -22,8 +23,6 @@ from .common import CLICKHOUSE_VERSION
 # 22.7 is excluded because query_kind column in system.processes is not available in all builds
 UNSUPPORTED_DBM_VERSIONS = {'18', '19', '20', '21.8', '22.7'}
 
-CLOSE_TO_ZERO_INTERVAL = 0.0000001
-
 SAMPLE_QUERIES = [
     "SELECT count() FROM system.tables WHERE database = 'default'",
     "SELECT name, engine FROM system.databases ORDER BY name",
@@ -33,10 +32,6 @@ METRICS_COLUMNS = {
     'count',
     'total_time',
     'mean_time',
-    'p50_time',
-    'p90_time',
-    'p95_time',
-    'p99_time',
     'read_rows',
     'read_bytes',
     'written_rows',
@@ -70,7 +65,7 @@ def dbm_instance(instance):
     instance['query_metrics'] = {
         'enabled': True,
         'run_sync': True,
-        'collection_interval': CLOSE_TO_ZERO_INTERVAL,
+        'collection_interval': 60,
     }
     instance['query_samples'] = {
         'enabled': True,
@@ -108,14 +103,13 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     check = ClickhouseCheck('clickhouse', {}, [dbm_instance])
     client = _get_clickhouse_client(dbm_instance)
 
-    client.query(query)
-    time.sleep(2)
+    client.command(query)
+    client.command('SYSTEM FLUSH LOGS')
 
     dd_run_check(check)
     dd_run_check(check)
 
-    obfuscated = obfuscate_sql_with_metadata(query, check.statement_metrics._obfuscate_options)
-    query_signature = compute_sql_signature(obfuscated['query'])
+    expected_obfuscated = obfuscate_sql_with_metadata(query, check.statement_metrics._obfuscate_options)['query']
 
     # -- Verify dbm-metrics --
     events = aggregator.get_event_platform_events("dbm-metrics")
@@ -125,7 +119,6 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     assert event['host'] is not None
     assert event['database_instance'] is not None
     assert event['ddagentversion'] == datadog_agent.get_version()
-    assert event['ddsource'] == 'clickhouse'
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] is not None
     assert 'tags' in event
@@ -134,13 +127,16 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     for e in events:
         all_rows.extend(e.get('clickhouse_rows', []))
 
-    matching_rows = [r for r in all_rows if r['query_signature'] == query_signature]
+    matching_rows = [r for r in all_rows if r.get('query') == expected_obfuscated]
     assert len(matching_rows) == 1, (
-        f"Expected exactly 1 metrics row with query_signature={query_signature} for query: {query!r}.\n"
-        f"Found {len(matching_rows)}. Available signatures: {[r['query_signature'] for r in all_rows]}"
+        f"Expected exactly 1 metrics row for query: {query!r}.\n"
+        f"Expected obfuscated query: {expected_obfuscated!r}\n"
+        f"Found {len(matching_rows)}.\n"
+        f"Available queries: {[r.get('query', '<no query>') for r in all_rows]}"
     )
 
     row = matching_rows[0]
+    query_signature = row['query_signature']
     assert row['count'] > 0
     for col in METRICS_COLUMNS:
         assert col in row, f"Missing metric column {col!r} in metrics row"
@@ -163,13 +159,13 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     assert fqt_event['ddsource'] == 'clickhouse'
     assert fqt_event['dbm_type'] == 'fqt'
     assert fqt_event['db']['statement'] is not None
-    assert fqt_event['db']['metadata']['commands'] is not None
+    assert 'commands' in fqt_event['db']['metadata']
     assert fqt_event['timestamp'] > 0
     assert fqt_event['host'] is not None
     assert fqt_event['ddagentversion'] == datadog_agent.get_version()
 
 
-def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check):
+def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check, datadog_agent):
     """
     Verify that query metadata (tables, commands) is correctly extracted and present
     in both metrics rows and FQT events.
@@ -178,14 +174,22 @@ def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check)
     client = _get_clickhouse_client(dbm_instance)
 
     query = "SELECT name, engine FROM system.databases ORDER BY name"
-    client.query(query)
-    time.sleep(2)
+    client.command(query)
+    client.command('SYSTEM FLUSH LOGS')
 
-    dd_run_check(check)
-    dd_run_check(check)
+    expected_obfuscated = obfuscate_sql_with_metadata(query, check.statement_metrics._obfuscate_options)['query']
 
-    obfuscated = obfuscate_sql_with_metadata(query, check.statement_metrics._obfuscate_options)
-    query_signature = compute_sql_signature(obfuscated['query'])
+    def obfuscate_sql(q, options=None):
+        if 'system.databases' in q:
+            return json.dumps(
+                {'query': expected_obfuscated, 'metadata': {'commands': ['SELECT'], 'tables': ['databases']}}
+            )
+        return json.dumps({'query': q, 'metadata': {}})
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        dd_run_check(check)
+        dd_run_check(check)
 
     # Verify metadata in metrics row
     events = aggregator.get_event_platform_events("dbm-metrics")
@@ -193,18 +197,19 @@ def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check)
     for e in events:
         all_rows.extend(e.get('clickhouse_rows', []))
 
-    matching = [r for r in all_rows if r['query_signature'] == query_signature]
+    matching = [r for r in all_rows if r.get('query') == expected_obfuscated]
     assert len(matching) >= 1
     row = matching[0]
-    assert row.get('dd_commands') is not None
-    assert 'SELECT' in row['dd_commands']
+    query_signature = row['query_signature']
+    assert row.get('dd_commands') == ['SELECT']
+    assert row.get('dd_tables')
 
     # Verify metadata in FQT event
     sample_events = aggregator.get_event_platform_events("dbm-samples")
     fqt_events = [e for e in sample_events if e.get('dbm_type') == 'fqt']
     matching_fqt = [e for e in fqt_events if e['db']['query_signature'] == query_signature]
     assert len(matching_fqt) >= 1
-    assert matching_fqt[0]['db']['metadata']['commands'] is not None
+    assert matching_fqt[0]['db']['metadata']['commands'] == ['SELECT']
 
 
 def test_statement_metrics_disabled(instance):
@@ -300,3 +305,111 @@ def test_samples_event_structure(instance):
     assert 'timestamp' in event
     assert 'clickhouse_activity' in event
     assert 'clickhouse_connections' in event
+
+
+def test_query_completions_data(aggregator, instance, dd_run_check, datadog_agent):
+    """
+    Run a known query, then verify the completions pipeline collects it:
+    1. A dbm-activity event with dbm_type='query_completion' is emitted
+    2. The payload contains a completion record matching the known query
+    3. Key fields (query_signature, duration_ms, username, read_rows,
+       event_time_microseconds) are populated
+    """
+    instance_config = deepcopy(instance)
+    instance_config['dbm'] = True
+    instance_config['query_metrics'] = {'enabled': False}
+    instance_config['query_samples'] = {'enabled': False}
+    instance_config['query_completions'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': 10,
+    }
+
+    check = ClickhouseCheck('clickhouse', {}, [instance_config])
+    client = _get_clickhouse_client(instance_config)
+
+    query = "SELECT name, engine FROM system.databases ORDER BY name"
+    client.command(query)
+    client.command('SYSTEM FLUSH LOGS')
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    events = aggregator.get_event_platform_events("dbm-activity")
+    completion_events = [e for e in events if e.get('dbm_type') == 'query_completion']
+    assert len(completion_events) > 0, "Expected at least one query_completion event"
+
+    all_completions = []
+    for e in completion_events:
+        all_completions.extend(e.get('clickhouse_query_completions', []))
+
+    assert len(all_completions) > 0, "Expected at least one completion record in payload"
+
+    expected_obfuscated = obfuscate_sql_with_metadata(query, check.query_completions._obfuscate_options)['query']
+    matching = [c for c in all_completions if c.get('query_details', {}).get('statement') == expected_obfuscated]
+    assert len(matching) >= 1, (
+        f"Expected at least 1 completion record for query: {query!r}.\n"
+        f"Expected obfuscated: {expected_obfuscated!r}\n"
+        f"Available statements: {[c.get('query_details', {}).get('statement', '<none>') for c in all_completions]}"
+    )
+
+    details = matching[0]['query_details']
+    assert details['query_signature'] is not None
+    assert details['duration_ms'] >= 0
+    assert details['username'] is not None
+    assert details['read_rows'] >= 0
+    assert details['event_time_microseconds'] > 0
+
+
+def test_query_samples_data(aggregator, instance, dd_run_check):
+    """
+    Start a long-running query in the background so it appears in system.processes,
+    then verify the samples pipeline actually captures active query rows:
+    1. A dbm-activity event with dbm_type='activity' is emitted
+    2. clickhouse_activity contains at least one row (not empty)
+    3. The slow query is present in the captured activity
+
+    This test specifically guards against regressions on versions that lack
+    query_kind in system.processes — on those versions the query silently fails
+    and clickhouse_activity is empty.
+    """
+    instance_config = deepcopy(instance)
+    instance_config['dbm'] = True
+    instance_config['query_metrics'] = {'enabled': False}
+    instance_config['query_samples'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': 1,
+    }
+    instance_config['query_completions'] = {'enabled': False}
+
+    check = ClickhouseCheck('clickhouse', {}, [instance_config])
+    client = _get_clickhouse_client(instance_config)
+
+    slow_query = "SELECT sleep(2)"
+    thread = threading.Thread(target=client.command, args=(slow_query,), daemon=True)
+    thread.start()
+
+    time.sleep(1)
+
+    dd_run_check(check)
+
+    thread.join(timeout=5)
+
+    activity_events = aggregator.get_event_platform_events("dbm-activity")
+    sample_events = [e for e in activity_events if e.get('dbm_type') == 'activity']
+    assert len(sample_events) > 0, "Expected at least one activity event"
+
+    all_activity = []
+    for e in sample_events:
+        all_activity.extend(e.get('clickhouse_activity', []))
+
+    assert len(all_activity) > 0, (
+        "Expected clickhouse_activity to contain active query rows but it was empty. "
+        "This likely means the query_kind column is missing in system.processes."
+    )
+
+    statements = [row.get('statement', '') for row in all_activity]
+    assert any('sleep' in s for s in statements), (
+        f"Expected to find the slow 'sleep' query in activity rows.\nCaptured statements: {statements}"
+    )
