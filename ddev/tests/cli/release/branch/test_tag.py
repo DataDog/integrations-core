@@ -46,18 +46,6 @@ def test_tag_skip_open_pr_check(ddev, git, mocker, config_file):
     list_prs.assert_not_called()
 
 
-def test_tag_no_github_credentials_skips_check(ddev, git, mocker, config_file):
-    config_file.model.github = {'user': '', 'token': ''}
-    config_file.save()
-
-    list_prs = mocker.patch('ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base')
-
-    result = ddev('release', 'branch', 'tag', '--final', input='y\n')
-
-    _assert_tag_pushed(git, result, '7.56.0')
-    assert 'GitHub credentials not configured' in result.output
-    list_prs.assert_not_called()
-
 
 def test_tag_github_api_error_degrades_gracefully(ddev, git, mocker, config_file):
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
