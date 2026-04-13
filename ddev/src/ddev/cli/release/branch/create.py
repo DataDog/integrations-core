@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import click
-from httpx import HTTPStatusError
+from httpx import HTTPError, HTTPStatusError
 from packaging.version import Version
 
 if TYPE_CHECKING:
@@ -112,11 +112,16 @@ def bump_milestone(app: Application, branch_name: str) -> None:
         app.display_waiting(f"Pushing the `{bump_branch}` branch...")
         app.repo.git.run('push', 'origin', bump_branch)
         app.display_success("Done.")
-    except OSError:
-        app.display_warning(f'Failed to push the branch. You can push it manually with: git push origin {bump_branch}')
+    except OSError as e:
+        app.display_warning(
+            f'Milestone branch update failed ({e}). You can push it manually with: git push origin {bump_branch}'
+        )
         return
     finally:
-        app.repo.git.run('checkout', 'master')
+        try:
+            app.repo.git.run('checkout', 'master')
+        except OSError:
+            app.display_warning('Failed to checkout master. You may need to run: git checkout master')
 
     app.display_waiting("Creating a pull request...")
     try:
@@ -128,7 +133,7 @@ def bump_milestone(app: Application, branch_name: str) -> None:
             f'after cutting the `{branch_name}` release branch.',
         )
         app.display_success(f'Pull request created: {pr_url}')
-    except Exception as e:
+    except HTTPError as e:
         app.display_warning(
             f'Failed to create the pull request ({e}). Please create one manually from `{bump_branch}` to `master`.'
         )

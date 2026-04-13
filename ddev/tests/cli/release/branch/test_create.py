@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 import json
 from unittest.mock import call
 
@@ -37,9 +39,11 @@ def test_create_invalid_branch_name(ddev, name, mocker):
 def test_create_branch(ddev, mocker, yaml_updated):
     """Test that the full git workflow is executed correctly."""
     run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
-    mocker.patch('ddev.utils.github.GitHubManager.create_label')
-    mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
+    label_mock = mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    milestone_mock = mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
+    pr_mock = mocker.patch(
+        'ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1'
+    )
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=yaml_updated)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
@@ -58,12 +62,20 @@ def test_create_branch(ddev, mocker, yaml_updated):
     yaml_commit = call('add', '.gitlab/build_agent.yaml')
     assert (yaml_commit in run_mock.call_args_list) is yaml_updated
 
+    # GitHub API calls
+    label_mock.assert_called_once_with('backport/5.5.x', '5319e7')
+    milestone_mock.assert_called_once_with('5.6.0')
+    pr_mock.assert_called_once()
+
     # Milestone bump workflow
     run_mock.assert_any_call('fetch', 'origin', 'master')
     run_mock.assert_any_call('checkout', '-B', 'release/bump-milestone-5.6.0', 'origin/master')
     run_mock.assert_any_call('add', 'release.json')
     run_mock.assert_any_call('commit', '-m', 'Update current_milestone to 5.6.0')
     run_mock.assert_any_call('push', 'origin', 'release/bump-milestone-5.6.0')
+
+    # Verify repo is restored to master after milestone bump
+    assert run_mock.call_args_list[-1] == call('checkout', 'master')
 
 
 @pytest.mark.parametrize(
@@ -280,16 +292,18 @@ def test_create_branch_push_failure(ddev, mocker):
     result = ddev('release', 'branch', 'create', '7.79.x')
 
     assert result.exit_code == 0, result.output
-    assert 'Failed to push the branch' in result.output
+    assert 'Milestone branch update failed' in result.output
     assert 'git push origin release/bump-milestone-7.80.0' in result.output
     create_pr_mock.assert_not_called()
 
 
 def test_create_branch_pr_creation_failure(ddev, mocker):
+    from httpx import HTTPError
+
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', side_effect=Exception('API error'))
+    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', side_effect=HTTPError('API error'))
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
