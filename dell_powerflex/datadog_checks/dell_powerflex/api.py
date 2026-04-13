@@ -18,3 +18,14 @@ class PowerFlexAPI:
         response = self._http.get(url)
         response.raise_for_status()
         return response.json()
+
+    def get_volumes(self) -> list[dict]:
+        response = self._http.get(f"{self._gateway_url}/api/types/Volume/instances")
+        response.raise_for_status()
+        return response.json()
+
+    def get_volume_statistics(self, volume_id: str) -> dict:
+        url = f"{self._gateway_url}/api/instances/Volume::{volume_id}/relationships/Statistics"
+        response = self._http.get(url)
+        response.raise_for_status()
+        return response.json()

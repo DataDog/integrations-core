@@ -15,6 +15,9 @@ from .constants import (
     SYSTEM_METRIC_PREFIX,
     SYSTEM_STATS_BWC_METRICS,
     SYSTEM_STATS_SIMPLE_METRICS,
+    VOLUME_METRIC_PREFIX,
+    VOLUME_STATS_BWC_METRICS,
+    VOLUME_STATS_SIMPLE_METRICS,
 )
 
 
@@ -35,6 +38,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         try:
             self._collect_systems()
             self.gauge('api.can_connect', 1, tags=self._base_tags)
+            self._collect_volumes()
         except (ConnectionError, HTTPError, InvalidURL, Timeout) as e:
             self.log.warning('Could not connect to PowerFlex Gateway: %s', e)
             self.gauge('api.can_connect', 0, tags=self._base_tags)
@@ -60,6 +64,37 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
                 tags=tags + [f"{tag_key}:{mdm_cluster.get(api_field)}"],
             )
         self._collect_system_statistics(system['id'], tags)
+
+    def _collect_volumes(self) -> None:
+        for volume in self._api.get_volumes():
+            try:
+                self._collect_volume(volume)
+            except Exception as e:
+                self.log.warning('Failed to collect metrics for volume %s: %s', volume.get('id'), e)
+
+    def _collect_volume(self, volume: dict) -> None:
+        tags = self._base_tags + [
+            f"volume_id:{volume['id']}",
+            f"volume_name:{volume['name']}",
+            f"volume_type:{volume['volumeType']}",
+            f"storage_pool_id:{volume['storagePoolId']}",
+        ]
+        if volume.get('ancestorVolumeId'):
+            tags = tags + [f"ancestor_volume_id:{volume['ancestorVolumeId']}"]
+        for sdc in (volume.get('mappedSdcInfo') or []):
+            tags = tags + [f"sdc_id:{sdc['sdcId']}"]
+        self._collect_volume_statistics(volume['id'], tags)
+
+    def _collect_volume_statistics(self, volume_id: str, tags: list[str]) -> None:
+        stats = self._api.get_volume_statistics(volume_id)
+        for api_field, metric_suffix in VOLUME_STATS_SIMPLE_METRICS:
+            self.gauge(f'{VOLUME_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
+        for api_field, metric_suffix in VOLUME_STATS_BWC_METRICS:
+            bwc = stats.get(api_field, {})
+            prefix = f'{VOLUME_METRIC_PREFIX}.{metric_suffix}'
+            self.gauge(f'{prefix}.num_seconds', bwc.get('numSeconds'), tags=tags)
+            self.gauge(f'{prefix}.total_weight_in_kb', bwc.get('totalWeightInKb'), tags=tags)
+            self.gauge(f'{prefix}.num_occured', bwc.get('numOccured'), tags=tags)
 
     def _collect_system_statistics(self, system_id: str, tags: list[str]) -> None:
         stats = self._api.get_system_statistics(system_id)

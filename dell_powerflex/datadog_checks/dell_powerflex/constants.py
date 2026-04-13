@@ -54,3 +54,21 @@ SYSTEM_STATS_BWC_METRICS = [
     ('journalerWriteLatency', 'journaler_write_latency'),
     ('targetWriteLatency', 'target_write_latency'),
 ]
+
+VOLUME_METRIC_PREFIX = 'volume'
+
+VOLUME_STATS_SIMPLE_METRICS = [
+    ('numOfChildVolumes', 'num_of_child_volumes'),
+    ('numOfMappedSdcs', 'num_of_mapped_sdcs'),
+    ('rplTotalJournalCap', 'rpl_total_journal_cap'),
+    ('rplUsedJournalCap', 'rpl_used_journal_cap'),
+]
+
+VOLUME_STATS_BWC_METRICS = [
+    ('userDataReadBwc', 'user_data_read_bwc'),
+    ('userDataWriteBwc', 'user_data_write_bwc'),
+    ('userDataTrimBwc', 'user_data_trim_bwc'),
+    ('userDataSdcReadLatency', 'user_data_sdc_read_latency'),
+    ('userDataSdcWriteLatency', 'user_data_sdc_write_latency'),
+    ('userDataSdcTrimLatency', 'user_data_sdc_trim_latency'),
+]

@@ -38,6 +38,22 @@ SYSTEM_STATS_SIMPLE_METRICS = [
     {'name': 'dell_powerflex.system.num_sdr_sdc_disconnections', 'value': 0},
 ]
 
+VOLUME_STATS_SIMPLE_METRICS = [
+    {'name': 'dell_powerflex.volume.num_of_child_volumes', 'value': 1},
+    {'name': 'dell_powerflex.volume.num_of_mapped_sdcs', 'value': 1},
+    {'name': 'dell_powerflex.volume.rpl_total_journal_cap', 'value': 0},
+    {'name': 'dell_powerflex.volume.rpl_used_journal_cap', 'value': 0},
+]
+
+VOLUME_STATS_BWC_METRICS = [
+    'dell_powerflex.volume.user_data_read_bwc',
+    'dell_powerflex.volume.user_data_write_bwc',
+    'dell_powerflex.volume.user_data_trim_bwc',
+    'dell_powerflex.volume.user_data_sdc_read_latency',
+    'dell_powerflex.volume.user_data_sdc_write_latency',
+    'dell_powerflex.volume.user_data_sdc_trim_latency',
+]
+
 SYSTEM_STATS_BWC_METRICS = [
     'dell_powerflex.system.user_data_read_bwc',
     'dell_powerflex.system.user_data_write_bwc',
