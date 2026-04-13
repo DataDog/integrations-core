@@ -223,9 +223,9 @@ files:
         - name: method
           description: |
             The OAuth method to use. Supported values:
-              - `aws_msk_iam`: AWS MSK IAM authentication. Requires `boto3` and `aws-msk-iam-sasl-signer-python`.
-              - `gcp_cloud_managed_kafka`: Google Cloud Managed Kafka IAM authentication using
-                SASL_SSL with OAUTHBEARER. Requires `google-auth`. Tokens are GCP IAM access tokens.
+              - `aws_msk_iam`: Amazon MSK IAM authentication. Requires `boto3` and `aws-msk-iam-sasl-signer-python`.
+              - `gcp_cloud_managed_kafka`: Google Cloud managed Kafka IAM authentication using
+                SASL_SSL with OAUTHBEARER. Requires `google-auth`. Tokens are Google Cloud IAM access tokens.
               - `oidc`: Standard OIDC authentication (default for backwards compatibility).
           value:
             type: string
@@ -242,13 +242,12 @@ files:
             example: us-west-2
         - name: gcp_credentials_file
           description: |
-            Path to a GCP service account JSON credentials file for Cloud Managed Kafka IAM authentication.
-            Used when method is `gcp_cloud_managed_kafka`. If not specified, Application Default Credentials
+            Path to a Google Cloud service account JSON credential file for cloud managed Kafka IAM authentication.
+            Used when method is `gcp_cloud_managed_kafka`. If not specified, application default credentials
             are used (for example, from `GOOGLE_APPLICATION_CREDENTIALS` environment variable,
             attached service account, or `gcloud auth application-default login`).
           value:
             type: string
-            example: /path/to/service_account.json
         - name: url
           fleet_configurable: true
           formats:
