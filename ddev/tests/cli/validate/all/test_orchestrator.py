@@ -15,6 +15,7 @@ from ddev.cli.validate.all.orchestrator import (
     ValidationOrchestrator,
     ValidationProcessor,
     ValidationResult,
+    load_validations,
 )
 from ddev.event_bus.orchestrator import BaseMessage
 
@@ -296,3 +297,45 @@ def test_on_finalize_pr_comment_omits_run_link_when_env_missing(mock_app, monkey
 
     body = mock_app.github.post_pull_request_comment.call_args[0][1]
     assert "[View full run]" not in body
+
+
+# --- load_validations ---
+
+
+def test_load_validations_returns_all_when_config_absent(mock_app):
+    mock_app.repo.config.get.return_value = None
+
+    result = load_validations(mock_app)
+
+    assert result is VALIDATIONS
+    mock_app.display_warning.assert_not_called()
+
+
+def test_load_validations_filters_to_selected_names(mock_app):
+    mock_app.repo.config.get.return_value = ["ci", "config"]
+
+    result = load_validations(mock_app)
+
+    assert set(result) == {"ci", "config"}
+    assert result["ci"] == VALIDATIONS["ci"]
+    assert result["config"] == VALIDATIONS["config"]
+    mock_app.display_warning.assert_not_called()
+
+
+def test_load_validations_warns_on_unknown_name(mock_app):
+    mock_app.repo.config.get.return_value = ["ci", "nonexistent"]
+
+    result = load_validations(mock_app)
+
+    assert set(result) == {"ci"}
+    mock_app.display_warning.assert_called_once()
+    assert "nonexistent" in str(mock_app.display_warning.call_args)
+
+
+def test_load_validations_empty_list_returns_empty(mock_app):
+    mock_app.repo.config.get.return_value = []
+
+    result = load_validations(mock_app)
+
+    assert result == {}
+    mock_app.display_warning.assert_not_called()

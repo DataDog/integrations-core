@@ -58,6 +58,26 @@ VALIDATIONS: dict[str, ValidationConfig] = {
     "version": ValidationConfig(),
 }
 
+
+def load_validations(app: Application) -> dict[str, ValidationConfig]:
+    """Read the selected validations from `.ddev/config.toml`.
+
+    If the `/validations` key is absent, all known validations are returned.
+    Unknown names are warned about and skipped.
+    """
+    selected: list[str] | None = app.repo.config.get('/validations', None)
+    if selected is None:
+        return VALIDATIONS
+
+    result: dict[str, ValidationConfig] = {}
+    for name in selected:
+        if name in VALIDATIONS:
+            result[name] = VALIDATIONS[name]
+        else:
+            app.display_warning(f"Unknown validation in .ddev/config.toml: {name!r}")
+    return result
+
+
 SUBPROCESS_TIMEOUT = 580
 
 

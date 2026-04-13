@@ -34,12 +34,14 @@ def all(
     scoped to that target. Repo-wide validations always run without a target.
     """
     from ddev.cli.validate.all.github import get_pr_number
-    from ddev.cli.validate.all.orchestrator import ValidationOrchestrator
+    from ddev.cli.validate.all.orchestrator import ValidationOrchestrator, load_validations
 
+    selected = load_validations(app)
     pr_number = get_pr_number(app)
     orchestrator = ValidationOrchestrator(
         app=app,
         target=target,
+        validations=list(selected),
         fix=fix,
         pr_number=pr_number,
         grace_period=grace_period,
