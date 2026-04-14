@@ -30,6 +30,42 @@ _CLICKHOUSE_PLAN_STATS_KEYS = frozenset(
     }
 )
 
+# Keys whose string values always contain SQL expressions and may embed literal values.
+_CLICKHOUSE_PLAN_EXPRESSION_KEYS = frozenset(
+    {
+        'Filter Column',  # e.g. "notLike(query, '%secret%'_String)"
+        'Condition',  # e.g. "equals(user_id, 12345)" in Index nodes
+        'Clauses',  # e.g. "[(__table1.sku) = (__table2.sku)]" in Join nodes
+    }
+)
+
+# Action node types whose Result Name embeds the full expression with literals.
+_CLICKHOUSE_EXPRESSION_ACTION_TYPES = frozenset({'COLUMN', 'FUNCTION'})
+
+
+def _obfuscate_clickhouse_plan(node: object) -> object:
+    """Recursively redact expression fields that may contain literal values."""
+    if isinstance(node, list):
+        return [_obfuscate_clickhouse_plan(item) for item in node]
+    if isinstance(node, dict):
+        node_type = node.get('Node Type', '')
+        result = {}
+        for k, v in node.items():
+            if k in _CLICKHOUSE_PLAN_EXPRESSION_KEYS:
+                result[k] = '?'
+            elif k == 'Result Name' and node_type in _CLICKHOUSE_EXPRESSION_ACTION_TYPES:
+                result[k] = '?'
+            elif k == 'Name' and isinstance(v, str) and ("'" in v or '(' in v):
+                # Input/Output Name derived from an expression, e.g.
+                # "notLike(query, '%secret%'_String)" or "equals(user_id, 12345)".
+                # ClickHouse uses the expression itself as the column name when
+                # no alias is given, embedding both string and numeric literals.
+                result[k] = '?'
+            else:
+                result[k] = _obfuscate_clickhouse_plan(v)
+        return result
+    return node
+
 
 def _normalize_clickhouse_plan(node: object) -> object:
     """Recursively strip cost/stats fields from a ClickHouse plan node."""
@@ -140,7 +176,7 @@ class ClickhouseExplainPlans:
 
         if plan_dict is not None:
             try:
-                obfuscated_plan = json.dumps(plan_dict)
+                obfuscated_plan = json.dumps(_obfuscate_clickhouse_plan(plan_dict))
                 if isinstance(obfuscated_plan, bytes):
                     obfuscated_plan = obfuscated_plan.decode('utf-8')
                 normalized_plan = json.dumps(_normalize_clickhouse_plan(plan_dict))

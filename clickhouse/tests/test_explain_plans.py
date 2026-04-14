@@ -7,7 +7,12 @@ from unittest import mock
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
-from datadog_checks.clickhouse.explain_plans import ClickhouseExplainPlans, DBExplainError, _normalize_clickhouse_plan
+from datadog_checks.clickhouse.explain_plans import (
+    ClickhouseExplainPlans,
+    DBExplainError,
+    _normalize_clickhouse_plan,
+    _obfuscate_clickhouse_plan,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -570,6 +575,129 @@ def test_plan_definition_preserves_descriptions(mock_agent, explain_plans):
     assert top_plan['Description'] == 'Project names + Projection'
     assert top_plan['Plans'][0]['Description'] == 'WHERE + Change column names to column identifiers'
     assert top_plan['Plans'][0]['Plans'][0]['Description'] == 'default.inventory_items'
+
+
+def test_obfuscate_clickhouse_plan_redacts_filter_column():
+    """Filter Column containing a predicate expression is redacted."""
+    plan = {
+        'Plan': {
+            'Node Type': 'Filter',
+            'Node Id': 'Filter_1',
+            'Description': 'WHERE',
+            'Filter Column': "notLike(query, '%secret%'_String)",
+            'Plans': [],
+        }
+    }
+    result = _obfuscate_clickhouse_plan(plan)
+    assert result['Plan']['Filter Column'] == '?'
+    assert result['Plan']['Description'] == 'WHERE'
+    assert result['Plan']['Node Type'] == 'Filter'
+
+
+def test_obfuscate_clickhouse_plan_redacts_index_condition():
+    """Condition in Index nodes containing a predicate expression is redacted."""
+    plan = {
+        'Plan': {
+            'Node Type': 'ReadFromMergeTree',
+            'Node Id': 'ReadFromMergeTree_0',
+            'Description': 'default.orders',
+            'Indexes': [
+                {
+                    'Type': 'PrimaryKey',
+                    'Condition': 'equals(user_id, 12345)',
+                    'Initial Parts': 4,
+                    'Selected Parts': 1,
+                }
+            ],
+        }
+    }
+    result = _obfuscate_clickhouse_plan(plan)
+    assert result['Plan']['Indexes'][0]['Condition'] == '?'
+    assert result['Plan']['Indexes'][0]['Type'] == 'PrimaryKey'
+    assert result['Plan']['Indexes'][0]['Initial Parts'] == 4
+
+
+def test_obfuscate_clickhouse_plan_redacts_join_clauses():
+    """Clauses in Join nodes is redacted."""
+    plan = {
+        'Plan': {
+            'Node Type': 'Join',
+            'Node Id': 'Join_1',
+            'Description': 'JOIN FillRightFirst',
+            'Clauses': '[(__table1.sku) = (__table2.sku)]',
+        }
+    }
+    result = _obfuscate_clickhouse_plan(plan)
+    assert result['Plan']['Clauses'] == '?'
+    assert result['Plan']['Description'] == 'JOIN FillRightFirst'
+
+
+def test_obfuscate_clickhouse_plan_redacts_column_and_function_result_names():
+    """Result Name in COLUMN and FUNCTION action nodes is redacted; INPUT/ALIAS are kept."""
+    plan = {
+        'Plan': {
+            'Node Type': 'Expression',
+            'Expression': {
+                'Actions': [
+                    {'Node Type': 'INPUT', 'Result Name': 'user_id', 'Result Type': 'UInt64'},
+                    {'Node Type': 'COLUMN', 'Result Name': "'%secret%'_String", 'Result Type': 'String'},
+                    {'Node Type': 'FUNCTION', 'Result Name': "notLike(query, '%secret%'_String)", 'Result Type': 'UInt8'},
+                    {'Node Type': 'ALIAS', 'Result Name': 'filtered_query', 'Result Type': 'UInt8'},
+                ]
+            },
+        }
+    }
+    result = _obfuscate_clickhouse_plan(plan)
+    actions = result['Plan']['Expression']['Actions']
+    assert actions[0]['Result Name'] == 'user_id'           # INPUT kept
+    assert actions[1]['Result Name'] == '?'                  # COLUMN redacted
+    assert actions[2]['Result Name'] == '?'                  # FUNCTION redacted
+    assert actions[3]['Result Name'] == 'filtered_query'     # ALIAS kept
+
+
+def test_obfuscate_clickhouse_plan_redacts_expression_names_in_outputs():
+    """Name in Inputs/Outputs is redacted when it contains a quote (string literal) or paren (expression)."""
+    plan = {
+        'Plan': {
+            'Node Type': 'Expression',
+            'Expression': {
+                'Inputs': [
+                    {'Name': 'user_id', 'Type': 'UInt64'},
+                    {'Name': "notLike(query, '%secret%'_String)", 'Type': 'UInt8'},
+                    {'Name': 'equals(user_id, 12345)', 'Type': 'UInt8'},
+                ],
+                'Outputs': [
+                    {'Name': 'user_id', 'Type': 'UInt64'},
+                    {'Name': "notLike(query, '%secret%'_String)", 'Type': 'UInt8'},
+                ],
+            },
+        }
+    }
+    result = _obfuscate_clickhouse_plan(plan)
+    inputs = result['Plan']['Expression']['Inputs']
+    assert inputs[0]['Name'] == 'user_id'    # plain column name, kept
+    assert inputs[1]['Name'] == '?'           # string literal in expression, redacted
+    assert inputs[2]['Name'] == '?'           # numeric literal in expression (has paren), redacted
+
+    outputs = result['Plan']['Expression']['Outputs']
+    assert outputs[0]['Name'] == 'user_id'
+    assert outputs[1]['Name'] == '?'
+
+
+def test_obfuscate_clickhouse_plan_preserves_structural_fields():
+    """Structural fields (Node Type, Node Id, Description, numeric values) are untouched."""
+    result = _obfuscate_clickhouse_plan(SAMPLE_PLAN_WITH_INDEXES)
+    plan = result['Plan']
+    assert plan['Node Type'] == 'Expression'
+    assert plan['Node Id'] == 'Expression_1'
+    assert plan['Description'] == 'Project names + Projection'
+    read_node = plan['Plans'][0]
+    assert read_node['Description'] == 'default.orders'
+    # Condition is redacted, but other index fields are kept
+    assert read_node['Indexes'][0]['Type'] == 'PrimaryKey'
+    assert read_node['Indexes'][0]['Condition'] == '?'
+    assert read_node['Indexes'][0]['Parts'] == 3
+    assert read_node['Indexes'][0]['Granules'] == 12
 
 
 def test_default_config_values(instance_with_dbm):
