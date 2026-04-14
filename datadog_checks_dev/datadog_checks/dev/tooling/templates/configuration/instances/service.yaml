@@ -1,4 +1,5 @@
 name: service
+display_priority: 1
 value:
   type: string
 description: |

@@ -1,4 +1,5 @@
 - name: host
+  display_priority: 1
   required: true
   description: JMX hostname to connect to.
   value:
@@ -6,6 +7,7 @@
   fleet_configurable: true
 
 - name: port
+  display_priority: 1
   required: true
   description: JMX port to connect to.
   formats: ["port"]
@@ -14,6 +16,7 @@
   fleet_configurable: true
 
 - name: is_jmx
+  display_priority: 0
   description: |
     Whether or not this instance is a configuration for a JMX integration.
     If `is_jmx` is set to true at the init_config level, this flag is ignored.
@@ -24,6 +27,7 @@
   fleet_configurable: true
 
 - name: jmx_url
+  display_priority: 0
   description: JMX URL to connect to. Can be used instead of host/port configs.
   hidden: true
   formats: ["url"]
@@ -32,12 +36,14 @@
   fleet_configurable: true
 
 - name: user
+  display_priority: 1
   description: User to use when connecting to JMX.
   value:
     type: string
   fleet_configurable: true
 
 - name: password
+  display_priority: 1
   description: Password to use when connecting to JMX.
   secret: true
   value:
@@ -45,6 +51,7 @@
   fleet_configurable: true
 
 - name: process_name_regex
+  display_priority: 0
   description: |
     Instead of using a host and port, the Agent can connect using the attach API.
     This requires the JDK to be installed and the path to tools.jar to be set below.
@@ -58,6 +65,7 @@
     type: string
 
 - name: tools_jar_path
+  display_priority: 0
   description: |
     The tools.jar path to be used with the `process_name_regex` parameter,
     for example: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
@@ -71,12 +79,14 @@
     require_trusted_provider: true
 
 - name: name
+  display_priority: 0
   description: Set the instance name to be used as the `instance` tag.
   value:
     type: string
 
   fleet_configurable: true
 - name: java_bin_path
+  display_priority: 0
   description: "`java_bin_path` should be set if the Agent cannot find your java executable."
   fleet_configurable: true
   value:
@@ -84,6 +94,7 @@
     require_trusted_provider: true
 
 - name: java_options
+  display_priority: 0
   description: 'A list of Java JVM options, for example: "-Xmx200m -Xms50m".'
   fleet_configurable: true
   formats: ["java_jvm_options"]
@@ -91,6 +102,7 @@
     type: string
   
 - name: trust_store_path
+  display_priority: 0
   description: |
     The path to your trusted store.
     `trust_store_path` should be set if SSL is enabled.
@@ -101,6 +113,7 @@
     require_trusted_provider: true
 
 - name: trust_store_password
+  display_priority: 0
   description: |
     The password for your TrustStore.jks file.
     `trust_store_password` should be set if SSL is enabled.
@@ -110,6 +123,7 @@
   fleet_configurable: true
 
 - name: key_store_path
+  display_priority: 0
   description: |
     The path to your key store.
     `key_store_path` should be set if client authentication is enabled on the target JVM.
@@ -120,6 +134,7 @@
   fleet_configurable: true
 
 - name: key_store_password
+  display_priority: 0
   description: |
     The password to your key store.
     `key_store_password` should be set if client authentication is enabled on the target JVM.
@@ -129,6 +144,7 @@
   fleet_configurable: true
 
 - name: rmi_registry_ssl
+  display_priority: 0
   description: Whether or not the Agent should connect to the RMI registry using SSL.
   fleet_configurable: true
   value:
@@ -136,6 +152,7 @@
     type: boolean
   
 - name: rmi_connection_timeout
+  display_priority: 0
   description: The connection timeout, in milliseconds, when connecting to a remote JVM.
   fleet_configurable: true
   value:
@@ -143,6 +160,7 @@
     type: number
   
 - name: rmi_client_timeout
+  display_priority: 0
   description: |
     The timeout to consider a remote connection, already successfully established, as lost.
     If a connected remote JVM does not reply after `rmi_client_timeout` milliseconds jmxfetch
@@ -153,6 +171,7 @@
     type: number
 
 - name: collect_default_jvm_metrics
+  display_priority: 0
   description: Configures the collection of default JVM metrics.
   value:
     example: true

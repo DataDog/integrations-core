@@ -1,4 +1,5 @@
 name: tags
+display_priority: 1
 value:
   example:
     - <KEY_1>:<VALUE_1>
