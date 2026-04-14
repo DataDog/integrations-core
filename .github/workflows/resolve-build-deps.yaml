@@ -388,6 +388,6 @@ jobs:
         if git diff --cached --quiet; then
           echo "No lockfile changes to commit."
         else
-          git commit -m "Update dependency resolution [skip ci]"
+          git commit -m "Update dependency resolution"
           git push
         fi
