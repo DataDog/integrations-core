@@ -179,6 +179,45 @@ SDS_STATS_BWC_METRICS = [
     ('userDataSdcWriteLatency', 'user_data_sdc_write_latency'),
 ]
 
+DEVICE_METRIC_PREFIX = 'device'
+
+DEVICE_STATS_SIMPLE_METRICS = [
+    ('backgroundScanFixedReadErrorCount', 'fixed_read_error_count'),
+    ('avgReadSizeInBytes', 'avg_read_size_in_bytes'),
+    ('avgWriteSizeInBytes', 'avg_write_size_in_bytes'),
+    ('avgReadLatencyInMicrosec', 'avg_read_latency_in_microsec'),
+    ('avgWriteLatencyInMicrosec', 'avg_write_latency_in_microsec'),
+    ('capacityLimitInKb', 'capacity_limit.in_kb'),
+    ('maxCapacityInKb', 'max_capacity.in_kb'),
+    ('capacityInUseInKb', 'capacity.in_use_in_kb'),
+    ('thickCapacityInUseInKb', 'thick_capacity.in_use_in_kb'),
+    ('thinCapacityInUseInKb', 'thin_capacity.in_use_in_kb'),
+    ('snapCapacityInUseInKb', 'snap_capacity.in_use_in_kb'),
+    ('failedVacInKb', 'failed_vac.in_kb'),
+    ('inUseVacInKb', 'in_use_vac.in_kb'),
+    ('rfcacheReadsReceived', 'rfcache.reads_received'),
+    ('rfcacheWritesReceived', 'rfcache.writes_received'),
+    ('rfacheReadHit', 'rfcache.read_hit'),
+    ('rfcacheReadMiss', 'rfcache.read_miss'),
+    ('rfacheWriteHit', 'rfcache.write_hit'),
+    ('rfcacheWriteMiss', 'rfcache.write_miss'),
+    ('userDataCapacityInKb', 'user_data.capacity_in_kb'),
+    ('snapshotCapacityInKb', 'snapshot.capacity_in_kb'),
+    ('compressionRatio', 'compression_ratio'),
+    ('inaccessibleCapacityInKb', 'inaccessible_capacity.in_kb'),
+]
+
+DEVICE_STATS_BWC_METRICS = [
+    ('primaryReadBwc', 'primary_read_bwc'),
+    ('primaryWriteBwc', 'primary_write_bwc'),
+    ('secondaryReadBwc', 'secondary_read_bwc'),
+    ('secondaryWriteBwc', 'secondary_write_bwc'),
+    ('totalReadBwc', 'total_read_bwc'),
+    ('totalWriteBwc', 'total_write_bwc'),
+    ('targetReadLatency', 'target_read_latency'),
+    ('targetWriteLatency', 'target_write_latency'),
+]
+
 PROTECTION_DOMAIN_METRIC_PREFIX = 'protection_domain'
 
 PROTECTION_DOMAIN_STATS_SIMPLE_METRICS = [

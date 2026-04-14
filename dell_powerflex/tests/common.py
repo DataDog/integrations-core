@@ -222,6 +222,43 @@ SDS_STATS_BWC_METRICS = [
     'dell_powerflex.sds.user_data_sdc_write_latency',
 ]
 
+DEVICE_STATS_SIMPLE_METRICS = [
+    {'name': 'dell_powerflex.device.fixed_read_error_count', 'value': 0},
+    {'name': 'dell_powerflex.device.avg_read_size_in_bytes', 'value': 353621},
+    {'name': 'dell_powerflex.device.avg_write_size_in_bytes', 'value': 0},
+    {'name': 'dell_powerflex.device.avg_read_latency_in_microsec', 'value': 9596},
+    {'name': 'dell_powerflex.device.avg_write_latency_in_microsec', 'value': 0},
+    {'name': 'dell_powerflex.device.capacity_limit.in_kb', 'value': 103756800},
+    {'name': 'dell_powerflex.device.max_capacity.in_kb', 'value': 103756800},
+    {'name': 'dell_powerflex.device.capacity.in_use_in_kb', 'value': 349184},
+    {'name': 'dell_powerflex.device.thick_capacity.in_use_in_kb', 'value': 0},
+    {'name': 'dell_powerflex.device.thin_capacity.in_use_in_kb', 'value': 0},
+    {'name': 'dell_powerflex.device.snap_capacity.in_use_in_kb', 'value': 0},
+    {'name': 'dell_powerflex.device.failed_vac.in_kb', 'value': 0},
+    {'name': 'dell_powerflex.device.in_use_vac.in_kb', 'value': 22380544},
+    {'name': 'dell_powerflex.device.rfcache.reads_received', 'value': 0},
+    {'name': 'dell_powerflex.device.rfcache.writes_received', 'value': 0},
+    {'name': 'dell_powerflex.device.rfcache.read_hit', 'value': 0},
+    {'name': 'dell_powerflex.device.rfcache.read_miss', 'value': 0},
+    {'name': 'dell_powerflex.device.rfcache.write_hit', 'value': 0},
+    {'name': 'dell_powerflex.device.rfcache.write_miss', 'value': 0},
+    {'name': 'dell_powerflex.device.user_data.capacity_in_kb', 'value': 349184},
+    {'name': 'dell_powerflex.device.snapshot.capacity_in_kb', 'value': 0},
+    {'name': 'dell_powerflex.device.compression_ratio', 'value': 1.0},
+    {'name': 'dell_powerflex.device.inaccessible_capacity.in_kb', 'value': 0},
+]
+
+DEVICE_STATS_BWC_METRICS = [
+    'dell_powerflex.device.primary_read_bwc',
+    'dell_powerflex.device.primary_write_bwc',
+    'dell_powerflex.device.secondary_read_bwc',
+    'dell_powerflex.device.secondary_write_bwc',
+    'dell_powerflex.device.total_read_bwc',
+    'dell_powerflex.device.total_write_bwc',
+    'dell_powerflex.device.target_read_latency',
+    'dell_powerflex.device.target_write_latency',
+]
+
 SDC_STATS_SIMPLE_METRICS = [
     {'name': 'dell_powerflex.sdc.num_of_mapped_volumes', 'value': 2},
 ]

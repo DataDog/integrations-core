@@ -43,6 +43,12 @@ class PowerFlexAPI:
     def get_sds_statistics(self, sds_id: str) -> dict:
         return self._get(f'/api/instances/Sds::{sds_id}/relationships/Statistics')
 
+    def get_devices(self) -> list[dict]:
+        return self._get('/api/types/Device/instances')
+
+    def get_device_statistics(self, device_id: str) -> dict:
+        return self._get(f'/api/instances/Device::{device_id}/relationships/Statistics')
+
     def get_protection_domains(self) -> list[dict]:
         return self._get('/api/types/ProtectionDomain/instances')
 

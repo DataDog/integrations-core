@@ -11,6 +11,9 @@ from .api import PowerFlexAPI
 from .config_models import ConfigMixin
 from .constants import (
     BWC_SUB_FIELDS,
+    DEVICE_METRIC_PREFIX,
+    DEVICE_STATS_BWC_METRICS,
+    DEVICE_STATS_SIMPLE_METRICS,
     PROTECTION_DOMAIN_METRIC_PREFIX,
     PROTECTION_DOMAIN_STATS_BWC_METRICS,
     PROTECTION_DOMAIN_STATS_SIMPLE_METRICS,
@@ -56,6 +59,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self._collect_protection_domains()
             self._collect_sds_list()
             self._collect_sdc_list()
+            self._collect_devices()
         except (ConnectionError, HTTPError, InvalidURL, Timeout) as e:
             self.log.warning('Could not connect to PowerFlex Gateway: %s', e)
             self.gauge('api.can_connect', 0, tags=self._base_tags)
@@ -190,6 +194,29 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         for api_field, metric_suffix in SDS_STATS_SIMPLE_METRICS:
             self.gauge(f'{SDS_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
         self._collect_bwc_metrics(stats, SDS_METRIC_PREFIX, SDS_STATS_BWC_METRICS, tags)
+
+    def _collect_devices(self) -> None:
+        for device in self._api.get_devices():
+            try:
+                self._collect_device(device)
+            except Exception as e:
+                self.log.warning('Failed to collect metrics for device %s: %s', device.get('id'), e)
+
+    def _collect_device(self, device: dict) -> None:
+        tags = self._base_tags + [
+            f"device_id:{device['id']}",
+            f"device_name:{device['name']}",
+            f"current_path_name:{device['deviceCurrentPathName']}",
+            f"storage_pool_id:{device['storagePoolId']}",
+            f"sds_id:{device['sdsId']}",
+        ]
+        self._collect_device_statistics(device['id'], tags)
+
+    def _collect_device_statistics(self, device_id: str, tags: list[str]) -> None:
+        stats = self._api.get_device_statistics(device_id)
+        for api_field, metric_suffix in DEVICE_STATS_SIMPLE_METRICS:
+            self.gauge(f'{DEVICE_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
+        self._collect_bwc_metrics(stats, DEVICE_METRIC_PREFIX, DEVICE_STATS_BWC_METRICS, tags)
 
     def _collect_bwc_metrics(
         self, stats: dict, metric_prefix: str, bwc_metrics: list[tuple[str, str]], tags: list[str]

@@ -13,6 +13,8 @@ from datadog_checks.dell_powerflex import DellPowerflexCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
+    DEVICE_STATS_BWC_METRICS,
+    DEVICE_STATS_SIMPLE_METRICS,
     PROTECTION_DOMAIN_STATS_BWC_METRICS,
     PROTECTION_DOMAIN_STATS_SIMPLE_METRICS,
     SDC_STATS_BWC_METRICS,
@@ -192,6 +194,7 @@ def test_collect_protection_domains(dd_run_check, aggregator, instance, mock_htt
         ('_collect_protection_domain', 1, 'Failed to collect metrics for protection domain'),
         ('_collect_sds', 3, 'Failed to collect metrics for SDS'),
         ('_collect_sdc', 3, 'Failed to collect metrics for SDC'),
+        ('_collect_device', 3, 'Failed to collect metrics for device'),
     ],
 )
 def test_collect_failure_continues(
@@ -283,6 +286,49 @@ def test_collect_sdc(dd_run_check, aggregator, instance, mock_http_get):
     ]
     aggregator.assert_metric('dell_powerflex.sdc.num_of_mapped_volumes', value=0, tags=sdc3_tags)
     assert_bwc_metrics(aggregator, SDC_STATS_BWC_METRICS, sdc3_tags)
+
+
+def test_collect_devices(dd_run_check, aggregator, instance, mock_http_get):
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+
+    # Device1: f7fd7d0b00020000, sds1-dev1 - full assertions
+    dev1_tags = base_tags + [
+        'device_id:f7fd7d0b00020000',
+        'device_name:sds1-dev1',
+        'current_path_name:/dev/sdb',
+        'storage_pool_id:25155ba600000000',
+        'sds_id:d1c062b900000002',
+    ]
+    for metric in DEVICE_STATS_SIMPLE_METRICS:
+        aggregator.assert_metric(metric['name'], value=metric['value'], tags=dev1_tags)
+    assert_bwc_metrics(aggregator, DEVICE_STATS_BWC_METRICS, dev1_tags)
+
+    # Device2: f7fd7d0a00010000, sds2-dev1
+    dev2_tags = base_tags + [
+        'device_id:f7fd7d0a00010000',
+        'device_name:sds2-dev1',
+        'current_path_name:/dev/sdb',
+        'storage_pool_id:25155ba600000000',
+        'sds_id:d1c062b800000001',
+    ]
+    aggregator.assert_metric('dell_powerflex.device.capacity.in_use_in_kb', value=350208, tags=dev2_tags)
+    aggregator.assert_metric('dell_powerflex.device.avg_read_latency_in_microsec', value=12793, tags=dev2_tags)
+    assert_bwc_metrics(aggregator, DEVICE_STATS_BWC_METRICS, dev2_tags)
+
+    # Device3: f7f77d0900000000, sds3-dev1
+    dev3_tags = base_tags + [
+        'device_id:f7f77d0900000000',
+        'device_name:sds3-dev1',
+        'current_path_name:/dev/sdb',
+        'storage_pool_id:25155ba600000000',
+        'sds_id:d1c062b700000000',
+    ]
+    aggregator.assert_metric('dell_powerflex.device.capacity.in_use_in_kb', value=349184, tags=dev3_tags)
+    aggregator.assert_metric('dell_powerflex.device.avg_read_latency_in_microsec', value=10023, tags=dev3_tags)
+    assert_bwc_metrics(aggregator, DEVICE_STATS_BWC_METRICS, dev3_tags)
 
 
 def test_collect_system_with_name(dd_run_check, aggregator, instance, mocker):
