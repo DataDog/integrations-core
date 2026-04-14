@@ -1,4 +1,7 @@
-on: [push]
+on:
+  push:
+    branches-ignore:
+      - master
 
 name: Datadog Static Analysis
 
