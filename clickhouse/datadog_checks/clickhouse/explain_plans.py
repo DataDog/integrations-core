@@ -234,6 +234,8 @@ class ClickhouseExplainPlans:
             query_signature = row.get('query_signature', '')
             if not query_signature:
                 continue
+            if row.get('query_kind', '').lower() != 'select':
+                continue
             if not self._can_explain_statement(row.get('statement', '')):
                 continue
             rate_limit_key = (row.get('databases', ''), query_signature)

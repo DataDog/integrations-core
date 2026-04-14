@@ -320,6 +320,33 @@ def test_collect_plans_rate_limiting(mock_agent, explain_plans):
 
 
 @mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
+def test_collect_plans_skips_cte_insert(mock_agent, explain_plans):
+    """WITH ... INSERT queries pass _can_explain_statement but are skipped via query_kind."""
+    mock_agent.get_version.return_value = '7.64.0'
+    explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
+
+    rows = [
+        {
+            'query': 'WITH foo AS (SELECT 1) INSERT INTO t SELECT * FROM foo',
+            'statement': 'WITH foo AS (SELECT ?) INSERT INTO t SELECT * FROM foo',
+            'query_signature': 'cte_insert_sig',
+            'databases': 'default',
+            'user': 'default',
+            'query_kind': 'Insert',
+            'query_duration_ms': 10.0,
+            'event_time_microseconds': 1746205423150500,
+            'dd_tables': [],
+            'dd_commands': ['INSERT'],
+        }
+    ]
+
+    plans = list(explain_plans._collect_plans(rows, ['test:tag']))
+
+    assert len(plans) == 0
+    explain_plans._execute_query_fn.assert_not_called()
+
+
+@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
 def test_collect_plans_skips_missing_signature(mock_agent, explain_plans):
     """Rows without a query_signature are skipped."""
     mock_agent.get_version.return_value = '7.64.0'
