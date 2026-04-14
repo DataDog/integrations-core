@@ -258,6 +258,7 @@ def test_get_previous_iteration_log_cursor_when_cusror_is_not_none(utc_timestamp
     assert last_collected_file_name == "20230401000000.20230401000015"
 
 
+@pytest.mark.unit
 @patch('datadog_checks.mac_audit_logs.check.subprocess.Popen')
 def test_fetch_audit_logs(mock_popen, instance):
     """Multiple file paths are joined into a single auditreduce command."""
@@ -299,6 +300,7 @@ def test_fetch_audit_logs(mock_popen, instance):
     assert len(log_entries) == len(log_file_entries)
 
 
+@pytest.mark.unit
 @patch('datadog_checks.mac_audit_logs.check.subprocess.Popen')
 def test_fetch_audit_logs_single_file(mock_popen, instance):
     """A single-element list produces the correct auditreduce command."""
@@ -347,7 +349,8 @@ def test_collect_data_from_files_batches_all_existing_files(mock_utc, mock_exist
 
     expected_paths = [os.path.join(check.audit_logs_dir_path, f) for _, f in relevant_files]
     check.fetch_audit_logs.assert_called_once_with(expected_paths, last_record_time)
-    check.process_and_ingest_log_entries.assert_called_once()
+    call_args = check.process_and_ingest_log_entries.call_args[0]
+    assert call_args[1] == relevant_files[0][1], "cursor file_name should be the first file in the batch"
 
 
 @pytest.mark.unit
@@ -424,6 +427,52 @@ def test_collect_data_from_files_no_valid_files(mock_utc, instance):
 
 @pytest.mark.unit
 @patch("os.path.exists", return_value=True)
+@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401030000")
+def test_collect_data_from_files_skips_files_outside_time_range(mock_utc, mock_exists, instance):
+    """Files whose end time is before the HOURS_OFFSET cutoff are excluded from the batch."""
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+    check.fetch_audit_logs = MagicMock(return_value=(b"<record/>", b""))
+    check.process_and_ingest_log_entries = MagicMock()
+
+    relevant_files = [
+        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401010000"),
+        (utils.time_string_to_datetime_utc("20230401010000"), "20230401010000.20230401020000"),
+        (utils.time_string_to_datetime_utc("20230401030000"), "20230401030000.20230401040000"),
+    ]
+
+    check.collect_data_from_files(relevant_files, None, "20230401000000", None, None, "+0000")
+
+    expected_paths = [os.path.join(check.audit_logs_dir_path, relevant_files[2][1])]
+    check.fetch_audit_logs.assert_called_once_with(expected_paths, "20230401000000")
+
+
+@pytest.mark.unit
+@patch("os.path.exists", return_value=True)
+@patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
+def test_collect_data_from_files_skips_rotated_not_terminated_file(mock_utc, mock_exists, instance):
+    """A not_terminated file that was completed and rotated into a named file is skipped."""
+    check = MacAuditLogsCheck("mac_audit_logs", {}, [instance])
+    check.fetch_audit_logs = MagicMock(return_value=(b"<record/>", b""))
+    check.process_and_ingest_log_entries = MagicMock()
+
+    relevant_files = [
+        (utils.time_string_to_datetime_utc("20230401000000"), "20230401000000.20230401010000"),
+        (utils.time_string_to_datetime_utc("20230401010000"), "20230401010000.20230401020000"),
+    ]
+    previous_cursor = {"is_file_collection_completed": True}
+    last_collected_file_name = "20230401000000.not_terminated"
+    last_record_time = "20230401010000"
+
+    check.collect_data_from_files(
+        relevant_files, previous_cursor, last_record_time, last_collected_file_name, None, "+0000"
+    )
+
+    expected_paths = [os.path.join(check.audit_logs_dir_path, relevant_files[1][1])]
+    check.fetch_audit_logs.assert_called_once_with(expected_paths, last_record_time)
+
+
+@pytest.mark.unit
+@patch("os.path.exists", return_value=True)
 @patch("datadog_checks.mac_audit_logs.utils.get_utc_timestamp_minus_hours", return_value="20230401000000")
 def test_collect_data_from_files_always_uses_last_record_time(mock_utc, mock_exists, instance):
     """The time filter is always last_record_time (regression test for file_index bug)."""
@@ -440,9 +489,7 @@ def test_collect_data_from_files_always_uses_last_record_time(mock_utc, mock_exi
 
     check.collect_data_from_files(relevant_files, None, last_record_time, None, None, "+0000")
 
-    _, call_kwargs = check.fetch_audit_logs.call_args
-    call_args = check.fetch_audit_logs.call_args[0]
-    assert call_args[1] == last_record_time
+    assert check.fetch_audit_logs.call_args[0][1] == last_record_time
 
 
 @patch.object(MacAuditLogsCheck, 'send_log')

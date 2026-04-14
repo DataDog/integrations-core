@@ -105,13 +105,14 @@ class MacAuditLogsCheck(AgentCheck):
 
         return last_record_time, last_record_milli_sec, last_collected_file_name
 
-    def fetch_audit_logs(self, file_paths: list[str], time_filter_arg) -> tuple[str, str]:
-        output = error = ""
+    def fetch_audit_logs(self, file_paths: list[str], time_filter_arg: str) -> tuple[bytes, bytes]:
+        output = error = b""
 
         auditreduce_command = f"sudo auditreduce -a {time_filter_arg} {' '.join(file_paths)}"
         praudit_command = "sudo praudit -xsl"
 
         try:
+            # use TZ=UTC because auditreduce does not translate daylight savings to UTC and always uses standard time
             auditreduce_process = subprocess.Popen(
                 auditreduce_command,
                 shell=True,
@@ -188,7 +189,13 @@ class MacAuditLogsCheck(AgentCheck):
                 self.log.exception(constants.LOG_TEMPLATE.format(message=err_message))
                 raise
 
-    def _should_skip_file(self, file, previous_cursor, last_collected_file_name, last_record_time) -> bool:
+    def _should_skip_file(
+        self,
+        file: str,
+        previous_cursor: dict | None,
+        last_collected_file_name: str | None,
+        last_record_time: str,
+    ) -> bool:
         start_time_str, end_time_str = file.split(".")
 
         if end_time_str not in ["not_terminated", "crash_recovery"] and utils.time_string_to_datetime_utc(
@@ -256,7 +263,7 @@ class MacAuditLogsCheck(AgentCheck):
         if not valid_file_paths:
             return
 
-        last_file = os.path.basename(valid_file_paths[-1])
+        first_file = os.path.basename(valid_file_paths[0])
 
         try:
             output, error = self.fetch_audit_logs(valid_file_paths, last_record_time)
@@ -270,7 +277,7 @@ class MacAuditLogsCheck(AgentCheck):
 
             log_entries = output_str.strip().split("\n")
 
-            self.process_and_ingest_log_entries(log_entries, last_file, timezone_offset, last_record_milli_sec)
+            self.process_and_ingest_log_entries(log_entries, first_file, timezone_offset, last_record_milli_sec)
 
         except Exception as e:
             err_message = f"Error processing files {valid_file_paths}: {e}"
