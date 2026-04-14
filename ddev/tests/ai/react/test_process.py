@@ -16,6 +16,8 @@ from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
 
+_TOOL_RESULT_DATA: str = "ok"
+
 # ---------------------------------------------------------------------------
 # Mock helpers
 # ---------------------------------------------------------------------------
@@ -51,7 +53,7 @@ class MockToolRegistry:
     """Minimal tool registry that always returns a configurable ToolResult."""
 
     def __init__(self, result: ToolResult | None = None) -> None:
-        self._result = result or ToolResult(success=True, data="ok")
+        self._result = result or ToolResult(success=True, data=_TOOL_RESULT_DATA)
         self.run_calls: list[tuple[str, dict]] = []
 
     async def run(self, name: str, raw: dict[str, object]) -> ToolResult:
@@ -206,7 +208,7 @@ async def test_single_tool_call_executes_tool_and_returns() -> None:
     assert agent.send_calls[0] == "Do something"
     assert isinstance(agent.send_calls[1], list)
     assert agent.send_calls[1][0].tool_call_id == "tc_01"
-    assert agent.send_calls[1][0].result.data == "ok"
+    assert agent.send_calls[1][0].result.data == _TOOL_RESULT_DATA
 
 
 # ---------------------------------------------------------------------------

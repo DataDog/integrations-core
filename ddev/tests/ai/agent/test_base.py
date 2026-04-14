@@ -8,6 +8,9 @@ from ddev.ai.agent.base import _COMPACT_SYSTEM_PROMPT, BaseAgent
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolResultMessage
 from ddev.ai.tools.core.registry import ToolRegistry
 
+_AGENT_NAME: str = "test"
+_AGENT_SYSTEM_PROMPT: str = "original"
+
 # ---------------------------------------------------------------------------
 # Minimal concrete agent for testing BaseAgent
 # ---------------------------------------------------------------------------
@@ -17,7 +20,7 @@ class ConcreteAgent(BaseAgent[dict]):
     """Minimal BaseAgent subclass that records send() calls and replays configured responses."""
 
     def __init__(self, responses: list[str | Exception] | None = None) -> None:
-        super().__init__(name="test", system_prompt="original", tools=ToolRegistry([]))
+        super().__init__(name=_AGENT_NAME, system_prompt=_AGENT_SYSTEM_PROMPT, tools=ToolRegistry([]))
         self._responses = list(responses or [])
         self._idx = 0
         self.send_calls: list[dict] = []
@@ -61,29 +64,28 @@ def make_history(n_messages: int) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
-# compact() — guard: history too short
+# compact() — history length after compact (guard cases + collapse)
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("n_messages", [0, 1, 2])
-async def test_compact_does_nothing_when_history_is_short(n_messages: int) -> None:
-    agent = ConcreteAgent()
+@pytest.mark.parametrize(
+    "n_messages, responses, expected_len",
+    [
+        (0, None, 0),
+        (1, None, 1),
+        (2, None, 2),
+        (4, ["summary"], 2),
+    ],
+)
+async def test_compact_history_length(
+    n_messages: int,
+    responses: list[str] | None,
+    expected_len: int,
+) -> None:
+    agent = ConcreteAgent(responses=responses)
     agent._history = make_history(n_messages)
     await agent.compact()
-    assert len(agent.send_calls) == 0
-    assert len(agent._history) == n_messages
-
-
-# ---------------------------------------------------------------------------
-# compact() — collapses history
-# ---------------------------------------------------------------------------
-
-
-async def test_compact_collapses_history_to_two_messages() -> None:
-    agent = ConcreteAgent(responses=["summary"])
-    agent._history = make_history(4)
-    await agent.compact()
-    assert len(agent.history) == 2
+    assert len(agent.history) == expected_len
 
 
 async def test_compact_first_message_is_original_task() -> None:
@@ -119,7 +121,7 @@ async def test_compact_restores_original_system_prompt() -> None:
     agent = ConcreteAgent(responses=["summary"])
     agent._history = make_history(4)
     await agent.compact()
-    assert agent._system_prompt == "original"
+    assert agent._system_prompt == _AGENT_SYSTEM_PROMPT
 
 
 async def test_compact_restores_system_prompt_on_send_error() -> None:
@@ -127,7 +129,7 @@ async def test_compact_restores_system_prompt_on_send_error() -> None:
     agent._history = make_history(4)
     with pytest.raises(RuntimeError):
         await agent.compact()
-    assert agent._system_prompt == "original"
+    assert agent._system_prompt == _AGENT_SYSTEM_PROMPT
 
 
 # ---------------------------------------------------------------------------

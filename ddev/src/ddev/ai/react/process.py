@@ -48,7 +48,11 @@ class ReActProcess:
 
     async def compact(self) -> None:
         """Compact the agent's conversation history unconditionally."""
-        await self._fire_compact()
+        for cb_set in self._callback_sets:
+            await cb_set.fire_before_compact()
+        await self._agent.compact()
+        for cb_set in self._callback_sets:
+            await cb_set.fire_after_compact()
 
     def _should_compact(self, response: AgentResponse) -> bool:
         if self._compact_threshold_pct is None:
@@ -57,13 +61,6 @@ class ReActProcess:
         if ctx is None:
             return False
         return ctx.context_pct >= self._compact_threshold_pct
-
-    async def _fire_compact(self) -> None:
-        for cb_set in self._callback_sets:
-            await cb_set.fire_before_compact()
-        await self._agent.compact()
-        for cb_set in self._callback_sets:
-            await cb_set.fire_after_compact()
 
     async def start(self, prompt: str, allowed_tools: list[str] | None = None) -> ReActResult:
         """
@@ -119,7 +116,7 @@ class ReActProcess:
                     await cb_set.fire_agent_response(response, iterations)
 
                 if self._should_compact(response):
-                    await self._fire_compact()
+                    await self.compact()
 
             react_result = ReActResult(
                 final_response=response,

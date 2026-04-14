@@ -33,13 +33,13 @@ class OnErrorCallback(Protocol):
     async def __call__(self, error: BaseException) -> None: ...
 
 
-class OnBeforeCompactCallback(Protocol):
+class BeforeCompactCallback(Protocol):
     """Called immediately before the agent's history is compacted."""
 
     async def __call__(self) -> None: ...
 
 
-class OnAfterCompactCallback(Protocol):
+class AfterCompactCallback(Protocol):
     """Called immediately after the agent's history has been compacted."""
 
     async def __call__(self) -> None: ...
@@ -62,8 +62,8 @@ class CallbackSet:
         self._on_tool_call: list[OnToolCallCallback] = []
         self._on_complete: list[OnCompleteCallback] = []
         self._on_error: list[OnErrorCallback] = []
-        self._on_before_compact: list[OnBeforeCompactCallback] = []
-        self._on_after_compact: list[OnAfterCompactCallback] = []
+        self._before_compact: list[BeforeCompactCallback] = []
+        self._after_compact: list[AfterCompactCallback] = []
 
     def on_agent_response(self, func: OnAgentResponseCallback) -> OnAgentResponseCallback:
         """Register a handler fired after every agent response."""
@@ -85,14 +85,14 @@ class CallbackSet:
         self._on_error.append(func)
         return func
 
-    def on_before_compact(self, func: OnBeforeCompactCallback) -> OnBeforeCompactCallback:
+    def on_before_compact(self, func: BeforeCompactCallback) -> BeforeCompactCallback:
         """Register a handler fired just before compaction runs."""
-        self._on_before_compact.append(func)
+        self._before_compact.append(func)
         return func
 
-    def on_after_compact(self, func: OnAfterCompactCallback) -> OnAfterCompactCallback:
+    def on_after_compact(self, func: AfterCompactCallback) -> AfterCompactCallback:
         """Register a handler fired just after compaction completes."""
-        self._on_after_compact.append(func)
+        self._after_compact.append(func)
         return func
 
     async def fire_agent_response(self, response: AgentResponse, iteration: int) -> None:
@@ -124,14 +124,14 @@ class CallbackSet:
                 pass
 
     async def fire_before_compact(self) -> None:
-        for handler in self._on_before_compact:
+        for handler in self._before_compact:
             try:
                 await handler()
             except Exception:
                 pass
 
     async def fire_after_compact(self) -> None:
-        for handler in self._on_after_compact:
+        for handler in self._after_compact:
             try:
                 await handler()
             except Exception:
