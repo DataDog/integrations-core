@@ -256,7 +256,6 @@ files:
         - name: samples_per_hour_per_query
           description: |
             Set the maximum number of error samples to collect per hour per unique query signature.
-            Errors are high-signal events, so this defaults higher than query_completions.
           value:
             type: number
             example: 60

@@ -194,7 +194,6 @@ instances:
 
         ## @param samples_per_hour_per_query - number - optional - default: 60
         ## Set the maximum number of error samples to collect per hour per unique query signature.
-        ## Errors are high-signal events, so this defaults higher than query_completions.
         #
         # samples_per_hour_per_query: 60
 
