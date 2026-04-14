@@ -46,7 +46,6 @@ def test_tag_skip_open_pr_check(ddev, git, mocker, config_file):
     list_prs.assert_not_called()
 
 
-
 def test_tag_github_api_error_degrades_gracefully(ddev, git, mocker, config_file):
     config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
     config_file.save()
