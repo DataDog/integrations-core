@@ -12,7 +12,7 @@ from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
-    from ddev.cli.validate.all.orchestrator import ValidationResult
+    from ddev.cli.validate.all.orchestrator import ValidationConfig, ValidationResult
 
 COMMENT_HEADING = "## Validation Report"
 
@@ -59,15 +59,6 @@ def get_pr_number(app: Application) -> int | None:
     return None
 
 
-def get_workflow_run_url() -> str | None:
-    server = os.environ.get("GITHUB_SERVER_URL")
-    repo = os.environ.get("GITHUB_REPOSITORY")
-    run_id = os.environ.get("GITHUB_RUN_ID")
-    if server and repo and run_id:
-        return f"{server}/{repo}/actions/runs/{run_id}"
-    return None
-
-
 def write_step_summary(content: str) -> None:
     if summary_path := os.environ.get("GITHUB_STEP_SUMMARY"):
         with contextlib.suppress(OSError):
@@ -75,25 +66,77 @@ def write_step_summary(content: str) -> None:
                 f.write(content + "\n")
 
 
+def _build_table(
+    rows: dict[str, ValidationResult],
+    configs: dict[str, ValidationConfig],
+) -> list[str]:
+    """Build a markdown table with Validation, Description, and Status columns."""
+    lines = ["| Validation | Description | Status |", "|---|---|---|"]
+    for name in sorted(rows):
+        status = "❌" if not rows[name].success else "✅"
+        description = configs[name].description if name in configs else ""
+        lines.append(f"| `{name}` | {description} | {status} |")
+    return lines
+
+
 def format_pr_comment(
     results: dict[str, ValidationResult],
+    configs: dict[str, ValidationConfig],
     target: str | None,
     *,
     error: str | None = None,
     warning: str | None = None,
 ) -> str:
-    failures = {n for n, r in results.items() if not r.success}
+    """Format a PR comment with collapsible sections to reduce clutter."""
+    failures = {n: r for n, r in results.items() if not r.success}
+    passed = {n: r for n, r in results.items() if r.success}
 
-    parts = [f"{COMMENT_HEADING}\n"]
+    parts: list[str] = [f"{COMMENT_HEADING}\n"]
     if error:
         parts.append(f"> **Error:** {error}\n")
     if warning:
         parts.append(f"> **Warning:** {warning}\n")
 
-    parts.extend(("| Validation | Status |", "|---|---|"))
-    for name in sorted(results):
-        status = "❌" if name in failures else "✅"
-        parts.append(f"| `{name}` | {status} |")
+    if failures:
+        parts.extend(_build_table(failures, configs))
+
+        fix_target = f" {target}" if target else ""
+        fix_all_cmd = f"ddev validate all{fix_target} --fix"
+        parts.append(f"\nRun `{fix_all_cmd}` to attempt to auto-fix supported validations.")
+
+        if passed:
+            parts.append("")
+            parts.append(f"<details>\n<summary>Passed validations ({len(passed)})</summary>\n")
+            parts.extend(_build_table(passed, configs))
+            parts.append("\n</details>")
+    else:
+        parts.append(f"All {len(results)} validations passed.")
+        parts.append("")
+        parts.append("<details>\n<summary>Show details</summary>\n")
+        parts.extend(_build_table(results, configs))
+        parts.append("\n</details>")
+
+    return "\n".join(parts)
+
+
+def format_step_summary(
+    results: dict[str, ValidationResult],
+    configs: dict[str, ValidationConfig],
+    target: str | None,
+    *,
+    error: str | None = None,
+    warning: str | None = None,
+) -> str:
+    """Format a flat summary table for the GitHub Actions step summary."""
+    failures = {n for n, r in results.items() if not r.success}
+
+    parts: list[str] = [f"{COMMENT_HEADING}\n"]
+    if error:
+        parts.append(f"> **Error:** {error}\n")
+    if warning:
+        parts.append(f"> **Warning:** {warning}\n")
+
+    parts.extend(_build_table(results, configs))
 
     if failures:
         fix_target = f" {target}" if target else ""

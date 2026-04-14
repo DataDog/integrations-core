@@ -14,9 +14,6 @@ def _clean_github_env(monkeypatch):
     """Provide a consistent GitHub Actions environment for all tests."""
     for key in ("GITHUB_EVENT_NAME", "GITHUB_EVENT_PATH", "GITHUB_REF", "GITHUB_STEP_SUMMARY"):
         monkeypatch.delenv(key, raising=False)
-    monkeypatch.setenv("GITHUB_SERVER_URL", "https://github.com")
-    monkeypatch.setenv("GITHUB_REPOSITORY", "DataDog/integrations-core")
-    monkeypatch.setenv("GITHUB_RUN_ID", "12345")
 
 
 def completed_process(returncode=0, stdout="", stderr=""):

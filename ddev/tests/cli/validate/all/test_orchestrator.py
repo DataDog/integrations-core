@@ -196,8 +196,10 @@ def test_on_finalize_writes_step_summary(mock_app, tmp_path, monkeypatch):
     }
     asyncio.run(orch.on_finalize(exception=None))
 
-    assert summary_file.exists()
-    assert "Validation Report" in summary_file.read_text()
+    content = summary_file.read_text()
+    assert "Validation Report" in content
+    assert "| Validation | Description | Status |" in content
+    assert "| `config` |" in content
 
 
 def test_on_finalize_posts_pr_comment_on_failure(mock_app):
@@ -213,9 +215,10 @@ def test_on_finalize_posts_pr_comment_on_failure(mock_app):
     mock_app.github.post_pull_request_comment.assert_called_once()
     body = mock_app.github.post_pull_request_comment.call_args[0][1]
     assert "Validation Report" in body
-    assert "| Validation | Status |" in body
-    assert "| `config` | ❌ |" in body
-    assert "[View full run](https://github.com/DataDog/integrations-core/actions/runs/12345)" in body
+    assert "| Validation | Description | Status |" in body
+    assert "| `config` |" in body
+    assert "❌" in body
+    assert "[View full run]" not in body
 
 
 def test_on_finalize_posts_pr_comment_on_success(mock_app):
@@ -230,9 +233,10 @@ def test_on_finalize_posts_pr_comment_on_success(mock_app):
 
     mock_app.github.post_pull_request_comment.assert_called_once()
     body = mock_app.github.post_pull_request_comment.call_args[0][1]
-    assert "| Validation | Status |" in body
-    assert "| `ci` | ✅ |" in body
-    assert "| `config` | ✅ |" in body
+    assert "All 2 validations passed." in body
+    assert "<details>" in body
+    assert "| `ci` |" in body
+    assert "| `config` |" in body
 
 
 def test_on_finalize_deletes_previous_validation_comments(mock_app):
@@ -282,21 +286,6 @@ def test_on_finalize_handles_post_failure(mock_app):
     mock_app.display_warning.assert_called()
     warning_args = [str(c) for c in mock_app.display_warning.call_args_list]
     assert any("network error" in w for w in warning_args)
-
-
-def test_on_finalize_pr_comment_omits_run_link_when_env_missing(mock_app, monkeypatch):
-    monkeypatch.delenv("GITHUB_RUN_ID")
-    mock_app.config.github.token = "fake-token"
-
-    orch = ValidationOrchestrator(app=mock_app, validations=["config"], target=None, pr_number=42)
-    orch._results = {
-        "config": ValidationResult(name="config", success=False, stdout="err", stderr="", duration=1.0),
-    }
-    with pytest.raises(SystemExit):
-        asyncio.run(orch.on_finalize(exception=None))
-
-    body = mock_app.github.post_pull_request_comment.call_args[0][1]
-    assert "[View full run]" not in body
 
 
 # --- load_validations ---
