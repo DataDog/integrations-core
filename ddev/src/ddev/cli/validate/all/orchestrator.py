@@ -246,14 +246,22 @@ class ValidationOrchestrator(EventBusOrchestrator):
         error_msg, extra_warning = self._build_error_and_warning(exception)
 
         summary_body = format_step_summary(
-            self._results, VALIDATIONS, self._target, self._validations,
-            error=error_msg, warning=extra_warning,
+            self._results,
+            VALIDATIONS,
+            self._target,
+            self._validations,
+            error=error_msg,
+            warning=extra_warning,
         )
         write_step_summary(summary_body)
 
         comment_body = format_pr_comment(
-            self._results, VALIDATIONS, self._target, self._validations,
-            error=error_msg, warning=extra_warning,
+            self._results,
+            VALIDATIONS,
+            self._target,
+            self._validations,
+            error=error_msg,
+            warning=extra_warning,
         )
         if run_url := get_workflow_run_url():
             comment_body += f"\n\n[View full run]({run_url})"
