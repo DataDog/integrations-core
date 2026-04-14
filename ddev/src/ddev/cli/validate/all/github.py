@@ -120,11 +120,19 @@ def _build_report_section(
     return table
 
 
+def _build_incomplete_warning(expected_validations: list[str], results: dict[str, ValidationResult]) -> list[str]:
+    missing = sorted(set(expected_validations) - set(results))
+    if not missing:
+        return []
+    names = ", ".join(f"`{n}`" for n in missing)
+    return [f"> **Warning:** {len(missing)} validation(s) did not complete: {names}\n"]
+
+
 def format_pr_comment(
     results: dict[str, ValidationResult],
     configs: dict[str, ValidationConfig],
     target: str | None,
-    expected_count: int,
+    expected_validations: list[str],
     *,
     error: str | None = None,
     warning: str | None = None,
@@ -135,11 +143,9 @@ def format_pr_comment(
     for name, result in results.items():
         (passed if result.success else failures)[name] = result
 
-    incomplete = expected_count - len(results)
+    incomplete = _build_incomplete_warning(expected_validations, results)
     parts = _build_preamble(error, warning)
-
-    if incomplete > 0:
-        parts.append(f"> **Warning:** {incomplete} validation(s) did not complete.\n")
+    parts.extend(incomplete)
 
     if failures:
         parts.extend(_build_report_section(failures, configs))
@@ -147,7 +153,7 @@ def format_pr_comment(
         parts.append(f"\nRun `ddev validate all{fix_target} --fix` to attempt to auto-fix supported validations.")
 
     if passed:
-        if failures or incomplete > 0:
+        if failures or incomplete:
             header = f"Passed validations ({len(passed)})"
         else:
             parts.append(f"All {len(passed)} validations passed.")
@@ -161,19 +167,16 @@ def format_step_summary(
     results: dict[str, ValidationResult],
     configs: dict[str, ValidationConfig],
     target: str | None,
-    expected_count: int,
+    expected_validations: list[str],
     *,
     error: str | None = None,
     warning: str | None = None,
 ) -> str:
     """Format a flat summary table for the GitHub Actions step summary."""
     has_failures = any(not r.success for r in results.values())
-    incomplete = expected_count - len(results)
 
     parts = _build_preamble(error, warning)
-
-    if incomplete > 0:
-        parts.append(f"> **Warning:** {incomplete} validation(s) did not complete.\n")
+    parts.extend(_build_incomplete_warning(expected_validations, results))
 
     parts.extend(_build_table(results, configs))
 
