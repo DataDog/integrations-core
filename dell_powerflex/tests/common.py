@@ -136,6 +136,7 @@ PROTECTION_DOMAIN_STATS_SIMPLE_METRICS = [
     {'name': 'dell_powerflex.protection_domain.rfcache.write_hit', 'value': 0},
     {'name': 'dell_powerflex.protection_domain.rfcache.write_miss', 'value': 0},
     {'name': 'dell_powerflex.protection_domain.net_user_data_capacity.in_kb', 'value': 524288},
+    {'name': 'dell_powerflex.protection_domain.user_data.capacity_in_kb', 'value': 1048576},
     {'name': 'dell_powerflex.protection_domain.snapshot.capacity_in_kb', 'value': 0},
     {'name': 'dell_powerflex.protection_domain.overall_usage_ratio', 'value': 96.0},
     {'name': 'dell_powerflex.protection_domain.net_capacity.in_use_in_kb', 'value': 524288},

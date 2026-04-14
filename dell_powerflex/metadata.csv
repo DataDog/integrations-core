@@ -190,6 +190,7 @@ dell_powerflex.protection_domain.rfcache.read_miss,gauge,,,,Number of RF cache r
 dell_powerflex.protection_domain.rfcache.write_hit,gauge,,,,Number of RF cache write hits.,0,dell_powerflex,protection domain rfcache write hits,,
 dell_powerflex.protection_domain.rfcache.write_miss,gauge,,,,Number of RF cache write misses.,0,dell_powerflex,protection domain rfcache write misses,,
 dell_powerflex.protection_domain.net_user_data_capacity.in_kb,gauge,,kibibyte,,Net user data capacity in the protection domain.,0,dell_powerflex,protection domain net user data capacity,,
+dell_powerflex.protection_domain.user_data.capacity_in_kb,gauge,,kibibyte,,Capacity consumed by user data.,0,dell_powerflex,protection domain user data capacity,,
 dell_powerflex.protection_domain.snapshot.capacity_in_kb,gauge,,kibibyte,,Capacity allocated for snapshots.,0,dell_powerflex,protection domain snapshot capacity,,
 dell_powerflex.protection_domain.overall_usage_ratio,gauge,,fraction,,Overall capacity usage ratio.,0,dell_powerflex,protection domain usage ratio,,
 dell_powerflex.protection_domain.net_capacity.in_use_in_kb,gauge,,kibibyte,,Net capacity in use in the protection domain.,0,dell_powerflex,protection domain net capacity in use,,
