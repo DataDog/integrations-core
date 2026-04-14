@@ -22,11 +22,10 @@ class NutanixCheck(AgentCheck, ConfigMixin):
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
         # Insert after load_configuration_models but before __initialize_persistent_cache_key_prefix
-        # so that ActivityMonitor reads persistent cache with an empty prefix (matching AgentCheck lifecycle)
-        self.check_initializations.insert(1, self._initialize_check_attributes)
-        self.check_initializations.insert(1, self._parse_config)
+        # so that ActivityMonitor reads persistent cache with an empty prefix (preserving existing cache keys)
+        self.check_initializations.insert(1, self._initialize)
 
-    def _parse_config(self):
+    def _initialize(self):
         self.pc_ip = self.config.pc_ip
         self.pc_port = self.config.pc_port or 9440
         if ":" in self.pc_ip:
@@ -42,7 +41,6 @@ class NutanixCheck(AgentCheck, ConfigMixin):
             [rf.model_dump() for rf in (self.config.resource_filters or ())], self.log
         )
 
-    def _initialize_check_attributes(self):
         self.base_url = f"{self.pc_ip}:{self.pc_port}"
         if not self.base_url.startswith("http"):
             self.base_url = "https://" + self.base_url
