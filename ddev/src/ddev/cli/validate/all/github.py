@@ -108,8 +108,10 @@ def format_pr_comment(
     warning: str | None = None,
 ) -> str:
     """Format a PR comment with collapsible sections to reduce clutter."""
-    failures = {n: r for n, r in results.items() if not r.success}
-    passed = {n: r for n, r in results.items() if r.success}
+    failures: dict[str, ValidationResult] = {}
+    passed: dict[str, ValidationResult] = {}
+    for n, r in results.items():
+        (passed if r.success else failures)[n] = r
 
     parts = _build_preamble(error, warning)
 
@@ -121,16 +123,20 @@ def format_pr_comment(
         parts.append(f"\nRun `{fix_all_cmd}` to attempt to auto-fix supported validations.")
 
         if passed:
-            parts.append("")
-            parts.append(f"<details>\n<summary>Passed validations ({len(passed)})</summary>\n")
-            parts.extend(_build_table(passed, configs))
-            parts.append("\n</details>")
+            parts.extend([
+                "",
+                f"<details>\n<summary>Passed validations ({len(passed)})</summary>\n",
+                *_build_table(passed, configs),
+                "\n</details>",
+            ])
     else:
-        parts.append(f"All {len(passed)} validations passed.")
-        parts.append("")
-        parts.append("<details>\n<summary>Show details</summary>\n")
-        parts.extend(_build_table(passed, configs))
-        parts.append("\n</details>")
+        parts.extend([
+            f"All {len(passed)} validations passed.",
+            "",
+            "<details>\n<summary>Show details</summary>\n",
+            *_build_table(passed, configs),
+            "\n</details>",
+        ])
 
     return "\n".join(parts)
 

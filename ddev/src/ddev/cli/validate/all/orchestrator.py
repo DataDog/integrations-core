@@ -220,7 +220,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
         if exception is not None:
             self._app.display_error(f"Error running validations: {exception}")
 
-        self._post_pr_comment(exception)
+        self._publish_report(exception)
         self._print_console_output()
 
     def _build_error_and_warning(self, exception: Exception | None) -> tuple[str | None, str | None]:
@@ -242,7 +242,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
         except Exception as exc:
             self._app.display_warning(f"Failed to clean up previous validation comments: {exc}")
 
-    def _post_pr_comment(self, exception: Exception | None) -> None:
+    def _publish_report(self, exception: Exception | None) -> None:
         error_msg, extra_warning = self._build_error_and_warning(exception)
 
         summary_body = format_step_summary(
