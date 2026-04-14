@@ -132,8 +132,8 @@ def format_pr_comment(
     """Format a PR comment with collapsible sections to reduce clutter."""
     failures: dict[str, ValidationResult] = {}
     passed: dict[str, ValidationResult] = {}
-    for n, r in results.items():
-        (passed if r.success else failures)[n] = r
+    for name, result in results.items():
+        (passed if result.success else failures)[name] = result
 
     incomplete = (expected_count or 0) - len(results)
     parts = _build_preamble(error, warning)
