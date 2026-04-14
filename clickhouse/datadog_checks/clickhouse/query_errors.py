@@ -15,6 +15,7 @@ except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
 from clickhouse_connect.driver.exceptions import Error
+
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
