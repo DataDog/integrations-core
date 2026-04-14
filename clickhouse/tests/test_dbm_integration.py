@@ -413,3 +413,52 @@ def test_query_samples_data(aggregator, instance, dd_run_check):
     assert any('sleep' in s for s in statements), (
         f"Expected to find the slow 'sleep' query in activity rows.\nCaptured statements: {statements}"
     )
+
+
+def test_query_errors_data(aggregator, instance, dd_run_check):
+    """
+    Execute a failing query, then verify the query errors pipeline captures it:
+    1. A dbm-activity event with dbm_type='query_error' is emitted
+    2. The payload contains an error record for the failing query
+    3. Key error fields (exception, exception_code, stack_trace) are populated
+    """
+    instance_config = deepcopy(instance)
+    instance_config['dbm'] = True
+    instance_config['query_metrics'] = {'enabled': False}
+    instance_config['query_samples'] = {'enabled': False}
+    instance_config['query_completions'] = {'enabled': False}
+    instance_config['query_errors'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': 10,
+    }
+
+    check = ClickhouseCheck('clickhouse', {}, [instance_config])
+    client = _get_clickhouse_client(instance_config)
+
+    try:
+        client.command("SELECT * FROM nonexistent_table_query_error_test")
+    except Exception:
+        pass  # Expected to fail
+
+    client.command('SYSTEM FLUSH LOGS')
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    events = aggregator.get_event_platform_events("dbm-activity")
+    error_events = [e for e in events if e.get('dbm_type') == 'query_error']
+    assert len(error_events) > 0, "Expected at least one query_error event"
+
+    all_errors = []
+    for e in error_events:
+        all_errors.extend(e.get('clickhouse_query_errors', []))
+
+    assert len(all_errors) > 0, "Expected at least one error record in payload"
+
+    details = all_errors[0]['query_details']
+    assert details['query_signature'] is not None
+    assert 'nonexistent_table_query_error_test' in details['exception']
+    assert 'UNKNOWN_TABLE' in details['exception']
+    assert details['exception_code'] == 60
+    assert 'stack_trace' in details

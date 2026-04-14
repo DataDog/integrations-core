@@ -14,18 +14,17 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
+from clickhouse_connect.driver.exceptions import Error
+
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.clickhouse.query_log_job import ClickhouseQueryLogJob, agent_check_getter
 
-# Query to fetch individual completed queries from system.query_log.
-# Unlike statements.py which aggregates, this returns individual query executions.
-#
-# Always includes hostName() as server_node for per-node checkpoint tracking.
-# For single-node deployments this is a single constant value; for multi-node
-# Cloud clusters it enables each node's checkpoint to advance independently.
-COMPLETED_QUERIES_QUERY = """
+# Query to fetch failed queries from system.query_log.
+# Collects ExceptionBeforeStart (type=3) and ExceptionWhileProcessing (type=4) events.
+# Includes exception, exception_code, and stack_trace fields in addition to the standard query fields.
+QUERY_ERRORS_QUERY = """
 SELECT
     normalized_query_hash,
     hostName() as server_node,
@@ -47,13 +46,18 @@ SELECT
     query_id,
     initial_query_id,
     query_kind,
-    is_initial_query
+    is_initial_query,
+    exception,
+    exception_code,
+    stack_trace,
+    current_database,
+    address
 FROM {query_log_table}
 WHERE
   {checkpoint_filter}
   AND event_time_microseconds <= now64(6)
   AND event_date >= toDate(fromUnixTimestamp64Micro({min_checkpoint_us:UInt64}))
-  AND type = 'QueryFinish'
+  AND type IN ('ExceptionBeforeStart', 'ExceptionWhileProcessing')
   AND is_initial_query = 1
   AND query != ''
   AND normalized_query_hash != 0
@@ -63,97 +67,81 @@ LIMIT {max_samples:UInt64}
 """
 
 
-class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
-    """Collects individual completed query samples from system.query_log"""
+class ClickhouseQueryErrors(ClickhouseQueryLogJob):
+    """Collects failed query samples from system.query_log"""
 
-    # Persistent cache key for storing the last collection timestamp
-    CHECKPOINT_CACHE_KEY = "query_completions_last_checkpoint_microseconds"
+    CHECKPOINT_CACHE_KEY = "query_errors_last_checkpoint_microseconds"
+    MAX_PAYLOAD_BYTES = 19e6
 
     def __init__(self, check: ClickhouseCheck, config):
         super().__init__(
             check=check,
             config=config,
-            job_name="query-completions",
+            job_name="query-errors",
         )
 
-        # Rate limiting: limit samples per query signature
         self._seen_samples_ratelimiter = RateLimitingTTLCache(
             maxsize=int(config.seen_samples_cache_maxsize),
             ttl=60 * 60 / float(config.samples_per_hour_per_query),
         )
 
-        # Maximum number of samples to collect per run
         self._max_samples_per_collection = int(config.max_samples_per_collection)
+
+    @staticmethod
+    def _get_estimated_row_size_bytes(row):
+        return len(str(row))
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_and_submit(self):
         """
-        Collect and submit completed query samples.
+        Collect and submit failed query samples.
 
         Checkpoint is always advanced after collection to prefer dropped data over duplicates.
         """
         try:
-            # Reset pending checkpoints at the start of each collection
             self._current_checkpoint_microseconds = None
             self._pending_node_checkpoints = {}
 
-            # Step 1: Collect rows (loads checkpoint internally)
-            rows = self._collect_completed_queries()
+            rows = self._collect_query_errors()
 
             if not rows:
-                # No new queries
-                self._log.debug("No new completed queries")
+                self._log.debug("No new query errors")
                 return
 
-            # Step 2: Apply rate limiting and create payload
             payload = self._create_batched_payload(rows)
 
-            if not payload or not payload.get('clickhouse_query_completions'):
-                self._log.debug("No query completions after rate limiting")
+            if not payload or not payload.get('clickhouse_query_errors'):
+                self._log.debug("No query errors after rate limiting")
                 return
 
-            # Step 3: Submit payload
-            payload_data = json.dumps(payload, default=default_json_event_encoding)
-            num_completions = len(payload.get('clickhouse_query_completions', []))
-            self._log.debug(
-                "Submitting query completions payload: %d bytes, %d completions",
-                len(payload_data),
-                num_completions,
-            )
-            self._check.database_monitoring_query_activity(payload_data)
-
-            if self._current_checkpoint_microseconds is not None:
+            try:
+                payload_data = json.dumps(payload, default=default_json_event_encoding)
+                num_errors = len(payload.get('clickhouse_query_errors', []))
+                self._log.debug(
+                    "Submitting query errors payload: %d bytes, %d errors",
+                    len(payload_data),
+                    num_errors,
+                )
+                self._check.database_monitoring_query_activity(payload_data)
                 self._log.debug(
                     "Successfully submitted. Checkpoint: %d microseconds", self._current_checkpoint_microseconds
                 )
+            except Exception:
+                self._log.exception('Failed to submit query errors payload')
+                # Checkpoint still advances — prefer dropped data over duplicates
 
-        except Exception:
-            self._log.exception('Unable to collect completed query samples due to an error')
         finally:
-            # Always advance checkpoint to avoid duplicates on retry.
-            # Dropped payloads are preferable to duplicate samples which can skew analysis.
             self._advance_checkpoint()
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _collect_completed_queries(self):
-        """
-        Load completed query samples using checkpoint-based collection.
-
-        Flow:
-            1. Build per-node checkpoint filter (falls back to global on first run)
-            2. Execute query with now64(6) as upper bound
-            3. Derive checkpoint from max(event_time_microseconds) in results
-            4. Return results (checkpoint saved later on success)
-
-        Optimization: Uses now64(6) directly in the query and derives the checkpoint from
-        the results, reducing DB roundtrips from 2 to 1 for normal operation.
-        """
+    def _collect_query_errors(self):
+        """Load failed query samples using checkpoint-based collection."""
         try:
             query_log_table = self._check.get_system_table('query_log')
             checkpoint_filter, min_checkpoint, params = self._build_per_node_checkpoint_filter()
 
             query = (
-                COMPLETED_QUERIES_QUERY.replace("{query_log_table}", query_log_table)
+                QUERY_ERRORS_QUERY.replace("{query_log_table}", query_log_table)
                 .replace("{checkpoint_filter}", checkpoint_filter)
                 .replace("{internal_user_filter}", self._get_internal_user_filter())
             )
@@ -163,13 +151,14 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             rows = self._execute_query(query, parameters=params)
 
             self._log.debug(
-                "Loaded %d completed queries from %s [%s]",
+                "Loaded %d query errors from %s [%s]",
                 len(rows),
                 query_log_table,
                 self.deployment_mode,
             )
 
             max_event_time = 0
+            estimated_size = 0
 
             result_rows = []
             for row in rows:
@@ -195,6 +184,11 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                     initial_query_id,
                     query_kind,
                     is_initial_query,
+                    exception,
+                    exception_code,
+                    stack_trace,
+                    current_database,
+                    address,
                 ) = row
 
                 event_time_int = self.to_microseconds(event_time_microseconds)
@@ -202,76 +196,77 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                     max_event_time = event_time_int
 
                 if server_node:
-                    self._track_node_checkpoint(str(server_node), event_time_int)
+                    self._track_node_checkpoint(server_node, event_time_int)
 
                 row_dict = {
                     'normalized_query_hash': str(normalized_query_hash),
-                    'hostname': str(server_node) if server_node else '',
-                    'query': str(query_text) if query_text else '',
+                    'hostname': server_node or '',
+                    'query': query_text or '',
                     'user': str(user) if user else '',
-                    'query_type': str(query_type) if query_type else '',
-                    'databases': str(databases[0]) if databases and len(databases) > 0 else '',
+                    'query_type': query_type or '',
+                    # For ExceptionBeforeStart errors, `databases` is empty because the query
+                    # failed before table resolution. Fall back to `current_database` (the
+                    # connection's default database) so the field is always populated.
+                    'databases': (
+                        str(databases[0]) if databases else (str(current_database) if current_database else '')
+                    ),
                     'tables': tables if tables else [],
                     'query_duration_ms': float(query_duration_ms) if query_duration_ms else 0.0,
-                    'read_rows': int(read_rows) if read_rows else 0,
-                    'read_bytes': int(read_bytes) if read_bytes else 0,
-                    'written_rows': int(written_rows) if written_rows else 0,
-                    'written_bytes': int(written_bytes) if written_bytes else 0,
-                    'result_rows': int(result_rows_count) if result_rows_count else 0,
-                    'result_bytes': int(result_bytes) if result_bytes else 0,
-                    'memory_usage': int(memory_usage) if memory_usage else 0,
+                    'read_rows': read_rows or 0,
+                    'read_bytes': read_bytes or 0,
+                    'written_rows': written_rows or 0,
+                    'written_bytes': written_bytes or 0,
+                    'result_rows': result_rows_count or 0,
+                    'result_bytes': result_bytes or 0,
+                    'memory_usage': memory_usage or 0,
                     'query_start_time_microseconds': self.to_microseconds(query_start_time_microseconds),
                     'event_time_microseconds': event_time_int,
-                    'query_id': str(query_id) if query_id else '',
-                    'initial_query_id': str(initial_query_id) if initial_query_id else '',
+                    'query_id': query_id or '',
+                    'initial_query_id': initial_query_id or '',
                     'query_kind': str(query_kind) if query_kind else '',
                     'is_initial_query': bool(is_initial_query) if is_initial_query is not None else True,
+                    'exception': exception or '',
+                    'exception_code': exception_code or 0,
+                    'stack_trace': stack_trace or '',
+                    'client_ip': str(address) if address else '',
                 }
 
-                # Obfuscate the query
                 obfuscated_row = self._normalize_query(row_dict)
                 if obfuscated_row:
+                    estimated_size += self._get_estimated_row_size_bytes(obfuscated_row)
+                    if estimated_size > ClickhouseQueryErrors.MAX_PAYLOAD_BYTES:
+                        self._log.warning("Query errors payload too large, truncating at %d rows", len(result_rows))
+                        break
                     result_rows.append(obfuscated_row)
 
-            # Step 4: Set checkpoint from results, or fetch current time if no rows (idle period)
             self._set_checkpoint_from_event_time(max_event_time)
 
             return result_rows
 
-        except Exception as e:
-            self._log.warning("Failed to load completed queries from system.query_log: %s", e)
+        except Error as e:
+            self._log.warning("Failed to load query errors from %s: %s", query_log_table, e)
 
             self._check.count(
-                "dd.clickhouse.query_completions.error",
+                "dd.clickhouse.query_errors.error",
                 1,
                 tags=self.tags + ["error:query_log_load_failed"],
                 raw=True,
             )
 
-            # Re-raise to let outer handler log the error.
-            # Checkpoint will still advance to avoid duplicates on retry.
             raise
 
-    def _create_batched_payload(self, rows):
-        """
-        Create a batched payload following SQL Server query_completion pattern.
-        Apply rate limiting and filter out rate-limited queries.
-
-        Returns:
-            dict: Batched payload with array of query completion details
-        """
-        query_completions = []
+    def _create_batched_payload(self, rows: list) -> dict | None:
+        """Create a batched payload with rate limiting applied."""
+        query_errors = []
 
         for row in rows:
             query_signature = row.get('query_signature')
             if not query_signature:
                 continue
 
-            # Apply rate limiting
             if not self._seen_samples_ratelimiter.acquire(query_signature):
                 continue
 
-            # Create query_details structure (similar to SQL Server)
             query_details = {
                 'statement': row.get('statement'),
                 'query_signature': query_signature,
@@ -294,6 +289,10 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                 'initial_query_id': row.get('initial_query_id', ''),
                 'is_initial_query': row.get('is_initial_query', True),
                 'hostname': row.get('hostname', ''),
+                'exception': row.get('exception', ''),
+                'exception_code': row.get('exception_code', 0),
+                'stack_trace': row.get('stack_trace', ''),
+                'client_ip': row.get('client_ip', ''),
                 'metadata': {
                     'tables': row.get('dd_tables'),
                     'commands': row.get('dd_commands'),
@@ -301,24 +300,23 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                 },
             }
 
-            query_completions.append({'query_details': query_details})
+            query_errors.append({'query_details': query_details})
 
-        if not query_completions:
+        if not query_errors:
             return None
 
-        # Create payload following SQL Server pattern
         payload = {
             'host': self._check.reported_hostname,
             'database_instance': self._check.database_identifier,
             'ddagentversion': datadog_agent.get_version(),
             'ddsource': 'clickhouse',
-            'dbm_type': 'query_completion',
+            'dbm_type': 'query_error',
             'collection_interval': self._collection_interval,
             'ddtags': self._tags_no_db,
             'timestamp': time.time() * 1000,
             'clickhouse_version': self._check.dbms_version,
-            'service': getattr(self._check, 'service', None),
-            'clickhouse_query_completions': query_completions,
+            'service': self._check._config.service,
+            'clickhouse_query_errors': query_errors,
         }
 
         return payload
