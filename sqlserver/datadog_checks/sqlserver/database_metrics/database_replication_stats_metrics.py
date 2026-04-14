@@ -12,7 +12,7 @@ DATABASE_REPLICATION_STATS_METRICS_QUERY = {
         replica_server_name,
         synchronization_health_desc as synchronization_state_desc,
         synchronization_health as synchronization_state,
-        synchronization_health
+        synchronization_health as replica_sync_state
         from sys.dm_hadr_availability_replica_states as dhars
         inner join sys.availability_groups as ag
         on ag.group_id = dhars.group_id
