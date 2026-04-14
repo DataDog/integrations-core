@@ -19,6 +19,7 @@ from datadog_checks.base.utils.models import validation
 
 from . import defaults, validators
 
+
 SECURE_FIELD_NAMES = frozenset(['tls_ca_cert'])
 
 
