@@ -101,10 +101,31 @@ instances:
     #     - r
     #     - p
 
+    ## @param collect_activity_metrics - boolean - optional - default: false
+    ## Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
+    ## has sufficient privileges to read from pg_stat_activity before enabling this option.
+    #
+    # collect_activity_metrics: false
+
     ## @param collect_function_metrics - boolean - optional - default: false
     ## If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions.
     #
     # collect_function_metrics: false
+
+    ## @param collect_database_size_metrics - boolean - optional - default: true
+    ## Collect database size metrics.
+    #
+    # collect_database_size_metrics: true
+
+    ## @param collect_bloat_metrics - boolean - optional - default: false
+    ## Collect metrics about table bloat. Only available when `relation` metrics are enabled.
+    #
+    collect_bloat_metrics: false
+
+    ## @param collect_count_metrics - boolean - optional - default: true
+    ## Collect count of user tables from pg_class.
+    #
+    # collect_count_metrics: true
 
     ## @param max_relations - integer - optional - default: 300
     ## Determines the maximum number of relations to fetch.
@@ -129,6 +150,11 @@ instances:
     ## For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
     # ssl: allow
+
+    ## @param collect_default_database - boolean - optional - default: true
+    ## Include statistics from the default database 'postgres' in the check metrics.
+    #
+    # collect_default_database: true
 
     ## @param query_timeout - integer - optional - default: 5000
     ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
@@ -158,32 +184,6 @@ instances:
     #   - cloudsqladmin
     #   - alloydbadmin
     #   - alloydbmetadata
-
-    ## @param collect_activity_metrics - boolean - optional - default: false
-    ## Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
-    ## has sufficient privileges to read from pg_stat_activity before enabling this option.
-    #
-    # collect_activity_metrics: false
-
-    ## @param collect_database_size_metrics - boolean - optional - default: true
-    ## Collect database size metrics.
-    #
-    # collect_database_size_metrics: true
-
-    ## @param collect_bloat_metrics - boolean - optional - default: false
-    ## Collect metrics about table bloat. Only available when `relation` metrics are enabled.
-    #
-    collect_bloat_metrics: false
-
-    ## @param collect_count_metrics - boolean - optional - default: true
-    ## Collect count of user tables from pg_class.
-    #
-    # collect_count_metrics: true
-
-    ## @param collect_default_database - boolean - optional - default: true
-    ## Include statistics from the default database 'postgres' in the check metrics.
-    #
-    # collect_default_database: true
 
     ## @param exclude_hostname - boolean - optional - default: false
     ## Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.

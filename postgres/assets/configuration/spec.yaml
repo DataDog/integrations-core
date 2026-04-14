@@ -128,6 +128,7 @@ files:
               - r
               - p
     - name: collect_activity_metrics
+      display_priority: 12
       fleet_configurable: true
       description: |
         Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
@@ -144,12 +145,14 @@ files:
         type: boolean
         example: false
     - name: collect_database_size_metrics
+      display_priority: 10
       fleet_configurable: true
       description: Collect database size metrics.
       value:
         type: boolean
         example: true
     - name: collect_bloat_metrics
+      display_priority: 9
       fleet_configurable: true
       description: Collect metrics about table bloat. Only available when `relation` metrics are enabled.
       enabled: true
@@ -157,6 +160,7 @@ files:
         type: boolean
         example: false
     - name: tag_replication_role
+      display_priority: 8
       fleet_configurable: true
       hidden: true
       description: Tag metrics and checks with `replication_role:<master|standby>`.
@@ -164,6 +168,7 @@ files:
         type: boolean
         example: true
     - name: collect_count_metrics
+      display_priority: 7
       fleet_configurable: true
       description: Collect count of user tables from pg_class.
       value:
@@ -200,6 +205,7 @@ files:
         example: 'allow'
         default: 'allow'
     - name: collect_default_database
+      display_priority: 4
       fleet_configurable: true
       description: Include statistics from the default database 'postgres' in the check metrics.
       value:
@@ -381,6 +387,7 @@ files:
         example: 30
         display_default: 30
     - name: locks_idle_in_transaction
+      display_priority: 0
       description: Configure collection of idle in transaction lock age metrics
       hidden: true
       options:
@@ -406,12 +413,14 @@ files:
             display_default: 100
           hidden: true
     - name: collect_checksum_metrics
+      display_priority: 0
       fleet_configurable: true
       description: Collect counts of database failed checksums. Only supported on versions >= 12.
       value:
         type: boolean
         example: false
     - name: activity_metrics_excluded_aggregations
+      display_priority: 0
       description: |
         A list of columns to remove from the pg_stat_activity aggregation.
         By default, datname, usename and application_name will be used.
@@ -426,6 +435,7 @@ files:
           - application_name
         default: []
     - name: collect_buffercache_metrics
+      display_priority: 0
       fleet_configurable: true
       description: |
         If set to true, collects metrics regarding buffer cache usage from pg_buffercache.
@@ -434,6 +444,7 @@ files:
         type: boolean
         example: false
     - name: collect_wal_metrics
+      display_priority: 0
       fleet_configurable: true
       description: |
         Collect metrics about WAL file age.
@@ -448,6 +459,7 @@ files:
         example: true
         display_default: null
     - name: data_directory
+      display_priority: 0
       description: |
         The data directory of your postgres installation.
         Only used when `collect_wal_metrics` is explicitly set to `true` on Postgres 9.6 and below.
@@ -456,6 +468,7 @@ files:
         example: /usr/local/pgsql/data
         display_default: /usr/local/pgsql/data
     - name: table_count_limit
+      display_priority: 0
       fleet_configurable: true
       description: The maximum number of tables to collect metrics from.
       value:
@@ -759,6 +772,7 @@ files:
             type: boolean
             example: false
     - name: query_activity
+      display_priority: 0
       fleet_configurable: true
       description: Configure collection of in-flight query samples
       options:
@@ -787,6 +801,7 @@ files:
             type: number
             example: 3500
     - name: collect_settings
+      display_priority: 0
       fleet_configurable: true
       description: Configure collection of pg_settings.
       options:
@@ -828,6 +843,7 @@ files:
             type: boolean
             example: false
     - name: collect_schemas
+      display_priority: 0
       fleet_configurable: true
       description: |
         Enable collection of database schemas. In order to collect schemas from all user databases,
@@ -953,6 +969,7 @@ files:
               - "customer.*"
 
     - name: aws
+      display_priority: 0
       description: |
         This block defines the configuration for AWS RDS and Aurora instances.
 
@@ -1010,6 +1027,7 @@ files:
               example: arn:aws:iam::123456789012:role/MyRole
 
     - name: gcp
+      display_priority: 0
       description: |
         This block defines the configuration for Google Cloud SQL instances.
 
@@ -1039,6 +1057,7 @@ files:
             example: foo-database
 
     - name: azure
+      display_priority: 0
       description: |
         This block defines the configuration for Azure Database for PostgreSQL.
 
@@ -1099,6 +1118,7 @@ files:
               type: string
               example: https://ossrdbms-aad.database.windows.net/.default
     - name: obfuscator_options
+      display_priority: 0
       description: |
         Configure how the SQL obfuscator behaves.
         Note: This option only applies when `dbm` is enabled.
@@ -1232,6 +1252,7 @@ files:
             example: false
             display_default: false
     - name: collect_raw_query_statement
+      display_priority: 0
       fleet_configurable: true
       description: |
         Configure the collection of raw query statements in query samples and explain plans.
@@ -1252,6 +1273,7 @@ files:
             example: false
             display_default: false
     - name: log_unobfuscated_queries
+      display_priority: 0
       fleet_configurable: true
       hidden: true
       description: |
@@ -1263,6 +1285,7 @@ files:
         example: false
         display_default: false
     - name: log_unobfuscated_plans
+      display_priority: 0
       hidden: true
       description: |
         Set to `true` to enable logging of original unobfuscated SQL plans when obfuscation errors occur.
@@ -1273,6 +1296,7 @@ files:
         example: false
         display_default: false
     - name: database_instance_collection_interval
+      display_priority: 0
       hidden: true
       fleet_configurable: true
       description: |
@@ -1283,6 +1307,7 @@ files:
         type: number
         default: 300
     - name: propagate_agent_tags
+      display_priority: 0
       fleet_configurable: true
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
