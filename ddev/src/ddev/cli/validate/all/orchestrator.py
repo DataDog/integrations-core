@@ -17,6 +17,7 @@ from ddev.cli.validate.all.github import (
     COMMENT_HEADING,
     format_pr_comment,
     format_step_summary,
+    get_workflow_run_url,
     write_step_summary,
 )
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator, SyncProcessor
@@ -252,6 +253,8 @@ class ValidationOrchestrator(EventBusOrchestrator):
         comment_body = format_pr_comment(
             self._results, VALIDATIONS, self._target, error=error_msg, warning=extra_warning
         )
+        if run_url := get_workflow_run_url():
+            comment_body += f"\n\n[View full run]({run_url})"
 
         self._app.logger.debug("PR number: %s", self._pr_number)
         self._app.logger.debug("GitHub token configured: %s", bool(self._app.config.github.token))

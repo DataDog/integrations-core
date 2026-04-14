@@ -9,6 +9,7 @@ from ddev.cli.validate.all.github import (
     format_pr_comment,
     format_step_summary,
     get_pr_number,
+    get_workflow_run_url,
     parse_pr_number_from_event,
     parse_pr_number_from_ref,
     write_step_summary,
@@ -284,6 +285,18 @@ def test_format_step_summary_with_error_and_warning(helpers):
 
         Run `ddev validate all --fix` to attempt to auto-fix supported validations.""")
     assert format_step_summary(results, CONFIGS, target=None, error="boom", warning="no PR") == expected
+
+
+# --- get_workflow_run_url ---
+
+
+def test_get_workflow_run_url_returns_url():
+    assert get_workflow_run_url() == "https://github.com/DataDog/integrations-core/actions/runs/12345"
+
+
+def test_get_workflow_run_url_returns_none_when_env_missing(monkeypatch):
+    monkeypatch.delenv("GITHUB_RUN_ID")
+    assert get_workflow_run_url() is None
 
 
 # --- write_step_summary ---

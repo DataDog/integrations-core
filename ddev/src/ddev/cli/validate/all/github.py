@@ -59,6 +59,15 @@ def get_pr_number(app: Application) -> int | None:
     return None
 
 
+def get_workflow_run_url() -> str | None:
+    server = os.environ.get("GITHUB_SERVER_URL")
+    repo = os.environ.get("GITHUB_REPOSITORY")
+    run_id = os.environ.get("GITHUB_RUN_ID")
+    if server and repo and run_id:
+        return f"{server}/{repo}/actions/runs/{run_id}"
+    return None
+
+
 def write_step_summary(content: str) -> None:
     if summary_path := os.environ.get("GITHUB_STEP_SUMMARY"):
         with contextlib.suppress(OSError):
