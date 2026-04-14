@@ -14,6 +14,9 @@ from .constants import (
     PROTECTION_DOMAIN_METRIC_PREFIX,
     PROTECTION_DOMAIN_STATS_BWC_METRICS,
     PROTECTION_DOMAIN_STATS_SIMPLE_METRICS,
+    SDS_METRIC_PREFIX,
+    SDS_STATS_BWC_METRICS,
+    SDS_STATS_SIMPLE_METRICS,
     STORAGE_POOL_METRIC_PREFIX,
     STORAGE_POOL_STATS_BWC_METRICS,
     STORAGE_POOL_STATS_SIMPLE_METRICS,
@@ -48,6 +51,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self._collect_volumes()
             self._collect_storage_pools()
             self._collect_protection_domains()
+            self._collect_sds_list()
         except (ConnectionError, HTTPError, InvalidURL, Timeout) as e:
             self.log.warning('Could not connect to PowerFlex Gateway: %s', e)
             self.gauge('api.can_connect', 0, tags=self._base_tags)
@@ -135,6 +139,29 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         for api_field, metric_suffix in PROTECTION_DOMAIN_STATS_SIMPLE_METRICS:
             self.gauge(f'{PROTECTION_DOMAIN_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
         self._collect_bwc_metrics(stats, PROTECTION_DOMAIN_METRIC_PREFIX, PROTECTION_DOMAIN_STATS_BWC_METRICS, tags)
+
+    def _collect_sds_list(self) -> None:
+        for sds in self._api.get_sds_list():
+            try:
+                self._collect_sds(sds)
+            except Exception as e:
+                self.log.warning('Failed to collect metrics for SDS %s: %s', sds.get('id'), e)
+
+    def _collect_sds(self, sds: dict) -> None:
+        tags = self._base_tags + [
+            f"sds_id:{sds['id']}",
+            f"sds_name:{sds['name']}",
+            f"protection_domain_id:{sds['protectionDomainId']}",
+        ]
+        if sds.get('faultSetId'):
+            tags = tags + [f"fault_set_id:{sds['faultSetId']}"]
+        self._collect_sds_statistics(sds['id'], tags)
+
+    def _collect_sds_statistics(self, sds_id: str, tags: list[str]) -> None:
+        stats = self._api.get_sds_statistics(sds_id)
+        for api_field, metric_suffix in SDS_STATS_SIMPLE_METRICS:
+            self.gauge(f'{SDS_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
+        self._collect_bwc_metrics(stats, SDS_METRIC_PREFIX, SDS_STATS_BWC_METRICS, tags)
 
     def _collect_bwc_metrics(
         self, stats: dict, metric_prefix: str, bwc_metrics: list[tuple[str, str]], tags: list[str]

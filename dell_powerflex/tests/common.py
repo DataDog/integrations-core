@@ -177,6 +177,51 @@ PROTECTION_DOMAIN_STATS_BWC_METRICS = [
     'dell_powerflex.protection_domain.vol_migration_write_bwc',
 ]
 
+SDS_STATS_SIMPLE_METRICS = [
+    {'name': 'dell_powerflex.sds.capacity_limit.in_kb', 'value': 103756800},
+    {'name': 'dell_powerflex.sds.max_capacity.in_kb', 'value': 103756800},
+    {'name': 'dell_powerflex.sds.capacity.in_use_in_kb', 'value': 349184},
+    {'name': 'dell_powerflex.sds.thick_capacity.in_use_in_kb', 'value': 0},
+    {'name': 'dell_powerflex.sds.thin_capacity.in_use_in_kb', 'value': 0},
+    {'name': 'dell_powerflex.sds.snap_capacity.in_use_in_kb', 'value': 0},
+    {'name': 'dell_powerflex.sds.unreachable_unused_capacity.in_kb', 'value': 0},
+    {'name': 'dell_powerflex.sds.unused_capacity.in_kb', 'value': 103407616},
+    {'name': 'dell_powerflex.sds.failed_vac.in_kb', 'value': 0},
+    {'name': 'dell_powerflex.sds.in_use_vac.in_kb', 'value': 22380544},
+    {'name': 'dell_powerflex.sds.fixed_read_error_count', 'value': 0},
+    {'name': 'dell_powerflex.sds.num_of_devices', 'value': 1},
+    {'name': 'dell_powerflex.sds.compression_ratio', 'value': 1.0},
+    {'name': 'dell_powerflex.sds.rfcache.reads_received', 'value': 0},
+    {'name': 'dell_powerflex.sds.rfcache.writes_received', 'value': 0},
+    {'name': 'dell_powerflex.sds.rfcache.read_hit', 'value': 0},
+    {'name': 'dell_powerflex.sds.rfcache.read_miss', 'value': 0},
+    {'name': 'dell_powerflex.sds.rfcache.write_hit', 'value': 0},
+    {'name': 'dell_powerflex.sds.rfcache.write_miss', 'value': 0},
+    {'name': 'dell_powerflex.sds.rfcache.reads_pending', 'value': 0},
+    {'name': 'dell_powerflex.sds.rfcache.io_errors', 'value': 0},
+    {'name': 'dell_powerflex.sds.user_data.capacity_in_kb', 'value': 349184},
+    {'name': 'dell_powerflex.sds.snapshot.capacity_in_kb', 'value': 0},
+    {'name': 'dell_powerflex.sds.rmcache.size_in_kb', 'value': 131072},
+    {'name': 'dell_powerflex.sds.rmcache.size_in_use_in_kb', 'value': 0},
+]
+
+SDS_STATS_BWC_METRICS = [
+    'dell_powerflex.sds.primary_read_bwc',
+    'dell_powerflex.sds.primary_write_bwc',
+    'dell_powerflex.sds.secondary_read_bwc',
+    'dell_powerflex.sds.secondary_write_bwc',
+    'dell_powerflex.sds.total_read_bwc',
+    'dell_powerflex.sds.total_write_bwc',
+    'dell_powerflex.sds.vol_migration_read_bwc',
+    'dell_powerflex.sds.vol_migration_write_bwc',
+    'dell_powerflex.sds.target_read_latency',
+    'dell_powerflex.sds.target_write_latency',
+    'dell_powerflex.sds.user_data_read_bwc',
+    'dell_powerflex.sds.user_data_write_bwc',
+    'dell_powerflex.sds.user_data_sdc_read_latency',
+    'dell_powerflex.sds.user_data_sdc_write_latency',
+]
+
 SYSTEM_STATS_BWC_METRICS = [
     'dell_powerflex.system.user_data_read_bwc',
     'dell_powerflex.system.user_data_write_bwc',

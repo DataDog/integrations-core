@@ -31,6 +31,12 @@ class PowerFlexAPI:
     def get_storage_pool_statistics(self, pool_id: str) -> dict:
         return self._get(f'/api/instances/StoragePool::{pool_id}/relationships/Statistics')
 
+    def get_sds_list(self) -> list[dict]:
+        return self._get('/api/types/Sds/instances')
+
+    def get_sds_statistics(self, sds_id: str) -> dict:
+        return self._get(f'/api/instances/Sds::{sds_id}/relationships/Statistics')
+
     def get_protection_domains(self) -> list[dict]:
         return self._get('/api/types/ProtectionDomain/instances')
 

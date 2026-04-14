@@ -13,6 +13,8 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .common import (
     PROTECTION_DOMAIN_STATS_BWC_METRICS,
     PROTECTION_DOMAIN_STATS_SIMPLE_METRICS,
+    SDS_STATS_BWC_METRICS,
+    SDS_STATS_SIMPLE_METRICS,
     STORAGE_POOL_STATS_BWC_METRICS,
     STORAGE_POOL_STATS_SIMPLE_METRICS,
     SYSTEM_MDM_CLUSTER_METRICS,
@@ -223,6 +225,57 @@ def test_collect_protection_domain_failure_continues(dd_run_check, aggregator, i
     dd_run_check(check)
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
     assert 'Failed to collect metrics for protection domain' in caplog.text
+
+
+def test_collect_sds(dd_run_check, aggregator, instance, mock_http_get):
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+
+    # SDS3: d1c062b700000000, no fault_set_id
+    sds3_tags = base_tags + [
+        'sds_id:d1c062b700000000',
+        'sds_name:SDS3',
+        'protection_domain_id:68c139ee00000000',
+    ]
+    for metric in SDS_STATS_SIMPLE_METRICS:
+        aggregator.assert_metric(metric['name'], value=metric['value'], tags=sds3_tags)
+    assert_bwc_metrics(aggregator, SDS_STATS_BWC_METRICS, sds3_tags)
+
+    # SDS2: d1c062b800000001
+    sds2_tags = base_tags + [
+        'sds_id:d1c062b800000001',
+        'sds_name:SDS2',
+        'protection_domain_id:68c139ee00000000',
+    ]
+    aggregator.assert_metric('dell_powerflex.sds.capacity.in_use_in_kb', value=350208, tags=sds2_tags)
+    aggregator.assert_metric('dell_powerflex.sds.unused_capacity.in_kb', value=103406592, tags=sds2_tags)
+    aggregator.assert_metric('dell_powerflex.sds.num_of_devices', value=1, tags=sds2_tags)
+    assert_bwc_metrics(aggregator, SDS_STATS_BWC_METRICS, sds2_tags)
+
+    # SDS1: d1c062b900000002
+    sds1_tags = base_tags + [
+        'sds_id:d1c062b900000002',
+        'sds_name:SDS1',
+        'protection_domain_id:68c139ee00000000',
+    ]
+    aggregator.assert_metric('dell_powerflex.sds.capacity.in_use_in_kb', value=349184, tags=sds1_tags)
+    aggregator.assert_metric('dell_powerflex.sds.unused_capacity.in_kb', value=103407616, tags=sds1_tags)
+    aggregator.assert_metric('dell_powerflex.sds.num_of_devices', value=1, tags=sds1_tags)
+    assert_bwc_metrics(aggregator, SDS_STATS_BWC_METRICS, sds1_tags)
+
+
+def test_collect_sds_failure_continues(dd_run_check, aggregator, instance, mock_http_get, mocker, caplog):
+    mocker.patch(
+        'datadog_checks.dell_powerflex.check.DellPowerflexCheck._collect_sds',
+        side_effect=[Exception(), None, None],
+    )
+    caplog.set_level(logging.WARNING)
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
+    assert 'Failed to collect metrics for SDS' in caplog.text
 
 
 def test_collect_system_with_name(dd_run_check, aggregator, instance, mocker):

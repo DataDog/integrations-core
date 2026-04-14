@@ -124,6 +124,53 @@ STORAGE_POOL_STATS_BWC_METRICS = _COMMON_BWC_METRICS + [
     ('normRebuildReadBwc', 'norm_rebuild_read_bwc'),
 ]
 
+SDS_METRIC_PREFIX = 'sds'
+
+SDS_STATS_SIMPLE_METRICS = [
+    ('capacityLimitInKb', 'capacity_limit.in_kb'),
+    ('maxCapacityInKb', 'max_capacity.in_kb'),
+    ('capacityInUseInKb', 'capacity.in_use_in_kb'),
+    ('thickCapacityInUseInKb', 'thick_capacity.in_use_in_kb'),
+    ('thinCapacityInUseInKb', 'thin_capacity.in_use_in_kb'),
+    ('snapCapacityInUseInKb', 'snap_capacity.in_use_in_kb'),
+    ('unreachableUnusedCapacityInKb', 'unreachable_unused_capacity.in_kb'),
+    ('unusedCapacityInKb', 'unused_capacity.in_kb'),
+    ('failedVacInKb', 'failed_vac.in_kb'),
+    ('inUseVacInKb', 'in_use_vac.in_kb'),
+    ('backgroundScanFixedReadErrorCount', 'fixed_read_error_count'),
+    ('numOfDevices', 'num_of_devices'),
+    ('compressionRatio', 'compression_ratio'),
+    ('rfcacheReadsReceived', 'rfcache.reads_received'),
+    ('rfcacheWritesReceived', 'rfcache.writes_received'),
+    ('rfacheReadHit', 'rfcache.read_hit'),
+    ('rfcacheReadMiss', 'rfcache.read_miss'),
+    ('rfacheWriteHit', 'rfcache.write_hit'),
+    ('rfcacheWriteMiss', 'rfcache.write_miss'),
+    ('rfcacheReadsPending', 'rfcache.reads_pending'),
+    ('rfcacheIoErrors', 'rfcache.io_errors'),
+    ('userDataCapacityInKb', 'user_data.capacity_in_kb'),
+    ('snapshotCapacityInKb', 'snapshot.capacity_in_kb'),
+    ('rmcacheSizeInKb', 'rmcache.size_in_kb'),
+    ('rmcacheSizeInUseInKb', 'rmcache.size_in_use_in_kb'),
+]
+
+SDS_STATS_BWC_METRICS = [
+    ('primaryReadBwc', 'primary_read_bwc'),
+    ('primaryWriteBwc', 'primary_write_bwc'),
+    ('secondaryReadBwc', 'secondary_read_bwc'),
+    ('secondaryWriteBwc', 'secondary_write_bwc'),
+    ('totalReadBwc', 'total_read_bwc'),
+    ('totalWriteBwc', 'total_write_bwc'),
+    ('volMigrationReadBwc', 'vol_migration_read_bwc'),
+    ('volMigrationWriteBwc', 'vol_migration_write_bwc'),
+    ('targetReadLatency', 'target_read_latency'),
+    ('targetWriteLatency', 'target_write_latency'),
+    ('userDataReadBwc', 'user_data_read_bwc'),
+    ('userDataWriteBwc', 'user_data_write_bwc'),
+    ('userDataSdcReadLatency', 'user_data_sdc_read_latency'),
+    ('userDataSdcWriteLatency', 'user_data_sdc_write_latency'),
+]
+
 PROTECTION_DOMAIN_METRIC_PREFIX = 'protection_domain'
 
 PROTECTION_DOMAIN_STATS_SIMPLE_METRICS = [
