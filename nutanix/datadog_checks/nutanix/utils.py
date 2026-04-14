@@ -27,8 +27,8 @@ def retry_on_rate_limit(method: Callable[..., Response]) -> Callable[..., Respon
     @wraps(method)
     def wrapper(self, *args, **kwargs) -> Response:
         max_retries: int = max(1, self.config.pc_max_retries)
-        base_backoff: float = self.config.pc_base_backoff_seconds
-        max_backoff: float = self.config.pc_max_backoff_seconds
+        base_backoff: int = self.config.pc_base_backoff_seconds
+        max_backoff: int = self.config.pc_max_backoff_seconds
 
         response = method(self, *args, **kwargs)
         for attempt in range(1, max_retries):
