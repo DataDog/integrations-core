@@ -9,8 +9,26 @@ files:
     options:
     - name: powerflex_gateway_url
       required: true
+      display_priority: 3
       description: URL of the PowerFlex Gateway REST API.
       value:
         example: https://localhost:443
         type: string
+    - template: instances/http
+      overrides:
+        auth_token.display_priority: 2
+        auth_token.description: |
+          Configuration for authenticating to the PowerFlex Gateway
+          using OAuth2 client credentials.
+        auth_token.value.example:
+          reader:
+            type: oauth
+            url: https://localhost:443/rest/auth/login
+            client_id: admin
+            client_secret: <password>
+            basic_auth: true
+          writer:
+            type: header
+            name: Authorization
+            value: "Bearer <token>"
     - template: instances/default
