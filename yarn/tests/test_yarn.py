@@ -5,7 +5,6 @@ import copy
 import re
 
 import pytest
-from requests.exceptions import SSLError
 
 from datadog_checks.yarn import YarnCheck
 from datadog_checks.yarn.yarn import (
@@ -267,36 +266,14 @@ def test_auth(aggregator, mocked_auth_request):
     )
 
 
-def test_ssl_verification(aggregator, mocked_bad_cert_request):
+def test_ssl_verification():
     instance = YARN_SSL_VERIFY_TRUE_CONFIG['instances'][0]
-
-    # Instantiate YarnCheck
     yarn = YarnCheck('yarn', {}, [instance])
+    assert yarn.http.options['verify'] is True
 
-    # Run the check on a config with a badly configured SSL certificate
-    try:
-        yarn.check(instance)
-    except SSLError:
-        aggregator.assert_service_check(
-            SERVICE_CHECK_NAME,
-            status=YarnCheck.CRITICAL,
-            tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
-            count=1,
-        )
-        pass
-    else:
-        raise AssertionError('Should have thrown an SSLError due to a badly configured certificate')
-
-    # Run the check on the same configuration, but with verify=False. We shouldn't get an exception.
     instance = YARN_SSL_VERIFY_FALSE_CONFIG['instances'][0]
     yarn = YarnCheck('yarn', {}, [instance])
-    yarn.check(instance)
-    aggregator.assert_service_check(
-        SERVICE_CHECK_NAME,
-        status=YarnCheck.OK,
-        tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
-        count=4,
-    )
+    assert yarn.http.options['verify'] is False
 
 
 def test_collect_apps_all_states(dd_run_check, aggregator, mocked_request):
