@@ -339,25 +339,25 @@ def test_sqlserver_availability_groups_metrics(
         pytest.param(
             None,
             None,
-            [('AG1', 'AG1', 'aoag_secondary', 'SYNCHRONIZED', 2), ('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            [('AG1', 'AG1', 'aoag_secondary', 'HEALTHY', 2), ('AG1', 'AG1', 'aoag_primary', 'HEALTHY', 2)],
             id='no availability_group, no only_emit_local',
         ),
         pytest.param(
             'AG1',
             None,
-            [('AG1', 'AG1', 'aoag_secondary', 'SYNCHRONIZED', 2), ('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            [('AG1', 'AG1', 'aoag_secondary', 'HEALTHY', 2), ('AG1', 'AG1', 'aoag_primary', 'HEALTHY', 2)],
             id='availability_group set, no only_emit_local',
         ),
         pytest.param(
             None,
             True,
-            [('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            [('AG1', 'AG1', 'aoag_primary', 'HEALTHY', 2)],
             id='no availability_group, only_emit_local is True',
         ),
         pytest.param(
             'AG1',
             True,
-            [('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            [('AG1', 'AG1', 'aoag_primary', 'HEALTHY', 2)],
             id='availability_group set, only_emit_local is True',
         ),
     ],
@@ -412,13 +412,13 @@ def test_sqlserver_database_replication_stats_metrics(
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         for result in mocked_results:
-            ag, availability_group_name, replica_server_name, synchronization_state_desc, *metric_values = result
+            ag, availability_group_name, replica_server_name, synchronization_health_desc, *metric_values = result
             metrics = zip(database_replication_stats_metrics.metric_names()[0], metric_values)
             expected_tags = [
                 f'availability_group:{ag}',
                 f'availability_group_name:{availability_group_name}',
                 f'replica_server_name:{replica_server_name}',
-                f'synchronization_state_desc:{synchronization_state_desc}',
+                f'synchronization_health_desc:{synchronization_health_desc}',
             ] + tags
             for metric_name, metric_value in metrics:
                 if metric_value is not None:
@@ -877,9 +877,9 @@ def test_sqlserver_index_usage_metrics(
         },
     }
     if index_usage_stats_interval:
-        instance_docker_metrics['database_metrics']['index_usage_metrics']['collection_interval'] = (
-            index_usage_stats_interval
-        )
+        instance_docker_metrics['database_metrics']['index_usage_metrics'][
+            'collection_interval'
+        ] = index_usage_stats_interval
 
     mocked_results_non_tempdb = [
         [
@@ -978,9 +978,9 @@ def test_sqlserver_db_fragmentation_metrics(
         },
     }
     if db_fragmentation_metrics_interval:
-        instance_docker_metrics['database_metrics']['db_fragmentation_metrics']['collection_interval'] = (
-            db_fragmentation_metrics_interval
-        )
+        instance_docker_metrics['database_metrics']['db_fragmentation_metrics'][
+            'collection_interval'
+        ] = db_fragmentation_metrics_interval
     mocked_results = [
         [
             ('master', 'spt_fallback_db', 'dbo', 0, None, 0, 0.0, 0, 0.0),
@@ -1532,9 +1532,9 @@ def test_sqlserver_database_backup_metrics(
         'db_backup_metrics': {'enabled': include_database_backup_metrics},
     }
     if database_backup_metrics_interval:
-        instance_docker_metrics['database_metrics']['db_backup_metrics']['collection_interval'] = (
-            database_backup_metrics_interval
-        )
+        instance_docker_metrics['database_metrics']['db_backup_metrics'][
+            'collection_interval'
+        ] = database_backup_metrics_interval
 
     mocked_results = [
         ('master', 'master', 0),

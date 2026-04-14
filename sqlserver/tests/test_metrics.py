@@ -513,7 +513,7 @@ def test_check_ao_primary_replica(aggregator, dd_run_check, init_config, instanc
         for tag_prefix in (
             'availability_group',
             'availability_group_name',
-            'synchronization_state_desc',
+            'synchronization_health_desc',
             'replica_server_name',
         ):
             aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
@@ -603,7 +603,7 @@ def test_check_ao_secondary_replica(aggregator, dd_run_check, init_config, insta
         for tag_prefix in (
             'availability_group',
             'availability_group_name',
-            'synchronization_state_desc',
+            'synchronization_health_desc',
             'replica_server_name',
         ):
             aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
