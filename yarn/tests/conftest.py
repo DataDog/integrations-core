@@ -7,8 +7,6 @@ from copy import deepcopy
 from urllib.parse import urljoin
 
 import pytest
-from mock import patch
-from requests.exceptions import SSLError
 
 from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import docker_run
@@ -63,19 +61,6 @@ def mocked_request(mock_http):
 def mocked_auth_request(mock_http):
     mock_http.get.side_effect = requests_get_mock
     yield
-
-
-@pytest.fixture
-def mocked_bad_cert_request():
-    """Keep requests.Session.get patch — tests verify=True vs verify=False which requires the real HTTP wrapper."""
-
-    def requests_bad_cert_get(session, *args, **kwargs):
-        if kwargs.get('verify', True):
-            raise SSLError("certificate verification failed for {}".format(args[0]))
-        return requests_get_mock(args[0], *args[1:], **kwargs)
-
-    with patch("requests.Session.get", new=requests_bad_cert_get):
-        yield
 
 
 def requests_get_mock(url, *args, **kwargs):
