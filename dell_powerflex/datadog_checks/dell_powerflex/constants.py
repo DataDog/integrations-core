@@ -133,13 +133,17 @@ STORAGE_POOL_STATS_SIMPLE_METRICS = _COMMON_SIMPLE_METRICS + [
     ('ActualNetCapacityInUseInKb', 'actual_net_capacity.in_use_in_kb'),
 ]
 
-STORAGE_POOL_STATS_BWC_METRICS = _COMMON_BWC_METRICS + _COMMON_IO_BWC_METRICS + [
-    ('rebalanceReadBwc', 'rebalance_read_bwc'),
-    ('rebalanceWriteBwc', 'rebalance_write_bwc'),
-    ('fwdRebuildReadBwc', 'fwd_rebuild_read_bwc'),
-    ('bckRebuildReadBwc', 'bck_rebuild_read_bwc'),
-    ('normRebuildReadBwc', 'norm_rebuild_read_bwc'),
-]
+STORAGE_POOL_STATS_BWC_METRICS = (
+    _COMMON_BWC_METRICS
+    + _COMMON_IO_BWC_METRICS
+    + [
+        ('rebalanceReadBwc', 'rebalance_read_bwc'),
+        ('rebalanceWriteBwc', 'rebalance_write_bwc'),
+        ('fwdRebuildReadBwc', 'fwd_rebuild_read_bwc'),
+        ('bckRebuildReadBwc', 'bck_rebuild_read_bwc'),
+        ('normRebuildReadBwc', 'norm_rebuild_read_bwc'),
+    ]
+)
 
 SDS_METRIC_PREFIX = 'sds'
 
@@ -206,15 +210,19 @@ PROTECTION_DOMAIN_STATS_SIMPLE_METRICS = _COMMON_SIMPLE_METRICS + [
     ('numOfFaultSets', 'num_of_fault_sets'),
 ]
 
-PROTECTION_DOMAIN_STATS_BWC_METRICS = _COMMON_BWC_METRICS + _COMMON_IO_BWC_METRICS + [
-    ('rebalanceReadBwc', 'rebalance_read_bwc'),
-    ('rebalanceWriteBwc', 'rebalance_write_bwc'),
-    ('fwdRebuildReadBwc', 'fwd_rebuild_read_bwc'),
-    ('fwdRebuildWriteBwc', 'fwd_rebuild_write_bwc'),
-    ('bckRebuildReadBwc', 'bck_rebuild_read_bwc'),
-    ('bckRebuildWriteBwc', 'bck_rebuild_write_bwc'),
-    ('normRebuildReadBwc', 'norm_rebuild_read_bwc'),
-    ('normRebuildWriteBwc', 'norm_rebuild_write_bwc'),
-    ('volMigrationReadBwc', 'vol_migration_read_bwc'),
-    ('volMigrationWriteBwc', 'vol_migration_write_bwc'),
-]
+PROTECTION_DOMAIN_STATS_BWC_METRICS = (
+    _COMMON_BWC_METRICS
+    + _COMMON_IO_BWC_METRICS
+    + [
+        ('rebalanceReadBwc', 'rebalance_read_bwc'),
+        ('rebalanceWriteBwc', 'rebalance_write_bwc'),
+        ('fwdRebuildReadBwc', 'fwd_rebuild_read_bwc'),
+        ('fwdRebuildWriteBwc', 'fwd_rebuild_write_bwc'),
+        ('bckRebuildReadBwc', 'bck_rebuild_read_bwc'),
+        ('bckRebuildWriteBwc', 'bck_rebuild_write_bwc'),
+        ('normRebuildReadBwc', 'norm_rebuild_read_bwc'),
+        ('normRebuildWriteBwc', 'norm_rebuild_write_bwc'),
+        ('volMigrationReadBwc', 'vol_migration_read_bwc'),
+        ('volMigrationWriteBwc', 'vol_migration_write_bwc'),
+    ]
+)

@@ -72,15 +72,15 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
                 self.log.warning('Failed to collect metrics for system %s: %s', system.get('id'), e)
 
     def _collect_system(self, system: dict) -> None:
-        tags = self._base_tags + [f"system_id:{system['id']}"]
+        tags = self._base_tags + [f"system_id:{system['id']}", f"dell_type:{SYSTEM_METRIC_PREFIX}"]
         if system.get('name'):
             tags = tags + [f"system_name:{system['name']}"]
         mdm_cluster = system.get('mdmCluster', {})
         for api_field, metric_suffix in SYSTEM_MDM_CLUSTER_SIMPLE_METRICS:
-            self.gauge(f'{SYSTEM_METRIC_PREFIX}.{metric_suffix}', mdm_cluster.get(api_field), tags=tags)
+            self.gauge(metric_suffix, mdm_cluster.get(api_field), tags=tags)
         for api_field, metric_suffix, tag_key in SYSTEM_MDM_CLUSTER_STATE_METRICS:
             self.gauge(
-                f'{SYSTEM_METRIC_PREFIX}.{metric_suffix}',
+                metric_suffix,
                 1,
                 tags=tags + [f"{tag_key}:{mdm_cluster.get(api_field)}"],
             )
@@ -99,6 +99,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             f"volume_name:{volume['name']}",
             f"volume_type:{volume['volumeType']}",
             f"storage_pool_id:{volume['storagePoolId']}",
+            f"dell_type:{VOLUME_METRIC_PREFIX}",
         ]
         if volume.get('ancestorVolumeId'):
             tags = tags + [f"ancestor_volume_id:{volume['ancestorVolumeId']}"]
@@ -118,14 +119,15 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             f"storage_pool_id:{pool['id']}",
             f"storage_pool_name:{pool['name']}",
             f"protection_domain_id:{pool['protectionDomainId']}",
+            f"dell_type:{STORAGE_POOL_METRIC_PREFIX}",
         ]
         self._collect_storage_pool_statistics(pool['id'], tags)
 
     def _collect_storage_pool_statistics(self, pool_id: str, tags: list[str]) -> None:
         stats = self._api.get_storage_pool_statistics(pool_id)
         for api_field, metric_suffix in STORAGE_POOL_STATS_SIMPLE_METRICS:
-            self.gauge(f'{STORAGE_POOL_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
-        self._collect_bwc_metrics(stats, STORAGE_POOL_METRIC_PREFIX, STORAGE_POOL_STATS_BWC_METRICS, tags)
+            self.gauge(metric_suffix, stats.get(api_field), tags=tags)
+        self._collect_bwc_metrics(stats, STORAGE_POOL_STATS_BWC_METRICS, tags)
 
     def _collect_protection_domains(self) -> None:
         for pd in self._api.get_protection_domains():
@@ -139,14 +141,15 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             f"protection_domain_id:{pd['id']}",
             f"protection_domain_name:{pd['name']}",
             f"system_id:{pd['systemId']}",
+            f"dell_type:{PROTECTION_DOMAIN_METRIC_PREFIX}",
         ]
         self._collect_protection_domain_statistics(pd['id'], tags)
 
     def _collect_protection_domain_statistics(self, pd_id: str, tags: list[str]) -> None:
         stats = self._api.get_protection_domain_statistics(pd_id)
         for api_field, metric_suffix in PROTECTION_DOMAIN_STATS_SIMPLE_METRICS:
-            self.gauge(f'{PROTECTION_DOMAIN_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
-        self._collect_bwc_metrics(stats, PROTECTION_DOMAIN_METRIC_PREFIX, PROTECTION_DOMAIN_STATS_BWC_METRICS, tags)
+            self.gauge(metric_suffix, stats.get(api_field), tags=tags)
+        self._collect_bwc_metrics(stats, PROTECTION_DOMAIN_STATS_BWC_METRICS, tags)
 
     def _collect_sdc_list(self) -> None:
         for sdc in self._api.get_sdc_list():
@@ -161,6 +164,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             f"sdc_guid:{sdc['sdcGuid']}",
             f"sdc_type:{sdc['sdcType']}",
             f"sdc_ip:{sdc['sdcIp']}",
+            f"dell_type:{SDC_METRIC_PREFIX}",
         ]
         if sdc.get('peerMdmId'):
             tags = tags + [f"peer_mdm_id:{sdc['peerMdmId']}"]
@@ -169,8 +173,8 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
     def _collect_sdc_statistics(self, sdc_id: str, tags: list[str]) -> None:
         stats = self._api.get_sdc_statistics(sdc_id)
         for api_field, metric_suffix in SDC_STATS_SIMPLE_METRICS:
-            self.gauge(f'{SDC_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
-        self._collect_bwc_metrics(stats, SDC_METRIC_PREFIX, SDC_STATS_BWC_METRICS, tags)
+            self.gauge(metric_suffix, stats.get(api_field), tags=tags)
+        self._collect_bwc_metrics(stats, SDC_STATS_BWC_METRICS, tags)
 
     def _collect_sds_list(self) -> None:
         for sds in self._api.get_sds_list():
@@ -184,6 +188,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             f"sds_id:{sds['id']}",
             f"sds_name:{sds['name']}",
             f"protection_domain_id:{sds['protectionDomainId']}",
+            f"dell_type:{SDS_METRIC_PREFIX}",
         ]
         if sds.get('faultSetId'):
             tags = tags + [f"fault_set_id:{sds['faultSetId']}"]
@@ -192,8 +197,8 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
     def _collect_sds_statistics(self, sds_id: str, tags: list[str]) -> None:
         stats = self._api.get_sds_statistics(sds_id)
         for api_field, metric_suffix in SDS_STATS_SIMPLE_METRICS:
-            self.gauge(f'{SDS_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
-        self._collect_bwc_metrics(stats, SDS_METRIC_PREFIX, SDS_STATS_BWC_METRICS, tags)
+            self.gauge(metric_suffix, stats.get(api_field), tags=tags)
+        self._collect_bwc_metrics(stats, SDS_STATS_BWC_METRICS, tags)
 
     def _collect_devices(self) -> None:
         for device in self._api.get_devices():
@@ -209,32 +214,30 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             f"current_path_name:{device['deviceCurrentPathName']}",
             f"storage_pool_id:{device['storagePoolId']}",
             f"sds_id:{device['sdsId']}",
+            f"dell_type:{DEVICE_METRIC_PREFIX}",
         ]
         self._collect_device_statistics(device['id'], tags)
 
     def _collect_device_statistics(self, device_id: str, tags: list[str]) -> None:
         stats = self._api.get_device_statistics(device_id)
         for api_field, metric_suffix in DEVICE_STATS_SIMPLE_METRICS:
-            self.gauge(f'{DEVICE_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
-        self._collect_bwc_metrics(stats, DEVICE_METRIC_PREFIX, DEVICE_STATS_BWC_METRICS, tags)
+            self.gauge(metric_suffix, stats.get(api_field), tags=tags)
+        self._collect_bwc_metrics(stats, DEVICE_STATS_BWC_METRICS, tags)
 
-    def _collect_bwc_metrics(
-        self, stats: dict, metric_prefix: str, bwc_metrics: list[tuple[str, str]], tags: list[str]
-    ) -> None:
+    def _collect_bwc_metrics(self, stats: dict, bwc_metrics: list[tuple[str, str]], tags: list[str]) -> None:
         for api_field, metric_suffix in bwc_metrics:
             bwc = stats.get(api_field, {})
-            prefix = f'{metric_prefix}.{metric_suffix}'
             for bwc_field, bwc_suffix in BWC_SUB_FIELDS:
-                self.gauge(f'{prefix}.{bwc_suffix}', bwc.get(bwc_field), tags=tags)
+                self.gauge(f'{metric_suffix}.{bwc_suffix}', bwc.get(bwc_field), tags=tags)
 
     def _collect_volume_statistics(self, volume_id: str, tags: list[str]) -> None:
         stats = self._api.get_volume_statistics(volume_id)
         for api_field, metric_suffix in VOLUME_STATS_SIMPLE_METRICS:
-            self.gauge(f'{VOLUME_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
-        self._collect_bwc_metrics(stats, VOLUME_METRIC_PREFIX, VOLUME_STATS_BWC_METRICS, tags)
+            self.gauge(metric_suffix, stats.get(api_field), tags=tags)
+        self._collect_bwc_metrics(stats, VOLUME_STATS_BWC_METRICS, tags)
 
     def _collect_system_statistics(self, system_id: str, tags: list[str]) -> None:
         stats = self._api.get_system_statistics(system_id)
         for api_field, metric_suffix in SYSTEM_STATS_SIMPLE_METRICS:
-            self.gauge(f'{SYSTEM_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
-        self._collect_bwc_metrics(stats, SYSTEM_METRIC_PREFIX, SYSTEM_STATS_BWC_METRICS, tags)
+            self.gauge(metric_suffix, stats.get(api_field), tags=tags)
+        self._collect_bwc_metrics(stats, SYSTEM_STATS_BWC_METRICS, tags)
