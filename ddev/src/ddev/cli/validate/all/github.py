@@ -99,6 +99,27 @@ def _build_table(
     return lines
 
 
+def _build_report_section(
+    rows: dict[str, ValidationResult],
+    configs: dict[str, ValidationConfig],
+    *,
+    header: str | None = None,
+    collapsed: bool = False,
+) -> list[str]:
+    table = _build_table(rows, configs)
+    if collapsed:
+        summary = header or "Details"
+        return [
+            "",
+            f"<details>\n<summary>{summary}</summary>\n",
+            *table,
+            "\n</details>",
+        ]
+    if header:
+        return [header, "", *table]
+    return table
+
+
 def format_pr_comment(
     results: dict[str, ValidationResult],
     configs: dict[str, ValidationConfig],
@@ -116,27 +137,17 @@ def format_pr_comment(
     parts = _build_preamble(error, warning)
 
     if failures:
-        parts.extend(_build_table(failures, configs))
-
+        parts.extend(_build_report_section(failures, configs))
         fix_target = f" {target}" if target else ""
-        fix_all_cmd = f"ddev validate all{fix_target} --fix"
-        parts.append(f"\nRun `{fix_all_cmd}` to attempt to auto-fix supported validations.")
+        parts.append(f"\nRun `ddev validate all{fix_target} --fix` to attempt to auto-fix supported validations.")
 
-        if passed:
-            parts.extend([
-                "",
-                f"<details>\n<summary>Passed validations ({len(passed)})</summary>\n",
-                *_build_table(passed, configs),
-                "\n</details>",
-            ])
-    else:
-        parts.extend([
-            f"All {len(passed)} validations passed.",
-            "",
-            "<details>\n<summary>Show details</summary>\n",
-            *_build_table(passed, configs),
-            "\n</details>",
-        ])
+    if passed:
+        if failures:
+            header = f"Passed validations ({len(passed)})"
+        else:
+            parts.append(f"All {len(passed)} validations passed.")
+            header = "Show details"
+        parts.extend(_build_report_section(passed, configs, header=header, collapsed=True))
 
     return "\n".join(parts)
 
