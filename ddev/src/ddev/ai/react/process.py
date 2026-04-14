@@ -76,7 +76,11 @@ class ReActProcess:
             return 0, 0
         for cb_set in self._callback_sets:
             await cb_set.fire_before_compact()
-        compact_response = await self._agent.compact_preserving_last_turn()
+        compact_response = None
+        if response.stop_reason == StopReason.TOOL_USE:
+            compact_response = await self._agent.compact_preserving_last_turn()
+        else:
+            compact_response = await self._agent.compact()
         for cb_set in self._callback_sets:
             await cb_set.fire_after_compact()
         if compact_response is None:

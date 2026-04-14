@@ -566,7 +566,7 @@ async def test_auto_compact_triggers_when_threshold_exceeded() -> None:
     ]
     agent = MockAgent(responses)
     await make_process(agent, compact_threshold_pct=75.0).start("task")
-    assert agent.compact_preserving_turn_calls == 1
+    assert agent.compact_calls == 1
 
 
 async def test_auto_compact_fires_callbacks() -> None:
@@ -622,7 +622,7 @@ async def test_auto_compact_tokens_included_in_result() -> None:
         make_response(StopReason.END_TURN, context_usage=make_context_usage(80.0), input_tokens=200, output_tokens=80),
     ]
     agent = MockAgent(responses)
-    agent.compact_token_response = make_response(StopReason.END_TURN, input_tokens=30, output_tokens=10)
+    agent.compact_response = make_response(StopReason.END_TURN, input_tokens=30, output_tokens=10)
 
     result = await make_process(agent, compact_threshold_pct=75.0).start("task")
 
