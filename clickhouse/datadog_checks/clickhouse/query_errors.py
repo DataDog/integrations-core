@@ -14,6 +14,7 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
+from clickhouse_connect.driver.exceptions import Error
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
@@ -112,22 +113,22 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
                 self._log.debug("No query errors after rate limiting")
                 return
 
-            payload_data = json.dumps(payload, default=default_json_event_encoding)
-            num_errors = len(payload.get('clickhouse_query_errors', []))
-            self._log.debug(
-                "Submitting query errors payload: %d bytes, %d errors",
-                len(payload_data),
-                num_errors,
-            )
-            self._check.database_monitoring_query_activity(payload_data)
-
-            if self._current_checkpoint_microseconds is not None:
+            try:
+                payload_data = json.dumps(payload, default=default_json_event_encoding)
+                num_errors = len(payload.get('clickhouse_query_errors', []))
+                self._log.debug(
+                    "Submitting query errors payload: %d bytes, %d errors",
+                    len(payload_data),
+                    num_errors,
+                )
+                self._check.database_monitoring_query_activity(payload_data)
                 self._log.debug(
                     "Successfully submitted. Checkpoint: %d microseconds", self._current_checkpoint_microseconds
                 )
+            except Exception:
+                self._log.exception('Failed to submit query errors payload')
+                # Checkpoint still advances — prefer dropped data over duplicates
 
-        except Exception:
-            self._log.exception('Unable to collect query error samples due to an error')
         finally:
             self._advance_checkpoint()
 
@@ -241,7 +242,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
 
             return result_rows
 
-        except Exception as e:
+        except Error as e:
             self._log.warning("Failed to load query errors from %s: %s", query_log_table, e)
 
             self._check.count(
