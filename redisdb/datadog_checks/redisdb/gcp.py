@@ -4,15 +4,10 @@
 import threading
 import time
 
-try:
-    import google.auth
-    import google.auth.exceptions
-    import google.auth.impersonated_credentials
-    import google.auth.transport.requests
-
-    HAS_GOOGLE_AUTH = True
-except ImportError:
-    HAS_GOOGLE_AUTH = False
+import google.auth
+import google.auth.exceptions
+import google.auth.impersonated_credentials
+import google.auth.transport.requests
 
 from datadog_checks.base import ConfigurationError
 
@@ -28,11 +23,6 @@ class GCPIAMTokenProvider:
     """
 
     def __init__(self, service_account: str | None = None):
-        if not HAS_GOOGLE_AUTH:
-            raise ConfigurationError(
-                "The 'google-auth' package is required for GCP IAM authentication. "
-                "Install it with: pip install datadog-checks-redisdb[gcp]"
-            )
         try:
             source_credentials, _ = google.auth.default(scopes=[GCP_SCOPE])
         except google.auth.exceptions.DefaultCredentialsError as e:

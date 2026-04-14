@@ -36,10 +36,8 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
+    "google-auth==2.49.2",
     "redis==7.3.0",
-]
-gcp = [
-    "google-auth>=2.0.0",
 ]
 
 [project.urls]

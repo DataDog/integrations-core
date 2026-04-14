@@ -23,15 +23,6 @@ def mock_google_auth(mock_credentials):
         yield mock_credentials
 
 
-class TestGCPIAMTokenProviderImportGuard:
-    def test_raises_config_error_when_google_auth_missing(self):
-        with patch("datadog_checks.redisdb.gcp.HAS_GOOGLE_AUTH", False):
-            from datadog_checks.redisdb.gcp import GCPIAMTokenProvider
-
-            with pytest.raises(ConfigurationError, match="google-auth"):
-                GCPIAMTokenProvider()
-
-
 class TestGCPIAMTokenProviderInit:
     def test_raises_config_error_on_missing_adc(self):
         import google.auth.exceptions
