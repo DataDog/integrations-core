@@ -11,7 +11,6 @@ DATABASE_REPLICATION_STATS_METRICS_QUERY = {
         name,
         replica_server_name,
         synchronization_health_desc as synchronization_state_desc,
-        synchronization_health as synchronization_state,
         synchronization_health as replica_sync_state
         from sys.dm_hadr_availability_replica_states as dhars
         inner join sys.availability_groups as ag
@@ -24,7 +23,6 @@ DATABASE_REPLICATION_STATS_METRICS_QUERY = {
         {"name": "availability_group_name", "type": "tag"},
         {"name": "replica_server_name", "type": "tag"},
         {"name": "synchronization_state_desc", "type": "tag"},
-        {"name": "synchronization_state", "type": "tag"},
         {"name": "ao.replica_sync_state", "type": "gauge"},
     ],
 }
