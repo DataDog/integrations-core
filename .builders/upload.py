@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from google.cloud.storage.bucket import Bucket as GCSBucket
 
 BUCKET_NAME = 'deps-agent-int-datadoghq-com'
-STORAGE_URL = 'https://agent-int-packages.datadoghq.com'
 BUILDER_DIR = Path(__file__).parent
 REPO_DIR = BUILDER_DIR.parent
 RESOLUTION_DIR = REPO_DIR / '.deps'

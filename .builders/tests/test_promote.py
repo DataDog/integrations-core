@@ -62,7 +62,7 @@ def test_collect_relative_paths(tmp_path):
     ]
 
 
-def test_collect_relative_paths_deduplicates(tmp_path):
+def test_collect_relative_paths_preserves_duplicates(tmp_path):
     """collect_relative_paths returns all paths even when shared across lockfiles."""
     lock_dir = tmp_path / ".deps" / "resolved"
     lock_dir.mkdir(parents=True)
@@ -146,6 +146,35 @@ def test_promote_fails_if_source_missing(capsys):
     assert exc_info.value.code == 1
     captured = capsys.readouterr()
     assert "MISSING" in captured.out or "not found" in captured.err
+
+
+def test_promote_partial_failure(capsys):
+    """promote copies available blobs and exits with error for missing ones."""
+    rel_paths = [
+        "built/present/present-1.0-cp313-cp313-linux_x86_64.whl",
+        "built/missing/missing-1.0-cp313-cp313-linux_x86_64.whl",
+    ]
+
+    mock_client = mock.Mock()
+    mock_bucket = mock.Mock()
+    mock_client.bucket.return_value = mock_bucket
+
+    present_blob = mock.Mock()
+    present_blob.exists.return_value = True
+    missing_blob = mock.Mock()
+    missing_blob.exists.return_value = False
+    mock_bucket.blob.side_effect = lambda path: missing_blob if "missing" in path else present_blob
+
+    with mock.patch("promote.storage.Client", return_value=mock_client):
+        with pytest.raises(SystemExit) as exc_info:
+            promote.promote(rel_paths)
+
+    assert exc_info.value.code == 1
+    mock_bucket.copy_blob.assert_called_once_with(
+        present_blob, mock_bucket, "stable/built/present/present-1.0-cp313-cp313-linux_x86_64.whl"
+    )
+    captured = capsys.readouterr()
+    assert "MISSING" in captured.out
 
 
 def test_promote_nothing_to_promote():

@@ -448,7 +448,7 @@ def test_built_wheel_priority(tmp_path, setup_targets_dir, setup_fake_hash, froz
           '']}
 
 
-def test_lockfile_generation(tmp_path, setup_targets_dir):
+def test_lockfile_generation(tmp_path, setup_targets_dir, frozen_timestamp):
 
     lockfile = {
         'linux-x86_64': [
