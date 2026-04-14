@@ -234,6 +234,24 @@ def test_format_pr_comment_missing_config_uses_empty_description():
     assert "| `unknown` |  | ✅ |" in comment
 
 
+def test_format_pr_comment_incomplete_validations_warns():
+    results = {
+        "ci": ValidationResult(name="ci", success=True, stdout="ok", stderr="", duration=2.0),
+    }
+    comment = format_pr_comment(results, CONFIGS, target=None, expected_count=3)
+    assert "2 validation(s) did not complete" in comment
+    assert "All " not in comment
+    assert "Passed validations (1)" in comment
+
+
+def test_format_step_summary_incomplete_validations_warns():
+    results = {
+        "ci": ValidationResult(name="ci", success=True, stdout="ok", stderr="", duration=2.0),
+    }
+    summary = format_step_summary(results, CONFIGS, target=None, expected_count=3)
+    assert "2 validation(s) did not complete" in summary
+
+
 # --- format_step_summary ---
 
 

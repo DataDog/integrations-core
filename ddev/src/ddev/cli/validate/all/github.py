@@ -125,6 +125,7 @@ def format_pr_comment(
     configs: dict[str, ValidationConfig],
     target: str | None,
     *,
+    expected_count: int | None = None,
     error: str | None = None,
     warning: str | None = None,
 ) -> str:
@@ -134,7 +135,11 @@ def format_pr_comment(
     for n, r in results.items():
         (passed if r.success else failures)[n] = r
 
+    incomplete = (expected_count or 0) - len(results)
     parts = _build_preamble(error, warning)
+
+    if incomplete > 0:
+        parts.append(f"> **Warning:** {incomplete} validation(s) did not complete.\n")
 
     if failures:
         parts.extend(_build_report_section(failures, configs))
@@ -142,7 +147,7 @@ def format_pr_comment(
         parts.append(f"\nRun `ddev validate all{fix_target} --fix` to attempt to auto-fix supported validations.")
 
     if passed:
-        if failures:
+        if failures or incomplete > 0:
             header = f"Passed validations ({len(passed)})"
         else:
             parts.append(f"All {len(passed)} validations passed.")
@@ -157,13 +162,19 @@ def format_step_summary(
     configs: dict[str, ValidationConfig],
     target: str | None,
     *,
+    expected_count: int | None = None,
     error: str | None = None,
     warning: str | None = None,
 ) -> str:
     """Format a flat summary table for the GitHub Actions step summary."""
     has_failures = any(not r.success for r in results.values())
+    incomplete = (expected_count or 0) - len(results)
 
     parts = _build_preamble(error, warning)
+
+    if incomplete > 0:
+        parts.append(f"> **Warning:** {incomplete} validation(s) did not complete.\n")
+
     parts.extend(_build_table(results, configs))
 
     if has_failures:
