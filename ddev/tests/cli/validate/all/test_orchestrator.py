@@ -196,7 +196,7 @@ def test_on_finalize_writes_step_summary(mock_app, tmp_path, monkeypatch):
     }
     asyncio.run(orch.on_finalize(exception=None))
 
-    content = summary_file.read_text()
+    content = summary_file.read_text(encoding="utf-8")
     assert "Validation Report" in content
     assert "| Validation | Description | Status |" in content
     assert "| `config` |" in content
@@ -249,7 +249,7 @@ def test_on_finalize_step_summary_does_not_include_run_link(mock_app, tmp_path, 
     with pytest.raises(SystemExit):
         asyncio.run(orch.on_finalize(exception=None))
 
-    content = summary_file.read_text()
+    content = summary_file.read_text(encoding="utf-8")
     assert "[View full run]" not in content
 
 
@@ -300,7 +300,7 @@ def test_on_finalize_includes_pr_warning_in_summary(mock_app, tmp_path, monkeypa
     }
     asyncio.run(orch.on_finalize(exception=None))
 
-    content = summary_file.read_text()
+    content = summary_file.read_text(encoding="utf-8")
     assert "could not determine PR number" in content
 
 
