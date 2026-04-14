@@ -156,3 +156,60 @@ async def test_compact_leaves_history_unchanged_on_send_error() -> None:
     with pytest.raises(RuntimeError):
         await agent.compact()
     assert agent._history == original_history
+
+
+# ---------------------------------------------------------------------------
+# compact_preserving_last_turn() — guard: history too short
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("n_messages", [0, 1, 2, 3])
+async def test_compact_preserving_last_turn_does_nothing_when_history_is_short(n_messages: int) -> None:
+    agent = ConcreteAgent()
+    agent._history = make_history(n_messages)
+    await agent.compact_preserving_last_turn()
+    assert len(agent.send_calls) == 0
+    assert len(agent._history) == n_messages
+
+
+# ---------------------------------------------------------------------------
+# compact_preserving_last_turn() — collapses middle, keeps last two
+# ---------------------------------------------------------------------------
+
+
+async def test_compact_preserving_last_turn_keeps_last_two_messages() -> None:
+    agent = ConcreteAgent(responses=["summary"])
+    agent._history = make_history(6)
+    last_two = agent._history[-2:]
+    await agent.compact_preserving_last_turn()
+    assert agent.history[-2:] == last_two
+
+
+async def test_compact_preserving_last_turn_first_message_is_original_task() -> None:
+    agent = ConcreteAgent(responses=["summary"])
+    original = make_history(6)[0]
+    agent._history = make_history(6)
+    await agent.compact_preserving_last_turn()
+    assert agent.history[0] == original
+
+
+async def test_compact_preserving_last_turn_produces_four_messages() -> None:
+    agent = ConcreteAgent(responses=["summary"])
+    agent._history = make_history(6)
+    await agent.compact_preserving_last_turn()
+    # original + summary + last user + last assistant
+    assert len(agent.history) == 4
+
+
+# ---------------------------------------------------------------------------
+# compact_preserving_last_turn() — error leaves history unchanged
+# ---------------------------------------------------------------------------
+
+
+async def test_compact_preserving_last_turn_leaves_history_unchanged_on_error() -> None:
+    agent = ConcreteAgent(responses=[RuntimeError("api failure")])
+    original_history = make_history(6)
+    agent._history = list(original_history)
+    with pytest.raises(RuntimeError):
+        await agent.compact_preserving_last_turn()
+    assert agent._history == original_history

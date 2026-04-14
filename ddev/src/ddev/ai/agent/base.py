@@ -49,17 +49,21 @@ class BaseAgent[TMessage](ABC):
         """Clear conversation history to start a new conversation."""
         self._history = []
 
-    async def compact(self) -> None:
-        """Collapse history to 2 messages: original task + LLM summary. No-op if already ≤ 2."""
+    async def compact(self) -> AgentResponse | None:
+        """Collapse history to 2 messages: original task + LLM summary.
+
+        Returns the AgentResponse from the compaction call so callers can
+        account for its token usage. Returns None if history is already ≤ 2.
+        """
         if len(self._history) <= 2:
-            return
+            return None
 
         original_prompt = self._history[0]
         original_system = self._system_prompt
 
         self._system_prompt = _COMPACT_SYSTEM_PROMPT
         try:
-            await self.send(_COMPACT_REQUEST, allowed_tools=[])
+            response = await self.send(_COMPACT_REQUEST, allowed_tools=[])
         finally:
             self._system_prompt = original_system  # restore even if send() raises
 
@@ -67,6 +71,27 @@ class BaseAgent[TMessage](ABC):
 
         self.reset()
         self._history = [original_prompt, compact_response]
+        return response
+
+    async def compact_preserving_last_turn(self) -> AgentResponse | None:
+        """Compact history while keeping the last user+assistant pair intact.
+
+        Used mid-ReAct loop where the last assistant message contains unresolved
+        tool calls that still need a tool-result response. After compaction the
+        preserved pair re-anchors the pending turn so the next send(tool_results)
+        produces a valid alternating message sequence. No-op if history is ≤ 3
+        messages (too short to compact without corrupting the sequence).
+
+        Returns the AgentResponse from the compaction call, or None if no
+        compaction occurred.
+        """
+        if len(self._history) <= 3:
+            return None
+
+        last_turn = self._history[-2:]  # [user(tool_results_N), assistant(tool_use_N+1)]
+        response = await self.compact()
+        self._history.extend(last_turn)
+        return response
 
     @abstractmethod
     async def send(

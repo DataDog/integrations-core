@@ -47,20 +47,34 @@ class ReActProcess:
         self._agent.reset()
 
     async def compact(self) -> None:
-        """Compact the agent's conversation history unconditionally."""
+        """Compact the agent's conversation history unconditionally.
+        Compaction does not preserve the last user+assistant pair."""
         for cb_set in self._callback_sets:
             await cb_set.fire_before_compact()
         await self._agent.compact()
         for cb_set in self._callback_sets:
             await cb_set.fire_after_compact()
 
-    def _should_compact(self, response: AgentResponse) -> bool:
+    async def _compact_if_needed(self, response: AgentResponse) -> tuple[int, int]:
+        """Compact mid-loop if the context threshold is exceeded.
+
+        Returns (input_tokens, output_tokens) from the compaction call so the
+        caller can add them to the running totals. Returns (0, 0) if no
+        compaction occurred.
+        """
         if self._compact_threshold_pct is None:
-            return False
+            return 0, 0
         ctx = response.usage.context_usage
-        if ctx is None:
-            return False
-        return ctx.context_pct >= self._compact_threshold_pct
+        if ctx is None or ctx.context_pct < self._compact_threshold_pct:
+            return 0, 0
+        for cb_set in self._callback_sets:
+            await cb_set.fire_before_compact()
+        compact_response = await self._agent.compact_preserving_last_turn()
+        for cb_set in self._callback_sets:
+            await cb_set.fire_after_compact()
+        if compact_response is None:
+            return 0, 0
+        return compact_response.usage.input_tokens, compact_response.usage.output_tokens
 
     async def start(self, prompt: str, allowed_tools: list[str] | None = None) -> ReActResult:
         """
@@ -115,8 +129,9 @@ class ReActProcess:
                 for cb_set in self._callback_sets:
                     await cb_set.fire_agent_response(response, iterations)
 
-                if self._should_compact(response):
-                    await self.compact()
+                compact_in, compact_out = await self._compact_if_needed(response)
+                total_input += compact_in
+                total_output += compact_out
 
             react_result = ReActResult(
                 final_response=response,

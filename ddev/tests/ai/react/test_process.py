@@ -31,6 +31,8 @@ class MockAgent(BaseAgent[Any]):
         self._responses = iter(responses)
         self.send_calls: list[str | list[ToolResultMessage]] = []
         self.compact_calls: int = 0
+        self.compact_preserving_turn_calls: int = 0
+        self.compact_token_response: AgentResponse | None = None
         self.reset_calls: int = 0
 
     async def send(
@@ -41,8 +43,13 @@ class MockAgent(BaseAgent[Any]):
         self.send_calls.append(content)
         return next(self._responses)
 
-    async def compact(self) -> None:
+    async def compact(self) -> AgentResponse | None:
         self.compact_calls += 1
+        return None
+
+    async def compact_preserving_last_turn(self) -> AgentResponse | None:
+        self.compact_preserving_turn_calls += 1
+        return self.compact_token_response
 
     def reset(self) -> None:
         super().reset()
@@ -548,7 +555,7 @@ async def test_auto_compact_triggers_when_threshold_exceeded() -> None:
     ]
     agent = MockAgent(responses)
     await make_process(agent, compact_threshold_pct=75.0).start("task")
-    assert agent.compact_calls == 1
+    assert agent.compact_preserving_turn_calls == 1
 
 
 async def test_auto_compact_fires_callbacks() -> None:
@@ -572,7 +579,7 @@ async def test_auto_compact_does_not_trigger_below_threshold() -> None:
     ]
     agent = MockAgent(responses)
     await make_process(agent, compact_threshold_pct=75.0).start("task")
-    assert agent.compact_calls == 0
+    assert agent.compact_preserving_turn_calls == 0
 
 
 async def test_auto_compact_disabled_when_threshold_is_none() -> None:
@@ -583,7 +590,7 @@ async def test_auto_compact_disabled_when_threshold_is_none() -> None:
     ]
     agent = MockAgent(responses)
     await make_process(agent, compact_threshold_pct=None).start("task")
-    assert agent.compact_calls == 0
+    assert agent.compact_preserving_turn_calls == 0
 
 
 async def test_auto_compact_skipped_when_context_usage_is_none() -> None:
@@ -594,4 +601,19 @@ async def test_auto_compact_skipped_when_context_usage_is_none() -> None:
     ]
     agent = MockAgent(responses)
     await make_process(agent, compact_threshold_pct=75.0).start("task")
-    assert agent.compact_calls == 0
+    assert agent.compact_preserving_turn_calls == 0
+
+
+async def test_auto_compact_tokens_included_in_result() -> None:
+    tc = make_tool_call()
+    responses = [
+        make_response(StopReason.TOOL_USE, tool_calls=[tc], input_tokens=100, output_tokens=50),
+        make_response(StopReason.END_TURN, context_usage=make_context_usage(80.0), input_tokens=200, output_tokens=80),
+    ]
+    agent = MockAgent(responses)
+    agent.compact_token_response = make_response(StopReason.END_TURN, input_tokens=30, output_tokens=10)
+
+    result = await make_process(agent, compact_threshold_pct=75.0).start("task")
+
+    assert result.total_input_tokens == 100 + 200 + 30
+    assert result.total_output_tokens == 50 + 80 + 10
