@@ -11,7 +11,7 @@
 * Collect prism central version metadata ([#23071](https://github.com/DataDog/integrations-core/pull/23071))
 * Improve configuration validation with stricter type checking and clearer error messages. ([#23304](https://github.com/DataDog/integrations-core/pull/23304))
 
-## 1.1.0 / 2026-04-01
+## 1.1.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 
