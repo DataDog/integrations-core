@@ -237,6 +237,7 @@ files:
           value:
             type: number
             default: 60
+            minimum: 1
         - name: explained_queries_cache_maxsize
           hidden: true
           description: |

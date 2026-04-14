@@ -12,13 +12,12 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
 from . import defaults, validators
-
 
 SECURE_FIELD_NAMES = frozenset(['tls_ca_cert'])
 
@@ -60,7 +59,7 @@ class QueryCompletions(BaseModel):
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     explained_queries_cache_maxsize: Optional[float] = None
-    explained_queries_per_hour_per_query: Optional[float] = None
+    explained_queries_per_hour_per_query: Optional[float] = Field(None, ge=1.0)
     max_samples_per_collection: Optional[float] = None
     run_sync: Optional[bool] = None
     samples_per_hour_per_query: Optional[float] = None

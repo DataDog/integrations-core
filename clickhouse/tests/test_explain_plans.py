@@ -641,7 +641,11 @@ def test_obfuscate_clickhouse_plan_redacts_column_and_function_result_names():
                 'Actions': [
                     {'Node Type': 'INPUT', 'Result Name': 'user_id', 'Result Type': 'UInt64'},
                     {'Node Type': 'COLUMN', 'Result Name': "'%secret%'_String", 'Result Type': 'String'},
-                    {'Node Type': 'FUNCTION', 'Result Name': "notLike(query, '%secret%'_String)", 'Result Type': 'UInt8'},
+                    {
+                        'Node Type': 'FUNCTION',
+                        'Result Name': "notLike(query, '%secret%'_String)",
+                        'Result Type': 'UInt8',
+                    },
                     {'Node Type': 'ALIAS', 'Result Name': 'filtered_query', 'Result Type': 'UInt8'},
                 ]
             },
@@ -649,10 +653,10 @@ def test_obfuscate_clickhouse_plan_redacts_column_and_function_result_names():
     }
     result = _obfuscate_clickhouse_plan(plan)
     actions = result['Plan']['Expression']['Actions']
-    assert actions[0]['Result Name'] == 'user_id'           # INPUT kept
-    assert actions[1]['Result Name'] == '?'                  # COLUMN redacted
-    assert actions[2]['Result Name'] == '?'                  # FUNCTION redacted
-    assert actions[3]['Result Name'] == 'filtered_query'     # ALIAS kept
+    assert actions[0]['Result Name'] == 'user_id'  # INPUT kept
+    assert actions[1]['Result Name'] == '?'  # COLUMN redacted
+    assert actions[2]['Result Name'] == '?'  # FUNCTION redacted
+    assert actions[3]['Result Name'] == 'filtered_query'  # ALIAS kept
 
 
 def test_obfuscate_clickhouse_plan_redacts_expression_names_in_outputs():
@@ -675,9 +679,9 @@ def test_obfuscate_clickhouse_plan_redacts_expression_names_in_outputs():
     }
     result = _obfuscate_clickhouse_plan(plan)
     inputs = result['Plan']['Expression']['Inputs']
-    assert inputs[0]['Name'] == 'user_id'    # plain column name, kept
-    assert inputs[1]['Name'] == '?'           # string literal in expression, redacted
-    assert inputs[2]['Name'] == '?'           # numeric literal in expression (has paren), redacted
+    assert inputs[0]['Name'] == 'user_id'  # plain column name, kept
+    assert inputs[1]['Name'] == '?'  # string literal in expression, redacted
+    assert inputs[2]['Name'] == '?'  # numeric literal in expression (has paren), redacted
 
     outputs = result['Plan']['Expression']['Outputs']
     assert outputs[0]['Name'] == 'user_id'
@@ -698,6 +702,109 @@ def test_obfuscate_clickhouse_plan_preserves_structural_fields():
     assert read_node['Indexes'][0]['Condition'] == '?'
     assert read_node['Indexes'][0]['Parts'] == 3
     assert read_node['Indexes'][0]['Granules'] == 12
+
+
+@pytest.mark.parametrize(
+    "query,expected",
+    [
+        ("SELECT * FROM orders FORMAT JSON", "SELECT * FROM orders"),
+        ("SELECT 1 FORMAT TabSeparated", "SELECT 1"),
+        ("SELECT 1   FORMAT TSV  ", "SELECT 1"),
+        ("select * from t format JSONEachRow", "select * from t"),
+        ("SELECT * FROM orders", "SELECT * FROM orders"),
+        ("SELECT FORMAT FROM t", "SELECT FORMAT FROM t"),
+    ],
+)
+def test_strip_format_clause(explain_plans, query, expected):
+    assert explain_plans._strip_format_clause(query) == expected
+
+
+def test_run_explain_empty_rows(explain_plans):
+    """_run_explain raises ValueError when the query returns no rows."""
+    explain_plans._execute_query_fn = mock.MagicMock(return_value=[])
+    with pytest.raises(ValueError, match="no rows"):
+        explain_plans._run_explain("SELECT 1")
+
+
+def test_run_explain_empty_json_array(explain_plans):
+    """_run_explain raises ValueError when the JSON response is an empty array."""
+    explain_plans._execute_query_fn = mock.MagicMock(return_value=[('[]',)])
+    with pytest.raises(ValueError, match="empty JSON array"):
+        explain_plans._run_explain("SELECT 1")
+
+
+def test_run_explain_invalid_json(explain_plans):
+    """_run_explain raises an error when the response is not valid JSON."""
+    explain_plans._execute_query_fn = mock.MagicMock(return_value=[('not valid json',)])
+    with pytest.raises(Exception):
+        explain_plans._run_explain("SELECT 1")
+
+
+def test_run_explain_safe_captures_empty_rows_as_database_error(explain_plans):
+    """Empty rows from EXPLAIN are surfaced as database_error via _run_explain_safe."""
+    explain_plans._execute_query_fn = mock.MagicMock(return_value=[])
+    row = {'query': 'SELECT 1', 'statement': 'SELECT ?', 'query_signature': 'sig'}
+    plan_dict, error_code, error_msg = explain_plans._run_explain_safe(row)
+    assert plan_dict is None
+    assert error_code == DBExplainError.database_error
+
+
+@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
+def test_collect_plan_for_statement_serialization_failure(mock_agent, explain_plans):
+    """A serialization failure during plan obfuscation is recorded as invalid_result."""
+    mock_agent.get_version.return_value = '7.64.0'
+
+    explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
+
+    row = {
+        'query': 'SELECT * FROM system.tables',
+        'statement': 'SELECT * FROM system.tables',
+        'query_signature': 'serial_sig',
+        'databases': 'default',
+        'user': 'default',
+        'query_kind': 'Select',
+        'query_duration_ms': 10.0,
+        'event_time_microseconds': 1746205423150500,
+        'dd_tables': [],
+        'dd_commands': ['SELECT'],
+    }
+
+    with mock.patch('datadog_checks.clickhouse.explain_plans.json') as mock_json:
+        mock_json.loads.return_value = SAMPLE_PLAN
+        mock_json.dumps.side_effect = Exception("serialization failed")
+        event = explain_plans._collect_plan_for_statement(row, ['test:tag'])
+
+    assert event is not None
+    errors = event['db']['plan']['collection_errors']
+    assert errors is not None
+    assert len(errors) == 1
+    assert errors[0]['code'] == DBExplainError.invalid_result.value
+    assert event['db']['plan']['definition'] is None
+    assert event['db']['plan']['signature'] is None
+
+
+@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
+def test_collect_plan_for_statement_no_collection_errors_on_success(mock_agent, explain_plans):
+    """collection_errors is None (not an empty list) when the plan is collected successfully."""
+    mock_agent.get_version.return_value = '7.64.0'
+    explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
+
+    row = {
+        'query': 'SELECT * FROM system.tables',
+        'statement': 'SELECT * FROM system.tables',
+        'query_signature': 'ok_sig',
+        'databases': 'default',
+        'user': 'default',
+        'query_kind': 'Select',
+        'query_duration_ms': 10.0,
+        'event_time_microseconds': 1746205423150500,
+        'dd_tables': [],
+        'dd_commands': ['SELECT'],
+    }
+    event = explain_plans._collect_plan_for_statement(row, ['test:tag'])
+
+    assert event is not None
+    assert event['db']['plan']['collection_errors'] is None
 
 
 def test_default_config_values(instance_with_dbm):

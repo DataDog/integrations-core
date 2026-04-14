@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import json as stdlib_json
 import re
 from enum import Enum
 from typing import TYPE_CHECKING, Callable, Iterator
@@ -99,7 +98,7 @@ class ClickhouseExplainPlans:
         self._log = check.log
         self._execute_query_fn = execute_query_fn
 
-        plan_ttl = _SECONDS_PER_HOUR / float(config.explained_queries_per_hour_per_query)
+        plan_ttl = _SECONDS_PER_HOUR / max(1.0, float(config.explained_queries_per_hour_per_query))
 
         self._explained_statements_ratelimiter = RateLimitingTTLCache(
             maxsize=int(config.explained_queries_cache_maxsize),
@@ -130,7 +129,7 @@ class ClickhouseExplainPlans:
         if not rows:
             raise ValueError("EXPLAIN PLAN returned no rows")
         plan_text = '\n'.join(str(row[0]) for row in rows if row)
-        result = stdlib_json.loads(plan_text)
+        result = json.loads(plan_text)
         if isinstance(result, list):
             if not result:
                 raise ValueError("EXPLAIN PLAN returned empty JSON array")
