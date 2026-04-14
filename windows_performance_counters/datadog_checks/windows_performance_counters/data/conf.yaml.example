@@ -2,12 +2,6 @@
 #
 init_config:
 
-    ## @param use_localized_counters - boolean - optional - default: false
-    ## Whether performance object and counter names should refer to their
-    ## locale-specific versions rather than their English name.
-    #
-    # use_localized_counters: false
-
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -15,9 +9,31 @@ init_config:
     #
     # service: <SERVICE>
 
+    ## @param use_localized_counters - boolean - optional - default: false
+    ## Whether performance object and counter names should refer to their
+    ## locale-specific versions rather than their English name.
+    #
+    # use_localized_counters: false
+
 ## Every instance is scheduled independently of the others.
 #
 instances:
+
+  -
+    ## @param server - string - optional
+    ## The server with which to connect, defaulting to the local machine.
+    #
+    # server: <SERVER>
+
+    ## @param username - string - optional
+    ## The username used to connect to the `server`.
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The password of `username`.
+    #
+    # password: <PASSWORD>
 
     ## @param metrics - mapping - required
     ## This mapping defines which metrics to collect from the performance
@@ -94,38 +110,7 @@ instances:
     ##   metric_name: This represents the full metric name in lieu of a `name` key and is not be prefixed by
     ##                the parent object's `name` key.
     #
-  - metrics: {}
-
-    ## @param server - string - optional
-    ## The server with which to connect, defaulting to the local machine.
-    #
-    # server: <SERVER>
-
-    ## @param username - string - optional
-    ## The username used to connect to the `server`.
-    #
-    # username: <USERNAME>
-
-    ## @param password - string - optional
-    ## The password of `username`.
-    #
-    # password: <PASSWORD>
-
-    ## @param enable_health_service_check - boolean - optional - default: true
-    ## Whether or not to send a service check named `<NAMESPACE>.windows.perf.health`, which reports
-    ## the health of the `server`.
-    #
-    # enable_health_service_check: true
-
-    ## @param server_tag - string - optional
-    ## The name used for tagging `server`. The value defined here replaces the `server:` tag key.
-    #
-    # server_tag: <SERVER_TAG>
-
-    ## @param namespace - string - optional
-    ## The namespace to be prepended to all metrics and service checks.
-    #
-    # namespace: <NAMESPACE>
+    metrics: {}
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -148,6 +133,22 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
+
+    ## @param enable_health_service_check - boolean - optional - default: true
+    ## Whether or not to send a service check named `<NAMESPACE>.windows.perf.health`, which reports
+    ## the health of the `server`.
+    #
+    # enable_health_service_check: true
+
+    ## @param server_tag - string - optional
+    ## The name used for tagging `server`. The value defined here replaces the `server:` tag key.
+    #
+    # server_tag: <SERVER_TAG>
+
+    ## @param namespace - string - optional
+    ## The namespace to be prepended to all metrics and service checks.
+    #
+    # namespace: <NAMESPACE>
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

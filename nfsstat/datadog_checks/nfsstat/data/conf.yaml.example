@@ -2,6 +2,13 @@
 #
 init_config:
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
     ## @param nfsiostat_path - string - optional
     ## A version of nfsiostat is shipped with the Agent binary.
     ## If you are using a source install, specify the location of nfsiostat
@@ -15,23 +22,11 @@ init_config:
     #
     # autofs_enabled: false
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
-
 ## Every instance is scheduled independently of the others.
 #
 instances:
 
   -
-    ## @param disable_missing_mountpoints_warning - boolean - optional - default: false
-    ## If true, no warning is logged if host has check enabled but no NFS mount point is found.
-    #
-    # disable_missing_mountpoints_warning: false
-
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -53,6 +48,11 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
+
+    ## @param disable_missing_mountpoints_warning - boolean - optional - default: false
+    ## If true, no warning is logged if host has check enabled but no NFS mount point is found.
+    #
+    # disable_missing_mountpoints_warning: false
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

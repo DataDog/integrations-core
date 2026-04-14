@@ -2,6 +2,13 @@
 #
 init_config:
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
     ## @param allowed_versions - list of strings - optional
     ## The expected versions of TLS/SSL when connecting to `server`. Any protocol versions
     ## negotiated by connections that are not in this list makes the service check
@@ -16,21 +23,42 @@ init_config:
     #
     # fetch_intermediate_certs: false
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
-
 ## Every instance is scheduled independently of the others.
 #
 instances:
 
+  -
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param tls_verify - boolean - optional - default: true
+    ## Instructs the check to validate the TLS certificate(s) of the service(s).
+    #
+    # tls_verify: true
+
     ## @param server - string - required
     ## The hostname or IP address with which to connect.
     #
-  - server: <SERVER>
+    server: <SERVER>
 
     ## @param port - integer - optional - default: 443
     ## The port that is used. This overrides any port specified in `server`.
@@ -137,28 +165,6 @@ instances:
     #
     # start_tls: <START_TLS>
 
-    ## @param tags - list of strings - optional
-    ## A list of tags to attach to every metric and service check emitted by this instance.
-    ##
-    ## Learn more about tagging at https://docs.datadoghq.com/tagging
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
-
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Overrides any `service` defined in the `init_config` section.
-    #
-    # service: <SERVICE>
-
-    ## @param min_collection_interval - number - optional - default: 15
-    ## This changes the collection interval of the check. For more information, see:
-    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
-    #
-    # min_collection_interval: 15
-
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.
     ##
@@ -176,11 +182,6 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
-
-    ## @param tls_verify - boolean - optional - default: true
-    ## Instructs the check to validate the TLS certificate(s) of the service(s).
-    #
-    # tls_verify: true
 
     ## @param tls_ca_cert - string - optional
     ## The path to a file of concatenated CA certificates in PEM format or a directory

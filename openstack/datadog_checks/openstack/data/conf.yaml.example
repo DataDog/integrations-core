@@ -2,6 +2,13 @@
 #
 init_config:
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
     ## @param keystone_server_url - string - required
     ## Where your identity server lives. Note that the server must support Identity API v3
     #
@@ -58,21 +65,24 @@ init_config:
     #
     # use_agent_proxy: true
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
-
 ## Every instance is scheduled independently of the others.
 #
 instances:
 
+  -
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
     ## @param name - string - required
     ## Unique identifier for this instance.
     #
-  - name: <INSTANCE_NAME>
+    name: <INSTANCE_NAME>
 
     ## @param user - mapping - required
     ## Password authentication is the only auth method supported
@@ -116,15 +126,6 @@ instances:
     ## Setting `append_tenant_id` to `true` manually adds this suffix for downstream requests.
     #
     # append_tenant_id: false
-
-    ## @param tags - list of strings - optional
-    ## A list of tags to attach to every metric and service check emitted by this instance.
-    ##
-    ## Learn more about tagging at https://docs.datadoghq.com/tagging
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
 
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.

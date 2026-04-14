@@ -2903,7 +2903,7 @@ def test_template_mapping():
         # Defaults should be post-populated
         'required': False,
         'hidden': False,
-        'display_priority': 0,
+        'display_priority': 1,
         'deprecation': {},
         'metadata_tags': [],
         'secret': False,

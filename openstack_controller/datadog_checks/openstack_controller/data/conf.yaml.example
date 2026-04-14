@@ -33,6 +33,27 @@ init_config:
 #
 instances:
 
+  -
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param tls_verify - boolean - optional - default: true
+    ## Instructs the check to validate the TLS certificate of services.
+    #
+    # tls_verify: true
+
     ## @param username - string - optional
     ## The User name used to connect to Openstack.
     #
@@ -194,21 +215,6 @@ instances:
     #   exclude:
     #   - tmp_.*
 
-    ## @param tags - list of strings - optional
-    ## A list of tags to attach to every metric and service check emitted by this instance.
-    ##
-    ## Learn more about tagging at https://docs.datadoghq.com/tagging
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
-
-    ## @param min_collection_interval - number - optional - default: 15
-    ## This changes the collection interval of the check. For more information, see:
-    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
-    #
-    # min_collection_interval: 15
-
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
     ##
@@ -311,11 +317,6 @@ instances:
     ## Set the path to your Kerberos key tab file.
     #
     # kerberos_keytab: <KEYTAB_FILE_PATH>
-
-    ## @param tls_verify - boolean - optional - default: true
-    ## Instructs the check to validate the TLS certificate of services.
-    #
-    # tls_verify: true
 
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.

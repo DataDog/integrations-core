@@ -2,6 +2,13 @@
 #
 init_config:
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
     ## @param proxy - mapping - optional
     ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
@@ -34,13 +41,6 @@ init_config:
     #
     # timeout: 10
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
-
 ## Every instance is scheduled independently of the others.
 #
 instances:
@@ -50,6 +50,74 @@ instances:
     ## https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/proposals/metrics.md
     #
   - openmetrics_endpoint: http://localhost:8085/metrics
+
+    ## @param auth_type - string - optional - default: basic
+    ## The type of authentication to use. The available types (and related options) are:
+    ## ```
+    ##   - basic
+    ##     |__ username
+    ##     |__ password
+    ##     |__ use_legacy_auth_encoding
+    ##   - digest
+    ##     |__ username
+    ##     |__ password
+    ##   - ntlm
+    ##     |__ ntlm_domain
+    ##     |__ password
+    ##   - kerberos
+    ##     |__ kerberos_auth
+    ##     |__ kerberos_cache
+    ##     |__ kerberos_delegate
+    ##     |__ kerberos_force_initiate
+    ##     |__ kerberos_hostname
+    ##     |__ kerberos_keytab
+    ##     |__ kerberos_principal
+    ##   - aws
+    ##     |__ aws_region
+    ##     |__ aws_host
+    ##     |__ aws_service
+    ## ```
+    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
+    ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
+    #
+    # auth_type: basic
+
+    ## @param username - string - optional
+    ## The username to use if services are behind basic or digest auth.
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The password to use if services are behind basic or NTLM auth.
+    #
+    # password: <PASSWORD>
+
+    ## @param tls_verify - boolean - optional - default: true
+    ## Instructs the check to validate the TLS certificate of services.
+    #
+    # tls_verify: true
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
@@ -312,51 +380,10 @@ instances:
     #
     # skip_proxy: false
 
-    ## @param auth_type - string - optional - default: basic
-    ## The type of authentication to use. The available types (and related options) are:
-    ## ```
-    ##   - basic
-    ##     |__ username
-    ##     |__ password
-    ##     |__ use_legacy_auth_encoding
-    ##   - digest
-    ##     |__ username
-    ##     |__ password
-    ##   - ntlm
-    ##     |__ ntlm_domain
-    ##     |__ password
-    ##   - kerberos
-    ##     |__ kerberos_auth
-    ##     |__ kerberos_cache
-    ##     |__ kerberos_delegate
-    ##     |__ kerberos_force_initiate
-    ##     |__ kerberos_hostname
-    ##     |__ kerberos_keytab
-    ##     |__ kerberos_principal
-    ##   - aws
-    ##     |__ aws_region
-    ##     |__ aws_host
-    ##     |__ aws_service
-    ## ```
-    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
-    ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
-    #
-    # auth_type: basic
-
     ## @param use_legacy_auth_encoding - boolean - optional - default: true
     ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
     #
     # use_legacy_auth_encoding: true
-
-    ## @param username - string - optional
-    ## The username to use if services are behind basic or digest auth.
-    #
-    # username: <USERNAME>
-
-    ## @param password - string - optional
-    ## The password to use if services are behind basic or NTLM auth.
-    #
-    # password: <PASSWORD>
 
     ## @param ntlm_domain - string - optional
     ## If your services use NTLM authentication, specify
@@ -486,11 +513,6 @@ instances:
     #
     # aws_service: <AWS_SERVICE>
 
-    ## @param tls_verify - boolean - optional - default: true
-    ## Instructs the check to validate the TLS certificate of services.
-    #
-    # tls_verify: true
-
     ## @param tls_use_host_header - boolean - optional - default: false
     ## If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
     #
@@ -601,28 +623,6 @@ instances:
     ## Whether or not to allow URL redirection.
     #
     # allow_redirects: true
-
-    ## @param tags - list of strings - optional
-    ## A list of tags to attach to every metric and service check emitted by this instance.
-    ##
-    ## Learn more about tagging at https://docs.datadoghq.com/tagging
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
-
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Overrides any `service` defined in the `init_config` section.
-    #
-    # service: <SERVICE>
-
-    ## @param min_collection_interval - number - optional - default: 15
-    ## This changes the collection interval of the check. For more information, see:
-    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
-    #
-    # min_collection_interval: 15
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

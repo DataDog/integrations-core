@@ -2,12 +2,6 @@
 #
 init_config:
 
-    ## @param gunicorn - string - optional - default: gunicorn
-    ## Command or path to gunicorn (e.g. `/usr/local/bin/gunicorn` or `docker exec container gunicorn`)
-    ## can be overwritten on an instance
-    #
-    # gunicorn: gunicorn
-
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -15,24 +9,17 @@ init_config:
     #
     # service: <SERVICE>
 
+    ## @param gunicorn - string - optional - default: gunicorn
+    ## Command or path to gunicorn (e.g. `/usr/local/bin/gunicorn` or `docker exec container gunicorn`)
+    ## can be overwritten on an instance
+    #
+    # gunicorn: gunicorn
+
 ## Every instance is scheduled independently of the others.
 #
 instances:
 
-    ## @param proc_name - string - required
-    ## The name of the gunicorn process. For the following gunicorn server:
-    ##
-    ## gunicorn --name <WEB_APP_NAME> <WEB_APP_CONFIG>.ini
-    ##
-    ## the name is `<WEB_APP_NAME>`
-    #
-  - proc_name: <PROC_NAME>
-
-    ## @param gunicorn - string - optional - default: gunicorn
-    ## Command or path to gunicorn (e.g. `/usr/local/bin/gunicorn` or `docker exec container gunicorn`)
-    #
-    # gunicorn: gunicorn
-
+  -
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -54,6 +41,20 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
+
+    ## @param proc_name - string - required
+    ## The name of the gunicorn process. For the following gunicorn server:
+    ##
+    ## gunicorn --name <WEB_APP_NAME> <WEB_APP_CONFIG>.ini
+    ##
+    ## the name is `<WEB_APP_NAME>`
+    #
+    proc_name: <PROC_NAME>
+
+    ## @param gunicorn - string - optional - default: gunicorn
+    ## Command or path to gunicorn (e.g. `/usr/local/bin/gunicorn` or `docker exec container gunicorn`)
+    #
+    # gunicorn: gunicorn
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

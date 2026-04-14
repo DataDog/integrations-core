@@ -2,6 +2,13 @@
 #
 init_config:
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
     ## @param persist_db_connections - boolean - optional - default: true
     ## Whether or not to persist database connections.
     #
@@ -19,82 +26,11 @@ init_config:
     #     tags: <TAGS>
     #     collection_interval: <COLLECTION_INTERVAL>
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
-
 ## Every instance is scheduled independently of the others.
 #
 instances:
 
-    ## @param server - string - required
-    ## The hostname used to connect to the system.
-    #
-  - server: <SERVER>
-
-    ## @param port - integer - optional - default: 30015
-    ## The port used to connect to the system.
-    #
-    # port: <PORT>
-
-    ## @param username - string - required
-    ## The database user to authenticate as.
-    #
-    username: <USERNAME>
-
-    ## @param password - string - required
-    ## The password of `username`.
-    #
-    password: <PASSWORD>
-
-    ## @param schema - string - optional - default: SYS_DATABASES
-    ## The schema containing the tenant databases views.
-    #
-    # schema: SYS_DATABASES
-
-    ## @param connection_properties - mapping - optional
-    ## When `hdbcli` is installed, this defines the properties of the database connections. Any property
-    ## defined here overrides any default value set by the check. For more information, see:
-    ## https://help.sap.com/viewer/f1b440ded6144a54ada97ff95dac7adf/2.10/en-US/ee592e89dcce4480a99571a4ae7a702f.html
-    #
-    # connection_properties:
-    #   key: hdbuserid
-    #   sslUseDefaultTrustStore: false
-
-    ## @param use_hana_hostnames - boolean - optional - default: false
-    ## Whether or not to use the hostnames contained in HANA's monitoring
-    ## views instead of the Agent hostname.
-    #
-    # use_hana_hostnames: false
-
-    ## @param batch_size - integer - optional - default: 1000
-    ## The number of rows to return with each query result.
-    #
-    # batch_size: 1000
-
-    ## @param timeout - number - optional - default: 10
-    ## The timeout in seconds for connecting to `server`.
-    #
-    # timeout: 10
-
-    ## @param only_custom_queries - boolean - optional - default: false
-    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
-    ## Only metrics specified in `custom_queries` will be collected.
-    #
-    # only_custom_queries: false
-
-    ## @param use_global_custom_queries - string - optional - default: true
-    ## How `global_custom_queries` should be used for this instance. There are 3 options:
-    ##
-    ## 1. true - `global_custom_queries` override `custom_queries`.
-    ## 2. false - `custom_queries` override `global_custom_queries`.
-    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
-    #
-    # use_global_custom_queries: 'true'
-
+  -
     ## @param custom_queries - list of mappings - optional
     ## Each query must have 2 fields, and can have a third optional field:
     ##
@@ -156,6 +92,98 @@ instances:
     #     collection_interval: 30
     #     metric_prefix: foo_prefix
 
+    ## @param tls_verify - boolean - optional - default: true
+    ## Instructs the check to validate the TLS certificate(s) of the service(s).
+    #
+    # tls_verify: true
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param server - string - required
+    ## The hostname used to connect to the system.
+    #
+    server: <SERVER>
+
+    ## @param port - integer - optional - default: 30015
+    ## The port used to connect to the system.
+    #
+    # port: <PORT>
+
+    ## @param username - string - required
+    ## The database user to authenticate as.
+    #
+    username: <USERNAME>
+
+    ## @param password - string - required
+    ## The password of `username`.
+    #
+    password: <PASSWORD>
+
+    ## @param schema - string - optional - default: SYS_DATABASES
+    ## The schema containing the tenant databases views.
+    #
+    # schema: SYS_DATABASES
+
+    ## @param connection_properties - mapping - optional
+    ## When `hdbcli` is installed, this defines the properties of the database connections. Any property
+    ## defined here overrides any default value set by the check. For more information, see:
+    ## https://help.sap.com/viewer/f1b440ded6144a54ada97ff95dac7adf/2.10/en-US/ee592e89dcce4480a99571a4ae7a702f.html
+    #
+    # connection_properties:
+    #   key: hdbuserid
+    #   sslUseDefaultTrustStore: false
+
+    ## @param use_hana_hostnames - boolean - optional - default: false
+    ## Whether or not to use the hostnames contained in HANA's monitoring
+    ## views instead of the Agent hostname.
+    #
+    # use_hana_hostnames: false
+
+    ## @param batch_size - integer - optional - default: 1000
+    ## The number of rows to return with each query result.
+    #
+    # batch_size: 1000
+
+    ## @param timeout - number - optional - default: 10
+    ## The timeout in seconds for connecting to `server`.
+    #
+    # timeout: 10
+
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
+
+    ## @param use_global_custom_queries - string - optional - default: true
+    ## How `global_custom_queries` should be used for this instance. There are 3 options:
+    ##
+    ## 1. true - `global_custom_queries` override `custom_queries`.
+    ## 2. false - `custom_queries` override `global_custom_queries`.
+    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+    #
+    # use_global_custom_queries: 'true'
+
     ## @param persist_db_connections - boolean - optional - default: true
     ## Whether or not to persist database connections.
     #
@@ -165,11 +193,6 @@ instances:
     ## Instructs the SAP HANA integration to connect using TLS.
     #
     # use_tls: false
-
-    ## @param tls_verify - boolean - optional - default: true
-    ## Instructs the check to validate the TLS certificate(s) of the service(s).
-    #
-    # tls_verify: true
 
     ## @param tls_ca_cert - string - optional
     ## The path to a file of concatenated CA certificates in PEM format or a directory
@@ -219,28 +242,6 @@ instances:
     #   - TLS_AES_256_GCM_SHA384
     #   - TLS_CHACHA20_POLY1305_SHA256
     #   - TLS_AES_128_GCM_SHA256
-
-    ## @param tags - list of strings - optional
-    ## A list of tags to attach to every metric and service check emitted by this instance.
-    ##
-    ## Learn more about tagging at https://docs.datadoghq.com/tagging
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
-
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Overrides any `service` defined in the `init_config` section.
-    #
-    # service: <SERVICE>
-
-    ## @param min_collection_interval - number - optional - default: 15
-    ## This changes the collection interval of the check. For more information, see:
-    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
-    #
-    # min_collection_interval: 15
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

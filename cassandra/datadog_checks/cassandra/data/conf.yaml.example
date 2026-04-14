@@ -12,6 +12,13 @@ init_config:
     #
     collect_default_metrics: true
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
     ## @param new_gc_metrics - boolean - optional - default: false
     ## Set to true to use better metric names for garbage collection metrics.
     ## jvm.gc.cms.count   => jvm.gc.minor_collection_count
@@ -42,13 +49,6 @@ init_config:
     #           alias: my.metric.name
     #           metric_type: gauge
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
-
 ## Every instance is scheduled independently of the others.
 #
 instances:
@@ -63,12 +63,6 @@ instances:
     #
     port: 7199
 
-    ## @param cassandra_aliasing - boolean - required
-    ## Must be set to true to comply with CASSANDRA-4009.
-    ## Learn more: https://issues.apache.org/jira/browse/CASSANDRA-4009
-    #
-    cassandra_aliasing: true
-
     ## @param user - string - optional
     ## User to use when connecting to JMX.
     #
@@ -78,6 +72,34 @@ instances:
     ## Password to use when connecting to JMX.
     #
     # password: <PASSWORD>
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param cassandra_aliasing - boolean - required
+    ## Must be set to true to comply with CASSANDRA-4009.
+    ## Learn more: https://issues.apache.org/jira/browse/CASSANDRA-4009
+    #
+    cassandra_aliasing: true
 
     ## @param process_name_regex - string - optional
     ## Instead of using a host and port, the Agent can connect using the attach API.
@@ -159,28 +181,6 @@ instances:
     ## Configures the collection of default JVM metrics.
     #
     # collect_default_jvm_metrics: true
-
-    ## @param tags - list of strings - optional
-    ## A list of tags to attach to every metric and service check emitted by this instance.
-    ##
-    ## Learn more about tagging at https://docs.datadoghq.com/tagging
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
-
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Overrides any `service` defined in the `init_config` section.
-    #
-    # service: <SERVICE>
-
-    ## @param min_collection_interval - number - optional - default: 15
-    ## This changes the collection interval of the check. For more information, see:
-    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
-    #
-    # min_collection_interval: 15
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

@@ -2,6 +2,13 @@
 #
 init_config:
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
     ## @param global_custom_queries - list of mappings - optional
     ## See `custom_queries` defined below.
     ##
@@ -14,74 +21,11 @@ init_config:
     #     columns: <COLUMNS>
     #     tags: <TAGS>
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
-
 ## Every instance is scheduled independently of the others.
 #
 instances:
 
-    ## @param db - string - required
-    ## The name of the database to establish a connection with.
-    #
-  - db: <DATABASE_NAME>
-
-    ## @param username - string - required
-    ## The database user to authenticate as.
-    #
-    username: <USERNAME>
-
-    ## @param password - string - required
-    ## The password of `username`.
-    #
-    password: <PASSWORD>
-
-    ## @param host - string - optional
-    ## The hostname used to connect to a remote or uncataloged database.
-    #
-    # host: <HOSTNAME>
-
-    ## @param port - integer - optional - default: 50000
-    ## The port used to connect to a remote or uncataloged database.
-    #
-    # port: 50000
-
-    ## @param security - string - optional - default: none
-    ## Set this parameter to `ssl` to use the SSL protocol for a connection to the database server using the default
-    ## certificate from the ibm-db driver package. Specifying `tls_cert` is not required when using this option.
-    #
-    # security: none
-
-    ## @param tls_cert - string - optional
-    ## The path to a SSL certificate to use, when connecting to a database in a secure fashion. It
-    ## has to be accessible and readable by the agent user.
-    #
-    # tls_cert: <TLS_CERT>
-
-    ## @param connection_timeout - integer - optional - default: 10
-    ## Connection timeout in seconds
-    #
-    # connection_timeout: 10
-
-    ## @param only_custom_queries - boolean - optional - default: false
-    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
-    ## Only metrics specified in `custom_queries` will be collected.
-    #
-    # only_custom_queries: false
-
-    ## @param use_global_custom_queries - string - optional - default: true
-    ## How `global_custom_queries` should be used for this instance. There are 3 options:
-    ##
-    ## 1. true - `global_custom_queries` override `custom_queries`.
-    ## 2. false - `custom_queries` override `global_custom_queries`.
-    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
-    #
-    # use_global_custom_queries: 'true'
-
+  -
     ## @param custom_queries - list of mappings - optional
     ## Each query must have 3 fields:
     ##
@@ -138,6 +82,63 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
+
+    ## @param db - string - required
+    ## The name of the database to establish a connection with.
+    #
+    db: <DATABASE_NAME>
+
+    ## @param username - string - required
+    ## The database user to authenticate as.
+    #
+    username: <USERNAME>
+
+    ## @param password - string - required
+    ## The password of `username`.
+    #
+    password: <PASSWORD>
+
+    ## @param host - string - optional
+    ## The hostname used to connect to a remote or uncataloged database.
+    #
+    # host: <HOSTNAME>
+
+    ## @param port - integer - optional - default: 50000
+    ## The port used to connect to a remote or uncataloged database.
+    #
+    # port: 50000
+
+    ## @param security - string - optional - default: none
+    ## Set this parameter to `ssl` to use the SSL protocol for a connection to the database server using the default
+    ## certificate from the ibm-db driver package. Specifying `tls_cert` is not required when using this option.
+    #
+    # security: none
+
+    ## @param tls_cert - string - optional
+    ## The path to a SSL certificate to use, when connecting to a database in a secure fashion. It
+    ## has to be accessible and readable by the agent user.
+    #
+    # tls_cert: <TLS_CERT>
+
+    ## @param connection_timeout - integer - optional - default: 10
+    ## Connection timeout in seconds
+    #
+    # connection_timeout: 10
+
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
+
+    ## @param use_global_custom_queries - string - optional - default: true
+    ## How `global_custom_queries` should be used for this instance. There are 3 options:
+    ##
+    ## 1. true - `global_custom_queries` override `custom_queries`.
+    ## 2. false - `custom_queries` override `global_custom_queries`.
+    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+    #
+    # use_global_custom_queries: 'true'
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

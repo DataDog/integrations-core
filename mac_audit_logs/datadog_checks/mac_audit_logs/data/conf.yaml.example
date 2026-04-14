@@ -13,16 +13,7 @@ init_config:
 #
 instances:
 
-    ## @param MONITOR - boolean - required
-    ## Flag indicating Mac audit log collection status. Set to true to enable collection.
-    #
-  - MONITOR: true
-
-    ## @param AUDIT_LOGS_DIR_PATH - string - required
-    ## Path to the directory containing the BSM audit logs.
-    #
-    AUDIT_LOGS_DIR_PATH: /var/audit
-
+  -
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -37,6 +28,16 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     min_collection_interval: 15
+
+    ## @param MONITOR - boolean - required
+    ## Flag indicating Mac audit log collection status. Set to true to enable collection.
+    #
+    MONITOR: true
+
+    ## @param AUDIT_LOGS_DIR_PATH - string - required
+    ## Path to the directory containing the BSM audit logs.
+    #
+    AUDIT_LOGS_DIR_PATH: /var/audit
 
 ## Log Section
 ##
