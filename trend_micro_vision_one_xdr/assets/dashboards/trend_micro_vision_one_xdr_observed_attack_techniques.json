@@ -76,7 +76,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -146,7 +146,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -214,7 +214,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @detail.filterRiskLevel:critical $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @detail.filterRiskLevel:critical $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -266,7 +266,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @detail.filterRiskLevel:high $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @detail.filterRiskLevel:high $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -318,7 +318,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @detail.filterRiskLevel:medium $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @detail.filterRiskLevel:medium $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -370,7 +370,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @detail.filterRiskLevel:low $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @detail.filterRiskLevel:low $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -422,7 +422,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @detail.filterRiskLevel:info $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @detail.filterRiskLevel:info $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -478,7 +478,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -546,7 +546,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -618,7 +618,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @entityType:* $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @entityType:* $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -681,7 +681,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -730,7 +730,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-xdr service:observed-attack-techniques $Source $Risk-Level",
+                                        "query_string": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) $Source $Risk-Level",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -815,7 +815,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:endpointActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:endpointActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -869,7 +869,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:endpointActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:endpointActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -923,7 +923,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:endpointActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:endpointActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -992,7 +992,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:endpointActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:endpointActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -1069,7 +1069,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:endpointActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:endpointActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -1146,7 +1146,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:endpointActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:endpointActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -1219,7 +1219,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @event_type:* @source:endpointActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @event_type:* @source:endpointActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -1282,7 +1282,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:endpointActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:endpointActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -1332,7 +1332,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:endpointActivityData $Source $Risk-Level",
+                                        "query_string": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:endpointActivityData $Source $Risk-Level",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1425,7 +1425,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:detections $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:detections $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -1479,7 +1479,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:detections $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:detections $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -1533,7 +1533,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:detections $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:detections $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -1601,7 +1601,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:detections $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:detections $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -1669,7 +1669,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:detections $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:detections $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -1737,7 +1737,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:detections $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:detections $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -1809,7 +1809,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @detail.app:* @source:detections $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @detail.app:* @source:detections $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -1876,7 +1876,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @detail.appGroup:* @source:detections $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @detail.appGroup:* @source:detections $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -1943,7 +1943,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @detail.deviceDirection:* @source:detections $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @detail.deviceDirection:* @source:detections $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -2010,7 +2010,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @detail.detectionType:* @source:detections $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @detail.detectionType:* @source:detections $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -2073,7 +2073,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:detections $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:detections $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -2141,7 +2141,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:detections $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:detections $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -2209,7 +2209,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:detections $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:detections $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -2258,7 +2258,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:detections $Source $Risk-Level",
+                                        "query_string": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:detections $Source $Risk-Level",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2331,7 +2331,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:cloudActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:cloudActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -2385,7 +2385,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:cloudActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:cloudActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -2435,7 +2435,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:cloudActivityData @detail.readOnly:true $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:cloudActivityData @detail.readOnly:true $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -2487,7 +2487,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @detail.eventCategory:* @source:cloudActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @detail.eventCategory:* @source:cloudActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -2550,7 +2550,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:cloudActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:cloudActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -2623,7 +2623,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @detail.eventType:* @source:cloudActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @detail.eventType:* @source:cloudActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -2667,7 +2667,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:cloudActivityData $Source $Risk-Level",
+                                        "query_string": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:cloudActivityData $Source $Risk-Level",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2740,7 +2740,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:containerActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:containerActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -2794,7 +2794,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:containerActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:containerActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -2848,7 +2848,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:containerActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:containerActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -2917,7 +2917,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:containerActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:containerActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -2986,7 +2986,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:containerActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:containerActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -3055,7 +3055,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:containerActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:containerActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -3105,7 +3105,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:containerActivityData $Source $Risk-Level",
+                                        "query_string": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:containerActivityData $Source $Risk-Level",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -3178,7 +3178,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:networkActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:networkActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -3232,7 +3232,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:networkActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:networkActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -3286,7 +3286,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:networkActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:networkActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -3355,7 +3355,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:networkActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:networkActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -3424,7 +3424,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:networkActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:networkActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -3493,7 +3493,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:networkActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:networkActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -3566,7 +3566,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:networkActivityData @detail.serverTls:* $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:networkActivityData @detail.serverTls:* $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -3629,7 +3629,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:networkActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:networkActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -3698,7 +3698,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:networkActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:networkActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -3748,7 +3748,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:networkActivityData $Source $Risk-Level",
+                                        "query_string": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:networkActivityData $Source $Risk-Level",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -3821,7 +3821,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:mobileActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:mobileActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -3875,7 +3875,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:mobileActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:mobileActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -3929,7 +3929,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:mobileActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:mobileActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -3998,7 +3998,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:mobileActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:mobileActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -4067,7 +4067,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:mobileActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:mobileActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -4136,7 +4136,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:mobileActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:mobileActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -4186,7 +4186,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:mobileActivityData $Source $Risk-Level",
+                                        "query_string": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:mobileActivityData $Source $Risk-Level",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -4259,7 +4259,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:emailActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:emailActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -4313,7 +4313,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:emailActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:emailActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -4367,7 +4367,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:emailActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:emailActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -4436,7 +4436,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:emailActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:emailActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -4505,7 +4505,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:emailActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:emailActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -4574,7 +4574,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:emailActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:emailActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -4647,7 +4647,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:emailActivityData @detail.mailSourceDomain:* $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:emailActivityData @detail.mailSourceDomain:* $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -4691,7 +4691,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:emailActivityData $Source $Risk-Level",
+                                        "query_string": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:emailActivityData $Source $Risk-Level",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -4764,7 +4764,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:identityActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:identityActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -4818,7 +4818,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:identityActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:identityActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -4872,7 +4872,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:identityActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:identityActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -4941,7 +4941,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:identityActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:identityActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -5014,7 +5014,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:identityActivityData @detail.idpName:* $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:identityActivityData @detail.idpName:* $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -5077,7 +5077,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:identityActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:identityActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -5147,7 +5147,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:identityActivityData $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:identityActivityData $Source $Risk-Level"
                                             },
                                             "storage": "hot"
                                         }
@@ -5195,7 +5195,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-xdr service:observed-attack-techniques @source:identityActivityData $Source $Risk-Level",
+                                        "query_string": "source:trend-micro-vision-one-xdr (service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques) @source:identityActivityData $Source $Risk-Level",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -5298,7 +5298,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:critical $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr status:critical $Source $Risk-Level"
                                             }
                                         }
                                     ],
@@ -5350,7 +5350,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:high $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr status:high $Source $Risk-Level"
                                             }
                                         }
                                     ],
@@ -5407,7 +5407,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:critical $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr status:critical $Source $Risk-Level"
                                             }
                                         }
                                     ],
@@ -5473,7 +5473,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:medium $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr status:medium $Source $Risk-Level"
                                             }
                                         }
                                     ],
@@ -5525,7 +5525,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:low $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr status:low $Source $Risk-Level"
                                             }
                                         }
                                     ],
@@ -5577,7 +5577,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:info $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr status:info $Source $Risk-Level"
                                             }
                                         }
                                     ],
@@ -5631,7 +5631,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:high $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr status:high $Source $Risk-Level"
                                             }
                                         }
                                     ],
@@ -5704,7 +5704,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:medium $Source $Risk-Level"
+                                                "query": "source:trend-micro-vision-one-xdr status:medium $Source $Risk-Level"
                                             }
                                         }
                                     ],

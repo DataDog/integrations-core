@@ -96,7 +96,7 @@ pipeline:
       name: Alerts
       enabled: true
       filter:
-        query: "service:alerts "
+        query: "(service:alerts OR @vendor.endpoint:alerts)"
       processors:
         - type: attribute-remapper
           name: Map `score` to `trend_micro_vision_one_xdr.score`
@@ -132,7 +132,7 @@ pipeline:
       name: Observed Attack Techniques
       enabled: true
       filter:
-        query: "service:observed-attack-techniques"
+        query: "(service:observed-attack-techniques OR @vendor.endpoint:observed-attack-techniques)"
       processors:
         - type: attribute-remapper
           name: Map `detail.userDisplayName` to `usr.name`

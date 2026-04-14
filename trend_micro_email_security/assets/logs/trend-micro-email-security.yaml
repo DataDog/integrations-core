@@ -131,7 +131,7 @@ pipeline:
       name: Remap attributes for mail tracking logs
       enabled: true
       filter:
-        query: "service:mail-tracking"
+        query: "(service:mail-tracking OR @vendor.endpoint:mail-tracking)"
       processors:
         - type: attribute-remapper
           name: Map `senderIP` to `network.client.ip`

@@ -292,7 +292,7 @@ pipeline:
       name: Remap attributes for Application Control logs
       enabled: true
       filter:
-        query: service:application-control
+        query: (service:application-control OR vendor_endpoint:application-control)
       processors:
         - type: attribute-remapper
           name: Map `cs1` to `pattern_version`
@@ -387,7 +387,7 @@ pipeline:
       name: Remap attributes for Attack Discovery Detection logs
       enabled: true
       filter:
-        query: service:attack-discovery-detections
+        query: (service:attack-discovery-detections OR vendor_endpoint:attack-discovery-detections)
       processors:
         - type: attribute-remapper
           name: Map `cat` to `category`
@@ -473,7 +473,7 @@ pipeline:
       name: Remap attributes for Behavior Monitoring logs
       enabled: true
       filter:
-        query: service:behavior-monitoring
+        query: (service:behavior-monitoring OR vendor_endpoint:behavior-monitoring)
       processors:
         - type: attribute-remapper
           name: Map `cs2` to `policy_type`
@@ -537,7 +537,7 @@ pipeline:
       name: Remap attributes for C&C Callback logs
       enabled: true
       filter:
-        query: service:cnc-callback
+        query: (service:cnc-callback OR vendor_endpoint:cnc-callback)
       processors:
         - type: attribute-remapper
           name: Map `src` to `network.client.ip`
@@ -667,7 +667,7 @@ pipeline:
       name: Remap attributes for Content Violation logs
       enabled: true
       filter:
-        query: service:content-violation
+        query: (service:content-violation OR vendor_endpoint:content-violation)
       processors:
         - type: attribute-remapper
           name: Map `dvchost` to `source_host_name`
@@ -989,7 +989,7 @@ pipeline:
       name: Remap attributes for Data Loss Prevention logs
       enabled: true
       filter:
-        query: service:data-loss-prevention
+        query: (service:data-loss-prevention OR vendor_endpoint:data-loss-prevention)
       processors:
         - type: attribute-remapper
           name: Map `src` to `network.client.ip`
@@ -1196,7 +1196,7 @@ pipeline:
       name: Remap attributes for Device Access Control logs
       enabled: true
       filter:
-        query: service:device-access-control
+        query: (service:device-access-control OR vendor_endpoint:device-access-control)
       processors:
         - type: attribute-remapper
           name: Map `cs1` to `host_name`
@@ -1254,7 +1254,7 @@ pipeline:
       name: Remap attributes for Intrusion Prevention logs
       enabled: true
       filter:
-        query: service:intrusion-prevention
+        query: (service:intrusion-prevention OR vendor_endpoint:intrusion-prevention)
       processors:
         - type: attribute-remapper
           name: Map `src` to `network.client.ip`
@@ -1387,7 +1387,7 @@ pipeline:
       name: Remap attributes for Network Content Inspection logs
       enabled: true
       filter:
-        query: service:network-content-inspection
+        query: (service:network-content-inspection OR vendor_endpoint:network-content-inspection)
       processors:
         - type: attribute-remapper
           name: Map `src` to `network.client.ip`
@@ -1467,7 +1467,7 @@ pipeline:
       name: Remap attributes for Predictive Machine Learning logs
       enabled: true
       filter:
-        query: service:predictive-machine-learning
+        query: (service:predictive-machine-learning OR vendor_endpoint:predictive-machine-learning)
       processors:
         - type: attribute-remapper
           name: Map `sproc` to `system_process`
@@ -1718,7 +1718,7 @@ pipeline:
       name: Remap attributes for Spyware/Grayware logs
       enabled: true
       filter:
-        query: service:spyware-grayware
+        query: (service:spyware-grayware OR vendor_endpoint:spyware-grayware)
       processors:
         - type: attribute-remapper
           name: Map `cs1` to `virus_name`
@@ -1823,7 +1823,7 @@ pipeline:
       name: Remap attributes for Suspicious File Information logs
       enabled: true
       filter:
-        query: service:suspicious-file-information
+        query: (service:suspicious-file-information OR vendor_endpoint:suspicious-file-information)
       processors:
         - type: attribute-remapper
           name: Map `cs2` to `file_type`
@@ -1886,7 +1886,7 @@ pipeline:
       name: Remap attributes for Virtual Analyzer Detections logs
       enabled: true
       filter:
-        query: service:virtual-analyzer-detections
+        query: (service:virtual-analyzer-detections OR vendor_endpoint:virtual-analyzer-detections)
       processors:
         - type: attribute-remapper
           name: Map `dvchost` to `product_server`
@@ -1943,7 +1943,7 @@ pipeline:
       name: Remap attributes for Virus/Malware logs
       enabled: true
       filter:
-        query: service:virus-malware
+        query: (service:virus-malware OR vendor_endpoint:virus-malware)
       processors:
         - type: attribute-remapper
           name: Map `event_name` to `malware_name`
@@ -2088,7 +2088,7 @@ pipeline:
       name: Remap attributes for Web Violation logs
       enabled: true
       filter:
-        query: service:web-violation
+        query: (service:web-violation OR vendor_endpoint:web-violation)
       processors:
         - type: attribute-remapper
           name: Map `dst` to `network.destination.ip`
