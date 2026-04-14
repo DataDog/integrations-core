@@ -15,6 +15,8 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .common import (
     PROTECTION_DOMAIN_STATS_BWC_METRICS,
     PROTECTION_DOMAIN_STATS_SIMPLE_METRICS,
+    SDC_STATS_BWC_METRICS,
+    SDC_STATS_SIMPLE_METRICS,
     SDS_STATS_BWC_METRICS,
     SDS_STATS_SIMPLE_METRICS,
     STORAGE_POOL_STATS_BWC_METRICS,
@@ -189,6 +191,7 @@ def test_collect_protection_domains(dd_run_check, aggregator, instance, mock_htt
         ('_collect_storage_pool', 2, 'Failed to collect metrics for storage pool'),
         ('_collect_protection_domain', 1, 'Failed to collect metrics for protection domain'),
         ('_collect_sds', 3, 'Failed to collect metrics for SDS'),
+        ('_collect_sdc', 3, 'Failed to collect metrics for SDC'),
     ],
 )
 def test_collect_failure_continues(
@@ -242,6 +245,44 @@ def test_collect_sds(dd_run_check, aggregator, instance, mock_http_get):
     aggregator.assert_metric('dell_powerflex.sds.unused_capacity.in_kb', value=103407616, tags=sds1_tags)
     aggregator.assert_metric('dell_powerflex.sds.num_of_devices', value=1, tags=sds1_tags)
     assert_bwc_metrics(aggregator, SDS_STATS_BWC_METRICS, sds1_tags)
+
+
+def test_collect_sdc(dd_run_check, aggregator, instance, mock_http_get):
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+
+    # SDC1: 1b8659fd00000001, numOfMappedVolumes=2
+    sdc1_tags = base_tags + [
+        'sdc_id:1b8659fd00000001',
+        'sdc_guid:33FC0AF2-5180-45D8-9BDC-8E2F78CD60BF',
+        'sdc_type:AppSdc',
+        'sdc_ip:10.0.1.250',
+    ]
+    for metric in SDC_STATS_SIMPLE_METRICS:
+        aggregator.assert_metric(metric['name'], value=metric['value'], tags=sdc1_tags)
+    assert_bwc_metrics(aggregator, SDC_STATS_BWC_METRICS, sdc1_tags)
+
+    # SDC2: 1b8659fc00000000, numOfMappedVolumes=0
+    sdc2_tags = base_tags + [
+        'sdc_id:1b8659fc00000000',
+        'sdc_guid:BE3BC972-269A-4931-96B8-286BFA45C004',
+        'sdc_type:AppSdc',
+        'sdc_ip:10.0.1.223',
+    ]
+    aggregator.assert_metric('dell_powerflex.sdc.num_of_mapped_volumes', value=0, tags=sdc2_tags)
+    assert_bwc_metrics(aggregator, SDC_STATS_BWC_METRICS, sdc2_tags)
+
+    # SDC3: 1b8659fe00000002, numOfMappedVolumes=0
+    sdc3_tags = base_tags + [
+        'sdc_id:1b8659fe00000002',
+        'sdc_guid:46EE0B53-B823-4E68-B0B4-41A2DEC5A425',
+        'sdc_type:AppSdc',
+        'sdc_ip:10.0.1.228',
+    ]
+    aggregator.assert_metric('dell_powerflex.sdc.num_of_mapped_volumes', value=0, tags=sdc3_tags)
+    assert_bwc_metrics(aggregator, SDC_STATS_BWC_METRICS, sdc3_tags)
 
 
 def test_collect_system_with_name(dd_run_check, aggregator, instance, mocker):

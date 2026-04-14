@@ -124,6 +124,14 @@ STORAGE_POOL_STATS_BWC_METRICS = _COMMON_BWC_METRICS + [
     ('normRebuildReadBwc', 'norm_rebuild_read_bwc'),
 ]
 
+SDC_METRIC_PREFIX = 'sdc'
+
+SDC_STATS_SIMPLE_METRICS = [
+    ('numOfMappedVolumes', 'num_of_mapped_volumes'),
+]
+
+SDC_STATS_BWC_METRICS = list(_COMMON_BWC_METRICS)
+
 SDS_METRIC_PREFIX = 'sds'
 
 SDS_STATS_SIMPLE_METRICS = [

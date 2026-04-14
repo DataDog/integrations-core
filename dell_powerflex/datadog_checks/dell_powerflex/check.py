@@ -14,6 +14,9 @@ from .constants import (
     PROTECTION_DOMAIN_METRIC_PREFIX,
     PROTECTION_DOMAIN_STATS_BWC_METRICS,
     PROTECTION_DOMAIN_STATS_SIMPLE_METRICS,
+    SDC_METRIC_PREFIX,
+    SDC_STATS_BWC_METRICS,
+    SDC_STATS_SIMPLE_METRICS,
     SDS_METRIC_PREFIX,
     SDS_STATS_BWC_METRICS,
     SDS_STATS_SIMPLE_METRICS,
@@ -52,6 +55,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self._collect_storage_pools()
             self._collect_protection_domains()
             self._collect_sds_list()
+            self._collect_sdc_list()
         except (ConnectionError, HTTPError, InvalidURL, Timeout) as e:
             self.log.warning('Could not connect to PowerFlex Gateway: %s', e)
             self.gauge('api.can_connect', 0, tags=self._base_tags)
@@ -139,6 +143,30 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         for api_field, metric_suffix in PROTECTION_DOMAIN_STATS_SIMPLE_METRICS:
             self.gauge(f'{PROTECTION_DOMAIN_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
         self._collect_bwc_metrics(stats, PROTECTION_DOMAIN_METRIC_PREFIX, PROTECTION_DOMAIN_STATS_BWC_METRICS, tags)
+
+    def _collect_sdc_list(self) -> None:
+        for sdc in self._api.get_sdc_list():
+            try:
+                self._collect_sdc(sdc)
+            except Exception as e:
+                self.log.warning('Failed to collect metrics for SDC %s: %s', sdc.get('id'), e)
+
+    def _collect_sdc(self, sdc: dict) -> None:
+        tags = self._base_tags + [
+            f"sdc_id:{sdc['id']}",
+            f"sdc_guid:{sdc['sdcGuid']}",
+            f"sdc_type:{sdc['sdcType']}",
+            f"sdc_ip:{sdc['sdcIp']}",
+        ]
+        if sdc.get('peerMdmId'):
+            tags = tags + [f"peer_mdm_id:{sdc['peerMdmId']}"]
+        self._collect_sdc_statistics(sdc['id'], tags)
+
+    def _collect_sdc_statistics(self, sdc_id: str, tags: list[str]) -> None:
+        stats = self._api.get_sdc_statistics(sdc_id)
+        for api_field, metric_suffix in SDC_STATS_SIMPLE_METRICS:
+            self.gauge(f'{SDC_METRIC_PREFIX}.{metric_suffix}', stats.get(api_field), tags=tags)
+        self._collect_bwc_metrics(stats, SDC_METRIC_PREFIX, SDC_STATS_BWC_METRICS, tags)
 
     def _collect_sds_list(self) -> None:
         for sds in self._api.get_sds_list():

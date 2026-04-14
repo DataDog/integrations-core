@@ -222,6 +222,19 @@ SDS_STATS_BWC_METRICS = [
     'dell_powerflex.sds.user_data_sdc_write_latency',
 ]
 
+SDC_STATS_SIMPLE_METRICS = [
+    {'name': 'dell_powerflex.sdc.num_of_mapped_volumes', 'value': 2},
+]
+
+SDC_STATS_BWC_METRICS = [
+    'dell_powerflex.sdc.user_data_read_bwc',
+    'dell_powerflex.sdc.user_data_write_bwc',
+    'dell_powerflex.sdc.user_data_trim_bwc',
+    'dell_powerflex.sdc.user_data_sdc_read_latency',
+    'dell_powerflex.sdc.user_data_sdc_write_latency',
+    'dell_powerflex.sdc.user_data_sdc_trim_latency',
+]
+
 SYSTEM_STATS_BWC_METRICS = [
     'dell_powerflex.system.user_data_read_bwc',
     'dell_powerflex.system.user_data_write_bwc',
