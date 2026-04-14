@@ -3207,19 +3207,19 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "sum:postgresql.queries.count{managed_observability:supabase,$project} by {query,query_signature}.as_rate()",
+                      "query": "sum:postgresql.queries.count{$project} by {query,query_signature}.as_rate()",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "sum:postgresql.queries.time{managed_observability:supabase,$project} by {query,query_signature}.as_rate()",
+                      "query": "sum:postgresql.queries.time{$project} by {query,query_signature}.as_rate()",
                       "data_source": "metrics",
                       "name": "query2",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "sum:postgresql.queries.time{managed_observability:supabase,$project}.as_count()",
+                      "query": "sum:postgresql.queries.time{$project}.as_count()",
                       "data_source": "metrics",
                       "name": "query3",
                       "aggregator": "avg"
@@ -3601,31 +3601,31 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:postgresql.total_size{managed_observability:supabase,$project} by {table}",
+                      "query": "avg:postgresql.total_size{$project} by {table}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:postgresql.index_rel_scans{managed_observability:supabase,$project} by {table}",
+                      "query": "avg:postgresql.index_rel_scans{$project} by {table}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "avg:postgresql.live_rows{managed_observability:supabase,$project} by {table}",
+                      "query": "avg:postgresql.live_rows{$project} by {table}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "avg:postgresql.dead_rows{managed_observability:supabase,$project} by {table}",
+                      "query": "avg:postgresql.dead_rows{$project} by {table}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query5",
-                      "query": "avg:postgresql.seq_scans{managed_observability:supabase,$project} by {table}",
+                      "query": "avg:postgresql.seq_scans{$project} by {table}",
                       "aggregator": "avg"
                     }
                   ]
@@ -3675,17 +3675,17 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:postgresql.rows_inserted{managed_observability:supabase,$project}"
+                      "query": "sum:postgresql.rows_inserted{$project}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:postgresql.rows_updated{managed_observability:supabase,$project}"
+                      "query": "sum:postgresql.rows_updated{$project}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:postgresql.rows_deleted{managed_observability:supabase,$project}"
+                      "query": "sum:postgresql.rows_deleted{$project}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3740,7 +3740,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:postgresql.database_size{managed_observability:supabase,$project} by {db}"
+                      "query": "sum:postgresql.database_size{$project} by {db}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3814,19 +3814,19 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:postgresql.table_size{managed_observability:supabase,$project} by {table}",
+                      "query": "avg:postgresql.table_size{$project} by {table}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:postgresql.index_size{managed_observability:supabase,$project} by {table}",
+                      "query": "avg:postgresql.index_size{$project} by {table}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "avg:postgresql.toast_size{managed_observability:supabase,$project} by {table}",
+                      "query": "avg:postgresql.toast_size{$project} by {table}",
                       "aggregator": "avg"
                     }
                   ]
