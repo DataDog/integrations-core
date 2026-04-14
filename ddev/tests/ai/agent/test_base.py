@@ -159,6 +159,27 @@ async def test_compact_leaves_history_unchanged_on_send_error() -> None:
 
 
 # ---------------------------------------------------------------------------
+# compact() — return value
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("n_messages", [0, 1, 2])
+async def test_compact_returns_none_when_history_too_short(n_messages: int) -> None:
+    agent = ConcreteAgent()
+    agent._history = make_history(n_messages)
+    result = await agent.compact()
+    assert result is None
+
+
+async def test_compact_returns_response_when_compaction_occurs() -> None:
+    agent = ConcreteAgent(responses=["the summary"])
+    agent._history = make_history(4)
+    result = await agent.compact()
+    assert result is not None
+    assert result.text == "the summary"
+
+
+# ---------------------------------------------------------------------------
 # compact_preserving_last_turn() — guard: history too short
 # ---------------------------------------------------------------------------
 

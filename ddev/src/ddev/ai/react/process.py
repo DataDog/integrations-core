@@ -46,14 +46,21 @@ class ReActProcess:
         """Clear the agent's conversation history."""
         self._agent.reset()
 
-    async def compact(self) -> None:
+    async def compact(self) -> tuple[int, int]:
         """Compact the agent's conversation history unconditionally.
-        Compaction does not preserve the last user+assistant pair."""
+
+        Compaction does not preserve the last user+assistant pair.
+        Returns (input_tokens, output_tokens) from the compaction API call.
+        Returns (0, 0) if history was already compact and no API call was made.
+        """
         for cb_set in self._callback_sets:
             await cb_set.fire_before_compact()
-        await self._agent.compact()
+        response = await self._agent.compact()
         for cb_set in self._callback_sets:
             await cb_set.fire_after_compact()
+        if response is None:
+            return 0, 0
+        return response.usage.input_tokens, response.usage.output_tokens
 
     async def _compact_if_needed(self, response: AgentResponse) -> tuple[int, int]:
         """Compact mid-loop if the context threshold is exceeded.

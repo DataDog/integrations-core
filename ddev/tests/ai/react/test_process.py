@@ -32,6 +32,7 @@ class MockAgent(BaseAgent[Any]):
         self.send_calls: list[str | list[ToolResultMessage]] = []
         self.compact_calls: int = 0
         self.compact_preserving_turn_calls: int = 0
+        self.compact_response: AgentResponse | None = None
         self.compact_token_response: AgentResponse | None = None
         self.reset_calls: int = 0
 
@@ -45,7 +46,7 @@ class MockAgent(BaseAgent[Any]):
 
     async def compact(self) -> AgentResponse | None:
         self.compact_calls += 1
-        return None
+        return self.compact_response
 
     async def compact_preserving_last_turn(self) -> AgentResponse | None:
         self.compact_preserving_turn_calls += 1
@@ -524,10 +525,20 @@ async def test_reset_delegates_to_agent() -> None:
     assert agent.history == []
 
 
-async def test_compact_delegates_to_agent() -> None:
-    agent = MockAgent([])
-    await make_process(agent).compact()
+async def test_compact_delegates_to_agent_returns_zero_when_no_op() -> None:
+    agent = MockAgent([])  # compact_response is None — no compaction occurred
+    compact_in, compact_out = await make_process(agent).compact()
     assert agent.compact_calls == 1
+    assert compact_in == 0
+    assert compact_out == 0
+
+
+async def test_compact_returns_tokens_when_compaction_occurs() -> None:
+    agent = MockAgent([])
+    agent.compact_response = make_response(StopReason.END_TURN, input_tokens=40, output_tokens=15)
+    compact_in, compact_out = await make_process(agent).compact()
+    assert compact_in == 40
+    assert compact_out == 15
 
 
 async def test_compact_fires_before_and_after_callbacks() -> None:
