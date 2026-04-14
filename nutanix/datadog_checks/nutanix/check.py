@@ -28,13 +28,13 @@ class NutanixCheck(AgentCheck, ConfigMixin):
 
     def _parse_config(self):
         self.pc_ip = self.config.pc_ip
-        self.pc_port = self.config.pc_port
+        self.pc_port = self.config.pc_port or 9440
         if ":" in self.pc_ip:
             host, _, port = self.pc_ip.rpartition(":")
             if port.isdigit():
                 if "pc_port" in self.instance:
                     raise ConfigurationError(
-                        f"Conflicting port configuration between pc_ip ({port}) and pc_port ({self.config.pc_port})"
+                        f"Conflicting port configuration between pc_ip ({port}) and pc_port ({self.pc_port})"
                     )
                 self.pc_ip, self.pc_port = host, int(port)
 

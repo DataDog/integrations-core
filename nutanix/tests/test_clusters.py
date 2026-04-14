@@ -104,7 +104,7 @@ def test_pc_ip_with_port_raises_error(dd_run_check, mock_instance):
     instance = mock_instance.copy()
     instance['pc_ip'] = '10.0.0.197:9440'
 
-    with pytest.raises(Exception, match="Conflicting port configuration between pc_ip"):
+    with pytest.raises(Exception, match="Conflicting port configuration"):
         check = NutanixCheck('nutanix', {}, [instance])
         dd_run_check(check)
 

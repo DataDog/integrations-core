@@ -568,7 +568,7 @@ class InfrastructureMonitor:
             "$startTime": start_time,
             "$endTime": end_time,
             "$statType": "AVG",
-            "$samplingInterval": self.check.config.min_collection_interval,
+            "$samplingInterval": int(self.check.config.min_collection_interval),
         }
 
     def _get_stats(self, endpoint: str) -> dict:
