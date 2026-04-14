@@ -2,6 +2,45 @@
 
 <!-- towncrier release notes start -->
 
+## 37.34.1 / 2026-04-02
+
+***Fixed***:
+
+* Fix logging when using process_isolation parameter. ([#23136](https://github.com/DataDog/integrations-core/pull/23136))
+* Improve compile-time error messages for invalid syntax in DB query extras expressions ([#23140](https://github.com/DataDog/integrations-core/pull/23140))
+
+## 37.34.0 / 2026-04-01
+
+***Added***:
+
+* Add support for timeout paramter to use with process_isolation. ([#22975](https://github.com/DataDog/integrations-core/pull/22975))
+* Update dependencies ([#22996](https://github.com/DataDog/integrations-core/pull/22996))
+
+***Fixed***:
+
+* Fix schema collection silently dropping all collected metadata when the last discovered database has no tables. ([#22880](https://github.com/DataDog/integrations-core/pull/22880))
+* Fix process_isolation parameter to handle log formats and external tags. ([#22973](https://github.com/DataDog/integrations-core/pull/22973))
+* Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place. ([#23075](https://github.com/DataDog/integrations-core/pull/23075))
+
+## 37.33.3 / 2026-04-09
+
+***Fixed***:
+
+* Bump `requests` to `==2.33.0` (CVE-2026-25645 / VULN-59770) and `cryptography` to `==46.0.6` (CVE-2026-34073 / VULN-59768). ([#23223](https://github.com/DataDog/integrations-core/pull/23223))
+* Bump pyOpenSSL to >=26.0.0 to address CVE-2026-27459 (VULN-59209, Critical 9.8) and CVE-2026-27448 (VULN-59208, Medium 5.3). ([#23225](https://github.com/DataDog/integrations-core/pull/23225))
+
+## 37.33.2 / 2026-04-03
+
+***Fixed***:
+
+* Improve compile-time error messages for invalid syntax in DB query extras expressions ([#23140](https://github.com/DataDog/integrations-core/pull/23140))
+
+## 37.33.1 / 2026-03-27
+
+***Fixed***:
+
+* Bump PyJWT to 2.12.1 to address CVE-2026-32597. ([#23065](https://github.com/DataDog/integrations-core/pull/23065))
+
 ## 37.33.0 / 2026-03-20
 
 ***Added***:

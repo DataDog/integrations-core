@@ -268,6 +268,7 @@ def test_discover_queues_resilience_with_broken_queue(instance, aggregator, get_
         (True, True, b'Test Description', 'queue_desc:test_description'),  # Enabled + normalized
         (True, False, b'Test Description', 'queue_desc:Test Description'),  # Enabled + raw
         (True, True, b'', None),  # Empty description
+        (True, False, b'Caf\xc6', 'queue_desc:Caf\ufffd'),  # Non-UTF-8 bytes — must not crash
     ],
 )
 def test_queue_description_tags(

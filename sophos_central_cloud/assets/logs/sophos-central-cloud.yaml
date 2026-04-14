@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: sophos-central-cloud
 metric_id: sophos-central-cloud
 backend_only: false

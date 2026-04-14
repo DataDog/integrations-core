@@ -43,7 +43,7 @@ jobs:
       DD_TRACE_ANALYTICS_ENABLED: "true"
 
     permissions:
-       # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
+       # needed for dd-sts and codecov in test-target.yml, allows the action to get a JWT signed by Github
        id-token: write
        # needed for compute-matrix in test-target.yml
        contents: read
@@ -79,6 +79,11 @@ jobs:
           )}}
         restore-keys: |-
           v01-python-${{ env.pythonLocation }}
+    - name: Get Datadog credentials
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-core-api-key
 
     - name: Install ddev from local folder
       run: |-
@@ -105,14 +110,14 @@ jobs:
     - name: Run E2E tests with FIPS disabled
       env:
         DDEV_E2E_AGENT: "${{ inputs.agent-image || 'registry.datadoghq.com/agent-dev:master-py3' }}"
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+        DD_API_KEY: "${{ steps.dd-sts.outputs.api_key }}"
       run: |
         ddev env test --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -m "fips_off"
 
     - name: Run E2E tests with FIPS enabled
       env:
         DDEV_E2E_AGENT: "${{ inputs.agent-image-fips || 'registry.datadoghq.com/agent-dev:master-fips' }}" 
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+        DD_API_KEY: "${{ steps.dd-sts.outputs.api_key }}"
       run: |
         ddev env test --base --new-env --junit ${{ inputs.target || 'tls' }} -- all -k "fips_on"
 
@@ -139,4 +144,16 @@ jobs:
       with:
         use_oidc: true
         files: "${{ inputs.target || 'tls' }}/coverage.xml"
+        flags: "${{ inputs.target || 'tls' }}"
+
+    - name: Upload coverage to Datadog
+      if: >
+        !github.event.repository.private &&
+        always()
+      continue-on-error: true
+      uses: DataDog/coverage-upload-github-action@9bbbf86d16f7db1b14c5b885e61cf0d96053686a # v1.0.0
+      with:
+        api_key: ${{ secrets.DD_API_KEY }}
+        files: "${{ inputs.target || 'tls' }}/coverage.xml"
+        format: cobertura
         flags: "${{ inputs.target || 'tls' }}"

@@ -650,10 +650,6 @@ coverage:
         target: 75
         flags:
         - slurm
-      Snowflake:
-        target: 75
-        flags:
-        - snowflake
       SonarQube:
         target: 75
         flags:
@@ -1688,11 +1684,6 @@ flags:
     paths:
     - snmp/datadog_checks/snmp
     - snmp/tests
-  snowflake:
-    carryforward: true
-    paths:
-    - snowflake/datadog_checks/snowflake
-    - snowflake/tests
   sonarqube:
     carryforward: true
     paths:

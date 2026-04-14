@@ -81,6 +81,9 @@ class GitHubManager:
     # https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28#create-a-workflow-dispatch-event
     WORKFLOW_DISPATCH_API = 'https://api.github.com/repos/{repo_id}/actions/workflows/{workflow_id}/dispatches'
 
+    # https://docs.github.com/en/rest/issues/comments?apiVersion=2022-11-28#create-an-issue-comment
+    ISSUE_COMMENTS_API = 'https://api.github.com/repos/{repo_id}/issues/{issue_number}/comments'
+
     def __init__(self, repo: Repository, *, user: str, token: str, status: BorrowedStatus):
         self.__repo = repo
         self.__auth = (user, token)
@@ -164,6 +167,24 @@ class GitHubManager:
         self.__api_post(
             self.WORKFLOW_DISPATCH_API.format(repo_id=self.repo_id, workflow_id=workflow_id),
             content=json.dumps({'ref': ref, 'inputs': inputs}),
+        )
+
+    def get_pull_request_comments(self, pr_number: int) -> list[dict]:
+        response = self.__api_get(
+            self.ISSUE_COMMENTS_API.format(repo_id=self.repo_id, issue_number=pr_number),
+        )
+        return response.json()
+
+    def delete_comment(self, comment_id: int) -> None:
+        self.__api_call(
+            'delete',
+            f'https://api.github.com/repos/{self.repo_id}/issues/comments/{comment_id}',
+        )
+
+    def post_pull_request_comment(self, pr_number: int, body: str) -> None:
+        self.__api_post(
+            self.ISSUE_COMMENTS_API.format(repo_id=self.repo_id, issue_number=pr_number),
+            content=json.dumps({'body': body}),
         )
 
     def create_label(self, name, color):

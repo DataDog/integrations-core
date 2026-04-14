@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 15.15.1 / 2026-04-09
+
+***Fixed***:
+
+* Bump `cryptography` to `==46.0.6` (CVE-2026-34073 / VULN-59768). ([#23223](https://github.com/DataDog/integrations-core/pull/23223))
+
+## 15.15.0 / 2026-04-01
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
 ## 15.14.0 / 2026-03-18
 
 ***Added***:

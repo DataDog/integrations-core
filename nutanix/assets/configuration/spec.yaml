@@ -191,6 +191,17 @@ files:
             value:
               type: boolean
               example: false
+          - name: exclude_filtered_resources_from_cluster_capacity
+            description: |
+              Whether to exclude filtered resources (hosts and VMs excluded by power state or
+              resource_filters) from cluster-level capacity metrics.
+              When false (default), cluster capacity reflects total provisioned resources across
+              all hosts and VMs, regardless of whether individual metrics are reported.
+              When true, only resources that pass filter checks contribute to cluster capacity
+              metrics (total_cores, total_threads, total_bytes, vcpus_allocated, memory_allocated_bytes).
+            value:
+              type: boolean
+              example: false
           - name: batch_vm_collection
             description: |
               Whether to fetch all VMs in a single paginated API call instead of per-host.

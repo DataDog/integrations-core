@@ -1,0 +1,36 @@
+# Policy for: .github/workflows/update-build-agent-yaml.yml in DataDog/integrations-core
+# Triggered by workflow_dispatch from master (manual trigger)
+#
+# Naming convention:
+#   self:                      Only this repository (DataDog/integrations-core) can use this policy
+#   update-build-agent-yaml:   Specific workflow
+#   dispatch:                  Triggered only via workflow_dispatch
+#
+# Security model:
+#   - Workflow is manually triggered via workflow_dispatch from master
+#   - Workflow file is committed to master (protected branch)
+#   - User provides the target release branch as input
+#
+# Permissions granted:
+#   - contents: write       - Create branches and push commits
+#   - pull_requests: write  - Create pull requests
+#
+# Usage in workflows:
+#   - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+#     with:
+#       scope: DataDog/integrations-core
+#       policy: self.update-build-agent-yaml.dispatch
+
+issuer: https://token.actions.githubusercontent.com
+
+subject: repo:DataDog/integrations-core:ref:refs/heads/master
+
+claim_pattern:
+  event_name: workflow_dispatch
+  job_workflow_ref: DataDog/integrations-core/\.github/workflows/update-build-agent-yaml\.yml@refs/heads/master
+  ref: refs/heads/master
+  repository: DataDog/integrations-core
+
+permissions:
+  contents: write
+  pull_requests: write
