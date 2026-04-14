@@ -14,7 +14,6 @@ files:
     multiple_instances_defined: true
     options:
     - name: OpenMetrics
-      display_priority: 0
       description: RabbitMQ Prometheus Plugin Example
       options:
       - name: prometheus_plugin
@@ -70,7 +69,6 @@ files:
           openmetrics_endpoint.required: false
           openmetrics_endpoint.hidden: true
     - name: RabbitMQ Management Plugin
-      display_priority: 0
       description: RabbitMQ Management Plugin Example
       options:
       - name: rabbitmq_api_url
