@@ -1,1 +1,1 @@
-Fix plan deduplication key to scope per database so the same query in different databases each emit their own plan event.
+Add support for ClickHouse explain plans.
