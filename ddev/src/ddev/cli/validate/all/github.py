@@ -124,8 +124,8 @@ def format_pr_comment(
     results: dict[str, ValidationResult],
     configs: dict[str, ValidationConfig],
     target: str | None,
+    expected_count: int,
     *,
-    expected_count: int | None = None,
     error: str | None = None,
     warning: str | None = None,
 ) -> str:
@@ -135,7 +135,7 @@ def format_pr_comment(
     for name, result in results.items():
         (passed if result.success else failures)[name] = result
 
-    incomplete = (expected_count or 0) - len(results)
+    incomplete = expected_count - len(results)
     parts = _build_preamble(error, warning)
 
     if incomplete > 0:
@@ -161,14 +161,14 @@ def format_step_summary(
     results: dict[str, ValidationResult],
     configs: dict[str, ValidationConfig],
     target: str | None,
+    expected_count: int,
     *,
-    expected_count: int | None = None,
     error: str | None = None,
     warning: str | None = None,
 ) -> str:
     """Format a flat summary table for the GitHub Actions step summary."""
     has_failures = any(not r.success for r in results.values())
-    incomplete = (expected_count or 0) - len(results)
+    incomplete = expected_count - len(results)
 
     parts = _build_preamble(error, warning)
 

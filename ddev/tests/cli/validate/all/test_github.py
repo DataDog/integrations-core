@@ -138,7 +138,7 @@ def test_format_pr_comment_all_passed(helpers):
         | `config` | Validate default configuration files against spec.yaml | ✅ |
 
         </details>""")
-    assert format_pr_comment(results, CONFIGS, target="changed") == expected
+    assert format_pr_comment(results, CONFIGS, target="changed", expected_count=len(results)) == expected
 
 
 def test_format_pr_comment_one_failure_with_target(helpers):
@@ -163,7 +163,7 @@ def test_format_pr_comment_one_failure_with_target(helpers):
         | `ci` | Validate CI configuration and Codecov settings | ✅ |
 
         </details>""")
-    assert format_pr_comment(results, CONFIGS, target="changed") == expected
+    assert format_pr_comment(results, CONFIGS, target="changed", expected_count=len(results)) == expected
 
 
 def test_format_pr_comment_all_failures_no_details_section(helpers):
@@ -178,14 +178,14 @@ def test_format_pr_comment_all_failures_no_details_section(helpers):
         | `config` | Validate default configuration files against spec.yaml | ❌ |
 
         Run `ddev validate all --fix` to attempt to auto-fix supported validations.""")
-    assert format_pr_comment(results, CONFIGS, target=None) == expected
+    assert format_pr_comment(results, CONFIGS, target=None, expected_count=len(results)) == expected
 
 
 def test_format_pr_comment_no_fix_command_when_all_pass():
     results = {
         "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
     }
-    comment = format_pr_comment(results, CONFIGS, target=None)
+    comment = format_pr_comment(results, CONFIGS, target=None, expected_count=len(results))
     assert "All 1 validations passed." in comment
     assert "ddev validate all" not in comment
 
@@ -211,6 +211,7 @@ def test_format_pr_comment_with_error_and_warning(helpers):
             results,
             CONFIGS,
             target=None,
+            expected_count=len(results),
             error="Error running validations: boom",
             warning="Could not determine PR number",
         )
@@ -222,7 +223,7 @@ def test_format_pr_comment_does_not_include_output():
     results = {
         "config": ValidationResult(name="config", success=False, stdout="secret error output", stderr="", duration=1.0),
     }
-    comment = format_pr_comment(results, CONFIGS, target=None)
+    comment = format_pr_comment(results, CONFIGS, target=None, expected_count=len(results))
     assert "secret error output" not in comment
 
 
@@ -230,7 +231,7 @@ def test_format_pr_comment_missing_config_uses_empty_description():
     results = {
         "unknown": ValidationResult(name="unknown", success=True, stdout="ok", stderr="", duration=1.0),
     }
-    comment = format_pr_comment(results, CONFIGS, target=None)
+    comment = format_pr_comment(results, CONFIGS, target=None, expected_count=len(results))
     assert "| `unknown` |  | ✅ |" in comment
 
 
@@ -267,7 +268,7 @@ def test_format_step_summary_all_passed(helpers):
         |---|---|---|
         | `ci` | Validate CI configuration and Codecov settings | ✅ |
         | `config` | Validate default configuration files against spec.yaml | ✅ |""")
-    assert format_step_summary(results, CONFIGS, target="changed") == expected
+    assert format_step_summary(results, CONFIGS, target="changed", expected_count=len(results)) == expected
 
 
 def test_format_step_summary_with_failures(helpers):
@@ -284,14 +285,14 @@ def test_format_step_summary_with_failures(helpers):
         | `config` | Validate default configuration files against spec.yaml | ❌ |
 
         Run `ddev validate all changed --fix` to attempt to auto-fix supported validations.""")
-    assert format_step_summary(results, CONFIGS, target="changed") == expected
+    assert format_step_summary(results, CONFIGS, target="changed", expected_count=len(results)) == expected
 
 
 def test_format_step_summary_no_fix_when_all_pass():
     results = {
         "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
     }
-    summary = format_step_summary(results, CONFIGS, target=None)
+    summary = format_step_summary(results, CONFIGS, target=None, expected_count=len(results))
     assert "ddev validate all" not in summary
 
 
@@ -311,7 +312,7 @@ def test_format_step_summary_with_error_and_warning(helpers):
         | `config` | Validate default configuration files against spec.yaml | ❌ |
 
         Run `ddev validate all --fix` to attempt to auto-fix supported validations.""")
-    assert format_step_summary(results, CONFIGS, target=None, error="boom", warning="no PR") == expected
+    assert format_step_summary(results, CONFIGS, target=None, expected_count=len(results), error="boom", warning="no PR") == expected
 
 
 # --- get_workflow_run_url ---
