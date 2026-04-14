@@ -21,6 +21,7 @@ class FeatureKey(Enum):
     QUERY_METRICS = "query_metrics"
     QUERY_SAMPLES = "query_samples"
     QUERY_COMPLETIONS = "query_completions"
+    QUERY_ERRORS = "query_errors"
     SINGLE_ENDPOINT_MODE = "single_endpoint_mode"
 
 
@@ -29,6 +30,7 @@ FeatureNames = {
     FeatureKey.QUERY_METRICS: 'Query Metrics',
     FeatureKey.QUERY_SAMPLES: 'Query Samples',
     FeatureKey.QUERY_COMPLETIONS: 'Query Completions',
+    FeatureKey.QUERY_ERRORS: 'Query Errors',
     FeatureKey.SINGLE_ENDPOINT_MODE: 'Single Endpoint Mode',
 }
 

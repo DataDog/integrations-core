@@ -65,6 +65,19 @@ class QueryCompletions(BaseModel):
     seen_samples_cache_maxsize: Optional[float] = None
 
 
+class QueryErrors(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_samples_per_collection: Optional[float] = None
+    run_sync: Optional[bool] = None
+    samples_per_hour_per_query: Optional[float] = None
+    seen_samples_cache_maxsize: Optional[float] = None
+
+
 class QueryMetrics(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -109,6 +122,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = None
     port: Optional[int] = None
     query_completions: Optional[QueryCompletions] = None
+    query_errors: Optional[QueryErrors] = None
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
     read_timeout: Optional[int] = None

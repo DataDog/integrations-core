@@ -167,6 +167,16 @@ instances:
     #
     # collect_subtasks: false
 
+    ## @param exclude_filtered_resources_from_cluster_capacity - boolean - optional - default: false
+    ## Whether to exclude filtered resources (hosts and VMs excluded by power state or
+    ## resource_filters) from cluster-level capacity metrics.
+    ## When false (default), cluster capacity reflects total provisioned resources across
+    ## all hosts and VMs, regardless of whether individual metrics are reported.
+    ## When true, only resources that pass filter checks contribute to cluster capacity
+    ## metrics (total_cores, total_threads, total_bytes, vcpus_allocated, memory_allocated_bytes).
+    #
+    # exclude_filtered_resources_from_cluster_capacity: false
+
     ## @param batch_vm_collection - boolean - optional - default: true
     ## Whether to fetch all VMs in a single paginated API call instead of per-host.
     ## When true, VMs are fetched once and grouped by host in-memory, significantly

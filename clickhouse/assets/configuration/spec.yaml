@@ -236,6 +236,50 @@ files:
           value:
             type: boolean
             example: false
+    - name: query_errors
+      description: Configure collection of query errors from system.query_log
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query errors. Requires `dbm: true`.
+            Collects ExceptionBeforeStart and ExceptionWhileProcessing events, which include
+            exception message, error code, and stack trace.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the query errors collection interval (in seconds).
+          value:
+            type: number
+            example: 10
+        - name: samples_per_hour_per_query
+          description: |
+            Set the maximum number of error samples to collect per hour per unique query signature.
+          value:
+            type: number
+            example: 60
+        - name: seen_samples_cache_maxsize
+          hidden: true
+          description: |
+            Set the max size of the cache used for rate limiting error samples.
+          value:
+            type: number
+            default: 10000
+        - name: max_samples_per_collection
+          hidden: true
+          description: |
+            Maximum number of error samples to collect in a single run (applies LIMIT in SQL).
+          value:
+            type: number
+            default: 1000
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the query errors collection synchronously. For testing only.
+          value:
+            type: boolean
+            example: false
     - template: instances/db
       overrides:
         custom_queries.value.example:
