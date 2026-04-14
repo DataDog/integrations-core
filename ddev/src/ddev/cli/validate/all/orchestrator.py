@@ -276,8 +276,8 @@ class ValidationOrchestrator(EventBusOrchestrator):
             self._app.github.post_pull_request_comment(self._pr_number, comment_body)
             self._app.logger.debug("Comment posted successfully.")
         except Exception as exc:
-            self._app.display_warning(f"Failed to post PR comment: {exc}")
-            write_step_summary(f"\n> Failed to post PR comment: {exc}")
+            self._app.display_warning(f"Failed to post PR comment: {type(exc).__name__}: {exc}")
+            write_step_summary(f"\n> Failed to post PR comment: {type(exc).__name__}: {exc}")
         finally:
             httpx_logger.setLevel(previous_level)
 

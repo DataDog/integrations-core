@@ -75,15 +75,26 @@ def write_step_summary(content: str) -> None:
                 f.write(content + "\n")
 
 
+def _build_preamble(error: str | None, warning: str | None) -> list[str]:
+    parts: list[str] = [f"{COMMENT_HEADING}\n"]
+    if error:
+        parts.append(f"> **Error:** {error}\n")
+    if warning:
+        parts.append(f"> **Warning:** {warning}\n")
+    return parts
+
+
 def _build_table(
     rows: dict[str, ValidationResult],
     configs: dict[str, ValidationConfig],
 ) -> list[str]:
     """Build a markdown table with Validation, Description, and Status columns."""
+    from ddev.cli.validate.all.orchestrator import ValidationConfig as _VC
+
     lines = ["| Validation | Description | Status |", "|---|---|---|"]
     for name in sorted(rows):
-        status = "❌" if not rows[name].success else "✅"
-        description = configs[name].description if name in configs else ""
+        status = "✅" if rows[name].success else "❌"
+        description = configs.get(name, _VC()).description
         lines.append(f"| `{name}` | {description} | {status} |")
     return lines
 
@@ -100,11 +111,7 @@ def format_pr_comment(
     failures = {n: r for n, r in results.items() if not r.success}
     passed = {n: r for n, r in results.items() if r.success}
 
-    parts: list[str] = [f"{COMMENT_HEADING}\n"]
-    if error:
-        parts.append(f"> **Error:** {error}\n")
-    if warning:
-        parts.append(f"> **Warning:** {warning}\n")
+    parts = _build_preamble(error, warning)
 
     if failures:
         parts.extend(_build_table(failures, configs))
@@ -119,10 +126,10 @@ def format_pr_comment(
             parts.extend(_build_table(passed, configs))
             parts.append("\n</details>")
     else:
-        parts.append(f"All {len(results)} validations passed.")
+        parts.append(f"All {len(passed)} validations passed.")
         parts.append("")
         parts.append("<details>\n<summary>Show details</summary>\n")
-        parts.extend(_build_table(results, configs))
+        parts.extend(_build_table(passed, configs))
         parts.append("\n</details>")
 
     return "\n".join(parts)
@@ -137,17 +144,12 @@ def format_step_summary(
     warning: str | None = None,
 ) -> str:
     """Format a flat summary table for the GitHub Actions step summary."""
-    failures = {n for n, r in results.items() if not r.success}
+    has_failures = any(not r.success for r in results.values())
 
-    parts: list[str] = [f"{COMMENT_HEADING}\n"]
-    if error:
-        parts.append(f"> **Error:** {error}\n")
-    if warning:
-        parts.append(f"> **Warning:** {warning}\n")
-
+    parts = _build_preamble(error, warning)
     parts.extend(_build_table(results, configs))
 
-    if failures:
+    if has_failures:
         fix_target = f" {target}" if target else ""
         fix_all_cmd = f"ddev validate all{fix_target} --fix"
         parts.append(f"\nRun `{fix_all_cmd}` to attempt to auto-fix supported validations.")

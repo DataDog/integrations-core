@@ -186,6 +186,7 @@ def test_format_pr_comment_no_fix_command_when_all_pass():
         "config": ValidationResult(name="config", success=True, stdout="ok", stderr="", duration=1.0),
     }
     comment = format_pr_comment(results, CONFIGS, target=None)
+    assert "All 1 validations passed." in comment
     assert "ddev validate all" not in comment
 
 
@@ -223,6 +224,14 @@ def test_format_pr_comment_does_not_include_output():
     }
     comment = format_pr_comment(results, CONFIGS, target=None)
     assert "secret error output" not in comment
+
+
+def test_format_pr_comment_missing_config_uses_empty_description():
+    results = {
+        "unknown": ValidationResult(name="unknown", success=True, stdout="ok", stderr="", duration=1.0),
+    }
+    comment = format_pr_comment(results, CONFIGS, target=None)
+    assert "| `unknown` |  | ✅ |" in comment
 
 
 # --- format_step_summary ---

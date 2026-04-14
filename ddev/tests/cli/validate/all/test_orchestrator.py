@@ -216,6 +216,7 @@ def test_on_finalize_posts_pr_comment_on_failure(mock_app):
     body = mock_app.github.post_pull_request_comment.call_args[0][1]
     assert "Validation Report" in body
     assert "| Validation | Description | Status |" in body
+    assert "Validate default configuration files against spec.yaml" in body
     assert "| `config` |" in body
     assert "❌" in body
     assert "[View full run](https://github.com/DataDog/integrations-core/actions/runs/12345)" in body
