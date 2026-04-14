@@ -16,7 +16,7 @@
             "id": 7248787798500294,
             "definition": {
               "type": "note",
-              "content": "This dashboard provides a high-level overview of your Supabase deployment to help monitor your system.\n\nMetrics are displayed within the groups on this left column, in purple. The metrics express health and activity for your Supabase project Postgres server database and OS.\n\nWhen multiple Postgres servers are present in the project, use the _identifier_ filter, above, to isolate metrics to a single server.",
+              "content": "This dashboard provides a high-level overview of your Supabase deployment to help monitor your system.\n\nMetrics are displayed within the groups on this left column, in purple. The metrics express health and activity for your Supabase project Postgres server database and OS.\n\nWhen multiple Postgres servers are present in the project, use the _identifier_ filter, above, to isolate metrics to a single server.\n\nThe blue **Database Monitoring** section (below) provides deep query performance, active sessions, and table health data via [Database Monitoring](https://docs.datadoghq.com/database_monitoring/).",
               "background_color": "transparent",
               "font_size": "14",
               "text_align": "left",
@@ -3163,6 +3163,780 @@
         "y": 27,
         "width": 12,
         "height": 14
+      }
+    },
+    {
+      "id": 9100000000000001,
+      "definition": {
+        "title": "Database Monitoring",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 9100000000000002,
+            "definition": {
+              "type": "note",
+              "content": "Get in-depth understanding of the health and performance of your databases and identify slow queries to troubleshoot by using [Database Monitoring](/databases/list?query=supabase).",
+              "background_color": "vivid_purple",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 9100000000000003,
+            "definition": {
+              "title": "Queries with Top Execution Time",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:postgresql.queries.count{managed_observability:supabase,$project} by {query,query_signature}.as_rate()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:postgresql.queries.time{managed_observability:supabase,$project} by {query,query_signature}.as_rate()",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:postgresql.queries.time{managed_observability:supabase,$project}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 1,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Query Rate",
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "% DB Time",
+                      "cell_display_mode": "bar",
+                      "formula": "100 * query2 / query3"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 9100000000000004,
+            "definition": {
+              "title": "Active Query Load by SQL Statement",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "database_queries",
+                      "name": "query1",
+                      "search": {
+                        "query": "@postgres.state:active dbm_type:activity -agent_query:activity_sampling source:postgres $project"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@db.statement",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "blue",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 9100000000000005,
+            "definition": {
+              "title": "Database Load by Wait Event",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "dbm_type:activity source:postgres $project"
+                      },
+                      "data_source": "database_queries",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@db.wait_event",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 10
+                        }
+                      ]
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 9100000000000006,
+            "definition": {
+              "title": "Active Sessions by Wait Event",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "dbm_type:activity source:postgres $project"
+                      },
+                      "data_source": "database_queries",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@db.wait_event",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 10
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9100000000000007,
+            "definition": {
+              "title": "Active Sessions by Database",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "dbm_type:activity source:postgres $project"
+                      },
+                      "data_source": "database_queries",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@db.instance",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 10
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 8,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9100000000000008,
+            "definition": {
+              "title": "Active Sessions by User",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "dbm_type:activity source:postgres $project"
+                      },
+                      "data_source": "database_queries",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@db.user",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 10
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 8,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9100000000000009,
+            "definition": {
+              "title": "Resources by Table",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Total Size",
+                      "cell_display_mode": "bar",
+                      "limit": {
+                        "count": 25,
+                        "order": "desc"
+                      },
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Index Scans",
+                      "cell_display_mode": "bar"
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "Live Rows",
+                      "cell_display_mode": "bar"
+                    },
+                    {
+                      "formula": "query4",
+                      "alias": "Dead Rows",
+                      "cell_display_mode": "bar"
+                    },
+                    {
+                      "formula": "query5",
+                      "alias": "Seq Scans",
+                      "cell_display_mode": "bar"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:postgresql.total_size{managed_observability:supabase,$project} by {table}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:postgresql.index_rel_scans{managed_observability:supabase,$project} by {table}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:postgresql.live_rows{managed_observability:supabase,$project} by {table}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "avg:postgresql.dead_rows{managed_observability:supabase,$project} by {table}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "avg:postgresql.seq_scans{managed_observability:supabase,$project} by {table}",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 9100000000000010,
+            "definition": {
+              "title": "Row Mutations Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Inserts"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Updates"
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "Deletes"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:postgresql.rows_inserted{managed_observability:supabase,$project}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:postgresql.rows_updated{managed_observability:supabase,$project}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:postgresql.rows_deleted{managed_observability:supabase,$project}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "cool",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 15,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9100000000000011,
+            "definition": {
+              "title": "Database Size",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Database Size",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:postgresql.database_size{managed_observability:supabase,$project} by {db}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "cool",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 15,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9100000000000012,
+            "definition": {
+              "title": "Table Size Breakdown",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Table Size",
+                      "cell_display_mode": "bar",
+                      "limit": {
+                        "count": 25,
+                        "order": "desc"
+                      },
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Index Size",
+                      "cell_display_mode": "bar",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "Toast Size",
+                      "cell_display_mode": "bar",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:postgresql.table_size{managed_observability:supabase,$project} by {table}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:postgresql.index_size{managed_observability:supabase,$project} by {table}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:postgresql.toast_size{managed_observability:supabase,$project} by {table}",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 18,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 41,
+        "width": 12,
+        "height": 23
+      }
+    },
+    {
+      "id": 9100000000000020,
+      "definition": {
+        "title": "Recommendations",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 9100000000000021,
+            "definition": {
+              "type": "note",
+              "content": "Performance and reliability insights from Datadog's database recommendation engine. [View all recommendations](/databases/recommendations?dbms=postgres) | [Database Monitoring](/databases/list?query=supabase)",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "75%",
+              "tick_edge": "bottom",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 9100000000000022,
+            "definition": {
+              "title": "",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "database_recommendations_stream",
+                    "query_string": "dbms:postgres",
+                    "sort": {
+                      "column": "severity",
+                      "order": "desc"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "severity",
+                      "width": 70
+                    },
+                    {
+                      "field": "type",
+                      "width": 150
+                    },
+                    {
+                      "field": "description",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "first_seen",
+                      "width": 120
+                    },
+                    {
+                      "field": "last_seen",
+                      "width": 120
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 64,
+        "width": 12,
+        "height": 7
       }
     }
   ],
