@@ -4,20 +4,41 @@
 
 from abc import ABC, abstractmethod
 from copy import deepcopy
+from typing import Final
 
 from ddev.ai.agent.types import AgentResponse, ToolResultMessage
+from ddev.ai.tools.core.registry import ToolRegistry
+
+_COMPACT_SYSTEM_PROMPT: Final[str] = """\
+You are summarizing an agentic conversation to free up context space.
+Produce a dense, structured summary that covers ALL of the following:
+  1. The original task given to the agent
+  2. Every tool call made and the key finding or result from each
+  3. Any decisions, conclusions, or hypotheses the agent reached
+  4. What has been completed and what work remains
+
+Rules:
+- Be exhaustive on facts and findings; omit raw data already consumed
+- Use bullet points, not prose
+- The agent will read ONLY this summary to continue — it must be self-sufficient
+"""
+
+_COMPACT_REQUEST: Final[str] = "Summarize the conversation so far following your instructions."
 
 
 class BaseAgent[TMessage](ABC):
     """Abstract base class for all agent implementations.
 
-    Provides shared, provider-agnostic history management. The message type
-    TMessage is supplied by each concrete provider (e.g. MessageParam for Anthropic).
-    Subclasses must implement send().
+    Provides shared, provider-agnostic history management and compaction.
+    The message type TMessage is supplied by each concrete provider
+    (e.g. MessageParam for Anthropic). Subclasses must implement send().
     """
 
-    def __init__(self) -> None:
+    def __init__(self, name: str, system_prompt: str, tools: ToolRegistry) -> None:
         self._history: list[TMessage] = []
+        self.name = name
+        self._system_prompt = system_prompt
+        self._tools = tools
 
     @property
     def history(self) -> list[TMessage]:
@@ -27,6 +48,25 @@ class BaseAgent[TMessage](ABC):
     def reset(self) -> None:
         """Clear conversation history to start a new conversation."""
         self._history = []
+
+    async def compact(self) -> None:
+        """Collapse history to 2 messages: original task + LLM summary. No-op if already ≤ 2."""
+        if len(self._history) <= 2:
+            return
+
+        original_prompt = self._history[0]
+        original_system = self._system_prompt
+
+        self._system_prompt = _COMPACT_SYSTEM_PROMPT
+        try:
+            await self.send(_COMPACT_REQUEST, allowed_tools=[])
+        finally:
+            self._system_prompt = original_system  # restore even if send() raises
+
+        compact_response = self._history[-1]  # summary message added by send()
+
+        self.reset()
+        self._history = [original_prompt, compact_response]
 
     @abstractmethod
     async def send(

@@ -13,6 +13,7 @@ from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUs
 from ddev.ai.react.callbacks import CallbackSet
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
+from ddev.ai.tools.core.registry import ToolRegistry
 from ddev.ai.tools.core.types import ToolResult
 
 # ---------------------------------------------------------------------------
@@ -24,9 +25,11 @@ class MockAgent(BaseAgent[Any]):
     """Minimal BaseAgent implementation that replays a fixed list of responses."""
 
     def __init__(self, responses: list[AgentResponse]) -> None:
-        super().__init__()
+        super().__init__(name="mock", system_prompt="", tools=ToolRegistry([]))
         self._responses = iter(responses)
         self.send_calls: list[str | list[ToolResultMessage]] = []
+        self.compact_calls: int = 0
+        self.reset_calls: int = 0
 
     async def send(
         self,
@@ -35,6 +38,13 @@ class MockAgent(BaseAgent[Any]):
     ) -> AgentResponse:
         self.send_calls.append(content)
         return next(self._responses)
+
+    async def compact(self) -> None:
+        self.compact_calls += 1
+
+    def reset(self) -> None:
+        super().reset()
+        self.reset_calls += 1
 
 
 class MockToolRegistry:
@@ -84,6 +94,8 @@ class CallbackRecorder:
         self.tool_calls_seen: list[tuple[ToolCall, ToolResult, int]] = []
         self.complete_results: list[ReActResult] = []
         self.errors: list[BaseException] = []
+        self.before_compacts: int = 0
+        self.after_compacts: int = 0
 
         self.callback_set = CallbackSet()
 
@@ -102,6 +114,14 @@ class CallbackRecorder:
         @self.callback_set.on_error
         async def _record_error(error: BaseException) -> None:
             self.errors.append(error)
+
+        @self.callback_set.on_before_compact
+        async def _record_before_compact() -> None:
+            self.before_compacts += 1
+
+        @self.callback_set.on_after_compact
+        async def _record_after_compact() -> None:
+            self.after_compacts += 1
 
 
 def make_response(
@@ -135,11 +155,13 @@ def make_process(
     agent: MockAgent,
     registry: MockToolRegistry | None = None,
     callback_sets: list[CallbackSet] | None = None,
+    compact_threshold_pct: float | None = None,
 ) -> ReActProcess:
     return ReActProcess(
         agent=agent,
         tool_registry=registry or MockToolRegistry(),
         callback_sets=callback_sets,
+        compact_threshold_pct=compact_threshold_pct,
     )
 
 
@@ -363,6 +385,9 @@ async def test_two_callback_sets_both_notified() -> None:
 
 
 class ErrorAgent(BaseAgent[Any]):
+    def __init__(self) -> None:
+        super().__init__(name="error", system_prompt="", tools=ToolRegistry([]))
+
     async def send(
         self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
     ) -> AgentResponse:
@@ -387,6 +412,9 @@ async def test_agent_error_notifies_and_reraises() -> None:
 
 
 class InterruptAgent(BaseAgent[Any]):
+    def __init__(self) -> None:
+        super().__init__(name="interrupt", system_prompt="", tools=ToolRegistry([]))
+
     async def send(
         self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
     ) -> AgentResponse:
@@ -410,6 +438,9 @@ async def test_keyboard_interrupt_notifies_and_reraises() -> None:
 
 
 class CancelledAgent(BaseAgent[Any]):
+    def __init__(self) -> None:
+        super().__init__(name="cancelled", system_prompt="", tools=ToolRegistry([]))
+
     async def send(
         self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
     ) -> AgentResponse:
@@ -470,3 +501,95 @@ async def test_context_usage_propagated(context_usage: ContextUsage | None) -> N
 
     assert result.context_usage is context_usage
     assert result.final_response.usage.context_usage is context_usage
+
+
+# ---------------------------------------------------------------------------
+# reset() and compact() — delegation
+# ---------------------------------------------------------------------------
+
+
+async def test_reset_delegates_to_agent() -> None:
+    agent = MockAgent([])
+    make_process(agent).reset()
+    assert agent.reset_calls == 1
+    assert agent.history == []
+
+
+async def test_compact_delegates_to_agent() -> None:
+    agent = MockAgent([])
+    await make_process(agent).compact()
+    assert agent.compact_calls == 1
+
+
+async def test_compact_fires_before_and_after_callbacks() -> None:
+    agent = MockAgent([])
+    recorder = CallbackRecorder()
+    await make_process(agent, callback_sets=[recorder.callback_set]).compact()
+    assert recorder.before_compacts == 1
+    assert recorder.after_compacts == 1
+
+
+# ---------------------------------------------------------------------------
+# Auto-compact inside the ReAct loop
+# ---------------------------------------------------------------------------
+
+
+def make_context_usage(pct: float, window: int = 200_000) -> ContextUsage:
+    return ContextUsage(window_size=window, used_tokens=int(window * pct / 100))
+
+
+async def test_auto_compact_triggers_when_threshold_exceeded() -> None:
+    tc = make_tool_call()
+    responses = [
+        make_response(StopReason.TOOL_USE, tool_calls=[tc]),
+        make_response(StopReason.END_TURN, context_usage=make_context_usage(80.0)),
+    ]
+    agent = MockAgent(responses)
+    await make_process(agent, compact_threshold_pct=75.0).start("task")
+    assert agent.compact_calls == 1
+
+
+async def test_auto_compact_fires_callbacks() -> None:
+    tc = make_tool_call()
+    responses = [
+        make_response(StopReason.TOOL_USE, tool_calls=[tc]),
+        make_response(StopReason.END_TURN, context_usage=make_context_usage(80.0)),
+    ]
+    agent = MockAgent(responses)
+    recorder = CallbackRecorder()
+    await make_process(agent, callback_sets=[recorder.callback_set], compact_threshold_pct=75.0).start("task")
+    assert recorder.before_compacts == 1
+    assert recorder.after_compacts == 1
+
+
+async def test_auto_compact_does_not_trigger_below_threshold() -> None:
+    tc = make_tool_call()
+    responses = [
+        make_response(StopReason.TOOL_USE, tool_calls=[tc]),
+        make_response(StopReason.END_TURN, context_usage=make_context_usage(50.0)),
+    ]
+    agent = MockAgent(responses)
+    await make_process(agent, compact_threshold_pct=75.0).start("task")
+    assert agent.compact_calls == 0
+
+
+async def test_auto_compact_disabled_when_threshold_is_none() -> None:
+    tc = make_tool_call()
+    responses = [
+        make_response(StopReason.TOOL_USE, tool_calls=[tc]),
+        make_response(StopReason.END_TURN, context_usage=make_context_usage(99.9)),
+    ]
+    agent = MockAgent(responses)
+    await make_process(agent, compact_threshold_pct=None).start("task")
+    assert agent.compact_calls == 0
+
+
+async def test_auto_compact_skipped_when_context_usage_is_none() -> None:
+    tc = make_tool_call()
+    responses = [
+        make_response(StopReason.TOOL_USE, tool_calls=[tc]),
+        make_response(StopReason.END_TURN, context_usage=None),
+    ]
+    agent = MockAgent(responses)
+    await make_process(agent, compact_threshold_pct=75.0).start("task")
+    assert agent.compact_calls == 0
