@@ -41,11 +41,8 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             programmatic_tool_calling: Whether to allow programmatic tool calling.
         """
 
-        super().__init__()
+        super().__init__(name=name, system_prompt=system_prompt, tools=tools)
         self._client = client
-        self._tools = tools
-        self._system_prompt = system_prompt
-        self.name = name
         self._model = model
         self._max_tokens = max_tokens
         self._programmatic_tool_calling = programmatic_tool_calling
