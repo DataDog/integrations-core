@@ -7,6 +7,7 @@ Pytest fixtures for external_dns integration tests.
 Provides fixtures for:
 - OpenMetrics V1 (legacy) and V2 instance configurations
 - Mock HTTP responses for external-dns v1.15.0 (legacy) and v1.20.0
+- E2E test environment (mock-based, no Docker)
 """
 
 import os
@@ -23,6 +24,18 @@ INSTANCE_OMV1 = {'prometheus_url': URL, 'tags': ['custom:tag']}
 
 # OpenMetrics V2 instance configuration using openmetrics_endpoint
 INSTANCE_OMV2 = {'openmetrics_endpoint': URL, 'tags': ['custom:tag']}
+
+
+@pytest.fixture(scope='session')
+def dd_environment():
+    """E2E test environment fixture (mock-based, no Docker)."""
+    yield deepcopy(INSTANCE_OMV1)
+
+
+@pytest.fixture(scope='session')
+def instance():
+    """Session-scoped instance for E2E tests."""
+    return deepcopy(INSTANCE_OMV1)
 
 
 @pytest.fixture
