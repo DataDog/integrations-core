@@ -160,12 +160,12 @@ if [ "$NOTIF_TYPE" = "RECOVERY" ]; then
   ALERT_TYPE="success"
 fi
 
-curl -s -m 15 -X POST "https://api.${DD_SITE}/api/v1/events" \
+curl -s -m 15 -X POST \
+  "https://event-management-intake.${DD_SITE}/api/v2/events/webhook?dd-api-key=${DD_API_KEY}&integration_id=nagios&oncall_team=${ONCALL_TEAM}" \
   -H "Content-Type: application/json" \
-  -H "DD-API-KEY: ${DD_API_KEY}" \
   -d "{
     \"title\": \"Nagios: ${HOSTNAME} / ${SERVICEDESC} is ${STATE}\",
-    \"text\": \"@oncall-${ONCALL_TEAM}\\n${OUTPUT}\",
+    \"text\": \"${OUTPUT}\",
     \"alert_type\": \"${ALERT_TYPE}\",
     \"aggregation_key\": \"${HOSTNAME}-${SERVICEDESC}\",
     \"source_type_name\": \"nagios\",
