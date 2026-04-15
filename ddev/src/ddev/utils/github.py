@@ -69,11 +69,20 @@ class GitHubManager:
     # https://docs.github.com/en/rest/issues/labels?apiVersion=2022-11-28#create-a-label
     LABELS_API = 'https://api.github.com/repos/{repo_id}/labels'
 
+    # https://docs.github.com/en/rest/issues/milestones?apiVersion=2022-11-28#create-a-milestone
+    MILESTONES_API = 'https://api.github.com/repos/{repo_id}/milestones'
+
+    # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#create-a-pull-request
+    PULLS_API = 'https://api.github.com/repos/{repo_id}/pulls'
+
     # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#list-pull-requests-files
     PULL_REQUEST_FILES_API = 'https://api.github.com/repos/{repo_id}/pulls/{pr_number}/files'
 
     # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#list-commits-on-a-repository
     COMMIT_API = 'https://api.github.com/repos/{repo_id}/commits/{sha}'
+
+    # https://docs.github.com/en/rest/issues/comments?apiVersion=2022-11-28#create-an-issue-comment
+    ISSUE_COMMENTS_API = 'https://api.github.com/repos/{repo_id}/issues/{issue_number}/comments'
 
     def __init__(self, repo: Repository, *, user: str, token: str, status: BorrowedStatus):
         self.__repo = repo
@@ -147,10 +156,38 @@ class GitHubManager:
             return None
         return [file_data['filename'] for file_data in response.json().get('files', [])]
 
+    def get_pull_request_comments(self, pr_number: int) -> list[dict]:
+        response = self.__api_get(
+            self.ISSUE_COMMENTS_API.format(repo_id=self.repo_id, issue_number=pr_number),
+        )
+        return response.json()
+
+    def delete_comment(self, comment_id: int) -> None:
+        self.__api_call(
+            'delete',
+            f'https://api.github.com/repos/{self.repo_id}/issues/comments/{comment_id}',
+        )
+
+    def post_pull_request_comment(self, pr_number: int, body: str) -> None:
+        self.__api_post(
+            self.ISSUE_COMMENTS_API.format(repo_id=self.repo_id, issue_number=pr_number),
+            content=json.dumps({'body': body}),
+        )
+
     def create_label(self, name, color):
         self.__api_post(
             self.LABELS_API.format(repo_id=self.repo_id), content=json.dumps({'name': name, 'color': color})
         )
+
+    def create_milestone(self, title: str) -> None:
+        self.__api_post(self.MILESTONES_API.format(repo_id=self.repo_id), content=json.dumps({'title': title}))
+
+    def create_pull_request(self, title: str, head: str, base: str, body: str = '') -> str:
+        response = self.__api_post(
+            self.PULLS_API.format(repo_id=self.repo_id),
+            content=json.dumps({'title': title, 'head': head, 'base': base, 'body': body}),
+        )
+        return response.json()['html_url']
 
     def get_label(self, name):
         return self.__api_get(f'{self.LABELS_API.format(repo_id=self.repo_id)}/{name}')
