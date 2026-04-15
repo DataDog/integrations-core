@@ -1,0 +1,120 @@
+# HELP external_dns_build_info A metric with a constant '1' value labeled with 'version' and 'revision' of external_dns and the 'go_version', 'os' and the 'arch' used the build.
+# TYPE external_dns_build_info gauge
+external_dns_build_info{arch="amd64",go_version="go1.25.4",os="linux",revision="unknown",version="v20251114-v0.20.0"} 1
+# HELP external_dns_controller_consecutive_soft_errors Number of consecutive soft errors in reconciliation loop.
+# TYPE external_dns_controller_consecutive_soft_errors gauge
+external_dns_controller_consecutive_soft_errors 0
+# HELP external_dns_controller_last_reconcile_timestamp_seconds Timestamp of last attempted sync with the DNS provider
+# TYPE external_dns_controller_last_reconcile_timestamp_seconds gauge
+external_dns_controller_last_reconcile_timestamp_seconds 1.7762388645130658e+09
+# HELP external_dns_controller_last_sync_timestamp_seconds Timestamp of last successful sync with the DNS provider
+# TYPE external_dns_controller_last_sync_timestamp_seconds gauge
+external_dns_controller_last_sync_timestamp_seconds 1.7762388651472921e+09
+# HELP external_dns_controller_no_op_runs_total Number of reconcile loops ending up with no changes on the DNS provider side.
+# TYPE external_dns_controller_no_op_runs_total counter
+external_dns_controller_no_op_runs_total 1122
+# HELP external_dns_controller_verified_records Number of DNS records that exists both in source and registry (vector).
+# TYPE external_dns_controller_verified_records gauge
+external_dns_controller_verified_records{record_type="a"} 0
+external_dns_controller_verified_records{record_type="aaaa"} 0
+external_dns_controller_verified_records{record_type="mx"} 0
+external_dns_controller_verified_records{record_type="naptr"} 0
+external_dns_controller_verified_records{record_type="ns"} 0
+external_dns_controller_verified_records{record_type="ptr"} 0
+external_dns_controller_verified_records{record_type="srv"} 0
+external_dns_controller_verified_records{record_type="txt"} 0
+# HELP external_dns_http_request_duration_seconds The HTTP request latencies in seconds.
+# TYPE external_dns_http_request_duration_seconds summary
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="endpointslices",scheme="https",status="200",quantile="0.5"} 0.001949703
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="endpointslices",scheme="https",status="200",quantile="0.9"} 0.002323098
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="endpointslices",scheme="https",status="200",quantile="0.99"} 0.00257613
+external_dns_http_request_duration_seconds_sum{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="endpointslices",scheme="https",status="200"} 4.696349410000004
+external_dns_http_request_duration_seconds_count{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="endpointslices",scheme="https",status="200"} 2266
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="ingresses",scheme="https",status="200",quantile="0.5"} 0.001080546
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="ingresses",scheme="https",status="200",quantile="0.9"} 0.001337935
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="ingresses",scheme="https",status="200",quantile="0.99"} 0.001339487
+external_dns_http_request_duration_seconds_sum{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="ingresses",scheme="https",status="200"} 2.423909636
+external_dns_http_request_duration_seconds_count{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="ingresses",scheme="https",status="200"} 2266
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="nodes",scheme="https",status="200",quantile="0.5"} 0.002058734
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="nodes",scheme="https",status="200",quantile="0.9"} 0.002311316
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="nodes",scheme="https",status="200",quantile="0.99"} 0.00258087
+external_dns_http_request_duration_seconds_sum{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="nodes",scheme="https",status="200"} 4.75841708000001
+external_dns_http_request_duration_seconds_count{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="nodes",scheme="https",status="200"} 2266
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="pods",scheme="https",status="200",quantile="0.5"} 0.002074329
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="pods",scheme="https",status="200",quantile="0.9"} 0.002351873
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="pods",scheme="https",status="200",quantile="0.99"} 0.002672893
+external_dns_http_request_duration_seconds_sum{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="pods",scheme="https",status="200"} 4.545729878999999
+external_dns_http_request_duration_seconds_count{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="pods",scheme="https",status="200"} 2266
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="services",scheme="https",status="200",quantile="0.5"} 0.001965744
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="services",scheme="https",status="200",quantile="0.9"} 0.002351749
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="services",scheme="https",status="200",quantile="0.99"} 0.002563598
+external_dns_http_request_duration_seconds_sum{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="services",scheme="https",status="200"} 4.8267032489999995
+external_dns_http_request_duration_seconds_count{handler="instrumented_http",host="172.20.0.1:443",method="GET",path="services",scheme="https",status="200"} 2266
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="route53.amazonaws.com",method="GET",path="hostedzone",scheme="https",status="200",quantile="0.5"} 0.10681967
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="route53.amazonaws.com",method="GET",path="hostedzone",scheme="https",status="200",quantile="0.9"} 0.159991149
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="route53.amazonaws.com",method="GET",path="hostedzone",scheme="https",status="200",quantile="0.99"} 0.165492536
+external_dns_http_request_duration_seconds_sum{handler="instrumented_http",host="route53.amazonaws.com",method="GET",path="hostedzone",scheme="https",status="200"} 264.70394800200006
+external_dns_http_request_duration_seconds_count{handler="instrumented_http",host="route53.amazonaws.com",method="GET",path="hostedzone",scheme="https",status="200"} 2244
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="route53.amazonaws.com",method="GET",path="rrset",scheme="https",status="200",quantile="0.5"} 0.098941484
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="route53.amazonaws.com",method="GET",path="rrset",scheme="https",status="200",quantile="0.9"} 0.121552656
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="route53.amazonaws.com",method="GET",path="rrset",scheme="https",status="200",quantile="0.99"} 0.315054621
+external_dns_http_request_duration_seconds_sum{handler="instrumented_http",host="route53.amazonaws.com",method="GET",path="rrset",scheme="https",status="200"} 516.4673350400005
+external_dns_http_request_duration_seconds_count{handler="instrumented_http",host="route53.amazonaws.com",method="GET",path="rrset",scheme="https",status="200"} 4488
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="sts.us-west-2.amazonaws.com",method="POST",path="",scheme="https",status="200",quantile="0.5"} NaN
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="sts.us-west-2.amazonaws.com",method="POST",path="",scheme="https",status="200",quantile="0.9"} NaN
+external_dns_http_request_duration_seconds{handler="instrumented_http",host="sts.us-west-2.amazonaws.com",method="POST",path="",scheme="https",status="200",quantile="0.99"} NaN
+external_dns_http_request_duration_seconds_sum{handler="instrumented_http",host="sts.us-west-2.amazonaws.com",method="POST",path="",scheme="https",status="200"} 0.6038678599999999
+external_dns_http_request_duration_seconds_count{handler="instrumented_http",host="sts.us-west-2.amazonaws.com",method="POST",path="",scheme="https",status="200"} 19
+# HELP external_dns_provider_cache_apply_changes_calls Number of calls to the provider cache ApplyChanges.
+# TYPE external_dns_provider_cache_apply_changes_calls counter
+external_dns_provider_cache_apply_changes_calls 0
+# HELP external_dns_registry_endpoints_total Number of Endpoints in the registry
+# TYPE external_dns_registry_endpoints_total gauge
+external_dns_registry_endpoints_total 98
+# HELP external_dns_registry_errors_total Number of Registry errors.
+# TYPE external_dns_registry_errors_total counter
+external_dns_registry_errors_total 0
+# HELP external_dns_registry_records Number of registry records partitioned by label name (vector).
+# TYPE external_dns_registry_records gauge
+external_dns_registry_records{record_type="a"} 56
+external_dns_registry_records{record_type="aaaa"} 1
+external_dns_registry_records{record_type="mx"} 0
+external_dns_registry_records{record_type="naptr"} 0
+external_dns_registry_records{record_type="ns"} 7
+external_dns_registry_records{record_type="ptr"} 0
+external_dns_registry_records{record_type="srv"} 0
+external_dns_registry_records{record_type="txt"} 2
+# HELP external_dns_source_endpoints_total Number of Endpoints in all sources
+# TYPE external_dns_source_endpoints_total gauge
+external_dns_source_endpoints_total 19
+# HELP external_dns_source_errors_total Number of Source errors.
+# TYPE external_dns_source_errors_total counter
+external_dns_source_errors_total 0
+# HELP external_dns_source_records Number of source records partitioned by label name (vector).
+# TYPE external_dns_source_records gauge
+external_dns_source_records{record_type="a"} 0
+external_dns_source_records{record_type="aaaa"} 0
+external_dns_source_records{record_type="mx"} 0
+external_dns_source_records{record_type="naptr"} 0
+external_dns_source_records{record_type="ns"} 0
+external_dns_source_records{record_type="ptr"} 0
+external_dns_source_records{record_type="srv"} 0
+external_dns_source_records{record_type="txt"} 0
+# HELP external_dns_webhook_provider_adjustendpoints_errors_total Errors with AdjustEndpoints method
+# TYPE external_dns_webhook_provider_adjustendpoints_errors_total gauge
+external_dns_webhook_provider_adjustendpoints_errors_total 0
+# HELP external_dns_webhook_provider_adjustendpoints_requests_total Requests with AdjustEndpoints method
+# TYPE external_dns_webhook_provider_adjustendpoints_requests_total gauge
+external_dns_webhook_provider_adjustendpoints_requests_total 0
+# HELP external_dns_webhook_provider_applychanges_errors_total Errors with ApplyChanges method
+# TYPE external_dns_webhook_provider_applychanges_errors_total gauge
+external_dns_webhook_provider_applychanges_errors_total 0
+# HELP external_dns_webhook_provider_applychanges_requests_total Requests with ApplyChanges method
+# TYPE external_dns_webhook_provider_applychanges_requests_total gauge
+external_dns_webhook_provider_applychanges_requests_total 0
+# HELP external_dns_webhook_provider_records_errors_total Errors with Records method
+# TYPE external_dns_webhook_provider_records_errors_total gauge
+external_dns_webhook_provider_records_errors_total 0
+# HELP external_dns_webhook_provider_records_requests_total Requests with Records method
+# TYPE external_dns_webhook_provider_records_requests_total gauge
+external_dns_webhook_provider_records_requests_total 0

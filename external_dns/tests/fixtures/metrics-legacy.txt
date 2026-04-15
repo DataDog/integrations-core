@@ -1,0 +1,57 @@
+# HELP external_dns_controller_last_reconcile_timestamp_seconds Timestamp of last attempted sync with the DNS provider
+# TYPE external_dns_controller_last_reconcile_timestamp_seconds gauge
+external_dns_controller_last_reconcile_timestamp_seconds 1.776236885445872e+09
+# HELP external_dns_controller_last_sync_timestamp_seconds Timestamp of last successful sync with the DNS provider
+# TYPE external_dns_controller_last_sync_timestamp_seconds gauge
+external_dns_controller_last_sync_timestamp_seconds 1.7762368873864365e+09
+# HELP external_dns_controller_no_op_runs_total Number of reconcile loops ending up with no changes on the DNS provider side.
+# TYPE external_dns_controller_no_op_runs_total counter
+external_dns_controller_no_op_runs_total 324
+# HELP external_dns_controller_verified_a_records Number of DNS A-records that exists both in source and registry.
+# TYPE external_dns_controller_verified_a_records gauge
+external_dns_controller_verified_a_records 0
+# HELP external_dns_controller_verified_aaaa_records Number of DNS AAAA-records that exists both in source and registry.
+# TYPE external_dns_controller_verified_aaaa_records gauge
+external_dns_controller_verified_aaaa_records 0
+# HELP external_dns_registry_a_records Number of Registry A records.
+# TYPE external_dns_registry_a_records gauge
+external_dns_registry_a_records 213
+# HELP external_dns_registry_aaaa_records Number of Registry AAAA records.
+# TYPE external_dns_registry_aaaa_records gauge
+external_dns_registry_aaaa_records 0
+# HELP external_dns_registry_endpoints_total Number of Endpoints in the registry
+# TYPE external_dns_registry_endpoints_total gauge
+external_dns_registry_endpoints_total 333
+# HELP external_dns_registry_errors_total Number of Registry errors.
+# TYPE external_dns_registry_errors_total counter
+external_dns_registry_errors_total 0
+# HELP external_dns_source_a_records Number of Source A records.
+# TYPE external_dns_source_a_records gauge
+external_dns_source_a_records 0
+# HELP external_dns_source_aaaa_records Number of Source AAAA records.
+# TYPE external_dns_source_aaaa_records gauge
+external_dns_source_aaaa_records 0
+# HELP external_dns_source_endpoints_total Number of Endpoints in all sources
+# TYPE external_dns_source_endpoints_total gauge
+external_dns_source_endpoints_total 50
+# HELP external_dns_source_errors_total Number of Source errors.
+# TYPE external_dns_source_errors_total counter
+external_dns_source_errors_total 0
+# HELP external_dns_webhook_provider_adjustendpoints_errors_total Errors with AdjustEndpoints method
+# TYPE external_dns_webhook_provider_adjustendpoints_errors_total gauge
+external_dns_webhook_provider_adjustendpoints_errors_total 0
+# HELP external_dns_webhook_provider_adjustendpoints_requests_total Requests with AdjustEndpoints method
+# TYPE external_dns_webhook_provider_adjustendpoints_requests_total gauge
+external_dns_webhook_provider_adjustendpoints_requests_total 0
+# HELP external_dns_webhook_provider_applychanges_errors_total Errors with ApplyChanges method
+# TYPE external_dns_webhook_provider_applychanges_errors_total gauge
+external_dns_webhook_provider_applychanges_errors_total 0
+# HELP external_dns_webhook_provider_applychanges_requests_total Requests with ApplyChanges method
+# TYPE external_dns_webhook_provider_applychanges_requests_total gauge
+external_dns_webhook_provider_applychanges_requests_total 0
+# HELP external_dns_webhook_provider_records_errors_total Errors with Records method
+# TYPE external_dns_webhook_provider_records_errors_total gauge
+external_dns_webhook_provider_records_errors_total 0
+# HELP external_dns_webhook_provider_records_requests_total Requests with Records method
+# TYPE external_dns_webhook_provider_records_requests_total gauge
+external_dns_webhook_provider_records_requests_total 0

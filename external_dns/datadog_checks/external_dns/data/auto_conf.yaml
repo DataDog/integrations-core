@@ -14,15 +14,32 @@ init_config:
 #
 instances:
 
-    ## @param prometheus_url - string - required
-    ## The URL where your application metrics are exposed by Prometheus.
+    ## @param prometheus_url - string - optional - default: http://%%host%%:7979/metrics
+    ## To enable ExternalDNS metrics using the legacy OpenMetricsBaseCheckV1 you must specify the prometheus url.
+    ##
+    ## Either `prometheus_url` or `openmetrics_endpoint` must be specified.
+    ## See documentation: https://docs.datadoghq.com/integrations/external_dns
     #
   - prometheus_url: http://%%host%%:7979/metrics
 
-    ## @param tags - list of strings - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ## @param tags - list of strings - required
+    ## List of tags to attach to every metric and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
     #
     tags:
       - externaldns-pod:%%host%%
+
+    ## @param send_monotonic_counter - boolean - optional - default: true
+    ## (Legacy OpenMetricsBaseCheckV1) To send counters as monotonic counter.
+    ## See: https://github.com/DataDog/integrations-core/issues/1303
+    #
+    # send_monotonic_counter: true
+
+    ## @param openmetrics_endpoint - string - optional - default: http://%%host%%:7979/metrics
+    ## To enable ExternalDNS metrics using OpenMetricsBaseCheckV2 you must specify the openmetrics endpoint url.
+    ##
+    ## Either `prometheus_url` or `openmetrics_endpoint` must be specified.
+    ## See documentation: https://docs.datadoghq.com/integrations/external_dns
+    #
+    # openmetrics_endpoint: http://%%host%%:7979/metrics
