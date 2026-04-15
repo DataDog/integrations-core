@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 9.5.1 / 2026-04-15
+
+***Fixed***:
+
+* Re-order configuration fields based on real-world usage data. ([#23278](https://github.com/DataDog/integrations-core/pull/23278))
+
 ## 9.5.0 / 2026-04-01
 
 ***Added***:
