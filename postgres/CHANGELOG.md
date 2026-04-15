@@ -11,9 +11,7 @@
 
 ***Fixed***:
 
-* Respect exclude_hostname config parameter for debug metrics. If this setting is not respected, we can still submit metrics wi
-  th a hostname tag, which can have undesirable effects throughout the platform. For example, a host can appear in the Host list wh
-  ere it should not. ([#22938](https://github.com/DataDog/integrations-core/pull/22938))
+* Respect exclude_hostname config parameter for debug metrics. If this setting is not respected, we can still submit metrics with a hostname tag, which can have undesirable effects throughout the platform. For example, a host can appear in the Host list where it should not. ([#22938](https://github.com/DataDog/integrations-core/pull/22938))
 * Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
 * Remove incorrect deprecation warning from Postgres config ([#23044](https://github.com/DataDog/integrations-core/pull/23044))
 * Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
