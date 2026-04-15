@@ -536,3 +536,170 @@ def test_alerts_first_run_collects_only_unresolved(
     assert cached, "open_alert_ids should be stored in persistent cache"
     open_ids = json.loads(cached)
     assert len(open_ids) == len(alerts)
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alerts_resolution_detected_on_subsequent_run(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """Test that when a previously open alert becomes resolved, a resolution event is emitted."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+
+    # First run: collect open alerts
+    dd_run_check(check)
+
+    open_alerts = [e for e in aggregator.events if "ntnx_alert_status:open" in e.get("tags", [])]
+    assert len(open_alerts) > 0
+
+    # Pick the first open alert's extId from cache
+    cached_ids = json.loads(check.read_persistent_cache("open_alert_ids"))
+    target_ext_id = cached_ids[0]
+
+    aggregator.reset()
+
+    resolved_alert = {
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": target_ext_id,
+        "isResolved": True,
+        "resolvedTime": "2026-03-04T01:10:00.000000Z",
+        "resolvedByUsername": "admin",
+        "isAutoResolved": False,
+        "isAcknowledged": False,
+        "title": "Resolved Test Alert",
+        "alertType": "A1031",
+        "severity": "WARNING",
+        "creationTime": "2026-03-04T00:46:29.532987Z",
+        "lastUpdatedTime": "2026-03-04T01:10:00.000000Z",
+        "classifications": ["Storage"],
+        "impactTypes": ["SYSTEM_INDICATOR"],
+    }
+
+    # Patch _list_alerts_since to return just the resolved alert
+    mocker.patch.object(
+        check.activity_monitor,
+        '_list_alerts_since',
+        return_value=[resolved_alert],
+    )
+
+    # Second run: should detect resolution
+    dd_run_check(check)
+
+    resolved_events = [e for e in aggregator.events if "ntnx_alert_status:resolved" in e.get("tags", [])]
+    assert len(resolved_events) == 1
+
+    event = resolved_events[0]
+    assert event["alert_type"] == "success"
+    assert event["aggregation_key"] == f"nutanix-alert-{target_ext_id}"
+    assert "Resolved by admin" in event["msg_text"]
+
+    # Verify the ID was removed from cache
+    updated_ids = json.loads(check.read_persistent_cache("open_alert_ids"))
+    assert target_ext_id not in updated_ids
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alerts_created_and_resolved_between_runs(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """Alert created and resolved between runs should emit both open and resolved events."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+
+    # First run to initialize cache
+    dd_run_check(check)
+    aggregator.reset()
+
+    new_resolved_alert = {
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": "brand-new-already-resolved-789",
+        "isResolved": True,
+        "resolvedTime": "2026-03-04T01:15:00.000000Z",
+        "resolvedByUsername": "system",
+        "isAutoResolved": True,
+        "isAcknowledged": False,
+        "title": "Transient Alert",
+        "message": "This alert was short-lived",
+        "alertType": "A9999",
+        "severity": "INFO",
+        "creationTime": "2026-03-04T01:10:00.000000Z",
+        "lastUpdatedTime": "2026-03-04T01:15:00.000000Z",
+        "classifications": [],
+        "impactTypes": [],
+    }
+
+    mocker.patch.object(
+        check.activity_monitor,
+        '_list_alerts_since',
+        return_value=[new_resolved_alert],
+    )
+
+    dd_run_check(check)
+
+    open_events = [e for e in aggregator.events if "ntnx_alert_status:open" in e.get("tags", [])]
+    resolved_events = [e for e in aggregator.events if "ntnx_alert_status:resolved" in e.get("tags", [])]
+
+    assert len(open_events) == 1, "Should emit open event for the newly seen alert"
+    assert len(resolved_events) == 1, "Should emit resolution event since it's already resolved"
+    assert open_events[0]["aggregation_key"] == "nutanix-alert-brand-new-already-resolved-789"
+    assert resolved_events[0]["aggregation_key"] == "nutanix-alert-brand-new-already-resolved-789"
+    assert resolved_events[0]["alert_type"] == "success"
+
+    # Should NOT remain in open alert cache
+    cached_ids = json.loads(check.read_persistent_cache("open_alert_ids"))
+    assert "brand-new-already-resolved-789" not in cached_ids
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alerts_still_open_no_duplicate_event(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """An already-tracked alert that's still open should not produce a duplicate event."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+
+    # First run: collect open alerts
+    dd_run_check(check)
+
+    cached_ids = json.loads(check.read_persistent_cache("open_alert_ids"))
+    target_ext_id = cached_ids[0]
+
+    aggregator.reset()
+
+    still_open_alert = {
+        "$objectType": "monitoring.v4.serviceability.Alert",
+        "extId": target_ext_id,
+        "isResolved": False,
+        "isAutoResolved": False,
+        "isAcknowledged": False,
+        "title": "Still Open Alert",
+        "alertType": "A1031",
+        "severity": "WARNING",
+        "creationTime": "2026-03-04T00:46:29.532987Z",
+        "lastUpdatedTime": "2026-03-04T01:20:00.000000Z",
+        "classifications": [],
+        "impactTypes": [],
+    }
+
+    mocker.patch.object(
+        check.activity_monitor,
+        '_list_alerts_since',
+        return_value=[still_open_alert],
+    )
+
+    dd_run_check(check)
+
+    all_alert_events = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    assert len(all_alert_events) == 0, "Should not emit any event for already-tracked still-open alert"
