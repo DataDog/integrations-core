@@ -29,11 +29,11 @@ The PingOne Advanced Identity Cloud integration seamlessly collects audit logs u
 
 1. Add your PingOne Advanced Identity Cloud domain and credentials.
 
-    | PingOne Parameters | Description                                                                                         |
-    |--------------------|-----------------------------------------------------------------------------------------------------|
-    | Tenant Domain      | The fully-qualified domain name of the tenant, such as https://openam-tap-example.forgeblocks.com/. |
-    | API Key ID         | The `api_key_id` obtained from the above instructions.                                              |
-    | API Key Secret     | The `api_key_secret` obtained from the above instructions.                                          |
+    | PingOne Parameters | Description                                                                                |
+    |--------------------|--------------------------------------------------------------------------------------------|
+    | Tenant Domain      | The fully-qualified domain name of the tenant, such as openam-tap-example.forgeblocks.com. |
+    | API Key ID         | The `api_key_id` obtained from the above instructions.                                     |
+    | API Key Secret     | The `api_key_secret` obtained from the above instructions.                                 |
 
 2. Click the **Save** button to save your settings.
 
