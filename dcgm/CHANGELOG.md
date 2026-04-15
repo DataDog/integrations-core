@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.4.1 / 2026-04-15
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
 ## 4.4.0 / 2026-04-01
 
 ***Added***:
