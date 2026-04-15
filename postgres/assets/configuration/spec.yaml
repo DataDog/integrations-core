@@ -598,12 +598,15 @@ files:
               type: object
               required:
                 - monitor_id
+                - dbname
                 - query
                 - interval_seconds
                 - entity
               properties:
               - name: monitor_id
                 type: integer
+              - name: dbname
+                type: string
               - name: type
                 type: string
               - name: query

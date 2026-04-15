@@ -20,9 +20,6 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-SECURE_FIELD_NAMES = frozenset(['ssl_cert', 'ssl_key', 'ssl_root_cert'])
-
-
 class ManagedAuthentication(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -138,6 +135,7 @@ class Query(BaseModel):
         frozen=True,
     )
     custom_sql_select_fields: Optional[CustomSqlSelectFields] = None
+    dbname: str
     entity: Entity
     interval_seconds: int
     monitor_id: int
@@ -368,11 +366,6 @@ class InstanceConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-            if info.field_name in SECURE_FIELD_NAMES:
-                validation.security.check_field_trusted_provider(
-                    info.field_name, value, info.context.get('security_config')
-                )
         else:
             value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+from contextlib import contextmanager
 from copy import deepcopy
 from unittest.mock import MagicMock, patch
 
@@ -17,6 +18,7 @@ pytestmark = pytest.mark.unit
 
 BASE_QUERY = {
     'monitor_id': 1,
+    'dbname': 'test_db',
     'query': 'SELECT count(*) FROM orders',
     'interval_seconds': 60,
     'type': 'freshness',
@@ -33,6 +35,7 @@ MULTI_QUERIES = [
     BASE_QUERY,
     {
         'monitor_id': 2,
+        'dbname': 'test_db',
         'query': 'SELECT count(*) FROM users',
         'interval_seconds': 120,
         'type': 'freshness',
@@ -71,12 +74,16 @@ def _make_mock_conn(rows=None, description=None, broken=False):
     return mock_conn, mock_cursor
 
 
-def _mock_get_main_db(mock_conn):
-    """Create a mock _get_main_db that returns a context manager wrapping mock_conn."""
-    mock_ctx = MagicMock()
-    mock_ctx.__enter__ = MagicMock(return_value=mock_conn)
-    mock_ctx.__exit__ = MagicMock(return_value=False)
-    return MagicMock(return_value=mock_ctx)
+def _mock_db_pool(mock_conn):
+    """Create a mock db_pool whose get_connection returns a context manager wrapping mock_conn."""
+    mock_pool = MagicMock()
+
+    @contextmanager
+    def get_connection(dbname=None):
+        yield mock_conn
+
+    mock_pool.get_connection = MagicMock(side_effect=get_connection)
+    return mock_pool
 
 
 def _create_check(pg_instance, queries=None, config_id='test-config-123'):
@@ -90,7 +97,7 @@ def _setup_and_run(pg_instance, queries=None, config_id='test-config-123', mock_
         mock_conn, mock_cursor = _make_mock_conn()
 
     check = _create_check(pg_instance, queries=queries, config_id=config_id)
-    check._get_main_db = _mock_get_main_db(mock_conn)
+    check.db_pool = _mock_db_pool(mock_conn)
     check.data_observability.run_job()
     return check, mock_conn, mock_cursor
 
@@ -102,12 +109,12 @@ def _get_do_event_calls(mock_epe):
 
 def test_no_queries_does_nothing(aggregator, pg_instance):
     check = _create_check(pg_instance, queries=[])
-    mock_get_main_db = MagicMock()
-    check._get_main_db = mock_get_main_db
+    mock_pool = MagicMock()
+    check.db_pool = mock_pool
 
     check.data_observability.run_job()
 
-    mock_get_main_db.assert_not_called()
+    mock_pool.get_connection.assert_not_called()
     assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 0
 
 
@@ -137,10 +144,9 @@ def test_query_failure_database_error(aggregator, pg_instance):
 def test_connection_failure_propagates(pg_instance):
     """Connection errors propagate to _job_loop for proper crash detection."""
     check = _create_check(pg_instance)
-    mock_ctx = MagicMock()
-    mock_ctx.__enter__ = MagicMock(side_effect=psycopg.OperationalError("Connection refused"))
-    mock_ctx.__exit__ = MagicMock(return_value=False)
-    check._get_main_db = MagicMock(return_value=mock_ctx)
+    mock_pool = MagicMock()
+    mock_pool.get_connection = MagicMock(side_effect=psycopg.OperationalError("Connection refused"))
+    check.db_pool = mock_pool
 
     with pytest.raises(psycopg.OperationalError, match="Connection refused"):
         check.data_observability.run_job()
@@ -152,7 +158,7 @@ def test_interface_error_propagates(pg_instance):
     mock_cursor.execute.side_effect = psycopg.InterfaceError("connection closed")
 
     check = _create_check(pg_instance)
-    check._get_main_db = _mock_get_main_db(mock_conn)
+    check.db_pool = _mock_db_pool(mock_conn)
 
     with pytest.raises(psycopg.InterfaceError, match="connection closed"):
         check.data_observability.run_job()
@@ -164,7 +170,7 @@ def test_operational_error_with_broken_conn_propagates(pg_instance):
     mock_cursor.execute.side_effect = psycopg.OperationalError("server closed the connection")
 
     check = _create_check(pg_instance)
-    check._get_main_db = _mock_get_main_db(mock_conn)
+    check.db_pool = _mock_db_pool(mock_conn)
 
     with pytest.raises(psycopg.OperationalError, match="server closed"):
         check.data_observability.run_job()
@@ -174,7 +180,7 @@ def test_per_query_interval_tracking(aggregator, pg_instance):
     mock_conn, _ = _make_mock_conn()
 
     check = _create_check(pg_instance)
-    check._get_main_db = _mock_get_main_db(mock_conn)
+    check.db_pool = _mock_db_pool(mock_conn)
 
     # First run: query executes
     check.data_observability.run_job()
@@ -209,7 +215,7 @@ def test_event_payload_structure(aggregator, pg_instance):
 
     with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
         check = _create_check(pg_instance)
-        check._get_main_db = _mock_get_main_db(mock_conn)
+        check.db_pool = _mock_db_pool(mock_conn)
         check.data_observability.run_job()
 
         do_calls = _get_do_event_calls(mock_epe)
@@ -239,7 +245,7 @@ def test_entity_schema_alias(aggregator, pg_instance):
 
     with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
         check = _create_check(pg_instance)
-        check._get_main_db = _mock_get_main_db(mock_conn)
+        check.db_pool = _mock_db_pool(mock_conn)
         check.data_observability.run_job()
 
         do_calls = _get_do_event_calls(mock_epe)
@@ -298,7 +304,7 @@ def test_custom_sql_select_fields_in_payload(aggregator, pg_instance):
 
     with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
         check = _create_check(pg_instance, queries=[query])
-        check._get_main_db = _mock_get_main_db(mock_conn)
+        check.db_pool = _mock_db_pool(mock_conn)
         check.data_observability.run_job()
 
         do_calls = _get_do_event_calls(mock_epe)
@@ -315,7 +321,7 @@ def test_dd_column_names_in_payload(aggregator, pg_instance):
 
     with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
         check = _create_check(pg_instance)
-        check._get_main_db = _mock_get_main_db(mock_conn)
+        check.db_pool = _mock_db_pool(mock_conn)
         check.data_observability.run_job()
 
         do_calls = _get_do_event_calls(mock_epe)
@@ -353,7 +359,7 @@ def test_query_with_no_description(aggregator, pg_instance):
 
     with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
         check = _create_check(pg_instance)
-        check._get_main_db = _mock_get_main_db(mock_conn)
+        check.db_pool = _mock_db_pool(mock_conn)
         check.data_observability.run_job()
 
         do_calls = _get_do_event_calls(mock_epe)
@@ -376,7 +382,6 @@ def test_collection_interval_none_uses_default(pg_instance):
         'queries': [],
     }
     check = PostgreSql('postgres', {}, [instance])
-    # Should not raise; verifies issue #4 fix
     assert check.data_observability._enabled
 
 
@@ -386,7 +391,7 @@ def test_failed_query_updates_last_execution(aggregator, pg_instance):
     mock_cursor.execute.side_effect = psycopg.errors.ProgrammingError("syntax error")
 
     check = _create_check(pg_instance)
-    check._get_main_db = _mock_get_main_db(mock_conn)
+    check.db_pool = _mock_db_pool(mock_conn)
 
     check.data_observability.run_job()
     assert 1 in check.data_observability._last_execution
@@ -404,7 +409,7 @@ def test_error_event_payload(aggregator, pg_instance):
 
     with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
         check = _create_check(pg_instance)
-        check._get_main_db = _mock_get_main_db(mock_conn)
+        check.db_pool = _mock_db_pool(mock_conn)
         check.data_observability.run_job()
 
         do_calls = _get_do_event_calls(mock_epe)
@@ -427,7 +432,66 @@ def test_fetchmany_called_with_max_rows(pg_instance):
     mock_conn, mock_cursor = _make_mock_conn()
 
     check = _create_check(pg_instance)
-    check._get_main_db = _mock_get_main_db(mock_conn)
+    check.db_pool = _mock_db_pool(mock_conn)
     check.data_observability.run_job()
 
     mock_cursor.fetchmany.assert_called_once_with(MAX_RESULT_ROWS)
+
+
+# --- Per-query dbname tests ---
+
+
+def test_per_query_dbname_used_for_connection(aggregator, pg_instance):
+    """db_pool.get_connection is called with the query's dbname."""
+    query = deepcopy(BASE_QUERY)
+    query['dbname'] = 'other_db'
+    mock_conn, _ = _make_mock_conn()
+
+    check = _create_check(pg_instance, queries=[query])
+    check.db_pool = _mock_db_pool(mock_conn)
+    check.data_observability.run_job()
+
+    check.db_pool.get_connection.assert_called_once_with('other_db')
+
+
+def test_per_query_dbname_in_event_payload(aggregator, pg_instance):
+    """The event payload db_name reflects the query's dbname."""
+    query = deepcopy(BASE_QUERY)
+    query['dbname'] = 'analytics_db'
+    mock_conn, _ = _make_mock_conn()
+
+    with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
+        check = _create_check(pg_instance, queries=[query])
+        check.db_pool = _mock_db_pool(mock_conn)
+        check.data_observability.run_job()
+
+        do_calls = _get_do_event_calls(mock_epe)
+        payload = json.loads(do_calls[0][0][0])
+
+    assert payload['db_name'] == 'analytics_db'
+
+
+def test_multi_query_different_dbnames(aggregator, pg_instance):
+    """Multiple queries with different dbnames each connect to the correct database."""
+    queries = [
+        {**deepcopy(BASE_QUERY), 'dbname': 'db_one'},
+        {**deepcopy(MULTI_QUERIES[1]), 'dbname': 'db_two'},
+    ]
+    mock_conn, _ = _make_mock_conn()
+
+    with patch.object(PostgreSql, 'event_platform_event') as mock_epe:
+        check = _create_check(pg_instance, queries=queries)
+        check.db_pool = _mock_db_pool(mock_conn)
+        check.data_observability.run_job()
+
+        calls = check.db_pool.get_connection.call_args_list
+        assert len(calls) == 2
+        assert calls[0][0][0] == 'db_one'
+        assert calls[1][0][0] == 'db_two'
+
+        do_calls = _get_do_event_calls(mock_epe)
+        payload_1 = json.loads(do_calls[0][0][0])
+        payload_2 = json.loads(do_calls[1][0][0])
+
+    assert payload_1['db_name'] == 'db_one'
+    assert payload_2['db_name'] == 'db_two'

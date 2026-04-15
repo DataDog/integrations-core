@@ -42,7 +42,7 @@ class PostgresDataObservability(DBMAsyncJob):
     def _do_config(self):
         return self._config.data_observability
 
-    def _get_due_queries(self) -> list[Any]:
+    def _get_due_queries(self) -> list[Query]:
         queries = self._do_config.queries or ()
         now = time.time()
         due = []
@@ -126,7 +126,7 @@ class PostgresDataObservability(DBMAsyncJob):
             'db_type': 'postgres',
             'db_host': self._check.reported_hostname,
             'db_port': self._config.port,
-            'db_name': self._config.dbname,
+            'db_name': query_spec.dbname,
             'monitor_id': query_spec.monitor_id,
             'query': query_spec.query,
             'entity': entity,
@@ -147,7 +147,7 @@ class PostgresDataObservability(DBMAsyncJob):
         for q in due_queries:
             tags = base_tags + [f'monitor_id:{q.monitor_id}']
 
-            with self._check._get_main_db() as conn:
+            with self._check.db_pool.get_connection(q.dbname) as conn:
                 result = self._execute_single_query(conn, q)
 
             # Update scheduling timestamp immediately after execution, before
