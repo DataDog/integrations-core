@@ -1,5 +1,5 @@
 - name: host
-  display_priority: 1
+  display_priority: 0
   legacy: true
   required: false
   description: |
@@ -10,7 +10,7 @@
     example: .
     type: string
 - name: username
-  display_priority: 1
+  display_priority: 0
   legacy: true
   required: false
   description: The username from the credentials needed to connect to the host.
@@ -18,7 +18,7 @@
   value:
     type: string
 - name: password
-  display_priority: 1
+  display_priority: 0
   legacy: true
   required: false
   secret: true

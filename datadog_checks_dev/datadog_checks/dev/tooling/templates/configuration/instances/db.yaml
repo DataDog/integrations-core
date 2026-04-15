@@ -20,7 +20,7 @@
     type: string
     example: "true"
 - name: custom_queries
-  display_priority: 1
+  display_priority: 0
   fleet_configurable: true
   description: |
     Each query must have 2 fields, and can have a third optional field:

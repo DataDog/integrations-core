@@ -1,5 +1,5 @@
 - name: openmetrics_endpoint
-  display_priority: 1
+  display_priority: 0
   required: true
   description: |
     The URL exposing metrics in the OpenMetrics format.

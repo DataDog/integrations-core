@@ -1,5 +1,5 @@
 - name: prometheus_url
-  display_priority: 1
+  display_priority: 0
   required: true
   description: The URL where your application metrics are exposed by Prometheus.
   fleet_configurable: true

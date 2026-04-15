@@ -1,5 +1,5 @@
 - name: tls_verify
-  display_priority: 1
+  display_priority: 0
   fleet_configurable: true
   value:
     example: true

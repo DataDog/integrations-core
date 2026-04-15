@@ -1,5 +1,5 @@
 - name: host
-  display_priority: 1
+  display_priority: 0
   required: true
   description: JMX hostname to connect to.
   value:
@@ -7,7 +7,7 @@
   fleet_configurable: true
 
 - name: port
-  display_priority: 1
+  display_priority: 0
   required: true
   description: JMX port to connect to.
   formats: ["port"]
@@ -36,14 +36,14 @@
   fleet_configurable: true
 
 - name: user
-  display_priority: 1
+  display_priority: 0
   description: User to use when connecting to JMX.
   value:
     type: string
   fleet_configurable: true
 
 - name: password
-  display_priority: 1
+  display_priority: 0
   description: Password to use when connecting to JMX.
   secret: true
   value:

@@ -1,19 +1,19 @@
 - name: server
-  display_priority: 1
+  display_priority: 0
   description: |
     The server with which to connect, defaulting to the local machine.
   value:
     type: string
   fleet_configurable: true
 - name: username
-  display_priority: 1
+  display_priority: 0
   description: |
     The username used to connect to the `server`.
   fleet_configurable: true
   value:
     type: string
 - name: password
-  display_priority: 1
+  display_priority: 0
   description: |
     The password of `username`.
   secret: true
