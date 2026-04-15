@@ -471,6 +471,54 @@ class ActivityMonitor:
             }
         )
 
+    def _emit_resolution_event(self, alert: dict) -> None:
+        """Emit a resolution event for a previously open alert."""
+        ext_id = alert.get("extId", "")
+        title = alert.get("title", "Nutanix Alert")
+        severity = alert.get("severity")
+        alert_type = alert.get("alertType")
+        resolved_time = alert.get("resolvedTime")
+        resolved_by = alert.get("resolvedByUsername")
+        is_auto_resolved = alert.get("isAutoResolved", False)
+
+        if parameters := alert.get("parameters"):
+            title = self._render_message(title, parameters)
+
+        msg_text = "Auto-resolved" if is_auto_resolved else f"Resolved by {resolved_by}" if resolved_by else "Resolved"
+
+        alert_tags = self.check.base_tags.copy()
+        if alert_type:
+            alert_tags.append(f"ntnx_alert_type:{alert_type}")
+        if severity:
+            alert_tags.append(f"ntnx_alert_severity:{severity}")
+
+        self._add_cluster_name_tag(alert_tags, alert.get("clusterUUID"))
+
+        for classification in alert.get("classifications", []) or []:
+            alert_tags.append(f"ntnx_alert_classification:{classification}")
+
+        for impact in alert.get("impactTypes", []) or []:
+            alert_tags.append(f"ntnx_alert_impact:{impact}")
+
+        self._add_source_entity_tags(alert_tags, alert)
+
+        alert_tags.append("ntnx_type:alert")
+        alert_tags.append("ntnx_alert_status:resolved")
+        alert_tags.append(f"ntnx_alert_auto_resolved:{str(is_auto_resolved).lower()}")
+
+        self.check.event(
+            {
+                "timestamp": self._parse_timestamp(resolved_time) if resolved_time else get_timestamp(get_current_datetime()),
+                "event_type": self.check.__NAMESPACE__,
+                "msg_title": f"Alert Resolved: {title}",
+                "msg_text": msg_text,
+                "alert_type": "success",
+                "source_type_name": self.check.__NAMESPACE__,
+                "aggregation_key": f"nutanix-alert-{ext_id}",
+                "tags": alert_tags,
+            }
+        )
+
     def _process_task(self, task: dict) -> None:
         """Process and send a single task to Datadog as an event."""
         task_operation = task.get("operation", "Nutanix Task")
