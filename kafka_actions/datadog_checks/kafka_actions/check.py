@@ -13,6 +13,38 @@ from .message_deserializer import DeserializedMessage, MessageDeserializer
 from .schema_registry import SchemaRegistryClient
 
 
+class _LazyMessageDict(dict):
+    """Dict-like wrapper around DeserializedMessage that only deserializes fields on access."""
+
+    _FIELD_MAP = {
+        'key': lambda m: m.key,
+        'value': lambda m: m.value,
+        'headers': lambda m: m.headers,
+        'topic': lambda m: m.topic,
+        'partition': lambda m: m.partition,
+        'offset': lambda m: m.offset,
+    }
+
+    def __init__(self, msg: DeserializedMessage):
+        super().__init__()
+        self._msg = msg
+
+    def __contains__(self, key):
+        return key in self._FIELD_MAP
+
+    def __getitem__(self, key):
+        getter = self._FIELD_MAP.get(key)
+        if getter is None:
+            raise KeyError(key)
+        return getter(self._msg)
+
+    def get(self, key, default=None):
+        getter = self._FIELD_MAP.get(key)
+        if getter is None:
+            return default
+        return getter(self._msg)
+
+
 class KafkaActionsCheck(AgentCheck):
     """
     Kafka Actions Check - Performs one-time actions on Kafka clusters.
@@ -337,18 +369,10 @@ class KafkaActionsCheck(AgentCheck):
             True if message matches filter, False otherwise
         """
         try:
-            msg_dict = {
-                'key': deserialized_msg.key,
-                'value': deserialized_msg.value,
-                'topic': deserialized_msg.topic,
-                'partition': deserialized_msg.partition,
-                'offset': deserialized_msg.offset,
-            }
+            # Use a lazy dict so key/value are only deserialized when the filter accesses them
+            context = _LazyMessageDict(deserialized_msg)
 
-            # Simple jq expression parser
-            # Supports: .field.subfield == "value", .field > 100, .field contains "text"
-            # Supports: and, or operators
-            result = self._evaluate_jq_expression(filter_expression, msg_dict)
+            result = self._evaluate_jq_expression(filter_expression, context)
             self.log.debug("Filter '%s' evaluated to: %s", filter_expression, result)
             return result
 
@@ -429,6 +453,8 @@ class KafkaActionsCheck(AgentCheck):
                 left_value = self._get_field_from_path(left, context)
                 right_value = self._parse_literal(right)
 
+                left_value, right_value = self._coerce_types(left_value, right_value)
+
                 if op == '==':
                     return left_value == right_value
                 elif op == '!=':
@@ -473,6 +499,27 @@ class KafkaActionsCheck(AgentCheck):
                 return None
 
         return current
+
+    @staticmethod
+    def _coerce_types(left, right):
+        """Coerce mismatched types for comparison (e.g., str vs int from protobuf int64)."""
+        if type(left) is type(right):
+            return left, right
+
+        # If one side is a numeric string and the other is a number, convert the string.
+        # Exclude bools since bool is a subclass of int in Python.
+        if isinstance(left, str) and isinstance(right, (int, float)) and not isinstance(right, bool):
+            try:
+                return (float(left) if '.' in left else int(left)), right
+            except ValueError:
+                pass
+        elif isinstance(right, str) and isinstance(left, (int, float)) and not isinstance(left, bool):
+            try:
+                return left, (float(right) if '.' in right else int(right))
+            except ValueError:
+                pass
+
+        return left, right
 
     def _parse_literal(self, value_str: str):
         """Parse a literal value from string.

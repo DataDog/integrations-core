@@ -1,10 +1,13 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 from types import MappingProxyType
+from typing import Any, Callable
 
 
-def make_immutable(obj):
+def make_immutable(obj: Any) -> Any:
     if isinstance(obj, list):
         return tuple(make_immutable(item) for item in obj)
     elif isinstance(obj, dict):
@@ -13,8 +16,13 @@ def make_immutable(obj):
     return obj
 
 
-def handle_deprecations(config_section, deprecations, fields, context):
-    warning_method = context['warning']
+def handle_deprecations(
+    config_section: str,
+    deprecations: dict[str, dict[str, str]],
+    fields: set[str],
+    context: dict[str, Any],
+) -> None:
+    warning_method: Callable[..., Any] = context['warning']
 
     for option, data in deprecations.items():
         if option not in fields:

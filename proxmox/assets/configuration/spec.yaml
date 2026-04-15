@@ -12,6 +12,8 @@ files:
     - name: proxmox_server
       fleet_configurable: true
       display_priority: 5
+      formats:
+        - url
       description: |
         Proxmox API endpoint.
       value:
@@ -32,7 +34,9 @@ files:
       fleet_configurable: true
       display_priority: 5
       description: |
-        Which Proxmox task types to collect. When `collect_tasks` is enabled, the integration will collect
+        Which Proxmox task types to collect.
+
+        When `collect_tasks` is enabled, the integration will collect
         the following task types by default:
           - qmstart
           - qhstop

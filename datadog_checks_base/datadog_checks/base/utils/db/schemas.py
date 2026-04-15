@@ -75,8 +75,6 @@ class SchemaCollector(ABC):
                     continue
                 with self._get_cursor(database_name) as cursor:
                     # Get the next row from the cursor
-                    # We need to know when we've reached the last row so we can efficiently flush the last payload
-                    # without an empty final payload
                     next_row = self._get_next(cursor)
                     while next_row:
                         self._queued_rows.append(self._map_row(database, next_row))
@@ -84,8 +82,9 @@ class SchemaCollector(ABC):
                         # Because we're iterating over a cursor we need to try to get
                         # the next row to see if we've reached the last row
                         next_row = self._get_next(cursor)
-                        is_last_payload = database == databases[-1] and next_row is None
-                        self.maybe_flush(is_last_payload)
+                        self.maybe_flush(is_last_payload=False)
+                is_last_payload = database == databases[-1]
+                self.maybe_flush(is_last_payload)
                 self._log.debug("Completed collection of schemas for database %s", database_name)
         except Exception as e:
             status = "error"

@@ -298,6 +298,104 @@ def test_labeler_sync_long_label_replacement_still_too_long(fake_repo, ddev):
     assert 'still too long' in result.output
 
 
+def test_labeler_duplicate_yaml_key_reports_error(fake_repo, ddev):
+    (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').write_text(
+        """\
+changelog/no-changelog:
+- changed-files:
+  - any-glob-to-any-file:
+    - requirements-agent-release.txt
+    - '*/__about__.py'
+- all:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '!*/datadog_checks/**'
+      - '!*/pyproject.toml'
+      - '!ddev/src/**'
+integration/datadog_checks_tests_helper:
+- changed-files:
+  - any-glob-to-any-file:
+    - datadog_checks_tests_helper/**/*
+integration/dummy:
+- changed-files:
+  - any-glob-to-any-file:
+    - dummy/stale/**/*
+integration/dummy2:
+- changed-files:
+  - any-glob-to-any-file:
+    - dummy2/**/*
+integration/dummy:
+- changed-files:
+  - any-glob-to-any-file:
+    - dummy/**/*
+release:
+- changed-files:
+  - any-glob-to-any-file:
+    - '*/__about__.py'
+""",
+    )
+
+    result = ddev('validate', 'labeler')
+
+    assert result.exit_code == 1, result.output
+    output = re.sub(r"\s+", " ", result.output)
+    assert 'Duplicate key `integration/dummy`' in output
+    assert 'running `--sync` will keep the last occurrence' in output
+
+
+def test_labeler_sync_removes_duplicate_yaml_key(fake_repo, ddev):
+    (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').write_text(
+        """\
+changelog/no-changelog:
+- changed-files:
+  - any-glob-to-any-file:
+    - requirements-agent-release.txt
+    - '*/__about__.py'
+- all:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '!*/datadog_checks/**'
+      - '!*/pyproject.toml'
+      - '!ddev/src/**'
+integration/datadog_checks_tests_helper:
+- changed-files:
+  - any-glob-to-any-file:
+    - datadog_checks_tests_helper/**/*
+integration/dummy:
+- changed-files:
+  - any-glob-to-any-file:
+    - dummy/stale/**/*
+integration/dummy2:
+- changed-files:
+  - any-glob-to-any-file:
+    - dummy2/**/*
+integration/dummy:
+- changed-files:
+  - any-glob-to-any-file:
+    - dummy/**/*
+release:
+- changed-files:
+  - any-glob-to-any-file:
+    - '*/__about__.py'
+""",
+    )
+
+    result = ddev('validate', 'labeler', '--sync')
+
+    assert result.exit_code == 0, result.output
+    output = re.sub(r"\s+", " ", result.output)
+    assert (
+        'Removing duplicate key `integration/dummy` from labeler config. Only the last occurrence will be kept.'
+        in output
+    )
+    assert 'Successfully updated' in output
+
+    labeler_content = (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').read_text()
+    assert labeler_content.count('integration/dummy:') == 1
+    assert 'dummy/**/*' in labeler_content
+    assert 'dummy/stale/**/*' not in labeler_content
+
+
 def test_labeler_no_sync_long_label_reports_error(fake_repo, ddev):
     long_check_dir = fake_repo.path / LONG_CHECK_NAME
     long_check_dir.mkdir()

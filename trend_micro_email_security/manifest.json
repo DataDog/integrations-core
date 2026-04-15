@@ -9,17 +9,27 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Trend Micro Email Security logs.",
-    "title": "Trend Micro Email Security",
+    "description": "Gain insights into TrendAI Email Security logs.",
+    "title": "TrendAI Email Security",
     "media": [
       {
-        "caption": "Trend Micro Email Security - Mail Tracking",
-        "image_url": "images/trend_micro_email_security_mail_tracking.png",
+        "caption": "TrendAI Email Security - Mail Tracking",
+        "image_url": "images/trend_ai_email_security_mail_tracking_light.png",
         "media_type": "image"
       },
       {
-        "caption": "Trend Micro Email Security - Policy Events",
-        "image_url": "images/trend_micro_email_security_policy_events.png",
+        "caption": "TrendAI Email Security - Mail Tracking",
+        "image_url": "images/trend_ai_email_security_mail_tracking_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "TrendAI Email Security - Policy Events",
+        "image_url": "images/trend_ai_email_security_policy_events_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "TrendAI Email Security - Policy Events",
+        "image_url": "images/trend_ai_email_security_policy_events_dark.png",
         "media_type": "image"
       }
     ],
@@ -43,8 +53,8 @@
       }
     },
     "dashboards": {
-      "Trend Micro Email Security - Mail Tracking": "assets/dashboards/trend_micro_email_security_mail_tracking.json",
-      "Trend Micro Email Security - Policy Events": "assets/dashboards/trend_micro_email_security_policy_events.json"
+      "TrendAI Email Security - Mail Tracking": "assets/dashboards/trend_micro_email_security_mail_tracking.json",
+      "TrendAI Email Security - Policy Events": "assets/dashboards/trend_micro_email_security_policy_events.json"
     },
     "logs": {
       "source": "trend-micro-email-security"

@@ -4,6 +4,8 @@
 
 This check collects CPU, memory, storage, and I/O performance metrics from your Nutanix clusters, hosts, and VMs. It also collects operational activity data from Prism Central, including events, tasks, audits, and alerts.
 
+This integration requires Nutanix API v4.0 or later, available through Prism Central.
+
 ## Setup
 
 ### Installation
@@ -98,6 +100,10 @@ resource_filters:
 ```
 
 Category tags use the Nutanix category key as the tag name (e.g., `Environment:Production`). Set `prefix_category_tags: true` to prefix them with `ntnx_` (e.g., `ntnx_Environment:Production`) to avoid collisions with existing Datadog tags.
+
+### Cluster capacity planning
+
+Cluster-level capacity metrics (such as `cluster.cpu.total_cores`, `cluster.cpu.vcpus_allocated`, `cluster.memory.allocated_bytes`) aggregate resources from all hosts and VMs. By default, all resources contribute regardless of `resource_filters`. This gives a complete view of provisioned capacity. Set `exclude_filtered_resources_from_cluster_capacity: true` to count only resources that pass filter checks.
 
 ### Duplicate hostnames
 

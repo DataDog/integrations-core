@@ -19,7 +19,7 @@ instances:
   - name: <SUPERVISORD_SERVER_NAME>
 
     ## @param host - string - optional - default: localhost
-    ## The host where supervisord server is running.
+    ## The host where the supervisord server is running.
     #
     # host: localhost
 

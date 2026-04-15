@@ -47,9 +47,9 @@ instances:
 
     ## @param openmetrics_endpoint - string - required
     ## Endpoint exposing the Karpenter's Prometheus metrics. For more information refer to:
-    ## https://karpenter.sh/docs/concepts/metrics/
+    ## https://karpenter.sh/docs/reference/metrics/
     #
-  - openmetrics_endpoint: http://localhost:8000/metrics
+  - openmetrics_endpoint: http://localhost:8080/metrics
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
@@ -116,6 +116,7 @@ instances:
     ## @param exclude_metrics - list of strings - optional
     ## A list of metrics to exclude, with each entry being either
     ## the exact metric name or a regular expression.
+    ##
     ## In order to exclude all metrics but the ones matching a specific filter,
     ## you can use a negative lookahead regex like:
     ##   - ^(?!foo).*$

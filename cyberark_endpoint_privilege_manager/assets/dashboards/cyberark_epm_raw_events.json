@@ -86,7 +86,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -157,7 +157,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -201,7 +201,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -264,7 +264,6 @@
                             "title": "Top computers",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -273,7 +272,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events $event_name $source_type $user_name $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events $event_name $source_type $user_name $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -344,7 +343,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events -@usr.name:\"\" $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events -@usr.name:\"\" $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -412,7 +411,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events $event_name $file_name $user_name $source_type $set_name $computer_name",
+                                        "query_string": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events $event_name $user_name $source_type $set_name $computer_name $file_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -507,7 +506,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -578,7 +577,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -632,7 +631,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -703,7 +702,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) -@usr.name:\"\" $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) -@usr.name:\"\" $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -771,7 +770,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) -(@fileName:\"\" @filePath:\"\" @fileDescription:\"\" @fileVersion:\"\") $event_name $file_name $user_name $source_type $set_name $computer_name",
+                                        "query_string": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) -(@fileName:\"\" @filePath:\"\" @fileDescription:\"\" @fileVersion:\"\") $event_name $user_name $source_type $set_name $computer_name $file_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -826,7 +825,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) -@sourceType:\"\" $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) -@sourceType:\"\" $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -894,7 +893,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) -(@sourceName:\"\" @sourceType:\"\") $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) -(@sourceName:\"\" @sourceType:\"\") $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -960,7 +959,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) -(@productName:\"\" @productVersion:\"\") $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) -(@productName:\"\" @productVersion:\"\") $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1027,7 +1026,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) @accessAction:false -(@accessTargetName:\"\" @accessTargetType:\"\") $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) @accessAction:false -(@accessTargetName:\"\" @accessTargetType:\"\") $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1108,7 +1107,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) @accessAction:false $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) @accessAction:false $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1153,7 +1152,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Block $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Block $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1223,7 +1222,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Block $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Block $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1268,7 +1267,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Block -@usr.name:\"\" $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Block -@usr.name:\"\" $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1345,7 +1344,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Block -@fileName:\"\" $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Block -@fileName:\"\" $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1423,7 +1422,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Ransomware $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Ransomware $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1479,7 +1478,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1494,7 +1492,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Ransomware $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Ransomware $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1539,7 +1537,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Ransomware -@usr.name:\"\" $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Ransomware -@usr.name:\"\" $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1616,7 +1614,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Ransomware -@fileName:\"\" $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:Ransomware -@fileName:\"\" $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1690,7 +1688,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) $event_name $file_name $user_name $source_type $set_name $computer_name",
+                                        "query_string": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(ElevationRequest OR Trust OR Installation OR Launch OR ManualRequest OR Block OR RestrictAccess OR DetectAccess OR Ransomware) $event_name $user_name $source_type $set_name $computer_name $file_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1785,7 +1783,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1855,11 +1853,12 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
+                                            "group_by": [],
                                             "compute": {
                                                 "aggregation": "sum",
                                                 "metric": "@agentEventCount"
@@ -1898,7 +1897,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1984,7 +1983,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock) $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock) $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2054,7 +2053,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(SuspiciousActivityAttempt OR SuspiciousActivityblock) $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(SuspiciousActivityAttempt OR SuspiciousActivityBlock) $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2109,7 +2108,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) -@policyName:\"\" $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) -@policyName:\"\" $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2174,7 +2173,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) -@usr.name:\"\" $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) -@usr.name:\"\" $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2242,7 +2241,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) -@lureUser:\"\" $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) -@lureUser:\"\" $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2307,7 +2306,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2375,7 +2374,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) -@fileName:\"\" $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) -@fileName:\"\" $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2442,7 +2441,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2474,6 +2473,7 @@
                                         }
                                     ],
                                     "sort": {
+                                        "count": 500,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -2515,7 +2515,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) -@logonStatusId:0 $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) -@logonStatusId:0 $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2581,7 +2581,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) -@logonStatusId:0 $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) -@logonStatusId:0 $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2626,7 +2626,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) -@logonStatusId:0 $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) -@logonStatusId:0 $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2703,7 +2703,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) -(@sourceProcessUsername:\"\" @sourceProcessHash:\"\" @sourceProcessPublisher:\"\" @sourceProcessSigner:\"\") $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) -(@sourceProcessUsername:\"\" @sourceProcessHash:\"\" @sourceProcessPublisher:\"\" @sourceProcessSigner:\"\") $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2773,7 +2773,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2844,7 +2844,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) $event_name $file_name $user_name $source_type $set_name $computer_name"
+                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) $event_name $user_name $source_type $set_name $computer_name $file_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2854,9 +2854,11 @@
                                                     "facet": "@network.client.geoip.country.iso_code",
                                                     "limit": 250,
                                                     "sort": {
+                                                        "aggregation": "sum",
                                                         "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
+                                                        "metric": "@agentEventCount"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
                                             "compute": {
@@ -2909,7 +2911,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityblock) $event_name $file_name $user_name $source_type $set_name $computer_name",
+                                        "query_string": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events @evt.name:(AttackAttempt OR AttackBlock OR SuspiciousActivityAttempt OR SuspiciousActivityBlock) $event_name $user_name $source_type $set_name $computer_name $file_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2958,7 +2960,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 63,
+                "y": 126,
                 "width": 12,
                 "height": 47,
                 "is_column_break": true
