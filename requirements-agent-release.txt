@@ -201,7 +201,7 @@ datadog-rethinkdb==5.4.0
 datadog-riak==5.5.0
 datadog-riakcs==4.13.0
 datadog-sap-hana==5.5.0
-datadog-scylla==5.4.0
+datadog-scylla==5.4.1
 datadog-sidekiq==3.2.0
 datadog-silk==4.5.0
 datadog-silverstripe-cms==1.8.0
