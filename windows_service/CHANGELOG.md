@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.7.1 / 2026-04-15
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
 ## 6.7.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

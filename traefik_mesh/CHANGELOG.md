@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 3.5.0 / 2026-04-15
+
+***Added***:
+
+* Include mapping for Traefik v3 metric ([#23025](https://github.com/DataDog/integrations-core/pull/23025))
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
 ## 3.4.0 / 2026-04-01
 
 ***Added***:
