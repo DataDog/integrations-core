@@ -27,7 +27,7 @@ class NutanixCheck(AgentCheck, ConfigMixin):
 
     def _initialize_check(self):
         self.pc_ip = self.config.pc_ip
-        self.pc_port = self.config.pc_port or 9440
+        self.pc_port = self.config.pc_port
         if ":" in self.pc_ip:
             host, _, port = self.pc_ip.rpartition(":")
             if port.isdigit():
