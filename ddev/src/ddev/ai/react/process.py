@@ -7,7 +7,7 @@ from typing import Any
 
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.exceptions import AgentError
-from ddev.ai.agent.types import StopReason, ToolResultMessage
+from ddev.ai.agent.types import AgentResponse, StopReason, ToolResultMessage
 from ddev.ai.react.callbacks import CallbackSet
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.registry import ToolRegistry
@@ -27,16 +27,56 @@ class ReActProcess:
         agent: BaseAgent[Any],
         tool_registry: ToolRegistry,
         callback_sets: list[CallbackSet] | None = None,
+        compact_threshold_pct: float | None = 75.0,
     ) -> None:
         """
         Args:
             agent: A BaseAgent subclass (e.g. AnthropicAgent).
             tool_registry: Registry of tools available in this loop.
             callback_sets: Optional CallbackSet instances to observe loop events.
+            compact_threshold_pct: Context usage percentage at which the loop auto-compacts.
+                None disables auto-compaction entirely.
         """
         self._agent = agent
         self._tool_registry = tool_registry
         self._callback_sets: list[CallbackSet] = callback_sets or []
+        self._compact_threshold_pct = compact_threshold_pct
+
+    def reset(self) -> None:
+        """Clear the agent's conversation history."""
+        self._agent.reset()
+
+    async def compact(self, response: AgentResponse | None = None) -> tuple[int, int]:
+        """Compact the agent's conversation history unconditionally.
+
+        Args:
+            response: The last agent response. If None, compaction is unconditional.
+
+        Returns (input_tokens, output_tokens) from the compaction API call.
+        Returns (0, 0) if history was already compact and no API call was made.
+        """
+        for cb_set in self._callback_sets:
+            await cb_set.fire_before_compact()
+
+        compact_response = None
+        if response is None or response.stop_reason != StopReason.TOOL_USE:
+            compact_response = await self._agent.compact()
+        else:
+            compact_response = await self._agent.compact_preserving_last_turn()
+
+        for cb_set in self._callback_sets:
+            await cb_set.fire_after_compact()
+        if compact_response is None:
+            return 0, 0
+        return compact_response.usage.input_tokens, compact_response.usage.output_tokens
+
+    def _is_compact_needed(self, response: AgentResponse) -> bool:
+        if self._compact_threshold_pct is None:
+            return False
+        ctx = response.usage.context_usage
+        if ctx is None or ctx.context_pct < self._compact_threshold_pct:
+            return False
+        return True
 
     async def start(self, prompt: str, allowed_tools: list[str] | None = None) -> ReActResult:
         """
@@ -90,6 +130,11 @@ class ReActProcess:
 
                 for cb_set in self._callback_sets:
                     await cb_set.fire_agent_response(response, iterations)
+
+                if self._is_compact_needed(response):
+                    compact_in, compact_out = await self.compact(response)
+                    total_input += compact_in
+                    total_output += compact_out
 
             react_result = ReActResult(
                 final_response=response,

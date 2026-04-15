@@ -182,3 +182,73 @@ async def test_fire_error_swallows_handler_exception() -> None:
 
     await cb.fire_error(ValueError("original error"))
     assert fired == [True]
+
+
+# ---------------------------------------------------------------------------
+# before_compact and after_compact
+# ---------------------------------------------------------------------------
+
+
+async def test_before_compact_registered_and_fired() -> None:
+    cb = CallbackSet()
+    fired: list[bool] = []
+
+    @cb.on_before_compact
+    async def h() -> None:
+        fired.append(True)
+
+    await cb.fire_before_compact()
+    assert fired == [True]
+
+
+async def test_after_compact_registered_and_fired() -> None:
+    cb = CallbackSet()
+    fired: list[bool] = []
+
+    @cb.on_after_compact
+    async def h() -> None:
+        fired.append(True)
+
+    await cb.fire_after_compact()
+    assert fired == [True]
+
+
+async def test_compact_callback_exception_is_swallowed() -> None:
+    cb = CallbackSet()
+    fired: list[bool] = []
+
+    @cb.on_before_compact
+    async def bad() -> None:
+        raise RuntimeError("boom")
+
+    @cb.on_before_compact
+    async def good() -> None:
+        fired.append(True)
+
+    await cb.fire_before_compact()
+    assert fired == [True]
+
+
+async def test_multiple_compact_handlers_all_fired() -> None:
+    cb = CallbackSet()
+    fired: list[str] = []
+
+    @cb.on_before_compact
+    async def b1() -> None:
+        fired.append("before-1")
+
+    @cb.on_before_compact
+    async def b2() -> None:
+        fired.append("before-2")
+
+    @cb.on_after_compact
+    async def a1() -> None:
+        fired.append("after-1")
+
+    @cb.on_after_compact
+    async def a2() -> None:
+        fired.append("after-2")
+
+    await cb.fire_before_compact()
+    await cb.fire_after_compact()
+    assert fired == ["before-1", "before-2", "after-1", "after-2"]
