@@ -803,6 +803,12 @@ plaid/assets/logs/                                                  @DataDog/saa
 /ide-shepherd/manifest.json                                           @DataDog/agent-integrations @DataDog/documentation
 /ide-shepherd/assets/logs/                                            @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/palo_alto_networks_cortex_xsoar/                                     @DataDog/saas-integrations
+/palo_alto_networks_cortex_xsoar/*.md                                 @DataDog/saas-integrations @DataDog/documentation
+/palo_alto_networks_cortex_xsoar/manifest.json                        @DataDog/saas-integrations @DataDog/documentation
+/palo_alto_networks_cortex_xsoar/assets/logs/                         @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
 # As well as the secure downloader.

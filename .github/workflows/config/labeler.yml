@@ -1102,6 +1102,10 @@ integration/palo_alto_cortex_xdr:
 - changed-files:
   - any-glob-to-any-file:
     - palo_alto_cortex_xdr/**/*
+integration/palo_alto_networks_cortex_xsoar:
+- changed-files:
+  - any-glob-to-any-file:
+    - palo_alto_networks_cortex_xsoar/**/*
 integration/palo_alto_panorama:
 - changed-files:
   - any-glob-to-any-file:

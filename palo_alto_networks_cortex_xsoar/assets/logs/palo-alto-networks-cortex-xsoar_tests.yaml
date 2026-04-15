@@ -1,0 +1,640 @@
+id: "palo-alto-networks-cortex-xsoar"
+tests:
+ -
+  sample: |-
+    {
+      "AUDIT_ASSET_NAMES" : "",
+      "AUDIT_RESULT" : "SUCCESS",
+      "AUDIT_SESSION_ID" : 382303947890,
+      "AUDIT_ENTITY_SUBTYPE" : "Login",
+      "AUDIT_HOSTNAME" : "host",
+      "AUDIT_ID" : 1,
+      "AUDIT_OWNER_EMAIL" : "john.doe@example.com",
+      "AUDIT_OWNER_NAME" : "John Doe",
+      "AUDIT_ADDITIONAL_INFORMATION" : {
+        "endpoint_count" : 1,
+        "endpoint_names" : [ "WIN-123123" ]
+      },
+      "AUDIT_DESCRIPTION" : "",
+      "AUDIT_CASE_ID" : 473829372,
+      "AUDIT_REASON" : "",
+      "AUDIT_USER_AGENT" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+      "AUDIT_ENTITY" : "AUTH",
+      "vendor" : {
+        "endpoint" : "audit-logs"
+      },
+      "AUDIT_ASSET_JSON" : "{}",
+      "AUDIT_USER_ROLES" : [ "Account Admin" ],
+      "AUDIT_SEVERITY" : "SEV_020_LOW",
+      "AUDIT_INSERT_TIME" : 1776253505000,
+      "AUDIT_SOURCE_IP" : "10.10.10.10"
+    }
+  result:
+    custom:
+      AUDIT_ADDITIONAL_INFORMATION:
+        endpoint_count: 1
+        endpoint_names:
+         - "WIN-123123"
+      AUDIT_ASSET_JSON: "{}"
+      AUDIT_ASSET_NAMES: ""
+      AUDIT_CASE_ID: 473829372
+      AUDIT_DESCRIPTION: ""
+      AUDIT_ENTITY: "AUTH"
+      AUDIT_ENTITY_SUBTYPE: "Login"
+      AUDIT_HOSTNAME: "host"
+      AUDIT_ID: 1
+      AUDIT_INSERT_TIME: 1776253505000
+      AUDIT_OWNER_EMAIL: "john.doe@example.com"
+      AUDIT_OWNER_NAME: "John Doe"
+      AUDIT_REASON: ""
+      AUDIT_RESULT: "SUCCESS"
+      AUDIT_SESSION_ID: 382303947890
+      AUDIT_SEVERITY: "SEV_020_LOW"
+      AUDIT_SOURCE_IP: "10.10.10.10"
+      AUDIT_USER_AGENT: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+      AUDIT_USER_ROLES:
+       - "Account Admin"
+      vendor:
+        endpoint: "audit-logs"
+    message: |-
+      {
+        "AUDIT_ASSET_NAMES" : "",
+        "AUDIT_RESULT" : "SUCCESS",
+        "AUDIT_SESSION_ID" : 382303947890,
+        "AUDIT_ENTITY_SUBTYPE" : "Login",
+        "AUDIT_HOSTNAME" : "host",
+        "AUDIT_ID" : 1,
+        "AUDIT_OWNER_EMAIL" : "john.doe@example.com",
+        "AUDIT_OWNER_NAME" : "John Doe",
+        "AUDIT_ADDITIONAL_INFORMATION" : {
+          "endpoint_count" : 1,
+          "endpoint_names" : [ "WIN-123123" ]
+        },
+        "AUDIT_DESCRIPTION" : "",
+        "AUDIT_CASE_ID" : 473829372,
+        "AUDIT_REASON" : "",
+        "AUDIT_USER_AGENT" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        "AUDIT_ENTITY" : "AUTH",
+        "vendor" : {
+          "endpoint" : "audit-logs"
+        },
+        "AUDIT_ASSET_JSON" : "{}",
+        "AUDIT_USER_ROLES" : [ "Account Admin" ],
+        "AUDIT_SEVERITY" : "SEV_020_LOW",
+        "AUDIT_INSERT_TIME" : 1776253505000,
+        "AUDIT_SOURCE_IP" : "10.10.10.10"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: |-
+    {
+      "AUDIT_ASSET_NAMES" : "",
+      "AUDIT_RESULT" : "FAIL",
+      "AUDIT_ENTITY_SUBTYPE" : "User Permissions Assigned",
+      "AUDIT_HOSTNAME" : "host",
+      "AUDIT_ID" : 2,
+      "AUDIT_OWNER_EMAIL" : "steve.smith@example.com",
+      "AUDIT_OWNER_NAME" : "Steve Smith",
+      "AUDIT_DESCRIPTION" : "jogn.doe@example.com was assigned permissions of role Account Admin ",
+      "AUDIT_USER_AGENT" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+      "AUDIT_ENTITY" : "PERMISSIONS",
+      "vendor" : {
+        "endpoint" : "audit-logs"
+      },
+      "AUDIT_USER_ROLES" : [ "Account Admin" ],
+      "AUDIT_SEVERITY" : "SEV_010_INFO",
+      "AUDIT_INSERT_TIME" : 1768238187000,
+      "AUDIT_SOURCE_IP" : "10.10.10.10"
+    }
+  result:
+    custom:
+      AUDIT_ASSET_NAMES: ""
+      AUDIT_DESCRIPTION: "jogn.doe@example.com was assigned permissions of role Account Admin "
+      AUDIT_ENTITY: "PERMISSIONS"
+      AUDIT_ENTITY_SUBTYPE: "User Permissions Assigned"
+      AUDIT_HOSTNAME: "host"
+      AUDIT_ID: 2
+      AUDIT_INSERT_TIME: 1768238187000
+      AUDIT_OWNER_EMAIL: "steve.smith@example.com"
+      AUDIT_OWNER_NAME: "Steve Smith"
+      AUDIT_RESULT: "FAIL"
+      AUDIT_SEVERITY: "SEV_010_INFO"
+      AUDIT_SOURCE_IP: "10.10.10.10"
+      AUDIT_USER_AGENT: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+      AUDIT_USER_ROLES:
+       - "Account Admin"
+      vendor:
+        endpoint: "audit-logs"
+    message: |-
+      {
+        "AUDIT_ASSET_NAMES" : "",
+        "AUDIT_RESULT" : "FAIL",
+        "AUDIT_ENTITY_SUBTYPE" : "User Permissions Assigned",
+        "AUDIT_HOSTNAME" : "host",
+        "AUDIT_ID" : 2,
+        "AUDIT_OWNER_EMAIL" : "steve.smith@example.com",
+        "AUDIT_OWNER_NAME" : "Steve Smith",
+        "AUDIT_DESCRIPTION" : "jogn.doe@example.com was assigned permissions of role Account Admin ",
+        "AUDIT_USER_AGENT" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "AUDIT_ENTITY" : "PERMISSIONS",
+        "vendor" : {
+          "endpoint" : "audit-logs"
+        },
+        "AUDIT_USER_ROLES" : [ "Account Admin" ],
+        "AUDIT_SEVERITY" : "SEV_010_INFO",
+        "AUDIT_INSERT_TIME" : 1768238187000,
+        "AUDIT_SOURCE_IP" : "10.10.10.10"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+ -
+  sample: |-
+    {
+      "lastOpen" : "0001-01-01T00:00:00Z",
+      "reason" : "",
+      "parent" : "",
+      "sourceInstance" : "GoogleSecOps_instance_1",
+      "sizeInBytes" : 0,
+      "closeNotes" : "",
+      "dueDate" : "0001-01-01T00:00:00Z",
+      "linkedCount" : 0,
+      "type" : "Chronicle IOC Domain Matches",
+      "closingUserId" : "",
+      "rawPhase" : "",
+      "modified" : "1970-01-01T00:00:00Z",
+      "details" : "{\"Artifact\": \"10.10.10.10\", \"IocIngestTime\": \"2026-02-12T19:04:29.605577Z\", \"FirstAccessedTime\": \"2023-01-16T08:00:00Z\", \"LastAccessedTime\": \"2026-03-27T05:00:00Z\", \"Sources\": [{\"Category\": \"malware, trojan\", \"IntRawConfidenceScore\": 4, \"NormalizedConfidenceScore\": \"4\", \"RawSeverity\": \"Medium\", \"Source\": \"Cyware Intel Exchange\"}], \"IncidentType\": \"IocDomainMatches\"}",
+      "id" : "1",
+      "closeReason" : "",
+      "dbotMirrorDirection" : "",
+      "rawCategory" : "",
+      "phase" : "",
+      "investigationId" : "",
+      "insights" : 0,
+      "created" : "2026-03-27T05:54:43.762Z",
+      "notifyTime" : "0001-01-01T00:00:00Z",
+      "custom_status" : "",
+      "sla" : 0,
+      "resolution_status" : "",
+      "autime" : 1774590883762000000,
+      "rawJSON" : "",
+      "version" : 0,
+      "labels" : [ {
+        "type" : "Brand",
+        "value" : "GoogleSecOps"
+      }, {
+        "type" : "Instance",
+        "value" : "GoogleSecOps_instance_1"
+      }, {
+        "type" : "IocIngestTime",
+        "value" : "2026-02-12T19:04:29.605577Z"
+      }, {
+        "type" : "FirstAccessedTime",
+        "value" : "2023-01-16T08:00:00Z"
+      }, {
+        "type" : "LastAccessedTime",
+        "value" : "2026-03-27T05:00:00Z"
+      }, {
+        "type" : "Sources",
+        "value" : "[{\"Category\":\"malware, trojan\",\"IntRawConfidenceScore\":4,\"NormalizedConfidenceScore\":\"4\",\"RawSeverity\":\"Medium\",\"Source\":\"Cyware Intel Exchange\"}]"
+      }, {
+        "type" : "IncidentType",
+        "value" : "IocDomainMatches"
+      }, {
+        "type" : "Artifact",
+        "value" : "10.10.10.10"
+      } ],
+      "dbotMirrorLastSync" : "0001-01-01T00:00:00Z",
+      "CustomFields" : {
+        "containmentsla" : {
+          "totalDuration" : 0,
+          "slaStatus" : -1,
+          "accumulatedPause" : 0,
+          "endDate" : "0001-01-01T00:00:00Z",
+          "breachTriggered" : false,
+          "dueDate" : "0001-01-01T00:00:00Z",
+          "sla" : 30,
+          "lastPauseDate" : "0001-01-01T00:00:00Z",
+          "runStatus" : "idle",
+          "startDate" : "0001-01-01T00:00:00Z"
+        },
+        "triagesla" : {
+          "totalDuration" : 0,
+          "slaStatus" : -1,
+          "accumulatedPause" : 0,
+          "endDate" : "0001-01-01T00:00:00Z",
+          "breachTriggered" : false,
+          "dueDate" : "0001-01-01T00:00:00Z",
+          "sla" : 30,
+          "lastPauseDate" : "0001-01-01T00:00:00Z",
+          "runStatus" : "idle",
+          "startDate" : "0001-01-01T00:00:00Z"
+        },
+        "incidentduration" : {
+          "totalDuration" : 0,
+          "slaStatus" : -1,
+          "accumulatedPause" : 0,
+          "endDate" : "0001-01-01T00:00:00Z",
+          "breachTriggered" : false,
+          "dueDate" : "0001-01-01T00:00:00Z",
+          "sla" : 0,
+          "lastPauseDate" : "0001-01-01T00:00:00Z",
+          "runStatus" : "idle",
+          "startDate" : "0001-01-01T00:00:00Z"
+        },
+        "remediationsla" : {
+          "totalDuration" : 0,
+          "slaStatus" : -1,
+          "accumulatedPause" : 0,
+          "endDate" : "0001-01-01T00:00:00Z",
+          "breachTriggered" : false,
+          "dueDate" : "0001-01-01T00:00:00Z",
+          "sla" : 7200,
+          "lastPauseDate" : "0001-01-01T00:00:00Z",
+          "runStatus" : "idle",
+          "startDate" : "0001-01-01T00:00:00Z"
+        },
+        "detectionsla" : {
+          "totalDuration" : 0,
+          "slaStatus" : -1,
+          "accumulatedPause" : 0,
+          "endDate" : "0001-01-01T00:00:00Z",
+          "breachTriggered" : false,
+          "dueDate" : "0001-01-01T00:00:00Z",
+          "sla" : 20,
+          "lastPauseDate" : "0001-01-01T00:00:00Z",
+          "runStatus" : "idle",
+          "startDate" : "0001-01-01T00:00:00Z"
+        },
+        "externalid" : "2033",
+        "timetoassignment" : {
+          "totalDuration" : 0,
+          "slaStatus" : -1,
+          "accumulatedPause" : 0,
+          "endDate" : "0001-01-01T00:00:00Z",
+          "breachTriggered" : false,
+          "dueDate" : "0001-01-01T00:00:00Z",
+          "sla" : 0,
+          "lastPauseDate" : "0001-01-01T00:00:00Z",
+          "runStatus" : "idle",
+          "startDate" : "0001-01-01T00:00:00Z"
+        }
+      },
+      "rawCloseReason" : "",
+      "playbookId" : "Threat Hunting - Chronicle",
+      "name" : "IOC Domain Match: 10.10.10.10",
+      "changeStatus" : "new",
+      "status" : 0,
+      "parentXDRIncident" : "",
+      "rawType" : "Chronicle IOC Domain Matches",
+      "isPlayground" : false,
+      "droppedCount" : 0,
+      "dbotMirrorId" : "",
+      "isDebug" : false,
+      "feedBased" : false,
+      "vendor" : {
+        "endpoint" : "incidents"
+      },
+      "runStatus" : "",
+      "severity" : 0,
+      "owner" : "",
+      "exported" : false,
+      "dbotMirrorInstance" : "",
+      "occurred" : "2026-03-27T05:54:43.762948893Z",
+      "reminder" : "0001-01-01T00:00:00Z",
+      "cacheVersn" : 0,
+      "openDuration" : 0,
+      "lastJobRunTime" : "0001-01-01T00:00:00Z",
+      "sortValues" : [ "1" ],
+      "rawName" : "IOC Domain Match: 10.10.10.10",
+      "retained" : false,
+      "sourceBrand" : "GoogleSecOps",
+      "closed" : "0001-01-01T00:00:00Z",
+      "category" : "",
+      "account" : "",
+      "activated" : "0001-01-01T00:00:00Z"
+    }
+  result:
+    custom:
+      CustomFields:
+        containmentsla:
+          accumulatedPause: 0
+          breachTriggered: false
+          dueDate: "0001-01-01T00:00:00Z"
+          endDate: "0001-01-01T00:00:00Z"
+          lastPauseDate: "0001-01-01T00:00:00Z"
+          runStatus: "idle"
+          sla: 30
+          slaStatus: -1
+          startDate: "0001-01-01T00:00:00Z"
+          totalDuration: 0
+        detectionsla:
+          accumulatedPause: 0
+          breachTriggered: false
+          dueDate: "0001-01-01T00:00:00Z"
+          endDate: "0001-01-01T00:00:00Z"
+          lastPauseDate: "0001-01-01T00:00:00Z"
+          runStatus: "idle"
+          sla: 20
+          slaStatus: -1
+          startDate: "0001-01-01T00:00:00Z"
+          totalDuration: 0
+        externalid: "2033"
+        incidentduration:
+          accumulatedPause: 0
+          breachTriggered: false
+          dueDate: "0001-01-01T00:00:00Z"
+          endDate: "0001-01-01T00:00:00Z"
+          lastPauseDate: "0001-01-01T00:00:00Z"
+          runStatus: "idle"
+          sla: 0
+          slaStatus: -1
+          startDate: "0001-01-01T00:00:00Z"
+          totalDuration: 0
+        remediationsla:
+          accumulatedPause: 0
+          breachTriggered: false
+          dueDate: "0001-01-01T00:00:00Z"
+          endDate: "0001-01-01T00:00:00Z"
+          lastPauseDate: "0001-01-01T00:00:00Z"
+          runStatus: "idle"
+          sla: 7200
+          slaStatus: -1
+          startDate: "0001-01-01T00:00:00Z"
+          totalDuration: 0
+        timetoassignment:
+          accumulatedPause: 0
+          breachTriggered: false
+          dueDate: "0001-01-01T00:00:00Z"
+          endDate: "0001-01-01T00:00:00Z"
+          lastPauseDate: "0001-01-01T00:00:00Z"
+          runStatus: "idle"
+          sla: 0
+          slaStatus: -1
+          startDate: "0001-01-01T00:00:00Z"
+          totalDuration: 0
+        triagesla:
+          accumulatedPause: 0
+          breachTriggered: false
+          dueDate: "0001-01-01T00:00:00Z"
+          endDate: "0001-01-01T00:00:00Z"
+          lastPauseDate: "0001-01-01T00:00:00Z"
+          runStatus: "idle"
+          sla: 30
+          slaStatus: -1
+          startDate: "0001-01-01T00:00:00Z"
+          totalDuration: 0
+      account: ""
+      activated: "0001-01-01T00:00:00Z"
+      autime: 1774590883762000000
+      cacheVersn: 0
+      category: ""
+      changeStatus: "new"
+      closeNotes: ""
+      closeReason: ""
+      closed: "0001-01-01T00:00:00Z"
+      closingUserId: ""
+      created: "2026-03-27T05:54:43.762Z"
+      custom_status: ""
+      dbotMirrorDirection: ""
+      dbotMirrorId: ""
+      dbotMirrorInstance: ""
+      dbotMirrorLastSync: "0001-01-01T00:00:00Z"
+      details: "{\"Artifact\": \"10.10.10.10\", \"IocIngestTime\": \"2026-02-12T19:04:29.605577Z\", \"FirstAccessedTime\": \"2023-01-16T08:00:00Z\", \"LastAccessedTime\": \"2026-03-27T05:00:00Z\", \"Sources\": [{\"Category\": \"malware, trojan\", \"IntRawConfidenceScore\": 4, \"NormalizedConfidenceScore\": \"4\", \"RawSeverity\": \"Medium\", \"Source\": \"Cyware Intel Exchange\"}], \"IncidentType\": \"IocDomainMatches\"}"
+      droppedCount: 0
+      dueDate: "0001-01-01T00:00:00Z"
+      exported: false
+      feedBased: false
+      id: "1"
+      insights: 0
+      investigationId: ""
+      isDebug: false
+      isPlayground: false
+      labels:
+       -
+        type: "Brand"
+        value: "GoogleSecOps"
+       -
+        type: "Instance"
+        value: "GoogleSecOps_instance_1"
+       -
+        type: "IocIngestTime"
+        value: "2026-02-12T19:04:29.605577Z"
+       -
+        type: "FirstAccessedTime"
+        value: "2023-01-16T08:00:00Z"
+       -
+        type: "LastAccessedTime"
+        value: "2026-03-27T05:00:00Z"
+       -
+        type: "Sources"
+        value: "[{\"Category\":\"malware, trojan\",\"IntRawConfidenceScore\":4,\"NormalizedConfidenceScore\":\"4\",\"RawSeverity\":\"Medium\",\"Source\":\"Cyware Intel Exchange\"}]"
+       -
+        type: "IncidentType"
+        value: "IocDomainMatches"
+       -
+        type: "Artifact"
+        value: "10.10.10.10"
+      lastJobRunTime: "0001-01-01T00:00:00Z"
+      lastOpen: "0001-01-01T00:00:00Z"
+      linkedCount: 0
+      modified: "1970-01-01T00:00:00Z"
+      name: "IOC Domain Match: 10.10.10.10"
+      notifyTime: "0001-01-01T00:00:00Z"
+      occurred: "2026-03-27T05:54:43.762948893Z"
+      openDuration: 0
+      owner: ""
+      parent: ""
+      parentXDRIncident: ""
+      phase: ""
+      playbookId: "Threat Hunting - Chronicle"
+      rawCategory: ""
+      rawCloseReason: ""
+      rawJSON: ""
+      rawName: "IOC Domain Match: 10.10.10.10"
+      rawPhase: ""
+      rawType: "Chronicle IOC Domain Matches"
+      reason: ""
+      reminder: "0001-01-01T00:00:00Z"
+      resolution_status: ""
+      retained: false
+      runStatus: ""
+      severity: 0
+      sizeInBytes: 0
+      sla: 0
+      sortValues:
+       - "1"
+      sourceBrand: "GoogleSecOps"
+      sourceInstance: "GoogleSecOps_instance_1"
+      status: 0
+      type: "Chronicle IOC Domain Matches"
+      vendor:
+        endpoint: "incidents"
+      version: 0
+    message: |-
+      {
+        "lastOpen" : "0001-01-01T00:00:00Z",
+        "reason" : "",
+        "parent" : "",
+        "sourceInstance" : "GoogleSecOps_instance_1",
+        "sizeInBytes" : 0,
+        "closeNotes" : "",
+        "dueDate" : "0001-01-01T00:00:00Z",
+        "linkedCount" : 0,
+        "type" : "Chronicle IOC Domain Matches",
+        "closingUserId" : "",
+        "rawPhase" : "",
+        "modified" : "1970-01-01T00:00:00Z",
+        "details" : "{\"Artifact\": \"10.10.10.10\", \"IocIngestTime\": \"2026-02-12T19:04:29.605577Z\", \"FirstAccessedTime\": \"2023-01-16T08:00:00Z\", \"LastAccessedTime\": \"2026-03-27T05:00:00Z\", \"Sources\": [{\"Category\": \"malware, trojan\", \"IntRawConfidenceScore\": 4, \"NormalizedConfidenceScore\": \"4\", \"RawSeverity\": \"Medium\", \"Source\": \"Cyware Intel Exchange\"}], \"IncidentType\": \"IocDomainMatches\"}",
+        "id" : "1",
+        "closeReason" : "",
+        "dbotMirrorDirection" : "",
+        "rawCategory" : "",
+        "phase" : "",
+        "investigationId" : "",
+        "insights" : 0,
+        "created" : "2026-03-27T05:54:43.762Z",
+        "notifyTime" : "0001-01-01T00:00:00Z",
+        "custom_status" : "",
+        "sla" : 0,
+        "resolution_status" : "",
+        "autime" : 1774590883762000000,
+        "rawJSON" : "",
+        "version" : 0,
+        "labels" : [ {
+          "type" : "Brand",
+          "value" : "GoogleSecOps"
+        }, {
+          "type" : "Instance",
+          "value" : "GoogleSecOps_instance_1"
+        }, {
+          "type" : "IocIngestTime",
+          "value" : "2026-02-12T19:04:29.605577Z"
+        }, {
+          "type" : "FirstAccessedTime",
+          "value" : "2023-01-16T08:00:00Z"
+        }, {
+          "type" : "LastAccessedTime",
+          "value" : "2026-03-27T05:00:00Z"
+        }, {
+          "type" : "Sources",
+          "value" : "[{\"Category\":\"malware, trojan\",\"IntRawConfidenceScore\":4,\"NormalizedConfidenceScore\":\"4\",\"RawSeverity\":\"Medium\",\"Source\":\"Cyware Intel Exchange\"}]"
+        }, {
+          "type" : "IncidentType",
+          "value" : "IocDomainMatches"
+        }, {
+          "type" : "Artifact",
+          "value" : "10.10.10.10"
+        } ],
+        "dbotMirrorLastSync" : "0001-01-01T00:00:00Z",
+        "CustomFields" : {
+          "containmentsla" : {
+            "totalDuration" : 0,
+            "slaStatus" : -1,
+            "accumulatedPause" : 0,
+            "endDate" : "0001-01-01T00:00:00Z",
+            "breachTriggered" : false,
+            "dueDate" : "0001-01-01T00:00:00Z",
+            "sla" : 30,
+            "lastPauseDate" : "0001-01-01T00:00:00Z",
+            "runStatus" : "idle",
+            "startDate" : "0001-01-01T00:00:00Z"
+          },
+          "triagesla" : {
+            "totalDuration" : 0,
+            "slaStatus" : -1,
+            "accumulatedPause" : 0,
+            "endDate" : "0001-01-01T00:00:00Z",
+            "breachTriggered" : false,
+            "dueDate" : "0001-01-01T00:00:00Z",
+            "sla" : 30,
+            "lastPauseDate" : "0001-01-01T00:00:00Z",
+            "runStatus" : "idle",
+            "startDate" : "0001-01-01T00:00:00Z"
+          },
+          "incidentduration" : {
+            "totalDuration" : 0,
+            "slaStatus" : -1,
+            "accumulatedPause" : 0,
+            "endDate" : "0001-01-01T00:00:00Z",
+            "breachTriggered" : false,
+            "dueDate" : "0001-01-01T00:00:00Z",
+            "sla" : 0,
+            "lastPauseDate" : "0001-01-01T00:00:00Z",
+            "runStatus" : "idle",
+            "startDate" : "0001-01-01T00:00:00Z"
+          },
+          "remediationsla" : {
+            "totalDuration" : 0,
+            "slaStatus" : -1,
+            "accumulatedPause" : 0,
+            "endDate" : "0001-01-01T00:00:00Z",
+            "breachTriggered" : false,
+            "dueDate" : "0001-01-01T00:00:00Z",
+            "sla" : 7200,
+            "lastPauseDate" : "0001-01-01T00:00:00Z",
+            "runStatus" : "idle",
+            "startDate" : "0001-01-01T00:00:00Z"
+          },
+          "detectionsla" : {
+            "totalDuration" : 0,
+            "slaStatus" : -1,
+            "accumulatedPause" : 0,
+            "endDate" : "0001-01-01T00:00:00Z",
+            "breachTriggered" : false,
+            "dueDate" : "0001-01-01T00:00:00Z",
+            "sla" : 20,
+            "lastPauseDate" : "0001-01-01T00:00:00Z",
+            "runStatus" : "idle",
+            "startDate" : "0001-01-01T00:00:00Z"
+          },
+          "externalid" : "2033",
+          "timetoassignment" : {
+            "totalDuration" : 0,
+            "slaStatus" : -1,
+            "accumulatedPause" : 0,
+            "endDate" : "0001-01-01T00:00:00Z",
+            "breachTriggered" : false,
+            "dueDate" : "0001-01-01T00:00:00Z",
+            "sla" : 0,
+            "lastPauseDate" : "0001-01-01T00:00:00Z",
+            "runStatus" : "idle",
+            "startDate" : "0001-01-01T00:00:00Z"
+          }
+        },
+        "rawCloseReason" : "",
+        "playbookId" : "Threat Hunting - Chronicle",
+        "name" : "IOC Domain Match: 10.10.10.10",
+        "changeStatus" : "new",
+        "status" : 0,
+        "parentXDRIncident" : "",
+        "rawType" : "Chronicle IOC Domain Matches",
+        "isPlayground" : false,
+        "droppedCount" : 0,
+        "dbotMirrorId" : "",
+        "isDebug" : false,
+        "feedBased" : false,
+        "vendor" : {
+          "endpoint" : "incidents"
+        },
+        "runStatus" : "",
+        "severity" : 0,
+        "owner" : "",
+        "exported" : false,
+        "dbotMirrorInstance" : "",
+        "occurred" : "2026-03-27T05:54:43.762948893Z",
+        "reminder" : "0001-01-01T00:00:00Z",
+        "cacheVersn" : 0,
+        "openDuration" : 0,
+        "lastJobRunTime" : "0001-01-01T00:00:00Z",
+        "sortValues" : [ "1" ],
+        "rawName" : "IOC Domain Match: 10.10.10.10",
+        "retained" : false,
+        "sourceBrand" : "GoogleSecOps",
+        "closed" : "0001-01-01T00:00:00Z",
+        "category" : "",
+        "account" : "",
+        "activated" : "0001-01-01T00:00:00Z"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
