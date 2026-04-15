@@ -417,6 +417,7 @@ class ActivityMonitor:
 
     def _process_alert(self, alert: dict) -> None:
         """Process and send a single alert to Datadog."""
+        ext_id = alert.get("extId", "")
         title = alert.get("title", "Nutanix Alert")
         message = alert.get("message", "")
         created_time = alert.get("creationTime")
@@ -453,6 +454,7 @@ class ActivityMonitor:
         self._add_source_entity_tags(alert_tags, alert)
 
         alert_tags.append("ntnx_type:alert")
+        alert_tags.append("ntnx_alert_status:open")
 
         self.check.event(
             {
@@ -465,6 +467,7 @@ class ActivityMonitor:
                 "alert_type": event_alert_type,
                 "source_type_name": self.check.__NAMESPACE__,
                 "tags": alert_tags,
+                "aggregation_key": f"nutanix-alert-{ext_id}",
             }
         )
 

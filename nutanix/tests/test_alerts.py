@@ -393,6 +393,28 @@ def test_alert_a6227_password_expiry_complete_output(
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alert_event_has_aggregation_key_and_status_tag(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """Test that alert events include aggregation_key and ntnx_alert_status:open tag."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    assert len(alerts) > 0
+
+    for alert in alerts:
+        assert "aggregation_key" in alert, "Alert event must have aggregation_key"
+        assert alert["aggregation_key"].startswith("nutanix-alert-")
+        assert "ntnx_alert_status:open" in alert["tags"]
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
 def test_alert_with_ip_address_rendering(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
     """Test that ip_address template variable is rendered correctly in alert messages."""
     instance = mock_instance.copy()
