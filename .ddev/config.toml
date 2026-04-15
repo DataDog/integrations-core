@@ -1,3 +1,29 @@
+# Validations to run with `ddev validate all`.
+# Each entry must match a known validation name.
+# Remove an entry to skip that validation for this repo.
+validations = [
+    "agent-reqs",
+    "ci",
+    "codeowners",
+    "config",
+    "dep",
+    "http",
+    "imports",
+    "integration-style",
+    "jmx-metrics",
+    "labeler",
+    "legacy-signature",
+    "license-headers",
+    "licenses",
+    "metadata",
+    "models",
+    "openmetrics",
+    "package",
+    "readmes",
+    "saved-views",
+    "version",
+]
+
 [overrides.display-name]
 datadog_checks_base = "Datadog Checks Base"
 datadog_checks_dev = "Datadog Checks Dev"

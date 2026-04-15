@@ -12,7 +12,7 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -53,6 +53,21 @@ class MetricPatterns(BaseModel):
 
 
 class QueryCompletions(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    explained_queries_cache_maxsize: Optional[float] = None
+    explained_queries_per_hour_per_query: Optional[float] = Field(None, ge=1.0)
+    max_samples_per_collection: Optional[float] = None
+    run_sync: Optional[bool] = None
+    samples_per_hour_per_query: Optional[float] = None
+    seen_samples_cache_maxsize: Optional[float] = None
+
+
+class QueryErrors(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -109,6 +124,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = None
     port: Optional[int] = None
     query_completions: Optional[QueryCompletions] = None
+    query_errors: Optional[QueryErrors] = None
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
     read_timeout: Optional[int] = None

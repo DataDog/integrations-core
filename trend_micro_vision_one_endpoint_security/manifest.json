@@ -9,27 +9,47 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Trend Micro Vision One Endpoint Security logs",
-    "title": "Trend Micro Vision One Endpoint Security",
+    "description": "Gain insights into TrendAI Vision One Endpoint Security logs",
+    "title": "TrendAI Vision One Endpoint Security",
     "media": [
       {
-        "caption": "Trend Micro Vision One Endpoint Security - Overview",
-        "image_url": "images/trend_micro_vision_one_endpoint_security_overview.png",
+        "caption": "TrendAI Vision One Endpoint Security - Overview",
+        "image_url": "images/trend_ai_vision_one_endpoint_security_overview_light.png",
         "media_type": "image"
       },
       {
-        "caption": "Trend Micro Vision One Endpoint Security - System Events",
-        "image_url": "images/trend_micro_vision_one_endpoint_security_system_events.png",
+        "caption": "TrendAI Vision One Endpoint Security - Overview",
+        "image_url": "images/trend_ai_vision_one_endpoint_security_overview_dark.png",
         "media_type": "image"
       },
       {
-        "caption": "Trend Micro Vision One Endpoint Security - Network Events",
-        "image_url": "images/trend_micro_vision_one_endpoint_security_network_events.png",
+        "caption": "TrendAI Vision One Endpoint Security - System Events",
+        "image_url": "images/trend_ai_vision_one_endpoint_security_system_events_light.png",
         "media_type": "image"
       },
       {
-        "caption": "Trend Micro Vision One Endpoint Security - Data Loss Prevention",
-        "image_url": "images/trend_micro_vision_one_endpoint_security_data_loss_prevention.png",
+        "caption": "TrendAI Vision One Endpoint Security - System Events",
+        "image_url": "images/trend_ai_vision_one_endpoint_security_system_events_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "TrendAI Vision One Endpoint Security - Network Events",
+        "image_url": "images/trend_ai_vision_one_endpoint_security_network_events_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "TrendAI Vision One Endpoint Security - Network Events",
+        "image_url": "images/trend_ai_vision_one_endpoint_security_network_events_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "TrendAI Vision One Endpoint Security - Data Loss Prevention",
+        "image_url": "images/trend_ai_vision_one_endpoint_security_data_loss_prevention_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "TrendAI Vision One Endpoint Security - Data Loss Prevention",
+        "image_url": "images/trend_ai_vision_one_endpoint_security_data_loss_prevention_dark.png",
         "media_type": "image"
       } 
     ],
@@ -53,10 +73,10 @@
       }
     },
     "dashboards": {
-      "Trend Micro Vision One Endpoint Security - Overview": "assets/dashboards/trend_micro_vision_one_endpoint_security_overview.json",
-      "Trend Micro Vision One Endpoint Security - System Events": "assets/dashboards/trend_micro_vision_one_endpoint_security_system_events.json",
-      "Trend Micro Vision One Endpoint Security - Network Events": "assets/dashboards/trend_micro_vision_one_endpoint_security_network_events.json",
-      "Trend Micro Vision One Endpoint Security - Data Loss Prevention": "assets/dashboards/trend_micro_vision_one_endpoint_security_data_loss_prevention.json"
+      "TrendAI Vision One Endpoint Security - Overview": "assets/dashboards/trend_micro_vision_one_endpoint_security_overview.json",
+      "TrendAI Vision One Endpoint Security - System Events": "assets/dashboards/trend_micro_vision_one_endpoint_security_system_events.json",
+      "TrendAI Vision One Endpoint Security - Network Events": "assets/dashboards/trend_micro_vision_one_endpoint_security_network_events.json",
+      "TrendAI Vision One Endpoint Security - Data Loss Prevention": "assets/dashboards/trend_micro_vision_one_endpoint_security_data_loss_prevention.json"
     },
     "logs": {
       "source": "trend-micro-vision-one-endpoint-security"

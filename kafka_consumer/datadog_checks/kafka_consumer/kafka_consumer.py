@@ -130,6 +130,7 @@ class KafkaCheck(AgentCheck):
 
         # Collect cluster metadata if enabled
         if self.config._cluster_monitoring_enabled:
+            self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id)
             try:
                 self.metadata_collector.collect_all_metadata(highwater_offsets)
             except Exception as e:
@@ -140,6 +141,18 @@ class KafkaCheck(AgentCheck):
 
     def count_consumer_contexts(self, consumer_offsets):
         return sum(len(offsets) for offsets in consumer_offsets.values())
+
+    def _send_cluster_monitoring_heartbeat(self, total_contexts: int, cluster_id: str) -> None:
+        payload = {
+            'collection_timestamp': int(time() * 1000),
+            'kafka_cluster_id': cluster_id,
+            'config_type': 'heartbeat',
+            'contexts': total_contexts,
+            'contexts_limit': self._context_limit,
+        }
+        if self.config._kafka_cluster_id_override:
+            payload['original_kafka_cluster_id'] = self.config._auto_detected_cluster_id
+        self.event_platform_event(json.dumps(payload), "data-streams-message")
 
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
