@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.10.0 / 2026-04-15
+
+***Added***:
+
+* Add filtering databases by regex capability. ([#23111](https://github.com/DataDog/integrations-core/pull/23111))
+
 ## 8.9.0 / 2026-03-18
 
 ***Added***:
