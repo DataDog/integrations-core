@@ -138,14 +138,15 @@ class NifiCheck(AgentCheck):
     def _emit_process_group(self, pg_status, base_tags, visited, all_connections, all_processors):
         """Emit metrics for a process group, collect child entity data, and recurse."""
         snap = pg_status.get('aggregateSnapshot', {})
-        pg_id = snap.get('id', 'unknown')
-        if pg_id in visited:
+        pg_id = snap.get('id')
+        if pg_id and pg_id in visited:
             return
-        visited.add(pg_id)
+        if pg_id:
+            visited.add(pg_id)
 
         pg_tags = base_tags + [
             f'process_group_name:{snap.get("name", "unknown")}',
-            f'process_group_id:{pg_id}',
+            f'process_group_id:{pg_id or "unknown"}',
         ]
 
         self._submit_gauges(snap, PROCESS_GROUP_METRICS, pg_tags)
@@ -219,6 +220,18 @@ class NifiCheck(AgentCheck):
 
         last_id_str = self.read_persistent_cache(self._CACHE_KEY_LAST_BULLETIN_ID)
         last_id = int(last_id_str) if last_id_str else -1
+
+        # NiFi bulletin IDs are auto-incrementing and reset to 0 on restart.
+        # Detect the reset so post-restart bulletins aren't silently dropped.
+        if last_id >= 0 and bulletins:
+            max_board_id = max(b.get('id', 0) for b in bulletins)
+            if max_board_id < last_id:
+                self.log.info(
+                    'Bulletin ID reset detected (cached=%d, max_on_board=%d); clearing watermark',
+                    last_id,
+                    max_board_id,
+                )
+                last_id = -1
 
         min_level = self.instance.get('bulletin_min_level', 'WARNING')
         min_level_order = BULLETIN_LEVEL_ORDER.get(min_level, 2)

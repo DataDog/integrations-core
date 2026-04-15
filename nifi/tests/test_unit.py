@@ -552,6 +552,71 @@ class TestProcessGroup:
         # Child group should only appear once even though it's reachable via both root and direct listing
         aggregator.assert_metric('nifi.process_group.flowfiles_queued', value=5, tags=child_tags, count=1)
 
+    def test_missing_id_does_not_block_other_groups(self, dd_run_check, aggregator):
+        """Process groups with missing IDs are still emitted and don't block each other via visited set."""
+        no_id_child_a = {
+            'name': 'Child A',
+            'flowFilesQueued': 10,
+            'bytesQueued': 0,
+            'bytesRead': 0,
+            'bytesWritten': 0,
+            'flowFilesReceived': 0,
+            'flowFilesSent': 0,
+            'flowFilesTransferred': 0,
+            'activeThreadCount': 0,
+            'connectionStatusSnapshots': [],
+            'processorStatusSnapshots': [],
+            'processGroupStatusSnapshots': [],
+        }
+        no_id_child_b = {
+            'name': 'Child B',
+            'flowFilesQueued': 20,
+            'bytesQueued': 0,
+            'bytesRead': 0,
+            'bytesWritten': 0,
+            'flowFilesReceived': 0,
+            'flowFilesSent': 0,
+            'flowFilesTransferred': 0,
+            'activeThreadCount': 0,
+            'connectionStatusSnapshots': [],
+            'processorStatusSnapshots': [],
+            'processGroupStatusSnapshots': [],
+        }
+        root_response = {
+            'processGroupStatus': {
+                'aggregateSnapshot': {
+                    'id': 'root-id',
+                    'name': 'Root',
+                    'flowFilesQueued': 0,
+                    'bytesQueued': 0,
+                    'bytesRead': 0,
+                    'bytesWritten': 0,
+                    'flowFilesReceived': 0,
+                    'flowFilesSent': 0,
+                    'flowFilesTransferred': 0,
+                    'activeThreadCount': 0,
+                    'connectionStatusSnapshots': [],
+                    'processorStatusSnapshots': [],
+                    'processGroupStatusSnapshots': [
+                        {'processGroupStatusSnapshot': no_id_child_a},
+                        {'processGroupStatusSnapshot': no_id_child_b},
+                    ],
+                },
+            }
+        }
+        responses = _standard_responses()
+        responses['/flow/process-groups/'] = _mock_response(200, json_data=root_response)
+        check = NifiCheck('nifi', {}, [_make_instance()])
+
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
+            dd_run_check(check)
+
+        # Both children should emit metrics even though neither has an 'id' field
+        tags_a = ['nifi_version:2.8.0', 'process_group_name:Child A', 'process_group_id:unknown']
+        tags_b = ['nifi_version:2.8.0', 'process_group_name:Child B', 'process_group_id:unknown']
+        aggregator.assert_metric('nifi.process_group.flowfiles_queued', value=10, tags=tags_a)
+        aggregator.assert_metric('nifi.process_group.flowfiles_queued', value=20, tags=tags_b)
+
 
 PG_WITH_CONNECTIONS_AND_PROCESSORS = {
     'processGroupStatus': {
@@ -707,6 +772,70 @@ class TestProcessorMetrics:
 
         assert 'Truncated processors from 1 to 0' in caplog.text
 
+    @pytest.mark.parametrize(
+        'run_status, expected_value',
+        [
+            ('Running', 1),
+            ('Stopped', 0),
+            ('Invalid', -1),
+            ('Disabled', -2),
+            ('Validating', -3),
+            ('SomeFutureState', -1),
+        ],
+    )
+    def test_run_status_mapping(self, dd_run_check, aggregator, run_status, expected_value):
+        """Each runStatus string maps to a distinct numeric value; unknown states map to -1."""
+        pg_data = {
+            'processGroupStatus': {
+                'aggregateSnapshot': {
+                    'id': 'root-pg-id',
+                    'name': 'NiFi Flow',
+                    'flowFilesQueued': 0,
+                    'bytesQueued': 0,
+                    'bytesRead': 0,
+                    'bytesWritten': 0,
+                    'flowFilesReceived': 0,
+                    'flowFilesSent': 0,
+                    'flowFilesTransferred': 0,
+                    'activeThreadCount': 0,
+                    'processGroupStatusSnapshots': [],
+                    'connectionStatusSnapshots': [],
+                    'processorStatusSnapshots': [
+                        {
+                            'processorStatusSnapshot': {
+                                'id': 'proc-1',
+                                'groupId': 'root-pg-id',
+                                'name': 'TestProc',
+                                'type': 'TestType',
+                                'runStatus': run_status,
+                                'bytesRead': 0,
+                                'bytesWritten': 0,
+                                'flowFilesIn': 0,
+                                'flowFilesOut': 0,
+                                'taskCount': 0,
+                                'tasksDurationNanos': 0,
+                                'activeThreadCount': 0,
+                            },
+                        },
+                    ],
+                },
+            }
+        }
+        responses = _standard_responses()
+        responses['/flow/process-groups/'] = _mock_response(200, json_data=pg_data)
+        check = NifiCheck('nifi', {}, [_make_instance(collect_processor_metrics=True)])
+
+        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
+            dd_run_check(check)
+
+        proc_tags = [
+            'nifi_version:2.8.0',
+            'processor_name:TestProc',
+            'processor_type:TestType',
+            'process_group_id:root-pg-id',
+        ]
+        aggregator.assert_metric('nifi.processor.run_status', value=expected_value, tags=proc_tags)
+
 
 class TestBulletins:
     @staticmethod
@@ -796,3 +925,31 @@ class TestBulletins:
         responses = _standard_responses(bulletins=BULLETIN_BOARD_RESPONSE)
         self._run_bulletin_check(dd_run_check, responses, max_bulletins_per_cycle=1)
         assert len(aggregator.events) == 1
+
+    def test_id_reset_after_nifi_restart(self, dd_run_check, aggregator):
+        """Bulletin IDs reset to 0 on NiFi restart; cached high-water mark must be cleared."""
+        post_restart_bulletins = {
+            'bulletinBoard': {
+                'bulletins': [
+                    {
+                        'id': 0,
+                        'canRead': True,
+                        'bulletin': {
+                            'id': 0,
+                            'sourceName': 'Post-Restart Proc',
+                            'level': 'ERROR',
+                            'message': 'Post-restart error',
+                            'sourceType': 'PROCESSOR',
+                        },
+                    },
+                ]
+            }
+        }
+        responses = _standard_responses(bulletins=post_restart_bulletins)
+        # Cached last_id=500 simulates a pre-restart high-water mark.
+        # New bulletin id=0 should still be emitted after reset detection.
+        _, cache = self._run_bulletin_check(dd_run_check, responses, cache_state='500')
+
+        assert len(aggregator.events) == 1
+        assert aggregator.events[0]['msg_title'] == 'NiFi Bulletin: Post-Restart Proc [ERROR]'
+        assert cache['last_bulletin_id'] == '0'

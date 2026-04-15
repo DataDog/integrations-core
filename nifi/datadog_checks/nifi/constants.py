@@ -17,7 +17,7 @@ BULLETIN_ALERT_TYPE = {'DEBUG': 'info', 'ERROR': 'error', 'INFO': 'info', 'WARNI
 
 BULLETIN_LEVEL_ORDER = {'DEBUG': 0, 'INFO': 1, 'WARNING': 2, 'ERROR': 3}
 
-RUN_STATUS_MAP = {'Running': 1, 'Stopped': 0, 'Invalid': -1, 'Disabled': -2}
+RUN_STATUS_MAP = {'Running': 1, 'Stopped': 0, 'Invalid': -1, 'Disabled': -2, 'Validating': -3}
 
 # Metric mappings: (api_key, metric_name)
 # Each group is alphabetically ordered by api_key.
