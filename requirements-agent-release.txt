@@ -23,7 +23,7 @@ datadog-barracuda-secure-edge==1.1.0
 datadog-bentoml==1.5.1
 datadog-beyondtrust-password-safe==1.2.0
 datadog-beyondtrust-privileged-remote-access==1.0.0; sys_platform == 'linux2'
-datadog-boundary==4.4.0
+datadog-boundary==4.4.1
 datadog-btrfs==4.3.0; sys_platform != 'win32'
 datadog-cacti==4.5.0; sys_platform == 'linux2'
 datadog-calico==5.4.0
