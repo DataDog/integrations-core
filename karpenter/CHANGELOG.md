@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 3.4.1 / 2026-04-15
+
+***Fixed***:
+
+* Use `8080` as the default metrics port and fix docs references ([#22860](https://github.com/DataDog/integrations-core/pull/22860))
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
 ## 3.4.0 / 2026-04-01
 
 ***Added***:
