@@ -7,7 +7,7 @@
 This integration ingests the following [audit logs][2]:
 
 - am-config: Represents all changes to configuration of the tenant environment, including OAuth client, journey, and application management.
-- am-authentication: Represents all Journey activity as well as including administrative and internal component authentication activity.
+- am-authentication: Represents all journey activity as well as including administrative and internal component authentication activity.
 - am-activity: Represents state changes to objects that were created, updated, or deleted by Advanced Identity Cloud end users.
 - am-access (A filtered subset): Represents access request outcomes for the OAuth _authorize_ endpoint.
 - idm-activity: Represents operations against internally managed users, groups, etc.
