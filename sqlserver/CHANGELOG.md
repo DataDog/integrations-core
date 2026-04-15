@@ -16,9 +16,7 @@
 
 * Fix ``database_autodiscovery_interval`` config option being silently ignored. The check was reading ``autodiscovery_interval`` instead of the documented ``database_autodiscovery_interval`` key, so customers setting this option were always getting the default 3600s interval. ([#22912](https://github.com/DataDog/integrations-core/pull/22912))
 * Fix stale database metrics cache when autodiscovered databases change. Previously, database-level metric query executors (e.g. ``sys.database_files``) were never rebuilt after autodiscovery detected database changes, causing persistent errors for deleted databases and missing metrics for newly added databases until agent restart. ([#22913](https://github.com/DataDog/integrations-core/pull/22913))
-* Respect exclude_hostname config parameter for debug metrics. If this setting is not respected, we can still submit metrics wi
-  th a hostname tag, which can have undesirable effects throughout the platform. For example, a host can appear in the Host list wh
-  ere it should not. ([#22938](https://github.com/DataDog/integrations-core/pull/22938))
+* Respect exclude_hostname config parameter for debug metrics. If this setting is not respected, we can still submit metrics with a hostname tag, which can have undesirable effects throughout the platform. For example, a host can appear in the Host list where it should not. ([#22938](https://github.com/DataDog/integrations-core/pull/22938))
 * Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
 * Bump `datadog-checks-base` to `>=37.34.1`. Notable changes:
     - Fix schema collection silently dropping all collected metadata when the last discovered database has no tables. ([#22880](https://github.com/DataDog/integrations-core/pull/22880))
