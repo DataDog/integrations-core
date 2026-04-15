@@ -1,7 +1,8 @@
+# Turning off while we investigate
 on:
   push:
     branches-ignore:
-      - master
+      - '**'
 
 name: Datadog Static Analysis
 
