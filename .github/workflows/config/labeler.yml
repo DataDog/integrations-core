@@ -418,10 +418,6 @@ integration/datadog_cluster_agent:
 - changed-files:
   - any-glob-to-any-file:
     - datadog_cluster_agent/**/*
-integration/datadog_csi_driver:
-- changed-files:
-  - any-glob-to-any-file:
-    - datadog_csi_driver/**/*
 integration/datadog_operator:
 - changed-files:
   - any-glob-to-any-file:
