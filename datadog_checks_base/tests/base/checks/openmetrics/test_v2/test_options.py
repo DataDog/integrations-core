@@ -941,11 +941,13 @@ class TestIgnoreTags:
             go_memstats_alloc_bytes 6.396288e+06
             """
         )
-        check = get_check({
-            'metrics': ['go_memstats_alloc_bytes'],
-            'tags': ['kept:tag'],
-            'ignore_tags': ['kube_replica_set:.*', 'pod_name:.*'],
-        })
+        check = get_check(
+            {
+                'metrics': ['go_memstats_alloc_bytes'],
+                'tags': ['kept:tag'],
+                'ignore_tags': ['kube_replica_set:.*', 'pod_name:.*'],
+            }
+        )
         dd_run_check(check)
         aggregator.reset()
 
