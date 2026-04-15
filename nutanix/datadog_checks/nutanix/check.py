@@ -23,9 +23,9 @@ class NutanixCheck(AgentCheck, ConfigMixin):
         super().__init__(name, init_config, instances)
         # Insert after load_configuration_models but before __initialize_persistent_cache_key_prefix
         # so that ActivityMonitor reads persistent cache with an empty prefix (preserving existing cache keys)
-        self.check_initializations.insert(1, self._initialize)
+        self.check_initializations.insert(1, self._initialize_check)
 
-    def _initialize(self):
+    def _initialize_check(self):
         self.pc_ip = self.config.pc_ip
         self.pc_port = self.config.pc_port or 9440
         if ":" in self.pc_ip:
