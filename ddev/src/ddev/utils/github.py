@@ -81,6 +81,9 @@ class GitHubManager:
     # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#list-commits-on-a-repository
     COMMIT_API = 'https://api.github.com/repos/{repo_id}/commits/{sha}'
 
+    # https://docs.github.com/en/rest/issues/comments?apiVersion=2022-11-28#create-an-issue-comment
+    ISSUE_COMMENTS_API = 'https://api.github.com/repos/{repo_id}/issues/{issue_number}/comments'
+
     def __init__(self, repo: Repository, *, user: str, token: str, status: BorrowedStatus):
         self.__repo = repo
         self.__auth = (user, token)
@@ -152,6 +155,24 @@ class GitHubManager:
         except HTTPStatusError:
             return None
         return [file_data['filename'] for file_data in response.json().get('files', [])]
+
+    def get_pull_request_comments(self, pr_number: int) -> list[dict]:
+        response = self.__api_get(
+            self.ISSUE_COMMENTS_API.format(repo_id=self.repo_id, issue_number=pr_number),
+        )
+        return response.json()
+
+    def delete_comment(self, comment_id: int) -> None:
+        self.__api_call(
+            'delete',
+            f'https://api.github.com/repos/{self.repo_id}/issues/comments/{comment_id}',
+        )
+
+    def post_pull_request_comment(self, pr_number: int, body: str) -> None:
+        self.__api_post(
+            self.ISSUE_COMMENTS_API.format(repo_id=self.repo_id, issue_number=pr_number),
+            content=json.dumps({'body': body}),
+        )
 
     def create_label(self, name, color):
         self.__api_post(

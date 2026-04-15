@@ -130,6 +130,7 @@ class KafkaCheck(AgentCheck):
 
         # Collect cluster metadata if enabled
         if self.config._cluster_monitoring_enabled:
+            self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id)
             try:
                 self.metadata_collector.collect_all_metadata(highwater_offsets)
             except Exception as e:
@@ -140,6 +141,18 @@ class KafkaCheck(AgentCheck):
 
     def count_consumer_contexts(self, consumer_offsets):
         return sum(len(offsets) for offsets in consumer_offsets.values())
+
+    def _send_cluster_monitoring_heartbeat(self, total_contexts: int, cluster_id: str) -> None:
+        payload = {
+            'collection_timestamp': int(time() * 1000),
+            'kafka_cluster_id': cluster_id,
+            'config_type': 'heartbeat',
+            'contexts': total_contexts,
+            'contexts_limit': self._context_limit,
+        }
+        if self.config._kafka_cluster_id_override:
+            payload['original_kafka_cluster_id'] = self.config._auto_detected_cluster_id
+        self.event_platform_event(json.dumps(payload), "data-streams-message")
 
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
@@ -408,21 +421,22 @@ class KafkaCheck(AgentCheck):
 
         # Open consumer once for both cluster_id and offset fetching
         self.client.open_consumer(dd_consumer_group)
-        cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
+        try:
+            cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
 
-        self.log.debug(
-            'Querying %s %s offsets',
-            len(topic_partitions_to_check),
-            'highwater' if mode == HIGH_WATERMARK else 'lowwater',
-        )
+            self.log.debug(
+                'Querying %s %s offsets',
+                len(topic_partitions_to_check),
+                'highwater' if mode == HIGH_WATERMARK else 'lowwater',
+            )
 
-        result = {}
-        for topic, partition, offset in self.client.consumer_offsets_for_times(
-            partitions=topic_partitions_to_check, offset=mode
-        ):
-            result[(topic, partition)] = offset
-
-        self.client.close_consumer()
+            result = {}
+            for topic, partition, offset in self.client.consumer_offsets_for_times(
+                partitions=topic_partitions_to_check, offset=mode
+            ):
+                result[(topic, partition)] = offset
+        finally:
+            self.client.close_consumer()
 
         self.log.debug('Got %s %s offsets', len(result), 'highwater' if mode == HIGH_WATERMARK else 'lowwater')
         return result, cluster_id

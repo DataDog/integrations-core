@@ -115,7 +115,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             # Step 3: Submit payload
             payload_data = json.dumps(payload, default=default_json_event_encoding)
             num_completions = len(payload.get('clickhouse_query_completions', []))
-            self._log.info(
+            self._log.debug(
                 "Submitting query completions payload: %d bytes, %d completions",
                 len(payload_data),
                 num_completions,
@@ -123,7 +123,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             self._check.database_monitoring_query_activity(payload_data)
 
             if self._current_checkpoint_microseconds is not None:
-                self._log.info(
+                self._log.debug(
                     "Successfully submitted. Checkpoint: %d microseconds", self._current_checkpoint_microseconds
                 )
 
@@ -162,7 +162,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
 
             rows = self._execute_query(query, parameters=params)
 
-            self._log.info(
+            self._log.debug(
                 "Loaded %d completed queries from %s [%s]",
                 len(rows),
                 query_log_table,
@@ -206,6 +206,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
 
                 row_dict = {
                     'normalized_query_hash': str(normalized_query_hash),
+                    'hostname': str(server_node) if server_node else '',
                     'query': str(query_text) if query_text else '',
                     'user': str(user) if user else '',
                     'query_type': str(query_type) if query_type else '',
@@ -238,7 +239,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             return result_rows
 
         except Exception as e:
-            self._log.exception("Failed to load completed queries from system.query_log: %s", e)
+            self._log.warning("Failed to load completed queries from system.query_log: %s", e)
 
             self._check.count(
                 "dd.clickhouse.query_completions.error",
@@ -250,22 +251,6 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             # Re-raise to let outer handler log the error.
             # Checkpoint will still advance to avoid duplicates on retry.
             raise
-
-    def _normalize_query(self, row):
-        """
-        Normalize and obfuscate a single query row
-        """
-        obfuscation_result = self._obfuscate_query(row['query'])
-        if obfuscation_result is None:
-            return None
-
-        row['statement'] = obfuscation_result['query']
-        row['query_signature'] = obfuscation_result['query_signature']
-        row['dd_tables'] = obfuscation_result['dd_tables']
-        row['dd_commands'] = obfuscation_result['dd_commands']
-        row['dd_comments'] = obfuscation_result['dd_comments']
-
-        return row
 
     def _create_batched_payload(self, rows):
         """
@@ -308,6 +293,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                 'event_time_microseconds': row.get('event_time_microseconds', 0),
                 'initial_query_id': row.get('initial_query_id', ''),
                 'is_initial_query': row.get('is_initial_query', True),
+                'hostname': row.get('hostname', ''),
                 'metadata': {
                     'tables': row.get('dd_tables'),
                     'commands': row.get('dd_commands'),
