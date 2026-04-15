@@ -102,7 +102,7 @@ datadog-http-check==12.6.1
 datadog-hudi==4.3.0
 datadog-hugging-face-tgi==1.5.1
 datadog-hyperv==3.3.0; sys_platform == 'win32'
-datadog-ibm-ace==4.5.0
+datadog-ibm-ace==4.5.1
 datadog-ibm-db2==4.3.0
 datadog-ibm-i==4.5.0; sys_platform != 'win32'
 datadog-ibm-mq==8.9.0
