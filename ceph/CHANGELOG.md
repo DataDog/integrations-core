@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.5.1 / 2026-04-15
+
+***Fixed***:
+
+* Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
+
 ## 4.5.0 / 2026-04-01
 
 ***Added***:
