@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 8.9.1 / 2026-04-15
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+* Fix UnicodeDecodeError when IBM MQ queue manager returns channel or queue description fields in non-UTF-8 encoding. ([#23130](https://github.com/DataDog/integrations-core/pull/23130))
+
 ## 8.9.0 / 2026-03-18
 
 ***Added***:
