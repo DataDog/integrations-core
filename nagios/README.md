@@ -105,11 +105,11 @@ The check watches the Nagios events log for log lines containing these strings, 
 
 The Nagios check does not include any service checks.
 
-## Triggering On-Call Pages
+## Trigger on-call pages
 
-Because Nagios events are submitted by the Datadog Agent through the `/intake` endpoint, the `oncall_team` query parameter approach is not available. Instead, configure Nagios notification commands to POST events directly to the [Datadog Events API][11], bypassing the Agent.
+The `oncall_team` query parameter approach is not available for triggering on-call pages. Instead, configure Nagios notification commands to POST events directly to the [Datadog Events API][11], bypassing the Agent.
 
-### How it works
+### Map Nagios events to on-call pages
 
 Nagios sends an event to Datadog with an `@oncall-<team-handle>` mention in the event text. Datadog On-Call matches this mention and pages the on-call team.
 
@@ -128,7 +128,7 @@ Nagios sends an event to Datadog with an `@oncall-<team-handle>` mention in the 
 
 ### Setup
 
-**Step 1: Create the notification script**
+#### Create the notification script
 
 Create `/usr/local/nagios/libexec/notify_datadog_oncall.sh`:
 
@@ -137,7 +137,7 @@ Create `/usr/local/nagios/libexec/notify_datadog_oncall.sh`:
 set -u
 
 DD_API_KEY="<YOUR_DATADOG_API_KEY>"
-DD_SITE="datadoghq.com"  # Change to your site, e.g. datadoghq.eu, us3.datadoghq.com
+DD_SITE="datadoghq.com"  # Change to your site. For example, datadoghq.eu, us3.datadoghq.com
 
 NOTIF_TYPE="${1}"   # PROBLEM or RECOVERY
 HOSTNAME="${2}"
@@ -145,6 +145,9 @@ SERVICEDESC="${3}"
 STATE="${4}"        # CRITICAL, WARNING, OK, UNKNOWN, UP, DOWN
 ONCALL_TEAM="${5}"  # Datadog On-Call team handle, e.g. "ops"
 OUTPUT="${6}"
+
+# Escape special characters for safe JSON embedding
+OUTPUT=$(printf '%s' "$OUTPUT" | sed 's/\\/\\\\/g; s/"/\\"/g')
 
 case "$STATE" in
   CRITICAL|DOWN) ALERT_TYPE="error" ;;
@@ -177,18 +180,23 @@ Make the script executable:
 sudo chmod 755 /usr/local/nagios/libexec/notify_datadog_oncall.sh
 ```
 
-**Step 2: Define the Nagios command**
+#### Define the Nagios commands
 
-Add to `commands.cfg`:
+Add to `commands.cfg`. Use separate commands for service and host notifications so the correct Nagios macros are passed:
 
 ```nagios
 define command {
-    command_name    notify-datadog-oncall
+    command_name    notify-datadog-oncall-service
     command_line    /usr/local/nagios/libexec/notify_datadog_oncall.sh "$NOTIFICATIONTYPE$" "$HOSTALIAS$" "$SERVICEDESC$" "$SERVICESTATE$" "$_CONTACTONCALL_TEAM$" "$SERVICEOUTPUT$"
+}
+
+define command {
+    command_name    notify-datadog-oncall-host
+    command_line    /usr/local/nagios/libexec/notify_datadog_oncall.sh "$NOTIFICATIONTYPE$" "$HOSTALIAS$" "Host" "$HOSTSTATE$" "$_CONTACTONCALL_TEAM$" "$HOSTOUTPUT$"
 }
 ```
 
-**Step 3: Create contacts with the On-Call team handle**
+#### Create contacts with the On-Call team handle
 
 The custom variable `_oncall_team` sets the Datadog On-Call team handle per contact. Add contacts to `contacts.cfg`:
 
@@ -200,15 +208,15 @@ define contact {
     host_notification_period        24x7
     service_notification_options    w,u,c,r
     host_notification_options       d,u,r
-    service_notification_commands   notify-datadog-oncall
-    host_notification_commands      notify-datadog-oncall
+    service_notification_commands   notify-datadog-oncall-service
+    host_notification_commands      notify-datadog-oncall-host
     _oncall_team                    ops
 }
 ```
 
-The `_oncall_team` value (e.g., `ops`) maps to the Datadog On-Call team handle `@oncall-ops`. Set it to exactly the team handle configured in [Datadog On-Call][12].
+The `_oncall_team` value (for example, `ops`) maps to the Datadog On-Call team handle `@oncall-ops`. Set it to exactly the team handle configured in [Datadog On-Call][12].
 
-**Step 4: Assign the contact to services or hosts**
+#### Assign the contact to services or hosts
 
 ```nagios
 define service {
@@ -221,7 +229,7 @@ define service {
 }
 ```
 
-**Step 5: Reload Nagios**
+#### Reload Nagios
 
 ```shell
 sudo systemctl reload nagios
