@@ -10,7 +10,7 @@ datadog-amazon-msk==7.7.0
 datadog-ambari==6.5.0; sys_platform != 'win32'
 datadog-apache==7.4.1
 datadog-appgate-sdp==2.4.1; sys_platform != 'win32'
-datadog-arangodb==4.4.0
+datadog-arangodb==4.4.1
 datadog-arctic-wolf-aurora-endpoint-security==1.0.0
 datadog-argo-rollouts==3.4.0
 datadog-argo-workflows==3.4.0
