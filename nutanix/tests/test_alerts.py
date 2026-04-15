@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+import json
 from datetime import datetime
 from unittest import mock
 
@@ -16,68 +17,20 @@ pytestmark = [pytest.mark.unit]
 # Mock datetime to cover full alerts fixture window
 MOCK_ALERT_DATETIME = datetime.fromisoformat("2026-01-04T21:09:00.000000Z")
 
-EXPECTED_ALERTS = [
-    {
-        'alert_type': 'warning',
-        'event_type': 'nutanix',
-        'msg_text': 'Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}',
-        'msg_title': 'Alert: Disk space usage high for {mount_path} on {entity} {ip_address}',
-        'source_type_name': 'nutanix',
-        'tags': [
-            'nutanix',
-            'prism_central:10.0.0.197',
-            'ntnx_alert_type:A1031',
-            'ntnx_alert_severity:WARNING',
-            'ntnx_alert_classification:Storage',
-            'ntnx_alert_impact:SYSTEM_INDICATOR',
-            'ntnx_node_name:10-0-0-103-aws-us-east-1a',
-            'ntnx_type:alert',
-        ],
-        'timestamp': 1767560958,
-    },
-    {
-        'alert_type': 'warning',
-        'event_type': 'nutanix',
-        'msg_text': 'Disk space usage for {mount_path} on {entity} {ip_address} has exceeded {threshold}%. {ref_msg}',
-        'msg_title': 'Alert: Disk space usage high for {mount_path} on {entity} {ip_address}',
-        'source_type_name': 'nutanix',
-        'tags': [
-            'nutanix',
-            'prism_central:10.0.0.197',
-            'ntnx_alert_type:A1031',
-            'ntnx_alert_severity:WARNING',
-            'ntnx_alert_classification:Storage',
-            'ntnx_alert_impact:SYSTEM_INDICATOR',
-            'ntnx_node_name:10-0-0-103-aws-us-east-1a',
-            'ntnx_type:alert',
-        ],
-        'timestamp': 1767691459,
-    },
-    {
-        'alert_type': 'info',
-        'event_type': 'nutanix',
-        'msg_text': 'Recovery Point for VM {vm_name} failed to capture associated policies '
-        'and categories because {reason}.',
-        'msg_title': 'Alert: Degraded VM Recovery Point.',
-        'source_type_name': 'nutanix',
-        'tags': [
-            'nutanix',
-            'prism_central:10.0.0.197',
-            'ntnx_alert_type:A130172',
-            'ntnx_alert_severity:INFO',
-            'ntnx_alert_classification:DR',
-            'ntnx_alert_impact:SYSTEM_INDICATOR',
-            'ntnx_vm_name:ubuntu-vm',
-            'ntnx_type:alert',
-        ],
-        'timestamp': 1768302387,
-    },
-]
+# Datetime after all alerts in the fixture (latest lastUpdatedTime is 2026-04-14T20:42:25Z)
+MOCK_ALERT_DATETIME_AFTER_ALL = datetime.fromisoformat("2026-05-01T00:00:00.000000Z")
+
+
+def _setup_subsequent_run(check, cursor="2026-01-04T21:09:00.000000Z"):
+    """Configure the check's activity monitor to simulate a subsequent run (not first run)."""
+    check.activity_monitor._is_first_alert_run = False
+    check.activity_monitor._open_alert_ids = set()
+    check.activity_monitor.last_alert_update_time = cursor
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
 def test_alerts_collection(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
-    """Test that alerts are collected and have basic structure."""
+    """Test that alerts are collected and have basic structure on first run (unresolved only)."""
     instance = mock_instance.copy()
     instance["collect_alerts"] = True
 
@@ -89,11 +42,11 @@ def test_alerts_collection(get_current_datetime, dd_run_check, aggregator, mock_
     alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
 
     assert len(alerts) > 0, "Expected alerts to be collected"
-    # Check that alerts have the expected structure
     for alert in alerts:
         assert alert['event_type'] == 'nutanix'
         assert alert['source_type_name'] == 'nutanix'
         assert 'ntnx_type:alert' in alert['tags']
+        assert 'ntnx_alert_status:open' in alert['tags']
         assert 'ntnx_alert_type' in str(alert['tags'])
 
 
@@ -105,7 +58,8 @@ def test_alerts_no_duplicates_on_subsequent_runs(
     instance = mock_instance.copy()
     instance["collect_alerts"] = True
 
-    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+    # Use a datetime after all alerts so the cursor is beyond all fixture data
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME_AFTER_ALL
 
     check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
@@ -115,7 +69,7 @@ def test_alerts_no_duplicates_on_subsequent_runs(
 
     aggregator.reset()
 
-    # second check run, no new alerts to be collected
+    # Second run: cursor is now after all alerts, so nothing new
     dd_run_check(check)
 
     alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
@@ -184,11 +138,16 @@ def test_alerts_filtered_by_activity_filter_severity(
     get_current_datetime.return_value = MOCK_ALERT_DATETIME
 
     check = NutanixCheck('nutanix', {}, [instance])
+    # Use subsequent-run mode so both resolved and unresolved alerts are processed
+    _setup_subsequent_run(check)
     dd_run_check(check)
 
-    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    alerts = [
+        e
+        for e in aggregator.events
+        if "ntnx_type:alert" in e.get("tags", []) and "ntnx_alert_status:open" in e.get("tags", [])
+    ]
     assert len(alerts) > 0, "Expected some WARNING alerts to be collected"
-    # All collected alerts should have WARNING severity
     assert all("ntnx_alert_severity:WARNING" in e["tags"] for e in alerts)
 
 
@@ -223,17 +182,22 @@ def test_alerts_filtered_by_activity_filter_alertType(
     instance = mock_instance.copy()
     instance["collect_alerts"] = True
     instance["resource_filters"] = [
-        {"resource": "alert", "property": "alertType", "patterns": ["^A130172$"]},
+        {"resource": "alert", "property": "alertType", "patterns": ["^A200335$"]},
     ]
 
     get_current_datetime.return_value = MOCK_ALERT_DATETIME
 
     check = NutanixCheck('nutanix', {}, [instance])
+    _setup_subsequent_run(check)
     dd_run_check(check)
 
-    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    alerts = [
+        e
+        for e in aggregator.events
+        if "ntnx_type:alert" in e.get("tags", []) and "ntnx_alert_status:open" in e.get("tags", [])
+    ]
     assert len(alerts) == 1
-    assert "ntnx_alert_type:A130172" in alerts[0]["tags"]
+    assert "ntnx_alert_type:A200335" in alerts[0]["tags"]
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
@@ -248,9 +212,14 @@ def test_alert_message_template_rendering(get_current_datetime, dd_run_check, ag
     get_current_datetime.return_value = MOCK_ALERT_DATETIME
 
     check = NutanixCheck('nutanix', {}, [instance])
+    _setup_subsequent_run(check)
     dd_run_check(check)
 
-    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    alerts = [
+        e
+        for e in aggregator.events
+        if "ntnx_type:alert" in e.get("tags", []) and "ntnx_alert_status:open" in e.get("tags", [])
+    ]
     assert len(alerts) > 0
 
     alert = alerts[0]
@@ -274,9 +243,14 @@ def test_alert_a1031_disk_space_complete_output(
     get_current_datetime.return_value = MOCK_ALERT_DATETIME
 
     check = NutanixCheck('nutanix', {}, [instance])
+    _setup_subsequent_run(check)
     dd_run_check(check)
 
-    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    alerts = [
+        e
+        for e in aggregator.events
+        if "ntnx_type:alert" in e.get("tags", []) and "ntnx_alert_status:open" in e.get("tags", [])
+    ]
     assert len(alerts) >= 1, "Expected at least one A1031 alert"
 
     alert = alerts[0]
@@ -307,14 +281,14 @@ def test_alert_a1031_disk_space_complete_output(
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_alert_a130172_vm_recovery_complete_output(
+def test_alert_a111050_default_password_complete_output(
     get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
 ):
-    """Test complete alert output for A130172 (VM recovery) with rendered message."""
+    """Test complete alert output for A111050 (default password) with rendered message."""
     instance = mock_instance.copy()
     instance["collect_alerts"] = True
     instance["resource_filters"] = [
-        {"resource": "alert", "property": "alertType", "patterns": ["^A130172$"]},
+        {"resource": "alert", "property": "alertType", "patterns": ["^A111050$"]},
     ]
 
     get_current_datetime.return_value = MOCK_ALERT_DATETIME
@@ -322,33 +296,33 @@ def test_alert_a130172_vm_recovery_complete_output(
     check = NutanixCheck('nutanix', {}, [instance])
     dd_run_check(check)
 
-    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
-    assert len(alerts) == 1, "Expected exactly one A130172 alert"
+    alerts = [
+        e
+        for e in aggregator.events
+        if "ntnx_type:alert" in e.get("tags", []) and "ntnx_alert_status:open" in e.get("tags", [])
+    ]
+    assert len(alerts) >= 1, "Expected at least one A111050 alert"
 
     alert = alerts[0]
 
     # Verify message rendering
-    expected_message = (
-        "Recovery Point for VM ubuntu-vm failed to capture associated policies "
-        "and categories because Management plane is not available to get the configuration."
-    )
-    assert alert["msg_text"] == expected_message
-    assert "{vm_name}" not in alert["msg_text"]
-    assert "{reason}" not in alert["msg_text"]
+    assert "nutanix" in alert["msg_text"]
+    assert "{users}" not in alert["msg_text"]
+    assert "{pcvm_ip}" not in alert["msg_title"]
+    assert "10.0.0.165" in alert["msg_title"]
 
     # Verify alert structure
     assert alert["event_type"] == "nutanix"
-    assert alert["alert_type"] == "info"
+    assert alert["alert_type"] == "error"
     assert alert["source_type_name"] == "nutanix"
-    assert alert["msg_title"] == "Alert: Degraded VM Recovery Point."
 
     # Verify tags
     assert "ntnx_type:alert" in alert["tags"]
-    assert "ntnx_alert_type:A130172" in alert["tags"]
-    assert "ntnx_alert_severity:INFO" in alert["tags"]
-    assert "ntnx_alert_classification:DR" in alert["tags"]
-    assert "ntnx_alert_impact:SYSTEM_INDICATOR" in alert["tags"]
-    assert "ntnx_vm_name:ubuntu-vm" in alert["tags"]
+    assert "ntnx_alert_type:A111050" in alert["tags"]
+    assert "ntnx_alert_severity:CRITICAL" in alert["tags"]
+    assert "ntnx_alert_classification:Cluster" in alert["tags"]
+    assert "ntnx_alert_impact:CONFIGURATION" in alert["tags"]
+    assert "ntnx_cluster_name:prism-central-deployment" in alert["tags"]
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
@@ -365,9 +339,14 @@ def test_alert_a6227_password_expiry_complete_output(
     get_current_datetime.return_value = MOCK_ALERT_DATETIME
 
     check = NutanixCheck('nutanix', {}, [instance])
+    _setup_subsequent_run(check)
     dd_run_check(check)
 
-    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    alerts = [
+        e
+        for e in aggregator.events
+        if "ntnx_type:alert" in e.get("tags", []) and "ntnx_alert_status:open" in e.get("tags", [])
+    ]
     assert len(alerts) >= 1, "Expected at least one A6227 alert"
 
     alert = alerts[0]
@@ -457,7 +436,9 @@ def test_emit_resolution_event(get_current_datetime, dd_run_check, aggregator, m
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
-def test_emit_resolution_event_auto_resolved(get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get):
+def test_emit_resolution_event_auto_resolved(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
     """Test resolution event for auto-resolved alerts."""
     get_current_datetime.return_value = MOCK_ALERT_DATETIME
 
@@ -500,9 +481,14 @@ def test_alert_with_ip_address_rendering(get_current_datetime, dd_run_check, agg
     get_current_datetime.return_value = MOCK_ALERT_DATETIME
 
     check = NutanixCheck('nutanix', {}, [instance])
+    _setup_subsequent_run(check)
     dd_run_check(check)
 
-    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+    alerts = [
+        e
+        for e in aggregator.events
+        if "ntnx_type:alert" in e.get("tags", []) and "ntnx_alert_status:open" in e.get("tags", [])
+    ]
     assert len(alerts) >= 1, "Expected at least one A1031 alert with ip_address"
 
     alert = alerts[0]
@@ -519,3 +505,34 @@ def test_alert_with_ip_address_rendering(get_current_datetime, dd_run_check, agg
     assert "Disk space usage for /var/log on Controller VM 10.0.0.108" in alert["msg_text"], (
         "Message should contain rendered ip_address in context"
     )
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_alerts_first_run_collects_only_unresolved(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get
+):
+    """First run (no cache) should fetch only unresolved alerts and cache their IDs."""
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    alerts = [e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", [])]
+
+    # All emitted alerts should be open (unresolved)
+    assert len(alerts) > 0
+    for alert in alerts:
+        assert "ntnx_alert_status:open" in alert["tags"]
+
+    # No resolution events on first run
+    resolved = [e for e in aggregator.events if "ntnx_alert_status:resolved" in e.get("tags", [])]
+    assert len(resolved) == 0
+
+    # Verify open alert IDs are persisted in cache
+    cached = check.read_persistent_cache("open_alert_ids")
+    assert cached, "open_alert_ids should be stored in persistent cache"
+    open_ids = json.loads(cached)
+    assert len(open_ids) == len(alerts)

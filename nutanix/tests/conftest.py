@@ -297,7 +297,31 @@ def mock_http_get(mocker):
             response_data = load_fixture_page("alerts.json", page)
 
             filter_param = params.get('$filter', '') if params else ''
-            if 'creationTime gt' in filter_param:
+            if 'isResolved eq false' in filter_param:
+                filtered_data = [a for a in response_data.get('data', []) if not a.get('isResolved')]
+                response_data = dict(response_data)
+                response_data['data'] = filtered_data
+            elif 'lastUpdatedTime gt' in filter_param:
+                from datetime import datetime
+
+                filter_time_str = filter_param.split('lastUpdatedTime gt ')[-1].strip()
+                filter_time = datetime.fromisoformat(filter_time_str.replace('Z', '+00:00'))
+
+                filtered_data = []
+                for alert in response_data.get('data', []):
+                    alert_time_str = alert.get('lastUpdatedTime', '')
+                    if alert_time_str:
+                        alert_time = datetime.fromisoformat(alert_time_str.replace('Z', '+00:00'))
+                        if alert_time > filter_time:
+                            filtered_data.append(alert)
+
+                filtered_data.sort(
+                    key=lambda t: datetime.fromisoformat(t.get('lastUpdatedTime', '').replace('Z', '+00:00'))
+                )
+
+                response_data = dict(response_data)
+                response_data['data'] = filtered_data
+            elif 'creationTime gt' in filter_param:
                 from datetime import datetime
 
                 filter_time_str = filter_param.split('creationTime gt ')[-1].strip()

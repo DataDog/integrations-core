@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
@@ -31,7 +32,6 @@ class ActivityMonitor:
         self.last_event_collection_time = self.check.read_persistent_cache("last_event_collection_time")
         self.last_task_collection_time = self.check.read_persistent_cache("last_task_collection_time")
         self.last_audit_collection_time = self.check.read_persistent_cache("last_audit_collection_time")
-        self.last_alert_collection_time = self.check.read_persistent_cache("last_alert_collection_time")
         # In-memory caches: id -> raw item (reset each check run)
         self.events: dict[str, dict] = {}
         self.audits: dict[str, dict] = {}
@@ -50,6 +50,12 @@ class ActivityMonitor:
             self.alerts_v42_supported = False
         else:
             self.alerts_v42_supported = None
+
+        # Persistent set of open (unresolved) alert extIds
+        cached_open_ids = self.check.read_persistent_cache("open_alert_ids")
+        self._open_alert_ids: set[str] = set(json.loads(cached_open_ids)) if cached_open_ids else set()
+        self._is_first_alert_run = not cached_open_ids
+        self.last_alert_update_time = self.check.read_persistent_cache("last_alert_update_time")
 
     def reset_state(self) -> None:
         """Reset in-memory caches and counters for a new collection run."""
@@ -191,16 +197,92 @@ class ActivityMonitor:
         )
 
     def collect_alerts(self) -> None:
-        self.alerts_count = self._safe_collect(
-            "alert",
-            lambda: self._collect(
-                activity_kind="alert",
-                list_fn=self._list_alerts,
-                process_fn=self._process_alert,
-                time_field="creationTime",
-                cache_key="last_alert_collection_time",
-            ),
-        )
+        self.alerts_count = self._safe_collect("alert", self._collect_alerts)
+
+    def _collect_alerts(self) -> int:
+        """Collect alerts with resolution tracking."""
+        if self._is_first_alert_run:
+            return self._collect_alerts_initial()
+        return self._collect_alerts_updates()
+
+    def _collect_alerts_initial(self) -> int:
+        """First run: fetch all unresolved alerts, cache their IDs."""
+        alerts = self._list_alerts_unresolved()
+        if not alerts:
+            self.check.log.debug("[%s] No unresolved alerts found on initial run", self._pc_label)
+            self._persist_open_alert_ids()
+            self._update_alert_cursor()
+            self._is_first_alert_run = False
+            return 0
+
+        alerts = [a for a in alerts if self._should_collect_activity_item(a, "alert")]
+
+        for alert in alerts:
+            if ext_id := alert.get("extId"):
+                self._open_alert_ids.add(ext_id)
+            self._process_alert(alert)
+
+        self._persist_open_alert_ids()
+        self._update_alert_cursor()
+        self._is_first_alert_run = False
+        return len(alerts)
+
+    def _collect_alerts_updates(self) -> int:
+        """Subsequent runs: fetch alerts updated since cursor, detect resolutions."""
+        cursor = self.last_alert_update_time
+        if not cursor:
+            cursor = get_current_datetime().isoformat().replace("+00:00", "Z")
+
+        alerts = self._list_alerts_since(cursor)
+        if not alerts:
+            return 0
+
+        alerts = self._filter_after_time(alerts, self.last_alert_update_time, "lastUpdatedTime")
+        if not alerts:
+            return 0
+
+        most_recent = self._find_max_timestamp(alerts, "lastUpdatedTime")
+
+        alerts = [a for a in alerts if self._should_collect_activity_item(a, "alert")]
+
+        count = 0
+        for alert in alerts:
+            ext_id = alert.get("extId", "")
+            is_resolved = alert.get("isResolved", False)
+
+            if not is_resolved and ext_id not in self._open_alert_ids:
+                # New open alert
+                self._open_alert_ids.add(ext_id)
+                self._process_alert(alert)
+                count += 1
+            elif is_resolved and ext_id in self._open_alert_ids:
+                # Previously open, now resolved
+                self._open_alert_ids.discard(ext_id)
+                self._emit_resolution_event(alert)
+                count += 1
+            elif is_resolved and ext_id not in self._open_alert_ids:
+                # Created and resolved between runs
+                self._process_alert(alert)
+                self._emit_resolution_event(alert)
+                count += 1
+            # else: still open and already tracked, skip
+
+        self._persist_open_alert_ids()
+        if most_recent:
+            self.last_alert_update_time = most_recent
+            self.check.write_persistent_cache("last_alert_update_time", most_recent)
+
+        return count
+
+    def _persist_open_alert_ids(self) -> None:
+        """Write current open alert IDs to persistent cache."""
+        self.check.write_persistent_cache("open_alert_ids", json.dumps(sorted(self._open_alert_ids)))
+
+    def _update_alert_cursor(self) -> None:
+        """Set the lastUpdatedTime cursor to now."""
+        now = get_current_datetime().isoformat().replace("+00:00", "Z")
+        self.last_alert_update_time = now
+        self.check.write_persistent_cache("last_alert_update_time", now)
 
     def _list_activity(self, endpoint: str, time_field: str, start_time_str: str) -> list[dict]:
         """Fetch activity items from Prism Central."""
@@ -210,41 +292,60 @@ class ActivityMonitor:
         }
         return self.check._get_paginated_request_data(endpoint, params=params)
 
-    def _list_alerts(self, start_time_str: str) -> list[dict]:
-        """Fetch alerts from Prism Central with v4.2/v4.0 fallback."""
+    def _list_alerts_unresolved(self) -> list[dict]:
+        """Fetch all unresolved alerts (first run)."""
         params = {
-            "$filter": f"creationTime gt {start_time_str}",
-            "$orderBy": "creationTime asc",
+            "$filter": "isResolved eq false",
+            "$orderBy": "lastUpdatedTime asc",
         }
+        return self._list_alerts_with_fallback(params, fallback_filter=lambda a: not a.get("isResolved"))
 
+    def _list_alerts_since(self, start_time_str: str) -> list[dict]:
+        """Fetch alerts updated since a given time (subsequent runs)."""
+        params = {
+            "$filter": f"lastUpdatedTime gt {start_time_str}",
+            "$orderBy": "lastUpdatedTime asc",
+        }
+        return self._list_alerts_with_fallback(params)
+
+    def _list_alerts_with_fallback(
+        self,
+        params: dict,
+        fallback_filter: Callable[[dict], bool] | None = None,
+    ) -> list[dict]:
+        """Fetch alerts with v4.2/v4.0 fallback."""
         if self.alerts_v42_supported is False:
             self.check.log.debug("[%s] Using alerts API v4.0 (v4.2 not supported)", self._pc_label)
-            del params["$filter"]
-            return self.check._get_paginated_request_data("api/monitoring/v4.0/serviceability/alerts", params=params)
+            v40_params = {"$orderBy": params.get("$orderBy", "lastUpdatedTime asc")}
+            alerts = self.check._get_paginated_request_data(
+                "api/monitoring/v4.0/serviceability/alerts", params=v40_params
+            )
+            if fallback_filter:
+                alerts = [a for a in alerts if fallback_filter(a)]
+            return alerts
 
         try:
             self.check.log.debug("[%s] Attempting to use alerts API v4.2", self._pc_label)
             result = self.check._get_paginated_request_data("api/monitoring/v4.2/serviceability/alerts", params=params)
             if self.alerts_v42_supported is None:
-                self.check.log.debug(
-                    "[%s] Alerts API v4.2 is supported, caching for future use",
-                    self._pc_label,
-                )
+                self.check.log.debug("[%s] Alerts API v4.2 is supported, caching for future use", self._pc_label)
                 self.alerts_v42_supported = True
                 self.check.write_persistent_cache("alerts_v42_supported", "True")
             return result
         except HTTPError as e:
             if e.response is not None and e.response.status_code == 404:
                 self.check.log.debug(
-                    "[%s] Alerts API v4.2 not supported, falling back to v4.0 permanently",
-                    self._pc_label,
+                    "[%s] Alerts API v4.2 not supported, falling back to v4.0 permanently", self._pc_label
                 )
                 self.alerts_v42_supported = False
                 self.check.write_persistent_cache("alerts_v42_supported", "False")
-                del params["$filter"]
-                return self.check._get_paginated_request_data(
-                    "api/monitoring/v4.0/serviceability/alerts", params=params
+                v40_params = {"$orderBy": params.get("$orderBy", "lastUpdatedTime asc")}
+                alerts = self.check._get_paginated_request_data(
+                    "api/monitoring/v4.0/serviceability/alerts", params=v40_params
                 )
+                if fallback_filter:
+                    alerts = [a for a in alerts if fallback_filter(a)]
+                return alerts
             raise
 
     def _get_alert(self, alert_ext_id: str) -> dict | None:
@@ -508,7 +609,9 @@ class ActivityMonitor:
 
         self.check.event(
             {
-                "timestamp": self._parse_timestamp(resolved_time) if resolved_time else get_timestamp(get_current_datetime()),
+                "timestamp": self._parse_timestamp(resolved_time)
+                if resolved_time
+                else get_timestamp(get_current_datetime()),
                 "event_type": self.check.__NAMESPACE__,
                 "msg_title": f"Alert Resolved: {title}",
                 "msg_text": msg_text,
