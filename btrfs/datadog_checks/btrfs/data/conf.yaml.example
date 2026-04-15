@@ -14,6 +14,13 @@ init_config:
 instances:
 
   -
+    ## @param excluded_devices - list of strings - optional
+    ## List of devices to exclude.
+    #
+    # excluded_devices:
+    #   - <DEVICE_1>
+    #   - <DEVICE_2>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -35,13 +42,6 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
-
-    ## @param excluded_devices - list of strings - optional
-    ## List of devices to exclude.
-    #
-    # excluded_devices:
-    #   - <DEVICE_1>
-    #   - <DEVICE_2>
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

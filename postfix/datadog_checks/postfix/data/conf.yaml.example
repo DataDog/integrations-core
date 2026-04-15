@@ -2,13 +2,6 @@
 #
 init_config:
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
-
     ## @param postfix_user - string - optional - default: root
     ## The user running dd-agent must have passwordless sudo access for the find
     ## command to run the postfix check.
@@ -36,11 +29,37 @@ init_config:
     #
     # postqueue: false
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
 ## Every instance is scheduled independently of the others.
 #
 instances:
 
-  -
+    ## @param directory - string - optional
+    ## Path to the postfix directory. The directory option is required if `postqueue: false` is set. For more
+    ## information see https://docs.datadoghq.com/integrations/postfix/#using-sudo.
+    #
+  - directory: /var/spool/postfix
+
+    ## @param queues - list of strings - optional
+    ## List of queues to monitor.
+    #
+    queues:
+      - incoming
+      - active
+      - deferred
+
+    ## @param config_directory - string - optional - default: /etc/postfix
+    ## The config_directory option applies only when `postqueue: true`.
+    ## The config_directory is the location of the Postfix configuration directory that contains the main.cf file.
+    #
+    # config_directory: /etc/postfix
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -62,26 +81,6 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
-
-    ## @param directory - string - optional
-    ## Path to the postfix directory. The directory option is required if `postqueue: false` is set. For more
-    ## information see https://docs.datadoghq.com/integrations/postfix/#using-sudo.
-    #
-    directory: /var/spool/postfix
-
-    ## @param queues - list of strings - optional
-    ## List of queues to monitor.
-    #
-    queues:
-      - incoming
-      - active
-      - deferred
-
-    ## @param config_directory - string - optional - default: /etc/postfix
-    ## The config_directory option applies only when `postqueue: true`.
-    ## The config_directory is the location of the Postfix configuration directory that contains the main.cf file.
-    #
-    # config_directory: /etc/postfix
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

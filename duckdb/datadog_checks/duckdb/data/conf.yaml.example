@@ -13,7 +13,17 @@ init_config:
 #
 instances:
 
-  -
+    ## @param db_name - string - required
+    ## The database to connect to (file path).
+    ## NOTE: DuckDB databases are stored as files.
+    #
+  - db_name: /path-to-file/my_database.db
+
+    ## @param connection_attempt - integer - optional - default: 3
+    ## The number of retries to connect to the database in case of failure
+    #
+    # connection_attempt: <CONNECTION_ATTEMPT>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -37,17 +47,6 @@ instances:
     ## further increase this value to minimise the monitoring acccess.
     #
     min_collection_interval: 60
-
-    ## @param db_name - string - required
-    ## The database to connect to (file path).
-    ## NOTE: DuckDB databases are stored as files.
-    #
-    db_name: /path-to-file/my_database.db
-
-    ## @param connection_attempt - integer - optional - default: 3
-    ## The number of retries to connect to the database in case of failure
-    #
-    # connection_attempt: <CONNECTION_ATTEMPT>
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

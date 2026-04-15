@@ -14,6 +14,12 @@ init_config:
 instances:
 
   -
+    ## @param include_interrupt_metrics - boolean - optional - default: false
+    ## Optionally include CPU/IRQ interrupt metrics.  This can dramatically increase cardinality
+    ## for large systems, so use with caution.
+    #
+    # include_interrupt_metrics: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -35,12 +41,6 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
-
-    ## @param include_interrupt_metrics - boolean - optional - default: false
-    ## Optionally include CPU/IRQ interrupt metrics.  This can dramatically increase cardinality
-    ## for large systems, so use with caution.
-    #
-    # include_interrupt_metrics: false
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

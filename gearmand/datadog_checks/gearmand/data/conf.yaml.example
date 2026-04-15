@@ -14,6 +14,26 @@ init_config:
 instances:
 
   -
+    ## @param server - string - optional - default: 127.0.0.1
+    ## Server to connect to.
+    #
+    # server: 127.0.0.1
+
+    ## @param port - integer - optional - default: 4730
+    ## Port to use when connecting to "server".
+    #
+    # port: 4730
+
+    ## @param tasks - list of strings - optional
+    ## Use the `tasks` parameter to specify the tasks you'd like to
+    ## collect metrics on (up to 200 tasks).
+    ## If you have fewer than 200 tasks, you don't have to set this parameter,
+    ## the metrics are collected on all the tasks by default.
+    #
+    # tasks:
+    #   - <TASK_1>
+    #   - <TASK_2>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -35,26 +55,6 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
-
-    ## @param server - string - optional - default: 127.0.0.1
-    ## Server to connect to.
-    #
-    # server: 127.0.0.1
-
-    ## @param port - integer - optional - default: 4730
-    ## Port to use when connecting to "server".
-    #
-    # port: 4730
-
-    ## @param tasks - list of strings - optional
-    ## Use the `tasks` parameter to specify the tasks you'd like to
-    ## collect metrics on (up to 200 tasks).
-    ## If you have fewer than 200 tasks, you don't have to set this parameter,
-    ## the metrics are collected on all the tasks by default.
-    #
-    # tasks:
-    #   - <TASK_1>
-    #   - <TASK_2>
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

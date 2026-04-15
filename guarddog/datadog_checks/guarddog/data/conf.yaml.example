@@ -22,6 +22,11 @@
 #
 init_config:
 
+    ## @param guarddog_path - string - required
+    ## Absolute path to the GuardDog file.
+    #
+    guarddog_path: <ABSOLUTE_PATH_OF_GUARDDOG>
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -29,16 +34,20 @@ init_config:
     #
     # service: <SERVICE>
 
-    ## @param guarddog_path - string - required
-    ## Absolute path to the GuardDog file.
-    #
-    guarddog_path: <ABSOLUTE_PATH_OF_GUARDDOG>
-
 ## Every instance is scheduled independently of the others.
 #
 instances:
 
-  -
+    ## @param package_ecosystem - string - required
+    ## The type of package ecosystem. Supported values: pypi, npm, go and github_action
+    #
+  - package_ecosystem: <PACKAGE_ECOSYSTEM>
+
+    ## @param dependency_file_path - string - required
+    ## Absolute path to the dependency file you want to monitor.
+    #
+    dependency_file_path: <DEPENDENCY_FILE_PATH>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -60,16 +69,6 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     min_collection_interval: 86400
-
-    ## @param package_ecosystem - string - required
-    ## The type of package ecosystem. Supported values: pypi, npm, go and github_action
-    #
-    package_ecosystem: <PACKAGE_ECOSYSTEM>
-
-    ## @param dependency_file_path - string - required
-    ## Absolute path to the dependency file you want to monitor.
-    #
-    dependency_file_path: <DEPENDENCY_FILE_PATH>
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

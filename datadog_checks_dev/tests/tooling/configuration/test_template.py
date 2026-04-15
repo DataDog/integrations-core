@@ -16,7 +16,6 @@ class TestLoadBasic:
 
         assert templates.load('init_config/tags') == {
             'name': 'tags',
-            'display_priority': 1,
             'value': {
                 'example': ['<KEY_1>:<VALUE_1>', '<KEY_2>:<VALUE_2>'],
                 'type': 'array',
@@ -120,7 +119,6 @@ class TestApplyOverrides:
 
         assert template == {
             'name': 'tags',
-            'display_priority': 1,
             'value': {'example': ['foo', 'bar'], 'type': 'array', 'items': {'type': 'string'}},
             'description': (
                 'A list of tags to attach to every metric and service check emitted by this integration.\n'
@@ -157,7 +155,6 @@ class TestApplyOverrides:
 
         assert {
             'name': 'skip_proxy',
-            'display_priority': 0,
             'value': {'example': False, 'type': 'boolean'},
             'description': 'foobar',
             'fleet_configurable': True,
@@ -172,7 +169,6 @@ class TestApplyOverrides:
 
         assert template == {
             'name': 'skip_proxy',
-            'display_priority': 0,
             'value': {'example': False, 'type': 'boolean'},
             'description': 'foobar',
             'fleet_configurable': True,

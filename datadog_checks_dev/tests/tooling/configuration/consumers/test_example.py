@@ -1001,17 +1001,16 @@ def test_template():
         #
         instances:
 
-          -
+            ## @param foo - string - required
+            ## words
+            #
+          - foo: <FOO>
+
             ## @param min_collection_interval - number - optional - default: 15
             ## This changes the collection interval of the check. For more information, see:
             ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
             #
             # min_collection_interval: 15
-
-            ## @param foo - string - required
-            ## words
-            #
-            foo: <FOO>
 
             ## @param empty_default_hostname - boolean - optional - default: false
             ## This forces the check to send metrics with no hostname.
@@ -1052,7 +1051,11 @@ def test_template_recursion():
         #
         instances:
 
-          -
+            ## @param foo - string - required
+            ## words
+            #
+          - foo: <FOO>
+
             ## @param tags - list of strings - optional
             ## A list of tags to attach to every metric and service check emitted by this instance.
             ##
@@ -1074,11 +1077,6 @@ def test_template_recursion():
             ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
             #
             # min_collection_interval: 15
-
-            ## @param foo - string - required
-            ## words
-            #
-            foo: <FOO>
 
             ## @param empty_default_hostname - boolean - optional - default: false
             ## This forces the check to send metrics with no hostname.

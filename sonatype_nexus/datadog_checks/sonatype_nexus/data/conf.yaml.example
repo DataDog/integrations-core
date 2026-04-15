@@ -2,13 +2,6 @@
 #
 init_config:
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
-
     ## @param proxy - mapping - optional
     ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
@@ -41,11 +34,32 @@ init_config:
     #
     # timeout: 10
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
 ## Every instance is scheduled independently of the others.
 #
 instances:
 
-  -
+    ## @param username - string - required
+    ## The username of your Sonatype Nexus account.
+    #
+  - username: test_username
+
+    ## @param password - string - required
+    ## The password of your Sonatype Nexus account.
+    #
+    password: test_password
+
+    ## @param server_url - string - required
+    ## The Server URL of your Sonatype Nexus account.
+    #
+    server_url: https://0.0.0.0:8081
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -60,18 +74,3 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     min_collection_interval: 600
-
-    ## @param username - string - required
-    ## The username of your Sonatype Nexus account.
-    #
-    username: test_username
-
-    ## @param password - string - required
-    ## The password of your Sonatype Nexus account.
-    #
-    password: test_password
-
-    ## @param server_url - string - required
-    ## The Server URL of your Sonatype Nexus account.
-    #
-    server_url: https://0.0.0.0:8081
