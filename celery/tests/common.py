@@ -40,6 +40,7 @@ E2E_METADATA = {
     'env_vars': {
         'DD_LOGS_ENABLED': 'true',
         'DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL': 'true',
+        'DD_IGNORE_AUTOCONF': 'redisdb',
     },
     'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro'],
 }
