@@ -261,6 +261,11 @@ def _apply_features(config: InstanceConfig, validation_result: ValidationResult)
         None if config.dbm else "Requires `dbm: true`",
     )
     validation_result.add_feature(
+        FeatureKey.EXPLAIN_PLANS,
+        config.query_completions.enabled and config.dbm,
+        None if config.dbm else "Requires `dbm: true`",
+    )
+    validation_result.add_feature(
         FeatureKey.QUERY_ERRORS,
         config.query_errors.enabled and config.dbm,
         None if config.dbm else "Requires `dbm: true`",
