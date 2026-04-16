@@ -3321,3 +3321,21 @@ pipeline:
               preserveSource: false
               overrideOnConflict: true
               type: schema-remapper
+            - name: Map `exe` to `ocsf.actor.process.path`
+              sources:
+                - exe
+              sourceType: attribute
+              target: ocsf.actor.process.path
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `comm` to `ocsf.actor.process.name`
+              sources:
+                - comm
+              sourceType: attribute
+              target: ocsf.actor.process.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
