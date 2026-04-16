@@ -1,0 +1,1 @@
+Fix `apply_overrides` to support nested template references in spec.yaml overrides.
