@@ -7,6 +7,7 @@ files:
     options:
     - template: init_config/openmetrics
     - name: go_metrics
+      display_priority: 0
       description: |
         Collect Go runtime metrics exposed by KrakenD's Prometheus endpoint.
 
@@ -19,6 +20,7 @@ files:
         type: boolean
         example: true
     - name: process_metrics
+      display_priority: 0
       description: |
         Collect process metrics exposed by KrakenD's Prometheus endpoint.
 
@@ -34,7 +36,11 @@ files:
   - template: instances
     options:
     - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.display_priority: 3
+        enable_health_service_check.display_priority: 1
     - name: go_metrics
+      display_priority: 0
       description: |
         Collect Go runtime metrics exposed by KrakenD's Prometheus endpoint.
 
@@ -49,6 +55,7 @@ files:
         type: boolean
         example: true
     - name: process_metrics
+      display_priority: 0
       description: |
         Collect process metrics exposed by KrakenD's Prometheus endpoint.
 
