@@ -62,10 +62,10 @@ class NifiCheck(AgentCheck):
             if self.instance.get('collect_bulletins', True):
                 self._collect_bulletins(api, base_tags)
 
-            self.service_check('can_connect', AgentCheck.OK, tags=base_tags)
+            self.gauge('can_connect', 1, tags=base_tags)
         except Exception:
             self.log.exception('NiFi check failed')
-            self.service_check('can_connect', AgentCheck.CRITICAL, tags=self.instance.get('tags', []))
+            self.gauge('can_connect', 0, tags=self.instance.get('tags', []))
             raise
 
     @staticmethod

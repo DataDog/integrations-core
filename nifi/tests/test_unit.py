@@ -10,7 +10,6 @@ import pytest
 from requests.exceptions import ConnectionError as RequestsConnectionError
 from requests.exceptions import HTTPError
 
-from datadog_checks.base import AgentCheck
 from datadog_checks.nifi import NifiCheck
 
 
@@ -257,7 +256,7 @@ class TestCanConnect:
         with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
             dd_run_check(check)
 
-        aggregator.assert_service_check('nifi.can_connect', AgentCheck.OK, tags=['nifi_version:2.8.0'])
+        aggregator.assert_metric('nifi.can_connect', value=1, tags=['nifi_version:2.8.0'])
 
     def test_can_connect_failure(self, dd_run_check, aggregator):
         """Connection error emits can_connect=0."""
@@ -267,7 +266,7 @@ class TestCanConnect:
             with pytest.raises(Exception):
                 dd_run_check(check)
 
-        aggregator.assert_service_check('nifi.can_connect', AgentCheck.CRITICAL)
+        aggregator.assert_metric('nifi.can_connect', value=0)
 
     def test_no_auth_mode(self, dd_run_check, aggregator):
         """Check works without credentials when NiFi has no auth configured."""
@@ -285,7 +284,7 @@ class TestCanConnect:
         with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
             dd_run_check(check)
 
-        aggregator.assert_service_check('nifi.can_connect', AgentCheck.OK, tags=['nifi_version:2.8.0'])
+        aggregator.assert_metric('nifi.can_connect', value=1, tags=['nifi_version:2.8.0'])
 
 
 class TestClusterHealth:
@@ -324,7 +323,7 @@ class TestClusterHealth:
         with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
             dd_run_check(check)
 
-        aggregator.assert_service_check('nifi.can_connect', AgentCheck.OK)
+        aggregator.assert_metric('nifi.can_connect', value=1)
         assert not aggregator.metrics('nifi.cluster.connected_node_count')
 
 

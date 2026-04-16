@@ -6,15 +6,12 @@
 # ABOUTME: Runs the check via the Datadog Agent container against a real NiFi instance.
 import pytest
 
-from datadog_checks.base import AgentCheck
-
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
 
-    # Connectivity (service check, not a metric)
-    aggregator.assert_service_check('nifi.can_connect', AgentCheck.OK)
+    aggregator.assert_metric('nifi.can_connect', value=1)
 
     # System diagnostics - JVM
     aggregator.assert_metric('nifi.system.jvm.daemon_threads')
