@@ -24,11 +24,6 @@
             "source_type_name": "Anomali ThreatStream",
             "events": {
                 "creates_events": false
-            },
-            "metrics": {
-                "prefix": "anomali_threatstream.",
-                "check": [],
-                "metadata_path": "metadata.csv"
             }
         }
     },
