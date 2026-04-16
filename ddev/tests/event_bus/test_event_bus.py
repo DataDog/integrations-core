@@ -157,6 +157,12 @@ def manager() -> Manager:
 
 
 @pytest.fixture
+def bare_orchestrator() -> MockOrchestrator:
+    logger = logging.getLogger("test")
+    return MockOrchestrator(logger, grace_period=0.1)
+
+
+@pytest.fixture
 def orchestrator(secretary: Secretary, analyst: Analyst, manager: Manager) -> MockOrchestrator:
     logger = logging.getLogger("test_orchestrator")
     # Use a short grace_period for tests to speed them up (0.1s instead of default 10s)
@@ -521,3 +527,58 @@ def test_fatal_processing_error_stops_orchestrator(
     # Assert that only the first message was processed/received by the hook
     assert len(orchestrator.received_messages) == 1
     assert orchestrator.received_messages[0].id == "fatal_msg"
+
+
+def test_should_process_message_conditional_filtering(bare_orchestrator: MockOrchestrator) -> None:
+    """Processor processes only messages matching a custom predicate on message attributes."""
+
+    class HighPriorityAnalyst(AsyncProcessor[TaskAssignment]):
+        def __init__(self, name: str, min_priority: int):
+            super().__init__(name)
+            self.min_priority = min_priority
+            self.processed: list[TaskAssignment] = []
+
+        def should_process_message(self, message: BaseMessage) -> bool:
+            return isinstance(message, TaskAssignment) and message.priority >= self.min_priority
+
+        async def process_message(self, message: TaskAssignment) -> None:
+            self.processed.append(message)
+
+    analyst = HighPriorityAnalyst("high_priority_analyst", min_priority=10)
+    bare_orchestrator.register_processor(analyst, [TaskAssignment])
+
+    bare_orchestrator.submit_message(TaskAssignment("low_task", priority=1))
+    bare_orchestrator.submit_message(TaskAssignment("high_task", priority=100))
+    bare_orchestrator.run()
+
+    assert len(analyst.processed) == 1
+    assert analyst.processed[0].id == "high_task"
+
+
+def test_should_process_message_is_independent_per_processor(
+    bare_orchestrator: MockOrchestrator, secretary: Secretary
+) -> None:
+    """Each processor filters independently — one skipping a message does not affect the others."""
+
+    class UrgentMemosOnlyProcessor(AsyncProcessor[Memo]):
+        def __init__(self, name: str):
+            super().__init__(name)
+            self.processed: list[Memo] = []
+
+        def should_process_message(self, message: BaseMessage) -> bool:
+            return isinstance(message, Memo) and message.subject == "urgent"
+
+        async def process_message(self, message: Memo) -> None:
+            self.processed.append(message)
+
+    urgent_proc = UrgentMemosOnlyProcessor("urgent_only")
+    bare_orchestrator.register_processor(secretary, [Memo])
+    bare_orchestrator.register_processor(urgent_proc, [Memo])
+
+    bare_orchestrator.submit_message(Memo("memo1", subject="regular"))
+    bare_orchestrator.submit_message(Memo("memo2", subject="urgent"))
+    bare_orchestrator.run()
+
+    assert len(secretary.delivered_memos) == 2
+    assert len(urgent_proc.processed) == 1
+    assert urgent_proc.processed[0].id == "memo2"

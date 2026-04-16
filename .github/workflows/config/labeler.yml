@@ -206,6 +206,10 @@ integration/bluecat_edge:
 - changed-files:
   - any-glob-to-any-file:
     - bluecat_edge/**/*
+integration/bluecat_integrity:
+- changed-files:
+  - any-glob-to-any-file:
+    - bluecat_integrity/**/*
 integration/boundary:
 - changed-files:
   - any-glob-to-any-file:

@@ -4,8 +4,11 @@
 """Message deserialization for Kafka messages."""
 
 import base64
+import datetime
+import decimal
 import hashlib
 import json
+import uuid
 from io import BytesIO
 
 from bson import decode as bson_decode
@@ -15,6 +18,25 @@ from google.protobuf import descriptor_pb2, descriptor_pool, message_factory
 from google.protobuf.json_format import MessageToJson
 
 SCHEMA_REGISTRY_MAGIC_BYTE = 0x00
+
+
+class _AvroJSONEncoder(json.JSONEncoder):
+    """JSON encoder that handles types returned by fastavro for Avro logical types."""
+
+    def default(self, obj):
+        if isinstance(obj, decimal.Decimal):
+            return str(obj)
+        if isinstance(obj, datetime.datetime):
+            return obj.isoformat()
+        if isinstance(obj, datetime.date):
+            return obj.isoformat()
+        if isinstance(obj, datetime.time):
+            return obj.isoformat()
+        if isinstance(obj, uuid.UUID):
+            return str(obj)
+        if isinstance(obj, bytes):
+            return base64.b64encode(obj).decode('ascii')
+        return super().default(obj)
 
 
 def _read_varint(data):
@@ -305,7 +327,7 @@ class MessageDeserializer:
                     f"Read {bytes_read} bytes, but message has {total_bytes} bytes."
                 )
 
-            return json.dumps(data)
+            return json.dumps(data, cls=_AvroJSONEncoder)
         except Exception as e:
             raise ValueError(f"Failed to deserialize Avro message: {e}")
 
