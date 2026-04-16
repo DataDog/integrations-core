@@ -415,6 +415,11 @@ class MongoDb(AgentCheck):
             self._operation_samples.cancel()
             self._slow_operations.cancel()
             self._query_metrics.cancel()
+            self._schemas.cancel()
+            self._operation_samples = None
+            self._slow_operations = None
+            self._query_metrics = None
+            self._schemas = None
 
     def _get_rs_deployment_from_status_payload(self, repl_set_payload, is_master_payload, cluster_role, hosting_type):
         replset_name = repl_set_payload["set"]

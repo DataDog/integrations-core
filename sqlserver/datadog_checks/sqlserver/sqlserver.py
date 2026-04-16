@@ -212,6 +212,12 @@ class SQLServer(DatabaseCheck):
         self.sql_metadata.cancel()
         self.deadlocks.cancel()
         self.agent_history.cancel()
+        self.statement_metrics = None
+        self.procedure_metrics = None
+        self.activity = None
+        self.sql_metadata = None
+        self.deadlocks = None
+        self.agent_history = None
 
         # Cancel all XE session handlers
         for handler in self.xe_session_handlers:
@@ -219,6 +225,7 @@ class SQLServer(DatabaseCheck):
                 handler.cancel()
             except Exception as e:
                 self.log.error("Error canceling XE session handler for %s: %s", handler.session_name, e)
+        self.xe_session_handlers = []
 
     def config_checks(self):
         if self._config.autodiscovery and self.instance.get("database"):

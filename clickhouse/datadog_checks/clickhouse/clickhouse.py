@@ -485,6 +485,10 @@ class ClickhouseCheck(DatabaseCheck):
         if self.query_errors and self.query_errors._job_loop_future:
             self.query_errors._job_loop_future.result()
 
+        self.statement_metrics = None
+        self.statement_samples = None
+        self.query_completions = None
+
         # Close main client
         if self._client:
             try:
