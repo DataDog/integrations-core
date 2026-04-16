@@ -11,7 +11,18 @@
         "changelog": "CHANGELOG.md",
         "description": "Enriches your security logs with threat intelligence data from Anomali ThreatStream.",
         "title": "Anomali ThreatStream",
-        "media": [],
+        "media": [
+            {
+                "caption": "Anomali ThreatStream Threat Intelligence",
+                "image_url": "images/anomali_threatstream_threat_intelligence_light.png",
+                "media_type": "image"
+            },
+            {
+                "caption": "Anomali ThreatStream Threat Intelligence",
+                "image_url": "images/anomali_threatstream_threat_intelligence_dark.png",
+                "media_type": "image"
+            }
+        ],
         "classifier_tags": [
             "Category::Security",
             "Offering::Integration"
@@ -25,6 +36,9 @@
             "events": {
                 "creates_events": false
             }
+        },
+        "dashboards": {
+            "Anomali ThreatStream Threat Intelligence": "assets/dashboards/anomali_threatstream_threat_intelligence.json"
         }
     },
     "author": {
