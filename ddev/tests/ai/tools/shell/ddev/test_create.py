@@ -21,7 +21,7 @@ def test_cmd_basic():
         "--type",
         "check",
         "--skip-manifest",
-        "my_check",
+        "My_check",
     ]
 
 
@@ -38,7 +38,7 @@ def test_cmd_all_types(integration_type: str):
 def test_cmd_integration_name_last():
     tool = DdevCreateTool()
     cmd = tool.cmd(CreateInput(integration="my_check", integration_type="jmx"))
-    assert cmd[-1] == "my_check"
+    assert cmd[-1] == "My_check"
 
 
 def test_invalid_type_raises():

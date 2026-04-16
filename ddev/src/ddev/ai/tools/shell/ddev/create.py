@@ -33,12 +33,6 @@ class DdevCreateTool(CmdTool[CreateInput]):
         return "ddev_create"
 
     def cmd(self, tool_input: CreateInput) -> list[str]:
-        return [
-            "ddev",
-            "--no-interactive",
-            "create",
-            "--type",
-            tool_input.integration_type,
-            "--skip-manifest",
-            tool_input.integration,
-        ]
+        # Capitalize to avoid ddev's islower() interactive prompt; normalize_package_name restores snake_case
+        name = tool_input.integration.capitalize()
+        return ["ddev", "--no-interactive", "create", "--type", tool_input.integration_type, "--skip-manifest", name]
