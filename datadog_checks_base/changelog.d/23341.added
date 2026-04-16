@@ -1,0 +1,1 @@
+Add `collect_endpoint_data_for_flare` option on `OpenMetricsBaseCheckV2` to capture raw endpoint HTTP response in Agent flares

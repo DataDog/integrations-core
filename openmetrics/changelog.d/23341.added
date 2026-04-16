@@ -1,0 +1,1 @@
+Add `collect_endpoint_data_for_flare` option to include raw OpenMetrics endpoint response in Agent flares
