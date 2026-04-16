@@ -479,6 +479,20 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
         self._collect_and_submit()
 
+    def _normalize_query(self, row: dict) -> dict | None:
+        """Normalize and obfuscate a single query row."""
+        obfuscation_result = self._obfuscate_query(row['query'])
+        if obfuscation_result is None:
+            return None
+
+        row['statement'] = obfuscation_result['query']
+        row['query_signature'] = obfuscation_result['query_signature']
+        row['dd_tables'] = obfuscation_result['dd_tables']
+        row['dd_commands'] = obfuscation_result['dd_commands']
+        row['dd_comments'] = obfuscation_result['dd_comments']
+
+        return row
+
     @abstractmethod
     def _collect_and_submit(self):
         """

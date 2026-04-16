@@ -26,6 +26,7 @@ files:
 
               WARNING: Overriding these defaults could negatively impact your system or
               the performance of the check.
+            fleet_configurable: true
             value:
               example: []
               type: array

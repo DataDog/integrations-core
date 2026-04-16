@@ -558,5 +558,66 @@ class TestLiteralParsing:
         assert check._evaluate_filter('.headers.nonexistent == "x"', msg) is False
 
 
+class TestTypeCoercion:
+    """Test type coercion for comparisons (e.g., protobuf int64 serialized as string)."""
+
+    def setup_method(self):
+        self.log = MagicMock()
+        self.deserializer = MessageDeserializer(self.log)
+        self.instance = {
+            'remote_config_id': 'test',
+            'kafka_connect_str': 'localhost:9092',
+            'read_messages': {'cluster': 'test', 'topic': 'test'},
+        }
+        self.check = KafkaActionsCheck('kafka_actions', {}, [self.instance])
+
+    def create_message(self, value_dict):
+        value_bytes = json.dumps(value_dict).encode('utf-8')
+        kafka_msg = MockKafkaMessage(key=b'test-key', value=value_bytes)
+        config = {'key_format': 'string', 'value_format': 'json', 'value_uses_schema_registry': False}
+        return DeserializedMessage(kafka_msg, self.deserializer, config)
+
+    def test_string_field_equals_int_literal(self):
+        """Test that string field values match numeric literals (protobuf int64 case)."""
+        msg = self.create_message({'orderDate': '1775237391227'})
+        assert self.check._evaluate_filter('.value.orderDate == 1775237391227', msg) is True
+
+    def test_string_field_not_equals_int_literal(self):
+        msg = self.create_message({'orderDate': '1775237391227'})
+        assert self.check._evaluate_filter('.value.orderDate != 9999', msg) is True
+
+    def test_string_field_greater_than_int_literal(self):
+        msg = self.create_message({'orderDate': '200'})
+        assert self.check._evaluate_filter('.value.orderDate > 100', msg) is True
+
+    def test_int_field_equals_int_literal(self):
+        """Verify normal int == int still works."""
+        msg = self.create_message({'orderDate': 1775237391227})
+        assert self.check._evaluate_filter('.value.orderDate == 1775237391227', msg) is True
+
+    def test_string_field_equals_float_literal(self):
+        msg = self.create_message({'price': '99.99'})
+        assert self.check._evaluate_filter('.value.price == 99.99', msg) is True
+
+    def test_non_numeric_string_does_not_match_int(self):
+        msg = self.create_message({'name': 'alice'})
+        assert self.check._evaluate_filter('.value.name == 42', msg) is False
+
+    def test_boolean_not_coerced_with_string(self):
+        """Ensure bool fields don't coerce strings (bool is subclass of int in Python)."""
+        msg = self.create_message({'flag': '1'})
+        assert self.check._evaluate_filter('.value.flag == true', msg) is False
+
+        msg = self.create_message({'flag': '0'})
+        assert self.check._evaluate_filter('.value.flag == false', msg) is False
+
+    def test_boolean_equality_still_works(self):
+        msg = self.create_message({'flag': True})
+        assert self.check._evaluate_filter('.value.flag == true', msg) is True
+
+        msg = self.create_message({'flag': False})
+        assert self.check._evaluate_filter('.value.flag == false', msg) is True
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-vv'])
