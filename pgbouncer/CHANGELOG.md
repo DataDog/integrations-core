@@ -8,7 +8,7 @@
 
 * Add filtering databases by regex capability. ([#23111](https://github.com/DataDog/integrations-core/pull/23111))
 
-## 8.9.0 / 2026-03-18
+## 8.9.0 / 2026-03-18 / Agent 7.78.0
 
 ***Added***:
 

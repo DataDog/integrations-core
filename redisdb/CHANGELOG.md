@@ -15,7 +15,7 @@
 * Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
 * Re-order configuration fields based on real-world usage data. ([#23270](https://github.com/DataDog/integrations-core/pull/23270))
 
-## 8.7.0 / 2026-04-01
+## 8.7.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 
