@@ -13,11 +13,17 @@ class DdevTestInput(BaseToolInput):
     integration: Annotated[str, Field(description="Integration name to test")]
     lint: Annotated[bool, Field(description="Run linter / style checks only (-s / --lint)")] = False
     fmt: Annotated[bool, Field(description="Fix formatting and linting errors (-fs / --fmt)")] = False
+    pytest_args: Annotated[
+        list[str] | None,
+        Field(description='Extra pytest arguments passed after `--` (e.g. ["-k", "test_my_func", "-s"])'),
+    ] = None
 
 
 class DdevTestTool(CmdTool[DdevTestInput]):
     """Runs unit and integration tests for the given integration. Set `lint=true`
-    to run the linter only. Set `fmt=true` to fix formatting and linting errors."""
+    to run the linter only. Set `fmt=true` to fix formatting and linting errors.
+    Use `pytest_args` to pass extra pytest arguments (e.g. `["-k", "test_my_func"]`)
+    to run specific tests instead of the full suite."""
 
     timeout = 600
 
@@ -32,4 +38,6 @@ class DdevTestTool(CmdTool[DdevTestInput]):
         if tool_input.fmt:
             cmd.append("-fs")
         cmd.append(tool_input.integration)
+        if tool_input.pytest_args:
+            cmd += ["--"] + tool_input.pytest_args
         return cmd

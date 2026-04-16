@@ -16,9 +16,9 @@ class EnvTestInput(BaseToolInput):
 
 
 class DdevEnvTestTool(CmdTool[EnvTestInput]):
-    """Runs E2E tests against the currently running Docker environment. The
-    environment must be started with `ddev_env_start` first. Use `dev=true` when the
-    environment was started with `--dev`."""
+    """Runs E2E tests for the given integration in the specified environment.
+    `ddev env test` starts the environment, runs the tests, and stops it automatically —
+    no prior `ddev_env_start` is needed. Use `dev=true` to pass the `--dev` flag."""
 
     timeout = 600
 

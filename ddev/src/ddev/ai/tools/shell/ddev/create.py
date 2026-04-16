@@ -24,7 +24,8 @@ class CreateInput(BaseToolInput):
 
 class DdevCreateTool(CmdTool[CreateInput]):
     """Scaffolds a new Datadog Agent integration with all boilerplate files and
-    directory structure. Use before writing any integration code."""
+    directory structure. Creates a directory named after the integration (snake_case)
+    in the current working directory. Use before writing any integration code."""
 
     timeout = 60
 
