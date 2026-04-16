@@ -163,7 +163,6 @@
 * SingleStore [4.6.0](https://github.com/DataDog/integrations-core/blob/master/singlestore/CHANGELOG.md)
 * Slurm [2.4.0](https://github.com/DataDog/integrations-core/blob/master/slurm/CHANGELOG.md)
 * SNMP [12.3.1](https://github.com/DataDog/integrations-core/blob/master/snmp/CHANGELOG.md)
-* snowflake [7.13.0](https://github.com/DataDog/integrations-core/blob/master/snowflake/CHANGELOG.md)
 * Solr [2.4.0](https://github.com/DataDog/integrations-core/blob/master/solr/CHANGELOG.md)
 * SonarQube [5.6.0](https://github.com/DataDog/integrations-core/blob/master/sonarqube/CHANGELOG.md)
 * Spark [7.7.0](https://github.com/DataDog/integrations-core/blob/master/spark/CHANGELOG.md)

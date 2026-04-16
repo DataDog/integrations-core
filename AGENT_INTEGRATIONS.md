@@ -207,7 +207,6 @@
 * datadog-singlestore: 4.6.0
 * datadog-slurm: 2.4.0
 * datadog-snmp: 12.3.1
-* datadog-snowflake: 7.13.0
 * datadog-solr: 2.4.0
 * datadog-sonarqube: 5.6.0
 * datadog-sonatype-nexus: 2.3.0
