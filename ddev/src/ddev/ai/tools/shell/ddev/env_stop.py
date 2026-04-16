@@ -24,4 +24,4 @@ class DdevEnvStopTool(CmdTool[EnvStopInput]):
         return "ddev_env_stop"
 
     def cmd(self, tool_input: EnvStopInput) -> list[str]:
-        return ["ddev", "env", "stop", tool_input.integration, tool_input.environment]
+        return ["ddev", "--no-interactive", "env", "stop", tool_input.integration, tool_input.environment]

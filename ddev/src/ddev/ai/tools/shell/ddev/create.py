@@ -33,4 +33,12 @@ class DdevCreateTool(CmdTool[CreateInput]):
         return "ddev_create"
 
     def cmd(self, tool_input: CreateInput) -> list[str]:
-        return ["ddev", "create", "--type", tool_input.integration_type, "--skip-manifest", tool_input.integration]
+        return [
+            "ddev",
+            "--no-interactive",
+            "create",
+            "--type",
+            tool_input.integration_type,
+            "--skip-manifest",
+            tool_input.integration,
+        ]

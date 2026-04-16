@@ -13,6 +13,7 @@ def test_cmd():
     tool = DdevEnvStopTool()
     assert tool.cmd(EnvStopInput(integration="mycheck", environment="py3.11-1.23")) == [
         "ddev",
+        "--no-interactive",
         "env",
         "stop",
         "mycheck",

@@ -13,6 +13,7 @@ def test_cmd_without_dev():
     tool = DdevEnvTestTool()
     assert tool.cmd(EnvTestInput(integration="mycheck", environment="py3.11-1.23")) == [
         "ddev",
+        "--no-interactive",
         "env",
         "test",
         "mycheck",
@@ -24,6 +25,7 @@ def test_cmd_with_dev():
     tool = DdevEnvTestTool()
     assert tool.cmd(EnvTestInput(integration="mycheck", environment="py3.11-1.23", dev=True)) == [
         "ddev",
+        "--no-interactive",
         "env",
         "test",
         "--dev",

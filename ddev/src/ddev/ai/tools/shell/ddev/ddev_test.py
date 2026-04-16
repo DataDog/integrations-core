@@ -9,16 +9,15 @@ from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.shell.base import CmdTool
 
 
-class TestInput(BaseToolInput):
+class DdevTestInput(BaseToolInput):
     integration: Annotated[str, Field(description="Integration name to test")]
-    fmt: Annotated[bool, Field(description="Run code formatter (ruff format)")] = False
-    style: Annotated[bool, Field(description="Run linter / style checks (ruff check)")] = False
+    lint: Annotated[bool, Field(description="Run linter / style checks only (-s / --lint)")] = False
+    fmt: Annotated[bool, Field(description="Fix formatting and linting errors (-fs / --fmt)")] = False
 
 
-class DdevTestTool(CmdTool[TestInput]):
-    """Runs unit and integration tests for the given integration. Set `fmt=true`
-    to auto-format code, `style=true` to run the linter. Use `fmt=true, style=true` together
-    to do both."""
+class DdevTestTool(CmdTool[DdevTestInput]):
+    """Runs unit and integration tests for the given integration. Set `lint=true`
+    to run the linter only. Set `fmt=true` to fix formatting and linting errors."""
 
     timeout = 600
 
@@ -26,13 +25,11 @@ class DdevTestTool(CmdTool[TestInput]):
     def name(self) -> str:
         return "ddev_test"
 
-    def cmd(self, tool_input: TestInput) -> list[str]:
+    def cmd(self, tool_input: DdevTestInput) -> list[str]:
         cmd = ["ddev", "--no-interactive", "test"]
-        if tool_input.fmt and tool_input.style:
-            cmd.append("-fs")
-        elif tool_input.fmt:
-            cmd.append("-f")
-        elif tool_input.style:
+        if tool_input.lint:
             cmd.append("-s")
+        if tool_input.fmt:
+            cmd.append("-fs")
         cmd.append(tool_input.integration)
         return cmd

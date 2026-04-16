@@ -27,7 +27,7 @@ class DdevEnvTestTool(CmdTool[EnvTestInput]):
         return "ddev_env_test"
 
     def cmd(self, tool_input: EnvTestInput) -> list[str]:
-        cmd = ["ddev", "env", "test"]
+        cmd = ["ddev", "--no-interactive", "env", "test"]
         if tool_input.dev:
             cmd.append("--dev")
         cmd += [tool_input.integration, tool_input.environment]

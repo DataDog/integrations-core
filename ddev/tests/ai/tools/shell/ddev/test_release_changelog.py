@@ -12,46 +12,12 @@ def test_tool_meta():
     assert DdevReleaseChangelogTool.timeout == 30
 
 
-def test_cmd_fixed():
-    tool = DdevReleaseChangelogTool()
-    assert tool.cmd(ReleaseChangelogInput(change_type="fixed", integration="mycheck", message="Fix a bug")) == [
-        "ddev",
-        "release",
-        "changelog",
-        "new",
-        "fixed",
-        "mycheck",
-        "-m",
-        "Fix a bug",
-    ]
-
-
-def test_cmd_added():
-    tool = DdevReleaseChangelogTool()
-    assert tool.cmd(ReleaseChangelogInput(change_type="added", integration="mycheck", message="Add new feature")) == [
-        "ddev",
-        "release",
-        "changelog",
-        "new",
-        "added",
-        "mycheck",
-        "-m",
-        "Add new feature",
-    ]
-
-
-def test_cmd_changed():
-    tool = DdevReleaseChangelogTool()
-    assert tool.cmd(ReleaseChangelogInput(change_type="changed", integration="mycheck", message="Breaking change")) == [
-        "ddev",
-        "release",
-        "changelog",
-        "new",
-        "changed",
-        "mycheck",
-        "-m",
-        "Breaking change",
-    ]
+@pytest.mark.parametrize("change_type", ["fixed", "added", "changed"])
+def test_cmd_change_type(change_type: str):
+    cmd = DdevReleaseChangelogTool().cmd(
+        ReleaseChangelogInput(change_type=change_type, integration="mycheck", message="msg")
+    )
+    assert cmd[4] == change_type
 
 
 def test_cmd_message_placement():

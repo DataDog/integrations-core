@@ -26,7 +26,7 @@ class DdevEnvStartTool(CmdTool[EnvStartInput]):
         return "ddev_env_start"
 
     def cmd(self, tool_input: EnvStartInput) -> list[str]:
-        cmd = ["ddev", "env", "start"]
+        cmd = ["ddev", "--no-interactive", "env", "start"]
         if tool_input.dev:
             cmd.append("--dev")
         cmd += [tool_input.integration, tool_input.environment]

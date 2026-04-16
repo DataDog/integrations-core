@@ -16,6 +16,7 @@ def test_cmd_basic():
     tool = DdevCreateTool()
     assert tool.cmd(CreateInput(integration="my_check", integration_type="check")) == [
         "ddev",
+        "--no-interactive",
         "create",
         "--type",
         "check",
