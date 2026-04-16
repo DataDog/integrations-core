@@ -3760,85 +3760,6 @@
               "width": 6,
               "height": 3
             }
-          },
-          {
-            "id": 9100000000000012,
-            "definition": {
-              "title": "Table Size Breakdown",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_table",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Table Size",
-                      "cell_display_mode": "bar",
-                      "limit": {
-                        "count": 25,
-                        "order": "desc"
-                      },
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "byte"
-                        }
-                      }
-                    },
-                    {
-                      "formula": "query2",
-                      "alias": "Index Size",
-                      "cell_display_mode": "bar",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "byte"
-                        }
-                      }
-                    },
-                    {
-                      "formula": "query3",
-                      "alias": "Toast Size",
-                      "cell_display_mode": "bar",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "byte"
-                        }
-                      }
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:postgresql.table_size{$project} by {table}",
-                      "aggregator": "avg"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query2",
-                      "query": "avg:postgresql.index_size{$project} by {table}",
-                      "aggregator": "avg"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query3",
-                      "query": "avg:postgresql.toast_size{$project} by {table}",
-                      "aggregator": "avg"
-                    }
-                  ]
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 18,
-              "width": 12,
-              "height": 4
-            }
           }
         ]
       },
@@ -3846,7 +3767,7 @@
         "x": 0,
         "y": 41,
         "width": 12,
-        "height": 23
+        "height": 19
       }
     },
     {
