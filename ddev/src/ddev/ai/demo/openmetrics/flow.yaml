@@ -1,0 +1,96 @@
+variables:
+  integration_name: placeholder
+  endpoint_url: placeholder
+
+agents:
+  validator:
+    tools: ["read_file"]
+  coder:
+    tools: []
+  renamer:
+    tools: []
+  tester:
+    tools: []
+  writer:
+    tools: []
+
+phases:
+  validate_endpoint:
+    agent: validator
+    tasks:
+      - name: validate_inputs
+        prompt: >
+          Validate the OpenMetrics endpoint for the ${integration_name} integration.
+          Endpoint URL: ${endpoint_url}
+          Confirm the endpoint is reachable and returns valid OpenMetrics format.
+    checkpoint:
+      memory_prompt: "Store the validated endpoint URL, the integration name, and any relevant details about the metrics format."
+
+  collect_metrics:
+    agent: coder
+    tasks:
+      - name: generate_temp_check
+        prompt: >
+          You are working on the ${integration_name} integration.
+          Context from the validation phase:
+          ${validate_endpoint_memory}
+
+          Generate a temporary OpenMetrics check that collects metrics from the endpoint
+          and writes them to a JSONL file. Also build the configuration spec.
+      - name: collect_metrics_list
+        prompt: >
+          Now run the temporary check and collect the full list of metrics in JSONL format.
+          Make sure you capture metric name, type, and any labels.
+    checkpoint:
+      memory_prompt: "List all metrics collected, the JSONL file path, and any config files created."
+
+  rename_metrics:
+    agent: renamer
+    tasks:
+      - name: rename_and_map
+        prompt: >
+          You are renaming metrics for the ${integration_name} integration.
+          Context from the metrics collection phase:
+          ${collect_metrics_memory}
+
+          Read the collected metrics. For each metric, generate a Datadog-compliant name
+          following naming conventions. Produce metrics.yaml and metadata.csv.
+    checkpoint:
+      memory_prompt: "List the final metric mappings and the files generated (metrics.yaml, metadata.csv)."
+
+  generate_tests:
+    agent: tester
+    tasks:
+      - name: write_tests
+        prompt: >
+          You are writing tests for the ${integration_name} integration.
+          Context from the renaming phase:
+          ${rename_metrics_memory}
+
+          Generate unit and integration tests for the OpenMetrics check.
+          Make sure tests cover metric collection and metadata validation.
+    checkpoint:
+      memory_prompt: "List the test files created and the test results."
+
+  write_docs:
+    agent: writer
+    tasks:
+      - name: write_readme
+        prompt: >
+          You are writing documentation for the ${integration_name} integration.
+          Context from the testing phase:
+          ${generate_tests_memory}
+
+          Generate a README.md following Datadog documentation standards.
+          Include setup instructions, metrics collected, and troubleshooting.
+
+flow:
+  - phase: validate_endpoint
+  - phase: collect_metrics
+    dependencies: [validate_endpoint]
+  - phase: rename_metrics
+    dependencies: [collect_metrics]
+  - phase: generate_tests
+    dependencies: [rename_metrics]
+  - phase: write_docs
+    dependencies: [generate_tests]
