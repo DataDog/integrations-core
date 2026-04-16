@@ -51,11 +51,9 @@ NiFi bulletins (errors and warnings from processors and system components) are f
 
 The NiFi integration does not include any service checks. Connectivity is reported via the `nifi.can_connect` gauge (1 = OK, 0 = unreachable).
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
-
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][8].
 
 
 [1]: https://nifi.apache.org/
@@ -65,5 +63,4 @@ Need help? Contact [Datadog support][9].
 [5]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/nifi/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/nifi/assets/service_checks.json
-[9]: https://docs.datadoghq.com/help/
+[8]: https://docs.datadoghq.com/help/
