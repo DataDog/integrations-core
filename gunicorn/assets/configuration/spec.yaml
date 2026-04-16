@@ -17,7 +17,7 @@ files:
   - template: instances
     options:
     - name: proc_name
-      display_priority: 1
+      display_priority: 2
       required: true
       description: |
         The name of the gunicorn process. For the following gunicorn server:
