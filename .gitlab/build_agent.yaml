@@ -31,7 +31,7 @@ build-agent-auto:
     - if: $CI_COMMIT_BRANCH !~ /^gh-readonly-queue.*/
       changes:
         paths:
-          - .deps/*
+          - .deps/**/*
           - .gitlab/build_agent.yaml
 
 build-agent-manual-release:
