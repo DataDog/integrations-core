@@ -6,9 +6,9 @@ agents:
   validator:
     tools: ["read_file"]
   coder:
-    tools: []
+    tools: ["ddev_create", "ddev_test"]
   renamer:
-    tools: []
+    tools: ["read_file", "edit_file"]
   tester:
     tools: []
   writer:

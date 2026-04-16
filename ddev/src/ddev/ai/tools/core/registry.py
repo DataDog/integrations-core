@@ -16,6 +16,13 @@ _TOOL_NAMES: list[str] = [
     "list_files",
     "mkdir",
     "http_get",
+    "ddev_create",
+    "ddev_test",
+    "ddev_env_show",
+    "ddev_env_start",
+    "ddev_env_stop",
+    "ddev_env_test",
+    "ddev_release_changelog",
 ]
 
 
@@ -42,6 +49,13 @@ class ToolRegistry:
         from ddev.ai.tools.fs.file_registry import FileRegistry
         from ddev.ai.tools.fs.read_file import ReadFileTool
         from ddev.ai.tools.http.http_get import HttpGetTool
+        from ddev.ai.tools.shell.ddev.create import DdevCreateTool
+        from ddev.ai.tools.shell.ddev.ddev_test import DdevTestTool
+        from ddev.ai.tools.shell.ddev.env_show import DdevEnvShowTool
+        from ddev.ai.tools.shell.ddev.env_start import DdevEnvStartTool
+        from ddev.ai.tools.shell.ddev.env_stop import DdevEnvStopTool
+        from ddev.ai.tools.shell.ddev.env_test import DdevEnvTestTool
+        from ddev.ai.tools.shell.ddev.release_changelog import DdevReleaseChangelogTool
         from ddev.ai.tools.shell.grep import GrepTool
         from ddev.ai.tools.shell.list_files import ListFilesTool
         from ddev.ai.tools.shell.mkdir import MkdirTool
@@ -66,6 +80,20 @@ class ToolRegistry:
                     tools.append(MkdirTool())
                 case "http_get":
                     tools.append(HttpGetTool())
+                case "ddev_create":
+                    tools.append(DdevCreateTool())
+                case "ddev_test":
+                    tools.append(DdevTestTool())
+                case "ddev_env_show":
+                    tools.append(DdevEnvShowTool())
+                case "ddev_env_start":
+                    tools.append(DdevEnvStartTool())
+                case "ddev_env_stop":
+                    tools.append(DdevEnvStopTool())
+                case "ddev_env_test":
+                    tools.append(DdevEnvTestTool())
+                case "ddev_release_changelog":
+                    tools.append(DdevReleaseChangelogTool())
                 case _:
                     raise ValueError(f"Unknown tool name: {name!r}")
         return cls(tools)

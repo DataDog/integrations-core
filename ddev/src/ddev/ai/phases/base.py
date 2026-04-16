@@ -12,12 +12,12 @@ import anthropic
 from ddev.ai.agent.anthropic_client import AnthropicAgent
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
-from ddev.ai.phases.messages import PhaseFailedMessage, PhaseFinishedMessage, StartMessage
+from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.callbacks import CallbackSet
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.tools.core.registry import ToolRegistry
-from ddev.event_bus.orchestrator import AsyncProcessor
+from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage
 
 
 class PhaseRegistry:
@@ -60,7 +60,7 @@ def render_memory_prompt(checkpoint: CheckpointConfig, config_dir: Path, context
     return render_inline(checkpoint.memory_prompt, context)  # type: ignore[arg-type]
 
 
-class Phase(AsyncProcessor[StartMessage | PhaseFinishedMessage]):
+class Phase(AsyncProcessor[PhaseTrigger]):
     """Concrete base for all phases.
 
     process_message() implements the immutable pipeline skeleton.
@@ -96,7 +96,24 @@ class Phase(AsyncProcessor[StartMessage | PhaseFinishedMessage]):
         self._started_at: datetime | None = None
         self._resolver: Callable[[str], str] | None = None
         self._executed = False
-        self._finish_emitted = False
+
+    def should_process_message(self, message: BaseMessage) -> bool:
+        if isinstance(message, PhaseTrigger):
+            if message.phase_id is None:
+                # Initial trigger — only root phases (no declared dependencies) respond
+                if self._dependencies:
+                    return False
+            else:
+                # Phase-completion trigger — check dependency tracking
+                if message.phase_id not in self._dependencies:
+                    return False
+                self._remaining_dependencies.discard(message.phase_id)
+                if self._remaining_dependencies:
+                    return False
+        if self._executed:
+            return False
+        self._executed = True
+        return True
 
     def before_react(self) -> None:
         """Called once before agent/tools are created. Override for phase-specific setup."""
@@ -128,22 +145,8 @@ class Phase(AsyncProcessor[StartMessage | PhaseFinishedMessage]):
             total_output += last_result.total_output_tokens
         return total_input, total_output
 
-    async def process_message(self, message: StartMessage | PhaseFinishedMessage) -> None:
+    async def process_message(self, message: PhaseTrigger) -> None:
         """Full phase pipeline. Not intended to be overridden -- customise via the extension points."""
-        # 1. Relevance check (non-root phases only)
-        if isinstance(message, PhaseFinishedMessage):
-            if message.phase_id not in self._dependencies:
-                return
-            self._remaining_dependencies.discard(message.phase_id)
-            if self._remaining_dependencies:
-                return
-
-        # 2. Guard against re-execution (remaining_dependencies is empty after first run,
-        #    so later PhaseFinishedMessages for known deps would pass the check above)
-        if self._executed:
-            return
-        self._executed = True
-
         # 3. Record start time
         self._started_at = datetime.now(UTC)
 
@@ -216,28 +219,17 @@ class Phase(AsyncProcessor[StartMessage | PhaseFinishedMessage]):
             },
         )
 
-    async def on_success(self, message: StartMessage | PhaseFinishedMessage) -> None:
-        """Emit PhaseFinishedMessage to unblock dependent phases.
-
-        Only emits once, and only after the phase actually executed. Early returns
-        from process_message (irrelevant messages, already executed) also trigger
-        on_success via _task_wrapper, but must not emit new messages.
-        """
-        if not self._executed or self._finish_emitted:
-            return
-        self._finish_emitted = True
+    async def on_success(self, message: PhaseTrigger) -> None:
+        """Emit PhaseTrigger to unblock dependent phases."""
         self.submit_message(
-            PhaseFinishedMessage(
+            PhaseTrigger(
                 id=f"{self._phase_id}_finished_{message.id}",
                 phase_id=self._phase_id,
             )
         )
 
-    async def on_error(self, message: StartMessage | PhaseFinishedMessage, error: Exception) -> None:
+    async def on_error(self, message: PhaseTrigger, error: Exception) -> None:
         """Write failed checkpoint and emit PhaseFailedMessage."""
-        if self._finish_emitted:
-            return
-        self._finish_emitted = True
         self._checkpoint_manager.write_phase_checkpoint(
             self._phase_id,
             {

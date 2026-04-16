@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from ddev.ai.phases.base import Phase, PhaseRegistry
-from ddev.ai.phases.messages import PhaseFailedMessage, PhaseFinishedMessage, StartMessage
+from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.orchestrator import PhaseOrchestrator, _discover_and_register_phases
 from ddev.event_bus.exceptions import FatalProcessingError
 
@@ -105,5 +105,5 @@ async def test_on_message_received_ignores_other_messages():
         anthropic_client=MagicMock(),
     )
     # These should not raise
-    await orchestrator.on_message_received(StartMessage(id="start"))
-    await orchestrator.on_message_received(PhaseFinishedMessage(id="f1", phase_id="p1"))
+    await orchestrator.on_message_received(PhaseTrigger(id="start", phase_id=None))
+    await orchestrator.on_message_received(PhaseTrigger(id="f1", phase_id="p1"))

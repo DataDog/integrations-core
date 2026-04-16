@@ -8,13 +8,8 @@ from ddev.event_bus.orchestrator import BaseMessage
 
 
 @dataclass
-class StartMessage(BaseMessage):
-    pass
-
-
-@dataclass
-class PhaseFinishedMessage(BaseMessage):
-    phase_id: str
+class PhaseTrigger(BaseMessage):
+    phase_id: str | None  # None = initial pipeline start; str = the phase that just finished
 
 
 @dataclass

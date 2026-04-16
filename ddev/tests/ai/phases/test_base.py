@@ -9,7 +9,7 @@ import pytest
 from ddev.ai.phases.base import Phase, _make_memory_resolver, render_memory_prompt, render_task_prompt
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
-from ddev.ai.phases.messages import PhaseFailedMessage, PhaseFinishedMessage, StartMessage
+from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.tools.core.registry import ToolRegistry
 
 from .conftest import MockAgent, make_agent_factory, make_response, resolve_key
@@ -152,7 +152,7 @@ async def test_happy_path_single_task(flow_dir, monkeypatch, message_queue):
     mock_agent = MockAgent(responses)
     phase, mgr = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
-    await phase.process_message(StartMessage(id="start"))
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     # Memory was written
     assert mgr.get_memory("p1") == "summary"
@@ -188,85 +188,11 @@ async def test_happy_path_two_tasks(flow_dir, monkeypatch, message_queue):
         ],
     )
 
-    await phase.process_message(StartMessage(id="start"))
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     checkpoint = mgr.read()["p1"]
     assert checkpoint["tokens"]["total_input"] == 310
     assert checkpoint["tokens"]["total_output"] == 135
-
-
-# ---------------------------------------------------------------------------
-# Phase.process_message — relevance check
-# ---------------------------------------------------------------------------
-
-
-async def test_irrelevant_message_returns_immediately(flow_dir, monkeypatch, message_queue):
-    mock_agent = MockAgent([])  # no responses needed — should never be called
-    phase, mgr = _make_phase(
-        flow_dir,
-        mock_agent,
-        monkeypatch,
-        message_queue,
-        dependencies=["other_phase"],
-    )
-
-    # Send a PhaseFinishedMessage from a phase that's NOT a dependency
-    msg = PhaseFinishedMessage(id="msg1", phase_id="unrelated_phase")
-    await phase.process_message(msg)
-
-    # No sends, no checkpoint
-    assert mock_agent.send_calls == []
-    assert mgr.read() == {}
-
-
-async def test_waits_for_all_dependencies(flow_dir, monkeypatch, message_queue):
-    responses = [
-        make_response("done", 100, 50),
-        make_response("summary", 10, 5),
-    ]
-    mock_agent = MockAgent(responses)
-    phase, mgr = _make_phase(
-        flow_dir,
-        mock_agent,
-        monkeypatch,
-        message_queue,
-        dependencies=["dep1", "dep2"],
-    )
-
-    # First dependency arrives — phase should NOT execute yet
-    msg1 = PhaseFinishedMessage(id="msg1", phase_id="dep1")
-    await phase.process_message(msg1)
-    assert mock_agent.send_calls == []
-
-    # Second dependency arrives — phase should execute
-    msg2 = PhaseFinishedMessage(id="msg2", phase_id="dep2")
-    await phase.process_message(msg2)
-    assert len(mock_agent.send_calls) == 2
-
-
-async def test_does_not_re_execute_after_completion(flow_dir, monkeypatch, message_queue):
-    responses = [
-        make_response("done", 100, 50),
-        make_response("summary", 10, 5),
-    ]
-    mock_agent = MockAgent(responses)
-    phase, mgr = _make_phase(
-        flow_dir,
-        mock_agent,
-        monkeypatch,
-        message_queue,
-        dependencies=["dep1"],
-    )
-
-    # First execution
-    msg1 = PhaseFinishedMessage(id="msg1", phase_id="dep1")
-    await phase.process_message(msg1)
-    assert len(mock_agent.send_calls) == 2
-
-    # Second message for the same dep — phase must NOT re-execute
-    msg2 = PhaseFinishedMessage(id="msg2", phase_id="dep1")
-    await phase.process_message(msg2)
-    assert len(mock_agent.send_calls) == 2  # unchanged
 
 
 # ---------------------------------------------------------------------------
@@ -288,7 +214,7 @@ async def test_memory_step_with_checkpoint_config(flow_dir, monkeypatch, message
         checkpoint=CheckpointConfig(memory_prompt="Also list the files."),
     )
 
-    await phase.process_message(StartMessage(id="start"))
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     # Memory prompt should include user additions
     memory_prompt = mock_agent.send_calls[1]
@@ -304,7 +230,7 @@ async def test_memory_step_without_checkpoint_config(flow_dir, monkeypatch, mess
     mock_agent = MockAgent(responses)
     phase, mgr = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
-    await phase.process_message(StartMessage(id="start"))
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     memory_prompt = mock_agent.send_calls[1]
     assert memory_prompt == "Write a brief summary of what you accomplished in this phase."
@@ -333,7 +259,7 @@ async def test_compact_between_tasks_when_above_threshold(flow_dir, monkeypatch,
         ],
     )
 
-    await phase.process_message(StartMessage(id="start"))
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     checkpoint = mgr.read()["p1"]
     assert checkpoint["status"] == "success"
@@ -357,7 +283,7 @@ async def test_no_compact_when_below_threshold(flow_dir, monkeypatch, message_qu
         ],
     )
 
-    await phase.process_message(StartMessage(id="start"))
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
     assert mgr.read()["p1"]["status"] == "success"
 
 
@@ -401,7 +327,7 @@ async def test_flow_variables_in_system_prompt(flow_dir, monkeypatch, message_qu
     )
     phase.queue = message_queue
 
-    await phase.process_message(StartMessage(id="start"))
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert "Project: myproj" == captured_kwargs["system_prompt"]
 
@@ -440,7 +366,7 @@ async def test_runtime_variables_override_flow_variables(flow_dir, monkeypatch, 
     )
     phase.queue = message_queue
 
-    await phase.process_message(StartMessage(id="start"))
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert captured_kwargs["system_prompt"] == "Project: runtime_override"
 
@@ -460,7 +386,7 @@ async def test_before_react_raises_propagates(flow_dir, monkeypatch, message_que
     phase.before_react = failing_hook
 
     with pytest.raises(RuntimeError, match="setup failed"):
-        await phase.process_message(StartMessage(id="start"))
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
 
 async def test_after_react_raises_propagates(flow_dir, monkeypatch, message_queue):
@@ -476,7 +402,7 @@ async def test_after_react_raises_propagates(flow_dir, monkeypatch, message_queu
     phase.after_react = failing_hook
 
     with pytest.raises(RuntimeError, match="teardown failed"):
-        await phase.process_message(StartMessage(id="start"))
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
 
 # ---------------------------------------------------------------------------
@@ -487,34 +413,13 @@ async def test_after_react_raises_propagates(flow_dir, monkeypatch, message_queu
 async def test_on_success_emits_finished_message(flow_dir, monkeypatch, message_queue):
     mock_agent = MockAgent([])
     phase, _ = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
-    phase._executed = True  # simulate that process_message ran the full pipeline
 
-    await phase.on_success(StartMessage(id="start"))
+    await phase.on_success(PhaseTrigger(id="start", phase_id=None))
 
     msg = message_queue.get_nowait()
-    assert isinstance(msg, PhaseFinishedMessage)
+    assert isinstance(msg, PhaseTrigger)
     assert msg.phase_id == "p1"
     assert msg.id == "p1_finished_start"
-
-
-async def test_on_success_skips_when_not_executed(flow_dir, monkeypatch, message_queue):
-    mock_agent = MockAgent([])
-    phase, _ = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
-
-    await phase.on_success(StartMessage(id="start"))
-
-    assert message_queue.empty()
-
-
-async def test_on_success_emits_only_once(flow_dir, monkeypatch, message_queue):
-    mock_agent = MockAgent([])
-    phase, _ = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
-    phase._executed = True
-
-    await phase.on_success(StartMessage(id="msg1"))
-    await phase.on_success(StartMessage(id="msg2"))
-
-    assert message_queue.qsize() == 1
 
 
 # ---------------------------------------------------------------------------
@@ -526,7 +431,7 @@ async def test_on_error_writes_failed_checkpoint(flow_dir, monkeypatch, message_
     mock_agent = MockAgent([])
     phase, mgr = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
-    await phase.on_error(StartMessage(id="start"), RuntimeError("boom"))
+    await phase.on_error(PhaseTrigger(id="start", phase_id=None), RuntimeError("boom"))
 
     checkpoint = mgr.read()["p1"]
     assert checkpoint["status"] == "failed"
@@ -538,7 +443,7 @@ async def test_on_error_emits_failed_message(flow_dir, monkeypatch, message_queu
     mock_agent = MockAgent([])
     phase, _ = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
-    await phase.on_error(StartMessage(id="start"), RuntimeError("boom"))
+    await phase.on_error(PhaseTrigger(id="start", phase_id=None), RuntimeError("boom"))
 
     msg = message_queue.get_nowait()
     assert isinstance(msg, PhaseFailedMessage)
@@ -584,6 +489,73 @@ async def test_task_prompt_resolves_memory_variable(flow_dir, monkeypatch, messa
     )
     phase.queue = message_queue
 
-    await phase.process_message(StartMessage(id="start"))
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert mock_agent.send_calls[0] == "Review: Created file.py"
+
+
+# ---------------------------------------------------------------------------
+# Phase.should_process_message
+# ---------------------------------------------------------------------------
+
+
+def test_should_process_returns_true_for_initial_trigger_on_root_phase(flow_dir, monkeypatch, message_queue):
+    mock_agent = MockAgent([])
+    phase, _ = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+
+    result = phase.should_process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert result is True
+    assert phase._executed is True
+
+
+def test_should_process_returns_false_for_initial_trigger_on_dependent_phase(flow_dir, monkeypatch, message_queue):
+    mock_agent = MockAgent([])
+    phase, _ = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue, dependencies=["dep1"])
+
+    result = phase.should_process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert result is False
+    assert phase._executed is False
+
+
+def test_should_process_returns_false_for_unrelated_dep(flow_dir, monkeypatch, message_queue):
+    mock_agent = MockAgent([])
+    phase, _ = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue, dependencies=["dep1"])
+
+    result = phase.should_process_message(PhaseTrigger(id="msg1", phase_id="other"))
+
+    assert result is False
+    assert phase._executed is False
+
+
+def test_should_process_returns_false_while_deps_pending(flow_dir, monkeypatch, message_queue):
+    mock_agent = MockAgent([])
+    phase, _ = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue, dependencies=["dep1", "dep2"])
+
+    result = phase.should_process_message(PhaseTrigger(id="msg1", phase_id="dep1"))
+
+    assert result is False
+    assert phase._remaining_dependencies == {"dep2"}
+    assert phase._executed is False
+
+
+def test_should_process_returns_true_when_last_dep_arrives(flow_dir, monkeypatch, message_queue):
+    mock_agent = MockAgent([])
+    phase, _ = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue, dependencies=["dep1", "dep2"])
+
+    phase.should_process_message(PhaseTrigger(id="msg1", phase_id="dep1"))
+    result = phase.should_process_message(PhaseTrigger(id="msg2", phase_id="dep2"))
+
+    assert result is True
+    assert phase._executed is True
+
+
+def test_should_process_returns_false_after_already_executed(flow_dir, monkeypatch, message_queue):
+    mock_agent = MockAgent([])
+    phase, _ = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+
+    phase.should_process_message(PhaseTrigger(id="start", phase_id=None))
+    result = phase.should_process_message(PhaseTrigger(id="start2", phase_id=None))
+
+    assert result is False

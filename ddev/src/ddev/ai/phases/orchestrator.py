@@ -12,7 +12,7 @@ import anthropic
 from ddev.ai.phases.base import Phase, PhaseRegistry
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import FlowConfig
-from ddev.ai.phases.messages import PhaseFailedMessage, PhaseFinishedMessage, StartMessage
+from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.react.callbacks import CallbackSet
 from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
@@ -55,7 +55,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._callback_sets = callback_sets
 
     async def on_initialize(self) -> None:
-        """Discover custom phases, parse flow.yaml, construct phases, submit StartMessage."""
+        """Discover custom phases, parse flow.yaml, construct phases, submit PhaseTrigger."""
         config_dir = self._flow_yaml_path.parent
 
         _discover_and_register_phases()
@@ -86,12 +86,9 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 callback_sets=self._callback_sets,
             )
 
-            if not dependencies:
-                self.register_processor(phase, [StartMessage])
-            else:
-                self.register_processor(phase, [PhaseFinishedMessage])
+            self.register_processor(phase, [PhaseTrigger])
 
-        self.submit_message(StartMessage(id="start"))
+        self.submit_message(PhaseTrigger(id="start", phase_id=None))
 
     async def on_message_received(self, message: BaseMessage) -> None:
         """Stop the entire pipeline immediately when any phase fails."""
