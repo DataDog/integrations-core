@@ -19,6 +19,25 @@ default to the NTP servers below:
 
 **Note:** NTP requests do not support proxy settings.
 
+## Agent version notes
+
+### Datadog Agent 7.79 — NTP metric and tag changes
+
+Agent **7.78** introduced **`ntp.offset`** for two signals, distinguished by a **`source`** tag:
+
+- **`source:intake`** — offset between the local clock and Datadog intake time (from the HTTP `Date` response header).
+- **`source:ntp`** — offset between the local clock and the configured NTP reference.
+
+Starting with Agent **7.79**:
+
+- The intake-derived series is renamed to **`ntp.intake_offset`** (it is no longer reported as **`ntp.offset`** with **`source:intake`**).
+- The NTP reference series remains **`ntp.offset`**, but the **`source:ntp` tag is removed**. That is a **breaking change** for any monitor, dashboard, or saved query that filters on **`ntp.offset` and `source:ntp`**.
+
+| If you match this today (Agent 7.78) | Use this after Agent 7.79 |
+|--------------------------------------|-----------------------------|
+| **`ntp.offset`** with **`source:intake`** | **`ntp.intake_offset`** |
+| **`ntp.offset`** with **`source:ntp`** | **`ntp.offset`** without a **`source`** filter |
+
 ## Setup
 
 ### Installation
@@ -66,7 +85,7 @@ For containerized environments, see the documentation concerning [Autodiscovery 
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this check.
+See [metadata.csv][6] for a list of metrics provided by this check. If you upgrade from Agent 7.78 to 7.79 or later, read [Agent version notes](#agent-version-notes) above before updating monitors or dashboards.
 
 ### Events
 
