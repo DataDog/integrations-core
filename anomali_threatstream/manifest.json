@@ -1,0 +1,41 @@
+{
+    "manifest_version": "2.0.0",
+    "app_uuid": "6525b01a-cddd-4f60-84ff-d6739812b4c6",
+    "app_id": "anomali-threatstream",
+    "owner": "saas-integrations",
+    "display_on_public_website": false,
+    "tile": {
+        "overview": "README.md#Overview",
+        "configuration": "README.md#Setup",
+        "support": "README.md#Support",
+        "changelog": "CHANGELOG.md",
+        "description": "Enriches your security logs with threat intelligence data from Anomali ThreatStream.",
+        "title": "Anomali ThreatStream",
+        "media": [],
+        "classifier_tags": [
+            "Category::Security",
+            "Offering::Integration"
+        ]
+    },
+    "assets": {
+        "integration": {
+            "auto_install": false,
+            "source_type_id": 76322335,
+            "source_type_name": "Anomali ThreatStream",
+            "events": {
+                "creates_events": false
+            },
+            "metrics": {
+                "prefix": "anomali_threatstream.",
+                "check": [],
+                "metadata_path": "metadata.csv"
+            }
+        }
+    },
+    "author": {
+        "support_email": "help@datadoghq.com",
+        "name": "Datadog",
+        "homepage": "https://www.datadoghq.com",
+        "sales_email": "info@datadoghq.com"
+    }
+}
