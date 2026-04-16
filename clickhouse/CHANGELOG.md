@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 6.6.0 / 2026-04-15
+
+***Added***:
+
+* Update dependencies ([#22996](https://github.com/DataDog/integrations-core/pull/22996))
+* Add query error collection from system.query_log for DBM ([#23041](https://github.com/DataDog/integrations-core/pull/23041))
+* Add support for ClickHouse explain plans. ([#23286](https://github.com/DataDog/integrations-core/pull/23286))
+
+***Fixed***:
+
+* Bump `datadog-checks-base` to `>=37.34.1`. Notable changes:
+    - Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place. ([#23075](https://github.com/DataDog/integrations-core/pull/23075)) ([#23282](https://github.com/DataDog/integrations-core/pull/23282))
+
 ## 6.5.0 / 2026-04-01
 
 ***Added***:
