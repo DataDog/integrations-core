@@ -5,7 +5,11 @@ import os
 import re
 
 from datadog_checks.base import ConfigurationError, is_affirmative
-from datadog_checks.kafka_consumer.constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
+from datadog_checks.kafka_consumer.constants import (
+    CONTEXT_UPPER_BOUND,
+    DEFAULT_KAFKA_TIMEOUT,
+    DEFAULT_MAX_TRACKED_CONSUMER_GROUPS,
+)
 
 # https://github.com/confluentinc/librdkafka/blob/e03d3bb91ed92a38f38d9806b8d8deffe78a1de5/src/rd.h#L78-L89
 LIBRDKAFKA_LOG_ERR = 3
@@ -35,6 +39,9 @@ class KafkaConfig:
         # https://github.com/confluentinc/confluent-kafka-python/issues/759
         self._consumer_queued_max_messages_kbytes = instance.get('consumer_queued_max_messages_kbytes', 1024)
         self._close_admin_client = instance.get('close_admin_client', True)
+        self._max_tracked_consumer_groups = int(
+            instance.get('max_tracked_consumer_groups', DEFAULT_MAX_TRACKED_CONSUMER_GROUPS)
+        )
 
         self._kafka_connect_str = instance.get('kafka_connect_str')
         self._kafka_version = instance.get('kafka_client_api_version')

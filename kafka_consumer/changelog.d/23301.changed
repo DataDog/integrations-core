@@ -1,0 +1,1 @@
+Add partition staggering, consumer group limits, and batched offset fetching to prevent OOM and slow check runs on large clusters.

@@ -80,6 +80,7 @@ class InstanceConfig(BaseModel):
     kafka_cluster_id_override: Optional[str] = None
     kafka_configs_refresh_interval: Optional[int] = None
     kafka_connect_str: Union[str, tuple[str, ...]]
+    max_tracked_consumer_groups: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     monitor_all_broker_highwatermarks: Optional[bool] = None

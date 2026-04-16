@@ -121,12 +121,21 @@ instances:
     # consumer_queued_max_messages_kbytes: 1024
 
     ## @param close_admin_client - boolean - optional - default: true
-    ## Release AdminClient at the end of execution for garbage collection. Originally, we kept the same AdminClient 
-    ## running over the entire life of the check. By deallocating the AdminClient after the check run, we should free 
-    ## up any memory used in the client, although the performance of the check run would be slower (since we will 
+    ## Release AdminClient at the end of execution for garbage collection. Originally, we kept the same AdminClient
+    ## running over the entire life of the check. By deallocating the AdminClient after the check run, we should free
+    ## up any memory used in the client, although the performance of the check run would be slower (since we will
     ## need to reconnect with a new client). Set this config option to false to improve performance.
     #
     # close_admin_client: true
+
+    ## @param max_tracked_consumer_groups - integer - optional - default: 1000
+    ## Maximum number of consumer groups to monitor when `monitor_unlisted_consumer_groups`
+    ## is enabled or when using `consumer_groups_regex`. When the number of discovered
+    ## consumer groups exceeds this limit, only the first N groups (sorted alphabetically)
+    ## are monitored. This prevents excessive API calls and memory usage on clusters with
+    ## many consumer groups.
+    #
+    # max_tracked_consumer_groups: 1000
 
     ## @param monitor_all_broker_highwatermarks - boolean - optional - default: false
     ## Setting monitor_all_broker_highwatermarks to `true` tells the check to
