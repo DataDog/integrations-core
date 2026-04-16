@@ -7,10 +7,15 @@ from contextlib import contextmanager
 from requests.exceptions import RequestException
 
 from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.tracing import traced_class
 
 from .scraper import OpenMetricsScraper
+
+# Maximum number of response body bytes captured per endpoint when collecting
+# flare data.  Keeps flares from becoming excessively large for busy endpoints.
+_FLARE_MAX_BODY_SIZE = 10_000
 
 
 class OpenMetricsBaseCheckV2(AgentCheck):
@@ -53,6 +58,9 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         self.scrapers = {}
 
         self.check_initializations.append(self.configure_scrapers)
+
+        if is_affirmative(self.instance.get('collect_endpoint_data_for_flare', False)):
+            self.diagnosis.register(self._collect_endpoint_flare_data)
 
     def check(self, _):
         """
@@ -99,6 +107,50 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         Subclasses can override to return a custom scraper based on instance configuration.
         """
         return OpenMetricsScraper(self, self.get_config_with_defaults(config))
+
+    def _collect_endpoint_flare_data(self):
+        """Fetch the raw HTTP response from each configured OpenMetrics endpoint
+        and record it as a diagnosis entry so it is included in Agent flares.
+
+        Registered as a diagnosis callback when ``collect_endpoint_data_for_flare``
+        is enabled in the instance configuration.  Each endpoint produces one
+        entry containing the status line, response headers, and up to
+        ``_FLARE_MAX_BODY_SIZE`` bytes of the response body — the equivalent of
+        running ``curl -v <endpoint>``.
+        """
+        if not self.scrapers:
+            self.diagnosis.warning(
+                'endpoint_flare_data',
+                'No scrapers initialised yet. Run the check at least once before generating a flare.',
+                category='flare',
+            )
+            return
+
+        for endpoint, scraper in self.scrapers.items():
+            name = 'endpoint_flare_data[{}]'.format(endpoint)
+            try:
+                response = scraper.http.get(endpoint, stream=False)
+                response.raise_for_status()
+
+                status_line = 'HTTP {} {}'.format(response.status_code, response.reason)
+                headers_text = '\n'.join('{}: {}'.format(k, v) for k, v in response.headers.items())
+                body = response.text
+                if len(body) > _FLARE_MAX_BODY_SIZE:
+                    body = body[:_FLARE_MAX_BODY_SIZE] + '\n[... response truncated at {} bytes ...]'.format(
+                        _FLARE_MAX_BODY_SIZE
+                    )
+
+                self.diagnosis.success(
+                    name,
+                    '{}\n{}\n\n{}'.format(status_line, headers_text, body),
+                    category='flare',
+                )
+            except Exception as e:
+                self.diagnosis.fail(
+                    name,
+                    'Failed to fetch {}: {}'.format(endpoint, e),
+                    category='flare',
+                )
 
     def set_dynamic_tags(self, *tags):
         for scraper in self.scrapers.values():

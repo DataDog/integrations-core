@@ -113,6 +113,7 @@ class InstanceConfig(BaseModel):
     cache_metric_wildcards: Optional[bool] = None
     cache_shared_labels: Optional[bool] = None
     collect_counters_with_distributions: Optional[bool] = None
+    collect_endpoint_data_for_flare: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None

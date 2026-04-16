@@ -17,6 +17,20 @@ files:
             tag_by_endpoint.example: false
             tag_by_endpoint.hidden: false
             tag_by_endpoint.enabled: true
+        - name: collect_endpoint_data_for_flare
+          description: |
+            When enabled, the check performs an additional HTTP GET request to each
+            configured `openmetrics_endpoint` at flare generation time and includes
+            the raw response (status line, response headers, and up to 10 KB of body)
+            in the flare. This is equivalent to running `curl -v <endpoint>` and is
+            useful for diagnosing scraping issues without requiring direct access to
+            the host.
+
+            This option is disabled by default and has no effect during normal check
+            runs.
+          value:
+            type: boolean
+            example: false
         - template: instances/openmetrics_legacy_base
           hidden: true
           overrides:

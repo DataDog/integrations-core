@@ -2,6 +2,15 @@
 
 <!-- towncrier release notes start -->
 
+## Unreleased
+
+***Added***:
+
+* Add `collect_endpoint_data_for_flare` instance option. When enabled, the raw HTTP response
+  from each `openmetrics_endpoint` (equivalent to `curl -v <endpoint>`) is captured and included
+  in Agent flares to aid in troubleshooting scraping issues. Response bodies are truncated to 10 KB.
+  See [#XXXXX](https://github.com/DataDog/integrations-core/pull/XXXXX).
+
 ## 7.1.1 / 2025-10-31
 
 ***Fixed***:
