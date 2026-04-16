@@ -1,0 +1,233 @@
+[
+  {
+    "ipList": [
+      {
+        "ip": "10.0.0.1",
+        "role": "sdsSdsOnly"
+      },
+      {
+        "ip": "10.0.1.1",
+        "role": "sdsOnly"
+      }
+    ],
+    "onVmWare": true,
+    "certificateInfo": {
+      "thumbprint": "AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67:89",
+      "subject": "CN=SDS3, O=Dell, C=US",
+      "issuer": "CN=PowerFlex Root CA, O=Dell, C=US",
+      "validFrom": "2025-01-01T00:00:00Z",
+      "validTo": "2026-01-01T00:00:00Z"
+    },
+    "port": 7072,
+    "sdsState": "Normal",
+    "membershipState": "Joined",
+    "mdmConnectionState": "Connected",
+    "drlMode": "Volatile",
+    "rmcacheEnabled": true,
+    "rmcacheSizeInKb": 131072,
+    "rmcacheFrozen": false,
+    "rmcacheMemoryAllocationState": "AllocationPending",
+    "rfcacheEnabled": false,
+    "maintenanceState": "NoMaintenance",
+    "maintenanceType": "NoMaintenance",
+    "rfcacheErrorDeviceDoesNotExist": false,
+    "rfcacheErrorLowResources": false,
+    "rfcacheErrorApiVersionMismatch": false,
+    "rfcacheErrorInconsistentCacheConfiguration": false,
+    "rfcacheErrorInconsistentSourceConfiguration": false,
+    "rfcacheErrorInvalidDriverPath": false,
+    "authenticationError": "None",
+    "fglNumConcurrentWrites": 1000,
+    "fglMetadataCacheState": "Disabled",
+    "fglMetadataCacheSize": 0,
+    "numIoBuffers": null,
+    "faultSetId": null,
+    "numRestarts": 0,
+    "lastUpgradeTime": 0,
+    "sdsDecoupled": null,
+    "sdsConfigurationFailure": null,
+    "sdsReceiveBufferAllocationFailures": null,
+    "softwareVersionInfo": "R4_5.2100.0",
+    "configuredDrlMode": "Volatile",
+    "protectionDomainId": "68c139ee00000000",
+    "protectionDomainName": "domain1",
+    "name": "SDS3",
+    "id": "d1c062b700000000",
+    "links": [
+      {
+        "rel": "self",
+        "href": "/api/instances/Sds::d1c062b700000000"
+      },
+      {
+        "rel": "/api/Sds/relationship/Statistics",
+        "href": "/api/instances/Sds::d1c062b700000000/relationships/Statistics"
+      },
+      {
+        "rel": "/api/Sds/relationship/Device",
+        "href": "/api/instances/Sds::d1c062b700000000/relationships/Device"
+      },
+      {
+        "rel": "/api/Sds/relationship/RfcacheDevice",
+        "href": "/api/instances/Sds::d1c062b700000000/relationships/RfcacheDevice"
+      },
+      {
+        "rel": "/api/parent/relationship/protectionDomainId",
+        "href": "/api/instances/ProtectionDomain::68c139ee00000000"
+      }
+    ]
+  },
+  {
+    "ipList": [
+      {
+        "ip": "10.0.0.2",
+        "role": "sdsSdsOnly"
+      },
+      {
+        "ip": "10.0.1.2",
+        "role": "sdsOnly"
+      }
+    ],
+    "onVmWare": true,
+    "certificateInfo": {
+      "thumbprint": "12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A:BC:DE:F0",
+      "subject": "CN=SDS2, O=Dell, C=US",
+      "issuer": "CN=PowerFlex Root CA, O=Dell, C=US",
+      "validFrom": "2025-01-01T00:00:00Z",
+      "validTo": "2026-01-01T00:00:00Z"
+    },
+    "port": 7072,
+    "sdsState": "Normal",
+    "membershipState": "Joined",
+    "mdmConnectionState": "Connected",
+    "drlMode": "Volatile",
+    "rmcacheEnabled": true,
+    "rmcacheSizeInKb": 131072,
+    "rmcacheFrozen": false,
+    "rmcacheMemoryAllocationState": "AllocationPending",
+    "rfcacheEnabled": false,
+    "maintenanceState": "NoMaintenance",
+    "maintenanceType": "NoMaintenance",
+    "rfcacheErrorDeviceDoesNotExist": false,
+    "rfcacheErrorLowResources": false,
+    "rfcacheErrorApiVersionMismatch": false,
+    "rfcacheErrorInconsistentCacheConfiguration": false,
+    "rfcacheErrorInconsistentSourceConfiguration": false,
+    "rfcacheErrorInvalidDriverPath": false,
+    "authenticationError": "None",
+    "fglNumConcurrentWrites": 1000,
+    "fglMetadataCacheState": "Disabled",
+    "fglMetadataCacheSize": 0,
+    "numIoBuffers": null,
+    "faultSetId": null,
+    "numRestarts": 0,
+    "lastUpgradeTime": 0,
+    "sdsDecoupled": null,
+    "sdsConfigurationFailure": null,
+    "sdsReceiveBufferAllocationFailures": null,
+    "softwareVersionInfo": "R4_5.2100.0",
+    "configuredDrlMode": "Volatile",
+    "protectionDomainId": "68c139ee00000000",
+    "protectionDomainName": "domain1",
+    "name": "SDS2",
+    "id": "d1c062b800000001",
+    "links": [
+      {
+        "rel": "self",
+        "href": "/api/instances/Sds::d1c062b800000001"
+      },
+      {
+        "rel": "/api/Sds/relationship/Statistics",
+        "href": "/api/instances/Sds::d1c062b800000001/relationships/Statistics"
+      },
+      {
+        "rel": "/api/Sds/relationship/Device",
+        "href": "/api/instances/Sds::d1c062b800000001/relationships/Device"
+      },
+      {
+        "rel": "/api/Sds/relationship/RfcacheDevice",
+        "href": "/api/instances/Sds::d1c062b800000001/relationships/RfcacheDevice"
+      },
+      {
+        "rel": "/api/parent/relationship/protectionDomainId",
+        "href": "/api/instances/ProtectionDomain::68c139ee00000000"
+      }
+    ]
+  },
+  {
+    "ipList": [
+      {
+        "ip": "10.0.0.3",
+        "role": "sdsSdsOnly"
+      },
+      {
+        "ip": "10.0.1.3",
+        "role": "sdsOnly"
+      }
+    ],
+    "onVmWare": true,
+    "certificateInfo": {
+      "thumbprint": "FE:DC:BA:98:76:54:32:10:FE:DC:BA:98:76:54:32:10:FE:DC:BA:98:76:54:32:10:FE:DC:BA:98:76:54:32:10",
+      "subject": "CN=SDS1, O=Dell, C=US",
+      "issuer": "CN=PowerFlex Root CA, O=Dell, C=US",
+      "validFrom": "2025-01-01T00:00:00Z",
+      "validTo": "2026-01-01T00:00:00Z"
+    },
+    "port": 7072,
+    "sdsState": "Normal",
+    "membershipState": "Joined",
+    "mdmConnectionState": "Connected",
+    "drlMode": "Volatile",
+    "rmcacheEnabled": true,
+    "rmcacheSizeInKb": 131072,
+    "rmcacheFrozen": false,
+    "rmcacheMemoryAllocationState": "AllocationPending",
+    "rfcacheEnabled": false,
+    "maintenanceState": "NoMaintenance",
+    "maintenanceType": "NoMaintenance",
+    "rfcacheErrorDeviceDoesNotExist": false,
+    "rfcacheErrorLowResources": false,
+    "rfcacheErrorApiVersionMismatch": false,
+    "rfcacheErrorInconsistentCacheConfiguration": false,
+    "rfcacheErrorInconsistentSourceConfiguration": false,
+    "rfcacheErrorInvalidDriverPath": false,
+    "authenticationError": "None",
+    "fglNumConcurrentWrites": 1000,
+    "fglMetadataCacheState": "Disabled",
+    "fglMetadataCacheSize": 0,
+    "numIoBuffers": null,
+    "faultSetId": null,
+    "numRestarts": 0,
+    "lastUpgradeTime": 0,
+    "sdsDecoupled": null,
+    "sdsConfigurationFailure": null,
+    "sdsReceiveBufferAllocationFailures": null,
+    "softwareVersionInfo": "R4_5.2100.0",
+    "configuredDrlMode": "Volatile",
+    "protectionDomainId": "68c139ee00000000",
+    "protectionDomainName": "domain1",
+    "name": "SDS1",
+    "id": "d1c062b900000002",
+    "links": [
+      {
+        "rel": "self",
+        "href": "/api/instances/Sds::d1c062b900000002"
+      },
+      {
+        "rel": "/api/Sds/relationship/Statistics",
+        "href": "/api/instances/Sds::d1c062b900000002/relationships/Statistics"
+      },
+      {
+        "rel": "/api/Sds/relationship/Device",
+        "href": "/api/instances/Sds::d1c062b900000002/relationships/Device"
+      },
+      {
+        "rel": "/api/Sds/relationship/RfcacheDevice",
+        "href": "/api/instances/Sds::d1c062b900000002/relationships/RfcacheDevice"
+      },
+      {
+        "rel": "/api/parent/relationship/protectionDomainId",
+        "href": "/api/instances/ProtectionDomain::68c139ee00000000"
+      }
+    ]
+  }
+]

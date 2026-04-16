@@ -1,0 +1,380 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+import logging
+from unittest.mock import MagicMock
+
+import pytest
+from requests.exceptions import ConnectionError
+
+from datadog_checks.dell_powerflex import DellPowerflexCheck
+from datadog_checks.dev.utils import get_metadata_metrics
+
+from .common import (
+    DEVICE_STATS_BWC_METRICS,
+    DEVICE_STATS_SIMPLE_METRICS,
+    PROTECTION_DOMAIN_STATS_BWC_METRICS,
+    PROTECTION_DOMAIN_STATS_SIMPLE_METRICS,
+    SDC_STATS_BWC_METRICS,
+    SDC_STATS_SIMPLE_METRICS,
+    SDS_STATS_BWC_METRICS,
+    SDS_STATS_SIMPLE_METRICS,
+    STORAGE_POOL_STATS_BWC_METRICS,
+    STORAGE_POOL_STATS_SIMPLE_METRICS,
+    SYSTEM_MDM_CLUSTER_METRICS,
+    SYSTEM_STATS_BWC_METRICS,
+    SYSTEM_STATS_SIMPLE_METRICS,
+    VOLUME_STATS_BWC_METRICS,
+    VOLUME_STATS_SIMPLE_METRICS,
+)
+
+
+def assert_bwc_metrics(aggregator, bwc_metrics, tags, value=0):
+    for metric_prefix in bwc_metrics:
+        aggregator.assert_metric(f'{metric_prefix}.num_seconds', value=value, tags=tags)
+        aggregator.assert_metric(f'{metric_prefix}.total_weight_in_kb', value=value, tags=tags)
+        aggregator.assert_metric(f'{metric_prefix}.num_occured', value=value, tags=tags)
+
+
+def test_can_connect_down(dd_run_check, aggregator, instance, mocker):
+    mocker.patch('requests.Session.get', side_effect=ConnectionError('connection refused'))
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'dell_powerflex.api.can_connect',
+        value=0,
+        tags=['powerflex_gateway_url:https://localhost:443'],
+    )
+
+
+def test_can_connect_up(dd_run_check, aggregator, instance, mocker):
+    mocker.patch('requests.Session.get', return_value=MagicMock(raise_for_status=MagicMock()))
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'dell_powerflex.api.can_connect',
+        value=1,
+        tags=['powerflex_gateway_url:https://localhost:443'],
+    )
+
+
+def test_collect_system(dd_run_check, aggregator, instance, mock_http_get):
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+    system_tags = base_tags + ['system_id:1fcf40fc60c6520f', 'dell_type:system']
+
+    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1, tags=base_tags)
+
+    for metric in SYSTEM_MDM_CLUSTER_METRICS:
+        aggregator.assert_metric(
+            metric['name'],
+            value=metric['value'],
+            tags=system_tags + metric.get('extra_tags', []),
+        )
+
+    for metric in SYSTEM_STATS_SIMPLE_METRICS:
+        aggregator.assert_metric(metric['name'], value=metric['value'], tags=system_tags)
+
+    assert_bwc_metrics(aggregator, SYSTEM_STATS_BWC_METRICS, system_tags)
+
+
+def test_assert_all_metrics(dd_run_check, aggregator, instance, mock_http_get):
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+    for metric_name in get_metadata_metrics():
+        aggregator.assert_metric(metric_name, at_least=1)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_collect_volumes(dd_run_check, aggregator, instance, mock_http_get):
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+    # volumee: ThinProvisioned, mapped to one SDC, no ancestor
+    volume_tags = base_tags + [
+        'volume_id:c58b06e700000000',
+        'volume_name:volumee',
+        'volume_type:ThinProvisioned',
+        'storage_pool_id:25155ba600000000',
+        'dell_type:volume',
+        'sdc_id:1b8659fd00000001',
+    ]
+    for metric in VOLUME_STATS_SIMPLE_METRICS:
+        aggregator.assert_metric(metric['name'], value=metric['value'], tags=volume_tags)
+    assert_bwc_metrics(aggregator, VOLUME_STATS_BWC_METRICS, volume_tags)
+
+    # bigvolume: ThinProvisioned, mapped to one SDC, no children
+    bigvolume_tags = base_tags + [
+        'volume_id:c58b06e800000001',
+        'volume_name:bigvolume',
+        'volume_type:ThinProvisioned',
+        'storage_pool_id:25155ba600000000',
+        'dell_type:volume',
+        'sdc_id:1b8659fd00000001',
+    ]
+    aggregator.assert_metric('dell_powerflex.num_of_child_volumes', value=0, tags=bigvolume_tags)
+    aggregator.assert_metric('dell_powerflex.num_of_mapped_sdcs', value=1, tags=bigvolume_tags)
+
+    # volumee-snap-01: Snapshot, no SDC mapping, has ancestor, 1 child
+    snap01_tags = base_tags + [
+        'volume_id:c58b06e900000002',
+        'volume_name:volumee-snap-01',
+        'volume_type:Snapshot',
+        'storage_pool_id:25155ba600000000',
+        'dell_type:volume',
+        'ancestor_volume_id:c58b06e700000000',
+    ]
+    aggregator.assert_metric('dell_powerflex.num_of_child_volumes', value=1, tags=snap01_tags)
+    aggregator.assert_metric('dell_powerflex.num_of_mapped_sdcs', value=0, tags=snap01_tags)
+
+    # volumee-snap-02: Snapshot, no SDC mapping, has ancestor, no children
+    snap02_tags = base_tags + [
+        'volume_id:c58b06ea00000003',
+        'volume_name:volumee-snap-02',
+        'volume_type:Snapshot',
+        'storage_pool_id:25155ba600000000',
+        'dell_type:volume',
+        'ancestor_volume_id:c58b06e900000002',
+    ]
+    aggregator.assert_metric('dell_powerflex.num_of_child_volumes', value=0, tags=snap02_tags)
+    aggregator.assert_metric('dell_powerflex.num_of_mapped_sdcs', value=0, tags=snap02_tags)
+
+
+def test_collect_storage_pools(dd_run_check, aggregator, instance, mock_http_get):
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+    pool_tags = base_tags + [
+        'storage_pool_id:25155ba600000000',
+        'storage_pool_name:pool1',
+        'protection_domain_id:68c139ee00000000',
+        'dell_type:storage_pool',
+    ]
+    for metric in STORAGE_POOL_STATS_SIMPLE_METRICS:
+        aggregator.assert_metric(metric['name'], value=metric['value'], tags=pool_tags)
+    assert_bwc_metrics(aggregator, STORAGE_POOL_STATS_BWC_METRICS, pool_tags)
+
+    # storagepool2: HDD, empty pool, no ActualNetCapacityInUseInKb
+    pool2_tags = base_tags + [
+        'storage_pool_id:2515d0d600000001',
+        'storage_pool_name:storagepool2',
+        'protection_domain_id:68c139ee00000000',
+        'dell_type:storage_pool',
+    ]
+    aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', value=0, tags=pool2_tags)
+    aggregator.assert_metric('dell_powerflex.max_capacity.in_kb', value=0, tags=pool2_tags)
+    aggregator.assert_metric('dell_powerflex.num_of_volumes', value=0, tags=pool2_tags)
+    assert_bwc_metrics(aggregator, STORAGE_POOL_STATS_BWC_METRICS, pool2_tags)
+
+
+def test_collect_protection_domains(dd_run_check, aggregator, instance, mock_http_get):
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+    pd_tags = base_tags + [
+        'protection_domain_id:68c139ee00000000',
+        'protection_domain_name:domain1',
+        'system_id:1fcf40fc60c6520f',
+        'dell_type:protection_domain',
+    ]
+    for metric in PROTECTION_DOMAIN_STATS_SIMPLE_METRICS:
+        aggregator.assert_metric(metric['name'], value=metric['value'], tags=pd_tags)
+    assert_bwc_metrics(aggregator, PROTECTION_DOMAIN_STATS_BWC_METRICS, pd_tags)
+
+
+@pytest.mark.parametrize(
+    'method, num_items, log_message',
+    [
+        ('_collect_system', 1, 'Failed to collect metrics for system'),
+        ('_collect_volume', 4, 'Failed to collect metrics for volume'),
+        ('_collect_storage_pool', 2, 'Failed to collect metrics for storage pool'),
+        ('_collect_protection_domain', 1, 'Failed to collect metrics for protection domain'),
+        ('_collect_sds', 3, 'Failed to collect metrics for SDS'),
+        ('_collect_sdc', 3, 'Failed to collect metrics for SDC'),
+        ('_collect_device', 3, 'Failed to collect metrics for device'),
+    ],
+)
+def test_collect_failure_continues(
+    dd_run_check, aggregator, instance, mock_http_get, mocker, caplog, method, num_items, log_message
+):
+    mocker.patch(
+        f'datadog_checks.dell_powerflex.check.DellPowerflexCheck.{method}',
+        side_effect=[Exception()] + [None] * (num_items - 1),
+    )
+    caplog.set_level(logging.WARNING)
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
+    assert log_message in caplog.text
+
+
+def test_collect_sds(dd_run_check, aggregator, instance, mock_http_get):
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+
+    # SDS3: d1c062b700000000, no fault_set_id
+    sds3_tags = base_tags + [
+        'sds_id:d1c062b700000000',
+        'sds_name:SDS3',
+        'protection_domain_id:68c139ee00000000',
+        'dell_type:sds',
+    ]
+    for metric in SDS_STATS_SIMPLE_METRICS:
+        aggregator.assert_metric(metric['name'], value=metric['value'], tags=sds3_tags)
+    assert_bwc_metrics(aggregator, SDS_STATS_BWC_METRICS, sds3_tags)
+
+    # SDS2: d1c062b800000001
+    sds2_tags = base_tags + [
+        'sds_id:d1c062b800000001',
+        'sds_name:SDS2',
+        'protection_domain_id:68c139ee00000000',
+        'dell_type:sds',
+    ]
+    aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', value=350208, tags=sds2_tags)
+    aggregator.assert_metric('dell_powerflex.unused_capacity.in_kb', value=103406592, tags=sds2_tags)
+    aggregator.assert_metric('dell_powerflex.num_of_devices', value=1, tags=sds2_tags)
+    assert_bwc_metrics(aggregator, SDS_STATS_BWC_METRICS, sds2_tags)
+
+    # SDS1: d1c062b900000002
+    sds1_tags = base_tags + [
+        'sds_id:d1c062b900000002',
+        'sds_name:SDS1',
+        'protection_domain_id:68c139ee00000000',
+        'dell_type:sds',
+    ]
+    aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', value=349184, tags=sds1_tags)
+    aggregator.assert_metric('dell_powerflex.unused_capacity.in_kb', value=103407616, tags=sds1_tags)
+    aggregator.assert_metric('dell_powerflex.num_of_devices', value=1, tags=sds1_tags)
+    assert_bwc_metrics(aggregator, SDS_STATS_BWC_METRICS, sds1_tags)
+
+
+def test_collect_sdc(dd_run_check, aggregator, instance, mock_http_get):
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+
+    # SDC1: 1b8659fd00000001, numOfMappedVolumes=2
+    sdc1_tags = base_tags + [
+        'sdc_id:1b8659fd00000001',
+        'sdc_guid:33FC0AF2-5180-45D8-9BDC-8E2F78CD60BF',
+        'sdc_type:AppSdc',
+        'sdc_ip:10.0.1.250',
+        'dell_type:sdc',
+    ]
+    for metric in SDC_STATS_SIMPLE_METRICS:
+        aggregator.assert_metric(metric['name'], value=metric['value'], tags=sdc1_tags)
+    assert_bwc_metrics(aggregator, SDC_STATS_BWC_METRICS, sdc1_tags)
+
+    # SDC2: 1b8659fc00000000, numOfMappedVolumes=0
+    sdc2_tags = base_tags + [
+        'sdc_id:1b8659fc00000000',
+        'sdc_guid:BE3BC972-269A-4931-96B8-286BFA45C004',
+        'sdc_type:AppSdc',
+        'sdc_ip:10.0.1.223',
+        'dell_type:sdc',
+    ]
+    aggregator.assert_metric('dell_powerflex.num_of_mapped_volumes', value=0, tags=sdc2_tags)
+    assert_bwc_metrics(aggregator, SDC_STATS_BWC_METRICS, sdc2_tags)
+
+    # SDC3: 1b8659fe00000002, numOfMappedVolumes=0
+    sdc3_tags = base_tags + [
+        'sdc_id:1b8659fe00000002',
+        'sdc_guid:46EE0B53-B823-4E68-B0B4-41A2DEC5A425',
+        'sdc_type:AppSdc',
+        'sdc_ip:10.0.1.228',
+        'dell_type:sdc',
+    ]
+    aggregator.assert_metric('dell_powerflex.num_of_mapped_volumes', value=0, tags=sdc3_tags)
+    assert_bwc_metrics(aggregator, SDC_STATS_BWC_METRICS, sdc3_tags)
+
+
+def test_collect_devices(dd_run_check, aggregator, instance, mock_http_get):
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['powerflex_gateway_url:https://localhost:443']
+
+    # Device1: f7fd7d0b00020000, sds1-dev1 - full assertions
+    dev1_tags = base_tags + [
+        'device_id:f7fd7d0b00020000',
+        'device_name:sds1-dev1',
+        'current_path_name:/dev/sdb',
+        'storage_pool_id:25155ba600000000',
+        'sds_id:d1c062b900000002',
+        'dell_type:device',
+    ]
+    for metric in DEVICE_STATS_SIMPLE_METRICS:
+        aggregator.assert_metric(metric['name'], value=metric['value'], tags=dev1_tags)
+    assert_bwc_metrics(aggregator, DEVICE_STATS_BWC_METRICS, dev1_tags)
+
+    # Device2: f7fd7d0a00010000, sds2-dev1
+    dev2_tags = base_tags + [
+        'device_id:f7fd7d0a00010000',
+        'device_name:sds2-dev1',
+        'current_path_name:/dev/sdb',
+        'storage_pool_id:25155ba600000000',
+        'sds_id:d1c062b800000001',
+        'dell_type:device',
+    ]
+    aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', value=350208, tags=dev2_tags)
+    aggregator.assert_metric('dell_powerflex.avg_read_latency_in_microsec', value=12793, tags=dev2_tags)
+    assert_bwc_metrics(aggregator, DEVICE_STATS_BWC_METRICS, dev2_tags)
+
+    # Device3: f7f77d0900000000, sds3-dev1
+    dev3_tags = base_tags + [
+        'device_id:f7f77d0900000000',
+        'device_name:sds3-dev1',
+        'current_path_name:/dev/sdb',
+        'storage_pool_id:25155ba600000000',
+        'sds_id:d1c062b700000000',
+        'dell_type:device',
+    ]
+    aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', value=349184, tags=dev3_tags)
+    aggregator.assert_metric('dell_powerflex.avg_read_latency_in_microsec', value=10023, tags=dev3_tags)
+    assert_bwc_metrics(aggregator, DEVICE_STATS_BWC_METRICS, dev3_tags)
+
+
+def test_collect_system_with_name(dd_run_check, aggregator, instance, mocker):
+    instances_response = [
+        {
+            'id': '1fcf40fc60c6520f',
+            'name': 'my-powerflex',
+            'mdmCluster': {
+                'goodNodesNum': 3,
+                'goodReplicasNum': 2,
+                'clusterState': 'ClusteredNormal',
+                'clusterMode': 'ThreeNodes',
+            },
+        }
+    ]
+
+    def mock_get(url, *args, **kwargs):
+        resp = MagicMock()
+        resp.raise_for_status = MagicMock()
+        resp.json = MagicMock(return_value=instances_response if 'types/System/instances' in url else {})
+        return resp
+
+    mocker.patch('requests.Session.get', side_effect=mock_get)
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    system_tags = [
+        'powerflex_gateway_url:https://localhost:443',
+        'system_id:1fcf40fc60c6520f',
+        'dell_type:system',
+        'system_name:my-powerflex',
+    ]
+    aggregator.assert_metric('dell_powerflex.mdm_cluster.good_nodes', value=3, tags=system_tags)
+    aggregator.assert_metric('dell_powerflex.mdm_cluster.good_replicas', value=2, tags=system_tags)
