@@ -70,7 +70,7 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         if allowed_tools is not None:
             allowed = set(allowed_tools)
             definitions = [d for d in definitions if d["name"] in allowed]
-        if not self._programmatic_tool_calling:
+        if self._programmatic_tool_calling:
             definitions = [{**d, "allowed_callers": ALLOWED_TOOL_CALLERS} for d in definitions]
         return definitions
 

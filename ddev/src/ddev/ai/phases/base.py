@@ -225,7 +225,8 @@ class Phase(AsyncProcessor[PhaseTrigger]):
 
         try:
             prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
-            response = await agent.send(prompt)
+            # allowed_tools=[] forces a text-only response
+            response = await agent.send(prompt, allowed_tools=[])
             total_input += response.usage.input_tokens
             total_output += response.usage.output_tokens
             self._checkpoint_manager.write_memory(self._phase_id, response.text)
