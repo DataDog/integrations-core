@@ -25,7 +25,7 @@ files:
       - template: instances
         options:
           - name: host
-            display_priority: 5
+            display_priority: 7
             description: |
               MySQL host to connect to.
               NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
@@ -38,7 +38,7 @@ files:
               display_default: null
 
           - name: port
-            display_priority: 4
+            display_priority: 6
             description: |
               Port to use when connecting to MySQL.
             fleet_configurable: true
@@ -49,7 +49,7 @@ files:
               example: 3306
 
           - name: username
-            display_priority: 3
+            display_priority: 5
             description: |
               Username used to connect to MySQL.
             fleet_configurable: true
@@ -60,7 +60,7 @@ files:
               display_default: null
 
           - name: password
-            display_priority: 2
+            display_priority: 4
             description: |
               Password associated to the MySQL user.
             fleet_configurable: true
@@ -70,7 +70,7 @@ files:
               type: string
 
           - name: dbm
-            display_priority: 1
+            display_priority: 2
             fleet_configurable: true
             description: |
               Set to `true` to enable Database Monitoring.
@@ -489,6 +489,7 @@ files:
                   type: number
                   example: 60
           - name: query_metrics
+            display_priority: 0
             description: Configure collection of query metrics
             fleet_configurable: true
             options:
@@ -530,6 +531,7 @@ files:
                   display_default: true
 
           - name: query_samples
+            display_priority: 0
             description: Configure collection of query samples
             fleet_configurable: true
             options:
@@ -639,6 +641,7 @@ files:
                   type: integer
                   example: 300
           - name: query_activity
+            display_priority: 0
             description: Configure collection of active sessions monitoring
             options:
               - name: enabled
@@ -662,6 +665,7 @@ files:
                   example: false
                   display_default: false
           - name: index_metrics
+            display_priority: 0
             description: |
               Configure collection of index metrics.
               Metrics provided by the options:
@@ -694,6 +698,7 @@ files:
                   type: integer
                   example: 1000
           - name: aws
+            display_priority: 0
             description: |
               This block defines the configuration for AWS RDS and Aurora instances.
 
@@ -748,6 +753,7 @@ files:
                     type: string
                     example: arn:aws:iam::123456789012:role/MyRole
           - name: gcp
+            display_priority: 0
             description: |
               This block defines the configuration for Google Cloud SQL instances.
 
@@ -777,6 +783,7 @@ files:
                   example: foo-database
 
           - name: azure
+            display_priority: 0
             description: |
               This block defines the configuration for Azure Database for MySQL.
 
@@ -810,6 +817,7 @@ files:
                   example: mysql-database.database.windows.net
 
           - name: obfuscator_options
+            display_priority: 0
             description: |
               Configure how the SQL obfuscator behaves.
               Note: This option only applies when `dbm` is enabled.
@@ -915,6 +923,7 @@ files:
                   example: false
                   display_default: false
           - name: log_unobfuscated_queries
+            display_priority: 0
             hidden: true
             description: |
               Set to `true` to enable logging of original unobfuscated SQL queries when obfuscation errors occur.
@@ -925,6 +934,7 @@ files:
               example: false
               display_default: false
           - name: log_unobfuscated_plans
+            display_priority: 0
             hidden: true
             description: |
               Set to `true` to enable logging of original unobfuscated SQL plans when obfuscation errors occur.
@@ -935,6 +945,7 @@ files:
               example: false
               display_default: false
           - name: database_instance_collection_interval
+            display_priority: 0
             hidden: true
             description: |
               Set the database instance collection interval (in seconds). The database instance collection sends
@@ -956,6 +967,7 @@ files:
                   tags:
                     - test:mysql
                   metric_prefix: mysql
+              custom_queries.display_priority: 1
           - template: instances/default
             overrides:
               disable_generic_tags.hidden: false
@@ -964,6 +976,7 @@ files:
                 Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
                 other integrations tags.
 
+              tags.display_priority: 3
       - template: logs
         example:
           - type: file
