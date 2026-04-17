@@ -13,9 +13,14 @@
     "title": "Palo Alto Networks Cortex XSOAR",
     "media": [],
     "classifier_tags": [
-      "Category::Logs",
+      "Category::Security",
       "Category::Metrics",
-      "Offering::Integration"
+      "Category::Log Collection",
+      "Category::Automation",
+      "Category::Cloud",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
     ]
   },
   "assets": {
