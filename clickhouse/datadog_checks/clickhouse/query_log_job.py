@@ -11,7 +11,6 @@ This module provides shared functionality for:
 Both jobs share:
 - Checkpoint-based collection with persistent cache
 - Dedicated DB client management
-- Internal user filtering
 - Query obfuscation
 """
 
@@ -37,16 +36,6 @@ GET_CURRENT_TIME_QUERY = "SELECT toUnixTimestamp64Micro(now64(6))"
 # If a node's checkpoint is more than this far behind the most advanced node,
 # it is considered decommissioned
 _NODE_CHECKPOINT_STALENESS_THRESHOLD_US = 60 * 60 * 1_000_000  # 1 hour
-
-# List of internal Cloud users to exclude from query metrics/samples
-# These are Datadog Cloud internal service accounts
-INTERNAL_CLOUD_USERS = frozenset(
-    {
-        # Add internal Cloud user names here as needed
-        # 'internal_service_user',
-    }
-)
-
 
 def agent_check_getter(self):
     """Helper function for @tracked_method decorator to get the check instance."""
@@ -240,19 +229,6 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
                 "Failed to save checkpoint to persistent cache: %s. Next collection will retry the same time window.",
                 str(e),
             )
-
-    def _get_internal_user_filter(self) -> str:
-        """
-        Build the SQL filter to exclude internal Cloud users.
-
-        Returns:
-            SQL fragment starting with "AND " to exclude internal users
-        """
-        filters = ["user NOT LIKE '%-internal'"]
-        if INTERNAL_CLOUD_USERS:
-            users_list = ", ".join(f"'{user}'" for user in INTERNAL_CLOUD_USERS)
-            filters.append(f"user NOT IN ({users_list})")
-        return "AND " + " AND ".join(filters)
 
     def _obfuscate_query(self, query_text: str) -> dict | None:
         """

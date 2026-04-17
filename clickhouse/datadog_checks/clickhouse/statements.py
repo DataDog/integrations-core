@@ -69,7 +69,6 @@ WHERE
     AND is_initial_query = 1
     AND query != ''
     AND normalized_query_hash != 0
-    {internal_user_filter}
 GROUP BY normalized_query_hash, server_node
 ORDER BY total_duration_ms DESC
 """
@@ -221,7 +220,6 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
             query = (
                 STATEMENTS_QUERY.replace("{query_log_table}", query_log_table)
                 .replace("{checkpoint_filter}", checkpoint_filter)
-                .replace("{internal_user_filter}", self._get_internal_user_filter())
             )
             params["min_checkpoint_us"] = min_checkpoint
 
