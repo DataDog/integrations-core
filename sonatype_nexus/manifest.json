@@ -32,6 +32,7 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Category::Metrics",
+      "Category::Developer Tools",
       "Offering::Integration",
       "Submitted Data Type::Metrics"
     ]

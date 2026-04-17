@@ -23,6 +23,8 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Metrics",
+      "Category::Collaboration",
+      "Category::Developer Tools",
       "Offering::Integration",
       "Submitted Data Type::Metrics"
     ]

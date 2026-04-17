@@ -25,6 +25,7 @@
         ],
         "classifier_tags": [
             "Category::Caching",
+            "Category::Network",
             "Category::Log Collection",
             "Supported OS::Linux",
             "Supported OS::Windows",
