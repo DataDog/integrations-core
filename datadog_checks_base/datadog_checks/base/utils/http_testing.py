@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+from collections.abc import Mapping
 from datetime import timedelta
 from http.client import responses as http_responses
 from io import BytesIO
@@ -42,7 +43,7 @@ class _CaseInsensitiveDict(dict):
         return super().pop(key.lower() if isinstance(key, str) else key, *args)
 
     def update(self, other=(), **kwargs):
-        if isinstance(other, dict):
+        if isinstance(other, Mapping):
             other = {(k.lower() if isinstance(k, str) else k): v for k, v in other.items()}
         elif other:
             other = [(k.lower() if isinstance(k, str) else k, v) for k, v in other]

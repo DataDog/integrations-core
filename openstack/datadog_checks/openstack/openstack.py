@@ -14,6 +14,7 @@ import requests
 import simplejson as json
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 
 SOURCE_TYPE = 'openstack'
 
@@ -218,7 +219,12 @@ class OpenStackScope(object):
         exception_msg = None
         try:
             auth_resp = cls.request_auth_token(auth_scope, identity, keystone_server_url, ssl_verify, proxy_config)
-        except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+        except (
+            requests.exceptions.HTTPError,
+            requests.exceptions.Timeout,
+            requests.exceptions.ConnectionError,
+            HTTPTimeoutError,
+        ):
             exception_msg = "Failed keystone auth with user:{user} domain:{domain} scope:{scope} @{url}".format(
                 user=identity['password']['user']['name'],
                 domain=identity['password']['user']['domain']['id'],
@@ -240,6 +246,7 @@ class OpenStackScope(object):
                 requests.exceptions.HTTPError,
                 requests.exceptions.Timeout,
                 requests.exceptions.ConnectionError,
+                HTTPTimeoutError,
             ) as e:
                 exception_msg = "{msg} and also failed keystone auth with \
                 identity:{user} domain:{domain} scope:{scope} @{url}: {ex}".format(
@@ -274,7 +281,12 @@ class OpenStackUnscoped(OpenStackScope):
         try:
             project_resp = cls.request_project_list(auth_token, keystone_server_url, ssl_verify, proxy_config)
             projects = project_resp.json().get('projects')
-        except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+        except (
+            requests.exceptions.HTTPError,
+            requests.exceptions.Timeout,
+            requests.exceptions.ConnectionError,
+            HTTPTimeoutError,
+        ) as e:
             exception_msg = "unable to retrieve project list from keystone auth with identity: @{url}: {ex}".format(
                 url=keystone_server_url, ex=e
             )
@@ -292,6 +304,7 @@ class OpenStackUnscoped(OpenStackScope):
                 requests.exceptions.HTTPError,
                 requests.exceptions.Timeout,
                 requests.exceptions.ConnectionError,
+                HTTPTimeoutError,
             ) as e:
                 exception_msg = "unable to retrieve project from keystone auth with identity: @{url}: {ex}".format(
                     url=keystone_server_url, ex=e
@@ -1061,7 +1074,12 @@ class OpenStackCheck(AgentCheck):
                 AgentCheck.OK,
                 tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + tags,
             )
-        except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+        except (
+            requests.exceptions.HTTPError,
+            requests.exceptions.Timeout,
+            requests.exceptions.ConnectionError,
+            HTTPTimeoutError,
+        ):
             self.service_check(
                 self.COMPUTE_API_SC,
                 AgentCheck.CRITICAL,
@@ -1082,7 +1100,12 @@ class OpenStackCheck(AgentCheck):
                 AgentCheck.OK,
                 tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + tags,
             )
-        except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+        except (
+            requests.exceptions.HTTPError,
+            requests.exceptions.Timeout,
+            requests.exceptions.ConnectionError,
+            HTTPTimeoutError,
+        ):
             self.service_check(
                 self.NETWORK_API_SC,
                 AgentCheck.CRITICAL,
@@ -1286,7 +1309,7 @@ class OpenStackCheck(AgentCheck):
                 self.warning("Error reaching nova API")
 
             return
-        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError, HTTPTimeoutError):
             # exponential backoff
             self.do_backoff(instance)
             self.warning("There were some problems reaching the nova API - applying exponential backoff")
