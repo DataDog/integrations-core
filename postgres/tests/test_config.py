@@ -101,6 +101,7 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
         FeatureKey.QUERY_SAMPLES,
         FeatureKey.COLLECT_SETTINGS,
         FeatureKey.COLLECT_SCHEMAS,
+        FeatureKey.COLLECT_COLUMN_STATS,
         FeatureKey.QUERY_ACTIVITY,
         FeatureKey.QUERY_METRICS,
         FeatureKey.DATA_OBSERVABILITY,
