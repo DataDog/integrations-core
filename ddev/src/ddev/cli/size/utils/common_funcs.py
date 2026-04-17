@@ -331,7 +331,7 @@ def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[st
             if not match:
                 raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
             name = match.group(1)
-            url = match.group(2)
+            url = match.group(2).replace("${INTEGRATIONS_WHEELS_STORAGE}", "stable")
 
             deps.append(name)
             download_urls.append(url)
