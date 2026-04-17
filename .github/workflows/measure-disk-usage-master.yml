@@ -5,7 +5,7 @@ run-name: "Measure Disk Usage (Master) [${{ github.sha }}]"
 # The main measure-disk-usage.yml workflow subscribes to resolve-build-deps via
 # workflow_run, but resolve-build-deps no longer runs on master pushes. This
 # workflow restores the master telemetry path until measure-disk-usage.yml is
-# reworked to subscribe to .deps/ changes directly (see dependency-resolution.allium Q5).
+# reworked to subscribe to .deps/ changes directly.
 
 on:
   push:
