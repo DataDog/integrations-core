@@ -10,7 +10,6 @@ from time import time
 
 import psycopg
 from cachetools import TTLCache
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db import QueryExecutor
@@ -22,6 +21,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.postgres.azure import AZURE_DEFAULT_AUTH_TYPE
 from datadog_checks.postgres.connection_pool import (
     AWSTokenProvider,
     AzureTokenProvider,
@@ -976,8 +976,11 @@ class PostgreSql(DatabaseCheck):
                 role_arn=self._config.aws.managed_authentication.role_arn,
             )
         elif self._config.azure.managed_authentication.enabled:
+            auth_type = self._config.azure.managed_authentication.auth_type
             return AzureTokenProvider(
+                auth_type=auth_type,
                 client_id=self._config.azure.managed_authentication.client_id,
+                tenant_id=self._config.azure.managed_authentication.tenant_id,
                 identity_scope=self._config.azure.managed_authentication.identity_scope,
             )
         else:

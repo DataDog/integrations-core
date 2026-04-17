@@ -7,7 +7,6 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
-
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.postgres.config import (
     FeatureKey,
@@ -358,6 +357,41 @@ def test_cloud_validations(mock_check, minimal_instance):
     config, result = build_config(check=mock_check)
     assert result.valid
     assert config.azure.managed_authentication.enabled
+
+
+def test_cloud_validations_azure_workload_identity(mock_check, minimal_instance):
+    """Test that workload_identity auth_type is valid without client_id."""
+    instance = minimal_instance.copy()
+    instance['azure'] = {'managed_authentication': {'enabled': True, 'auth_type': 'workload_identity'}}
+    instance['password'] = None
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.azure.managed_authentication.auth_type == 'workload_identity'
+
+
+@pytest.mark.parametrize(
+    'auth_type, has_client_id, expect_valid',
+    [
+        ('workload_identity', False, True),
+        ('managed_identity', True, True),
+        ('managed_identity', False, False),
+        ('bad_type', True, False),
+    ],
+    ids=['workload_no_client_id', 'managed_with_client_id', 'managed_missing_client_id', 'invalid_auth_type'],
+)
+def test_azure_auth_type_validation(mock_check, minimal_instance, auth_type, has_client_id, expect_valid):
+    instance = minimal_instance.copy()
+    auth_cfg = {'enabled': True, 'auth_type': auth_type}
+    if has_client_id:
+        auth_cfg['client_id'] = 'some-id'
+    instance['azure'] = {'managed_authentication': auth_cfg}
+    instance['password'] = None
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    _, result = build_config(check=mock_check)
+    assert result.valid == expect_valid
 
 
 @pytest.mark.parametrize(

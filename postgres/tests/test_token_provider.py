@@ -5,6 +5,7 @@
 import time
 from unittest.mock import MagicMock, Mock, patch
 
+import pytest
 from datadog_checks.postgres.connection_pool import (
     AWSTokenProvider,
     AzureTokenProvider,
@@ -183,15 +184,18 @@ def test_aws_token_provider_integration():
 
 def test_azure_token_provider_initialization():
     """Test AzureTokenProvider initialization."""
-    provider = AzureTokenProvider(client_id="test-client-id", identity_scope="https://test.scope/.default")
+    provider = AzureTokenProvider(
+        auth_type="managed_identity", client_id="test-client-id", identity_scope="https://test.scope/.default"
+    )
 
+    assert provider.auth_type == "managed_identity"
     assert provider.client_id == "test-client-id"
     assert provider.identity_scope == "https://test.scope/.default"
 
 
 def test_azure_token_provider_initialization_without_scope():
     """Test AzureTokenProvider initialization without identity_scope."""
-    provider = AzureTokenProvider(client_id="test-client-id")
+    provider = AzureTokenProvider(auth_type="managed_identity", client_id="test-client-id")
 
     assert provider.identity_scope is None
 
@@ -207,7 +211,9 @@ def test_azure_fetch_token_with_scope(mock_credential_class):
     mock_credential.get_token.return_value = mock_token
     mock_credential_class.return_value = mock_credential
 
-    provider = AzureTokenProvider(client_id="test-client-id", identity_scope="https://custom.scope/.default")
+    provider = AzureTokenProvider(
+        auth_type="managed_identity", client_id="test-client-id", identity_scope="https://custom.scope/.default"
+    )
 
     token, expires_at = provider._fetch_token()
 
@@ -228,7 +234,7 @@ def test_azure_fetch_token_without_scope(mock_credential_class):
     mock_credential.get_token.return_value = mock_token
     mock_credential_class.return_value = mock_credential
 
-    provider = AzureTokenProvider(client_id="test-client-id")
+    provider = AzureTokenProvider(auth_type="managed_identity", client_id="test-client-id")
 
     token, expires_at = provider._fetch_token()
 
@@ -249,7 +255,7 @@ def test_azure_token_provider_integration():
         mock_credential.get_token.return_value = mock_token
         mock_credential_class.return_value = mock_credential
 
-        provider = AzureTokenProvider(client_id="test-client-id")
+        provider = AzureTokenProvider(auth_type="managed_identity", client_id="test-client-id")
 
         # First call should fetch token
         token1 = provider.get_token()
@@ -363,6 +369,52 @@ def test_multiple_connection_pools_no_token_collision():
     # Clean up
     pool_manager_1.close_all()
     pool_manager_2.close_all()
+
+
+@pytest.mark.parametrize(
+    'client_id, tenant_id, expected_kwargs',
+    [
+        (None, None, {'client_id': None, 'tenant_id': None}),
+        ('c', None, {'client_id': 'c', 'tenant_id': None}),
+        (None, 't', {'client_id': None, 'tenant_id': 't'}),
+        ('c', 't', {'client_id': 'c', 'tenant_id': 't'}),
+    ],
+)
+@patch('datadog_checks.postgres.azure.WorkloadIdentityCredential')
+def test_workload_identity_credential_kwargs(mock_cred, client_id, tenant_id, expected_kwargs):
+    mock_token = Mock()
+    mock_token.token = "wi_token"
+    mock_token.expires_on = time.time() + 3600
+    mock_cred.return_value.get_token.return_value = mock_token
+
+    provider = AzureTokenProvider(auth_type='workload_identity', client_id=client_id, tenant_id=tenant_id)
+    provider.get_token()
+
+    mock_cred.assert_called_once_with(**expected_kwargs)
+
+
+def test_azure_workload_identity_token_provider_integration():
+    """Test AzureTokenProvider with workload_identity auth_type."""
+    with patch('datadog_checks.postgres.azure.WorkloadIdentityCredential') as mock_credential_class:
+        mock_token = Mock()
+        mock_token.token = "integration_wi_token"
+        mock_token.expires_on = time.time() + 3600
+
+        mock_credential = Mock()
+        mock_credential.get_token.return_value = mock_token
+        mock_credential_class.return_value = mock_credential
+
+        provider = AzureTokenProvider(auth_type='workload_identity', client_id="test-client", tenant_id="test-tenant")
+
+        # First call should fetch token
+        token1 = provider.get_token()
+        assert token1 == "integration_wi_token"
+        assert mock_credential.get_token.call_count == 1
+
+        # Second call should use cached token
+        token2 = provider.get_token()
+        assert token2 == "integration_wi_token"
+        assert mock_credential.get_token.call_count == 1
 
 
 class MockTokenProvider(TokenProvider):

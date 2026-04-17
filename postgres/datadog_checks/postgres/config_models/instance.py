@@ -47,9 +47,17 @@ class ManagedAuthentication1(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    client_id: Optional[str] = None
+    auth_type: Optional[str] = Field('managed_identity', examples=['managed_identity'])
+    client_id: Optional[str] = Field(
+        None,
+        description='Required for `managed_identity` auth. Optional for `workload_identity`,\nwhere it defaults to the `AZURE_CLIENT_ID` environment variable.\n',
+    )
     enabled: Optional[bool] = Field(None, examples=[False])
     identity_scope: Optional[str] = Field(None, examples=['https://ossrdbms-aad.database.windows.net/.default'])
+    tenant_id: Optional[str] = Field(
+        None,
+        description='Only used for `workload_identity` auth. Defaults to the `AZURE_TENANT_ID`\nenvironment variable. Ignored for `managed_identity`.\n',
+    )
 
 
 class Azure(BaseModel):
