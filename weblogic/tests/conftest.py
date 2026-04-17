@@ -30,7 +30,6 @@ def dd_environment(instance):
 
 
 @pytest.fixture(scope='session', autouse=True)
-@pytest.mark.usefixtures('dd_environment')
 def instance():
     inst = load_jmx_config()
     # Add managed servers to the configuration

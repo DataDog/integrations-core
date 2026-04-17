@@ -911,11 +911,21 @@
                                 {
                                     "on_right_yaxis": false,
                                     "response_format": "timeseries",
+                                    "formulas": [
+                                        {
+                                            "formula": "clamp_min(diff(query1), 0) * query2"
+                                        }
+                                    ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.containers.state.terminated{$cluster,$namespace,$deployment,reason:oomkilled,$scope,$statefulset,$daemonset,$job} by {pod_name}",
+                                            "query": "sum:kubernetes.containers.restarts{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name,kube_container_name}.fill(last)",
                                             "data_source": "metrics",
                                             "name": "query1"
+                                        },
+                                        {
+                                            "query": "sum:kubernetes.containers.last_state.terminated{$cluster,$namespace,$deployment,reason:oomkilled,$scope,$statefulset,$daemonset,$job} by {pod_name,kube_container_name}.rollup(max)",
+                                            "data_source": "metrics",
+                                            "name": "query2"
                                         }
                                     ],
                                     "style": {

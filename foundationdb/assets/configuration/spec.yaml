@@ -17,16 +17,19 @@ files:
       value:
         example: /var/lib/foundationdb/fdb.cluster
         type: string
+        require_trusted_provider: true
     - name: tls_certificate_file
       description: Path to the file from which the local certificates can be loaded
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
     - name: tls_key_file
       description: Path to the file from which to load the private key
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
     - name: tls_verify_peers
       description: The byte-string for the verification of peer certificates and sessions
       fleet_configurable: true
@@ -43,6 +46,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
     - name: custom_queries
       description: |
         Define custom queries to collect custom metrics from your FoundationDB

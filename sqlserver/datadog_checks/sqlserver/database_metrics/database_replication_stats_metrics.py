@@ -5,18 +5,18 @@
 from .base import SqlserverDatabaseMetricsBase
 
 DATABASE_REPLICATION_STATS_METRICS_QUERY = {
-    "name": "sys.dm_hadr_database_replica_states",
+    "name": "sys.dm_hadr_availability_replica_states",
     "query": """SELECT
         resource_group_id,
         name,
         replica_server_name,
-        synchronization_state_desc,
-        synchronization_state
-        from sys.dm_hadr_database_replica_states as dhdrs
+        synchronization_health_desc as synchronization_state_desc,
+        synchronization_health as replica_sync_state
+        from sys.dm_hadr_availability_replica_states as dhars
         inner join sys.availability_groups as ag
-        on ag.group_id = dhdrs.group_id
+        on ag.group_id = dhars.group_id
         inner join sys.availability_replicas as ar
-        on dhdrs.replica_id = ar.replica_id
+        on dhars.replica_id = ar.replica_id
     """.strip(),
     "columns": [
         {"name": "availability_group", "type": "tag"},
