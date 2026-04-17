@@ -9,6 +9,7 @@ __all__ = [
     'HTTPStatusError',
     'HTTPTimeoutError',
     'HTTPConnectionError',
+    'HTTPInvalidURLError',
     'HTTPSSLError',
 ]
 
@@ -33,6 +34,10 @@ class HTTPTimeoutError(HTTPRequestError):
 
 
 class HTTPConnectionError(HTTPRequestError):
+    pass
+
+
+class HTTPInvalidURLError(HTTPRequestError):
     pass
 
 
