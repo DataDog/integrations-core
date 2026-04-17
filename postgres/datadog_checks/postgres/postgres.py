@@ -980,8 +980,11 @@ class PostgreSql(DatabaseCheck):
                 role_arn=self._config.aws.managed_authentication.role_arn,
             )
         elif self._config.azure.managed_authentication.enabled:
+            auth_type = self._config.azure.managed_authentication.auth_type
             return AzureTokenProvider(
+                auth_type=auth_type,
                 client_id=self._config.azure.managed_authentication.client_id,
+                tenant_id=self._config.azure.managed_authentication.tenant_id,
                 identity_scope=self._config.azure.managed_authentication.identity_scope,
             )
         else:
