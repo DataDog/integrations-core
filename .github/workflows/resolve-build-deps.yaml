@@ -209,11 +209,11 @@ jobs:
         python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest --constraints .constraints/constraints.txt
 
     - name: Publish image
-      if: github.event_name == 'push' && needs.check-should-run.outputs.builder_changed == 'true'
+      if: needs.check-should-run.outputs.builder_changed == 'true'
       run: ${DOCKER} push ${{ env.BUILDER_IMAGE }}
 
     - name: Save new image digest
-      if: github.event_name == 'push' && needs.check-should-run.outputs.builder_changed == 'true'
+      if: needs.check-should-run.outputs.builder_changed == 'true'
       run: >-
         ${DOCKER} inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }}
         | cut -d '@' -f 2
