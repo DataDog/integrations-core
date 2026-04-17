@@ -248,7 +248,9 @@ def _validate_code_coverage(
     config_path = app.repo.path / config_filename
 
     if not config_path.is_file():
-        validation_tracker.error((repo_choice,), message=f'Unable to find the code coverage config file: {config_filename}')
+        validation_tracker.error(
+            (repo_choice,), message=f'Unable to find the code coverage config file: {config_filename}'
+        )
         validation_tracker.display()
         app.abort()
 
@@ -299,10 +301,12 @@ def _validate_code_coverage(
         if sync:
             fixed = True
             for check_name in missing_services:
-                existing_services.append({
-                    'id': check_name,
-                    'paths': get_coverage_sources(check_name, app),
-                })
+                existing_services.append(
+                    {
+                        'id': check_name,
+                        'paths': get_coverage_sources(check_name, app),
+                    }
+                )
                 app.display_success(f'Added service `{check_name}`\n')
         else:
             success = False
@@ -319,10 +323,12 @@ def _validate_code_coverage(
         # Ensure at least one gate exists
         gates = config.get('gates') or []
         if not gates:
-            gates.append({
-                'type': 'total_coverage_percentage',
-                'config': {'threshold': DEFAULT_COVERAGE_THRESHOLD},
-            })
+            gates.append(
+                {
+                    'type': 'total_coverage_percentage',
+                    'config': {'threshold': DEFAULT_COVERAGE_THRESHOLD},
+                }
+            )
             config['gates'] = gates
             app.display_success(f'Added default coverage gate with {DEFAULT_COVERAGE_THRESHOLD}% threshold\n')
 

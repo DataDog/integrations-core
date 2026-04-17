@@ -42,7 +42,7 @@ VALIDATIONS: dict[str, ValidationConfig] = {
         description="Verify check versions match the Agent requirements file",
     ),
     "ci": ValidationConfig(
-        description="Validate CI configuration and Codecov settings",
+        description="Validate CI configuration and code coverage settings",
         repo_wide=True,
         fix_flag="--sync",
     ),
