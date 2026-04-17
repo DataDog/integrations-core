@@ -176,11 +176,6 @@ pipeline:
   filter:
     query: "source:checkpoint-quantum-firewall"
   processors:
-    - type: service-remapper
-      name: Define `product` as the official service of the log
-      enabled: true
-      sources:
-        - product
     - type: date-remapper
       name: Define `time` as the official date of the log
       enabled: true
