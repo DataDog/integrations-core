@@ -4,42 +4,22 @@
 
 This integration parses and ingests the following types of logs:
 
-- **Audit Logs**: Provides visibility into audit activities including configuration changes, user authentication patterns within the Palo Alto Networks Cortex XSOAR platform.
-- **Incidents**: Provides visibilities into incidents from Palo Alto Networks Cortex XSOAR. 
+- **Audit Logs**: Capture all administrative user activities within Palo Alto Networks Cortex XSOAR.
+- **Incidents**: Capture key details of incidents, including severity, status, type, and ownership, to support tracking and investigation activities in Palo Alto Networks Cortex XSOAR.
 
 You can visualize detailed insights into these logs through the out-of-the-box dashboards. Additionally, ready-to-use Cloud SIEM detection rules are available to help you monitor and respond to potential security threats effectively.
 
 This integration collects the following metrics:
 
-- **Playbook Execution Count**: Represents the total number of playbook executions recorded within the selected time range, indicating the level of automation activity and operational workload.
-- **Playbook Execution Failed Count**: Represents the total number of playbook executions that ended in failure within the selected time range, helping identify automation issues, monitor reliability, and track error trends.
-- **playbook_execution Average Duration**: Represents the average time taken to complete playbook executions within the selected time range, helping evaluate automation performance and identify delays in workflows.
-- **Command Execution Count**: Represents the total number of command executions within the selected time range, helping measure automation activity, track integration usage, and monitor operational workload.
-- **Command Execution Failed Count**: Represents the total number of command executions that resulted in failure within the selected time range, helping identify integration issues, monitor reliability, and track error trends.
-- **Task Execution Count**: Represents the total number of task executions within the selected time range, helping measure workflow activity, monitor automation usage, and understand operational workload.
-- **Task Execution Failed Count**: Represents the total number of task executions that resulted in failure within the selected time range, helping identify workflow issues, monitor reliability, and track error trends.
-- **Rate Limited API Call Count**: Represents the total number of API calls that were rate limited within the selected time range, helping identify throttling events, monitor integration limits, and track potential performance impacts.
-- **API Execution Count**: Represents the total number of API executions within the selected time range, helping measure integration activity, monitor usage patterns, and understand operational workload.
-- **Withing SLA Count**: Represents the total number of items completed within the defined Service Level Agreement (SLA) timeframe, helping measure operational efficiency, track compliance, and monitor response performance.
-- **Late SLA Count**: Represents the total number of items that exceeded the defined Service Level Agreement (SLA) timeframe within the selected period, helping track delays, monitor compliance gaps, and identify areas impacting response performance.
-
-**Note:** All metrics are collected at 5-minute intervals.
+- **Automation Insight Metrics**: Provide visibility into playbook, task, and command execution activity, including counts, failures, and execution duration, to help monitor automation performance, identify errors, and evaluate operational efficiency.
+- **API Execution Metrics**: Provide visibility into API execution activity, including total calls and rate-limited requests, to help monitor integration usage, detect throttling events, and evaluate API performance.
+- **SLA Metrics**: Provide visibility into incident response timelines, including mean time to detection, triage, containment, and resolution, along with counts of items within and outside SLA thresholds, helping monitor response performance and compliance.
 
 Visualize detailed insights into these metrics through the out-of-the-box dashboards. Additionally, monitors are provided to alert you to any potential issues.
 
-### Monitors
-
-#### Metrics
-
-Here is the list of monitors for metrics:
-
-- Anomalous spikes in playbook execution failure
-- High integration error rate alert
-- Connectivity errors per integration alert
-
 ## Setup
 
-### Generate API Key
+### Generate API Key, API Key ID and API URL
 
 1. Sign in to Palo Alto Networks Cortex XSOAR platform.
 2. Navigate to **Settings & Info** > **Settings** > **Integrations** > **API Keys**.
@@ -48,14 +28,8 @@ Here is the list of monitors for metrics:
    - **Security Level**: Select **Standard**.
    - **Role**: Select **Read-Only**.
 5. Click **Generate**.
-
-### Get API Key ID 
-1. Navigate to **Settings & Info** > **Settings** > **Integrations** > **API Keys**
-1. In the **API Keys** table, locate the **ID** field for created API Key.
-
-### Get FQDN
-1. Navigate to **Settings & Info** > **Settings** > **Integrations** > **API Keys**.
-2. Click **Copy API URL**.
+6. In the **API Keys** table, locate the **ID** field for the created API Key.
+7. Click **Copy API URL** to copy the API URL.
 
 ### Connect your Palo Alto Networks Cortex XSOAR account to Datadog
 

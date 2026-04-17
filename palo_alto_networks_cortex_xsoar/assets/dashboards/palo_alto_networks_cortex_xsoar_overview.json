@@ -524,7 +524,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 1
+                "height": 17
             }
         },
         {
@@ -540,7 +540,7 @@
                         "id": 5892796361897741,
                         "definition": {
                             "type": "note",
-                            "content": "This group provides a high-level overview of automation and API activity in Palo Alto Networks Cortex XSOAR. It shows total automation and API execution counts, automation execution trends by type, and API execution trends over time.",
+                            "content": "This group provides an overview of automation and API activity along with SLA performance. It highlights automation and API execution activity, trends over time, and SLA status by type.",
                             "background_color": "green",
                             "font_size": "14",
                             "text_align": "center",
@@ -651,17 +651,17 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:palo_alto_networks_cortex_xsoar.playbook_execution.count{*}.as_count()"
+                                            "query": "sum:palo_alto_networks_cortex_xsoar.playbook_execution.count{*}.as_count().rollup(sum, 300)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:palo_alto_networks_cortex_xsoar.task_execution.count{*}.as_count()"
+                                            "query": "sum:palo_alto_networks_cortex_xsoar.task_execution.count{*}.as_count().rollup(sum, 300)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:palo_alto_networks_cortex_xsoar.command_execution.count{*}.as_count()"
+                                            "query": "sum:palo_alto_networks_cortex_xsoar.command_execution.count{*}.as_count().rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -748,7 +748,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "API Executions",
+                                            "alias": "Executions",
                                             "formula": "query1"
                                         }
                                     ],
@@ -756,7 +756,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:palo_alto_networks_cortex_xsoar.api_execution.count{*}.as_count()"
+                                            "query": "sum:palo_alto_networks_cortex_xsoar.api_execution.count{*}.as_count().rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -776,14 +776,112 @@
                             "width": 9,
                             "height": 3
                         }
+                    },
+                    {
+                        "id": 1412882020652824,
+                        "definition": {
+                            "title": "Within SLA by type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "bar_chart",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:palo_alto_networks_cortex_xsoar.sla.within_count{*} by {type}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8590188778231516,
+                        "definition": {
+                            "title": "Late SLA by type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "bar_chart",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:palo_alto_networks_cortex_xsoar.sla.late_count{*} by {type}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 7,
+                            "width": 6,
+                            "height": 4
+                        }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 8,
+                "y": 40,
                 "width": 12,
-                "height": 1,
+                "height": 12,
                 "is_column_break": true
             }
         },
@@ -1316,9 +1414,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 9,
+                "y": 52,
                 "width": 12,
-                "height": 1
+                "height": 10
             }
         },
         {
@@ -1330,6 +1428,27 @@
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
+                    {
+                        "id": 2211626017067590,
+                        "definition": {
+                            "type": "note",
+                            "content": "This group provides an overview of monitors and their status, helping track configured monitors and quickly identify their current state.",
+                            "background_color": "green",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
                     {
                         "id": 2658646207540137,
                         "definition": {
@@ -1350,7 +1469,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 0,
+                            "y": 1,
                             "width": 12,
                             "height": 4
                         }
@@ -1359,9 +1478,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 10,
+                "y": 62,
                 "width": 12,
-                "height": 1
+                "height": 6
             }
         }
     ],

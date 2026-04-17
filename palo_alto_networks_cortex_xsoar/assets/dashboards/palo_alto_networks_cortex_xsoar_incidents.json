@@ -55,7 +55,7 @@
                         "id": 4405873161198118,
                         "definition": {
                             "type": "note",
-                            "content": "Provides a high-level view of incident activity, including incident volume, trends, types, and status details. Use this group to quickly assess overall incident flow and identify areas requiring attention.",
+                            "content": "This group provides a high-level view of incident activity, including incident volume, trends, types, and status details. Use this group to quickly assess overall incident flow and identify areas requiring attention.",
                             "background_color": "green",
                             "font_size": "14",
                             "text_align": "center",
@@ -87,7 +87,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $user_name $incident_name $incident_type"
+                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $incident_type $user_name $incident_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -156,7 +156,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $user_name $incident_name $incident_type"
+                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $incident_type $user_name $incident_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -201,7 +201,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $user_name $incident_name $incident_type"
+                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $incident_type $user_name $incident_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -256,7 +256,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $user_name $incident_name $incident_type"
+                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $incident_type $user_name $incident_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -324,7 +324,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $user_name $incident_name $incident_type",
+                                        "query_string": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $incident_type $user_name $incident_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -368,7 +368,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $user_name $incident_name $incident_type",
+                                        "query_string": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $incident_type $user_name $incident_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -481,7 +481,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $user_name $incident_name $incident_type"
+                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $incident_type $user_name $incident_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -535,7 +535,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $user_name $incident_name $incident_type"
+                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $incident_type $user_name $incident_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -611,7 +611,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents -@playbookId:\"\" $user_name $incident_name $incident_type"
+                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents -@playbookId:\"\" $incident_type $user_name $incident_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -687,7 +687,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $user_name $incident_name $incident_type"
+                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $incident_type $user_name $incident_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -760,7 +760,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents @runStatus:* -@runStatus:\"\" $user_name $incident_name $incident_type",
+                                        "query_string": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents @runStatus:* -@runStatus:\"\" $incident_type $user_name $incident_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -807,7 +807,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $user_name $incident_name $incident_type"
+                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $incident_type $user_name $incident_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -880,7 +880,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents @phase:* -@phase:\"\" $user_name $incident_name $incident_type",
+                                        "query_string": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents @phase:* -@phase:\"\" $incident_type $user_name $incident_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -927,7 +927,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents -@parent:\"\" $user_name $incident_name $incident_type"
+                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents -@parent:\"\" $incident_type $user_name $incident_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -940,15 +940,14 @@
                                                 ],
                                                 "limit": 1000,
                                                 "sort": {
-                                                    "aggregation": "cardinality",
-                                                    "metric": "@id",
+                                                    "aggregation": "count",
+                                                    "metric": "count",
                                                     "order": "desc"
                                                 },
                                                 "should_exclude_missing": true
                                             },
                                             "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@id"
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -996,7 +995,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $user_name $incident_name $incident_type"
+                                                "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents $incident_type $user_name $incident_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1069,7 +1068,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents (@closeNotes:* OR @closeReason:* OR @closingUserId:*) -@closeNotes:\"\" -@closeReason:\"\" -@closingUserId:\"\" $user_name $incident_name $incident_type",
+                                        "query_string": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents (@closeNotes:* OR @closeReason:* OR @closingUserId:*) -@closeNotes:\"\" -@closeReason:\"\" -@closingUserId:\"\" $incident_type $user_name $incident_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },

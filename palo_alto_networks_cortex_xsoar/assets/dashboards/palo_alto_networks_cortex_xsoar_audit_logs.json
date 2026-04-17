@@ -1,6 +1,6 @@
 {
-    "title": "Palo Alto Networks Cortex XSOAR Audit Logs",
-    "description": "This dashboard provides visibility into audit logs and authentication activity, highlighting log volume, trends, users, hosts, severity distribution, client IP patterns, and access outcomes.",
+    "title": "Palo Alto Networks Cortex XSOAR Audit",
+    "description": "This dashboard provides visibility into administrative user activities captured in audit logs within Palo Alto Networks Cortex XSOAR.",
     "widgets": [
         {
             "id": 4286664588589624,
@@ -25,7 +25,7 @@
             "id": 2990398897345185,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides visibility into audit logs and authentication activity, highlighting log volume, trends, users, hosts, severity distribution, client IP patterns, and access outcomes. Use this dashboard to monitor system activity, identify unusual behavior, and support investigation.\n\nFor more information, see the [Palo Alto Networks Cortex XSOAR Integration Documentation](https://docs.datadoghq.com/integrations/palo_alto_networks_cortex_xsoar/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "content": "This dashboard provides visibility into administrative user activities captured in audit logs within Palo Alto Networks Cortex XSOAR, highlighting log volume, trends, users, hosts, severity distribution, client IP patterns, and access outcomes.\n\nFor more information, see the [Palo Alto Networks Cortex XSOAR Integration Documentation](https://docs.datadoghq.com/integrations/palo_alto_networks_cortex_xsoar/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",
@@ -55,7 +55,7 @@
                         "id": 5384626431324785,
                         "definition": {
                             "type": "note",
-                            "content": "Provides visibility into audit activity, highlighting log volume, user and host activity, severity distribution, and client IP patterns. Use this group to monitor administrative actions, detect anomalies, and investigate audit events with detailed context.",
+                            "content": "This group provides visibility into audit activity, highlighting log volume, user and host activity, severity distribution, and client IP patterns. Use this group to monitor administrative actions, detect anomalies, and investigate audit events with detailed context.",
                             "background_color": "green",
                             "font_size": "14",
                             "text_align": "center",

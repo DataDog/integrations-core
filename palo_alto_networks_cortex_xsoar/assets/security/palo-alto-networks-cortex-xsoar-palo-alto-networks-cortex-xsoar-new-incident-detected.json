@@ -1,0 +1,63 @@
+{
+    "name": "Palo Alto Networks Cortex XSOAR new incident detected",
+    "product": [
+        "security_monitoring"
+    ],
+    "defaultRuleId": "",
+    "tags": [
+        "mitre_platform:saas",
+        "source:palo-alto-networks-cortex-xsoar",
+        "security:attack"
+    ],
+    "isEnabled": true,
+    "isBeta": true,
+    "isShadowDeployed": true,
+    "options": {
+        "detectionMethod": "third_party",
+        "maxSignalDuration": 86400,
+        "keepAlive": 3600,
+        "thirdPartyRuleOptions": {
+            "defaultStatus": "Info",
+            "defaultNotifications": [],
+            "rootQueries": [
+                {
+                    "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:incidents @modified:N/A",
+                    "groupByFields": [
+                        "@id",
+                        "@usr.name"
+                    ]
+                }
+            ],
+            "signalTitleTemplate": "Palo Alto Networks Cortex XSOAR new incident detected"
+        },
+        "relatedSignalsFields": []
+    },
+    "queries": [
+        {
+            "query": "@severity_value:Critical"
+        },
+        {
+            "query": "@severity_value:High"
+        },
+        {
+            "query": "@severity_value:Medium"
+        },
+        {
+            "query": "@severity_value:Low"
+        }
+    ],
+    "cases": [
+        {
+            "status": "Critical"
+        },
+        {
+            "status": "High"
+        },
+        {
+            "status": "Medium"
+        },
+        {
+            "status": "Low"
+        }
+    ]
+}

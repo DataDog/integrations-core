@@ -12,6 +12,16 @@
     "title": "Palo Alto Networks Cortex XSOAR",
     "media": [
       {
+        "caption": "Palo Alto Networks Cortex XSOAR Overview",
+        "image_url": "images/palo_alto_networks_cortex_xsoar_overview_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Networks Cortex XSOAR Overview",
+        "image_url": "images/palo_alto_networks_cortex_xsoar_overview_light.png",
+        "media_type": "image"
+      },
+      {
         "caption": "Palo Alto Networks Cortex XSOAR Audit Logs",
         "image_url": "images/palo_alto_networks_cortex_xsoar_audit_logs_dark.png",
         "media_type": "image"
@@ -20,10 +30,37 @@
         "caption": "Palo Alto Networks Cortex XSOAR Audit Logs",
         "image_url": "images/palo_alto_networks_cortex_xsoar_audit_logs_light.png",
         "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Networks Cortex XSOAR Incidents",
+        "image_url": "images/palo_alto_networks_cortex_xsoar_incidents_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Networks Cortex XSOAR Incidents",
+        "image_url": "images/palo_alto_networks_cortex_xsoar_incidents_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Networks Cortex XSOAR Metrics",
+        "image_url": "images/palo_alto_networks_cortex_xsoar_metrics_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Networks Cortex XSOAR Metrics",
+        "image_url": "images/palo_alto_networks_cortex_xsoar_metrics_light.png",
+        "media_type": "image"
       }
     ],
     "classifier_tags": [
-      "Category::Metrics"
+      "Category::Security",
+      "Category::Metrics",
+      "Category::Incidents",
+      "Category::Log Collection",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Incidents",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -45,6 +82,14 @@
       "Palo Alto Networks Cortex XSOAR Audit Logs": "assets/dashboards/palo_alto_networks_cortex_xsoar_audit_logs.json",
       "Palo Alto Networks Cortex XSOAR Incidents": "assets/dashboards/palo_alto_networks_cortex_xsoar_incidents.json",
       "Palo Alto Networks Cortex XSOAR Metrics": "assets/dashboards/palo_alto_networks_cortex_xsoar_metrics.json"
+    },
+    "monitors": {
+      "Anomalous spikes in playbook execution failure": "assets/monitors/anomalous_spikes_in_playbook_execution_failure.json",
+      "Connectivity errors per integration alert": "assets/monitors/connectivity_errors_per_integration_alert.json",
+      "High integration error rate alert": "assets/monitors/high_integration_error_rate_alert.json"
+    },
+    "logs": {
+      "source": "palo-alto-networks-cortex-xsoar"
     }
   },
   "author": {

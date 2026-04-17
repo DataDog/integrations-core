@@ -1,0 +1,54 @@
+{
+    "name": "Palo Alto Networks Cortex XSOAR multiple failed login attempts detected followed by successful login",
+    "product": [
+        "security_monitoring"
+    ],
+    "defaultRuleId": "",
+    "tags": [
+        "tactic:TA0006-credential-access",
+        "mitre_platform:saas",
+        "source:palo-alto-networks-cortex-xsoar",
+        "technique:T1110-brute-force",
+        "security:attack"
+    ],
+    "isEnabled": true,
+    "isBeta": true,
+    "isShadowDeployed": true,
+    "isMapperMetricsOnly": false,
+    "options": {
+        "detectionMethod": "threshold",
+        "evaluationWindow": 900,
+        "keepAlive": 3600,
+        "maxSignalDuration": 86400
+    },
+    "queries": [
+        {
+            "name": "failed_login",
+            "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:audit-logs @AUDIT_ENTITY_SUBTYPE:Login @evt.outcome:FAIL",
+            "groupByFields": [
+                "@network.client.ip",
+                "@usr.name"
+            ],
+            "distinctFields": [],
+            "aggregation": "count"
+        },
+        {
+            "name": "successful_login",
+            "query": "source:palo-alto-networks-cortex-xsoar @vendor.endpoint:audit-logs @AUDIT_ENTITY_SUBTYPE:Login @evt.outcome:SUCCESS",
+            "groupByFields": [
+                "@network.client.ip",
+                "@usr.name"
+            ],
+            "distinctFields": [],
+            "aggregation": "count"
+        }
+    ],
+    "cases": [
+        {
+            "condition": "failed_login >= 5 THEN successful_login > 0",
+            "name": "Failed login attempts followed by successful login",
+            "status": "Medium",
+            "notifications": []
+        }
+    ]
+}

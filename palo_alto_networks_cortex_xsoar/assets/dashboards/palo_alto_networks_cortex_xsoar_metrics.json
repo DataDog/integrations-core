@@ -1,14 +1,14 @@
 {
     "title": "Palo Alto Networks Cortex XSOAR Metrics",
-    "description": "This dashboard provides visibility into Cortex XSOAR metrics.",
+    "description": "This dashboard provides visibility into Automation Insights, API execution activity, and SLA metrics within Palo Alto Networks Cortex XSOAR.",
     "widgets": [
         {
             "id": 1428041187457901,
             "definition": {
                 "type": "image",
-                "url": "https://www.cisco.com/c/dam/assets/swa/img/anchor-info/cortex-primary-628x353.jpg",
-                "url_dark_theme": "https://www.cisco.com/c/dam/assets/swa/img/anchor-info/cortex-primary-628x353.jpg",
-                "sizing": "cover",
+                "url": "https://xsoar.pan.dev/img/Cortex_XSoar_logos_RGB_Cortex-Ng-Soar-Horizontal.svg",
+                "url_dark_theme": "https://xsoar.pan.dev/img/Cortex_XSoar_logos_RGB_Cortex-Ng-Soar-Horizontal-KO.svg",
+                "sizing": "contain",
                 "has_background": true,
                 "has_border": false,
                 "vertical_align": "center",
@@ -25,7 +25,7 @@
             "id": 4295850556181644,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides visibility into Palo Alto Cortex XSOAR metrics.\n\nFor more information, see the [Palo Alto Networks Cortex XSOAR Integration Documentation](https://docs.datadoghq.com/integrations/palo_alto_networks_cortex_xsoar/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "content": "This dashboard provides visibility into Automation Insights, API execution activity, and SLA metrics within Palo Alto Networks Cortex XSOAR.\n\nFor more information, see the [Palo Alto Networks Cortex XSOAR Integration Documentation](https://docs.datadoghq.com/integrations/palo_alto_networks_cortex_xsoar/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",
@@ -170,7 +170,7 @@
                             "title": "Playbook executions over time",
                             "title_size": "16",
                             "title_align": "left",
-                            "show_legend": false,
+                            "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
@@ -184,11 +184,11 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "Execution Count",
+                                            "alias": "Total Executions",
                                             "formula": "query1"
                                         },
                                         {
-                                            "alias": "Failed Failed Count",
+                                            "alias": "Failed Executions",
                                             "formula": "query2"
                                         }
                                     ],
@@ -196,12 +196,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:palo_alto_networks_cortex_xsoar.playbook_execution.count{*}.as_count()"
+                                            "query": "sum:palo_alto_networks_cortex_xsoar.playbook_execution.count{*}.as_count().rollup(sum, 300)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:palo_alto_networks_cortex_xsoar.playbook_execution.failed_count{*}.as_count()"
+                                            "query": "sum:palo_alto_networks_cortex_xsoar.playbook_execution.failed_count{*}.as_count().rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -235,7 +235,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:palo_alto_networks_cortex_xsoar.playbook_execution.avg_duration{*}",
+                                            "query": "avg:palo_alto_networks_cortex_xsoar.playbook_execution.avg_duration{*} by {playbook_name}.rollup(avg, 300)",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -249,6 +249,12 @@
                                     ],
                                     "formulas": [
                                         {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
                                             "formula": "query1"
                                         }
                                     ],
@@ -347,7 +353,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:palo_alto_networks_cortex_xsoar.playbook_execution.avg_duration{*} by {name}",
+                                            "query": "avg:palo_alto_networks_cortex_xsoar.playbook_execution.avg_duration{*} by {name}.rollup(avg, 300)",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -361,6 +367,12 @@
                                     ],
                                     "formulas": [
                                         {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
                                             "formula": "query1"
                                         }
                                     ],
@@ -442,7 +454,7 @@
                             "title": "Command executions over time",
                             "title_size": "16",
                             "title_align": "left",
-                            "show_legend": false,
+                            "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
                                 "avg",
@@ -456,11 +468,11 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "Execution Count",
+                                            "alias": "Total Executions",
                                             "formula": "query1"
                                         },
                                         {
-                                            "alias": "Failed Execution Count",
+                                            "alias": "Failed Executions",
                                             "formula": "query2"
                                         }
                                     ],
@@ -468,12 +480,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:palo_alto_networks_cortex_xsoar.command_execution.count{*}.as_count()"
+                                            "query": "sum:palo_alto_networks_cortex_xsoar.command_execution.count{*}.as_count().rollup(sum, 300)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:palo_alto_networks_cortex_xsoar.command_execution.failed_count{*}.as_count()"
+                                            "query": "sum:palo_alto_networks_cortex_xsoar.command_execution.failed_count{*}.as_count().rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -774,11 +786,11 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "Task Execution Count",
+                                            "alias": "Total Executions",
                                             "formula": "query1"
                                         },
                                         {
-                                            "alias": "Task Execution Failed Count",
+                                            "alias": "Failed Executions",
                                             "formula": "query2"
                                         }
                                     ],
@@ -786,12 +798,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:palo_alto_networks_cortex_xsoar.task_execution.count{*}.as_count()"
+                                            "query": "sum:palo_alto_networks_cortex_xsoar.task_execution.count{*}.as_count().rollup(sum, 300)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:palo_alto_networks_cortex_xsoar.task_execution.failed_count{*}.as_count()"
+                                            "query": "sum:palo_alto_networks_cortex_xsoar.task_execution.failed_count{*}.as_count().rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -861,7 +873,7 @@
                     {
                         "id": 6304717743363254,
                         "definition": {
-                            "title": "Task executions by status",
+                            "title": "Task executions by state",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -1063,7 +1075,13 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:palo_alto_networks_cortex_xsoar.api_execution.count{*} by {api_response_type}"
+                                            "query": "sum:palo_alto_networks_cortex_xsoar.api_execution.count{*} by {api_response_type}.rollup(sum, 300)"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "Executions",
+                                            "formula": "query1"
                                         }
                                     ],
                                     "style": {
@@ -1179,7 +1197,7 @@
                     {
                         "id": 4563831231160281,
                         "definition": {
-                            "title": "API executions category by status",
+                            "title": "API executions categories by status",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "bar_chart",
@@ -1287,12 +1305,18 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_detection_count{*}",
+                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_detection{*}.rollup(avg, 300)",
                                             "aggregator": "avg"
                                         }
                                     ],
                                     "formulas": [
                                         {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
                                             "formula": "query1"
                                         }
                                     ]
@@ -1301,8 +1325,8 @@
                             "autoscale": true,
                             "precision": 2,
                             "timeseries_background": {
-                                "type": "bars",
-                                "yaxis": {}
+                                "yaxis": {},
+                                "type": "bars"
                             }
                         },
                         "layout": {
@@ -1313,29 +1337,38 @@
                         }
                     },
                     {
-                        "id": 4500702792750075,
+                        "id": 7501434429201543,
                         "definition": {
-                            "title": "Late SLA by type",
+                            "title": "Mean time to detection by severity",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "bar_chart",
                             "requests": [
                                 {
+                                    "response_format": "scalar",
                                     "queries": [
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:palo_alto_networks_cortex_xsoar.sla.late_count{*} by {type}",
-                                            "aggregator": "sum"
+                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_detection{*} by {severity}.rollup(avg, 300)",
+                                            "aggregator": "avg"
                                         }
                                     ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
                                     "formulas": [
                                         {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
                                             "formula": "query1"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 10,
+                                        "count": 500,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -1343,21 +1376,18 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "response_format": "scalar"
+                                    }
                                 }
                             ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
                             }
                         },
                         "layout": {
-                            "x": 6,
+                            "x": 3,
                             "y": 13,
-                            "width": 6,
+                            "width": 9,
                             "height": 4
                         }
                     },
@@ -1411,6 +1441,55 @@
                         }
                     },
                     {
+                        "id": 4500702792750075,
+                        "definition": {
+                            "title": "Late SLA by type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "bar_chart",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:palo_alto_networks_cortex_xsoar.sla.late_count{*} by {type}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 17,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
                         "id": 7526578846705518,
                         "definition": {
                             "title": "Mean time to containment",
@@ -1424,12 +1503,18 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_containment_count{*}",
+                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_containment{*}.rollup(avg, 300)",
                                             "aggregator": "avg"
                                         }
                                     ],
                                     "formulas": [
                                         {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
                                             "formula": "query1"
                                         }
                                     ]
@@ -1438,8 +1523,8 @@
                             "autoscale": true,
                             "precision": 2,
                             "timeseries_background": {
-                                "type": "bars",
-                                "yaxis": {}
+                                "yaxis": {},
+                                "type": "bars"
                             }
                         },
                         "layout": {
@@ -1450,9 +1535,9 @@
                         }
                     },
                     {
-                        "id": 7501434429201543,
+                        "id": 1971583707893375,
                         "definition": {
-                            "title": "Mean time to detection by severity",
+                            "title": "Mean time to containment by severity",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -1462,7 +1547,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_detection_count{*} by {severity}",
+                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_containment{*} by {severity}.rollup(avg, 300)",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -1471,6 +1556,12 @@
                                     },
                                     "formulas": [
                                         {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
                                             "formula": "query1"
                                         }
                                     ],
@@ -1512,12 +1603,18 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_triage_count{*}",
+                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_triage{*}.rollup(avg, 300)",
                                             "aggregator": "avg"
                                         }
                                     ],
                                     "formulas": [
                                         {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
                                             "formula": "query1"
                                         }
                                     ]
@@ -1526,8 +1623,8 @@
                             "autoscale": true,
                             "precision": 2,
                             "timeseries_background": {
-                                "type": "bars",
-                                "yaxis": {}
+                                "yaxis": {},
+                                "type": "bars"
                             }
                         },
                         "layout": {
@@ -1538,9 +1635,9 @@
                         }
                     },
                     {
-                        "id": 1971583707893375,
+                        "id": 536165196207421,
                         "definition": {
-                            "title": "Mean time to containment by severity",
+                            "title": "Mean time to triage by severity",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -1550,7 +1647,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_containment_count{*} by {severity}",
+                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_triage{*} by {severity}.rollup(avg, 300)",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -1559,6 +1656,12 @@
                                     },
                                     "formulas": [
                                         {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
                                             "formula": "query1"
                                         }
                                     ],
@@ -1600,12 +1703,18 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_resolution_count{*}",
+                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_resolution{*}.rollup(avg, 300)",
                                             "aggregator": "avg"
                                         }
                                     ],
                                     "formulas": [
                                         {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
                                             "formula": "query1"
                                         }
                                     ]
@@ -1614,63 +1723,14 @@
                             "autoscale": true,
                             "precision": 2,
                             "timeseries_background": {
-                                "type": "bars",
-                                "yaxis": {}
+                                "yaxis": {},
+                                "type": "bars"
                             }
                         },
                         "layout": {
                             "x": 0,
                             "y": 29,
                             "width": 3,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 536165196207421,
-                        "definition": {
-                            "title": "Mean time to triage by severity",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_triage_count{*} by {severity}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 29,
-                            "width": 9,
                             "height": 4
                         }
                     },
@@ -1687,7 +1747,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_resolution_count{*} by {severity}",
+                                            "query": "avg:palo_alto_networks_cortex_xsoar.sla.mean_time_to_resolution{*} by {severity}.rollup(avg, 300)",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -1696,6 +1756,12 @@
                                     },
                                     "formulas": [
                                         {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
                                             "formula": "query1"
                                         }
                                     ],
@@ -1718,7 +1784,7 @@
                         },
                         "layout": {
                             "x": 3,
-                            "y": 33,
+                            "y": 29,
                             "width": 9,
                             "height": 4
                         }
@@ -1729,7 +1795,7 @@
                 "x": 0,
                 "y": 28,
                 "width": 12,
-                "height": 38
+                "height": 34
             }
         }
     ],

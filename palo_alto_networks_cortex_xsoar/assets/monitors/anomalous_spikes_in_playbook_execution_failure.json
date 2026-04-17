@@ -1,0 +1,44 @@
+{
+	"version": 2,
+	"created_at": "2026-04-16T16:15:50.729+05:30",
+	"last_updated_at": "2026-04-16T16:15:50.729+05:30",
+	"title": "Anomalous spikes in playbook execution failure",
+	"description": "It monitors for anomalous spikes in playbook execution failure rate by comparing failed executions against total executions over time. Sudden increases may indicate issues in playbook logic, integration failures, or downstream dependency problems. Persistent anomalies can impact automation reliability and overall operational efficiency.",
+	"definition": {
+		"id": 272993798,
+		"name": "Anomalous spikes in playbook execution failure",
+		"type": "query alert",
+		"query": "avg(last_4h):anomalies(sum:palo_alto_networks_cortex_xsoar.playbook_execution.failed_count{*} by {playbook_name}.as_count() / sum:palo_alto_networks_cortex_xsoar.playbook_execution.count{*} by {playbook_name}.as_count(), 'basic', 2, direction='above', interval=60, alert_window='last_10m', count_default_zero='true') >= 0.6",
+		"message": "{{#is_warning}}\r\n⚠️ **Warning**: Anomalous increase in playbook execution failure behavior detected.\r\n\r\n📊 The playbook execution success/failure ratio is deviating from normal patterns.\r\n\r\nCurrent value: **{{value}}**, which is above the warning threshold (0.4).\r\n\r\nPlease review recent playbook runs and check for partial failures or degraded executions.\r\n\r\n{{/is_warning}}\r\n\r\n{{#is_alert}}\r\n🚨 **Alert**: Significant anomaly detected in playbook execution failure rate.\r\n\r\n📊 The success/failure ratio is showing abnormal behavior.\r\n\r\nCurrent value: **{{value}}**, exceeding the alert threshold (0.6).\r\n\r\nImmediate investigation required: check failing playbooks, dependencies, and downstream integration issues.\r\n\r\n{{/is_alert}}\r\n\r\n@example@example.com",
+		"tags": [
+			"integration:palo-alto-networks-cortex-xsoar"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0.6,
+				"critical_recovery": 0.2,
+				"warning": 0.4
+			},
+			"notify_audit": false,
+			"require_full_window": false,
+			"renotify_interval": 0,
+			"threshold_windows": {
+				"trigger_window": "last_10m",
+				"recovery_window": "last_15m"
+			},
+			"escalation_message": "",
+			"notification_preset_name": "show_all",
+			"include_tags": false,
+			"on_missing_data": "show_no_data",
+			"new_group_delay": 0,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:palo-alto-networks-cortex-xsoar"
+	]
+}
