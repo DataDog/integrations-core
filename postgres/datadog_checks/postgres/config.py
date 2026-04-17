@@ -360,10 +360,19 @@ def apply_cloud_defaults(args: dict, instance: dict, validation_result: Validati
             'managed_authentication': {**args.get('azure', {}).get('managed_authentication', {}), 'enabled': True},
         }
 
-    if args.get('azure', {}).get('managed_authentication', {}).get('enabled') and not args.get('azure', {}).get(
-        'managed_authentication', {}
-    ).get('client_id'):
-        validation_result.add_error('Azure client_id must be set when using Azure managed authentication')
+    azure_auth_type = args.get('azure', {}).get('managed_authentication', {}).get('auth_type') or 'managed_identity'
+    if azure_auth_type not in ('managed_identity', 'workload_identity'):
+        validation_result.add_error(
+            f"Invalid azure.managed_authentication.auth_type '{azure_auth_type}'. "
+            "Must be 'managed_identity' or 'workload_identity'."
+        )
+
+    if (
+        args.get('azure', {}).get('managed_authentication', {}).get('enabled')
+        and azure_auth_type == 'managed_identity'
+        and not args.get('azure', {}).get('managed_authentication', {}).get('client_id')
+    ):
+        validation_result.add_error('Azure client_id must be set when using managed_identity authentication')
 
 
 def deprecation_warning(option: str, replacement: str):

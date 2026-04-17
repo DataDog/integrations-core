@@ -92,6 +92,32 @@ class AzureTokenProvider(TokenProvider):
         return token.token, float(token.expires_on)
 
 
+class AzureWorkloadIdentityTokenProvider(TokenProvider):
+    """Token provider for Azure Workload Identity federation."""
+
+    def __init__(
+        self,
+        client_id: str | None = None,
+        tenant_id: str | None = None,
+        identity_scope: str | None = None,
+        skew_seconds: int = 60
+    ):
+        super().__init__(skew_seconds=skew_seconds)
+        self.client_id = client_id
+        self.tenant_id = tenant_id
+        self.identity_scope = identity_scope
+
+    def _fetch_token(self) -> Tuple[str, float]:
+        from .azure import generate_workload_identity_token
+
+        token = generate_workload_identity_token(
+            client_id=self.client_id,
+            tenant_id=self.tenant_id,
+            identity_scope=self.identity_scope
+        )
+        return token.token, float(token.expires_on)
+
+
 class TokenAwareConnection(Connection):
     """
     Connection that can be used for managed authentication.

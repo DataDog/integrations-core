@@ -25,6 +25,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres.connection_pool import (
     AWSTokenProvider,
     AzureTokenProvider,
+    AzureWorkloadIdentityTokenProvider,
     LRUConnectionPoolManager,
     PostgresConnectionArgs,
     TokenAwareConnection,
@@ -976,6 +977,13 @@ class PostgreSql(DatabaseCheck):
                 role_arn=self._config.aws.managed_authentication.role_arn,
             )
         elif self._config.azure.managed_authentication.enabled:
+            auth_type = self._config.azure.managed_authentication.auth_type or 'managed_identity'
+            if auth_type == 'workload_identity':
+                return AzureWorkloadIdentityTokenProvider(
+                    client_id=self._config.azure.managed_authentication.client_id,
+                    tenant_id=self._config.azure.managed_authentication.tenant_id,
+                    identity_scope=self._config.azure.managed_authentication.identity_scope,
+                )
             return AzureTokenProvider(
                 client_id=self._config.azure.managed_authentication.client_id,
                 identity_scope=self._config.azure.managed_authentication.identity_scope,

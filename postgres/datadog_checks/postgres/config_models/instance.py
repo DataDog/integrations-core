@@ -47,9 +47,11 @@ class ManagedAuthentication1(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    auth_type: Optional[str] = Field(None, examples=['managed_identity'])
     client_id: Optional[str] = None
     enabled: Optional[bool] = Field(None, examples=[False])
     identity_scope: Optional[str] = Field(None, examples=['https://ossrdbms-aad.database.windows.net/.default'])
+    tenant_id: Optional[str] = None
 
 
 class Azure(BaseModel):

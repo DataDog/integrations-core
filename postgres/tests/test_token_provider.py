@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, Mock, patch
 from datadog_checks.postgres.connection_pool import (
     AWSTokenProvider,
     AzureTokenProvider,
+    AzureWorkloadIdentityTokenProvider,
     LRUConnectionPoolManager,
     PostgresConnectionArgs,
     TokenProvider,
@@ -363,6 +364,29 @@ def test_multiple_connection_pools_no_token_collision():
     # Clean up
     pool_manager_1.close_all()
     pool_manager_2.close_all()
+
+def test_azure_workload_identity_token_provider_integration():
+    """Test AzureWorkloadIdentityTokenProvider integration with get_token()."""
+    with patch('datadog_checks.postgres.azure.WorkloadIdentityCredential') as mock_credential_class:
+        mock_token = Mock()
+        mock_token.token = "integration_wi_token"
+        mock_token.expires_on = time.time() + 3600
+
+        mock_credential = Mock()
+        mock_credential.get_token.return_value = mock_token
+        mock_credential_class.return_value = mock_credential
+
+        provider = AzureWorkloadIdentityTokenProvider(client_id="test-client", tenant_id="test-tenant")
+
+        # First call should fetch token
+        token1 = provider.get_token()
+        assert token1 == "integration_wi_token"
+        assert mock_credential.get_token.call_count == 1
+
+        # Second call should use cached token
+        token2 = provider.get_token()
+        assert token2 == "integration_wi_token"
+        assert mock_credential.get_token.call_count == 1
 
 
 class MockTokenProvider(TokenProvider):

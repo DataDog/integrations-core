@@ -759,7 +759,8 @@ instances:
         ## @param managed_authentication - mapping - optional
         ## Configuration section used for Azure AD Authentication.
         ##
-        ## This supports using System or User assigned managed identities.
+        ## This supports using System, User assigned managed identities
+        ## or Workload identity federation (e.g. on AKS).
         ##
         ## For more information on configuration, see
         ## https://docs.datadoghq.com/database_monitoring/guide/managed_authentication
@@ -767,9 +768,17 @@ instances:
         ## For more information on Managed Identities, see the Azure docs
         ## https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
         ##
+        ## For more information on Workload Identity, see the Azure docs
+        ## https://learn.microsoft.com/en-us/azure/aks/workload-identity-overview
+        ##
         ## To enable Azure AD Authentication, set `azure.managed_authentication.enabled` to `true`.
         ## If `azure.managed_authentication.enabled` is set, then the `password` fields will be ignored.
-        ## `azure.managed_authentication.client_id` is required to enable Azure AD Authentication.
+        ##
+        ## Set `azure.managed_authentication.auth_type` to `managed_identity` (default) or `workload_identity`.
+        ## For managed identity, `client_id` is required.
+        ## For workload identity, `client_id` and `tenant_id` are optional overrides. By default they are
+        ## read from the `AZURE_CLIENT_ID` and `AZURE_TENANT_ID` environment variables, which are
+        ## automatically injected by the AKS workload identity webhook along with `AZURE_FEDERATED_TOKEN_FILE`.
         ##
         ## For more information on scopes, see the Azure docs
         ## https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
