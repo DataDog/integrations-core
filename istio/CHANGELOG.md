@@ -9,7 +9,7 @@
 * Polish fleet-configurable spec descriptions. ([#22967](https://github.com/DataDog/integrations-core/pull/22967))
 * Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
 
-## 9.5.0 / 2026-04-01
+## 9.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 

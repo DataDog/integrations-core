@@ -41,6 +41,9 @@ class BaseProcessor[T: BaseMessage]:
             raise ProcessorQueueError("This processor has not been added to an active event bus")
         self.queue.put_nowait(message)
 
+    def should_process_message(self, message: BaseMessage) -> bool:
+        return True
+
 
 class AsyncProcessor[T: BaseMessage](BaseProcessor[T], ABC):
     @abstractmethod
@@ -329,6 +332,7 @@ class EventBusOrchestrator(ABC):
         running_tasks.update(
             asyncio.create_task(self._task_wrapper(processor, msg))
             for processor in self._subscribers.get(type(msg), [])
+            if processor.should_process_message(msg)
         )
 
     async def _task_wrapper(self, processor: Processor, message: BaseMessage):
