@@ -83,7 +83,7 @@ E2E_METRIC_TAGS: dict[str, list[str]] = {
 
 @pytest.mark.e2e
 def test_e2e_metrics(dd_agent_check):
-    aggregator = dd_agent_check()
+    aggregator = dd_agent_check(check_times=2, pause=20000)
 
     cross_check_metrics = (
         'flow_runs.retry_gaps_duration',

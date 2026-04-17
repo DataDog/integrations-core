@@ -1,6 +1,6 @@
 ## Overview
 
-[Trend Micro Vision One Endpoint Security][1] is a cloud-based solution specifically designed for endpoints, servers, and cloud workloads.
+[TrendAI Vision One Endpoint Security][1] is a cloud-based solution specifically designed for endpoints, servers, and cloud workloads.
 
 This integration ingests the following logs:
 
@@ -24,35 +24,35 @@ Use out-of-the-box dashboards to gain detailed insights into system events, netw
 
 ## Setup
 
-### Generate API credentials in Trend Micro Vision One Endpoint Security
+### Generate API credentials in TrendAI Vision One Endpoint Security
 
-1. Log in to the Trend Micro Vision One console.
+1. Log in to the TrendAI Vision One console.
 2. Go to **Endpoint Security** (Sidebar) > **Standard Endpoint Protection** > **Administration** > **Settings** > **Automation API Access Settings**.
 3. Click **Add**.<br> The Application Access Settings section appears and displays the following information:
-   1. **API URL**: The API Host of the Trend Micro Vision One Endpoint Security console.
-   2. **Application ID**: The Application ID of the Trend Micro Vision One Endpoint Security console.
-   3. **API key**: The API key of the Trend Micro Vision One Endpoint Security console.
+   1. **API URL**: The API Host of the TrendAI Vision One Endpoint Security console.
+   2. **Application ID**: The Application ID of the TrendAI Vision One Endpoint Security console.
+   3. **API key**: The API key of the TrendAI Vision One Endpoint Security console.
 4. Tick the **Enable application integration using Apex Central Automation APIs** checkbox.
 5. Configure the following settings.
    1. **Application name**: Specify an easily identifiable name for the application.
    2. **Communication time-out**: Select 120 seconds for a request to reach Apex Central after the application generates the request.
 6. Click **Save**.
 
-### Get Timezone of Trend Micro Vision One console
+### Get Timezone of TrendAI Vision One console
 
-1. Log in to the Trend Micro Vision One console.
+1. Log in to the TrendAI Vision One console.
 2. Go to **Administration** (Sidebar) > **Console Settings** > **Time Zone**.
 3. Check the **Timezone** from **Current console time**.
 
-### Connect your Trend Micro Vision One Endpoint Security Account to Datadog
+### Connect your TrendAI Vision One Endpoint Security Account to Datadog
 
 1. Add your API host, application ID, and API key, and select the time zone from the dropdown.
    | Parameters     | Description                                                             |
    | -------------- | ----------------------------------------------------------------------- |
-   | API Host       | The API host of the Trend Micro Vision One Endpoint Security console.       |
-   | Application ID | The application ID of the Trend Micro Vision One Endpoint Security console. |
-   | API Key        | The API key of the Trend Micro Vision One Endpoint Security console.     |
-   | Time Zone      | The time zone of the Trend Micro Vision One console.                    |
+   | API Host       | The API host of the TrendAI Vision One Endpoint Security console.       |
+   | Application ID | The application ID of the TrendAI Vision One Endpoint Security console. |
+   | API Key        | The API key of the TrendAI Vision One Endpoint Security console.     |
+   | Time Zone      | The time zone of the TrendAI Vision One console.                    |
 
 2. Click the **Save** button to save your settings.
 
@@ -60,15 +60,15 @@ Use out-of-the-box dashboards to gain detailed insights into system events, netw
 
 ### Logs
 
-The Trend Micro Vision One Endpoint Security integration collects and forwards security events, including system events, network events, and data loss prevention events to Datadog.
+The TrendAI Vision One Endpoint Security integration collects and forwards security events, including system events, network events, and data loss prevention events to Datadog.
 
 ### Metrics
 
-The Trend Micro Vision One Endpoint Security integration does not include any metrics.
+The TrendAI Vision One Endpoint Security integration does not include any metrics.
 
 ### Events
 
-The Trend Micro Vision One Endpoint Security integration does not include any events.
+The TrendAI Vision One Endpoint Security integration does not include any events.
 
 ## Support
 

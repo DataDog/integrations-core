@@ -359,6 +359,30 @@ instances:
     #
     # application_name: datadog-agent
 
+    ## @param dbm - boolean - optional - default: false
+    ## Set to `true` to enable Database Monitoring.
+    #
+    # dbm: false
+
+    ## Configure the Data Observability async job, which executes monitoring
+    ## queries delivered via Remote Configuration.
+    #
+    # data_observability:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable the Data Observability job.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 10
+        ## How often (in seconds) the job wakes up to check which queries are
+        ## due. Individual queries have their own interval_seconds. This value
+        ## must be less than or equal to the smallest interval_seconds across
+        ## all configured queries (i.e. the least common denominator), otherwise
+        ## queries with short intervals will be delayed.
+        #
+        # collection_interval: 10
+
     ## @param pg_stat_statements_view - string - optional - default: pg_stat_statements
     ## Set this value if you want to define a custom view or function to allow the datadog user to query the
     ## `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.

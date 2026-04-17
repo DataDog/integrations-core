@@ -19,7 +19,7 @@ files:
   - template: instances
     options:
     - name: host
-      display_priority: 19
+      display_priority: 24
       description: |
         The hostname to connect to. To connect to a Unix socket, specify the full path to the socket directory,
         e.g. `/var/run/postgresql`.
@@ -28,29 +28,28 @@ files:
         type: string
         display_default: "localhost"
     - name: port
-      display_priority: 18
+      display_priority: 23
       description: The port to use when connecting to PostgreSQL.
       fleet_configurable: true
-      formats: ["port"]
       value:
         type: integer
         display_default: 5432
     - name: username
-      display_priority: 17
+      display_priority: 22
       description: The Datadog username created to connect to PostgreSQL.
       fleet_configurable: true
       value:
         type: string
         display_default: "datadog"
     - name: password
-      display_priority: 16
+      display_priority: 21
       description: The password associated with the Datadog user.
       fleet_configurable: true
       secret: true
       value:
         type: string
     - name: dbname
-      display_priority: 15
+      display_priority: 19
       description: |
         The name of the PostgreSQL database to monitor.
         Note: If omitted, the default system Postgres database is queried.
@@ -59,7 +58,7 @@ files:
         type: string
         display_default: postgres
     - name: dbm
-      display_priority: 14
+      display_priority: 18
       fleet_configurable: true
       description: |
         Set to `true` to enable Database Monitoring.
@@ -68,7 +67,7 @@ files:
         example: false
         display_default: false
     - name: relations
-      display_priority: 13
+      display_priority: 17
       fleet_configurable: true
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index, view, etc.) metrics.
@@ -128,7 +127,7 @@ files:
               - r
               - p
     - name: collect_activity_metrics
-      display_priority: 12
+      display_priority: 15
       fleet_configurable: true
       description: |
         Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
@@ -137,7 +136,7 @@ files:
         type: boolean
         example: false
     - name: collect_function_metrics
-      display_priority: 11
+      display_priority: 14
       fleet_configurable: true
       description: |
         If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions.
@@ -145,14 +144,14 @@ files:
         type: boolean
         example: false
     - name: collect_database_size_metrics
-      display_priority: 10
+      display_priority: 13
       fleet_configurable: true
       description: Collect database size metrics.
       value:
         type: boolean
         example: true
     - name: collect_bloat_metrics
-      display_priority: 9
+      display_priority: 12
       fleet_configurable: true
       description: Collect metrics about table bloat. Only available when `relation` metrics are enabled.
       enabled: true
@@ -160,7 +159,7 @@ files:
         type: boolean
         example: false
     - name: tag_replication_role
-      display_priority: 8
+      display_priority: 10
       fleet_configurable: true
       hidden: true
       description: Tag metrics and checks with `replication_role:<master|standby>`.
@@ -168,21 +167,21 @@ files:
         type: boolean
         example: true
     - name: collect_count_metrics
-      display_priority: 7
+      display_priority: 9
       fleet_configurable: true
       description: Collect count of user tables from pg_class.
       value:
         type: boolean
         example: true
     - name: max_relations
-      display_priority: 6
+      display_priority: 8
       fleet_configurable: true
       description: Determines the maximum number of relations to fetch.
       value:
         type: integer
         example: 300
     - name: ssl
-      display_priority: 5
+      display_priority: 7
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
         is negotiated with the server.
@@ -571,6 +570,104 @@ files:
       value:
         type: string
         example: "datadog-agent"
+    - name: data_observability
+      display_priority: 0
+      fleet_configurable: true
+      description: |
+        Configure the Data Observability async job, which executes monitoring
+        queries delivered via Remote Configuration.
+      options:
+        - name: enabled
+          fleet_configurable: true
+          description: Enable the Data Observability job.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: collection_interval
+          fleet_configurable: true
+          description: |
+            How often (in seconds) the job wakes up to check which queries are
+            due. Individual queries have their own interval_seconds. This value
+            must be less than or equal to the smallest interval_seconds across
+            all configured queries (i.e. the least common denominator), otherwise
+            queries with short intervals will be delayed.
+          value:
+            type: number
+            example: 10
+            display_default: 10
+        - name: run_sync
+          hidden: true
+          description: Run the job synchronously (for testing).
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: config_id
+          hidden: true
+          description: |
+            Unique identifier of the Remote Configuration payload that populated
+            this data_observability block. Set automatically by the Datadog Agent
+            Go RC handler when it delivers query configuration; do not set this
+            field manually. It is forwarded as-is on every emitted event so that
+            the intake can correlate results back to the originating RC config.
+          value:
+            type: string
+        - name: queries
+          hidden: true
+          description: |
+            List of monitor queries to execute. Populated automatically by the
+            Datadog Agent Go RC handler when Remote Configuration delivers a
+            DO_QUERY_ACTIONS payload; do not set this field manually. Each entry
+            describes one SQL monitoring query along with its scheduling
+            parameters and entity metadata.
+          value:
+            type: array
+            items:
+              type: object
+              required:
+                - monitor_id
+                - dbname
+                - query
+                - interval_seconds
+                - entity
+              properties:
+              - name: monitor_id
+                type: integer
+              - name: dbname
+                type: string
+              - name: type
+                type: string
+              - name: query
+                type: string
+              - name: interval_seconds
+                type: integer
+              - name: entity
+                type: object
+                required:
+                  - platform
+                  - account
+                  - database
+                  - schema
+                  - table
+                properties:
+                - name: platform
+                  type: string
+                - name: account
+                  type: string
+                - name: database
+                  type: string
+                - name: schema
+                  type: string
+                - name: table
+                  type: string
+              - name: custom_sql_select_fields
+                type: object
+                properties:
+                - name: metric_config_id
+                  type: integer
+                - name: entity_id
+                  type: string
     - name: pg_stat_statements_view
       display_priority: 0
       description: |
@@ -1329,11 +1426,16 @@ files:
             tags:
               - test:postgresql
             metric_prefix: postgresql
+        custom_queries.display_priority: 16
     - template: instances/default
       overrides:
         disable_generic_tags.hidden: False
         disable_generic_tags.enabled: True
         disable_generic_tags.description: The integration will stop sending server tag as is reduntant with host tag
+        tags.display_priority: 20
+        min_collection_interval.display_priority: 11
+        disable_generic_tags.display_priority: 6
+        empty_default_hostname.display_priority: 5
   - template: logs
     example:
     - type: file
