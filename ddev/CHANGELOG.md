@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 15.0.0 / 2026-04-15
+
+***Changed***:
+
+* Bump datadog_checks_dev requirement ([#23100](https://github.com/DataDog/integrations-core/pull/23100))
+* Drop support for Python versions older than 3.13 by setting requires-python to >=3.13. ([#23206](https://github.com/DataDog/integrations-core/pull/23206))
+
+***Added***:
+
+* Automate milestone bump when cutting a release branch in ddev ([#23151](https://github.com/DataDog/integrations-core/pull/23151))
+* Bump datadog_checks_dev requirement. ([#23195](https://github.com/DataDog/integrations-core/pull/23195))
+* Add parallel validation orchestrator with ddev validate all command ([#23249](https://github.com/DataDog/integrations-core/pull/23249))
+
+***Fixed***:
+
+* Bump `requests` to `==2.33.0` (CVE-2026-25645 / VULN-59770). ([#23223](https://github.com/DataDog/integrations-core/pull/23223))
+* Add descriptions to validations and improve PR comment formatting with collapsible sections ([#23308](https://github.com/DataDog/integrations-core/pull/23308))
+
 ## 14.4.0 / 2026-03-27
 
 ***Added***:
