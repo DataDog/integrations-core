@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e4f68beb-6472-490c-ba02-72ded5b9c203",
   "app_id": "palo-alto-networks-cortex-xsoar",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,7 +13,9 @@
     "title": "Palo Alto Networks Cortex XSOAR",
     "media": [],
     "classifier_tags": [
-      "Category::Metrics"
+      "Category::Logs",
+      "Category::Metrics",
+      "Offering::Integration"
     ]
   },
   "assets": {
