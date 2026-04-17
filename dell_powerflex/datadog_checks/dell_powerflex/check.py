@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datetime import datetime, timezone
 from typing import Any
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
@@ -35,6 +36,7 @@ from .constants import (
     VOLUME_STATS_BWC_METRICS,
     VOLUME_STATS_SIMPLE_METRICS,
 )
+from .resource_filters import parse_resource_filters, should_collect_resource, should_collect_statistics
 
 
 class DellPowerflexCheck(AgentCheck, ConfigMixin):
@@ -44,25 +46,31 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         super(DellPowerflexCheck, self).__init__(name, init_config, instances)
         self._base_tags: list[str] = []
         self._api: PowerFlexAPI | None = None
+        self._resource_filters: dict = {}
         self.check_initializations.append(self._parse_config)
 
     def _parse_config(self) -> None:
         self._base_tags = [f'powerflex_gateway_url:{self.config.powerflex_gateway_url}']
         self._api = PowerFlexAPI(self.http, self.config.powerflex_gateway_url)
+        self._resource_filters = parse_resource_filters(self.instance.get('resource_filters'), self.log)
 
     def check(self, _: Any) -> None:
         try:
-            self._collect_systems()
+            self._api.get_version()
             self.gauge('api.can_connect', 1, tags=self._base_tags)
-            self._collect_volumes()
-            self._collect_storage_pools()
-            self._collect_protection_domains()
-            self._collect_sds_list()
-            self._collect_sdc_list()
-            self._collect_devices()
         except (ConnectionError, HTTPError, InvalidURL, Timeout) as e:
             self.log.warning('Could not connect to PowerFlex Gateway: %s', e)
             self.gauge('api.can_connect', 0, tags=self._base_tags)
+            return
+        self._collect_systems()
+        self._collect_volumes()
+        self._collect_storage_pools()
+        self._collect_protection_domains()
+        self._collect_sds_list()
+        self._collect_sdc_list()
+        self._collect_devices()
+        if self.config.collect_events:
+            self._collect_events()
 
     def _collect_systems(self) -> None:
         for system in self._api.get_systems():
@@ -89,6 +97,8 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
     def _collect_volumes(self) -> None:
         for volume in self._api.get_volumes():
             try:
+                if not should_collect_resource('volume', volume, self._resource_filters, self.log):
+                    continue
                 self._collect_volume(volume)
             except Exception as e:
                 self.log.warning('Failed to collect metrics for volume %s: %s', volume.get('id'), e)
@@ -105,11 +115,14 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             tags = tags + [f"ancestor_volume_id:{volume['ancestorVolumeId']}"]
         for sdc in volume.get('mappedSdcInfo') or []:
             tags = tags + [f"sdc_id:{sdc['sdcId']}"]
-        self._collect_volume_statistics(volume['id'], tags)
+        if should_collect_statistics('volume', self._resource_filters):
+            self._collect_volume_statistics(volume['id'], tags)
 
     def _collect_storage_pools(self) -> None:
         for pool in self._api.get_storage_pools():
             try:
+                if not should_collect_resource('storage_pool', pool, self._resource_filters, self.log):
+                    continue
                 self._collect_storage_pool(pool)
             except Exception as e:
                 self.log.warning('Failed to collect metrics for storage pool %s: %s', pool.get('id'), e)
@@ -121,7 +134,8 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             f"protection_domain_id:{pool['protectionDomainId']}",
             f"dell_type:{STORAGE_POOL_METRIC_PREFIX}",
         ]
-        self._collect_storage_pool_statistics(pool['id'], tags)
+        if should_collect_statistics('storage_pool', self._resource_filters):
+            self._collect_storage_pool_statistics(pool['id'], tags)
 
     def _collect_storage_pool_statistics(self, pool_id: str, tags: list[str]) -> None:
         stats = self._api.get_storage_pool_statistics(pool_id)
@@ -132,6 +146,8 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
     def _collect_protection_domains(self) -> None:
         for pd in self._api.get_protection_domains():
             try:
+                if not should_collect_resource('protection_domain', pd, self._resource_filters, self.log):
+                    continue
                 self._collect_protection_domain(pd)
             except Exception as e:
                 self.log.warning('Failed to collect metrics for protection domain %s: %s', pd.get('id'), e)
@@ -143,7 +159,8 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             f"system_id:{pd['systemId']}",
             f"dell_type:{PROTECTION_DOMAIN_METRIC_PREFIX}",
         ]
-        self._collect_protection_domain_statistics(pd['id'], tags)
+        if should_collect_statistics('protection_domain', self._resource_filters):
+            self._collect_protection_domain_statistics(pd['id'], tags)
 
     def _collect_protection_domain_statistics(self, pd_id: str, tags: list[str]) -> None:
         stats = self._api.get_protection_domain_statistics(pd_id)
@@ -154,6 +171,8 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
     def _collect_sdc_list(self) -> None:
         for sdc in self._api.get_sdc_list():
             try:
+                if not should_collect_resource('sdc', sdc, self._resource_filters, self.log):
+                    continue
                 self._collect_sdc(sdc)
             except Exception as e:
                 self.log.warning('Failed to collect metrics for SDC %s: %s', sdc.get('id'), e)
@@ -168,7 +187,8 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         ]
         if sdc.get('peerMdmId'):
             tags = tags + [f"peer_mdm_id:{sdc['peerMdmId']}"]
-        self._collect_sdc_statistics(sdc['id'], tags)
+        if should_collect_statistics('sdc', self._resource_filters):
+            self._collect_sdc_statistics(sdc['id'], tags)
 
     def _collect_sdc_statistics(self, sdc_id: str, tags: list[str]) -> None:
         stats = self._api.get_sdc_statistics(sdc_id)
@@ -179,6 +199,8 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
     def _collect_sds_list(self) -> None:
         for sds in self._api.get_sds_list():
             try:
+                if not should_collect_resource('sds', sds, self._resource_filters, self.log):
+                    continue
                 self._collect_sds(sds)
             except Exception as e:
                 self.log.warning('Failed to collect metrics for SDS %s: %s', sds.get('id'), e)
@@ -192,7 +214,8 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         ]
         if sds.get('faultSetId'):
             tags = tags + [f"fault_set_id:{sds['faultSetId']}"]
-        self._collect_sds_statistics(sds['id'], tags)
+        if should_collect_statistics('sds', self._resource_filters):
+            self._collect_sds_statistics(sds['id'], tags)
 
     def _collect_sds_statistics(self, sds_id: str, tags: list[str]) -> None:
         stats = self._api.get_sds_statistics(sds_id)
@@ -203,6 +226,8 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
     def _collect_devices(self) -> None:
         for device in self._api.get_devices():
             try:
+                if not should_collect_resource('device', device, self._resource_filters, self.log):
+                    continue
                 self._collect_device(device)
             except Exception as e:
                 self.log.warning('Failed to collect metrics for device %s: %s', device.get('id'), e)
@@ -216,13 +241,63 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             f"sds_id:{device['sdsId']}",
             f"dell_type:{DEVICE_METRIC_PREFIX}",
         ]
-        self._collect_device_statistics(device['id'], tags)
+        if should_collect_statistics('device', self._resource_filters):
+            self._collect_device_statistics(device['id'], tags)
 
     def _collect_device_statistics(self, device_id: str, tags: list[str]) -> None:
         stats = self._api.get_device_statistics(device_id)
         for api_field, metric_suffix in DEVICE_STATS_SIMPLE_METRICS:
             self.gauge(metric_suffix, stats.get(api_field), tags=tags)
         self._collect_bwc_metrics(stats, DEVICE_STATS_BWC_METRICS, tags)
+
+    def _collect_events(self) -> None:
+        now = datetime.now(tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        last_ts = self.read_persistent_cache('last_event_timestamp') or now
+        try:
+            events = self._api.get_events(since=last_ts)
+        except Exception as e:
+            self.log.warning('Failed to collect events: %s', e)
+            return
+        self.write_persistent_cache(
+            'last_event_timestamp', datetime.now(tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        )
+        for event in events:
+            dd_event = self._create_dd_event(event)
+            self.event(dd_event)
+
+    def _create_dd_event(self, event: dict) -> dict:
+        raw_ts = event.get('timestamp')
+        if raw_ts:
+            timestamp = datetime.fromisoformat(raw_ts.replace('Z', '+00:00')).timestamp()
+        else:
+            timestamp = datetime.now(tz=timezone.utc).timestamp()
+
+        severity = event.get('severity', '')
+
+        tags = list(self._base_tags)
+        tags.append(f"powerflex_event_name:{event.get('name', '')}")
+        tags.append(f"severity:{severity}")
+        tags.append(f"category:{event.get('category', '')}")
+        tags.append(f"domain:{event.get('domain', '')}")
+        tags.append(f"resource_type:{event.get('resource_type', '')}")
+        tags.append(f"resource_name:{event.get('resource_name', '')}")
+        tags.append(f"service_name:{event.get('service_name', '')}")
+
+        name = event.get('name', '')
+        title = name.replace('_', ' ').title()
+        resource_name = event.get('resource_name', '')
+        description = event.get('description', '')
+        msg_text = f"{resource_name}: {description}" if resource_name else description
+
+        return {
+            'timestamp': timestamp,
+            'event_type': self.__NAMESPACE__,
+            'msg_title': title,
+            'msg_text': msg_text,
+            'alert_type': 'error',
+            'source_type_name': self.__NAMESPACE__,
+            'tags': tags,
+        }
 
     def _collect_bwc_metrics(self, stats: dict, bwc_metrics: list[tuple[str, str]], tags: list[str]) -> None:
         for api_field, metric_suffix in bwc_metrics:

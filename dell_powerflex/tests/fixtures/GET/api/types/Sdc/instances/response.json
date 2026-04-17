@@ -5,7 +5,7 @@
     "sdcIp": "10.0.1.250",
     "sdcGuid": "33FC0AF2-5180-45D8-9BDC-8E2F78CD60BF",
     "sdcType": "AppSdc",
-    "peerMdmId": null,
+    "peerMdmId": "mdm00000001",
     "sdcApproved": true,
     "sdcApprovedIps": null,
     "sdcAgentActive": true,

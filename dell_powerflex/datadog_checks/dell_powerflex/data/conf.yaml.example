@@ -34,6 +34,59 @@ instances:
     #     name: Authorization
     #     value: Bearer <token>
 
+    ## @param collect_events - boolean - optional - default: false
+    ## Enable collection of CRITICAL events from the PowerFlex Gateway.
+    #
+    # collect_events: false
+
+    ## @param resource_filters - list of mappings - optional
+    ## Filter resources by property regex patterns and control statistics
+    ## collection per resource type. Exclude takes precedence over include.
+    ## If no filter is configured for a resource type, all resources of
+    ## that type are collected with statistics enabled.
+    ##
+    ## Each filter entry has the following fields:
+    ##   resource: The resource type to filter.
+    ##   property: The API property name to match against.
+    ##   include: List of regex patterns. Resource must match at least one.
+    ##   exclude: List of regex patterns. Matching resources are excluded.
+    ##   collect_statistics: When false, skip per-resource statistics API
+    ##     calls to reduce load. Defaults to true.
+    ##
+    ## Supported resource types and common filterable properties:
+    ##   volume: name, id, volumeType, storagePoolId, ancestorVolumeId
+    ##   storage_pool: name, id, mediaType, protectionDomainId
+    ##   protection_domain: name, id, protectionDomainState
+    ##   sds: name, id, protectionDomainId, sdsState, faultSetId
+    ##   sdc: id, sdcGuid, sdcType, sdcIp
+    ##   device: name, id, storagePoolId, sdsId, deviceCurrentPathName
+    #
+    # resource_filters:
+    #   - resource: volume
+    #     property: name
+    #     include:
+    #     - .*
+    #   - resource: storage_pool
+    #     property: name
+    #     collect_statistics: true
+    #     include:
+    #     - ^prod-
+    #   - resource: protection_domain
+    #     property: name
+    #     include:
+    #     - .*
+    #   - resource: sds
+    #     property: name
+    #     exclude:
+    #     - ^standby-
+    #   - resource: sdc
+    #     property: sdcType
+    #     include:
+    #     - ^AppSdc$
+    #   - resource: device
+    #     property: name
+    #     collect_statistics: false
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

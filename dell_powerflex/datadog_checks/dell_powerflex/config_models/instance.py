@@ -61,6 +61,7 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str] = None
     aws_region: Optional[str] = None
     aws_service: Optional[str] = None
+    collect_events: Optional[bool] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
@@ -84,6 +85,7 @@ class InstanceConfig(BaseModel):
     proxy: Optional[Proxy] = None
     read_timeout: Optional[float] = None
     request_size: Optional[float] = None
+    resource_filters: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     service: Optional[str] = None
     skip_proxy: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None

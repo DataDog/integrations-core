@@ -41,7 +41,7 @@
     "fglMetadataCacheState": "Disabled",
     "fglMetadataCacheSize": 0,
     "numIoBuffers": null,
-    "faultSetId": null,
+    "faultSetId": "faultset00000001",
     "numRestarts": 0,
     "lastUpgradeTime": 0,
     "sdsDecoupled": null,

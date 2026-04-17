@@ -25,8 +25,7 @@ def instance():
 
 def _get_url_path(url):
     parsed = urlparse(url)
-    path = parsed.path + "?" + parsed.query if parsed.query else parsed.path
-    return path.replace('::', '__')
+    return parsed.path.replace('::', '__')
 
 
 @pytest.fixture

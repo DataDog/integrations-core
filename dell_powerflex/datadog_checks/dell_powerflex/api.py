@@ -13,6 +13,9 @@ class PowerFlexAPI:
         response.raise_for_status()
         return response.json()
 
+    def get_version(self) -> str:
+        return self._get('/api/version')
+
     def get_systems(self) -> list[dict]:
         return self._get('/api/types/System/instances')
 
@@ -54,3 +57,11 @@ class PowerFlexAPI:
 
     def get_protection_domain_statistics(self, pd_id: str) -> dict:
         return self._get(f'/api/instances/ProtectionDomain::{pd_id}/relationships/Statistics')
+
+    def get_events(self, since: str | None = None) -> list[dict]:
+        filters = ['(severity eq CRITICAL or severity eq MAJOR)']
+        if since:
+            filters.append(f'timestamp ge {since}')
+        filter_str = ' and '.join(filters)
+        response = self._get(f'/rest/v1/events?filter={filter_str}')
+        return response.get('results', []) if isinstance(response, dict) else []

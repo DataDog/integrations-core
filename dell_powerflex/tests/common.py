@@ -286,3 +286,12 @@ SYSTEM_STATS_BWC_METRICS = [
     'dell_powerflex.journaler_write_latency',
     'dell_powerflex.target_write_latency',
 ]
+
+RESOURCE_STATS_METRIC = {
+    'volume': ('dell_powerflex.num_of_child_volumes', ['dell_type:volume']),
+    'storage_pool': ('dell_powerflex.capacity.in_use_in_kb', ['dell_type:storage_pool']),
+    'protection_domain': ('dell_powerflex.capacity.in_use_in_kb', ['dell_type:protection_domain']),
+    'sds': ('dell_powerflex.capacity.in_use_in_kb', ['dell_type:sds']),
+    'sdc': ('dell_powerflex.num_of_mapped_volumes', ['dell_type:sdc']),
+    'device': ('dell_powerflex.capacity.in_use_in_kb', ['dell_type:device']),
+}
