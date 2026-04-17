@@ -275,14 +275,14 @@ class DatabasesData:
                 self._fetch_database_data(cursor, start_time, db_info['name'])
             except StopIteration as e:
                 self._log.error(
-                    "While executing fetch database data for database {}, the following exception occured {}".format(
+                    "While executing fetch database data for database {}, the following exception occurred {}".format(
                         db_info['name'], e
                     )
                 )
                 return
             except Exception as e:
                 self._log.error(
-                    "While executing fetch database data for database {}, the following exception occured {}".format(
+                    "While executing fetch database data for database {}, the following exception occurred {}".format(
                         db_info['name'], e
                     )
                 )
