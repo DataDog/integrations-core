@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from functools import cached_property
 from json import JSONDecodeError
 from typing import TYPE_CHECKING, Any, Literal
+from urllib.parse import urlparse
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
@@ -667,6 +668,9 @@ class PrefectClient:
     def __init__(self, url: str, http: RequestsWrapper, log: CheckLoggingAdapter):
         self.http_exceptions = (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError)
         self.url = url
+        parsed_url = urlparse(url)
+        self.base_url_scheme = parsed_url.scheme
+        self.base_url_netloc = parsed_url.netloc
         self.http = http
         self.log = log
 
@@ -688,6 +692,11 @@ class PrefectClient:
             return response.json()
         except self.http_exceptions:
             raise
+
+    def check_pagination_url(self, next_page: str):
+        parsed_next_page = urlparse(next_page)
+        if parsed_next_page.scheme != self.base_url_scheme or parsed_next_page.netloc != self.base_url_netloc:
+            raise InvalidURL(f'Invalid next_page URL with unexpected host: {next_page}')
 
     def paginate_filter(self, endpoint: str, payload: dict | None = None) -> list[dict]:
         """Implements pagination for /filter endpoints using limit/offset loop."""
@@ -728,9 +737,10 @@ class PrefectClient:
             events.extend(response.get("events", []))
             if not response.get("next_page"):
                 break
-
             try:
-                response = self.get(response.get("next_page"), pagination=True)
+                next_page = response.get("next_page")
+                self.check_pagination_url(next_page)
+                response = self.get(next_page, pagination=True)
             except self.http_exceptions as e:
                 self.log.error("Could not collect next page of events: %s, data is incomplete", e)
                 return events
