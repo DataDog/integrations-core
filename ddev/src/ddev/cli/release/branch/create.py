@@ -147,7 +147,7 @@ def compute_next_milestone(branch_name: str) -> str:
 def update_release_json(path: Path, milestone: str) -> None:
     data = json.loads(path.read_text()) if path.exists() else {}
     data['current_milestone'] = milestone
-    path.write_text(f"{json.dumps(data, indent='\t')}\n")
+    path.write_text(json.dumps(data, indent='\t') + '\n')
 
 
 def suggest_next_branch(app: Application) -> str:
