@@ -19,6 +19,8 @@ class PostgresHealthEvent(Enum):
     """
 
     EXPLAIN_PLAN_ERROR = 'explain_plan_error'
+    COLUMN_STATS_FUNCTION_NOT_FOUND = 'column_stats_function_not_found'
+    COLUMN_STATS_INSUFFICIENT_PRIVILEGE = 'column_stats_insufficient_privilege'
 
 
 class PostgresHealth(Health):

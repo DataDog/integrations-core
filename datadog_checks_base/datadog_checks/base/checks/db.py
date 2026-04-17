@@ -23,6 +23,9 @@ class DatabaseCheck(AgentCheck):
     def database_monitoring_health(self, raw_event: str):
         self.event_platform_event(raw_event, "dbm-health")
 
+    def database_monitoring_column_stats(self, raw_event: str):
+        self.event_platform_event(raw_event, "dbm-column-stats")
+
     @property
     @abstractmethod
     def reported_hostname(self) -> str | None:
