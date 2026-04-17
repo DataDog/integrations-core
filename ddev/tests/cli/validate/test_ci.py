@@ -30,8 +30,7 @@ def test_validate_ci_success(ddev, helpers):
     )
 
 
-def test_code_coverage_missing_services(ddev, repository, helpers):
-    config_path = repository.path / 'code-coverage.datadog.yml'
+def _remove_service(config_path):
     with config_path.open(encoding='utf-8') as f:
         config = yaml.safe_load(f)
 
@@ -40,14 +39,8 @@ def test_code_coverage_missing_services(ddev, repository, helpers):
     with config_path.open(mode='w', encoding='utf-8') as f:
         yaml.safe_dump(config, f, default_flow_style=False, sort_keys=False)
 
-    result = ddev("validate", "ci")
-    assert result.exit_code == 1, result.output
-    error = "missing service"
-    assert error in helpers.remove_trailing_spaces(result.output)
 
-
-def test_code_coverage_incorrect_paths(ddev, repository, helpers):
-    config_path = repository.path / 'code-coverage.datadog.yml'
+def _set_wrong_paths(config_path):
     with config_path.open(encoding='utf-8') as f:
         config = yaml.safe_load(f)
 
@@ -59,10 +52,34 @@ def test_code_coverage_incorrect_paths(ddev, repository, helpers):
     with config_path.open(mode='w', encoding='utf-8') as f:
         yaml.safe_dump(config, f, default_flow_style=False, sort_keys=False)
 
+
+@pytest.mark.parametrize(
+    'corrupt_config, expected_error',
+    [
+        pytest.param(_remove_service, "missing service", id='missing_services'),
+        pytest.param(
+            _set_wrong_paths,
+            "Service `active_directory` has incorrect coverage source paths",
+            id='incorrect_paths',
+        ),
+    ],
+)
+def test_code_coverage_config(ddev, repository, helpers, corrupt_config, expected_error):
+    result = ddev("validate", "ci", "--sync")
+    assert result.exit_code == 0, result.output
+
+    config_path = repository.path / 'code-coverage.datadog.yml'
+    corrupt_config(config_path)
+
     result = ddev("validate", "ci")
-    assert result.exit_code == 1, result.output
-    error = "Service `active_directory` has incorrect coverage source paths"
-    assert error in helpers.remove_trailing_spaces(result.output)
+    assert result.exit_code == 1, f"Expected validation to detect corrupted config: {result.output}"
+    assert expected_error in helpers.remove_trailing_spaces(result.output)
+
+    result = ddev("validate", "ci", "--sync")
+    assert result.exit_code == 0, f"Expected --sync to fix corrupted config: {result.output}"
+
+    result = ddev("validate", "ci")
+    assert result.exit_code == 0, f"Expected validation to pass after sync: {result.output}"
 
 
 def test_code_coverage_file_missing(ddev, repository, helpers, config_file):

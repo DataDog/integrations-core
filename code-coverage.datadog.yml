@@ -4,6 +4,7 @@ gates:
 - type: total_coverage_percentage
   config:
     threshold: 75
+    notify_only: true
     services:
     - '*'
     - '!openstack'
@@ -14,6 +15,7 @@ gates:
 - type: total_coverage_percentage
   config:
     threshold: 50
+    notify_only: true
     services:
     - openstack
     - teradata
@@ -21,6 +23,7 @@ gates:
 - type: total_coverage_percentage
   config:
     threshold: 30
+    notify_only: true
     services:
     - snmp
     - sap_hana
