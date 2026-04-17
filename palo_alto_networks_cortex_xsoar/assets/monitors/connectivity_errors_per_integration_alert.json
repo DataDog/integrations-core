@@ -1,14 +1,15 @@
 {
 	"version": 2,
-	"created_at": "2026-04-16T16:24:28.874+05:30",
-	"last_updated_at": "2026-04-16T16:24:28.874+05:30",
+	"created_at": "2026-04-17",
+	"last_updated_at": "2026-04-17",
 	"title": "Connectivity errors per integration alert",
 	"description": "It monitors for connectivity-related API execution errors per integration, which may indicate communication failures, network issues, or unavailable external services. Persistent errors can disrupt automation workflows and impact integration reliability in Cortex XSOAR.",
 	"definition": {
 		"id": 272980370,
 		"name": "Connectivity errors per integration alert",
 		"type": "query alert",
- 		"message": "{{#is_warning}}\r\n⚠️ **Warning**: Connectivity errors detected in **{{integration_name.name}}**.\r\n\r\n📊 Connection error count is **{{value}}** in the last 10 minutes, exceeding the warning threshold.\r\n\r\nPlease check network connectivity, integration endpoint availability, or firewall restrictions.\r\n\r\n{{/is_warning}}\r\n\r\n{{#is_alert}}\r\n🚨 **Alert**: High connectivity failure rate detected in **{{integration_name.name}}**.\r\n\r\n📊 Connection error count is **{{value}}** in the last 10 minutes, exceeding the alert threshold.\r\n\r\nImmediate investigation required: API endpoint unreachable, network issues, or service downtime.\r\n\r\n{{/is_alert}}\r\n\r\n@example@example.com",
+		"query": "sum(last_10m):sum:palo_alto_networks_cortex_xsoar.api_execution.count{api_response_type:connectionerror} by {integration_name}.as_count() >= 5",
+		"message": "{{#is_warning}}\r\n⚠️ **Warning**: Connectivity errors detected in **{{integration_name.name}}**.\r\n\r\n📊 Connection error count is **{{value}}** in the last 10 minutes, exceeding the warning threshold.\r\n\r\nPlease check network connectivity, integration endpoint availability, or firewall restrictions.\r\n\r\n{{/is_warning}}\r\n\r\n{{#is_alert}}\r\n🚨 **Alert**: High connectivity failure rate detected in **{{integration_name.name}}**.\r\n\r\n📊 Connection error count is **{{value}}** in the last 10 minutes, exceeding the alert threshold.\r\n\r\nImmediate investigation required: API endpoint unreachable, network issues, or service downtime.\r\n\r\n{{/is_alert}}\r\n\r\n@example@example.com",
 		"tags": [
 			"integration:palo-alto-networks-cortex-xsoar"
 		],

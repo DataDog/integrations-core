@@ -512,6 +512,15 @@ pipeline:
             extensions: []
             profiles: []
           mappers:
+            - name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: ocsf.activity_id
               categories:
                 - filter:
@@ -715,6 +724,15 @@ pipeline:
             extensions: []
             profiles: []
           mappers:
+            - name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
             - name: ocsf.activity_id
               categories:
                 - filter:
