@@ -73,6 +73,7 @@ class CLIParameters(TypedDict):
     compressed: bool  # Whether to analyze compressed file sizes
     format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
+    wheels_storage: Optional[str]  # Storage tier (dev/stable) for new-style lockfile URLs
 
 
 class CLIParametersTimeline(TypedDict):
@@ -82,6 +83,7 @@ class CLIParametersTimeline(TypedDict):
     compressed: bool  # Whether to analyze compressed file sizes
     format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
+    wheels_storage: Optional[str]  # Storage tier (dev/stable) for new-style lockfile URLs
 
 
 class InitialParametersTimelineIntegration(CLIParametersTimeline):
@@ -300,7 +302,31 @@ def extract_version_from_about_py(path: str) -> str:
     return ""
 
 
-def get_dependencies(repo_path: str | Path, platform: str, version: str, compressed: bool) -> list[FileDataEntry]:
+WHEELS_STORAGE_PLACEHOLDER = "${INTEGRATIONS_WHEELS_STORAGE}"
+
+
+def resolve_wheel_url(url: str, wheels_storage: str | None) -> str:
+    """
+    Substitute the wheels storage tier into a lockfile URL.
+
+    Old-style lockfiles hard-code the storage tier in the domain and contain no placeholder,
+    so they ignore ``wheels_storage``. New-style lockfiles template the tier via
+    ``${INTEGRATIONS_WHEELS_STORAGE}`` and require a value to resolve.
+    """
+    if WHEELS_STORAGE_PLACEHOLDER not in url:
+        return url
+    if wheels_storage is None:
+        raise ValueError(
+            "This lockfile templates the wheel storage tier via ${INTEGRATIONS_WHEELS_STORAGE} "
+            "but no tier was provided. Pass --wheels-storage=dev|stable or set the "
+            "INTEGRATIONS_WHEELS_STORAGE environment variable."
+        )
+    return url.replace(WHEELS_STORAGE_PLACEHOLDER, wheels_storage)
+
+
+def get_dependencies(
+    repo_path: str | Path, platform: str, version: str, compressed: bool, wheels_storage: str | None
+) -> list[FileDataEntry]:
     """
     Gets the list of dependencies for a given platform and Python version and returns a FileDataEntry that includes:
     Name, Version, Size_Bytes, Size, and Type.
@@ -311,12 +337,12 @@ def get_dependencies(repo_path: str | Path, platform: str, version: str, compres
         file_path = os.path.join(resolved_path, filename)
 
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
-            deps, download_urls, versions = get_dependencies_list(file_path)
+            deps, download_urls, versions = get_dependencies_list(file_path, wheels_storage)
             return get_dependencies_sizes(deps, download_urls, versions, compressed)
     return []
 
 
-def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[str]]:
+def get_dependencies_list(file_path: str, wheels_storage: str | None) -> tuple[list[str], list[str], list[str]]:
     """
     Parses a dependency file and extracts the dependency names, download URLs, and versions.
     """
@@ -331,7 +357,7 @@ def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[st
             if not match:
                 raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
             name = match.group(1)
-            url = match.group(2).replace("${INTEGRATIONS_WHEELS_STORAGE}", "stable")
+            url = resolve_wheel_url(match.group(2), wheels_storage)
 
             deps.append(name)
             download_urls.append(url)

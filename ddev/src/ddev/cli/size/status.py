@@ -35,6 +35,7 @@ def status(
     compressed: bool,
     format: list[str],
     show_gui: bool,
+    wheels_storage: str | None,
     to_dd_org: str | None,
     to_dd_key: str | None,
     dependency_sizes: Path | None,
@@ -91,6 +92,7 @@ def status(
                 "compressed": compressed,
                 "format": format,
                 "show_gui": show_gui,
+                "wheels_storage": wheels_storage,
             }
             modules_plat_ver.extend(
                 status_mode(
@@ -179,7 +181,7 @@ def status_mode(
                 f"Getting dependencies from lockfiles for {params['platform']} {params['version']}"
             )
             modules = get_files(repo_path, params["compressed"], params["version"]) + get_dependencies(
-                repo_path, params["platform"], params["version"], params["compressed"]
+                repo_path, params["platform"], params["version"], params["compressed"], params["wheels_storage"]
             )
 
     formatted_modules = format_modules(modules, params["platform"], params["version"])

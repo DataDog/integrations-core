@@ -49,6 +49,7 @@ def diff(
     compressed: bool,
     format: list[str],
     show_gui: bool,
+    wheels_storage: Optional[str],
 ) -> None:
     """
     Compare the size of integrations and dependencies between two commits.
@@ -107,6 +108,7 @@ def diff(
                         "compressed": compressed,
                         "format": format,
                         "show_gui": show_gui,
+                        "wheels_storage": wheels_storage,
                     }
                     modules_plat_ver.extend(
                         diff_mode(
@@ -133,7 +135,14 @@ def diff_mode(
     progress: Progress,
 ) -> list[FileDataEntryPlatformVersion]:
     files_b, dependencies_b, files_a, dependencies_a = get_repo_info(
-        gitRepo, params["platform"], params["version"], first_commit, second_commit, params["compressed"], progress
+        gitRepo,
+        params["platform"],
+        params["version"],
+        first_commit,
+        second_commit,
+        params["compressed"],
+        params["wheels_storage"],
+        progress,
     )
 
     integrations = get_diff(files_b, files_a, "Integration")
@@ -178,6 +187,7 @@ def get_repo_info(
     first_commit: str,
     second_commit: str,
     compressed: bool,
+    wheels_storage: Optional[str],
     progress: Progress,
 ) -> tuple[list[FileDataEntry], list[FileDataEntry], list[FileDataEntry], list[FileDataEntry]]:
     with progress:
@@ -205,13 +215,13 @@ def get_repo_info(
         task = progress.add_task("[cyan]Calculating sizes for the first commit...", total=None)
         gitRepo.checkout_commit(first_commit)
         files_b = get_files(repo, compressed, version)
-        dependencies_b = get_dependencies(repo, platform, version, compressed)
+        dependencies_b = get_dependencies(repo, platform, version, compressed, wheels_storage)
         progress.remove_task(task)
 
         task = progress.add_task("[cyan]Calculating sizes for the second commit...", total=None)
         gitRepo.checkout_commit(second_commit)
         files_a = get_files(repo, compressed, version)
-        dependencies_a = get_dependencies(repo, platform, version, compressed)
+        dependencies_a = get_dependencies(repo, platform, version, compressed, wheels_storage)
         progress.remove_task(task)
 
     return files_b, dependencies_b, files_a, dependencies_a

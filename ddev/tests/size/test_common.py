@@ -148,7 +148,7 @@ def test_get_dependencies_list():
     file_content = "dependency1 @ https://example.com/dependency1/dependency1-1.1.1-.whl\ndependency2 @ https://example.com/dependency2/dependency2-1.1.1-.whl"
     mock_open_obj = mock_open(read_data=file_content)
     with patch("builtins.open", mock_open_obj):
-        deps, urls, versions = get_dependencies_list("fake_path")
+        deps, urls, versions = get_dependencies_list("fake_path", None)
     assert deps == ["dependency1", "dependency2"]
     assert urls == [
         "https://example.com/dependency1/dependency1-1.1.1-.whl",
