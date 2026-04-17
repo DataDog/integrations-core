@@ -1,20 +1,18 @@
 name: Resolve Dependencies and Build Wheels
 
 on:
-  workflow_dispatch:
   pull_request:
     branches:
     - master
     - 7.*.*
-
-  push:
-    branches:
-    - master
-    - 7.*.*
+    paths:
+    - agent_requirements.in
+    - .builders/**
+    - .github/workflows/resolve-build-deps.yaml
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' && true || false }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 defaults:
   run:
@@ -28,58 +26,9 @@ env:
   SOURCE_DATE_EPOCH: "1580601600"
 
 jobs:
-  # measure-disk-usage.yml depends on this workflow being triggered and completed,
-  # so it can wait for the build to calculate dependency sizes.
-  # The 'on' setting ensures it runs, but this job cancels it if no dependency changes are detected.
-
-  check-should-run:
-    name: Check if build should run
-    runs-on: ubuntu-22.04
-    permissions:
-      actions: write
-      contents: read
-    outputs:
-      builder_changed: ${{ steps.dependency-check.outputs.builder_changed }}
-      should_run_build: ${{ steps.dependency-check.outputs.should_run_build }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Define diff commits
-        id: set_sha
-        if: github.event_name != 'workflow_dispatch'
-        run: .github/workflows/scripts/resolve_deps_define_diff_commits.sh
-        env:
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          EVENT_BEFORE: ${{ github.event.before }}
-
-      - name: Get changed files
-        id: changed-files
-        if: github.event_name != 'workflow_dispatch'
-        run: |
-          REPO="${{ github.repository }}"
-
-          CHANGED_FILES=$(gh api "repos/$REPO/compare/${{ steps.set_sha.outputs.prev_sha }}...${{ steps.set_sha.outputs.curr_sha }}" --paginate | \
-          jq -r 'select(.files != null) | .files | map(.filename) | join(" ")')
-
-          echo "files_changed=$CHANGED_FILES" >> $GITHUB_OUTPUT
-          echo "files_changed=$CHANGED_FILES"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Check if build should run
-        id: dependency-check
-        run: .github/workflows/scripts/resolve_deps_check_should_run.sh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FILES_CHANGED: ${{ steps.changed-files.outputs.files_changed }}
-
   test:
     name: Run tests
-    needs:
-      - check-should-run
-    if: needs.check-should-run.outputs.should_run_build == 'true'
+    if: github.event.pull_request.head.repo.fork == false
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -107,9 +56,7 @@ jobs:
   pre-resolve:
     name: Pre-resolve dependency versions
     needs:
-      - check-should-run
       - test
-    if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -147,9 +94,7 @@ jobs:
   build:
     name: Target ${{ matrix.job.image }} on ${{ matrix.job.os }}
     needs:
-      - check-should-run
       - pre-resolve
-    if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: false
@@ -173,6 +118,17 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        fetch-depth: 0
+
+    - name: Detect builder changes
+      id: builder-check
+      run: |
+        if git diff --quiet "origin/${{ github.base_ref }}...HEAD" -- .builders/; then
+          echo "builder_changed=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "builder_changed=true" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -199,28 +155,28 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build image and wheels
-      if: needs.check-should-run.outputs.builder_changed == 'true'
+      if: steps.builder-check.outputs.builder_changed == 'true'
       run: python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --constraints .constraints/constraints.txt
 
     - name: Pull image and build wheels
-      if: needs.check-should-run.outputs.builder_changed == 'false'
+      if: steps.builder-check.outputs.builder_changed == 'false'
       run: |
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
         python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest --constraints .constraints/constraints.txt
 
     - name: Publish image
-      if: github.event_name == 'push' && needs.check-should-run.outputs.builder_changed == 'true'
+      if: steps.builder-check.outputs.builder_changed == 'true'
       run: ${DOCKER} push ${{ env.BUILDER_IMAGE }}
 
     - name: Save new image digest
-      if: github.event_name == 'push' && needs.check-should-run.outputs.builder_changed == 'true'
+      if: steps.builder-check.outputs.builder_changed == 'true'
       run: >-
         ${DOCKER} inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }}
         | cut -d '@' -f 2
         > ${{ env.OUT_DIR }}/image_digest
 
     - name: Persist current image digest
-      if: needs.check-should-run.outputs.builder_changed == 'false'
+      if: steps.builder-check.outputs.builder_changed == 'false'
       run: >-
         jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json
         > ${{ env.OUT_DIR }}/image_digest
@@ -234,9 +190,7 @@ jobs:
   build-macos:
     name: Target macOS/${{ matrix.job.arch }} on ${{ matrix.job.os }}
     needs:
-      - check-should-run
       - pre-resolve
-    if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: false
@@ -323,11 +277,9 @@ jobs:
 
   publish:
     name: Publish artifacts and commit lockfiles to branch
-    if: needs.check-should-run.outputs.should_run_build == 'true' && github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork
     needs:
     - build
     - build-macos
-    - check-should-run
     runs-on: ubuntu-latest
 
     permissions:
