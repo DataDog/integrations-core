@@ -66,7 +66,7 @@ jobs:
         cache: 'pip'
 
     - name: Restore cache
-      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
       with:
         path: '~/.cache/pip'
         key: >-
@@ -151,7 +151,7 @@ jobs:
         !github.event.repository.private &&
         always()
       continue-on-error: true
-      uses: DataDog/coverage-upload-github-action@9bbbf86d16f7db1b14c5b885e61cf0d96053686a # v1.0.0
+      uses: DataDog/coverage-upload-github-action@6c4bd935248daa6f0ef94e3e6ba71ad5ad079998 # v1.0.3
       with:
         api_key: ${{ secrets.DD_API_KEY }}
         files: "${{ inputs.target || 'tls' }}/coverage.xml"
