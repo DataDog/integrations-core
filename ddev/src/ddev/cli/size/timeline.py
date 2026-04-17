@@ -72,7 +72,7 @@ def timeline(
     compressed: bool,
     format: Optional[list[str]],
     show_gui: bool,
-    wheels_storage: Optional[str],
+    wheels_storage: str,
 ) -> None:
     """
     Show the size evolution of a module (integration or dependency) over time.
@@ -498,7 +498,7 @@ def get_dependencies(
     author: str,
     message: str,
     compressed: bool,
-    wheels_storage: Optional[str],
+    wheels_storage: str,
 ) -> Optional[CommitEntry]:
     """
     Returns the size and metadata of a dependency for a given commit and platform.
@@ -531,9 +531,7 @@ def get_dependencies(
     return None
 
 
-def get_dependency_data(
-    file_path: str, module: str, wheels_storage: Optional[str]
-) -> tuple[Optional[str], Optional[str]]:
+def get_dependency_data(file_path: str, module: str, wheels_storage: str) -> tuple[Optional[str], Optional[str]]:
     """
     Parses a dependency file and extracts the dependency name, download URL, and version.
 

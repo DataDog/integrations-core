@@ -35,7 +35,7 @@ def status(
     compressed: bool,
     format: list[str],
     show_gui: bool,
-    wheels_storage: str | None,
+    wheels_storage: str,
     to_dd_org: str | None,
     to_dd_key: str | None,
     dependency_sizes: Path | None,

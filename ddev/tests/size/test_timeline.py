@@ -108,7 +108,7 @@ def test_get_dependency():
     content = """dep1 @ https://example.com/dep1/dep1-1.1.1-.whl
 dep2 @ https://example.com/dep2/dep2-1.1.2-.whl"""
     with patch("ddev.cli.size.timeline.open", mock_open(read_data=content)):
-        url, version = get_dependency_data(Path("some") / "path" / "file.txt", "dep2", None)
+        url, version = get_dependency_data(Path("some") / "path" / "file.txt", "dep2", "stable")
         assert (url, version) == ("https://example.com/dep2/dep2-1.1.2-.whl", "1.1.2")
 
 
@@ -163,7 +163,7 @@ def test_get_compressed_dependencies():
             "auth",
             "Added dep1",
             True,
-            None,
+            "stable",
         )
         assert result == {
             "Size_Bytes": 12345,

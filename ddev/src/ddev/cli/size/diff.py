@@ -49,7 +49,7 @@ def diff(
     compressed: bool,
     format: list[str],
     show_gui: bool,
-    wheels_storage: Optional[str],
+    wheels_storage: str,
 ) -> None:
     """
     Compare the size of integrations and dependencies between two commits.
@@ -187,7 +187,7 @@ def get_repo_info(
     first_commit: str,
     second_commit: str,
     compressed: bool,
-    wheels_storage: Optional[str],
+    wheels_storage: str,
     progress: Progress,
 ) -> tuple[list[FileDataEntry], list[FileDataEntry], list[FileDataEntry], list[FileDataEntry]]:
     with progress:

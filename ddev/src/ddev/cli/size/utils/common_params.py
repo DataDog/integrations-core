@@ -21,16 +21,17 @@ def common_params(func: Callable) -> Callable:
         is_flag=True,
         help="Display a pop-up window with a treemap showing the current size distribution of modules.",
     )
+    # An option rather than a positional argument so it can bind to the
+    # INTEGRATIONS_WHEELS_STORAGE env var (Click only supports envvar on options).
+    # This keeps CI invocations aligned with the GitLab variable of the same name.
     @click.option(
         "--wheels-storage",
         type=click.Choice(["dev", "stable"]),
-        default=None,
+        required=True,
         envvar="INTEGRATIONS_WHEELS_STORAGE",
         help=(
             "Which wheel storage tier to resolve dependency URLs against. "
-            "Only required for new-style lockfiles that template the storage tier into the URL "
-            "via ${INTEGRATIONS_WHEELS_STORAGE}. Old-style lockfiles hard-code the domain and "
-            "ignore this option. Can also be set via the INTEGRATIONS_WHEELS_STORAGE env var."
+            "Can also be set via the INTEGRATIONS_WHEELS_STORAGE env var."
         ),
     )
     @click.pass_context
@@ -40,7 +41,7 @@ def common_params(func: Callable) -> Callable:
         compressed: bool,
         format: list[str],
         show_gui: bool,
-        wheels_storage: str | None,
+        wheels_storage: str,
         *args,
         **kwargs,
     ):

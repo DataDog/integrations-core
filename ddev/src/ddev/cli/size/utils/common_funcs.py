@@ -73,7 +73,7 @@ class CLIParameters(TypedDict):
     compressed: bool  # Whether to analyze compressed file sizes
     format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
-    wheels_storage: Optional[str]  # Storage tier (dev/stable) for new-style lockfile URLs
+    wheels_storage: str  # Storage tier (dev/stable) for new-style lockfile URLs
 
 
 class CLIParametersTimeline(TypedDict):
@@ -83,7 +83,7 @@ class CLIParametersTimeline(TypedDict):
     compressed: bool  # Whether to analyze compressed file sizes
     format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
-    wheels_storage: Optional[str]  # Storage tier (dev/stable) for new-style lockfile URLs
+    wheels_storage: str  # Storage tier (dev/stable) for new-style lockfile URLs
 
 
 class InitialParametersTimelineIntegration(CLIParametersTimeline):
@@ -305,27 +305,13 @@ def extract_version_from_about_py(path: str) -> str:
 WHEELS_STORAGE_PLACEHOLDER = "${INTEGRATIONS_WHEELS_STORAGE}"
 
 
-def resolve_wheel_url(url: str, wheels_storage: str | None) -> str:
-    """
-    Substitute the wheels storage tier into a lockfile URL.
-
-    Old-style lockfiles hard-code the storage tier in the domain and contain no placeholder,
-    so they ignore ``wheels_storage``. New-style lockfiles template the tier via
-    ``${INTEGRATIONS_WHEELS_STORAGE}`` and require a value to resolve.
-    """
-    if WHEELS_STORAGE_PLACEHOLDER not in url:
-        return url
-    if wheels_storage is None:
-        raise ValueError(
-            "This lockfile templates the wheel storage tier via ${INTEGRATIONS_WHEELS_STORAGE} "
-            "but no tier was provided. Pass --wheels-storage=dev|stable or set the "
-            "INTEGRATIONS_WHEELS_STORAGE environment variable."
-        )
+def resolve_wheel_url(url: str, wheels_storage: str) -> str:
+    """Substitute the wheels storage tier into a lockfile URL."""
     return url.replace(WHEELS_STORAGE_PLACEHOLDER, wheels_storage)
 
 
 def get_dependencies(
-    repo_path: str | Path, platform: str, version: str, compressed: bool, wheels_storage: str | None
+    repo_path: str | Path, platform: str, version: str, compressed: bool, wheels_storage: str
 ) -> list[FileDataEntry]:
     """
     Gets the list of dependencies for a given platform and Python version and returns a FileDataEntry that includes:
@@ -342,7 +328,7 @@ def get_dependencies(
     return []
 
 
-def get_dependencies_list(file_path: str, wheels_storage: str | None) -> tuple[list[str], list[str], list[str]]:
+def get_dependencies_list(file_path: str, wheels_storage: str) -> tuple[list[str], list[str], list[str]]:
     """
     Parses a dependency file and extracts the dependency names, download URLs, and versions.
     """
