@@ -101,9 +101,11 @@ tests:
         "cloudIdentityCount" : 0,
         "containerCount" : 0
       },
-      "status" : "Open"
+      "status" : "Open",
+      "vendor" : {
+        "endpoint": "alerts"
+      }
     }
-  service: "alerts"
   result:
     custom:
       alertProvider: "SAE"
@@ -229,9 +231,10 @@ tests:
       trend_micro_vision_one_xdr:
         score: 20
       updatedDateTime: "2024-07-30T07:18:38Z"
+      vendor:
+        endpoint: "alerts"
       workbenchLink: "https://portal.in.xdr.trendmicro.com/index.html#/workbench/alerts/WB-12773-20240730-00015"
     message: "An unknown threat was detected on an endpoint and blocked by Trend Micro Predictive Machine Learning."
-    service: "alerts"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -247,6 +250,9 @@ tests:
       "detectedDateTime" : "2024-07-30T16:20:25Z",
       "entityType" : "endpoint",
       "entityName" : "DESKTOP-N19I543(ab80::42jk:a793:2667:b585,10.10.10.10)",
+      "vendor" : {
+        "endpoint" : "observed-attack-techniques"
+      },
       "source" : "endpointActivityData",
       "filters" : [ {
         "riskLevel" : "low",
@@ -370,7 +376,6 @@ tests:
       "ingestedDateTime" : "2024-07-30T16:22:16Z",
       "uuid" : "65f9d8c7-33a9-41a3-a1a6-445376599211"
     }
-  service: "observed-attack-techniques"
   result:
     custom:
       detail:
@@ -553,6 +558,8 @@ tests:
       oat_event_severity: "Info"
       source: "endpointActivityData"
       uuid: "65f9d8c7-33a9-41a3-a1a6-445376599211"
+      vendor:
+        endpoint: "observed-attack-techniques"
     message: |-
       {
         "endpoint" : {
@@ -563,6 +570,9 @@ tests:
         "detectedDateTime" : "2024-07-30T16:20:25Z",
         "entityType" : "endpoint",
         "entityName" : "DESKTOP-N19I543(ab80::42jk:a793:2667:b585,10.10.10.10)",
+        "vendor" : {
+          "endpoint" : "observed-attack-techniques"
+        },
         "source" : "endpointActivityData",
         "filters" : [ {
           "riskLevel" : "low",
@@ -686,7 +696,6 @@ tests:
         "ingestedDateTime" : "2024-07-30T16:22:16Z",
         "uuid" : "65f9d8c7-33a9-41a3-a1a6-445376599211"
       }
-    service: "observed-attack-techniques"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
@@ -702,6 +711,9 @@ tests:
       "detectedDateTime" : "2024-07-31T05:00:44Z",
       "entityType" : "endpoint",
       "entityName" : "ASSETTAG-EID(10.10.10.10)",
+      "vendor" : {
+        "endpoint" : "observed-attack-techniques"
+      },
       "source" : "identityActivityData",
       "filters" : [ {
         "riskLevel" : "medium",
@@ -808,7 +820,6 @@ tests:
       "ingestedDateTime" : "2024-07-31T05:00:49Z",
       "uuid" : "31f42842-e527-443a-bb9d-1918c0f65342"
     }
-  service: "observed-attack-techniques"
   result:
     custom:
       detail:
@@ -935,6 +946,8 @@ tests:
         id: "23fd34w4"
         name: "Jordan"
       uuid: "31f42842-e527-443a-bb9d-1918c0f65342"
+      vendor:
+        endpoint: "observed-attack-techniques"
     message: |-
       {
         "endpoint" : {
@@ -945,6 +958,9 @@ tests:
         "detectedDateTime" : "2024-07-31T05:00:44Z",
         "entityType" : "endpoint",
         "entityName" : "ASSETTAG-EID(10.10.10.10)",
+        "vendor" : {
+          "endpoint" : "observed-attack-techniques"
+        },
         "source" : "identityActivityData",
         "filters" : [ {
           "riskLevel" : "medium",
@@ -1051,7 +1067,6 @@ tests:
         "ingestedDateTime" : "2024-07-31T05:00:49Z",
         "uuid" : "31f42842-e527-443a-bb9d-1918c0f65342"
       }
-    service: "observed-attack-techniques"
     status: "notice"
     tags:
      - "source:LOGS_SOURCE"
@@ -1067,6 +1082,9 @@ tests:
       "entityType" : "endpoint",
       "entityName" : "desktop-17",
       "detectedDateTime" : "2020-06-01T02:12:56Z",
+      "vendor" : {
+        "endpoint" : "observed-attack-techniques"
+      },
       "source" : "cloudActivityData",
       "filters" : [ {
         "riskLevel" : "info",
@@ -1108,7 +1126,6 @@ tests:
       "ingestedDateTime" : "2020-06-01T02:12:56Z",
       "uuid" : "fdd69d98-58de-4249-9871-2e1b233b72ff"
     }
-  service: "observed-attack-techniques"
   result:
     custom:
       detail:
@@ -1165,6 +1182,8 @@ tests:
       oat_event_severity: "Debug"
       source: "cloudActivityData"
       uuid: "fdd69d98-58de-4249-9871-2e1b233b72ff"
+      vendor:
+        endpoint: "observed-attack-techniques"
     message: |-
       {
         "endpoint" : {
@@ -1175,6 +1194,9 @@ tests:
         "entityType" : "endpoint",
         "entityName" : "desktop-17",
         "detectedDateTime" : "2020-06-01T02:12:56Z",
+        "vendor" : {
+          "endpoint" : "observed-attack-techniques"
+        },
         "source" : "cloudActivityData",
         "filters" : [ {
           "riskLevel" : "info",
@@ -1216,11 +1238,11 @@ tests:
         "ingestedDateTime" : "2020-06-01T02:12:56Z",
         "uuid" : "fdd69d98-58de-4249-9871-2e1b233b72ff"
       }
-    service: "observed-attack-techniques"
     status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1590977576000
+
  -
   sample: |-
     {
@@ -1232,6 +1254,9 @@ tests:
       "entityType" : "endpoint",
       "entityName" : "desktop-17",
       "detectedDateTime" : "2020-06-01T02:12:56Z",
+      "vendor" : {
+        "endpoint" : "observed-attack-techniques"
+      },
       "source" : "networkActivityData",
       "filters" : [ {
         "riskLevel" : "info",
@@ -1300,7 +1325,6 @@ tests:
       "ingestedDateTime" : "2020-06-01T02:12:56Z",
       "uuid" : "fdd69d98-58de-4249-9871-2e1b233b72ff"
     }
-  service: "observed-attack-techniques"
   result:
     custom:
       detail:
@@ -1385,6 +1409,8 @@ tests:
       oat_event_severity: "Debug"
       source: "networkActivityData"
       uuid: "fdd69d98-58de-4249-9871-2e1b233b72ff"
+      vendor:
+        endpoint: "observed-attack-techniques"
     message: |-
       {
         "endpoint" : {
@@ -1395,6 +1421,9 @@ tests:
         "entityType" : "endpoint",
         "entityName" : "desktop-17",
         "detectedDateTime" : "2020-06-01T02:12:56Z",
+        "vendor" : {
+          "endpoint" : "observed-attack-techniques"
+        },
         "source" : "networkActivityData",
         "filters" : [ {
           "riskLevel" : "info",
@@ -1463,7 +1492,6 @@ tests:
         "ingestedDateTime" : "2020-06-01T02:12:56Z",
         "uuid" : "fdd69d98-58de-4249-9871-2e1b233b72ff"
       }
-    service: "observed-attack-techniques"
     status: "debug"
     tags:
      - "source:LOGS_SOURCE"
