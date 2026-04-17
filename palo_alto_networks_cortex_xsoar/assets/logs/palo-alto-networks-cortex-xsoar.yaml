@@ -98,7 +98,7 @@ pipeline:
           name: N/A
       target: modified
     - type: pipeline
-      name: Date remapper using modified
+      name: Parse modified
       enabled: true
       filter:
         query: -@modified:"N/A"
@@ -123,6 +123,12 @@ pipeline:
       targetType: attribute
       preserveSource: true
       overrideOnConflict: false
+    - type: date-remapper
+      name: Define `timestamp` and `AUDIT_INSERT_TIME` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+        - AUDIT_INSERT_TIME
     - type: pipeline
       name: Parse Incident logs
       enabled: true
