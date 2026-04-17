@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
 import pytest
@@ -263,6 +264,7 @@ async def test_compact_between_tasks_when_above_threshold(flow_dir, monkeypatch,
 
     checkpoint = mgr.read()["p1"]
     assert checkpoint["status"] == "success"
+    assert mock_agent.compact_call_count >= 1
 
 
 async def test_no_compact_when_below_threshold(flow_dir, monkeypatch, message_queue):
@@ -285,6 +287,7 @@ async def test_no_compact_when_below_threshold(flow_dir, monkeypatch, message_qu
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
     assert mgr.read()["p1"]["status"] == "success"
+    assert mock_agent.compact_call_count == 0
 
 
 # ---------------------------------------------------------------------------
@@ -449,6 +452,18 @@ async def test_on_error_emits_failed_message(flow_dir, monkeypatch, message_queu
     assert isinstance(msg, PhaseFailedMessage)
     assert msg.phase_id == "p1"
     assert msg.error == "boom"
+
+
+async def test_on_error_writes_failed_checkpoint_after_start(flow_dir, monkeypatch, message_queue):
+    mock_agent = MockAgent([])
+    phase, mgr = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+    phase._started_at = datetime.now(UTC)
+
+    await phase.on_error(PhaseTrigger(id="start", phase_id=None), RuntimeError("boom"))
+
+    checkpoint = mgr.read()["p1"]
+    assert checkpoint["status"] == "failed"
+    assert checkpoint["started_at"] is not None
 
 
 # ---------------------------------------------------------------------------

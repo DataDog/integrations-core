@@ -11,7 +11,7 @@ import anthropic
 
 from ddev.ai.phases.base import Phase, PhaseRegistry
 from ddev.ai.phases.checkpoint import CheckpointManager
-from ddev.ai.phases.config import FlowConfig
+from ddev.ai.phases.config import FlowConfig, FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.react.callbacks import CallbackSet
 from ddev.event_bus.exceptions import FatalProcessingError
@@ -19,22 +19,20 @@ from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 
 
 def _discover_and_register_phases() -> None:
-    """Import every non-private module in ddev/ai/phases/ and register Phase subclasses.
-
-    Phase itself is registered here too -- issubclass(Phase, Phase) is True and
-    Phase.__module__ matches when base.py is processed.
-    Framework modules are already in sys.modules; importlib.import_module is a no-op for them.
-    Only custom phase files that haven't been imported yet trigger a real import.
-    Non-phase files in phases/ must be prefixed with _ to be skipped.
+    """
+    Import all non-private modules in phases/ and register Phase subclasses in PhaseRegistry.
     """
     phases_dir = Path(__file__).parent
     for py_file in phases_dir.glob("*.py"):
         if py_file.stem.startswith("_"):
             continue
-        module = importlib.import_module(f"ddev.ai.phases.{py_file.stem}")
+        try:
+            module = importlib.import_module(f"ddev.ai.phases.{py_file.stem}")
+        except Exception as e:
+            raise FlowConfigError(f"Failed to import phase module '{py_file.stem}': {e}") from e
         for _, obj in inspect.getmembers(module, inspect.isclass):
             if issubclass(obj, Phase) and obj.__module__ == module.__name__:
-                PhaseRegistry._registry[obj.__name__] = obj
+                PhaseRegistry.register(obj.__name__, obj)
 
 
 class PhaseOrchestrator(EventBusOrchestrator):
@@ -61,6 +59,12 @@ class PhaseOrchestrator(EventBusOrchestrator):
         _discover_and_register_phases()
 
         config = FlowConfig.from_yaml(self._flow_yaml_path, config_dir)
+
+        for _, phase_config in config.phases.items():
+            try:
+                PhaseRegistry.get(phase_config.type)
+            except ValueError as e:
+                raise FlowConfigError(str(e)) from e
 
         checkpoint_manager = CheckpointManager(self._checkpoint_path)
 

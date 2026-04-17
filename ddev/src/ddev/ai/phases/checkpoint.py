@@ -35,6 +35,7 @@ class CheckpointManager:
     def write_memory(self, phase_id: str, text: str) -> None:
         """Write agent-authored text to this phase's memory file ({phase_id}_memory.md)."""
         memory_path = self._path.parent / f"{phase_id}_memory.md"
+        self._path.parent.mkdir(parents=True, exist_ok=True)
         memory_path.write_text(text)
 
     def get_memory(self, phase_id: str) -> str:

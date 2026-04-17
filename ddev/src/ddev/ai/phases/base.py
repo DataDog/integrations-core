@@ -24,9 +24,17 @@ class PhaseRegistry:
     _registry: dict[str, type["Phase"]] = {}
 
     @classmethod
+    def register(cls, name: str, phase_cls: type["Phase"]) -> None:
+        cls._registry[name] = phase_cls
+
+    @classmethod
+    def known_names(cls) -> list[str]:
+        return sorted(cls._registry)
+
+    @classmethod
     def get(cls, name: str) -> type["Phase"]:
         if name not in cls._registry:
-            raise ValueError(f"Unknown phase type: {name!r}. Known: {sorted(cls._registry)}")
+            raise ValueError(f"Unknown phase type: {name!r}. Known: {cls.known_names()}")
         return cls._registry[name]
 
 
@@ -50,14 +58,16 @@ def render_task_prompt(
     """Render a task prompt -- from file if prompt_path is set, inline otherwise."""
     if task.prompt_path is not None:
         return render_prompt(config_dir / task.prompt_path, context, resolver)
-    return render_inline(task.prompt, context, resolver)  # type: ignore[arg-type]
+    assert task.prompt is not None
+    return render_inline(task.prompt, context, resolver)
 
 
 def render_memory_prompt(checkpoint: CheckpointConfig, config_dir: Path, context: dict[str, Any]) -> str:
     """Render a checkpoint memory prompt -- from file if memory_prompt_path is set, inline otherwise."""
     if checkpoint.memory_prompt_path is not None:
         return render_prompt(config_dir / checkpoint.memory_prompt_path, context)
-    return render_inline(checkpoint.memory_prompt, context)  # type: ignore[arg-type]
+    assert checkpoint.memory_prompt is not None
+    return render_inline(checkpoint.memory_prompt, context)
 
 
 class Phase(AsyncProcessor[PhaseTrigger]):
@@ -147,10 +157,10 @@ class Phase(AsyncProcessor[PhaseTrigger]):
 
     async def process_message(self, message: PhaseTrigger) -> None:
         """Full phase pipeline. Not intended to be overridden -- customise via the extension points."""
-        # 3. Record start time
+        # 1. Record start time
         self._started_at = datetime.now(UTC)
 
-        # 3. Build template context and memory resolver
+        # 2. Build template context and memory resolver
         context: dict[str, Any] = {
             **self._flow_variables,
             **self._runtime_variables,
@@ -159,10 +169,10 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         }
         self._resolver = _make_memory_resolver(self._checkpoint_manager)
 
-        # 4. Call before_react()
+        # 3. Call before_react()
         self.before_react()
 
-        # 5. Create system prompt, ToolRegistry, AnthropicAgent
+        # 4. Create system prompt, ToolRegistry, AnthropicAgent
         system_prompt = render_prompt(
             self._config_dir / "prompts" / f"{self._config.agent}.md",
             context,
@@ -184,31 +194,20 @@ class Phase(AsyncProcessor[PhaseTrigger]):
             **agent_kwargs,
         )
 
-        # 6. Build ReActProcess
+        # 5. Build ReActProcess
         process = ReActProcess(
             agent=agent,
             tool_registry=tool_registry,
             callback_sets=self._callback_sets,
         )
 
-        # 7. Call run_tasks()
+        # 6. Call run_tasks()
         total_input, total_output = await self.run_tasks(process, context)
 
-        # 8. Call after_react()
+        # 7. Call after_react()
         self.after_react()
 
-        # 9. Memory step (always)
-        user_additions = None
-        if self._config.checkpoint is not None:
-            user_additions = render_memory_prompt(self._config.checkpoint, self._config_dir, context)
-
-        prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
-        response = await agent.send(prompt)
-        total_input += response.usage.input_tokens
-        total_output += response.usage.output_tokens
-        self._checkpoint_manager.write_memory(self._phase_id, response.text)
-
-        # 10. Write checkpoint
+        # 8. Write success checkpoint — task work is done
         self._checkpoint_manager.write_phase_checkpoint(
             self._phase_id,
             {
@@ -218,6 +217,20 @@ class Phase(AsyncProcessor[PhaseTrigger]):
                 "tokens": {"total_input": total_input, "total_output": total_output},
             },
         )
+
+        # 9. Best-effort memory step — failure here doesn't invalidate a completed phase
+        user_additions = None
+        if self._config.checkpoint is not None:
+            user_additions = render_memory_prompt(self._config.checkpoint, self._config_dir, context)
+
+        try:
+            prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
+            response = await agent.send(prompt)
+            total_input += response.usage.input_tokens
+            total_output += response.usage.output_tokens
+            self._checkpoint_manager.write_memory(self._phase_id, response.text)
+        except Exception:
+            pass
 
     async def on_success(self, message: PhaseTrigger) -> None:
         """Emit PhaseTrigger to unblock dependent phases."""
@@ -230,15 +243,18 @@ class Phase(AsyncProcessor[PhaseTrigger]):
 
     async def on_error(self, message: PhaseTrigger, error: Exception) -> None:
         """Write failed checkpoint and emit PhaseFailedMessage."""
-        self._checkpoint_manager.write_phase_checkpoint(
-            self._phase_id,
-            {
-                "status": "failed",
-                "started_at": self._started_at.isoformat() if self._started_at else None,
-                "finished_at": datetime.now(UTC).isoformat(),
-                "error": str(error),
-            },
-        )
+        try:
+            self._checkpoint_manager.write_phase_checkpoint(
+                self._phase_id,
+                {
+                    "status": "failed",
+                    "started_at": self._started_at.isoformat() if self._started_at else None,
+                    "finished_at": datetime.now(UTC).isoformat(),
+                    "error": str(error),
+                },
+            )
+        except Exception:
+            pass
         self.submit_message(
             PhaseFailedMessage(
                 id=f"{self._phase_id}_failed_{message.id}",

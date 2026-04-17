@@ -53,6 +53,7 @@ class MockAgent:
         self._responses = list(responses)
         self._index = 0
         self.send_calls: list[str | list[ToolResultMessage]] = []
+        self.compact_call_count: int = 0
         self.name = "mock"
         self._history: list[Any] = []
 
@@ -70,9 +71,11 @@ class MockAgent:
         self._history = []
 
     async def compact(self) -> AgentResponse | None:
+        self.compact_call_count += 1
         return None
 
     async def compact_preserving_last_turn(self) -> AgentResponse | None:
+        self.compact_call_count += 1
         return None
 
 

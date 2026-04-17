@@ -256,36 +256,6 @@ flow:
         FlowConfig.from_yaml(flow_yaml, tmp_path)
 
 
-def test_from_yaml_unknown_phase_type(tmp_path):
-    from ddev.ai.phases.base import Phase, PhaseRegistry
-
-    PhaseRegistry._registry["Phase"] = Phase
-
-    prompts_dir = tmp_path / "prompts"
-    prompts_dir.mkdir()
-    (prompts_dir / "writer.md").write_text("system prompt")
-
-    flow_yaml = tmp_path / "flow.yaml"
-    flow_yaml.write_text(
-        """\
-agents:
-  writer:
-    tools: []
-phases:
-  p1:
-    type: NonexistentPhase
-    agent: writer
-    tasks:
-      - name: t1
-        prompt: "Do it."
-flow:
-  - phase: p1
-"""
-    )
-    with pytest.raises(FlowConfigError, match="unknown type"):
-        FlowConfig.from_yaml(flow_yaml, tmp_path)
-
-
 def test_from_yaml_missing_task_prompt_path(tmp_path):
     from ddev.ai.phases.base import Phase, PhaseRegistry
 

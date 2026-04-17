@@ -88,16 +88,20 @@ class FlowConfig(BaseModel):
     @model_validator(mode="after")
     def cross_references(self) -> "FlowConfig":
         """Validate all cross-references between agents, phases, and dependencies."""
+        seen: set[str] = set()
         for entry in self.flow:
+            if entry.phase in seen:
+                raise ValueError(f"Duplicate phase in flow: {entry.phase!r}")
+            seen.add(entry.phase)
             if entry.phase not in self.phases:
-                raise ValueError(f"flow references unknown phase: {entry.phase!r}")
+                raise ValueError(f"Flow references unknown phase: {entry.phase!r}")
             for dep in entry.dependencies:
                 if dep not in self.phases:
-                    raise ValueError(f"phase {entry.phase!r} depends on unknown phase: {dep!r}")
+                    raise ValueError(f"Phase {entry.phase!r} depends on unknown phase: {dep!r}")
 
         for phase_id, phase in self.phases.items():
             if phase.agent not in self.agents:
-                raise ValueError(f"phase {phase_id!r} references unknown agent: {phase.agent!r}")
+                raise ValueError(f"Phase {phase_id!r} references unknown agent: {phase.agent!r}")
         return self
 
     @classmethod
@@ -117,19 +121,13 @@ class FlowConfig(BaseModel):
         return config
 
     def _validate_files(self, config_dir: Path) -> None:
-        """Check all referenced files exist and all phase types are registered."""
-        from ddev.ai.phases.base import PhaseRegistry
-
+        """Check all referenced files exist."""
         for agent_name in self.agents:
             system_prompt = config_dir / "prompts" / f"{agent_name}.md"
             if not system_prompt.exists():
                 raise FlowConfigError(f"System prompt not found for agent {agent_name!r}: {system_prompt}")
 
         for phase_id, phase in self.phases.items():
-            if phase.type not in PhaseRegistry._registry:
-                known = sorted(PhaseRegistry._registry)
-                raise FlowConfigError(f"Phase {phase_id!r} has unknown type: {phase.type!r}. Known types: {known}")
-
             for i, task in enumerate(phase.tasks):
                 if task.prompt_path is not None:
                     resolved = config_dir / task.prompt_path

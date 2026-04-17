@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 from string import Template
 from typing import Any
@@ -22,7 +22,7 @@ class _SafeMapping(Mapping[str, str]):
             return self._resolver(key)
         return f"<VARIABLE UNDEFINED: {key}>"
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return iter(self._context)
 
     def __len__(self) -> int:
