@@ -274,13 +274,13 @@ def show_replica_status_query(version, is_mariadb, channel=''):
         return "{0};".format(base_query)
 
 
-def get_indexes_query(version, is_mariadb, table_names):
+def get_indexes_query(version, is_mariadb, placeholders):
     """
     Get the appropriate indexes query based on MySQL version and flavor.
     The EXPRESSION column was introduced in MySQL 8.0.13 for functional indexes.
     MariaDB doesn't support functional indexes.
     """
     if not is_mariadb and version.version_compatible((8, 0, 13)):
-        return SQL_INDEXES_8_0_13.format(table_names)
+        return SQL_INDEXES_8_0_13.format(placeholders)
     else:
-        return SQL_INDEXES.format(table_names)
+        return SQL_INDEXES.format(placeholders)
