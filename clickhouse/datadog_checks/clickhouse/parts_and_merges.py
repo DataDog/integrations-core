@@ -860,9 +860,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         detached_parts = self._collect_detached_parts()
         thresholds = self._collect_thresholds()
 
-        self._emit_gauges(
-            parts, merges, mutations_aggregated, replication_aggregated, detached_parts, thresholds
-        )
+        self._emit_gauges(parts, merges, mutations_aggregated, replication_aggregated, detached_parts, thresholds)
         self._emit_events(parts, merges, mutations, replication_queue, detached_parts, thresholds)
 
         elapsed_ms = (time.time() - start_time) * 1000
