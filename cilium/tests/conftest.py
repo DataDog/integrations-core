@@ -198,18 +198,26 @@ def operator_instance_use_openmetrics():
 
 
 @pytest.fixture()
-def mock_agent_data(mock_http):
+def mock_agent_data(mock_http, mocker):
     f_name = os.path.join(os.path.dirname(__file__), "fixtures", "agent_metrics.txt")
     with open(f_name, "r") as f:
         text_data = f.read()
+    mocker.patch(
+        'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
+        return_value=mock_http,
+    )
     mock_http.get.return_value = MockHTTPResponse(content=text_data, headers={"Content-Type": "text/plain"})
     yield
 
 
 @pytest.fixture()
-def mock_operator_data(mock_http):
+def mock_operator_data(mock_http, mocker):
     f_name = os.path.join(os.path.dirname(__file__), "fixtures", "operator_metrics.txt")
     with open(f_name, "r") as f:
         text_data = f.read()
+    mocker.patch(
+        'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
+        return_value=mock_http,
+    )
     mock_http.get.return_value = MockHTTPResponse(content=text_data, headers={"Content-Type": "text/plain"})
     yield

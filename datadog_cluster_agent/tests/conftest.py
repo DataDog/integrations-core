@@ -22,9 +22,13 @@ def instance():
 
 
 @pytest.fixture()
-def mock_metrics_endpoint(mock_http):
+def mock_metrics_endpoint(mock_http, mocker):
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
+    mocker.patch(
+        'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
+        return_value=mock_http,
+    )
     mock_http.get.return_value = MockHTTPResponse(content=text_data, headers={'Content-Type': 'text/plain'})
     yield
