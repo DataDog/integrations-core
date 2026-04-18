@@ -102,12 +102,8 @@ def dd_environment():
 
 
 @pytest.fixture()
-def mock_data(mock_http, mocker):
-    mocker.patch(
-        'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
-        return_value=mock_http,
-    )
-    mock_http.get.side_effect = mocked_requests_get
+def mock_data(mock_openmetrics_http):
+    mock_openmetrics_http.get.side_effect = mocked_requests_get
     yield
 
 
@@ -142,7 +138,7 @@ def mocked_requests_get(*args, **kwargs):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'version.json')
         with open(f_name, 'r') as f:
             text_data = f.read()
-            return MockHTTPResponse(json_data=text_data)
+            return MockHTTPResponse(json_data=json.loads(text_data))
 
     pytest.fail("url `{}` not registered".format(args[0]))
 

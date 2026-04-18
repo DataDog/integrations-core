@@ -50,7 +50,7 @@ def dd_environment(e2e_instance):
 
 
 @pytest.fixture
-def poll_mock(mock_http, mocker):
+def poll_mock(mock_prometheus_http):
     registry = CollectorRegistry()
     # pylint: disable=E1123,E1101
     g1 = Gauge('metric1', 'processor usage', ['matched_label', 'node', 'flavor'], registry=registry)
@@ -62,10 +62,6 @@ def poll_mock(mock_http, mocker):
     g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
     g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
 
-    mocker.patch(
-        'datadog_checks.base.checks.prometheus.mixins.PrometheusScraperMixin.get_http_handler',
-        return_value=mock_http,
-    )
     content = ensure_unicode(generate_latest(registry))
-    mock_http.get.return_value = MockHTTPResponse(content=content, headers={'Content-Type': 'text/plain'})
+    mock_prometheus_http.get.return_value = MockHTTPResponse(content=content, headers={'Content-Type': 'text/plain'})
     yield
