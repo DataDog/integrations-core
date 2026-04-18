@@ -155,6 +155,20 @@ ORDER BY create_time ASC
 LIMIT {max_mutations_rows}
 """
 
+MUTATIONS_AGGREGATED_QUERY = """\
+SELECT
+    database,
+    table,
+    hostName() AS server_node,
+    count()                                  AS in_progress,
+    countIf(latest_fail_reason IS NOT NULL)  AS failing,
+    sum(parts_to_do)                         AS parts_remaining,
+    min(create_time)                         AS oldest_create_time
+FROM {mutations_table}
+WHERE NOT is_done
+GROUP BY database, table, server_node
+"""
+
 REPLICATION_QUEUE_QUERY = """\
 SELECT
     database,
@@ -172,6 +186,17 @@ SELECT
 FROM {replication_queue_table}
 ORDER BY position ASC
 LIMIT {max_replication_queue_rows}
+"""
+
+REPLICATION_QUEUE_AGGREGATED_QUERY = """\
+SELECT
+    database,
+    table,
+    hostName() AS server_node,
+    count()                                  AS depth,
+    countIf(num_tries > {stuck_threshold})   AS stuck
+FROM {replication_queue_table}
+GROUP BY database, table, server_node
 """
 
 #   parts_to_delay_insert  — ClickHouse starts throttling INSERTs at this count.
@@ -466,6 +491,33 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             )
         return result
 
+    def _collect_mutations_aggregated(self) -> list[dict]:
+        query = MUTATIONS_AGGREGATED_QUERY.format(
+            mutations_table=self._check.get_system_table('mutations'),
+        )
+        try:
+            rows = self._execute_query(query)
+        except Exception:
+            self._log.exception("Failed to collect mutation aggregates")
+            self._emit_error_count("collect-mutations-aggregated")
+            return []
+
+        result = []
+        for row in rows:
+            database, table, server_node, in_progress, failing, parts_remaining, oldest_create_time = row
+            result.append(
+                {
+                    'database': database,
+                    'table': table,
+                    'server_node': server_node,
+                    'in_progress': int(in_progress),
+                    'failing': int(failing),
+                    'parts_remaining': int(parts_remaining) if parts_remaining else 0,
+                    'oldest_create_time': int(oldest_create_time.timestamp()) if oldest_create_time else None,
+                }
+            )
+        return result
+
     def _collect_replication_queue(self) -> list[dict]:
         query = REPLICATION_QUEUE_QUERY.format(
             replication_queue_table=self._check.get_system_table('replication_queue'),
@@ -512,6 +564,32 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             )
         return result
 
+    def _collect_replication_queue_aggregated(self) -> list[dict]:
+        query = REPLICATION_QUEUE_AGGREGATED_QUERY.format(
+            replication_queue_table=self._check.get_system_table('replication_queue'),
+            stuck_threshold=STUCK_REPLICATION_NUM_TRIES,
+        )
+        try:
+            rows = self._execute_query(query)
+        except Exception:
+            self._log.exception("Failed to collect replication queue aggregates")
+            self._emit_error_count("collect-replication-queue-aggregated")
+            return []
+
+        result = []
+        for row in rows:
+            database, table, server_node, depth, stuck = row
+            result.append(
+                {
+                    'database': database,
+                    'table': table,
+                    'server_node': server_node,
+                    'depth': int(depth),
+                    'stuck': int(stuck),
+                }
+            )
+        return result
+
     def _collect_thresholds(self) -> list[dict]:
         """Fetch server-level parts_to_delay_insert / parts_to_throw_insert from system.merge_tree_settings."""
         query = THRESHOLDS_QUERY.format(
@@ -545,8 +623,8 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         self,
         parts: list[dict],
         merges: list[dict],
-        mutations: list[dict],
-        replication_queue: list[dict],
+        mutations_aggregated: list[dict],
+        replication_aggregated: list[dict],
         detached_parts: list[dict],
         thresholds: list[dict] | None = None,
     ) -> None:
@@ -660,55 +738,29 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             self._check.gauge('merges.total_bytes', agg['total_bytes'], tags=tags)
             self._check.gauge('merges.avg_progress', avg_progress, tags=tags)
 
-        # --- Mutations ---
-        mutations_agg: dict[tuple, dict] = defaultdict(
-            lambda: {
-                'in_progress': 0,
-                'failing': 0,
-                'parts_remaining': 0,
-                'oldest_create_time': None,
-            }
-        )
-        for row in mutations:
-            key = (row['database'], row['table'], row.get('server_node', ''))
-            agg = mutations_agg[key]
-            agg['in_progress'] += 1
-            if row.get('latest_fail_reason'):
-                agg['failing'] += 1
-            agg['parts_remaining'] += row.get('parts_to_do', 0)
-            create_time = row.get('create_time')
-            if create_time is not None:
-                if agg['oldest_create_time'] is None or create_time < agg['oldest_create_time']:
-                    agg['oldest_create_time'] = create_time
-
-        for (database, table, server_node), agg in mutations_agg.items():
+        # --- Mutations (server-side aggregated) ---
+        for row in mutations_aggregated:
             tags = self.tags + [
-                f'database:{database}',
-                f'table:{table}',
-                f'server_node:{server_node}',
+                f'database:{row["database"]}',
+                f'table:{row["table"]}',
+                f'server_node:{row.get("server_node", "")}',
             ]
-            oldest_age = now - agg['oldest_create_time'] if agg['oldest_create_time'] is not None else 0
-            self._check.gauge('mutations.in_progress', agg['in_progress'], tags=tags)
-            self._check.gauge('mutations.failing', agg['failing'], tags=tags)
-            self._check.gauge('mutations.parts_remaining', agg['parts_remaining'], tags=tags)
+            oldest_create_time = row.get('oldest_create_time')
+            oldest_age = now - oldest_create_time if oldest_create_time is not None else 0
+            self._check.gauge('mutations.in_progress', row['in_progress'], tags=tags)
+            self._check.gauge('mutations.failing', row['failing'], tags=tags)
+            self._check.gauge('mutations.parts_remaining', row['parts_remaining'], tags=tags)
             self._check.gauge('mutations.oldest_age_seconds', oldest_age, tags=tags)
 
-        # --- Replication queue ---
-        repl_agg: dict[tuple, dict] = defaultdict(lambda: {'depth': 0, 'stuck': 0})
-        for row in replication_queue:
-            key = (row['database'], row['table'], row.get('server_node', ''))
-            repl_agg[key]['depth'] += 1
-            if row.get('num_tries', 0) > STUCK_REPLICATION_NUM_TRIES:
-                repl_agg[key]['stuck'] += 1
-
-        for (database, table, server_node), agg in repl_agg.items():
+        # --- Replication queue (server-side aggregated) ---
+        for row in replication_aggregated:
             tags = self.tags + [
-                f'database:{database}',
-                f'table:{table}',
-                f'server_node:{server_node}',
+                f'database:{row["database"]}',
+                f'table:{row["table"]}',
+                f'server_node:{row.get("server_node", "")}',
             ]
-            self._check.gauge('replication.queue_depth', agg['depth'], tags=tags)
-            self._check.gauge('replication.stuck_tasks', agg['stuck'], tags=tags)
+            self._check.gauge('replication.queue_depth', row['depth'], tags=tags)
+            self._check.gauge('replication.stuck_tasks', row['stuck'], tags=tags)
 
         # --- Detached parts ---
         detached_agg: dict[tuple, dict] = defaultdict(
@@ -802,11 +854,15 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         parts = self._collect_parts()
         merges = self._collect_merges()
         mutations = self._collect_mutations()
+        mutations_aggregated = self._collect_mutations_aggregated()
         replication_queue = self._collect_replication_queue()
+        replication_aggregated = self._collect_replication_queue_aggregated()
         detached_parts = self._collect_detached_parts()
         thresholds = self._collect_thresholds()
 
-        self._emit_gauges(parts, merges, mutations, replication_queue, detached_parts, thresholds)
+        self._emit_gauges(
+            parts, merges, mutations_aggregated, replication_aggregated, detached_parts, thresholds
+        )
         self._emit_events(parts, merges, mutations, replication_queue, detached_parts, thresholds)
 
         elapsed_ms = (time.time() - start_time) * 1000

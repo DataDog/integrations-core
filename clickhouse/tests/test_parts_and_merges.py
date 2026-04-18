@@ -503,6 +503,32 @@ def _collected_replication():
     ]
 
 
+def _collected_mutations_aggregated():
+    return [
+        {
+            'database': 'default',
+            'table': 'events',
+            'server_node': 'node-1',
+            'in_progress': 1,
+            'failing': 0,
+            'parts_remaining': 47,
+            'oldest_create_time': 1704067200,
+        }
+    ]
+
+
+def _collected_replication_aggregated():
+    return [
+        {
+            'database': 'default',
+            'table': 'events',
+            'server_node': 'node-1',
+            'depth': 2,
+            'stuck': 1,
+        }
+    ]
+
+
 def test_emit_gauges_parts(check):
     job = check.parts_and_merges
     job.tags = ['test:clickhouse']
@@ -602,7 +628,7 @@ def test_emit_gauges_mutations(check):
     emitted = []
     check.gauge = lambda name, value, tags=None: emitted.append((name, value, tags))
 
-    job._emit_gauges([], [], _collected_mutations(), [], [])
+    job._emit_gauges([], [], _collected_mutations_aggregated(), [], [])
 
     names = {m[0] for m in emitted}
     assert {
@@ -633,13 +659,13 @@ def test_emit_gauges_merges_stalled(check):
 
 
 def test_emit_gauges_mutations_failing(check):
-    """A mutation with latest_fail_reason populated increments mutations.failing."""
+    """An aggregated row with failing>0 emits the mutations.failing gauge."""
     job = check.parts_and_merges
     job.tags = ['test:clickhouse']
     emitted = []
     check.gauge = lambda name, value, tags=None: emitted.append((name, value, tags))
 
-    failing = {**_collected_mutations()[0], 'latest_fail_reason': 'DB::Exception: disk full'}
+    failing = {**_collected_mutations_aggregated()[0], 'failing': 1, 'in_progress': 1}
     job._emit_gauges([], [], [failing], [], [])
 
     failing_count = next(v for n, v, _ in emitted if n == 'mutations.failing')
@@ -654,7 +680,7 @@ def test_emit_gauges_replication(check):
     emitted = []
     check.gauge = lambda name, value, tags=None: emitted.append((name, value, tags))
 
-    job._emit_gauges([], [], [], _collected_replication(), [])
+    job._emit_gauges([], [], [], _collected_replication_aggregated(), [])
 
     depth = next(v for n, v, _ in emitted if n == 'replication.queue_depth')
     stuck = next(v for n, v, _ in emitted if n == 'replication.stuck_tasks')
@@ -696,6 +722,30 @@ def test_default_sql_aggregates_per_table(check):
     with mock.patch.object(job, '_execute_query', side_effect=lambda q: seen.append(q) or []):
         job._collect_parts()
     assert 'GROUP BY database, table, server_node\n' in seen[0]
+
+
+def test_mutations_aggregated_query_has_no_limit(check):
+    """Mutation gauges come from an unbounded aggregate, so backlog > max_mutations_rows is counted."""
+    job = check.parts_and_merges
+    job.tags = []
+    job._tags_no_db = []
+    seen = []
+    with mock.patch.object(job, '_execute_query', side_effect=lambda q: seen.append(q) or []):
+        job._collect_mutations_aggregated()
+    assert 'LIMIT' not in seen[0]
+    assert 'GROUP BY database, table, server_node' in seen[0]
+
+
+def test_replication_aggregated_query_has_no_limit(check):
+    """Replication gauges come from an unbounded aggregate; a full backlog is never truncated."""
+    job = check.parts_and_merges
+    job.tags = []
+    job._tags_no_db = []
+    seen = []
+    with mock.patch.object(job, '_execute_query', side_effect=lambda q: seen.append(q) or []):
+        job._collect_replication_queue_aggregated()
+    assert 'LIMIT' not in seen[0]
+    assert 'GROUP BY database, table, server_node' in seen[0]
 
 
 def test_emit_gauges_max_tables_truncates():
@@ -794,7 +844,9 @@ def test_collection_error_returns_empty(check):
         assert job._collect_parts() == []
         assert job._collect_merges() == []
         assert job._collect_mutations() == []
+        assert job._collect_mutations_aggregated() == []
         assert job._collect_replication_queue() == []
+        assert job._collect_replication_queue_aggregated() == []
 
 
 def test_collect_and_emit_runs_with_partial_failures(check):
@@ -807,7 +859,9 @@ def test_collect_and_emit_runs_with_partial_failures(check):
         mock.patch.object(job, '_collect_parts', return_value=[]),
         mock.patch.object(job, '_collect_merges', return_value=_collected_merges()),
         mock.patch.object(job, '_collect_mutations', return_value=[]),
+        mock.patch.object(job, '_collect_mutations_aggregated', return_value=[]),
         mock.patch.object(job, '_collect_replication_queue', return_value=[]),
+        mock.patch.object(job, '_collect_replication_queue_aggregated', return_value=[]),
         mock.patch.object(job, '_collect_detached_parts', return_value=[]),
         mock.patch.object(job, '_collect_thresholds', return_value=[]),
         mock.patch.object(check, 'database_monitoring_query_activity', side_effect=captured.append),
@@ -848,7 +902,9 @@ def test_single_endpoint_mode_routes_through_cluster_all_replicas():
         job._collect_parts()
         job._collect_merges()
         job._collect_mutations()
+        job._collect_mutations_aggregated()
         job._collect_replication_queue()
+        job._collect_replication_queue_aggregated()
     assert all("clusterAllReplicas" in q for q in seen), seen
 
 
@@ -873,7 +929,9 @@ def test_direct_mode_uses_local_system_tables():
         job._collect_parts()
         job._collect_merges()
         job._collect_mutations()
+        job._collect_mutations_aggregated()
         job._collect_replication_queue()
+        job._collect_replication_queue_aggregated()
     for q in seen:
         assert "clusterAllReplicas" not in q
         assert "system." in q
