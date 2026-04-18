@@ -206,10 +206,14 @@ def instancev2():
 
 
 @pytest.fixture
-def haproxy_mock(mock_http):
+def haproxy_mock(mock_http, mocker):
     filepath = os.path.join(HERE, 'fixtures', 'mock_data')
     with open(filepath, 'rb') as f:
         data = f.read()
+    mocker.patch(
+        'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
+        return_value=mock_http,
+    )
     mock_http.get.return_value = MockHTTPResponse(content=data)
     yield
 
@@ -223,19 +227,27 @@ def mock_data():
 
 
 @pytest.fixture
-def haproxy_mock_evil(mock_http):
+def haproxy_mock_evil(mock_http, mocker):
     filepath = os.path.join(HERE, 'fixtures', 'mock_data_evil')
     with open(filepath, 'rb') as f:
         data = f.read()
+    mocker.patch(
+        'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
+        return_value=mock_http,
+    )
     mock_http.get.return_value = MockHTTPResponse(content=data)
     yield
 
 
 @pytest.fixture
-def haproxy_mock_enterprise_version_info(mock_http):
+def haproxy_mock_enterprise_version_info(mock_http, mocker):
     filepath = os.path.join(HERE, 'fixtures', 'enterprise_version_info.html')
     with open(filepath, 'rb') as f:
         data = f.read()
+    mocker.patch(
+        'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
+        return_value=mock_http,
+    )
     mock_http.get.return_value = MockHTTPResponse(content=data)
     yield
 

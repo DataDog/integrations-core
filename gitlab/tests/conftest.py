@@ -102,7 +102,11 @@ def dd_environment():
 
 
 @pytest.fixture()
-def mock_data(mock_http):
+def mock_data(mock_http, mocker):
+    mocker.patch(
+        'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
+        return_value=mock_http,
+    )
     mock_http.get.side_effect = mocked_requests_get
     yield
 
