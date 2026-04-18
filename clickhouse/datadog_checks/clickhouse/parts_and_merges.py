@@ -50,9 +50,6 @@ def _classify_detach_reason(reason: str | None) -> str:
     return 'other'
 
 
-# Default query: aggregate server-side at the (database, table, server_node) level so the
-# LIMIT caps *tables*, not partitions. This prevents per-table metric under-counting on
-# clusters with many partitions per table (e.g., 100 tables × 300 daily partitions).
 PARTS_AGGREGATED_QUERY = """\
 SELECT
     database,
@@ -78,8 +75,6 @@ ORDER BY active_part_count DESC
 LIMIT {max_parts_rows}
 """
 
-# Partition-level query: used only when table_metrics_include_partition_tag=True so that
-# partition tags and per-partition metrics are available. LIMIT applies at partition rows.
 PARTS_BY_PARTITION_QUERY = """\
 SELECT
     database,
@@ -179,12 +174,9 @@ ORDER BY position ASC
 LIMIT {max_replication_queue_rows}
 """
 
-# Server-level MergeTree thresholds that drive the UI's part-count health colors:
-#   parts_to_delay_insert   (default 150) — ClickHouse starts throttling INSERTs at this count
-#   parts_to_throw_insert   (default 300) — ClickHouse rejects INSERTs at this count
-# Users can override these per-table via SETTINGS in CREATE TABLE, but those overrides are
-# not surfaced here — this query returns the server defaults that apply to every table unless
-# it specifies its own value.
+#   parts_to_delay_insert  — ClickHouse starts throttling INSERTs at this count.
+#   parts_to_throw_insert  — ClickHouse rejects INSERTs at this count.
+# Per-table SETTINGS overrides are not surfaced here; this returns only the server defaults.
 THRESHOLDS_QUERY = """\
 SELECT
     hostName() AS server_node,
@@ -230,7 +222,6 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         self.tags: list[str] | None = None
 
         self._include_partition_tag: bool = bool(config.table_metrics_include_partition_tag)
-        # Defaulting of <=0 values happens in config._apply_validated_defaults; trust the config here.
         self._max_tables: int = config.table_metrics_max_tables
 
         self._db_client = None
@@ -269,8 +260,6 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             raise
 
     def _collect_parts(self) -> list[dict]:
-        # Pick SQL granularity based on whether per-partition tags are requested. Aggregating
-        # server-side at the table level avoids per-table under-counting when the LIMIT is hit.
         if self._include_partition_tag:
             query_template = PARTS_BY_PARTITION_QUERY
         else:
@@ -748,8 +737,6 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             self._check.gauge('table.detached_parts.other', agg['other'], tags=tags)
 
         # --- Thresholds (server-level MergeTree settings) ---
-        # Emitted as gauges so the frontend's getPartCountStatus() can color-code against the
-        # cluster's actual thresholds instead of hardcoded 150/300. One gauge per (server_node, name).
         for row in thresholds or []:
             server_node = row.get('server_node', '')
             tags = self.tags + [f'server_node:{server_node}']

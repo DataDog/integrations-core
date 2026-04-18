@@ -21,8 +21,6 @@ from datadog_checks.clickhouse import ClickhouseCheck
 
 from .common import CLICKHOUSE_VERSION
 
-# system.detached_parts and multi-part INSERT accumulation are available across all supported
-# ClickHouse versions, but DBM config plumbing requires 21.8+ (matches test_dbm_integration).
 UNSUPPORTED_VERSIONS = {'18', '19', '20', '21.8', '22.7'}
 
 
@@ -74,13 +72,7 @@ def _client(instance_config):
 
 
 def _find_metric(aggregator, name, required_tags, value=None):
-    """Return the first submitted metric whose tag set is a superset of required_tags.
-
-    `aggregator.assert_metric(tags=...)` requires exact tag equality, but the agent
-    emits many additional tags (database_instance, server, foo:bar, etc.) that would
-    make exact-match tests brittle across environments. This helper asserts on the
-    tags we actually care about without constraining the rest.
-    """
+    """Return the first submitted metric whose tag set is a superset of required_tags."""
     required = set(required_tags)
     matches = [
         m for m in aggregator.metrics(name) if required.issubset(set(m.tags)) and (value is None or m.value == value)
@@ -110,7 +102,6 @@ def test_parts_and_merges_emits_per_table_gauges(aggregator, parts_and_merges_in
         required_tags = ['database:default', f'table:{table}']
         _find_metric(aggregator, 'clickhouse.table.parts.active', required_tags, value=2)
         _find_metric(aggregator, 'clickhouse.table.parts.rows', required_tags, value=2000)
-        # These always get emitted alongside parts.active, regardless of exact value.
         for metric in (
             'clickhouse.table.parts.bytes_on_disk',
             'clickhouse.table.parts.compressed_bytes',

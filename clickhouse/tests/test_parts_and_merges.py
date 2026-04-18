@@ -687,18 +687,14 @@ def test_emit_gauges_partition_tag_when_enabled(check):
     assert 'partition:20240101' in tags
 
 
-def test_default_sql_prevents_per_table_undercounting(check):
-    """Regression: the default aggregated query must not split a single table into many
-    partition rows that would then be truncated by max_parts_rows. One row per table means
-    the SQL LIMIT caps tables — not partitions — so per-table metrics are never partial.
-    """
+def test_default_sql_aggregates_per_table(check):
+    """The default query groups by (database, table, server_node) so LIMIT caps tables."""
     job = check.parts_and_merges
     job.tags = []
     job._tags_no_db = []
     seen = []
     with mock.patch.object(job, '_execute_query', side_effect=lambda q: seen.append(q) or []):
         job._collect_parts()
-    # Guard against a regression that re-introduces partition in the default GROUP BY.
     assert 'GROUP BY database, table, server_node\n' in seen[0]
 
 
@@ -768,7 +764,7 @@ def test_emit_events_shape(check):
 
 
 def test_emit_events_uses_query_activity_channel_not_metadata(check):
-    """Regression: this feature must not flow through dbm-metadata-processor / REDAPL."""
+    """Events go through database_monitoring_query_activity, not database_monitoring_metadata."""
     job = check.parts_and_merges
     job.tags = ['test:clickhouse']
     job._tags_no_db = ['test:clickhouse']
@@ -889,7 +885,7 @@ def test_direct_mode_uses_local_system_tables():
 
 
 def test_obfuscate_mutation_command_falls_back_to_none_on_error(check):
-    """If the SQL obfuscator raises, the command is dropped rather than leaking literals."""
+    """When the obfuscator raises, _obfuscate_mutation_command returns None."""
     job = check.parts_and_merges
     with mock.patch(
         'datadog_checks.clickhouse.parts_and_merges.obfuscate_sql_with_metadata',
