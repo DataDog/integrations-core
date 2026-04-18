@@ -7,10 +7,10 @@ import os
 from contextlib import contextmanager
 from time import sleep
 
-import mock
 import pytest
 import requests
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import EnvVars, TempDir, docker_run
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
@@ -102,12 +102,9 @@ def dd_environment():
 
 
 @pytest.fixture()
-def mock_data():
-    with mock.patch(
-        'requests.Session.get',
-        side_effect=mocked_requests_get,
-    ):
-        yield
+def mock_data(mock_http):
+    mock_http.get.side_effect = mocked_requests_get
+    yield
 
 
 def mocked_requests_get(*args, **kwargs):
@@ -117,45 +114,31 @@ def mocked_requests_get(*args, **kwargs):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'readiness_check.json')
         with open(f_name, 'r') as f:
             text_data = f.read()
-            response = mock.MagicMock()
-            response.status_code = 200
-            response.json.return_value = json.loads(text_data)
-            return response
+            return MockHTTPResponse(json_data=json.loads(text_data))
 
     elif url == "http://{}:{}/-/liveness".format(HOST, GITLAB_LOCAL_PORT) or url == "http://{}:{}/-/health".format(
         HOST, GITLAB_LOCAL_PORT
     ):
-        response = mock.MagicMock()
-        response.status_code = 200
-        return response
+        return MockHTTPResponse()
     elif url == "http://{}:{}/-/metrics".format(HOST, GITLAB_LOCAL_PORT):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
 
         with open(f_name, 'r') as f:
             text_data = f.read()
-            return mock.MagicMock(
-                status_code=200,
-                iter_lines=lambda **kwargs: text_data.split("\n"),
-                headers={'Content-Type': "text/plain"},
-            )
+            return MockHTTPResponse(content=text_data, headers={'Content-Type': 'text/plain'})
     elif url == "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_GITALY_PROMETHEUS_PORT):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'gitaly.txt')
 
         with open(f_name, 'r') as f:
             text_data = f.read()
-            return mock.MagicMock(
-                status_code=200,
-                iter_lines=lambda **kwargs: text_data.split("\n"),
-                headers={'Content-Type': "text/plain"},
-            )
-    elif url == "http://{}:{}/api/v4/version".format(HOST, GITLAB_LOCAL_PORT):
+            return MockHTTPResponse(content=text_data, headers={'Content-Type': 'text/plain'})
+    elif url == "http://{}:{}/api/v4/version".format(HOST, GITLAB_LOCAL_PORT) or url == "http://{}:{}/-/health".format(
+        HOST, GITLAB_LOCAL_PORT
+    ):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'version.json')
         with open(f_name, 'r') as f:
             text_data = f.read()
-            response = mock.MagicMock()
-            response.status_code = 200
-            response.json.return_value = json.loads(text_data)
-            return response
+            return MockHTTPResponse(json_data=text_data)
 
     pytest.fail("url `{}` not registered".format(args[0]))
 

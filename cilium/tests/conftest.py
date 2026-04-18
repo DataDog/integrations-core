@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-import mock
 import pytest
 
 from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.cilium import CiliumCheck
 from datadog_checks.dev import run_command
 from datadog_checks.dev.kind import kind_run
@@ -198,28 +198,18 @@ def operator_instance_use_openmetrics():
 
 
 @pytest.fixture()
-def mock_agent_data():
+def mock_agent_data(mock_http):
     f_name = os.path.join(os.path.dirname(__file__), "fixtures", "agent_metrics.txt")
     with open(f_name, "r") as f:
         text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={"Content-Type": "text/plain"}
-        ),
-    ):
-        yield
+    mock_http.get.return_value = MockHTTPResponse(content=text_data, headers={"Content-Type": "text/plain"})
+    yield
 
 
 @pytest.fixture()
-def mock_operator_data():
+def mock_operator_data(mock_http):
     f_name = os.path.join(os.path.dirname(__file__), "fixtures", "operator_metrics.txt")
     with open(f_name, "r") as f:
         text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={"Content-Type": "text/plain"}
-        ),
-    ):
-        yield
+    mock_http.get.return_value = MockHTTPResponse(content=text_data, headers={"Content-Type": "text/plain"})
+    yield

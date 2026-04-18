@@ -4,9 +4,9 @@
 
 import os
 
-import mock
 import pytest
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
@@ -68,21 +68,14 @@ def _mocked_requests_get(*args, **kwargs):
         fixtures_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
         with open(fixtures_path, 'r') as f:
             text_data = f.read()
-            return mock.MagicMock(
-                status_code=200,
-                iter_lines=lambda **kwargs: text_data.split("\n"),
-                headers={'Content-Type': "text/plain"},
-            )
+            return MockHTTPResponse(content=text_data, headers={'Content-Type': 'text/plain'})
     elif url == 'http://{}:{}/ci'.format(HOST, GITLAB_LOCAL_MASTER_PORT):
-        return mock.MagicMock(status_code=200)
+        return MockHTTPResponse()
 
-    return mock.MagicMock(status_code=404)
+    return MockHTTPResponse(status_code=404)
 
 
 @pytest.fixture()
-def mock_data():
-    with mock.patch(
-        'requests.Session.get',
-        side_effect=_mocked_requests_get,
-    ):
-        yield
+def mock_data(mock_http):
+    mock_http.get.side_effect = _mocked_requests_get
+    yield
