@@ -69,7 +69,7 @@ jobs:
           echo "cutoff=$(git log -1 --format=%cI)" >> "${GITHUB_OUTPUT}"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v8.0.0
 
       - name: Generate dependency constraints
         run: |
@@ -289,7 +289,7 @@ jobs:
 
     steps:
     - name: Create token
-      uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+      uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
       id: token-generator
       with:
         app-id: ${{ vars.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
