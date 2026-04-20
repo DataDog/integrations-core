@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import pytest
 
-from ddev.cli.validate.images_utils import parse_env_file, substitute_env_vars
+from ddev.cli.validate.images_utils import hatch_contexts, parse_env_file, substitute_env_vars
 
 
 def test_images_command_registered(fake_repo, ddev):
@@ -57,3 +57,27 @@ def test_parse_env_file(tmp_path):
 
 def test_parse_env_file_missing_returns_empty(tmp_path):
     assert parse_env_file(tmp_path / 'absent.env') == {}
+
+
+def test_hatch_contexts_static_env_vars(tmp_path):
+    (tmp_path / 'hatch.toml').write_text(
+        '[envs.default.env-vars]\n'
+        'POSTGRES_IMAGE = "15"\n'
+    )
+    contexts = hatch_contexts(tmp_path / 'hatch.toml')
+    assert contexts == [{'POSTGRES_IMAGE': '15'}]
+
+
+def test_hatch_contexts_matrix_expansion(tmp_path):
+    (tmp_path / 'hatch.toml').write_text(
+        '[[envs.default.matrix]]\n'
+        'version = ["15", "16", "17"]\n'
+        '[envs.default.overrides]\n'
+        'matrix.version.env-vars = "POSTGRES_IMAGE"\n'
+    )
+    contexts = hatch_contexts(tmp_path / 'hatch.toml')
+    assert sorted(ctx['POSTGRES_IMAGE'] for ctx in contexts) == ['15', '16', '17']
+
+
+def test_hatch_contexts_missing_file(tmp_path):
+    assert hatch_contexts(tmp_path / 'absent.toml') == [{}]

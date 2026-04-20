@@ -13,6 +13,8 @@ Public surface:
 from __future__ import annotations
 
 import re
+import tomllib
+from itertools import product
 from pathlib import Path
 
 _ENV_VAR_RE = re.compile(
@@ -78,3 +80,49 @@ def parse_env_file(path: Path) -> dict[str, str]:
             value = value[1:-1]
         result[key] = value
     return result
+
+
+def hatch_contexts(hatch_toml_path: Path) -> list[dict[str, str]]:
+    """Return one env-var context per hatch matrix combination.
+
+    Missing file yields a single empty context so callers can still resolve
+    inline `${VAR:-default}` defaults.
+    """
+    if not hatch_toml_path.is_file():
+        return [{}]
+
+    data = tomllib.loads(hatch_toml_path.read_text(encoding='utf-8'))
+    envs = data.get('envs', {})
+
+    all_contexts: list[dict[str, str]] = []
+    for env_cfg in envs.values():
+        static = {k: str(v) for k, v in (env_cfg.get('env-vars') or {}).items()}
+
+        matrix_entries = env_cfg.get('matrix') or []
+        overrides = (env_cfg.get('overrides') or {}).get('matrix') or {}
+
+        if not matrix_entries:
+            all_contexts.append(dict(static))
+            continue
+
+        for entry in matrix_entries:
+            keys = list(entry.keys())
+            value_lists = [entry[k] for k in keys]
+            for combo in product(*value_lists):
+                ctx = dict(static)
+                for k, v in zip(keys, combo, strict=True):
+                    env_var_name = _override_env_var_name(overrides, k)
+                    if env_var_name:
+                        ctx[env_var_name] = str(v)
+                all_contexts.append(ctx)
+
+    return all_contexts or [{}]
+
+
+def _override_env_var_name(overrides: dict, matrix_key: str) -> str | None:
+    entry = overrides.get(matrix_key, {})
+    if isinstance(entry, dict):
+        name = entry.get('env-vars')
+        if isinstance(name, str):
+            return name
+    return None
