@@ -204,20 +204,26 @@ class PostgresSchemaCollector(SchemaCollector):
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 query = DATABASE_INFORMATION_QUERY
+                params: list[str] = []
+
                 for exclude_regex in self._config.exclude_databases:
-                    query += " AND datname !~ '{}'".format(exclude_regex)
+                    query += " AND datname !~ %s"
+                    params.append(exclude_regex)
+
                 if self._config.include_databases:
-                    query += f" AND ({
-                        ' OR '.join(f"datname ~ '{include_regex}'" for include_regex in self._config.include_databases)
-                    })"
+                    placeholders = " OR ".join("datname ~ %s" for _ in self._config.include_databases)
+                    query += f" AND ({placeholders})"
+                    params.extend(self._config.include_databases)
 
                 # Autodiscovery trumps exclude and include
                 if self._check.autodiscovery:
                     autodiscovery_databases = self._check.autodiscovery.get_items()
                     if autodiscovery_databases:
-                        query += " AND datname IN ({})".format(", ".join(f"'{db}'" for db in autodiscovery_databases))
+                        placeholders = ", ".join("%s" for _ in autodiscovery_databases)
+                        query += f" AND datname IN ({placeholders})"
+                        params.extend(autodiscovery_databases)
 
-                cursor.execute(query)
+                cursor.execute(query, params or None)
                 return [dict(row) for row in cursor.fetchall()]
 
     @contextlib.contextmanager
