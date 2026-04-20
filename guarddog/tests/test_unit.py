@@ -166,7 +166,7 @@ def test_get_guarddog_output(config, instance, mocker):
     expected_returncode = 0
     check.package_ecosystem = "pypi"
     check.path = dependency_file_path
-    cmd = "guarddog pypi verify /tmp/dependency_file_path/requirements.txt --output-format=json"
+    cmd = ["guarddog", "pypi", "verify", "/tmp/dependency_file_path/requirements.txt", "--output-format=json"]
 
     mock_completed_process = Mock(stdout=expected_stdout, stderr=expected_stderr, returncode=expected_returncode)
 
@@ -175,6 +175,22 @@ def test_get_guarddog_output(config, instance, mocker):
     stdout = check.get_guarddog_output(cmd).stdout
 
     assert stdout == expected_stdout
+
+
+@pytest.mark.unit
+def test_validate_configurations_with_whitespace_guarddog_path(config, instance, mocker):
+    check = GuarddogCheck("guarddog", config['init_config'], [instance])
+
+    err_message = "guarddog_path must be a single executable path without arguments"
+
+    mocker.patch("os.path.exists", return_value=True)
+    mocker.patch("os.access", return_value=True)
+
+    with pytest.raises(ConfigurationError, match=err_message):
+        check.package_ecosystem = "pypi"
+        check.path = "/path/to/dependency_file"
+        check.guarddog_path = "/bin/sh -c"
+        check.validate_config()
 
 
 @pytest.mark.unit

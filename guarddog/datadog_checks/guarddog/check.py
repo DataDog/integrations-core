@@ -8,9 +8,6 @@ import subprocess
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 
-from . import constants
-
-
 class GuarddogCheck(AgentCheck):
     __NAMESPACE__ = "guarddog"
 
@@ -27,10 +24,10 @@ class GuarddogCheck(AgentCheck):
         self.guarddog_path = str(init_config.get('guarddog_path')).strip()
         self.check_initializations.append(self.validate_config)
 
-    def get_guarddog_output(self, cmd_with_abs_path) -> subprocess.CompletedProcess:
+    def get_guarddog_output(self, command_parts) -> subprocess.CompletedProcess:
         try:
-            self.log.debug("Running command: %s", cmd_with_abs_path)
-            cmd_output_with_abs_path = subprocess.run(cmd_with_abs_path.split(), capture_output=True, text=True)
+            self.log.debug("Running command: %s", command_parts)
+            cmd_output_with_abs_path = subprocess.run(command_parts, capture_output=True, text=True)
             return cmd_output_with_abs_path
         except FileNotFoundError as cmd_error:
             err_message = "GuardDog is not found at configured path."
@@ -66,15 +63,17 @@ class GuarddogCheck(AgentCheck):
             err_message = "guarddog_path field should not be an empty string"
             self.log.error(err_message)
             raise ConfigurationError(err_message)
+        elif any(char.isspace() for char in self.guarddog_path):
+            err_message = "guarddog_path must be a single executable path without arguments"
+            self.log.error(err_message)
+            raise ConfigurationError(err_message)
 
     def check(self, _):
         try:
             current_time = get_current_datetime()
-            guarddog_command = constants.GUARDDOG_COMMAND.format(
-                package_ecosystem=self.package_ecosystem,
-                path=self.path,
+            cmd_result = self.get_guarddog_output(
+                [self.guarddog_path, self.package_ecosystem, "verify", self.path, "--output-format=json"]
             )
-            cmd_result = self.get_guarddog_output(self.guarddog_path + " " + guarddog_command)
             if cmd_result.returncode != 0:
                 cmd_result_err_message = f"GuardDog command failed: {cmd_result.stderr}"
                 self.log.error(cmd_result_err_message)
