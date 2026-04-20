@@ -21,8 +21,10 @@ else
   export DDEV_TEST_ENABLE_TRACING="0"
 fi
 
-# Set E2E flags based on repo (latest always uses --base --new-env)
-if [[ "$INPUT_REPO" == 'core' || "$INPUT_IS_LATEST" == 'true' ]]; then
+# Set E2E flags based on context and repo
+if [[ "$INPUT_CONTEXT" == 'test-agent' ]]; then
+  E2E_FLAGS="--new-env"
+elif [[ "$INPUT_REPO" == 'core' || "$INPUT_IS_LATEST" == 'true' ]]; then
   E2E_FLAGS="--base --new-env"
 else
   E2E_FLAGS="--dev"
