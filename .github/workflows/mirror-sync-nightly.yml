@@ -1,0 +1,61 @@
+name: mirror-sync-nightly
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh-and-propose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install ddev
+        run: pip install -e ./ddev
+
+      - name: Capture current manifest for diffing
+        run: cp .ddev/docker-images.json /tmp/old-manifest.json
+
+      - name: Refresh manifest
+        run: ddev validate images --sync
+
+      - name: Compute new upstream images
+        run: |
+          python .github/scripts/mirror_sync.py diff \
+            --old /tmp/old-manifest.json \
+            --new .ddev/docker-images.json \
+            --out /tmp/new-upstream.json
+          cat /tmp/new-upstream.json
+
+      - name: Commit manifest update
+        run: |
+          if git diff --quiet .ddev/docker-images.json; then
+            echo "No manifest drift, nothing to commit."
+            exit 0
+          fi
+          git config user.name "dd-mirror-bot"
+          git config user.email "dd-mirror-bot@users.noreply.github.com"
+          git add .ddev/docker-images.json
+          git commit -m "chore: refresh docker image manifest"
+          git push origin HEAD:master
+
+      - name: Summarize new upstream images
+        run: |
+          if [ -s /tmp/new-upstream.json ] && [ "$(cat /tmp/new-upstream.json)" != "[]" ]; then
+            echo "## New upstream images today" >> $GITHUB_STEP_SUMMARY
+            jq -r '.[] | "- `\(.image):\(.tag)`"' /tmp/new-upstream.json >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No new upstream images." >> $GITHUB_STEP_SUMMARY
+          fi
