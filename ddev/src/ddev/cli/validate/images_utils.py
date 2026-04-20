@@ -13,9 +13,11 @@ Public surface:
 from __future__ import annotations
 
 import ast
+import fnmatch
 import re
 import tomllib
 from collections.abc import Iterator
+from dataclasses import dataclass, field
 from itertools import product
 from pathlib import Path
 
@@ -223,3 +225,108 @@ def split_ref(ref: str) -> tuple[str, str]:
 def classify(image: str, mirror_prefixes: list[str]) -> bool:
     """True when `image` starts with any configured mirror prefix."""
     return any(image.startswith(prefix) for prefix in mirror_prefixes)
+
+
+@dataclass(frozen=True)
+class ResolvedRef:
+    ref: str
+    integration: str
+
+
+@dataclass
+class ImageEntry:
+    image: str
+    mirrored: bool
+    tags: list[str]
+    integrations: list[str]
+
+
+@dataclass
+class Manifest:
+    version: int = 1
+    images: list[ImageEntry] = field(default_factory=list)
+
+
+def aggregate(refs: list[tuple[str, str]], mirror_prefixes: list[str]) -> Manifest:
+    """Group (ref, integration) pairs into a sorted Manifest."""
+    per_image: dict[str, dict[str, set[str]]] = {}
+    for ref, integration in refs:
+        image, tag = split_ref(ref)
+        entry = per_image.setdefault(image, {'tags': set(), 'integrations': set()})
+        entry['tags'].add(tag)
+        entry['integrations'].add(integration)
+
+    images = [
+        ImageEntry(
+            image=image,
+            mirrored=classify(image, mirror_prefixes),
+            tags=sorted(entry['tags']),
+            integrations=sorted(entry['integrations']),
+        )
+        for image, entry in sorted(per_image.items())
+    ]
+    return Manifest(version=1, images=images)
+
+
+def scan_repo(
+    repo_path: Path,
+    integrations: list[str],
+    mirror_prefixes: list[str],
+    exclude_globs: list[str],
+) -> Manifest:
+    """Scan every source file for every integration and build a Manifest."""
+    refs: list[tuple[str, str]] = []
+    for integration in integrations:
+        integ_root = repo_path / integration
+        if not integ_root.is_dir():
+            continue
+        contexts = _contexts_for_integration(integ_root)
+        refs.extend(_scan_integration_sources(integration, integ_root, contexts, exclude_globs))
+    return aggregate(refs, mirror_prefixes)
+
+
+def _contexts_for_integration(integ_root: Path) -> list[dict[str, str]]:
+    contexts = hatch_contexts(integ_root / 'hatch.toml')
+    env_overlays = [parse_env_file(env_file) for env_file in integ_root.rglob('.env')]
+    if not env_overlays:
+        return contexts
+    merged: list[dict[str, str]] = []
+    for ctx in contexts:
+        for overlay in env_overlays:
+            merged.append({**ctx, **overlay})
+    return merged
+
+
+def _scan_integration_sources(
+    integration: str,
+    integ_root: Path,
+    contexts: list[dict[str, str]],
+    exclude_globs: list[str],
+) -> Iterator[tuple[str, str]]:
+    def _excluded(path: Path) -> bool:
+        rel = path.relative_to(integ_root.parent)
+        return any(fnmatch.fnmatch(str(rel), g) for g in exclude_globs)
+
+    for compose in integ_root.rglob('docker-compose*.y*ml'):
+        if _excluded(compose):
+            continue
+        for ref in scan_compose_file(compose, contexts):
+            yield ref, integration
+
+    for dockerfile in _iter_dockerfiles(integ_root):
+        if _excluded(dockerfile):
+            continue
+        for ref in scan_dockerfile(dockerfile, contexts):
+            yield ref, integration
+
+    for py_file in integ_root.rglob('tests/**/*.py'):
+        if _excluded(py_file):
+            continue
+        for ref in scan_python_fixture(py_file):
+            yield ref, integration
+
+
+def _iter_dockerfiles(root: Path) -> Iterator[Path]:
+    yield from root.rglob('Dockerfile')
+    yield from root.rglob('*.Dockerfile')
+    yield from root.rglob('Dockerfile.*')

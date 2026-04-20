@@ -6,12 +6,16 @@ from __future__ import annotations
 import pytest
 
 from ddev.cli.validate.images_utils import (
+    ImageEntry,
+    Manifest,
+    aggregate,
     classify,
     hatch_contexts,
     parse_env_file,
     scan_compose_file,
     scan_dockerfile,
     scan_python_fixture,
+    scan_repo,
     split_ref,
     substitute_env_vars,
 )
@@ -223,3 +227,51 @@ def test_classify_mirrored_false():
 
 def test_classify_empty_prefix_list():
     assert classify('anything', []) is False
+
+
+def test_aggregate_groups_by_image_and_sorts():
+    refs = [
+        ('postgres:15', 'postgres'),
+        ('postgres:16', 'postgres'),
+        ('postgres:15', 'pgbouncer'),
+        ('redis:7.2', 'redis'),
+    ]
+    manifest = aggregate(refs, mirror_prefixes=['registry.ddbuild.io/dockerhub/'])
+    assert manifest == Manifest(
+        version=1,
+        images=[
+            ImageEntry(image='postgres', mirrored=False, tags=['15', '16'], integrations=['pgbouncer', 'postgres']),
+            ImageEntry(image='redis', mirrored=False, tags=['7.2'], integrations=['redis']),
+        ],
+    )
+
+
+def test_aggregate_marks_mirrored():
+    refs = [('registry.ddbuild.io/dockerhub/redis:7.2', 'redis')]
+    manifest = aggregate(refs, mirror_prefixes=['registry.ddbuild.io/dockerhub/'])
+    assert manifest.images[0].mirrored is True
+
+
+def test_scan_repo_end_to_end(tmp_path):
+    integ = tmp_path / 'postgres'
+    (integ / 'tests' / 'compose').mkdir(parents=True)
+    (integ / 'tests' / 'compose' / 'docker-compose.yaml').write_text(
+        'services:\n'
+        '  pg:\n'
+        '    image: "postgres:${POSTGRES_IMAGE}"\n'
+    )
+    (integ / 'hatch.toml').write_text(
+        '[[envs.default.matrix]]\n'
+        'version = ["15", "16"]\n'
+        '[envs.default.overrides]\n'
+        'matrix.version.env-vars = "POSTGRES_IMAGE"\n'
+    )
+    manifest = scan_repo(
+        repo_path=tmp_path,
+        integrations=['postgres'],
+        mirror_prefixes=[],
+        exclude_globs=[],
+    )
+    assert manifest.images == [
+        ImageEntry(image='postgres', mirrored=False, tags=['15', '16'], integrations=['postgres']),
+    ]
