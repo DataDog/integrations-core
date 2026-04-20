@@ -56,14 +56,17 @@ def compute(target: str) -> str:
         paths.update(_iter_files(HERE / rel))
     paths.update(_iter_files(target_dir))
 
+    # Sort by the relative POSIX path string, not by Path objects: WindowsPath
+    # sorting is case-insensitive and uses backslashes, which produces a
+    # different iteration order (and therefore a different hash) than on
+    # POSIX systems for the same input set.
+    sorted_paths = sorted(paths, key=lambda p: p.relative_to(HERE).as_posix())
+
     digest = sha256()
-    for path in sorted(paths):
+    for path in sorted_paths:
         rel_path = path.relative_to(HERE).as_posix().encode('utf-8')
         digest.update(rel_path + b'\0')
-        # Normalize line endings so the hash is OS-agnostic. Windows runners
-        # may check out text files with CRLF even when .gitattributes
-        # specifies eol=lf, and we don't want that to force rebuilds.
-        digest.update(path.read_bytes().replace(b'\r', b''))
+        digest.update(path.read_bytes())
         digest.update(b'\0')
     return digest.hexdigest()
 
