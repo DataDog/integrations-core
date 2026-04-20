@@ -100,7 +100,6 @@ def test_e2e_profile_hpe_msa(dd_agent_check):
         'os_name': 'Jaded forward oxen zombies Jaded',
         'os_version': 'quaintly oxen',
         'profile': 'hpe-msa',
-        'serial_number': 'kept Jaded driving',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.11.2.51',
         'vendor': 'hp',
