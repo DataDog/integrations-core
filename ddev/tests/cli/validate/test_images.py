@@ -10,7 +10,9 @@ from ddev.cli.validate.images_utils import (
     Manifest,
     aggregate,
     classify,
+    diff_manifests,
     hatch_contexts,
+    load_manifest,
     parse_env_file,
     scan_compose_file,
     scan_dockerfile,
@@ -18,6 +20,7 @@ from ddev.cli.validate.images_utils import (
     scan_repo,
     split_ref,
     substitute_env_vars,
+    write_manifest,
 )
 
 
@@ -275,3 +278,51 @@ def test_scan_repo_end_to_end(tmp_path):
     assert manifest.images == [
         ImageEntry(image='postgres', mirrored=False, tags=['15', '16'], integrations=['postgres']),
     ]
+
+
+def test_manifest_round_trip(tmp_path):
+    m = Manifest(images=[
+        ImageEntry(image='redis', mirrored=False, tags=['7.2'], integrations=['redis']),
+    ])
+    path = tmp_path / 'docker-images.json'
+    write_manifest(path, m)
+    assert load_manifest(path) == m
+
+
+def test_load_manifest_missing_returns_empty(tmp_path):
+    assert load_manifest(tmp_path / 'absent.json') == Manifest()
+
+
+def test_diff_detects_added_image():
+    old = Manifest()
+    new = Manifest(images=[
+        ImageEntry(image='redis', mirrored=False, tags=['7.2'], integrations=['redis']),
+    ])
+    diff = diff_manifests(old, new)
+    assert diff.added_images == ['redis']
+    assert not diff.removed_images
+    assert not diff.modified_images
+
+
+def test_diff_detects_tag_and_integration_changes():
+    old = Manifest(images=[
+        ImageEntry(image='postgres', mirrored=False, tags=['15'], integrations=['postgres']),
+    ])
+    new = Manifest(images=[
+        ImageEntry(image='postgres', mirrored=False, tags=['15', '16'], integrations=['pgbouncer', 'postgres']),
+    ])
+    diff = diff_manifests(old, new)
+    assert diff.modified_images == ['postgres']
+    assert not diff.added_images
+
+
+def test_write_manifest_is_stable_json(tmp_path):
+    m = Manifest(images=[
+        ImageEntry(image='b', mirrored=False, tags=['1'], integrations=['x']),
+        ImageEntry(image='a', mirrored=False, tags=['2'], integrations=['y']),
+    ])
+    path = tmp_path / 'out.json'
+    write_manifest(path, m)
+    text = path.read_text()
+    assert text.index('"image": "a"') < text.index('"image": "b"')
+    assert text.endswith('\n')

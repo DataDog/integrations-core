@@ -14,10 +14,11 @@ from __future__ import annotations
 
 import ast
 import fnmatch
+import json
 import re
 import tomllib
 from collections.abc import Iterator
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from itertools import product
 from pathlib import Path
 
@@ -330,3 +331,46 @@ def _iter_dockerfiles(root: Path) -> Iterator[Path]:
     yield from root.rglob('Dockerfile')
     yield from root.rglob('*.Dockerfile')
     yield from root.rglob('Dockerfile.*')
+
+
+@dataclass
+class ManifestDiff:
+    added_images: list[str] = field(default_factory=list)
+    removed_images: list[str] = field(default_factory=list)
+    modified_images: list[str] = field(default_factory=list)
+
+    def is_empty(self) -> bool:
+        return not (self.added_images or self.removed_images or self.modified_images)
+
+
+def load_manifest(path: Path) -> Manifest:
+    if not path.is_file():
+        return Manifest()
+    raw = json.loads(path.read_text(encoding='utf-8'))
+    return Manifest(
+        version=raw.get('version', 1),
+        images=[ImageEntry(**entry) for entry in raw.get('images', [])],
+    )
+
+
+def write_manifest(path: Path, manifest: Manifest) -> None:
+    sorted_images = sorted(manifest.images, key=lambda e: e.image)
+    payload = {
+        'version': manifest.version,
+        'images': [asdict(e) for e in sorted_images],
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=False) + '\n', encoding='utf-8')
+
+
+def diff_manifests(old: Manifest, new: Manifest) -> ManifestDiff:
+    old_by_image = {e.image: e for e in old.images}
+    new_by_image = {e.image: e for e in new.images}
+    added = sorted(set(new_by_image) - set(old_by_image))
+    removed = sorted(set(old_by_image) - set(new_by_image))
+    modified = sorted(
+        image
+        for image in set(old_by_image) & set(new_by_image)
+        if old_by_image[image] != new_by_image[image]
+    )
+    return ManifestDiff(added_images=added, removed_images=removed, modified_images=modified)
