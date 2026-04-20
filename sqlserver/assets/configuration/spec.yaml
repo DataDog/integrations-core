@@ -995,6 +995,7 @@ files:
         type: string
         example: <PROCEDURE_NAME>
     - name: proc_only_if
+      fleet_configurable: true
       description: Run this SQL before each call to `stored_procedure`. Only if it returns 1 then call the proc.
       value:
         type: string
@@ -1086,6 +1087,7 @@ files:
     - name: propagate_agent_tags
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+
         When set to `true`, the tags from the agent host are added to the check's tags for all instances.
         This option takes precedence over the `propagate_agent_tags` option in `init_config`.
       value:

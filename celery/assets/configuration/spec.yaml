@@ -15,3 +15,8 @@ files:
         openmetrics_endpoint.description: |
           Endpoint exposing the Celery Flower's Prometheus metrics. For more information refer to:
           https://docs.celeryq.dev/en/stable/userguide/monitoring.html#flower-real-time-celery-web-monitor
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/celery/*.log
+      source: celery

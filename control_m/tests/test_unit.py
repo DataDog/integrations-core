@@ -1,0 +1,522 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+import json
+import time
+from typing import Any
+
+import pytest
+from pytest import MonkeyPatch
+from requests.exceptions import HTTPError
+
+from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.dev.utils import get_metadata_metrics
+
+from .common import BASE_TAGS, FIXTURE_DIR, _load_job, _make_check, _mock_api, _run_check
+
+
+@pytest.mark.parametrize(
+    "instance, match",
+    [
+        ({"control_m_api_endpoint": ""}, "control_m_api_endpoint.*required"),
+        ({"control_m_api_endpoint": "https://x/api"}, "No authentication configured"),
+        (
+            {
+                "control_m_api_endpoint": "https://x/api",
+                "control_m_username": "user",
+                "control_m_password": "pass",
+                "token_lifetime_seconds": 0,
+            },
+            "token_lifetime_seconds.*at least 60",
+        ),
+        ({"control_m_api_endpoint": "https://x/api", "control_m_username": "user"}, "must both be set"),
+        ({"control_m_api_endpoint": "https://x/api", "control_m_password": "pass"}, "must both be set"),
+    ],
+)
+def test_config_invalid(instance: dict[str, Any], match: str) -> None:
+    with pytest.raises(Exception, match=match):
+        _make_check(instance)
+
+
+def test_connect_server_error_emits_critical(
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+) -> None:
+    check = _make_check(instance)
+    _mock_api(check, monkeypatch, server_status=500)
+
+    with pytest.raises(HTTPError, match="500"):
+        _run_check(check)
+
+    aggregator.assert_metric("control_m.can_connect", value=0, count=1)
+    aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:static_token")
+
+
+def test_connect_session_login_ok(
+    session_instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+) -> None:
+    check = _make_check(session_instance)
+    _mock_api(check, monkeypatch, servers=[{"name": "srv1", "state": "Up"}])
+
+    _run_check(check)
+
+    aggregator.assert_metric("control_m.can_login", value=1, count=1)
+    aggregator.assert_metric("control_m.can_connect", value=1, count=1)
+    aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:session_login")
+
+
+def test_connect_session_login_failure_emits_critical(
+    session_instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+) -> None:
+    check = _make_check(session_instance)
+    _mock_api(check, monkeypatch, login_status=401)
+
+    with pytest.raises(HTTPError, match="401"):
+        _run_check(check)
+
+    aggregator.assert_metric("control_m.can_login", value=0, count=1)
+    aggregator.assert_metric("control_m.can_connect", value=0, count=1)
+
+
+def test_connect_static_token_401_falls_back_to_session(
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+) -> None:
+    instance["control_m_username"] = "user"
+    instance["control_m_password"] = "pass"
+    check = _make_check(instance)
+    _mock_api(
+        check,
+        monkeypatch,
+        servers=[{"name": "srv1", "state": "Up"}],
+        reject_first_server_call=True,
+    )
+
+    _run_check(check)
+
+    aggregator.assert_metric("control_m.can_connect", value=1, count=1)
+    aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:session_login")
+
+
+def test_server_health_up_and_down(
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+) -> None:
+    check = _make_check(instance)
+    _mock_api(
+        check,
+        monkeypatch,
+        servers=[
+            {"name": "srv_up", "state": "Up"},
+            {"name": "srv_down", "state": "Disconnected"},
+            {"name": "srv_no_state"},
+        ],
+    )
+
+    _run_check(check)
+
+    aggregator.assert_metric(
+        "control_m.server.up", value=1, tags=BASE_TAGS + ["ctm_server:srv_up", "state:up"], count=1
+    )
+    aggregator.assert_metric(
+        "control_m.server.up", value=0, tags=BASE_TAGS + ["ctm_server:srv_down", "state:disconnected"], count=1
+    )
+    aggregator.assert_metric(
+        "control_m.server.up", value=0, tags=BASE_TAGS + ["ctm_server:srv_no_state", "state:unknown"], count=1
+    )
+
+
+def test_jobs_total_and_returned(
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+) -> None:
+    check = _make_check(instance)
+    _mock_api(
+        check,
+        monkeypatch,
+        jobs=[
+            _load_job("job_executing.json"),
+            _load_job("job_executing.json"),
+        ],
+        jobs_total=10,
+    )
+
+    _run_check(check)
+
+    aggregator.assert_metric("control_m.jobs.total", value=10, count=1)
+    aggregator.assert_metric("control_m.jobs.returned", value=2, count=1)
+
+
+def test_terminal_ended_ok_with_duration(
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+) -> None:
+    check = _make_check(instance)
+    _mock_api(
+        check,
+        monkeypatch,
+        jobs=[
+            _load_job(
+                "job_ended_ok.json",
+                jobId="t1",
+                name="timed_job",
+                startTime="20260115100000",
+                endTime="20260115103000",
+            )
+        ],
+    )
+
+    _run_check(check)
+
+    aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
+    aggregator.assert_metric_has_tag("control_m.job.run.count", "result:ok")
+    aggregator.assert_metric("control_m.job.run.duration_ms", value=1_800_000, count=1)
+    aggregator.assert_metric_has_tag("control_m.job.run.duration_ms", "job_name:timed_job")
+
+
+def test_dedup_same_terminal_job_counted_once(
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+) -> None:
+    check = _make_check(instance)
+    _mock_api(check, monkeypatch, jobs=[_load_job("job_ended_ok.json", jobId="d1", name="j1")])
+
+    _run_check(check)
+    aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
+
+    aggregator.reset()
+    _run_check(check)
+    aggregator.assert_metric("control_m.job.run.count", count=0)
+
+
+def test_dedup_new_run_number_counted_as_new_completion(
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+) -> None:
+    check = _make_check(instance)
+    state = _mock_api(check, monkeypatch, jobs=[_load_job("job_ended_ok.json", jobId="r1", name="j1")])
+
+    _run_check(check)
+    aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
+
+    aggregator.reset()
+    state["jobs"] = [_load_job("job_ended_ok.json", jobId="r1", name="j1", numberOfRuns=2)]
+    _run_check(check)
+    aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
+
+
+@pytest.mark.parametrize(
+    "extra_config, fixture, fixture_kwargs",
+    [
+        pytest.param({}, "job_ended_not_ok.json", {"jobId": "e1"}, id="events_disabled_by_default"),
+        pytest.param(
+            {"emit_job_events": True},
+            "job_ended_ok.json",
+            {"jobId": "e4", "name": "ok_job"},
+            id="success_suppressed_by_default",
+        ),
+    ],
+)
+def test_no_events_emitted(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+    extra_config: dict[str, Any],
+    fixture: str,
+    fixture_kwargs: dict[str, str],
+) -> None:
+    instance.update(extra_config)
+    check = _make_check(instance)
+    _mock_api(check, monkeypatch, jobs=[_load_job(fixture, **fixture_kwargs)])
+
+    _run_check(check)
+
+    aggregator.assert_metric("control_m.job.run.count", count=1)
+    assert len(aggregator.events) == 0
+
+
+def test_event_on_terminal_failure(
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+) -> None:
+    instance["emit_job_events"] = True
+    check = _make_check(instance)
+    _mock_api(check, monkeypatch, jobs=[_load_job("job_ended_not_ok.json", jobId="e2")])
+
+    _run_check(check)
+
+    assert len(aggregator.events) == 1
+    aggregator.assert_event(
+        "",
+        exact_match=False,
+        msg_title="Control-M job failed: fail_job",
+        alert_type="error",
+        event_type="control_m.job.completion",
+    )
+
+
+def test_event_success_when_opted_in(
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+) -> None:
+    instance["emit_job_events"] = True
+    instance["emit_success_events"] = True
+    check = _make_check(instance)
+    _mock_api(check, monkeypatch, jobs=[_load_job("job_ended_ok.json", jobId="e5", name="ok_job")])
+
+    _run_check(check)
+
+    assert len(aggregator.events) == 1
+    aggregator.assert_event(
+        "Result: ok",
+        exact_match=False,
+        msg_title="Control-M job ok: ok_job",
+        alert_type="success",
+    )
+
+
+def test_event_slow_run_check(instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+    instance["emit_job_events"] = True
+    instance["slow_run_threshold_ms"] = 60000
+    check = _make_check(instance)
+    _mock_api(
+        check,
+        monkeypatch,
+        jobs=[
+            _load_job(
+                "job_ended_ok.json",
+                jobId="e6",
+                name="slow_job",
+                startTime="20260115100000",
+                endTime="20260115103000",
+            )
+        ],
+    )
+
+    _run_check(check)
+
+    assert len(aggregator.events) == 1
+    aggregator.assert_event(
+        "Result: ok",
+        exact_match=False,
+        event_type="control_m.job.slow_run",
+        alert_type="warning",
+    )
+    assert "1800000ms" in aggregator.events[0]["msg_title"]
+
+
+@pytest.mark.parametrize(
+    "servers, expected_version",
+    [
+        pytest.param(
+            [{"name": "s1", "version": "9.0.21.080"}, {"name": "s2", "version": "9.1.00.000"}],
+            "9.0.21.080",
+            id="first_server_has_version",
+        ),
+        pytest.param(
+            [{"name": "s1", "state": "Up"}, {"name": "s2", "version": "9.1.00.000"}],
+            "9.1.00.000",
+            id="fallback_to_second_server",
+        ),
+    ],
+)
+def test_metadata_version_from_servers(
+    instance: dict[str, Any],
+    datadog_agent: Any,
+    monkeypatch: MonkeyPatch,
+    servers: list[dict[str, str]],
+    expected_version: str,
+) -> None:
+    check = _make_check(instance)
+    _mock_api(check, monkeypatch, servers=servers)
+
+    _run_check(check)
+
+    datadog_agent.assert_metadata(check.check_id, {"version.raw": expected_version})
+
+
+def test_full_cycle_with_fixture_data(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    datadog_agent: Any,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    servers = json.loads((FIXTURE_DIR / "config_servers_response.txt").read_text())
+    jobs_payload = json.loads((FIXTURE_DIR / "jobs_status_response.txt").read_text())
+
+    check = _make_check(instance)
+    _mock_api(
+        check,
+        monkeypatch,
+        servers=servers,
+        jobs=jobs_payload["statuses"],
+        jobs_total=jobs_payload.get("total"),
+    )
+
+    _run_check(check)
+
+    wb_tags = BASE_TAGS + ["ctm_server:workbench"]
+
+    aggregator.assert_metric("control_m.can_connect", value=1, tags=BASE_TAGS + ["auth_method:static_token"], count=1)
+    aggregator.assert_metric("control_m.server.up", value=1, tags=BASE_TAGS + ["ctm_server:workbench", "state:up"])
+    aggregator.assert_metric("control_m.jobs.total", value=3, tags=BASE_TAGS, count=1)
+    aggregator.assert_metric("control_m.jobs.returned", value=3, tags=BASE_TAGS, count=1)
+    aggregator.assert_metric("control_m.jobs.active", value=2, tags=wb_tags, count=1)
+    aggregator.assert_metric("control_m.jobs.waiting.total", value=1, tags=BASE_TAGS, count=1)
+    aggregator.assert_metric("control_m.jobs.waiting.by_server", value=1, tags=wb_tags, count=1)
+    aggregator.assert_metric("control_m.jobs.by_status", value=1, tags=wb_tags + ["status:ended_ok"], count=1)
+    aggregator.assert_metric("control_m.jobs.by_status", value=1, tags=wb_tags + ["status:wait_condition"], count=1)
+    aggregator.assert_metric("control_m.jobs.by_status", value=1, tags=wb_tags + ["status:executing"], count=1)
+    aggregator.assert_metric(
+        "control_m.job.run.count", value=1, tags=wb_tags + ["job_name:job_ok", "result:ok"], count=1
+    )
+    aggregator.assert_metric(
+        "control_m.job.run.duration_ms", value=60000, tags=wb_tags + ["job_name:job_ok", "result:ok"], count=1
+    )
+
+    datadog_agent.assert_metadata(check.check_id, {"version.raw": "9.0.21.080"})
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        exclude=[
+            "control_m.job.run.duration_ms",
+            "control_m.job.run.overrun_ms",
+        ],
+    )
+
+
+@pytest.mark.parametrize(
+    "time_offset, expected_value",
+    [
+        pytest.param(300, 300_000, id="5min_past_estimate"),
+        pytest.param(-60, None, id="1min_before_estimate"),
+    ],
+)
+def test_overrun_gauge_given_executing_job(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+    time_offset: int,
+    expected_value: int | None,
+) -> None:
+    monkeypatch.setattr(time, "time", lambda: 1770750250.0 + time_offset)
+    # estimatedEndTime 2026-02-10 19:04:10 UTC → epoch 1770750250
+
+    check = _make_check(instance)
+    _mock_api(
+        check,
+        monkeypatch,
+        jobs=[
+            _load_job(
+                "job_executing.json",
+                jobId="wb:overrun1",
+                name="late_job",
+                folder="nightly",
+                startTime="20260210185000",
+                estimatedEndTime=["20260210190410"],
+            )
+        ],
+    )
+
+    _run_check(check)
+
+    if expected_value is not None:
+        aggregator.assert_metric(
+            "control_m.job.overrun_ms",
+            value=expected_value,
+            tags=BASE_TAGS + ["ctm_server:srv1", "job_name:late_job", "job_id:wb:overrun1", "folder:nightly"],
+            count=1,
+        )
+    else:
+        aggregator.assert_metric("control_m.job.overrun_ms", count=0)
+
+
+@pytest.mark.parametrize(
+    "end_time, expected_value",
+    [
+        pytest.param("20260210191410", 600_000, id="10min_overrun"),
+        pytest.param("20260210190000", None, id="within_estimate"),
+    ],
+)
+def test_overrun_histogram_given_terminal_job(
+    instance: dict[str, Any],
+    aggregator: AggregatorStub,
+    monkeypatch: MonkeyPatch,
+    end_time: str,
+    expected_value: int | None,
+) -> None:
+    check = _make_check(instance)
+    _mock_api(
+        check,
+        monkeypatch,
+        jobs=[
+            _load_job(
+                "job_ended_ok.json",
+                jobId="wb:done1",
+                name="finished_job",
+                startTime="20260210185000",
+                endTime=end_time,
+                estimatedEndTime=["20260210190410"],
+            )
+        ],
+    )
+
+    _run_check(check)
+
+    if expected_value is not None:
+        aggregator.assert_metric("control_m.job.run.overrun_ms", value=expected_value, count=1)
+        aggregator.assert_metric_has_tag("control_m.job.run.overrun_ms", "job_name:finished_job")
+        aggregator.assert_metric_has_tag("control_m.job.run.overrun_ms", "result:ok")
+    else:
+        aggregator.assert_metric("control_m.job.run.overrun_ms", count=0)
+
+
+def test_timezone_displayed_in_event_text(
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+) -> None:
+    instance["emit_job_events"] = True
+    instance["emit_success_events"] = True
+    instance["control_m_timezone"] = "America/New_York"
+
+    check = _make_check(instance)
+    _mock_api(
+        check,
+        monkeypatch,
+        jobs=[
+            _load_job(
+                "job_ended_ok.json",
+                jobId="tz1",
+                name="tz_job",
+                startTime="20260115100000",
+                endTime="20260115103000",
+            )
+        ],
+    )
+
+    _run_check(check)
+
+    assert len(aggregator.events) == 1
+    assert "EST" in aggregator.events[0]["msg_text"]
+
+
+def test_timezone_corrects_overrun_for_non_utc_server(
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+) -> None:
+    # Control-M server in US Eastern reports estimatedEndTime as 19:04:10 local.
+    # That's 2026-02-10 19:04:10 EST = 2026-02-11 00:04:10 UTC (epoch 1770768250).
+    # Freeze wall-clock 5 minutes past that UTC instant.
+    frozen_now = 1770768250.0 + 300
+    monkeypatch.setattr(time, "time", lambda: frozen_now)
+
+    instance["control_m_timezone"] = "America/New_York"
+    check = _make_check(instance)
+    _mock_api(
+        check,
+        monkeypatch,
+        jobs=[
+            _load_job(
+                "job_executing.json",
+                jobId="wb:tz_overrun",
+                name="tz_late_job",
+                startTime="20260210185000",
+                estimatedEndTime=["20260210190410"],
+            )
+        ],
+    )
+
+    _run_check(check)
+
+    aggregator.assert_metric("control_m.job.overrun_ms", value=300_000, count=1)

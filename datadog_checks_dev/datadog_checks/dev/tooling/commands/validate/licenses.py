@@ -168,7 +168,6 @@ PACKAGE_REPO_OVERRIDES = {
     'requests': 'https://github.com/psf/requests',
     'requests-toolbelt': 'https://github.com/requests/toolbelt',
     'service-identity': 'https://github.com/pyca/service-identity',
-    'snowflake-connector-python': 'https://github.com/snowflakedb/snowflake-connector-python',
     'supervisor': 'https://github.com/Supervisor/supervisor',
     'tuf': 'https://github.com/theupdateframework/python-tuf',
     'typing': 'https://github.com/python/typing',

@@ -159,13 +159,16 @@ class GlusterfsCheck(AgentCheck):
             if 'healinfo' in volume:
                 self.parse_healinfo_stats(volume.get('healinfo', []), volume_tags)
 
-            self.submit_service_check(self.VOLUME_SC, volume.get('health'), volume_tags)
+            if 'health' in volume:
+                self.submit_service_check(self.VOLUME_SC, volume['health'], volume_tags)
 
     def parse_subvols_stats(self, subvols, volume_tags):
         for subvol in subvols:
             subvol_tags = volume_tags + ['subvol_name:{}'.format(subvol.get('name'))]
             self.submit_metrics(subvol, 'subvol', VOL_SUBVOL_STATS, subvol_tags)
-            self.submit_service_check(self.BRICK_SC, subvol['health'], subvol_tags)
+
+            if 'health' in subvol:
+                self.submit_service_check(self.BRICK_SC, subvol['health'], subvol_tags)
 
             for brick in subvol.get('bricks', []):
                 brick_name = brick['name'].split(":")
@@ -207,6 +210,9 @@ class GlusterfsCheck(AgentCheck):
         for key, metric in metric_mapping.items():
             if key in payload:
                 value = payload[key]
+
+                if isinstance(value, str) and value.lower() == 'n/a':
+                    continue
 
                 if key in PARSE_METRICS:
                     try:

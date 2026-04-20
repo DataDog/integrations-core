@@ -57,7 +57,7 @@ ibm_spectrum_lsf.load.idle_time,gauge,,minute,,"On UNIX, the idle time of the ho
 ibm_spectrum_lsf.load.login_users,gauge,,,,The number of current login users. [Reported by lsload],0,ibm_spectrum_lsf,lsf ls,,
 ibm_spectrum_lsf.load.mem.available_ram,gauge,,megabyte,,The amount of available RAM. [Reported by lsload],0,ibm_spectrum_lsf,lsf avail ram,,
 ibm_spectrum_lsf.load.mem.available_swap,gauge,,megabyte,,The amount of available swap space. [Reported by lsload],0,ibm_spectrum_lsf,lsf avail swap,,
-ibm_spectrum_lsf.load.mem.free,gauge,,,,"The amount of free space in /tmp, in MB. [Reported by lsload]",0,ibm_spectrum_lsf,lsf mem free,,
+ibm_spectrum_lsf.load.mem.free,gauge,,megabyte,,"The amount of free space in /tmp, in MB. [Reported by lsload]",0,ibm_spectrum_lsf,lsf mem free,,
 ibm_spectrum_lsf.load.mem.paging_rate,gauge,,page,second,"The memory paging rate exponentially averaged over the last minute, in pages per second. [Reported by lsload]",0,ibm_spectrum_lsf,lsf paging,,
 ibm_spectrum_lsf.load.status,gauge,,,,Status of the host. [Reported by lsload],0,ibm_spectrum_lsf,lsf load status,,
 ibm_spectrum_lsf.perfmon.host.queries.avg,gauge,,,,The average number of host information queries in the sampling period. [Reported by badmin_perfmon],0,ibm_spectrum_lsf,lsf perf host queries avg,,

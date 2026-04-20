@@ -30,7 +30,7 @@ instances:
 
     ## @param expected_mode - string or list of strings - optional
     ## If `expected_mode` is defined, a service check is sent where the
-    ## status is determined by whether the current mode matches the expected.
+    ## status is determined by whether the current mode matches the expected mode.
     ##
     ## Available options are: `leader`, `follower`, `standalone` or an array of one or more of these.
     #
@@ -40,7 +40,7 @@ instances:
 
     ## @param report_instance_mode - boolean - optional - default: true
     ## Whether to report the current instance mode as a 0/1 gauge.
-    ## For example if the current instance mode is `observer` - `zookeeper.instances.observer` reports as 1.
+    ## For example, if the current instance mode is `observer`, `zookeeper.instances.observer` reports as 1,
     ## and `zookeeper.instances.(leader|follower|standalone|etc.)` reports as 0.
     #
     # report_instance_mode: true

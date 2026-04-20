@@ -1,0 +1,39 @@
+# Policy for: .gitlab-ci.yml release-auto job in DataDog/integrations-core
+#
+# This policy grants the GitLab CI release-auto job permission to push
+# release tags to this repository. The job runs on pushes to the master
+# branch and maintenance branches (e.g. 1.2.x).
+#
+# Naming convention:
+#   self:     Only this repository (DataDog/integrations-core) can use this policy
+#   gitlab:   This policy is for GitLab CI (not GitHub Actions)
+#   release:  Grants permission to push release tags
+#   branches: Restricted to protected release branches (master and X.Y.x)
+#
+# Security model:
+#   - Pipeline must run from master or a maintenance branch (X.Y.x)
+#   - Pipeline must be triggered by a push event (not scheduled or manual)
+#   - CI config must be committed to the same branch
+#
+# Permissions granted:
+#   - contents: write  - Push release tags to the repository
+#
+# Usage in .gitlab-ci.yml:
+#   id_tokens:
+#     DDOCTOSTS_ID_TOKEN:
+#       aud: dd-octo-sts
+#   script:
+#     - GITHUB_TOKEN=$(dd-octo-sts token --scope DataDog/integrations-core --policy self.gitlab.release.branches)
+
+issuer: https://gitlab.ddbuild.io
+
+subject_pattern: project_path:DataDog/integrations-core:ref_type:branch:ref:(master|\d+\.\d+\.x)
+
+claim_pattern:
+  ci_config_ref_uri: gitlab\.ddbuild\.io/DataDog/integrations-core//\.gitlab-ci\.yml@refs/heads/(master|\d+\.\d+\.x)
+  pipeline_source: push
+  project_path: DataDog/integrations-core
+  ref_path: refs/heads/(master|\d+\.\d+\.x)
+
+permissions:
+  contents: write

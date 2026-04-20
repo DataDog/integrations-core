@@ -9,6 +9,7 @@ files:
   - template: instances
     options:
     - name: host
+      display_priority: 4
       required: true
       description: Enter the host to connect to.
       value:
@@ -16,6 +17,7 @@ files:
         example: localhost
       fleet_configurable: true
     - name: port
+      display_priority: 3
       required: true
       description: Enter the port of the host to connect to.
       formats: ["port"]
@@ -23,14 +25,30 @@ files:
         type: integer
         example: 6379
       fleet_configurable: true
+    - name: username
+      display_priority: 2
+      description: The username for the connection. Redis 6+ only.
+      value:
+          type: string
+      fleet_configurable: true
+    - name: password
+      display_priority: 1
+      description: The password for the connection.
+      secret: true
+      value:
+        type: string
+      fleet_configurable: true
     - name: unix_socket_path
+      display_priority: 0
       description: Connect through a unix socket instead of using a `host` and `port`.
       value:
         type: string
+        require_trusted_provider: true
         example: /var/run/redis/redis.sock
         display_default: null
       fleet_configurable: true
     - name: db
+      display_priority: 0
       description: |
         The index of the database (keyspace) to use.
         The default is index 0. Any other index results in a SELECT command sent upon connection
@@ -40,18 +58,8 @@ files:
         type: integer
         example: 0
       fleet_configurable: true
-    - name: username
-      description: The username for the connection. Redis 6+ only.
-      value:
-          type: string
-      fleet_configurable: true
-    - name: password
-      description: The password for the connection.
-      secret: true
-      value:
-        type: string
-      fleet_configurable: true
     - name: collect_client_metrics
+      display_priority: 0
       description: |
         Collects metrics using the `CLIENT` command.
         This requires the Redis CLIENT command to be available on your servers.
@@ -60,39 +68,49 @@ files:
         example: false
       fleet_configurable: true
     - name: socket_timeout
+      display_priority: 0
       description: Custom timeout for the check request.
       value:
         type: integer
         example: 5
       fleet_configurable: true
     - name: ssl
+      display_priority: 0
       description: Enable SSL/TLS encryption for the check.
       value:
         type: boolean
         example: false
       fleet_configurable: true
     - name: ssl_keyfile
+      display_priority: 0
       description: The path to the client-side private keyfile.
       value:
         type: string
+        require_trusted_provider: true
         example: "<CERT_KEY_PATH>"
       fleet_configurable: true
     - name: ssl_certfile
+      display_priority: 0
       description: The path to the client-side certificate file.
       value:
         type: string
+        require_trusted_provider: true
         example: "<CERT_PEM_PATH>"
       fleet_configurable: true
     - name: ssl_ca_certs
-      description:  The path to the ca_certs file.
+      display_priority: 0
+      description:  The path to the CA certs file.
       value:
         type: string
+        require_trusted_provider: true
         example: "<CERT_PATH>"
       fleet_configurable: true
     - name: ssl_cert_reqs
+      display_priority: 0
       description: |
         Specifies whether a certificate is required from the
         other side of the connection, and whether it's validated if provided.
+
           * 0 for ssl.CERT_NONE (certificates ignored)
           * 1 for ssl.CERT_OPTIONAL (not required, but validated if provided)
           * 2 for ssl.CERT_REQUIRED (required and validated)
@@ -100,7 +118,18 @@ files:
         type: integer
         example: 2
       fleet_configurable: true
+    - name: ssl_check_hostname
+      display_priority: 0
+      description: |
+        Verify the server's SSL certificate hostname matches the connection target.
+        Redis-py 6.0+ defaults this to true. Set to false if your certificate
+        does not match the connection hostname (for example, if connecting by IP).
+      value:
+        type: boolean
+        example: true
+      fleet_configurable: true
     - name: keys
+      display_priority: 0
       description: |
         Enter the list of keys to collect the lengths from.
         The length is 1 for strings.
@@ -115,6 +144,7 @@ files:
           - "<KEY_PATTERN>"
       fleet_configurable: true
     - name: warn_on_missing_keys
+      display_priority: 0
       description: |
         If you provide a list of 'keys', set this to true to have the Agent log a warning
         when keys are missing.
@@ -123,6 +153,7 @@ files:
         example: true
       fleet_configurable: true
     - name: slowlog-max-len
+      display_priority: 0
       description: |
         Set the maximum number of entries to fetch from the slow query log.
         By default, the check reads this value from the redis config, but is limited to 128.
@@ -133,12 +164,14 @@ files:
         type: integer
         example: 128
     - name: command_stats
+      display_priority: 0
       description: Collect INFO COMMANDSTATS output as metrics.
       value:
         type: boolean
         example: false
       fleet_configurable: true
     - name: disable_connection_cache
+      display_priority: 0
       description: |
         Enable the connections cache so the check attempts to reuse the same Redis connections
         at every collection cycle. If disabled, this prevents stale connections.
