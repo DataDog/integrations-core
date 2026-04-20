@@ -1,6 +1,9 @@
 name: Resolve Dependencies and Build Wheels
 
 on:
+  # We considered using pull_request as a trigger event, but then the diff will always contain all the changes compared to the target branch.
+  # Using the push target naturally limits the diff to the changes part of the push.
+  # This simplifies the decision whether to trigger the workflow or not.
   push:
     branches-ignore:
     - master
@@ -125,6 +128,7 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
 
     - name: Detect builder changes
+      # Hashing the builder code is more robust than any kind of dance with git when it comes to determining whether we need to rebuild the builder images.
       id: builder-check
       run: |
         current=$(python .builders/inputs_hash.py compute ${{ matrix.job.image }})
