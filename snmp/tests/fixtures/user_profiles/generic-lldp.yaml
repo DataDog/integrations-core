@@ -1,5 +1,5 @@
 extends:
-  - _base.yaml
   - _generic-lldp.yaml
+  - _base.yaml
 
 sysobjectid: 1.2.3.99999

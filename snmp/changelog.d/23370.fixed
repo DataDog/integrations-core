@@ -1,1 +1,0 @@
-Add ENTITY-MIB chassis metadata to SNMP `_base.yaml`, deduplicate `_arista-metadata.yaml`, and use CISCO-STACK serial on Catalyst with ENTITY fallback from `_base`.
