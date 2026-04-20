@@ -133,10 +133,14 @@ jobs:
       run: |
         current=$(python .builders/inputs_hash.py compute ${{ matrix.job.image }})
         pinned=$(python .builders/inputs_hash.py pinned ${{ matrix.job.image }})
+        echo "current hash: $current"
+        echo "pinned  hash: $pinned"
         echo "current=$current" >> "$GITHUB_OUTPUT"
         if [[ "$current" == "$pinned" ]]; then
+          echo "=> builder unchanged, will pull image by digest"
           echo "builder_changed=false" >> "$GITHUB_OUTPUT"
         else
+          echo "=> builder changed, will rebuild image"
           echo "builder_changed=true" >> "$GITHUB_OUTPUT"
         fi
 

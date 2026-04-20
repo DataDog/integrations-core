@@ -60,7 +60,10 @@ def compute(target: str) -> str:
     for path in sorted(paths):
         rel_path = path.relative_to(HERE).as_posix().encode('utf-8')
         digest.update(rel_path + b'\0')
-        digest.update(path.read_bytes())
+        # Normalize line endings so the hash is OS-agnostic. Windows runners
+        # may check out text files with CRLF even when .gitattributes
+        # specifies eol=lf, and we don't want that to force rebuilds.
+        digest.update(path.read_bytes().replace(b'\r', b''))
         digest.update(b'\0')
     return digest.hexdigest()
 
