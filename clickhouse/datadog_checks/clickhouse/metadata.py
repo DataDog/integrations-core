@@ -43,7 +43,6 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-
 # create_query DDL is bounded before emit. Real-world DDL is 1-3KB;
 # the cap protects REDAPL/OrgStore from pathological view definitions.
 _CREATE_QUERY_MAX_BYTES = 16 * 1024

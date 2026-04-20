@@ -17,6 +17,7 @@ from . import queries
 from .__about__ import __version__
 from .config import build_config, sanitize
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
+from .metadata import ClickhouseMetadata
 from .query_completions import ClickhouseQueryCompletions
 from .query_errors import ClickhouseQueryErrors
 from .statement_samples import ClickhouseStatementSamples
