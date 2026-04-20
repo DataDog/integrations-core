@@ -6,6 +6,7 @@ Invoked via ``ddev promote <PR_URL>`` which dispatches the promote workflow.
 """
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path, PurePosixPath
@@ -54,13 +55,15 @@ def url_to_blob_path(url: str) -> str | None:
 
 def collect_relative_paths() -> list[str]:
     """Read all lockfiles and return relative wheel paths from ${INTEGRATIONS_WHEELS_STORAGE} entries."""
-    if not LOCK_FILE_DIR.is_dir():
-        print(f"No lockfile directory found at {LOCK_FILE_DIR}", file=sys.stderr)
+    lockfile_dir = Path(os.environ.get("PROMOTE_LOCKFILE_DIR", LOCK_FILE_DIR))
+
+    if not lockfile_dir.is_dir():
+        print(f"No lockfile directory found at {lockfile_dir}", file=sys.stderr)
         sys.exit(1)
 
-    lockfiles = list(LOCK_FILE_DIR.glob("*.txt"))
+    lockfiles = list(lockfile_dir.glob("*.txt"))
     if not lockfiles:
-        print(f"No lockfiles found in {LOCK_FILE_DIR}", file=sys.stderr)
+        print(f"No lockfiles found in {lockfile_dir}", file=sys.stderr)
         sys.exit(1)
 
     rel_paths: list[str] = []
