@@ -326,3 +326,51 @@ def test_write_manifest_is_stable_json(tmp_path):
     text = path.read_text()
     assert text.index('"image": "a"') < text.index('"image": "b"')
     assert text.endswith('\n')
+
+
+def _setup_fake_images_repo(fake_repo):
+    from tests.helpers.api import write_file as _write_file
+
+    (fake_repo.path / '.ddev' / 'config.toml').write_text(
+        '[docker-images]\n'
+        'mirror-prefixes = ["registry.ddbuild.io/dockerhub/"]\n'
+        'exclude = []\n'
+    )
+    _write_file(
+        fake_repo.path / 'postgres' / 'tests' / 'compose',
+        'docker-compose.yaml',
+        'services:\n'
+        '  pg:\n'
+        '    image: postgres:15\n',
+    )
+    _write_file(fake_repo.path / 'postgres', 'manifest.json', '{}')
+
+
+def test_images_sync_writes_manifest(fake_repo, ddev):
+    _setup_fake_images_repo(fake_repo)
+    result = ddev('validate', 'images', '--sync')
+    assert result.exit_code == 0, result.output
+
+    manifest_path = fake_repo.path / '.ddev' / 'docker-images.json'
+    assert manifest_path.is_file()
+    content = manifest_path.read_text()
+    assert '"image": "postgres"' in content
+    assert '"15"' in content
+
+
+def test_images_validate_fails_on_drift(fake_repo, ddev):
+    _setup_fake_images_repo(fake_repo)
+    (fake_repo.path / '.ddev' / 'docker-images.json').write_text(
+        '{"version": 1, "images": []}\n'
+    )
+    result = ddev('validate', 'images')
+    assert result.exit_code == 1, result.output
+    assert 'postgres' in result.output
+    assert '--sync' in result.output
+
+
+def test_images_validate_passes_when_fresh(fake_repo, ddev):
+    _setup_fake_images_repo(fake_repo)
+    ddev('validate', 'images', '--sync')
+    result = ddev('validate', 'images')
+    assert result.exit_code == 0, result.output
