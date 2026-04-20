@@ -225,8 +225,7 @@ class ClickhouseMetadata(DBMAsyncJob):
             if 'unknown table' in lowered or 'unknowntable' in lowered:
                 if not self._view_refreshes_unsupported_logged:
                     self._log.info(
-                        "system.view_refreshes not present (ClickHouse < 24.3); "
-                        "refresh status will not be populated."
+                        "system.view_refreshes not present (ClickHouse < 24.3); refresh status will not be populated."
                     )
                     self._view_refreshes_unsupported_logged = True
             elif 'not enough privileges' in lowered or 'access_denied' in lowered:
