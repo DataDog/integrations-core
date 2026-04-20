@@ -177,21 +177,6 @@ def test_get_guarddog_output(config, instance, mocker):
     assert stdout == expected_stdout
 
 
-@pytest.mark.unit
-def test_validate_configurations_with_whitespace_guarddog_path(config, instance, mocker):
-    check = GuarddogCheck("guarddog", config['init_config'], [instance])
-
-    err_message = "guarddog_path must be a single executable path without arguments"
-
-    mocker.patch("os.path.exists", return_value=True)
-    mocker.patch("os.access", return_value=True)
-
-    with pytest.raises(ConfigurationError, match=err_message):
-        check.package_ecosystem = "pypi"
-        check.path = "/path/to/dependency_file"
-        check.guarddog_path = "/bin/sh -c"
-        check.validate_config()
-
 
 @pytest.mark.unit
 def test_check_guarddog_command_successful(config, datadog_agent, example_dependencies, instance, mocker):

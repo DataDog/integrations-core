@@ -63,10 +63,6 @@ class GuarddogCheck(AgentCheck):
             err_message = "guarddog_path field should not be an empty string"
             self.log.error(err_message)
             raise ConfigurationError(err_message)
-        elif any(char.isspace() for char in self.guarddog_path):
-            err_message = "guarddog_path must be a single executable path without arguments"
-            self.log.error(err_message)
-            raise ConfigurationError(err_message)
 
     def check(self, _):
         try:
