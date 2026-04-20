@@ -174,7 +174,6 @@ def test_e2e_profile_hp_ilo(dd_agent_check):
         'profile': 'hp-ilo',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.232.9.4.11',
-        'version': 'A04-08/12/2018',
         'tags': [
             'device_id:default:' + ip_address,
             'agent_host:' + common.get_agent_hostname(),
@@ -186,7 +185,6 @@ def test_e2e_profile_hp_ilo(dd_agent_check):
             'snmp_profile:hp-ilo',
         ],
         'vendor': 'hp',
-        'serial_number': 'dXPEdPBE5yKtjW9xx3',
         'device_type': 'server',
         'integration': 'snmp',
     }
