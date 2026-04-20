@@ -53,6 +53,15 @@ instances:
     #
     # password: <PASSWORD>
 
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
     ## @param dbname - string - optional - default: postgres
     ## The name of the PostgreSQL database to monitor.
     ## Note: If omitted, the default system Postgres database is queried.
@@ -101,6 +110,66 @@ instances:
     #     - r
     #     - p
 
+    ## @param custom_queries - list of mappings - optional
+    ## Each query must have 2 fields, and can have a third optional field:
+    ##
+    ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
+    ##     Use the pipe `|` if you require a multi-line script.
+    ## 2. columns - The list representing each column, ordered sequentially from left to right.
+    ##     The number of columns must equal the number of columns returned in the query.
+    ##     There are 2 required pieces of data:
+    ##       1. name - The suffix to append to `<INTEGRATION>.` to form
+    ##           the full metric name. If `type` is a `tag` type, this column is considered a tag and applied
+    ##           to every metric collected by this particular query.
+    ##       2. type - The submission method (gauge, monotonic_count, etc.).
+    ##           This can also be set to the following `tag` types to tag each metric in the row with the name
+    ##           and value of the item in this column:
+    ##             1. tag - This is the default tag type
+    ##             2. tag_list - This allows multiple values to be attached to the tag name. For example: 
+    ##                 ```
+    ##                 query = {
+    ##                   "name": "example",
+    ##                   "query": "...",
+    ##                   "columns": [
+    ##                     {"name": "server_tag", "type": "tag_list"},
+    ##                     {"name": "foo", "type": "gauge"},
+    ##                   ]
+    ##                 }
+    ##                 ```
+    ##                 May result in:
+    ##                 ```
+    ##                 gauge("foo", tags=["server_tag:us", "server_tag:primary", "server_tag:default"])
+    ##                 gauge("foo", tags=["server_tag:eu"])
+    ##                 gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
+    ##                 ```
+    ##             3. tag_not_null - This only sets tags in the metric if the value is not null
+    ##           You can use the `count` type to perform aggregation for queries that return multiple rows with
+    ##           the same or no tags.
+    ##     Columns without a name are ignored. To skip a column, enter:
+    ##     ```
+    ##       - {}
+    ##     ```
+    ## 3. tags (optional) - A list of tags to apply to each metric.
+    ## 4. collection_interval (optional) - The frequency at which to collect the metrics.
+    ##     If collection_interval is not set, the query will be run every check run.
+    ##     If the collection interval is less than check collection interval, the query will be run every check
+    ##     run.
+    ##     If the collection interval is greater than check collection interval, the query will NOT BE RUN
+    ##     exactly at the collection interval.
+    ##     The query will be run at the next check run after the collection interval has passed.
+    ## 5. metric_prefix (optional) - The prefix to apply to each metric.
+    #
+    # custom_queries:
+    #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
+    #     columns:
+    #     - name: foo
+    #       type: tag
+    #     - name: event.total
+    #       type: gauge
+    #     tags:
+    #     - test:postgresql
+    #     metric_prefix: postgresql
+
     ## @param collect_activity_metrics - boolean - optional - default: false
     ## Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
     ## has sufficient privileges to read from pg_stat_activity before enabling this option.
@@ -121,6 +190,12 @@ instances:
     ## Collect metrics about table bloat. Only available when `relation` metrics are enabled.
     #
     collect_bloat_metrics: false
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
 
     ## @param collect_count_metrics - boolean - optional - default: true
     ## Collect count of user tables from pg_class.
@@ -150,6 +225,18 @@ instances:
     ## For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
     # ssl: allow
+
+    ## @param disable_generic_tags - boolean - optional - default: false
+    ## The integration will stop sending server tag as is reduntant with host tag
+    #
+    disable_generic_tags: true
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
 
     ## @param collect_default_database - boolean - optional - default: true
     ## Include statistics from the default database 'postgres' in the check metrics.
@@ -358,11 +445,6 @@ instances:
     ## The name is displayed in the pg_stat_activity view and included in CSV log entries.
     #
     # application_name: datadog-agent
-
-    ## @param dbm - boolean - optional - default: false
-    ## Set to `true` to enable Database Monitoring.
-    #
-    # dbm: false
 
     ## Configure the Data Observability async job, which executes monitoring
     ## queries delivered via Remote Configuration.
@@ -841,99 +923,12 @@ instances:
     #
     # use_global_custom_queries: 'true'
 
-    ## @param custom_queries - list of mappings - optional
-    ## Each query must have 2 fields, and can have a third optional field:
-    ##
-    ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
-    ##     Use the pipe `|` if you require a multi-line script.
-    ## 2. columns - The list representing each column, ordered sequentially from left to right.
-    ##     The number of columns must equal the number of columns returned in the query.
-    ##     There are 2 required pieces of data:
-    ##       1. name - The suffix to append to `<INTEGRATION>.` to form
-    ##           the full metric name. If `type` is a `tag` type, this column is considered a tag and applied
-    ##           to every metric collected by this particular query.
-    ##       2. type - The submission method (gauge, monotonic_count, etc.).
-    ##           This can also be set to the following `tag` types to tag each metric in the row with the name
-    ##           and value of the item in this column:
-    ##             1. tag - This is the default tag type
-    ##             2. tag_list - This allows multiple values to be attached to the tag name. For example: 
-    ##                 ```
-    ##                 query = {
-    ##                   "name": "example",
-    ##                   "query": "...",
-    ##                   "columns": [
-    ##                     {"name": "server_tag", "type": "tag_list"},
-    ##                     {"name": "foo", "type": "gauge"},
-    ##                   ]
-    ##                 }
-    ##                 ```
-    ##                 May result in:
-    ##                 ```
-    ##                 gauge("foo", tags=["server_tag:us", "server_tag:primary", "server_tag:default"])
-    ##                 gauge("foo", tags=["server_tag:eu"])
-    ##                 gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
-    ##                 ```
-    ##             3. tag_not_null - This only sets tags in the metric if the value is not null
-    ##           You can use the `count` type to perform aggregation for queries that return multiple rows with
-    ##           the same or no tags.
-    ##     Columns without a name are ignored. To skip a column, enter:
-    ##     ```
-    ##       - {}
-    ##     ```
-    ## 3. tags (optional) - A list of tags to apply to each metric.
-    ## 4. collection_interval (optional) - The frequency at which to collect the metrics.
-    ##     If collection_interval is not set, the query will be run every check run.
-    ##     If the collection interval is less than check collection interval, the query will be run every check
-    ##     run.
-    ##     If the collection interval is greater than check collection interval, the query will NOT BE RUN
-    ##     exactly at the collection interval.
-    ##     The query will be run at the next check run after the collection interval has passed.
-    ## 5. metric_prefix (optional) - The prefix to apply to each metric.
-    #
-    # custom_queries:
-    #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
-    #     columns:
-    #     - name: foo
-    #       type: tag
-    #     - name: event.total
-    #       type: gauge
-    #     tags:
-    #     - test:postgresql
-    #     metric_prefix: postgresql
-
-    ## @param tags - list of strings - optional
-    ## A list of tags to attach to every metric and service check emitted by this instance.
-    ##
-    ## Learn more about tagging at https://docs.datadoghq.com/tagging
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
-
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
     ## Overrides any `service` defined in the `init_config` section.
     #
     # service: <SERVICE>
-
-    ## @param min_collection_interval - number - optional - default: 15
-    ## This changes the collection interval of the check. For more information, see:
-    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
-    #
-    # min_collection_interval: 15
-
-    ## @param empty_default_hostname - boolean - optional - default: false
-    ## This forces the check to send metrics with no hostname.
-    ##
-    ## This is useful for cluster-level checks.
-    #
-    # empty_default_hostname: false
-
-    ## @param disable_generic_tags - boolean - optional - default: false
-    ## The integration will stop sending server tag as is reduntant with host tag
-    #
-    disable_generic_tags: true
 
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
