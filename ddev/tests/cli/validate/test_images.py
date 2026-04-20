@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import pytest
 
-from ddev.cli.validate.images_utils import substitute_env_vars
+from ddev.cli.validate.images_utils import parse_env_file, substitute_env_vars
 
 
 def test_images_command_registered(fake_repo, ddev):
@@ -35,3 +35,25 @@ def test_substitute_env_vars_resolves(template, context, expected):
 def test_substitute_env_vars_returns_none_when_unresolved():
     assert substitute_env_vars('postgres:${MISSING}', {}) is None
     assert substitute_env_vars('$MISSING', {}) is None
+
+
+def test_parse_env_file(tmp_path):
+    env = tmp_path / '.env'
+    env.write_text(
+        '# comment\n'
+        'POSTGRES_IMAGE=15\n'
+        '\n'
+        'REDIS_IMAGE="7.2"\n'
+        "KAFKA_VERSION='7.5.0'\n"
+        'EMPTY=\n'
+    )
+    assert parse_env_file(env) == {
+        'POSTGRES_IMAGE': '15',
+        'REDIS_IMAGE': '7.2',
+        'KAFKA_VERSION': '7.5.0',
+        'EMPTY': '',
+    }
+
+
+def test_parse_env_file_missing_returns_empty(tmp_path):
+    assert parse_env_file(tmp_path / 'absent.env') == {}
