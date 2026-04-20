@@ -10,7 +10,7 @@
 * Add kafka.log.partition.size metric for topic partition disk usage. ([#23028](https://github.com/DataDog/integrations-core/pull/23028))
 * Add kafka.log.directory.offline metric to track log directory health status. ([#23038](https://github.com/DataDog/integrations-core/pull/23038))
 
-## 4.4.0 / 2026-04-01
+## 4.4.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 

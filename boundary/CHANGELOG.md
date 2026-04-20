@@ -8,7 +8,7 @@
 
 * Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
 
-## 4.4.0 / 2026-04-01
+## 4.4.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 

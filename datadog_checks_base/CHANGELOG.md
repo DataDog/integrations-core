@@ -35,7 +35,7 @@
 * Fix process_isolation parameter to handle log formats and external tags. ([#22973](https://github.com/DataDog/integrations-core/pull/22973))
 * Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place. ([#23075](https://github.com/DataDog/integrations-core/pull/23075))
 
-## 37.33.3 / 2026-04-09
+## 37.33.3 / 2026-04-09 / Agent 7.78.0
 
 ***Fixed***:
 

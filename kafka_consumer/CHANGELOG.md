@@ -13,7 +13,7 @@
 
 * Fix consumer leak when offsets_for_times() times out, preventing a potential librdkafka crash ([#23241](https://github.com/DataDog/integrations-core/pull/23241))
 
-## 7.1.0 / 2026-04-01
+## 7.1.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 
