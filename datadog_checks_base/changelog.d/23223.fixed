@@ -1,1 +1,0 @@
-Bump `requests` to `>=2.33.0` (CVE-2026-25645 / VULN-59770) and `cryptography` to `>=46.0.6` (CVE-2026-34073 / VULN-59768).

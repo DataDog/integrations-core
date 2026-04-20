@@ -339,25 +339,31 @@ def test_sqlserver_availability_groups_metrics(
         pytest.param(
             None,
             None,
-            [('AG1', 'AG1', 'aoag_secondary', 'SYNCHRONIZED', 2), ('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            [
+                ('AG1', 'AG1', 'aoag_secondary', 'HEALTHY', 2),
+                ('AG1', 'AG1', 'aoag_primary', 'HEALTHY', 2),
+            ],
             id='no availability_group, no only_emit_local',
         ),
         pytest.param(
             'AG1',
             None,
-            [('AG1', 'AG1', 'aoag_secondary', 'SYNCHRONIZED', 2), ('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            [
+                ('AG1', 'AG1', 'aoag_secondary', 'HEALTHY', 2),
+                ('AG1', 'AG1', 'aoag_primary', 'HEALTHY', 2),
+            ],
             id='availability_group set, no only_emit_local',
         ),
         pytest.param(
             None,
             True,
-            [('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            [('AG1', 'AG1', 'aoag_primary', 'HEALTHY', 2)],
             id='no availability_group, only_emit_local is True',
         ),
         pytest.param(
             'AG1',
             True,
-            [('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            [('AG1', 'AG1', 'aoag_primary', 'HEALTHY', 2)],
             id='availability_group set, only_emit_local is True',
         ),
     ],

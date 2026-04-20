@@ -6,7 +6,7 @@ import copy
 import pytest
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
 from . import common
 
@@ -21,7 +21,8 @@ def dd_environment():
     with docker_run(
         compose_file,
         conditions=[
-            CheckDockerLogs('docker-redis-standalone-1', 'Ready to accept connections tcp'),
+            CheckDockerLogs(compose_file, 'Ready to accept connections tcp', service='redis-standalone'),
+            CheckEndpoints(common.MOCKED_INSTANCE['openmetrics_endpoint']),
         ],
     ):
         yield common.MOCKED_INSTANCE, common.E2E_METADATA

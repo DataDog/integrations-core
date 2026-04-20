@@ -180,6 +180,14 @@ EXPECTED_DEFAULTS = {
     'collect_raw_query_statement': {
         'enabled': False,
     },
+    # === Data Observability ===
+    'data_observability': {
+        'enabled': False,
+        'collection_interval': 10,
+        'run_sync': False,
+        'config_id': None,
+        'queries': (),
+    },
     # === Relations configuration ===
     'relations': [],
     # === Query encodings ===
