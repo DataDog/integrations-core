@@ -91,7 +91,7 @@ The NiFi check does not include any service checks. Connectivity is reported via
 The check authenticates to NiFi via `POST /access/token` (JWT bearer token). If authentication fails, the Agent log records an error from the `nifi` check. Common causes:
 
 - Wrong `username` or `password`.
-- The NiFi user lacks a policy granting access to the REST API. Grant **view the UI** and **access the controller** at minimum, plus read access on the process groups the check queries.
+- The NiFi user lacks sufficient permissions. The check reads `/flow/about`, `/flow/status`, `/flow/cluster/summary`, `/system-diagnostics`, `/flow/bulletin-board`, and `/flow/process-groups/{id}/status`. Grant the user read access on those resources. See the [NiFi System Administrator's Guide][10] for configuring access policies.
 - The configured NiFi identity provider (LDAP, Kerberos, certificates) rejects the credentials. Confirm the credentials work against the NiFi UI first.
 
 ### TLS verification errors
