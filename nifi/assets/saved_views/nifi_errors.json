@@ -2,7 +2,7 @@
     "name": "NiFi Error Logs",
     "type": "logs",
     "page": "stream",
-    "query": "source:nifi status:(error OR warn)",
+    "query": "source:nifi status:(error OR warn OR warning)",
     "timerange": {
         "interval_ms": 3600000
     },
