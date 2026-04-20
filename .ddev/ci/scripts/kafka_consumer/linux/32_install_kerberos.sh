@@ -8,12 +8,12 @@ sudo apt install -y --no-install-recommends build-essential libkrb5-dev libzstd-
 # Install librdkafka from source since no binaries are available for the distribution we use on the CI:
 LIBRDKAFKA_VERSION="v2.13.2"
 LIBRDKAFKA_SHA256="14972092e4115f6e99f798a7cb420cbf6daa0c73502b3c52ae42fb5b418eea8f"
-LIBRDKAFKA_TARBALL=".tar.gz"
+LIBRDKAFKA_TARBALL="${LIBRDKAFKA_VERSION}.tar.gz"
 
-wget "https://github.com/confluentinc/librdkafka/archive/refs/tags/"
-echo "  " | sha256sum -c -
-tar -xzf ""
-cd "librdkafka-"
+wget "https://github.com/confluentinc/librdkafka/archive/refs/tags/${LIBRDKAFKA_TARBALL}"
+echo "${LIBRDKAFKA_SHA256}  ${LIBRDKAFKA_TARBALL}" | sha256sum -c -
+tar -xzf "${LIBRDKAFKA_TARBALL}"
+cd "librdkafka-${LIBRDKAFKA_VERSION#v}"
 sudo ./configure --install-deps --prefix=/usr
 make
 sudo make install
