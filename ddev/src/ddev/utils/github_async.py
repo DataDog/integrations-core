@@ -1,4 +1,4 @@
-"""Async GitHub API client for triggering and monitoring GitHub Actions workflows."""
+"""Async GitHub API client for triggering and monitoring GitHub Actions workflows"""
 
 import re
 from collections.abc import AsyncIterator
