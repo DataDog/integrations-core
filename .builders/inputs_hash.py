@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import sys
 import tomllib
+from collections.abc import Iterator
 from hashlib import sha256
 from pathlib import Path
 
@@ -25,6 +26,7 @@ PINNED_FILE = HERE.parent / '.deps' / 'builder_inputs.toml'
 # Files and directories whose contents determine a builder image. A change to
 # any of these should force a rebuild. Paths are relative to .builders/ and
 # are shared across all targets; per-target inputs live under images/<target>/.
+# If you add a new input under .builders/ that affects image contents, add it here.
 COMMON_INPUTS = [
     'build.py',
     'deps/build_dependencies.txt',
@@ -36,13 +38,20 @@ COMMON_INPUTS = [
 ]
 
 
-def _iter_files(root: Path):
+def _iter_files(root: Path) -> Iterator[Path]:
     if root.is_file():
         yield root
     elif root.is_dir():
         for path in root.rglob('*'):
-            if path.is_file():
+            rel_parts = path.relative_to(root).parts
+            if path.is_file() and not any(_is_ignored(part) for part in rel_parts):
                 yield path
+
+
+def _is_ignored(name: str) -> bool:
+    if name == '.gitkeep':
+        return False
+    return name.startswith('.') or name == '__pycache__'
 
 
 def compute(target: str) -> str:
@@ -53,7 +62,10 @@ def compute(target: str) -> str:
 
     paths: set[Path] = set()
     for rel in COMMON_INPUTS:
-        paths.update(_iter_files(HERE / rel))
+        files = list(_iter_files(HERE / rel))
+        if not files:
+            print(f'warning: {rel} matched no files under {HERE}', file=sys.stderr)
+        paths.update(files)
     paths.update(_iter_files(target_dir))
 
     # Sort by the relative POSIX path string, not by Path objects: WindowsPath
@@ -76,9 +88,15 @@ def pinned(target: str) -> str:
     if not PINNED_FILE.is_file():
         print(f'{PINNED_FILE} not found; treating as unpinned', file=sys.stderr)
         return ''
-    with PINNED_FILE.open('rb') as f:
-        data = tomllib.load(f)
-    return data.get('inputs', {}).get(target, '')
+    try:
+        with PINNED_FILE.open('rb') as f:
+            data = tomllib.load(f)
+    except tomllib.TOMLDecodeError as e:
+        raise RuntimeError(f'{PINNED_FILE} is malformed (it should not be edited by hand): {e}') from e
+    inputs = data.get('inputs', {})
+    if target not in inputs:
+        print(f'{PINNED_FILE}: no entry for {target}; treating as unpinned', file=sys.stderr)
+    return inputs.get(target, '')
 
 
 def main() -> None:
