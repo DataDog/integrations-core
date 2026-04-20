@@ -155,3 +155,28 @@ def scan_compose_file(path: Path, contexts: list[dict[str, str]]) -> Iterator[st
             if resolved is not None and resolved not in seen:
                 seen.add(resolved)
                 yield resolved
+
+
+_ARG_RE = re.compile(r'^\s*ARG\s+([A-Za-z_][A-Za-z0-9_]*)(?:=(.*))?\s*$')
+_FROM_RE = re.compile(r'^\s*FROM\s+(?:--platform=\S+\s+)?(\S+)(?:\s+AS\s+\S+)?\s*$', re.IGNORECASE)
+
+
+def scan_dockerfile(path: Path, contexts: list[dict[str, str]]) -> Iterator[str]:
+    """Yield resolved image refs from FROM lines in a Dockerfile."""
+    text = path.read_text(encoding='utf-8', errors='replace')
+    arg_defaults: dict[str, str] = {}
+    seen: set[str] = set()
+    for raw_line in text.splitlines():
+        if (arg_match := _ARG_RE.match(raw_line)):
+            name, default = arg_match.group(1), arg_match.group(2)
+            if default is not None:
+                arg_defaults[name] = default
+            continue
+        if (from_match := _FROM_RE.match(raw_line)):
+            raw_ref = from_match.group(1)
+            for ctx in contexts:
+                merged = {**arg_defaults, **ctx}
+                resolved = substitute_env_vars(raw_ref, merged)
+                if resolved and resolved not in seen:
+                    seen.add(resolved)
+                    yield resolved

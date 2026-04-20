@@ -9,6 +9,7 @@ from ddev.cli.validate.images_utils import (
     hatch_contexts,
     parse_env_file,
     scan_compose_file,
+    scan_dockerfile,
     substitute_env_vars,
 )
 
@@ -131,3 +132,33 @@ def test_scan_compose_unresolved_is_skipped(tmp_path):
     )
     refs = list(scan_compose_file(compose, contexts=[{}]))
     assert refs == []
+
+
+def test_scan_dockerfile_plain(tmp_path):
+    df = tmp_path / 'Dockerfile'
+    df.write_text('FROM alpine:3.20\n')
+    assert list(scan_dockerfile(df, contexts=[{}])) == ['alpine:3.20']
+
+
+def test_scan_dockerfile_platform_and_as(tmp_path):
+    df = tmp_path / 'Dockerfile'
+    df.write_text('FROM --platform=linux/amd64 alpine:3.20 AS builder\n')
+    assert list(scan_dockerfile(df, contexts=[{}])) == ['alpine:3.20']
+
+
+def test_scan_dockerfile_arg_default(tmp_path):
+    df = tmp_path / 'Dockerfile'
+    df.write_text('ARG BASE=alpine:3.20\nFROM ${BASE}\n')
+    assert list(scan_dockerfile(df, contexts=[{}])) == ['alpine:3.20']
+
+
+def test_scan_dockerfile_arg_from_context(tmp_path):
+    df = tmp_path / 'Dockerfile'
+    df.write_text('ARG BASE\nFROM ${BASE}\n')
+    assert list(scan_dockerfile(df, contexts=[{'BASE': 'alpine:3.20'}])) == ['alpine:3.20']
+
+
+def test_scan_dockerfile_multistage(tmp_path):
+    df = tmp_path / 'Dockerfile'
+    df.write_text('FROM alpine:3.20 AS build\nFROM debian:12 AS run\n')
+    assert sorted(scan_dockerfile(df, contexts=[{}])) == ['alpine:3.20', 'debian:12']
