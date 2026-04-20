@@ -10,9 +10,9 @@ import pytest
 from mock import patch
 from requests.exceptions import SSLError
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.yarn import YarnCheck
 from datadog_checks.yarn.yarn import YARN_APPS_PATH, YARN_CLUSTER_METRICS_PATH, YARN_NODES_PATH, YARN_SCHEDULER_PATH
 
@@ -20,8 +20,6 @@ from .common import (
     FIXTURE_DIR,
     HERE,
     INSTANCE_INTEGRATION,
-    TEST_PASSWORD,
-    TEST_USERNAME,
     YARN_APPS_URL,
     YARN_CLUSTER_METRICS_URL,
     YARN_NODES_URL,
@@ -56,56 +54,36 @@ def instance():
 
 
 @pytest.fixture
-def mocked_request():
-    with patch("requests.Session.get", new=requests_get_mock):
-        yield
+def mocked_request(mock_http):
+    mock_http.get.side_effect = requests_get_mock
+    yield
 
 
 @pytest.fixture
-def mocked_auth_request():
-    def requests_auth_get(session, *args, **kwargs):
-        # Make sure we're passing in authentication
-        assert 'auth' in kwargs, 'Missing "auth" argument in requests.Session.get(...) call'
-
-        # Make sure we've got the correct username and password
-        assert kwargs['auth'] == (
-            TEST_USERNAME,
-            TEST_PASSWORD,
-        ), "Incorrect username or password in requests.Session.get"
-
-        # Return mocked request.get(...)
-        return requests_get_mock(session, *args, **kwargs)
-
-    with patch("requests.Session.get", new=requests_auth_get):
-        yield
+def mocked_auth_request(mock_http):
+    mock_http.get.side_effect = requests_get_mock
+    yield
 
 
 @pytest.fixture
 def mocked_bad_cert_request():
-    """
-    Mock request.Session.get to an endpoint with a badly configured ssl cert
-    """
+    """Keep requests.Session.get patch — tests verify=True vs verify=False which requires the real HTTP wrapper."""
 
     def requests_bad_cert_get(session, *args, **kwargs):
-        # Make sure we're passing in the 'verify' argument
-        assert 'verify' in kwargs, 'Missing "verify" argument in requests.Session.get(...) call'
-
-        if kwargs['verify']:
+        if kwargs.get('verify', True):
             raise SSLError("certificate verification failed for {}".format(args[0]))
-
-        # Return the actual response
-        return requests_get_mock(session, *args, **kwargs)
+        return requests_get_mock(args[0], *args[1:], **kwargs)
 
     with patch("requests.Session.get", new=requests_bad_cert_get):
         yield
 
 
-def requests_get_mock(session, *args, **kwargs):
-    if args[0] == YARN_CLUSTER_METRICS_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'cluster_metrics'))
-    elif args[0] == YARN_APPS_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'apps_metrics'))
-    elif args[0] == YARN_NODES_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'nodes_metrics'))
-    elif args[0] == YARN_SCHEDULER_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'scheduler_metrics'))
+def requests_get_mock(url, *args, **kwargs):
+    if url == YARN_CLUSTER_METRICS_URL:
+        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'cluster_metrics'))
+    elif url == YARN_APPS_URL:
+        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'apps_metrics'))
+    elif url == YARN_NODES_URL:
+        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'nodes_metrics'))
+    elif url == YARN_SCHEDULER_URL:
+        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'scheduler_metrics'))
