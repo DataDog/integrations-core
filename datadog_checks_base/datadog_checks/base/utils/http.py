@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import socket
+import ssl
 import warnings
 from collections import ChainMap
 from contextlib import ExitStack, contextmanager
@@ -535,6 +536,10 @@ class RequestsWrapper(object):
         with sock:
             try:
                 context = create_ssl_context(ChainMap({'tls_verify': False}, self.tls_config))
+                # Restrict the AIA cert-discovery handshake to TLS 1.2+ regardless of
+                # `tls_protocols_allowed`; weak protocols are still rejected post-connect
+                # via the `tls_protocols_allowed` check below for the user-facing path.
+                context.minimum_version = ssl.TLSVersion.TLSv1_2
 
                 with context.wrap_socket(sock, server_hostname=hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
