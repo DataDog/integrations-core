@@ -6,8 +6,8 @@ import os
 import mock
 import pytest
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.cert_manager import CertManagerCheck
-from datadog_checks.dev.http import MockResponse
 
 from .common import ACME_METRICS, CERT_METRICS, CONTROLLER_METRICS, MOCK_INSTANCE
 
@@ -32,7 +32,7 @@ def test_check(aggregator, dd_run_check):
     check = CertManagerCheck('cert_manager', {}, [MOCK_INSTANCE])
 
     def mock_requests_get(url, *args, **kwargs):
-        return MockResponse(file_path=os.path.join(os.path.dirname(__file__), 'fixtures', 'cert_manager.txt'))
+        return MockHTTPResponse(file_path=os.path.join(os.path.dirname(__file__), 'fixtures', 'cert_manager.txt'))
 
     with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
         dd_run_check(check)

@@ -8,7 +8,7 @@ import mock
 import pytest
 import requests
 
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.vault import Vault
 from datadog_checks.vault.common import DEFAULT_API_VERSION
 from datadog_checks.vault.errors import ApiUnreachable
@@ -78,11 +78,11 @@ class TestVault:
 
         def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
                 )
             elif url == instance['api_url'] + '/sys/health':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
@@ -135,7 +135,7 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        with mock.patch('requests.Session.get', return_value=MockResponse(status_code=500)):
+        with mock.patch('requests.Session.get', return_value=MockHTTPResponse(status_code=500)):
             with pytest.raises(
                 Exception, match=r'^The Vault endpoint `{}.+?` returned 500$'.format(re.escape(instance['api_url']))
             ):
@@ -171,11 +171,11 @@ class TestVault:
 
         def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
                 )
             elif url == instance['api_url'] + '/sys/health':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
@@ -214,7 +214,7 @@ class TestVault:
 
         def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
@@ -255,11 +255,11 @@ class TestVault:
 
         def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
                 )
             elif url == instance['api_url'] + '/sys/health':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
@@ -298,7 +298,7 @@ class TestVault:
 
         def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
@@ -329,11 +329,11 @@ class TestVault:
 
         def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
                 )
             elif url == instance['api_url'] + '/sys/health':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
@@ -370,7 +370,7 @@ class TestVault:
 
         def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
@@ -407,7 +407,7 @@ class TestVault:
 
         def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
@@ -453,7 +453,7 @@ class TestVault:
                 else:
                     replication_dr_mode = 'secondary'
 
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
@@ -506,7 +506,7 @@ class TestVault:
 
         def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={
                         'ha_enabled': False,
                         'is_self': True,
@@ -547,7 +547,7 @@ class TestVault:
 
         def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={
                         'ha_enabled': False,
                         'is_self': False,
@@ -573,7 +573,7 @@ class TestVault:
 
         def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={
                         'ha_enabled': False,
                         'is_self': True,
@@ -599,7 +599,7 @@ class TestVault:
 
         def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={
                         'ha_enabled': False,
                         'is_self': False,
@@ -626,7 +626,7 @@ class TestVault:
 
         def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                return MockResponse(
+                return MockHTTPResponse(
                     json_data={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
@@ -660,7 +660,7 @@ class TestVault:
 
         def mock_requests_get(session, url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(json_data={'errors': ["Vault is sealed"]}, status_code=503)
+                return MockHTTPResponse(json_data={'errors': ["Vault is sealed"]}, status_code=503)
             return requests_get(url, *args, **kwargs)
 
         with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):

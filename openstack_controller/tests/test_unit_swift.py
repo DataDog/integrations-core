@@ -11,7 +11,7 @@ import pytest
 
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 from tests.metrics import (
@@ -106,8 +106,8 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         pytest.param(
             {
                 'http_error': {
-                    '/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                    '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                    '/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
+                    '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
                 }
             },
             configs.REST,
@@ -116,8 +116,8 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         pytest.param(
             {
                 'http_error': {
-                    '/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                    '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                    '/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
+                    '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
                 }
             },
             configs.SDK,
@@ -197,8 +197,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         pytest.param(
             {
                 'http_error': {
-                    '/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                    '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                    '/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
+                    '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
                 },
             },
             None,
@@ -211,8 +211,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
             {
                 'http_error': {
                     'containers': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
                     }
                 }
             },

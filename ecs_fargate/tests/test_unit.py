@@ -8,7 +8,7 @@ import os
 import mock
 import pytest
 
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.ecs_fargate import FargateCheck
 
 from .conftest import (
@@ -42,7 +42,8 @@ def test_failing_check(check, aggregator, dd_run_check):
     Testing fargate metadata endpoint error.
     """
     with mock.patch(
-        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', return_value=MockResponse('{}', status_code=500)
+        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get',
+        return_value=MockHTTPResponse('{}', status_code=500),
     ):
         dd_run_check(check)
 
@@ -55,7 +56,8 @@ def test_invalid_response_check(check, aggregator, dd_run_check):
     Testing invalid fargate metadata payload.
     """
     with mock.patch(
-        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', return_value=MockResponse('{}', status_code=200)
+        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get',
+        return_value=MockHTTPResponse('{}', status_code=200),
     ):
         dd_run_check(check)
 
