@@ -177,7 +177,6 @@ def test_get_guarddog_output(config, instance, mocker):
     assert stdout == expected_stdout
 
 
-
 @pytest.mark.unit
 def test_check_guarddog_command_successful(config, datadog_agent, example_dependencies, instance, mocker):
     check = GuarddogCheck("guarddog", config['init_config'], [instance])

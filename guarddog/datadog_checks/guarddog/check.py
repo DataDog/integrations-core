@@ -8,6 +8,7 @@ import subprocess
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 
+
 class GuarddogCheck(AgentCheck):
     __NAMESPACE__ = "guarddog"
 
