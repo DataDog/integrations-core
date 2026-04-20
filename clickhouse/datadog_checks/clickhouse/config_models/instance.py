@@ -52,6 +52,18 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_columns: Optional[int] = None
+    max_tables: Optional[int] = None
+    run_sync: Optional[bool] = None
+
+
 class QueryCompletions(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -109,6 +121,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_schemas: Optional[CollectSchemas] = None
     compression: Optional[str] = None
     connect_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None

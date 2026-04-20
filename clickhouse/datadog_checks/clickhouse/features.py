@@ -23,6 +23,7 @@ class FeatureKey(Enum):
     QUERY_COMPLETIONS = "query_completions"
     EXPLAIN_PLANS = "explain_plans"
     QUERY_ERRORS = "query_errors"
+    COLLECT_SCHEMAS = "collect_schemas"
     SINGLE_ENDPOINT_MODE = "single_endpoint_mode"
 
 
@@ -33,6 +34,7 @@ FeatureNames = {
     FeatureKey.QUERY_COMPLETIONS: 'Query Completions',
     FeatureKey.QUERY_ERRORS: 'Query Errors',
     FeatureKey.EXPLAIN_PLANS: 'Explain Plans',
+    FeatureKey.COLLECT_SCHEMAS: 'Collect Schemas',
     FeatureKey.SINGLE_ENDPOINT_MODE: 'Single Endpoint Mode',
 }
 
