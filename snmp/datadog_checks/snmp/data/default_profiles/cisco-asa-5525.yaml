@@ -6,8 +6,8 @@
 #   "Cisco Adaptive Security Appliance Version 9.12(3)12"
 
 extends:
-  - _base.yaml
   - _cisco-asa.yaml
+  - _base.yaml
 
 device:
   vendor: "cisco"
