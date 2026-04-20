@@ -247,3 +247,14 @@ lustre = ["linux", "windows", "mac_os"]
 prefect = ["linux", "windows", "mac_os"]
 n8n = ["linux", "windows", "mac_os"]
 control_m = ["linux", "windows", "mac_os"]
+
+[docker-images]
+mirror-prefixes = [
+    "registry.ddbuild.io/dockerhub/",
+    "registry.ddbuild.io/images/",
+    "datadog/docker-library",
+]
+exclude = [
+    "ddev/**",
+    "**/tests/tooling/fixtures/**",
+]
