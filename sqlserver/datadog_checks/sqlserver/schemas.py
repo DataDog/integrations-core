@@ -104,9 +104,7 @@ class SQLServerSchemaCollector(SchemaCollector):
                     return []
                 placeholders = ",".join(["?"] * len(database_names))
                 query = DB_QUERY.format(placeholders)
-                return execute_query(
-                    query, cursor, convert_results_to_str=True, parameters=tuple(database_names)
-                )
+                return execute_query(query, cursor, convert_results_to_str=True, parameters=tuple(database_names))
 
     @contextlib.contextmanager
     def _get_cursor(self, database_name):
