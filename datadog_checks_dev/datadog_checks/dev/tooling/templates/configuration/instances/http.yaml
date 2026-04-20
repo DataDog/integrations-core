@@ -310,7 +310,6 @@
   fleet_configurable: true
   value:
     example:
-      - 'SSLv3'
       - 'TLSv1.2'
       - 'TLSv1.3'
     type: array
@@ -318,12 +317,8 @@
       type: string
   description: |
     The expected versions of TLS/SSL when fetching intermediate certificates.
-    Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
-      SSLv3
-      TLSv1
-      TLSv1.1
-      TLSv1.2
-      TLSv1.3
+    Only `TLSv1.2` and `TLSv1.3` are allowed by default and only those values are supported.
+    SSLv3, TLSv1 and TLSv1.1 are insecure and are no longer accepted.
 - name: tls_ciphers
   description: |
     The list of ciphers suites to use when connecting to an endpoint. If not specified, 

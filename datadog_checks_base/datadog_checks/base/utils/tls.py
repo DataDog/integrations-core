@@ -24,8 +24,8 @@ LOGGER = logging.getLogger(__file__)
 UNIQUE_FIELD_PREFIX = '_tls_context_'
 
 # https://github.com/python/cpython/blob/ef516d11c1a0f885dba0aba8cf5366502077cdd4/Lib/ssl.py#L158-L165
-DEFAULT_PROTOCOL_VERSIONS = ('SSLv3', 'TLSv1.2', 'TLSv1.3')
-SUPPORTED_PROTOCOL_VERSIONS = ('SSLv3', 'TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3')
+DEFAULT_PROTOCOL_VERSIONS = ('TLSv1.2', 'TLSv1.3')
+SUPPORTED_PROTOCOL_VERSIONS = ('TLSv1.2', 'TLSv1.3')
 
 STANDARD_FIELDS = {
     'tls_verify': True,
@@ -120,7 +120,8 @@ def _load_ca_certs(context, config):
 def create_ssl_context(config):
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
     # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
-    context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
+    context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_CLIENT)
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
 
     LOGGER.debug('Creating SSL context with config: %s', config)
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
