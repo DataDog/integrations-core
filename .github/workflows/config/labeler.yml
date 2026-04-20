@@ -1138,6 +1138,10 @@ integration/ping_one:
 - changed-files:
   - any-glob-to-any-file:
     - ping_one/**/*
+integration/ping_one_aic:
+- changed-files:
+  - any-glob-to-any-file:
+    - ping_one_aic/**/*
 integration/pivotal_pks:
 - changed-files:
   - any-glob-to-any-file:
