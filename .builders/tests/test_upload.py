@@ -477,6 +477,28 @@ def test_lockfile_generation(tmp_path, setup_targets_dir, frozen_timestamp):
         assert len(lock_files) == 2
 
 
+def test_generate_lockfiles_skips_targets_with_no_wheels(tmp_path):
+    """An empty target (no wheels uploaded) should not produce a lockfile."""
+    lockfile = {
+        'linux-x86_64': ['dep @ https://example.com/dep.whl#sha256=abc', ''],
+        'windows-x86_64': [''],
+        'macos-aarch64': [],
+    }
+
+    fake_deps_dir = tmp_path / ".deps"
+    fake_resolved_dir = fake_deps_dir / "resolved"
+    fake_deps_dir.mkdir()
+    fake_resolved_dir.mkdir()
+    (tmp_path / "targets").mkdir()
+
+    with mock.patch.object(upload, "RESOLUTION_DIR", fake_deps_dir), \
+         mock.patch.object(upload, "LOCK_FILE_DIR", fake_resolved_dir):
+        upload.generate_lockfiles(str(tmp_path / "targets"), lockfile)
+
+    lock_files = {f.name for f in fake_resolved_dir.glob("*.txt")}
+    assert lock_files == {f"linux-x86_64_{upload.CURRENT_PYTHON_VERSION}.txt"}
+
+
 def test_generate_lockfiles_accepts_string_path(tmp_path):
 
     lockfile = {'linux-x86_64': ['dep @ https://example.com/dep.whl#sha256=abc', '']}
