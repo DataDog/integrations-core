@@ -162,7 +162,7 @@ SELECT db.oid::text                  AS id,
 FROM   pg_catalog.pg_database db
        JOIN pg_roles a
          ON datdba = a.oid
-        WHERE datname NOT LIKE 'template%'
+        WHERE datname NOT LIKE 'template%%'
 """
 
 
@@ -223,7 +223,7 @@ class PostgresSchemaCollector(SchemaCollector):
                         query += f" AND datname IN ({placeholders})"
                         params.extend(autodiscovery_databases)
 
-                cursor.execute(query, params or None)
+                cursor.execute(query, params)
                 return [dict(row) for row in cursor.fetchall()]
 
     @contextlib.contextmanager
