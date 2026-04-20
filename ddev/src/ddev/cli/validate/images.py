@@ -33,7 +33,7 @@ def images(app: Application, integrations: tuple[str, ...], sync: bool) -> None:
     """
     tracker = app.create_validation_tracker('Docker images')
 
-    config = app.repo.config.get('/docker-images') or {}
+    config = app.repo.config.get('/docker-images', default={}) or {}
     mirror_prefixes: list[str] = list(config.get('mirror-prefixes') or [])
     exclude_globs: list[str] = list(config.get('exclude') or [])
 

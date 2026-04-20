@@ -1,0 +1,1077 @@
+{
+  "version": 1,
+  "images": [
+    {
+      "image": "aerospike/aerospike-prometheus-exporter",
+      "mirrored": false,
+      "tags": [
+        "1.5.0"
+      ],
+      "integrations": [
+        "aerospike"
+      ]
+    },
+    {
+      "image": "alpine",
+      "mirrored": false,
+      "tags": [
+        "3.17.0",
+        "3.18",
+        "3.19.1"
+      ],
+      "integrations": [
+        "http_check",
+        "tls"
+      ]
+    },
+    {
+      "image": "amazoncorretto",
+      "mirrored": false,
+      "tags": [
+        "19-al2-jdk",
+        "8-alpine-jdk"
+      ],
+      "integrations": [
+        "hudi",
+        "quarkus"
+      ]
+    },
+    {
+      "image": "apache/airflow",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "airflow"
+      ]
+    },
+    {
+      "image": "apache/hadoop",
+      "mirrored": false,
+      "tags": [
+        "3.3.5"
+      ],
+      "integrations": [
+        "yarn"
+      ]
+    },
+    {
+      "image": "apache/impala",
+      "mirrored": false,
+      "tags": [
+        "4.0.0-catalogd",
+        "4.0.0-impala_quickstart_client",
+        "4.0.0-impala_quickstart_hms",
+        "4.0.0-impalad_coord_exec",
+        "4.0.0-statestored"
+      ],
+      "integrations": [
+        "impala"
+      ]
+    },
+    {
+      "image": "apache/spark",
+      "mirrored": false,
+      "tags": [
+        "v3.2.4"
+      ],
+      "integrations": [
+        "hudi"
+      ]
+    },
+    {
+      "image": "apacheignite/ignite",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "ignite"
+      ]
+    },
+    {
+      "image": "arangodb",
+      "mirrored": false,
+      "tags": [
+        "3.8"
+      ],
+      "integrations": [
+        "arangodb"
+      ]
+    },
+    {
+      "image": "bash",
+      "mirrored": false,
+      "tags": [
+        "5.2.15"
+      ],
+      "integrations": [
+        "linkerd"
+      ]
+    },
+    {
+      "image": "bde2020/hadoop-datanode",
+      "mirrored": false,
+      "tags": [
+        "2.0.0-hadoop2.7.4-java8",
+        "2.0.0-hadoop3.1.3-java8",
+        "2.0.0-hadoop3.2.1-java8"
+      ],
+      "integrations": [
+        "hdfs_datanode",
+        "hdfs_namenode",
+        "hive",
+        "mapreduce"
+      ]
+    },
+    {
+      "image": "bde2020/hadoop-historyserver",
+      "mirrored": false,
+      "tags": [
+        "2.0.0-hadoop3.2.1-java8"
+      ],
+      "integrations": [
+        "mapreduce"
+      ]
+    },
+    {
+      "image": "bde2020/hadoop-namenode",
+      "mirrored": false,
+      "tags": [
+        "2.0.0-hadoop2.7.4-java8",
+        "2.0.0-hadoop3.1.3-java8",
+        "2.0.0-hadoop3.2.1-java8"
+      ],
+      "integrations": [
+        "hdfs_datanode",
+        "hdfs_namenode",
+        "hive",
+        "mapreduce"
+      ]
+    },
+    {
+      "image": "bde2020/hadoop-nodemanager",
+      "mirrored": false,
+      "tags": [
+        "2.0.0-hadoop3.2.1-java8"
+      ],
+      "integrations": [
+        "mapreduce"
+      ]
+    },
+    {
+      "image": "bde2020/hadoop-resourcemanager",
+      "mirrored": false,
+      "tags": [
+        "2.0.0-hadoop3.2.1-java8"
+      ],
+      "integrations": [
+        "mapreduce"
+      ]
+    },
+    {
+      "image": "bde2020/hive",
+      "mirrored": false,
+      "tags": [
+        "2.3.2"
+      ],
+      "integrations": [
+        "hive"
+      ]
+    },
+    {
+      "image": "caddy",
+      "mirrored": false,
+      "tags": [
+        "2",
+        "2.1.1-alpine",
+        "2.6.2-alpine",
+        "2.7"
+      ],
+      "integrations": [
+        "amazon_msk",
+        "appgate_sdp",
+        "aws_neuron",
+        "azure_iot_edge",
+        "cloudera",
+        "datadog_csi_driver",
+        "dcgm",
+        "fly_io",
+        "hugging_face_tgi",
+        "karpenter",
+        "kubeflow",
+        "kubernetes_cluster_autoscaler",
+        "nvidia_nim",
+        "nvidia_triton",
+        "octopus_deploy",
+        "openstack_controller",
+        "silk",
+        "supabase",
+        "teleport",
+        "vllm"
+      ]
+    },
+    {
+      "image": "cassandra",
+      "mirrored": false,
+      "tags": [
+        "3.11.10"
+      ],
+      "integrations": [
+        "cassandra"
+      ]
+    },
+    {
+      "image": "centos",
+      "mirrored": false,
+      "tags": [
+        "7"
+      ],
+      "integrations": [
+        "kafka_consumer"
+      ]
+    },
+    {
+      "image": "clickhouse/clickhouse-server",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "clickhouse"
+      ]
+    },
+    {
+      "image": "cockroachdb/cockroach",
+      "mirrored": false,
+      "tags": [
+        "latest",
+        "v22.1.11"
+      ],
+      "integrations": [
+        "cockroachdb"
+      ]
+    },
+    {
+      "image": "confluentinc/cp-kafka",
+      "mirrored": false,
+      "tags": [
+        "7.3.0",
+        "latest"
+      ],
+      "integrations": [
+        "kafka",
+        "kafka_actions",
+        "kafka_consumer"
+      ]
+    },
+    {
+      "image": "confluentinc/cp-server",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "kafka_consumer"
+      ]
+    },
+    {
+      "image": "confluentinc/cp-zookeeper",
+      "mirrored": false,
+      "tags": [
+        "7.2.0",
+        "7.3.0"
+      ],
+      "integrations": [
+        "kafka",
+        "kafka_actions",
+        "kafka_consumer"
+      ]
+    },
+    {
+      "image": "consul",
+      "mirrored": false,
+      "tags": [
+        "1.14.3"
+      ],
+      "integrations": [
+        "vault"
+      ]
+    },
+    {
+      "image": "datadog/docker-library",
+      "mirrored": true,
+      "tags": [
+        "cacti-1.2.19",
+        "druid_0_16",
+        "memcached_SASL",
+        "snmp",
+        "teamcity-2022.10",
+        "varnish_5_2_1"
+      ],
+      "integrations": [
+        "cacti",
+        "druid",
+        "mcache",
+        "snmp",
+        "teamcity",
+        "varnish"
+      ]
+    },
+    {
+      "image": "datadog/tokumx",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "tokumx"
+      ]
+    },
+    {
+      "image": "debian",
+      "mirrored": false,
+      "tags": [
+        "bullseye-slim"
+      ],
+      "integrations": [
+        "velero"
+      ]
+    },
+    {
+      "image": "elasticsearch",
+      "mirrored": false,
+      "tags": [
+        "7.16.2"
+      ],
+      "integrations": [
+        "temporal"
+      ]
+    },
+    {
+      "image": "envoyproxy/envoy",
+      "mirrored": false,
+      "tags": [
+        "v1.14.1"
+      ],
+      "integrations": [
+        "envoy"
+      ]
+    },
+    {
+      "image": "falcosecurity/falco",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "falco"
+      ]
+    },
+    {
+      "image": "foundationdb/foundationdb",
+      "mirrored": false,
+      "tags": [
+        "6.3.13"
+      ],
+      "integrations": [
+        "foundationdb"
+      ]
+    },
+    {
+      "image": "ghcr.io/singlestore-labs/singlestoredb-dev",
+      "mirrored": false,
+      "tags": [
+        "0.2.51"
+      ],
+      "integrations": [
+        "singlestore"
+      ]
+    },
+    {
+      "image": "gitlab/gitlab-ce",
+      "mirrored": false,
+      "tags": [
+        "10.8.0-ce.0",
+        "13.0.6-ce.0",
+        "latest"
+      ],
+      "integrations": [
+        "gitlab",
+        "gitlab_runner"
+      ]
+    },
+    {
+      "image": "gitlab/gitlab-runner",
+      "mirrored": false,
+      "tags": [
+        "v10.8.0"
+      ],
+      "integrations": [
+        "gitlab_runner"
+      ]
+    },
+    {
+      "image": "gluster-custom",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "glusterfs"
+      ]
+    },
+    {
+      "image": "gluster/gluster-centos",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "glusterfs"
+      ]
+    },
+    {
+      "image": "goharbor/harbor-core",
+      "mirrored": false,
+      "tags": [
+        "v1.10.11",
+        "v2.0.5",
+        "v2.3.2"
+      ],
+      "integrations": [
+        "harbor"
+      ]
+    },
+    {
+      "image": "goharbor/harbor-db",
+      "mirrored": false,
+      "tags": [
+        "v1.10.11",
+        "v2.0.5",
+        "v2.3.2"
+      ],
+      "integrations": [
+        "harbor"
+      ]
+    },
+    {
+      "image": "goharbor/nginx-photon",
+      "mirrored": false,
+      "tags": [
+        "v1.10.11",
+        "v2.0.5",
+        "v2.3.2"
+      ],
+      "integrations": [
+        "harbor"
+      ]
+    },
+    {
+      "image": "goharbor/redis-photon",
+      "mirrored": false,
+      "tags": [
+        "v1.10.11",
+        "v2.0.5",
+        "v2.3.2"
+      ],
+      "integrations": [
+        "harbor"
+      ]
+    },
+    {
+      "image": "goharbor/registry-photon",
+      "mirrored": false,
+      "tags": [
+        "v1.10.11",
+        "v2.0.5",
+        "v2.3.2"
+      ],
+      "integrations": [
+        "harbor"
+      ]
+    },
+    {
+      "image": "golang",
+      "mirrored": false,
+      "tags": [
+        "1.6"
+      ],
+      "integrations": [
+        "go_expvar"
+      ]
+    },
+    {
+      "image": "hashicorp/boundary",
+      "mirrored": false,
+      "tags": [
+        "0.8"
+      ],
+      "integrations": [
+        "boundary"
+      ]
+    },
+    {
+      "image": "hermsi/alpine-sshd",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "ssh_check"
+      ]
+    },
+    {
+      "image": "ianbytchek/riak-cs",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "riakcs"
+      ]
+    },
+    {
+      "image": "ibmcom/mq",
+      "mirrored": false,
+      "tags": [
+        "9",
+        "9.2.4.0-r1"
+      ],
+      "integrations": [
+        "ibm_ace",
+        "ibm_mq"
+      ]
+    },
+    {
+      "image": "ibmcom/mq:{matrix",
+      "mirrored": false,
+      "tags": [
+        "version}"
+      ],
+      "integrations": [
+        "ibm_mq"
+      ]
+    },
+    {
+      "image": "jasonrivers/nagios",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "nagios"
+      ]
+    },
+    {
+      "image": "jboss/wildfly",
+      "mirrored": false,
+      "tags": [
+        "16.0.0.Final"
+      ],
+      "integrations": [
+        "jboss_wildfly"
+      ]
+    },
+    {
+      "image": "jetbrains/teamcity-agent",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "teamcity"
+      ]
+    },
+    {
+      "image": "jetbrains/teamcity-minimal-agent",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "teamcity"
+      ]
+    },
+    {
+      "image": "kennethreitz/httpbin",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "http_check"
+      ]
+    },
+    {
+      "image": "kong",
+      "mirrored": false,
+      "tags": [
+        "1.5.0",
+        "3.0.0"
+      ],
+      "integrations": [
+        "kong"
+      ]
+    },
+    {
+      "image": "krakend",
+      "mirrored": false,
+      "tags": [
+        "2.10"
+      ],
+      "integrations": [
+        "krakend"
+      ]
+    },
+    {
+      "image": "malexer/twemproxy",
+      "mirrored": false,
+      "tags": [
+        "0.5.0"
+      ],
+      "integrations": [
+        "twemproxy"
+      ]
+    },
+    {
+      "image": "mariadb",
+      "mirrored": false,
+      "tags": [
+        "10.3",
+        "10.6"
+      ],
+      "integrations": [
+        "cacti",
+        "tomcat"
+      ]
+    },
+    {
+      "image": "maven",
+      "mirrored": false,
+      "tags": [
+        "3-eclipse-temurin-11"
+      ],
+      "integrations": [
+        "tomcat"
+      ]
+    },
+    {
+      "image": "mesosphere/marathon",
+      "mirrored": false,
+      "tags": [
+        "v1.3.0"
+      ],
+      "integrations": [
+        "marathon"
+      ]
+    },
+    {
+      "image": "mesosphere/mesos-master",
+      "mirrored": false,
+      "tags": [
+        "1.7.1"
+      ],
+      "integrations": [
+        "marathon"
+      ]
+    },
+    {
+      "image": "mesosphere/mesos-slave",
+      "mirrored": false,
+      "tags": [
+        "1.7.1"
+      ],
+      "integrations": [
+        "marathon"
+      ]
+    },
+    {
+      "image": "milvusdb/milvus",
+      "mirrored": false,
+      "tags": [
+        "v2.5.0"
+      ],
+      "integrations": [
+        "milvus"
+      ]
+    },
+    {
+      "image": "mockserver/mockserver",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "teamcity"
+      ]
+    },
+    {
+      "image": "mysql",
+      "mirrored": false,
+      "tags": [
+        "5.7",
+        "8.0",
+        "8.0.37"
+      ],
+      "integrations": [
+        "proxysql",
+        "silverstripe_cms",
+        "tls"
+      ]
+    },
+    {
+      "image": "n8nio/n8n",
+      "mirrored": false,
+      "tags": [
+        "1.118.1"
+      ],
+      "integrations": [
+        "n8n"
+      ]
+    },
+    {
+      "image": "nginx",
+      "mirrored": false,
+      "tags": [
+        "1.23.3-alpine",
+        "alpine",
+        "latest"
+      ],
+      "integrations": [
+        "http_check",
+        "nginx",
+        "php_fpm",
+        "tls"
+      ]
+    },
+    {
+      "image": "php",
+      "mirrored": false,
+      "tags": [
+        "7-fpm"
+      ],
+      "integrations": [
+        "php_fpm"
+      ]
+    },
+    {
+      "image": "postgres",
+      "mirrored": false,
+      "tags": [
+        "11",
+        "12-alpine",
+        "13",
+        "14",
+        "15-alpine",
+        "9.5"
+      ],
+      "integrations": [
+        "airflow",
+        "boundary",
+        "do_query_actions",
+        "kong",
+        "prefect",
+        "temporal",
+        "tls"
+      ]
+    },
+    {
+      "image": "prefecthq/prefect",
+      "mirrored": false,
+      "tags": [
+        "3.6.17-python3.13"
+      ],
+      "integrations": [
+        "prefect"
+      ]
+    },
+    {
+      "image": "prom/prometheus",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "openmetrics",
+        "prometheus"
+      ]
+    },
+    {
+      "image": "public.ecr.aws/gravitational/teleport-distroless",
+      "mirrored": false,
+      "tags": [
+        "17.2"
+      ],
+      "integrations": [
+        "teleport"
+      ]
+    },
+    {
+      "image": "python",
+      "mirrored": false,
+      "tags": [
+        "3.10-alpine3.16",
+        "3.11",
+        "3.11-slim",
+        "3.11.1-slim",
+        "3.12-slim",
+        "3.8-buster",
+        "3.9-slim",
+        "3.9.5-slim-buster",
+        "alpine3.17"
+      ],
+      "integrations": [
+        "avi_vantage",
+        "celery",
+        "citrix_hypervisor",
+        "gunicorn",
+        "krakend",
+        "milvus",
+        "nutanix",
+        "spark",
+        "temporal",
+        "tomcat",
+        "vault"
+      ]
+    },
+    {
+      "image": "quay.io/coreos/etcd",
+      "mirrored": false,
+      "tags": [
+        "v3.5.14"
+      ],
+      "integrations": [
+        "twemproxy"
+      ]
+    },
+    {
+      "image": "quay.io/quarkus/quarkus-micro-image",
+      "mirrored": false,
+      "tags": [
+        "2.0"
+      ],
+      "integrations": [
+        "quarkus"
+      ]
+    },
+    {
+      "image": "rabbitmq",
+      "mirrored": false,
+      "tags": [
+        "3.11-management",
+        "3.7-management",
+        "4.0-management"
+      ],
+      "integrations": [
+        "rabbitmq"
+      ]
+    },
+    {
+      "image": "redis",
+      "mirrored": false,
+      "tags": [
+        "7",
+        "7.2",
+        "latest"
+      ],
+      "integrations": [
+        "celery",
+        "http_check",
+        "prefect",
+        "twemproxy"
+      ]
+    },
+    {
+      "image": "registry.access.redhat.com/ubi8/openjdk-17",
+      "mirrored": false,
+      "tags": [
+        "1.20"
+      ],
+      "integrations": [
+        "quarkus"
+      ]
+    },
+    {
+      "image": "registry.access.redhat.com/ubi8/ubi-minimal",
+      "mirrored": false,
+      "tags": [
+        "8.10"
+      ],
+      "integrations": [
+        "quarkus"
+      ]
+    },
+    {
+      "image": "rethinkdb",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "rethinkdb"
+      ]
+    },
+    {
+      "image": "rmohr/activemq",
+      "mirrored": false,
+      "tags": [
+        "5.11.1"
+      ],
+      "integrations": [
+        "activemq_xml"
+      ]
+    },
+    {
+      "image": "sebp/lighttpd",
+      "mirrored": false,
+      "tags": [
+        "1.4.54-r0"
+      ],
+      "integrations": [
+        "lighttpd"
+      ]
+    },
+    {
+      "image": "shaker/trafficserver",
+      "mirrored": false,
+      "tags": [
+        "9.1.1"
+      ],
+      "integrations": [
+        "traffic_server"
+      ]
+    },
+    {
+      "image": "silverstripe-image-latest",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "silverstripe_cms"
+      ]
+    },
+    {
+      "image": "sonarsource/sonar-scanner-cli",
+      "mirrored": false,
+      "tags": [
+        "4.7"
+      ],
+      "integrations": [
+        "sonarqube"
+      ]
+    },
+    {
+      "image": "sonatype/nexus3",
+      "mirrored": false,
+      "tags": [
+        "3.79.0"
+      ],
+      "integrations": [
+        "sonatype_nexus"
+      ]
+    },
+    {
+      "image": "statsd/statsd",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "statsd"
+      ]
+    },
+    {
+      "image": "taskana/db2:{matrix:version",
+      "mirrored": false,
+      "tags": [
+        "11.1}"
+      ],
+      "integrations": [
+        "ibm_db2"
+      ]
+    },
+    {
+      "image": "temporalio/ui",
+      "mirrored": false,
+      "tags": [
+        "2.9.0"
+      ],
+      "integrations": [
+        "temporal"
+      ]
+    },
+    {
+      "image": "ubuntu",
+      "mirrored": false,
+      "tags": [
+        "16.04",
+        "22.04"
+      ],
+      "integrations": [
+        "azure_iot_edge",
+        "silverstripe_cms"
+      ]
+    },
+    {
+      "image": "varnish",
+      "mirrored": false,
+      "tags": [
+        "6.5.1"
+      ],
+      "integrations": [
+        "varnish"
+      ]
+    },
+    {
+      "image": "vault",
+      "mirrored": false,
+      "tags": [
+        "1.9.0"
+      ],
+      "integrations": [
+        "vault"
+      ]
+    },
+    {
+      "image": "vmware/vcsim",
+      "mirrored": false,
+      "tags": [
+        "v0.35.0"
+      ],
+      "integrations": [
+        "esxi"
+      ]
+    },
+    {
+      "image": "wls_base",
+      "mirrored": false,
+      "tags": [
+        "latest"
+      ],
+      "integrations": [
+        "weblogic"
+      ]
+    },
+    {
+      "image": "zookeeper",
+      "mirrored": false,
+      "tags": [
+        "3.4.11",
+        "3.4.13",
+        "3.5.7",
+        "3.8.1",
+        "latest"
+      ],
+      "integrations": [
+        "clickhouse",
+        "druid",
+        "marathon",
+        "mesos_master",
+        "mesos_slave"
+      ]
+    }
+  ]
+}
