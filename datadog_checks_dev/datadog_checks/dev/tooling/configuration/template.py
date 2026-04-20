@@ -108,7 +108,7 @@ class ConfigTemplates:
             elif isinstance(nested, list):
                 found = self._expand_and_find(nested, name, visited)
                 if found is not None:
-                    items[idx:idx + 1] = nested
+                    items[idx : idx + 1] = nested
                     return found
 
         return None

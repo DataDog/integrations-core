@@ -240,9 +240,7 @@ class TestApplyOverrides:
         errors = templates.apply_overrides(template, {'tags.display_priority': 5})
         assert not errors
 
-        tags_item = next(
-            (item for item in template if isinstance(item, dict) and item.get('name') == 'tags'), None
-        )
+        tags_item = next((item for item in template if isinstance(item, dict) and item.get('name') == 'tags'), None)
         assert tags_item is not None
         assert tags_item['display_priority'] == 5
 
