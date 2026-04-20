@@ -8,7 +8,7 @@ device:
   vendor: "aruba"
 
 extends:
-  - _base.yaml
   - _aruba-base.yaml
   - _generic-if.yaml
   - _generic-ospf.yaml
+  - _base.yaml

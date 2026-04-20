@@ -1,8 +1,8 @@
 # Profile for Cisco ASR devices
 
 extends:
-  - _base.yaml
   - _cisco-generic.yaml
+  - _base.yaml
 
 device:
   vendor: "cisco"

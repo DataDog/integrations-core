@@ -1,7 +1,7 @@
 extends:
-  - _base.yaml
   - _cisco-generic.yaml
   - _cisco-voice.yaml
+  - _base.yaml
 
 device:
   vendor: "cisco"

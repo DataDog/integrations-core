@@ -3,10 +3,10 @@
 # For Fortinet FortiGate devices, the sysDescr is not a reliable source of info.
 
 extends:
-  - _base.yaml
   - _generic-if.yaml
   - _fortinet-fortigate-cpu-memory.yaml
   - _fortinet-fortigate-vpn-tunnel.yaml
+  - _base.yaml
 
 device:
   vendor: "fortinet"
