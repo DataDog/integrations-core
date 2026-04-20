@@ -1,0 +1,1 @@
+Enforce TLS 1.2+ in shared SSL context used by HTTP intermediate cert fetch; drop SSLv3/TLSv1.0/TLSv1.1 from supported and default `tls_protocols_allowed` values.
