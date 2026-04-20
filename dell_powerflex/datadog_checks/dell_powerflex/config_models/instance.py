@@ -81,7 +81,10 @@ class InstanceConfig(BaseModel):
     ntlm_domain: Optional[str] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
+    powerflex_client_id: Optional[str] = None
     powerflex_gateway_url: str
+    powerflex_password: Optional[str] = None
+    powerflex_username: Optional[str] = None
     proxy: Optional[Proxy] = None
     read_timeout: Optional[float] = None
     request_size: Optional[float] = None

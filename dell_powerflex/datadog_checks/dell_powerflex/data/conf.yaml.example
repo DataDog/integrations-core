@@ -18,21 +18,20 @@ instances:
     #
   - powerflex_gateway_url: https://localhost:443
 
-    ## @param auth_token - mapping - optional
-    ## Configuration for authenticating to the PowerFlex Gateway
-    ## using OAuth2 client credentials.
+    ## @param powerflex_username - string - optional - default: admin
+    ## Username for PowerFlex Gateway authentication via Keycloak.
     #
-    # auth_token:
-    #   reader:
-    #     type: oauth
-    #     url: https://localhost:443/rest/auth/login
-    #     client_id: admin
-    #     client_secret: <password>
-    #     basic_auth: true
-    #   writer:
-    #     type: header
-    #     name: Authorization
-    #     value: Bearer <token>
+    # powerflex_username: admin
+
+    ## @param powerflex_password - string - optional
+    ## Password for PowerFlex Gateway authentication via Keycloak.
+    #
+    # powerflex_password: <PASSWORD>
+
+    ## @param powerflex_client_id - string - optional - default: powerflexUI
+    ## OAuth2 client ID for Keycloak authentication.
+    #
+    # powerflex_client_id: powerflexUI
 
     ## @param collect_events - boolean - optional - default: false
     ## Enable collection of CRITICAL events from the PowerFlex Gateway.
@@ -224,6 +223,45 @@ instances:
     ## Set the path to your Kerberos key tab file.
     #
     # kerberos_keytab: <KEYTAB_FILE_PATH>
+
+    ## @param auth_token - mapping - optional
+    ## This allows for the use of authentication information from dynamic sources.
+    ## Both a reader and writer must be configured.
+    ##
+    ## The available readers are:
+    ##
+    ##   - type: file
+    ##     path (required): The absolute path for the file to read from.
+    ##     pattern: A regular expression pattern with a single capture group used to find the
+    ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##   - type: oauth
+    ##     url (required): The token endpoint.
+    ##     client_id (required): The client identifier.
+    ##     client_secret (required): The client secret.
+    ##     basic_auth: Whether the provider expects credentials to be transmitted in
+    ##                 an HTTP Basic Auth header. The default is: false
+    ##     options: Mapping of additional options to pass to the provider, such as the audience
+    ##              or the scope. For example:
+    ##                 options:
+    ##                   audience: https://example.com
+    ##                   scope: read:example
+    ##
+    ## The available writers are:
+    ##
+    ##   - type: header
+    ##     name (required): The name of the field, for example: Authorization
+    ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+    ##     placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
+    #
+    # auth_token:
+    #   reader:
+    #     type: <READER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
+    #   writer:
+    #     type: <WRITER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
 
     ## @param aws_region - string - optional
     ## If your services require AWS Signature Version 4 signing, set the region.

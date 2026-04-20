@@ -56,6 +56,14 @@ def instance_persist_connections():
     return False
 
 
+def instance_powerflex_client_id():
+    return 'powerflexUI'
+
+
+def instance_powerflex_username():
+    return 'admin'
+
+
 def instance_request_size():
     return 16
 

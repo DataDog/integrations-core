@@ -1,14 +1,60 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from time import time
+
+
+TOKEN_PATH = '/auth/realms/powerflex/protocol/openid-connect/token'
 
 
 class PowerFlexAPI:
-    def __init__(self, http, gateway_url: str) -> None:
+    def __init__(
+        self,
+        http,
+        gateway_url: str,
+        username: str | None = None,
+        password: str | None = None,
+        client_id: str = 'powerflexUI',
+        logger=None,
+    ) -> None:
         self._http = http
         self._gateway_url = gateway_url
+        self._username = username
+        self._password = password
+        self._client_id = client_id
+        self._log = logger
+        self._token: str | None = None
+        self._token_expiry: float = 0.0
+
+    def _ensure_authenticated(self) -> None:
+        if not self._username:
+            return
+        if self._token and time() < self._token_expiry:
+            return
+        self._authenticate()
+
+    def _authenticate(self) -> None:
+        url = f'{self._gateway_url}{TOKEN_PATH}'
+        response = self._http.post(
+            url,
+            data={
+                'grant_type': 'password',
+                'client_id': self._client_id,
+                'username': self._username,
+                'password': self._password,
+            },
+        )
+        response.raise_for_status()
+        data = response.json()
+        self._token = data['access_token']
+        expires_in = data.get('expires_in', 300)
+        self._token_expiry = time() + expires_in - 30
+        self._http.options['headers']['Authorization'] = f'Bearer {self._token}'
+        if self._log:
+            self._log.debug('Refreshed PowerFlex auth token, expires in %ds', expires_in)
 
     def _get(self, path: str):
+        self._ensure_authenticated()
         response = self._http.get(f"{self._gateway_url}{path}")
         response.raise_for_status()
         return response.json()

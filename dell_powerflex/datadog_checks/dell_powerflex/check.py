@@ -51,7 +51,14 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
 
     def _parse_config(self) -> None:
         self._base_tags = [f'powerflex_gateway_url:{self.config.powerflex_gateway_url}']
-        self._api = PowerFlexAPI(self.http, self.config.powerflex_gateway_url)
+        self._api = PowerFlexAPI(
+            self.http,
+            self.config.powerflex_gateway_url,
+            username=self.config.powerflex_username,
+            password=self.config.powerflex_password,
+            client_id=self.config.powerflex_client_id,
+            logger=self.log,
+        )
         self._resource_filters = parse_resource_filters(self.instance.get('resource_filters'), self.log)
 
     def check(self, _: Any) -> None:
