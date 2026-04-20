@@ -9,15 +9,18 @@ metadata:
   device:
     fields:
       serial_number:
-        symbol:
-          # Cisco Catalyst devices are using CISCO-STACK-MIB
-          # Source1: http://www.circitor.fr/Mibs/Html/C/CISCO-STACK-MIB.php
-          #   "This MIB provides configuration and runtime status for chassis, modules, ports, etc. on the Catalyst systems."
-          # Source2: chassisSerialNumberString is present for this device:
+        symbols:
+          # CISCO-STACK-MIB: chassisSerialNumberString — primary chassis serial on classic Catalyst.
+          # Source 1: https://circitor.fr/Mibs/Html/CISCO-STACK-MIB.php
+          # Source 2: chassisSerialNumberString is present for this device:
           #   Cisco Systems WS-C6509.Cisco Catalyst Operating System Software, Version 5.5(8).Copyright (c) 1995-2001 by Cisco Systems.
-          MIB: CISCO-STACK-MIB
-          OID: 1.3.6.1.4.1.9.5.1.2.19.0
-          name: chassisSerialNumberString
+          - OID: 1.3.6.1.4.1.9.5.1.2.19.0
+            name: chassisSerialNumberString
+          # ENTITY-MIB: entPhysicalSerialNum at entPhysicalIndex 1 — fallback when stack MIB data is missing.
+          # Source: https://circitor.fr/Mibs/Html/ENTITY-MIB.php
+          # Stacked members often use x000 indexes (1000, 2000, …); add more list entries if you need them.
+          - OID: 1.3.6.1.2.1.47.1.1.1.1.11.1
+            name: entPhysicalSerialNum
 
 metrics:
   - MIB: CISCO-ENTITY-SENSOR-MIB
