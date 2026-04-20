@@ -10,7 +10,7 @@ import pytest
 
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 
@@ -148,12 +148,12 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
     ('mock_http_get', 'instance'),
     [
         pytest.param(
-            {'http_error': {'/volume/v3/': MockResponse(status_code=500)}},
+            {'http_error': {'/volume/v3/': MockHTTPResponse(status_code=500)}},
             configs.REST,
             id='api rest',
         ),
         pytest.param(
-            {'http_error': {'/volume/v3/': MockResponse(status_code=500)}},
+            {'http_error': {'/volume/v3/': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             id='api sdk',
         ),

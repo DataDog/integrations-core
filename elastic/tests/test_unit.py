@@ -8,7 +8,7 @@ import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError, is_affirmative
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.elastic import AuthenticationError, get_value_from_path
 from datadog_checks.elastic.metrics import INDEX_STATS_METRICS, stats_for_version
@@ -135,7 +135,7 @@ def test_get_template_metrics(aggregator, instance, mock_http_response):
 def test_get_template_metrics_raise_exception(aggregator, instance):
     with mock.patch(
         'requests.Session.get',
-        return_value=MockResponse(status_code=403),
+        return_value=MockHTTPResponse(status_code=403),
     ):
         check = ESCheck('elastic', {}, instances=[instance])
         # Make sure we do not throw an exception and move on
@@ -152,7 +152,7 @@ def test_get_value_from_path():
 def test__get_data_throws_authentication_error(instance):
     with mock.patch(
         'requests.Session.get',
-        return_value=MockResponse(status_code=400),
+        return_value=MockHTTPResponse(status_code=400),
     ):
         check = ESCheck('elastic', {}, instances=[instance])
 
@@ -163,7 +163,7 @@ def test__get_data_throws_authentication_error(instance):
 def test__get_data_creates_critical_service_alert(aggregator, instance):
     with mock.patch(
         'requests.Session.get',
-        return_value=MockResponse(status_code=500),
+        return_value=MockHTTPResponse(status_code=500),
     ):
         check = ESCheck('elastic', {}, instances=[instance])
 
@@ -174,7 +174,7 @@ def test__get_data_creates_critical_service_alert(aggregator, instance):
             check.SERVICE_CHECK_CONNECT_NAME,
             status=check.CRITICAL,
             tags=check._config.service_check_tags,
-            message="Error 500 Server Error: None for url: None when hitting test.com",
+            message="Error 500 Server Error when hitting test.com",
         )
 
 
@@ -194,7 +194,7 @@ def test__get_data_creates_critical_service_alert(aggregator, instance):
 def test_disable_legacy_sc_tags(aggregator, es_instance):
     with mock.patch(
         'requests.Session.get',
-        return_value=MockResponse(status_code=500),
+        return_value=MockHTTPResponse(status_code=500),
     ):
         check = ESCheck('elastic', {}, instances=[es_instance])
 
@@ -210,7 +210,7 @@ def test_disable_legacy_sc_tags(aggregator, es_instance):
             check.SERVICE_CHECK_CONNECT_NAME,
             status=check.CRITICAL,
             tags=expected_tags,
-            message="Error 500 Server Error: None for url: None when hitting test.com",
+            message="Error 500 Server Error when hitting test.com",
         )
 
 

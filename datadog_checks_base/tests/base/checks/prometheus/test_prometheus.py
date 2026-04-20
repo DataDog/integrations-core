@@ -1963,11 +1963,14 @@ def test_text_filter_input():
 
 
 def test_ssl_verify_not_raise_warning(caplog, mocked_prometheus_check, text_data):
-    from datadog_checks.dev.http import MockResponse
+    from datadog_checks.base.utils.http_testing import MockHTTPResponse
 
     check = mocked_prometheus_check
 
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockResponse('httpbin.org')):
+    with (
+        caplog.at_level(logging.DEBUG),
+        mock.patch('requests.Session.get', return_value=MockHTTPResponse(content='httpbin.org')),
+    ):
         resp = check.poll('https://httpbin.org/get')
 
     assert 'httpbin.org' in resp.content.decode('utf-8')
@@ -1978,12 +1981,15 @@ def test_ssl_verify_not_raise_warning(caplog, mocked_prometheus_check, text_data
 
 
 def test_ssl_verify_not_raise_warning_cert_false(caplog, mocked_prometheus_check, text_data):
-    from datadog_checks.dev.http import MockResponse
+    from datadog_checks.base.utils.http_testing import MockHTTPResponse
 
     check = mocked_prometheus_check
     check.ssl_ca_cert = False
 
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockResponse('httpbin.org')):
+    with (
+        caplog.at_level(logging.DEBUG),
+        mock.patch('requests.Session.get', return_value=MockHTTPResponse(content='httpbin.org')),
+    ):
         resp = check.poll('https://httpbin.org/get')
 
     assert 'httpbin.org' in resp.content.decode('utf-8')

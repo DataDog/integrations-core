@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from json import JSONDecodeError as StdJSONDecodeError
 from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup
@@ -455,7 +456,7 @@ class SparkCheck(AgentCheck):
                 continue
             try:
                 yield (response.json(), [f'app_name:{app_name}'] + addl_tags)
-            except JSONDecodeError:
+            except (JSONDecodeError, StdJSONDecodeError):
                 self.log.debug(
                     'Skipping metrics for %s from app %s due to unparsable JSON payload.', property, app_name
                 )
@@ -723,7 +724,7 @@ class SparkCheck(AgentCheck):
         try:
             response_json = response.json()
 
-        except JSONDecodeError as e:
+        except (JSONDecodeError, StdJSONDecodeError) as e:
             response_text = response.text.strip()
             if response_text and 'spark is starting up' in response_text.lower():
                 # Handle startup message based on retry configuration
