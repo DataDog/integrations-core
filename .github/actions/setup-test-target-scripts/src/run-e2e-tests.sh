@@ -22,7 +22,7 @@ else
 fi
 
 # Set E2E flags based on context and repo
-if [[ "$INPUT_CONTEXT" == 'test-agent' ]]; then
+if [[ "$INPUT_CONTEXT" == test-agent* ]]; then
   E2E_FLAGS="--new-env"
 elif [[ "$INPUT_REPO" == 'core' || "$INPUT_IS_LATEST" == 'true' ]]; then
   E2E_FLAGS="--base --new-env"
