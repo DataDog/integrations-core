@@ -1,1 +1,0 @@
-Fix generate-traps-db silently dropping MIB variables with hyphenated names when using pysmi 1.x

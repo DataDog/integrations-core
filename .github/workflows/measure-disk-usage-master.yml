@@ -1,0 +1,59 @@
+name: Measure Disk Usage (Master)
+run-name: "Measure Disk Usage (Master) [${{ github.sha }}]"
+
+# Temporary crutch: emits master disk-usage telemetry on .deps/ changes.
+# The main measure-disk-usage.yml workflow subscribes to resolve-build-deps via
+# workflow_run, but resolve-build-deps no longer runs on master pushes. This
+# workflow restores the master telemetry path until measure-disk-usage.yml is
+# reworked to subscribe to .deps/ changes directly.
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - .deps/**
+
+env:
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  measure-disk-usage:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Get Datadog credentials
+        id: dd-sts
+        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+        with:
+          policy: integrations-core-api-key
+
+      - name: Install ddev
+        run: |
+          pip install -e ./datadog_checks_dev[cli]
+          pip install -e ./ddev
+
+      - name: Configure ddev
+        run: ddev config override
+
+      - name: Measure disk usage (Uncompressed)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ddev -v size status --commit "${{ github.sha }}" --format json --to-dd-key ${{ steps.dd-sts.outputs.api_key }}
+
+      - name: Measure disk usage (Compressed)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ddev -v size status --commit "${{ github.sha }}" --format json --to-dd-key ${{ steps.dd-sts.outputs.api_key }} --compressed

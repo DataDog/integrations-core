@@ -30,6 +30,7 @@ from .utils.common_funcs import (
     is_correct_dependency,
     is_valid_integration_file,
     print_table,
+    resolve_wheel_url,
     save_csv,
     save_json,
     save_markdown,
@@ -71,6 +72,7 @@ def timeline(
     compressed: bool,
     format: Optional[list[str]],
     show_gui: bool,
+    wheels_storage: str,
 ) -> None:
     """
     Show the size evolution of a module (integration or dependency) over time.
@@ -174,6 +176,7 @@ def timeline(
                                 "show_gui": show_gui,
                                 "first_commit": None,
                                 "platform": plat,
+                                "wheels_storage": wheels_storage,
                             }
 
                             modules_plat.extend(
@@ -196,6 +199,7 @@ def timeline(
                             "show_gui": show_gui,
                             "first_commit": None,
                             "platform": platform,
+                            "wheels_storage": wheels_storage,
                         }
                         modules_plat.extend(
                             timeline_mode(
@@ -220,6 +224,7 @@ def timeline(
                         "show_gui": show_gui,
                         "first_commit": first_commit,
                         "platform": None,
+                        "wheels_storage": wheels_storage,
                     }
                     progress.remove_task(task)
                     modules.extend(
@@ -388,6 +393,7 @@ def process_commits(
                 author,
                 message,
                 params["compressed"],
+                params["wheels_storage"],
             )
             if result:
                 file_data.append(result)
@@ -492,6 +498,7 @@ def get_dependencies(
     author: str,
     message: str,
     compressed: bool,
+    wheels_storage: str,
 ) -> Optional[CommitEntry]:
     """
     Returns the size and metadata of a dependency for a given commit and platform.
@@ -515,7 +522,7 @@ def get_dependencies(
     for filename in paths:
         file_path = os.path.join(resolved_path, filename)
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
-            download_url, dep_version = get_dependency_data(file_path, module)
+            download_url, dep_version = get_dependency_data(file_path, module, wheels_storage)
             return (
                 get_dependency_size(download_url, dep_version, commit, date, author, message, compressed)
                 if download_url and dep_version is not None
@@ -524,7 +531,7 @@ def get_dependencies(
     return None
 
 
-def get_dependency_data(file_path: str, module: str) -> tuple[Optional[str], Optional[str]]:
+def get_dependency_data(file_path: str, module: str, wheels_storage: str) -> tuple[Optional[str], Optional[str]]:
     """
     Parses a dependency file and extracts the dependency name, download URL, and version.
 
@@ -545,6 +552,7 @@ def get_dependency_data(file_path: str, module: str) -> tuple[Optional[str], Opt
                 raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
             name, url = match.groups()
             if name == module:
+                url = resolve_wheel_url(url, wheels_storage)
                 version_match = re.search(rf"{re.escape(name)}/[^/]+?-([0-9]+(?:\.[0-9]+)*)-", url)
                 version = version_match.group(1) if version_match else ""
                 return url, version

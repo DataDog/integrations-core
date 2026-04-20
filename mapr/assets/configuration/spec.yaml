@@ -30,6 +30,7 @@ files:
       value:
         example: /var/mapr/mapr.monitoring/metricstreams
         type: string
+        require_trusted_provider: true
     - name: metric_whitelist
       description: |
         List of regexes for metrics to collect. Note that you can only collect metrics starting with "mapr.",
