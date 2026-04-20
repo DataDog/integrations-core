@@ -229,6 +229,22 @@ files:
           value:
             type: number
             default: 1000
+        - name: explained_queries_per_hour_per_query
+          hidden: true
+          description: |
+            Set the maximum number of explain plans to collect per hour per unique query signature.
+            This rate limits EXPLAIN PLAN execution to avoid overhead on frequently executed queries.
+          value:
+            type: number
+            default: 60
+            minimum: 1
+        - name: explained_queries_cache_maxsize
+          hidden: true
+          description: |
+            Set the max size of the cache used for rate limiting explain plan collection.
+          value:
+            type: number
+            default: 5000
         - name: run_sync
           hidden: true
           description: |
