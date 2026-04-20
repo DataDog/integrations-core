@@ -18,7 +18,7 @@ This validates that each integration version is in sync with the [`requirements-
 ddev validate ci
 ```
 
-This validates that all CI entries for integrations are valid. This includes checking if the integration has the correct [Codecov config](https://github.com/DataDog/integrations-core/blob/master/.codecov.yml), and has a valid [CI entry](testing.md#target-enumeration) if it is testable.
+This validates that all CI entries for integrations are valid. This includes checking if the integration has a valid [CI entry](testing.md#target-enumeration) if it is testable.
 
 !!! tip
     Run `ddev validate ci --sync` to resolve most errors.

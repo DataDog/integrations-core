@@ -17,7 +17,7 @@ from ddev.cli.validate.all.github import (
 from ddev.cli.validate.all.orchestrator import ValidationConfig, ValidationResult
 
 CONFIGS = {
-    "ci": ValidationConfig(description="Validate CI configuration and Codecov settings", repo_wide=True),
+    "ci": ValidationConfig(description="Validate CI configuration and code coverage settings", repo_wide=True),
     "config": ValidationConfig(description="Validate default configuration files against spec.yaml"),
     "metadata": ValidationConfig(description="Validate metadata.csv metric definitions"),
 }
@@ -134,7 +134,7 @@ def test_format_pr_comment_all_passed(helpers):
 
         | Validation | Description | Status |
         |---|---|---|
-        | `ci` | Validate CI configuration and Codecov settings | ✅ |
+        | `ci` | Validate CI configuration and code coverage settings | ✅ |
         | `config` | Validate default configuration files against spec.yaml | ✅ |
 
         </details>""")
@@ -160,7 +160,7 @@ def test_format_pr_comment_one_failure_with_target(helpers):
 
         | Validation | Description | Status |
         |---|---|---|
-        | `ci` | Validate CI configuration and Codecov settings | ✅ |
+        | `ci` | Validate CI configuration and code coverage settings | ✅ |
 
         </details>""")
     assert format_pr_comment(results, CONFIGS, "changed", list(results)) == expected
@@ -266,7 +266,7 @@ def test_format_step_summary_all_passed(helpers):
 
         | Validation | Description | Status |
         |---|---|---|
-        | `ci` | Validate CI configuration and Codecov settings | ✅ |
+        | `ci` | Validate CI configuration and code coverage settings | ✅ |
         | `config` | Validate default configuration files against spec.yaml | ✅ |""")
     assert format_step_summary(results, CONFIGS, "changed", list(results)) == expected
 
@@ -281,7 +281,7 @@ def test_format_step_summary_with_failures(helpers):
 
         | Validation | Description | Status |
         |---|---|---|
-        | `ci` | Validate CI configuration and Codecov settings | ✅ |
+        | `ci` | Validate CI configuration and code coverage settings | ✅ |
         | `config` | Validate default configuration files against spec.yaml | ❌ |
 
         Run `ddev validate all changed --fix` to attempt to auto-fix supported validations.""")

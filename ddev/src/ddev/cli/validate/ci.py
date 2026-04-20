@@ -10,33 +10,20 @@ import click
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
-
-def read_file(file, encoding='utf-8'):
-    # type: (str, str) -> str
-    with open(file, 'r', encoding=encoding) as f:
-        return f.read()
+DEFAULT_COVERAGE_THRESHOLD = 75
 
 
-def write_file(file, contents, encoding='utf-8'):
-    with open(file, 'w', encoding=encoding) as f:
-        f.write(contents)
-
-
-def code_coverage_enabled(check_name, app):
+def code_coverage_enabled(check_name: str, app: Application) -> bool:
     if check_name in ('datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader', 'ddev'):
         return True
 
     return app.repo.integrations.get(check_name).is_agent_check
 
 
-def get_coverage_sources(check_name, app):
+def get_coverage_sources(check_name: str, app: Application) -> list[str]:
     package_path = app.repo.integrations.get(check_name).package_directory
     package_dir = package_path.relative_to(app.repo.path)
-    return sorted([str(package_dir.as_posix()), f'{check_name}/tests'])
-
-
-def sort_projects(projects):
-    return sorted(projects.items(), key=lambda item: (item[0] != 'default', item[0]))
+    return sorted([f'{package_dir.as_posix()}/', f'{check_name}/tests/'])
 
 
 @click.command()
@@ -46,9 +33,7 @@ def ci(app: Application, sync: bool):
     """Validate CI infrastructure configuration."""
     import hashlib
     import json
-    import os
     import re
-    from collections import defaultdict
 
     import yaml
 
@@ -237,184 +222,119 @@ def ci(app: Application, sync: bool):
             app.abort('CI configuration is not in sync, try again with the `--sync` flag')
 
     validation_tracker = app.create_validation_tracker('CI configuration validation')
-    error_message = ''
-    warning_message = ''
 
     repo_choice = app.repo.name
     valid_repos = ['core', 'marketplace', 'extras', 'internal']
     if repo_choice not in valid_repos:
         app.abort(f'Unknown repository `{repo_choice}`')
 
-    # marketplace does not have a .codecov.yml file
-    if app.repo.name == 'marketplace':
+    if is_marketplace:
+        validation_tracker.success()
+        validation_tracker.display()
         return
 
-    testable_checks = {integration.name for integration in app.repo.integrations.iter_testable('all')}
+    _validate_code_coverage(app, sync, validation_tracker, repo_choice)
 
-    cached_display_names: defaultdict[str, str] = defaultdict(str)
 
-    codecov_config_relative_path = '.codecov.yml'
+def _validate_code_coverage(
+    app: Application,
+    sync: bool,
+    validation_tracker: Any,
+    repo_choice: str,
+) -> None:
+    import yaml
 
-    path_split = str(codecov_config_relative_path).split('/')
-    codecov_config_path = os.path.join(app.repo.path, *path_split)
-    if not os.path.isfile(codecov_config_path):
-        error_message = 'Unable to find the Codecov config file'
-        validation_tracker.error((repo_choice,), message=error_message)
+    config_filename = 'code-coverage.datadog.yml'
+    config_path = app.repo.path / config_filename
+
+    if not config_path.is_file():
+        validation_tracker.error(
+            (repo_choice,), message=f'Unable to find the code coverage config file: {config_filename}'
+        )
         validation_tracker.display()
         app.abort()
 
-    codecov_config = yaml.safe_load(read_file(codecov_config_path))
-    projects = codecov_config.setdefault('coverage', {}).setdefault('status', {}).setdefault('project', {})
-    defined_checks = set()
+    config = yaml.safe_load(config_path.read_text())
+    if config is None:
+        config = {}
+
+    testable_checks = {integration.name for integration in app.repo.integrations.iter_testable('all')}
+    excluded_jobs = {
+        name for name, conf in app.repo.config.get('/overrides/ci', {}).items() if conf.get('exclude', False)
+    }
+
+    expected_checks = set()
+    for check in testable_checks:
+        if check not in excluded_jobs and code_coverage_enabled(check, app):
+            expected_checks.add(check)
+
+    existing_services = config.get('services') or []
+    existing_service_ids = {s['id'] for s in existing_services if 'id' in s}
+
     success = True
     fixed = False
+    error_message = ''
 
-    for project, data in list(projects.items()):
-        if project == 'default':
+    # Validate existing services have correct paths
+    for service in existing_services:
+        service_id = service.get('id', '')
+        if service_id not in expected_checks:
             continue
 
-        project_flags = data.get('flags', [])
-        if len(project_flags) != 1:
-            success = False
-            error_message += f'Project `{project}` must have exactly one flag\n'
-            continue
-
-        check_name = project_flags[0]
-
-        if check_name in defined_checks:
-            success = False
-            error_message += f'Check `{check_name}` is defined as a flag in more than one project\n'
-            continue
-
-        defined_checks.add(check_name)
-        # Project names cannot contain spaces, see:
-        # https://github.com/DataDog/integrations-core/pull/6760#issuecomment-634976885
-        if check_name in cached_display_names:
-            display_name = cached_display_names[check_name].replace(' ', '_')
-        else:
-            try:
-                integration = app.repo.integrations.get(check_name)
-            except OSError as e:
-                if str(e).startswith('Integration does not exist: '):
-                    continue
-
-                raise
-
-            display_name = integration.display_name
-            display_name = display_name.replace(' ', '_')
-            cached_display_names[check_name] = display_name
-
-        if project != display_name:
-            message = f'Project `{project}` should be called `{display_name}`\n'
-
+        expected_paths = get_coverage_sources(service_id, app)
+        configured_paths = service.get('paths', [])
+        if sorted(configured_paths) != sorted(expected_paths):
+            message = f'Service `{service_id}` has incorrect coverage source paths\n'
             if sync:
                 fixed = True
-                warning_message += message
-                if display_name not in projects:
-                    projects[display_name] = data
-                    del projects[project]
-                app.display_success(f'Renamed project to `{display_name}`\n')
+                service['paths'] = expected_paths
+                app.display_success(f'Configured coverage paths for service `{service_id}`\n')
             else:
                 success = False
                 error_message += message
 
-    # This works because we ensure there is a 1 to 1 correspondence between projects and checks (flags)
-    excluded_jobs = {
-        name for name, config in app.repo.config.get('/overrides/ci', {}).items() if config.get('exclude', False)
-    }
-    missing_projects = testable_checks - set(defined_checks) - excluded_jobs
-
-    not_agent_checks = set()
-    for check in set(missing_projects):
-        if not code_coverage_enabled(check, app):
-            not_agent_checks.add(check)
-            missing_projects.discard(check)
-
-    if missing_projects:
-        num_missing_projects = len(missing_projects)
-        message = (
-            f"Codecov config has {num_missing_projects} missing project{'s' if num_missing_projects > 1 else ''}\n"
-        )
+    missing_services = sorted(expected_checks - existing_service_ids)
+    if missing_services:
+        num_missing = len(missing_services)
+        message = f"Code coverage config has {num_missing} missing service{'s' if num_missing > 1 else ''}\n"
 
         if sync:
             fixed = True
-            warning_message += message
-
-            for missing_check in sorted(missing_projects):
-                display_name = app.repo.integrations.get(missing_check).display_name
-                display_name = display_name.replace(' ', '_')
-                projects[display_name] = {'target': 75, 'flags': [missing_check]}
-                app.display_success(f'Added project `{display_name}`\n')
-        else:
-            success = False
-            error_message += message
-
-    flags = codecov_config.setdefault('flags', {})
-    defined_checks = set()
-
-    for flag, data in list(flags.items()):
-        defined_checks.add(flag)
-
-        expected_coverage_paths = get_coverage_sources(flag, app)
-
-        configured_coverage_paths = data.get('paths', [])
-        if configured_coverage_paths != expected_coverage_paths:
-            message = f'Flag `{flag}` has incorrect coverage source paths\n'
-
-            if sync:
-                fixed = True
-                warning_message += message
-                data['paths'] = expected_coverage_paths
-                app.display_success(f'Configured coverage paths for flag `{flag}`\n')
-            else:
-                success = False
-                error_message += message
-
-        if not data.get('carryforward'):
-            message = f'Flag `{flag}` must have carryforward set to true\n'
-
-            if sync:
-                fixed = True
-                warning_message += message
-                data['carryforward'] = True
-                app.display_success(f'Enabled the carryforward feature for flag `{flag}`\n')
-            else:
-                success = False
-                error_message += message
-
-    missing_flags = testable_checks - set(defined_checks) - excluded_jobs
-    for check in set(missing_flags):
-        if check in not_agent_checks or not code_coverage_enabled(check, app):
-            missing_flags.discard(check)
-
-    if missing_flags:
-        num_missing_flags = len(missing_flags)
-        message = f"Codecov config has {num_missing_flags} missing flag{'s' if num_missing_flags > 1 else ''}\n"
-
-        if sync:
-            fixed = True
-            warning_message += message
-
-            for missing_check in sorted(missing_flags):
-                flags[missing_check] = {'carryforward': True, 'paths': get_coverage_sources(missing_check, app)}
-                app.display_success(f'Added flag `{missing_check}`\n')
+            for check_name in missing_services:
+                existing_services.append(
+                    {
+                        'id': check_name,
+                        'paths': get_coverage_sources(check_name, app),
+                    }
+                )
+                app.display_success(f'Added service `{check_name}`\n')
         else:
             success = False
             error_message += message
 
     if not success:
-        message = 'Try running `ddev validate ci --sync`\n'
-        app.display_info(message)
-        validation_tracker.error((codecov_config_path,), message=error_message)
-
+        app.display_info('Try running `ddev validate ci --sync`\n')
+        validation_tracker.error((str(config_path),), message=error_message)
         validation_tracker.display()
         app.abort()
     elif fixed:
-        codecov_config['coverage']['status']['project'] = dict(sort_projects(projects))
-        codecov_config['flags'] = dict(sorted(flags.items()))
-        output = yaml.safe_dump(codecov_config, default_flow_style=False, sort_keys=False)
-        write_file(codecov_config_path, output)
-        app.display_success(f'Successfully fixed {codecov_config_relative_path}')
+        config['services'] = sorted(existing_services, key=lambda s: s.get('id', ''))
+
+        # Ensure at least one gate exists
+        gates = config.get('gates') or []
+        if not gates:
+            gates.append(
+                {
+                    'type': 'total_coverage_percentage',
+                    'config': {'threshold': DEFAULT_COVERAGE_THRESHOLD},
+                }
+            )
+            config['gates'] = gates
+            app.display_success(f'Added default coverage gate with {DEFAULT_COVERAGE_THRESHOLD}% threshold\n')
+
+        output = yaml.safe_dump(config, default_flow_style=False, sort_keys=False)
+        config_path.write_text(output)
+        app.display_success(f'Successfully fixed {config_filename}')
 
         validation_tracker.success()
         validation_tracker.display()

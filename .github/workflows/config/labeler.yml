@@ -19,7 +19,7 @@ dev/testing:
 - changed-files:
   - any-glob-to-any-file:
     - .github/workflows/**
-    - .codecov.yml
+    - code-coverage.datadog.yml
 dev/tooling:
 - changed-files:
   - any-glob-to-any-file:

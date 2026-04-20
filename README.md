@@ -2,7 +2,7 @@
 
 | | |
 | --- | --- |
-| CI/CD | [![CI - Test][1]][2] [![CI - Coverage][17]][18] |
+| CI/CD | [![CI - Test][1]][2] |
 | Docs | [![Docs - Release][19]][20] |
 | Meta | [![Hatch project][26]][27] [![Linting - Ruff][24]][25] [![Code style - black][21]][22] [![Typing - Mypy][28]][29] [![License - BSD-3-Clause][30]][31] |
 
@@ -41,8 +41,6 @@ For more information on integrations, please reference our [documentation][11] a
 [13]: https://docs.datadoghq.com/help/
 [15]: https://github.com/DataDog/integrations-core/blob/6.2.1/requirements-integration-core.txt
 [16]: https://github.com/DataDog/integrations-core/blob/ea2dfbf1e8859333af4c8db50553eb72a3b466f9/requirements-agent-release.txt
-[17]: https://codecov.io/github/DataDog/integrations-core/coverage.svg?branch=master
-[18]: https://codecov.io/github/DataDog/integrations-core?branch=master
 [19]: https://github.com/DataDog/integrations-core/workflows/docs/badge.svg
 [20]: https://github.com/DataDog/integrations-core/actions?workflow=docs
 [21]: https://img.shields.io/badge/code%20style-black-000000.svg

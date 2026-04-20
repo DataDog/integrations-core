@@ -5,44 +5,6 @@ import pytest
 import yaml
 
 
-def test_exactly_one_flag(ddev, repository, helpers):
-    codecov_yaml = repository.path / '.codecov.yml'
-
-    with codecov_yaml.open(encoding='utf-8') as file:
-        codecov_yaml_info = yaml.safe_load(file)
-
-    codecov_yaml_info['coverage']['status']['project']['ActiveMQ_XML']['flags'].append('test')
-
-    output = yaml.safe_dump(codecov_yaml_info, default_flow_style=False, sort_keys=False)
-    with codecov_yaml.open(mode='w', encoding='utf-8') as file:
-        file.write(output)
-
-    result = ddev("validate", "ci")
-
-    assert result.exit_code == 1, result.output
-    error = "Project `ActiveMQ_XML` must have exactly one flag"
-    assert error in helpers.remove_trailing_spaces(result.output)
-
-
-def test_carryforward_flag(ddev, repository, helpers):
-    codecov_yaml = repository.path / '.codecov.yml'
-
-    with codecov_yaml.open(encoding='utf-8') as file:
-        temp = yaml.safe_load(file)
-
-    temp['flags']['active_directory']['carryforward'] = False
-
-    output = yaml.safe_dump(temp, default_flow_style=False, sort_keys=False)
-    with codecov_yaml.open(mode='w', encoding='utf-8') as file:
-        file.write(output)
-
-    result = ddev("validate", "ci")
-
-    assert result.exit_code == 1, result.output
-    error = "Flag `active_directory` must have carryforward set to true"
-    assert error in helpers.remove_trailing_spaces(result.output)
-
-
 def test_missing_hatch_toml(ddev, repository, helpers):
     import os
 
@@ -56,116 +18,6 @@ def test_missing_hatch_toml(ddev, repository, helpers):
     assert error in helpers.remove_trailing_spaces(result.output)
 
 
-def test_incorrect_project_name(ddev, repository, helpers):
-    codecov_yaml = repository.path / '.codecov.yml'
-    with codecov_yaml.open(encoding='utf-8') as file:
-        codecov_yaml_info = yaml.safe_load(file)
-
-    temp = codecov_yaml_info['coverage']['status']['project']['Active_Directory']
-    codecov_yaml_info['coverage']['status']['project']['active directory'] = temp
-    codecov_yaml_info['coverage']['status']['project'].pop('Active_Directory')
-
-    output = yaml.safe_dump(codecov_yaml_info, default_flow_style=False, sort_keys=False)
-    with codecov_yaml.open(mode='w', encoding='utf-8') as file:
-        file.write(output)
-
-    result = ddev("validate", "ci")
-    assert result.exit_code == 1, result.output
-    error = "Project `active directory` should be called `Active_Directory`"
-    assert error in helpers.remove_trailing_spaces(result.output)
-
-
-def test_check_in_multiple_projects(ddev, repository, helpers):
-    codecov_yaml = repository.path / '.codecov.yml'
-    with codecov_yaml.open(encoding='utf-8') as file:
-        codecov_yaml_info = yaml.safe_load(file)
-
-    codecov_yaml_info['coverage']['status']['project']['Airflow']['flags'] = ['active_directory']
-
-    output = yaml.safe_dump(codecov_yaml_info, default_flow_style=False, sort_keys=False)
-    with codecov_yaml.open(mode='w', encoding='utf-8') as file:
-        file.write(output)
-
-    result = ddev("validate", "ci")
-    assert result.exit_code == 1, result.output
-    error = "Check `active_directory` is defined as a flag in more than one project"
-    assert error in helpers.remove_trailing_spaces(result.output)
-
-
-def test_codecov_missing_projects(ddev, repository, helpers):
-    codecov_yaml = repository.path / '.codecov.yml'
-    with codecov_yaml.open(encoding='utf-8') as file:
-        codecov_yaml_info = yaml.safe_load(file)
-
-    codecov_yaml_info['coverage']['status']['project'].pop('Apache')
-
-    output = yaml.safe_dump(codecov_yaml_info, default_flow_style=False, sort_keys=False)
-    with codecov_yaml.open(mode='w', encoding='utf-8') as file:
-        file.write(output)
-
-    result = ddev("validate", "ci")
-    assert result.exit_code == 1, result.output
-    error = "Codecov config has 1 missing project"
-    assert error in helpers.remove_trailing_spaces(result.output)
-
-
-def test_incorrect_coverage_source_path(ddev, repository, helpers):
-    codecov_yaml = repository.path / '.codecov.yml'
-    with codecov_yaml.open(encoding='utf-8') as file:
-        codecov_yaml_info = yaml.safe_load(file)
-
-    codecov_yaml_info['flags']['active_directory']['paths'] = [
-        'active_directory/datadog_checks/test',
-        'active_directory/tests',
-    ]
-
-    output = yaml.safe_dump(codecov_yaml_info, default_flow_style=False, sort_keys=False)
-    with codecov_yaml.open(mode='w', encoding='utf-8') as file:
-        file.write(output)
-
-    result = ddev("validate", "ci")
-    assert result.exit_code == 1, result.output
-    error = "Flag `active_directory` has incorrect coverage source paths"
-    assert error in helpers.remove_trailing_spaces(result.output)
-
-
-def test_codecov_missing_flag(ddev, repository, helpers):
-    codecov_yaml = repository.path / '.codecov.yml'
-    with codecov_yaml.open(encoding='utf-8') as file:
-        codecov_yaml_info = yaml.safe_load(file)
-
-    codecov_yaml_info['flags'].pop('active_directory')
-
-    output = yaml.safe_dump(codecov_yaml_info, default_flow_style=False, sort_keys=False)
-    with codecov_yaml.open(mode='w', encoding='utf-8') as file:
-        file.write(output)
-
-    result = ddev("validate", "ci")
-    assert result.exit_code == 1, result.output
-    error = "Codecov config has 1 missing flag"
-    assert error in helpers.remove_trailing_spaces(result.output)
-
-
-# TODO We do not have an off the shelf fixture to generate a marketplace repository
-@pytest.mark.parametrize(
-    'repository_name, repository_flag, expected_exit_code, expected_output',
-    [
-        pytest.param('core', '-c', 1, 'Unable to find the Codecov config file', id='integrations-core'),
-    ],
-)
-def test_codecov_file_missing(
-    ddev, repository, helpers, config_file, repository_name, repository_flag, expected_exit_code, expected_output
-):
-    config_file.model.repos[repository_name] = str(repository.path)
-    config_file.save()
-
-    (repository.path / '.codecov.yml').unlink()
-
-    result = ddev(repository_flag, "validate", "ci")
-    assert result.exit_code == expected_exit_code, result.output
-    assert expected_output in helpers.remove_trailing_spaces(result.output)
-
-
 def test_validate_ci_success(ddev, helpers):
     result = ddev('validate', 'ci')
     assert result.exit_code == 0, result.output
@@ -176,6 +28,69 @@ def test_validate_ci_success(ddev, helpers):
         Passed: 1
         """
     )
+
+
+def _remove_service(config_path):
+    with config_path.open(encoding='utf-8') as f:
+        config = yaml.safe_load(f)
+
+    config['services'] = [s for s in config.get('services', []) if s.get('id') != 'apache']
+
+    with config_path.open(mode='w', encoding='utf-8') as f:
+        yaml.safe_dump(config, f, default_flow_style=False, sort_keys=False)
+
+
+def _set_wrong_paths(config_path):
+    with config_path.open(encoding='utf-8') as f:
+        config = yaml.safe_load(f)
+
+    for service in config.get('services', []):
+        if service.get('id') == 'active_directory':
+            service['paths'] = ['wrong/path/']
+            break
+
+    with config_path.open(mode='w', encoding='utf-8') as f:
+        yaml.safe_dump(config, f, default_flow_style=False, sort_keys=False)
+
+
+@pytest.mark.parametrize(
+    'corrupt_config, expected_error',
+    [
+        pytest.param(_remove_service, "missing service", id='missing_services'),
+        pytest.param(
+            _set_wrong_paths,
+            "Service `active_directory` has incorrect coverage source paths",
+            id='incorrect_paths',
+        ),
+    ],
+)
+def test_code_coverage_config(ddev, repository, helpers, corrupt_config, expected_error):
+    result = ddev("validate", "ci", "--sync")
+    assert result.exit_code == 0, result.output
+
+    config_path = repository.path / 'code-coverage.datadog.yml'
+    corrupt_config(config_path)
+
+    result = ddev("validate", "ci")
+    assert result.exit_code == 1, f"Expected validation to detect corrupted config: {result.output}"
+    assert expected_error in helpers.remove_trailing_spaces(result.output)
+
+    result = ddev("validate", "ci", "--sync")
+    assert result.exit_code == 0, f"Expected --sync to fix corrupted config: {result.output}"
+
+    result = ddev("validate", "ci")
+    assert result.exit_code == 0, f"Expected validation to pass after sync: {result.output}"
+
+
+def test_code_coverage_file_missing(ddev, repository, helpers, config_file):
+    config_file.model.repos['core'] = str(repository.path)
+    config_file.save()
+
+    (repository.path / 'code-coverage.datadog.yml').unlink()
+
+    result = ddev("-c", "validate", "ci")
+    assert result.exit_code == 1, result.output
+    assert "Unable to find the code coverage config file" in helpers.remove_trailing_spaces(result.output)
 
 
 @pytest.mark.parametrize(
