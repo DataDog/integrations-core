@@ -12,6 +12,7 @@ Public surface:
 """
 from __future__ import annotations
 
+import ast
 import re
 import tomllib
 from collections.abc import Iterator
@@ -180,3 +181,25 @@ def scan_dockerfile(path: Path, contexts: list[dict[str, str]]) -> Iterator[str]
                 if resolved and resolved not in seen:
                     seen.add(resolved)
                     yield resolved
+
+
+def scan_python_fixture(path: Path) -> Iterator[str]:
+    """Yield string-literal `image=` values from a Python file's AST."""
+    try:
+        tree = ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+    except (SyntaxError, UnicodeDecodeError):
+        return
+    seen: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        for kw in node.keywords:
+            if (
+                kw.arg == 'image'
+                and isinstance(kw.value, ast.Constant)
+                and isinstance(kw.value.value, str)
+            ):
+                value = kw.value.value
+                if value and value not in seen:
+                    seen.add(value)
+                    yield value

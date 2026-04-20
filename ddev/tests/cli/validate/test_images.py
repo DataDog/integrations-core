@@ -10,6 +10,7 @@ from ddev.cli.validate.images_utils import (
     parse_env_file,
     scan_compose_file,
     scan_dockerfile,
+    scan_python_fixture,
     substitute_env_vars,
 )
 
@@ -162,3 +163,34 @@ def test_scan_dockerfile_multistage(tmp_path):
     df = tmp_path / 'Dockerfile'
     df.write_text('FROM alpine:3.20 AS build\nFROM debian:12 AS run\n')
     assert sorted(scan_dockerfile(df, contexts=[{}])) == ['alpine:3.20', 'debian:12']
+
+
+def test_scan_python_docker_run_kwarg(tmp_path):
+    src = tmp_path / 'conftest.py'
+    src.write_text(
+        'from datadog_checks.dev import docker_run\n'
+        'def test_x():\n'
+        '    with docker_run(compose_file="x", image="mysql:8.0"):\n'
+        '        pass\n'
+    )
+    assert list(scan_python_fixture(src)) == ['mysql:8.0']
+
+
+def test_scan_python_ignores_dynamic(tmp_path):
+    src = tmp_path / 'conftest.py'
+    src.write_text(
+        'img = "mysql:" + "8.0"\n'
+        'def test_x(image):\n'
+        '    with docker_run(image=img):\n'
+        '        pass\n'
+    )
+    assert list(scan_python_fixture(src)) == []
+
+
+def test_scan_python_multiple_calls(tmp_path):
+    src = tmp_path / 'conftest.py'
+    src.write_text(
+        'def a(): return docker_run(image="mysql:8.0")\n'
+        'def b(): return docker_run(image="redis:7.2")\n'
+    )
+    assert sorted(scan_python_fixture(src)) == ['mysql:8.0', 'redis:7.2']
