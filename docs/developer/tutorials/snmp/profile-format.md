@@ -53,15 +53,19 @@ _(Optional)_
 
 This field can be used to include metrics and metric tags from other so-called _base profiles_. Base profiles can derive from other base profiles to build a hierarchy of reusable profile mixins.
 
+For device **`metadata`**, **`extends`** order is **first wins, later fallbacks**—same model as [Value from multiple OIDs (symbols)](#value-from-multiple-oids-symbols).
+
 !!! important
     All device profiles should extend from the `_base.yaml` profile, which defines items that should be collected for all devices.
+    List **`_base.yaml` last** in **`extends`** so vendor-specific fragments merged earlier override shared metadata from base.
 
 Example:
 
 ```yaml
 extends:
-  - _base.yaml
+  - device-specific-profile.yaml  # Vendor or device overrides (metadata, metrics, …).
   - _generic-if.yaml  # Include basic metrics from IF-MIB.
+  - _base.yaml
 ```
 
 ### `metrics`
@@ -608,6 +612,7 @@ metadata:
 
 All OID values are fetched, even if they might not be used in the end. In the example above, both `1.3.6.100.0` and `1.3.6.101.0` are retrieved.
 
+Merged **`metadata`** across **`extends`** follows the same first-wins / later-fallback ordering; see [`extends`](#extends).
 
 ### Symbol modifiers
 
