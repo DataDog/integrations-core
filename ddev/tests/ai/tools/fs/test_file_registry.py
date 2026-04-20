@@ -5,6 +5,9 @@ import pytest
 
 from ddev.ai.tools.fs.file_registry import FileRegistry
 
+AGENT_A = "agent-a"
+AGENT_B = "agent-b"
+
 
 @pytest.fixture
 def registry() -> FileRegistry:
@@ -26,13 +29,20 @@ def registry() -> FileRegistry:
 def test_is_known(registry: FileRegistry, tmp_path, record, expected) -> None:
     path = str(tmp_path / "file.txt")
     if record:
-        registry.record(path, "hello")
-    assert registry.is_known(path) is expected
+        registry.record(AGENT_A, path, "hello")
+    assert registry.is_known(AGENT_A, path) is expected
 
 
 def test_is_known_different_path(registry: FileRegistry, tmp_path) -> None:
-    registry.record(str(tmp_path / "other.txt"), "hello")
-    assert registry.is_known(str(tmp_path / "file.txt")) is False
+    registry.record(AGENT_A, str(tmp_path / "other.txt"), "hello")
+    assert registry.is_known(AGENT_A, str(tmp_path / "file.txt")) is False
+
+
+def test_is_known_is_scoped_to_agent(registry: FileRegistry, tmp_path) -> None:
+    path = str(tmp_path / "file.txt")
+    registry.record(AGENT_A, path, "hello")
+    assert registry.is_known(AGENT_A, path) is True
+    assert registry.is_known(AGENT_B, path) is False
 
 
 # ---------------------------------------------------------------------------
@@ -51,8 +61,14 @@ def test_is_known_different_path(registry: FileRegistry, tmp_path) -> None:
 def test_verify(registry: FileRegistry, tmp_path, recorded_content, verify_content, expected) -> None:
     path = str(tmp_path / "file.txt")
     if recorded_content is not None:
-        registry.record(path, recorded_content)
-    assert registry.verify(path, verify_content) is expected
+        registry.record(AGENT_A, path, recorded_content)
+    assert registry.verify(AGENT_A, path, verify_content) is expected
+
+
+def test_verify_fails_for_different_agent(registry: FileRegistry, tmp_path) -> None:
+    path = str(tmp_path / "file.txt")
+    registry.record(AGENT_A, path, "hello")
+    assert registry.verify(AGENT_B, path, "hello") is False
 
 
 # ---------------------------------------------------------------------------
@@ -60,13 +76,24 @@ def test_verify(registry: FileRegistry, tmp_path, recorded_content, verify_conte
 # ---------------------------------------------------------------------------
 
 
-def test_record_overwrites_previous_hash(registry: FileRegistry, tmp_path) -> None:
+def test_record_overwrites_previous_hash_within_agent(registry: FileRegistry, tmp_path) -> None:
     path = str(tmp_path / "file.txt")
-    registry.record(path, "old")
-    registry.record(path, "new")
+    registry.record(AGENT_A, path, "old")
+    registry.record(AGENT_A, path, "new")
 
-    assert registry.verify(path, "new") is True
-    assert registry.verify(path, "old") is False
+    assert registry.verify(AGENT_A, path, "new") is True
+    assert registry.verify(AGENT_A, path, "old") is False
+
+
+def test_record_does_not_cross_agents(registry: FileRegistry, tmp_path) -> None:
+    path = str(tmp_path / "file.txt")
+    registry.record(AGENT_A, path, "from-a")
+    registry.record(AGENT_B, path, "from-b")
+
+    assert registry.verify(AGENT_A, path, "from-a") is True
+    assert registry.verify(AGENT_A, path, "from-b") is False
+    assert registry.verify(AGENT_B, path, "from-b") is True
+    assert registry.verify(AGENT_B, path, "from-a") is False
 
 
 # ---------------------------------------------------------------------------
@@ -75,19 +102,18 @@ def test_record_overwrites_previous_hash(registry: FileRegistry, tmp_path) -> No
 
 
 def test_normalize_relative_and_absolute_are_same_key(registry: FileRegistry, tmp_path, monkeypatch) -> None:
-    # Make tmp_path the cwd so that a relative path resolves to the same absolute path
     monkeypatch.chdir(tmp_path)
 
     abs_path = str(tmp_path / "file.txt")
     rel_path = "file.txt"
 
-    registry.record(abs_path, "hello")
-    assert registry.is_known(rel_path) is True
-    assert registry.verify(rel_path, "hello") is True
+    registry.record(AGENT_A, abs_path, "hello")
+    assert registry.is_known(AGENT_A, rel_path) is True
+    assert registry.verify(AGENT_A, rel_path, "hello") is True
 
 
 # ---------------------------------------------------------------------------
-# lock_for
+# lock_for — shared across agents so concurrent writes serialize on the path
 # ---------------------------------------------------------------------------
 
 

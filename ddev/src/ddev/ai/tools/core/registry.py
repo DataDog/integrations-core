@@ -1,29 +1,50 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
+from dataclasses import dataclass
+from importlib import import_module
 
 from anthropic.types import ToolParam
+
+from ddev.ai.tools.fs.file_registry import FileRegistry
 
 from .protocol import ToolProtocol
 from .types import ToolResult
 
-_TOOL_NAMES: list[str] = [
-    "read_file",
-    "create_file",
-    "edit_file",
-    "append_file",
-    "grep",
-    "list_files",
-    "mkdir",
-    "http_get",
-    "ddev_create",
-    "ddev_test",
-    "ddev_env_show",
-    "ddev_env_start",
-    "ddev_env_stop",
-    "ddev_env_test",
-    "ddev_release_changelog",
-]
+TOOLS_PACKAGE = "ddev.ai.tools"
+
+
+@dataclass(frozen=True)
+class ToolSpec:
+    """Lazy pointer to a tool class and how to construct it.
+
+    ``module`` is relative to ``TOOLS_PACKAGE`` (e.g. ``"fs.read_file"``).
+    """
+
+    module: str
+    cls: str
+    requires_file_registry: bool = False
+
+
+TOOL_MANIFEST: dict[str, ToolSpec] = {
+    "read_file": ToolSpec("fs.read_file", "ReadFileTool", requires_file_registry=True),
+    "create_file": ToolSpec("fs.create_file", "CreateFileTool", requires_file_registry=True),
+    "edit_file": ToolSpec("fs.edit_file", "EditFileTool", requires_file_registry=True),
+    "append_file": ToolSpec("fs.append_file", "AppendFileTool", requires_file_registry=True),
+    "grep": ToolSpec("shell.grep", "GrepTool"),
+    "list_files": ToolSpec("shell.list_files", "ListFilesTool"),
+    "mkdir": ToolSpec("fs.mkdir", "MkdirTool", requires_file_registry=True),
+    "http_get": ToolSpec("http.http_get", "HttpGetTool"),
+    "ddev_create": ToolSpec("shell.ddev.create", "DdevCreateTool"),
+    "ddev_test": ToolSpec("shell.ddev.ddev_test", "DdevTestTool"),
+    "ddev_env_show": ToolSpec("shell.ddev.env_show", "DdevEnvShowTool"),
+    "ddev_env_start": ToolSpec("shell.ddev.env_start", "DdevEnvStartTool"),
+    "ddev_env_stop": ToolSpec("shell.ddev.env_stop", "DdevEnvStopTool"),
+    "ddev_env_test": ToolSpec("shell.ddev.env_test", "DdevEnvTestTool"),
+    "ddev_release_changelog": ToolSpec("shell.ddev.release_changelog", "DdevReleaseChangelogTool"),
+}
 
 
 class ToolRegistry:
@@ -35,67 +56,34 @@ class ToolRegistry:
     @staticmethod
     def available_tool_names() -> list[str]:
         """Return all tool names that from_names can resolve."""
-        return list(_TOOL_NAMES)
+        return list(TOOL_MANIFEST)
 
     @classmethod
-    def from_names(cls, tool_names: list[str]) -> "ToolRegistry":
+    def from_names(
+        cls,
+        tool_names: list[str],
+        *,
+        agent_id: str,
+        file_registry: FileRegistry | None = None,
+    ) -> ToolRegistry:
         """Build a ToolRegistry from a list of tool name strings.
 
-        All file-system tools in the same registry share a single FileRegistry.
+        The file_registry is expected to be shared across all agents in a run so
+        that the access policy applies globally; hashes inside it are partitioned
+        by agent_id so each agent must still read-before-write on its own.
+        A new (unshared) FileRegistry is created if one is not supplied.
         """
-        from ddev.ai.tools.fs.append_file import AppendFileTool
-        from ddev.ai.tools.fs.create_file import CreateFileTool
-        from ddev.ai.tools.fs.edit_file import EditFileTool
-        from ddev.ai.tools.fs.file_registry import FileRegistry
-        from ddev.ai.tools.fs.read_file import ReadFileTool
-        from ddev.ai.tools.http.http_get import HttpGetTool
-        from ddev.ai.tools.shell.ddev.create import DdevCreateTool
-        from ddev.ai.tools.shell.ddev.ddev_test import DdevTestTool
-        from ddev.ai.tools.shell.ddev.env_show import DdevEnvShowTool
-        from ddev.ai.tools.shell.ddev.env_start import DdevEnvStartTool
-        from ddev.ai.tools.shell.ddev.env_stop import DdevEnvStopTool
-        from ddev.ai.tools.shell.ddev.env_test import DdevEnvTestTool
-        from ddev.ai.tools.shell.ddev.release_changelog import DdevReleaseChangelogTool
-        from ddev.ai.tools.shell.grep import GrepTool
-        from ddev.ai.tools.shell.list_files import ListFilesTool
-        from ddev.ai.tools.shell.mkdir import MkdirTool
-
-        file_registry = FileRegistry()
         tools: list[ToolProtocol] = []
+        shared_registry = file_registry if file_registry is not None else FileRegistry()
         for name in tool_names:
-            match name:
-                case "read_file":
-                    tools.append(ReadFileTool(file_registry))
-                case "create_file":
-                    tools.append(CreateFileTool(file_registry))
-                case "edit_file":
-                    tools.append(EditFileTool(file_registry))
-                case "append_file":
-                    tools.append(AppendFileTool(file_registry))
-                case "grep":
-                    tools.append(GrepTool())
-                case "list_files":
-                    tools.append(ListFilesTool())
-                case "mkdir":
-                    tools.append(MkdirTool())
-                case "http_get":
-                    tools.append(HttpGetTool())
-                case "ddev_create":
-                    tools.append(DdevCreateTool())
-                case "ddev_test":
-                    tools.append(DdevTestTool())
-                case "ddev_env_show":
-                    tools.append(DdevEnvShowTool())
-                case "ddev_env_start":
-                    tools.append(DdevEnvStartTool())
-                case "ddev_env_stop":
-                    tools.append(DdevEnvStopTool())
-                case "ddev_env_test":
-                    tools.append(DdevEnvTestTool())
-                case "ddev_release_changelog":
-                    tools.append(DdevReleaseChangelogTool())
-                case _:
-                    raise ValueError(f"Unknown tool name: {name!r}")
+            spec = TOOL_MANIFEST.get(name)
+            if spec is None:
+                raise ValueError(f"Unknown tool name: {name!r}")
+            tool_cls = getattr(import_module(f"{TOOLS_PACKAGE}.{spec.module}"), spec.cls)
+            if spec.requires_file_registry:
+                tools.append(tool_cls(shared_registry, agent_id))
+            else:
+                tools.append(tool_cls())
         return cls(tools)
 
     @property

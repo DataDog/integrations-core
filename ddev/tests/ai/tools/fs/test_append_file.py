@@ -9,9 +9,11 @@ from ddev.ai.tools.fs.append_file import AppendFileTool
 from ddev.ai.tools.fs.create_file import CreateFileTool
 from ddev.ai.tools.fs.file_registry import FileRegistry
 
+from .conftest import AGENT_ID
+
 
 def test_tool_name(registry: FileRegistry) -> None:
-    assert AppendFileTool(registry).name == "append_file"
+    assert AppendFileTool(registry, AGENT_ID).name == "append_file"
 
 
 @pytest.mark.parametrize(
@@ -76,7 +78,7 @@ async def test_append_file_updates_registry(append_tool: AppendFileTool, registr
     await append_tool.run({"path": str(known_file), "content": "extra\n"})
 
     new_content = known_file.read_text(encoding="utf-8")
-    assert registry.verify(str(known_file), new_content) is True
+    assert registry.verify(AGENT_ID, str(known_file), new_content) is True
 
 
 async def test_append_file_oserror_on_write(append_tool: AppendFileTool, registry: FileRegistry, known_file) -> None:
@@ -89,4 +91,4 @@ async def test_append_file_oserror_on_write(append_tool: AppendFileTool, registr
     assert result.error is not None
     # File must be untouched and registry must still reflect the original content
     assert known_file.read_text(encoding="utf-8") == original_content
-    assert registry.verify(str(known_file), original_content) is True
+    assert registry.verify(AGENT_ID, str(known_file), original_content) is True

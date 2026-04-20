@@ -7,7 +7,6 @@ import pytest
 
 from ddev.ai.tools.shell.grep import GrepInput, GrepTool
 from ddev.ai.tools.shell.list_files import ListFilesInput, ListFilesTool
-from ddev.ai.tools.shell.mkdir import MkdirInput, MkdirTool
 
 # ---------------------------------------------------------------------------
 # Tool metadata
@@ -19,7 +18,6 @@ from ddev.ai.tools.shell.mkdir import MkdirInput, MkdirTool
     [
         (GrepTool, "grep", 30),
         (ListFilesTool, "list_files", 30),
-        (MkdirTool, "mkdir", 5),
     ],
 )
 def test_tool_meta(tool_cls, expected_name, expected_timeout):
@@ -97,18 +95,3 @@ def test_list_files_cmd_non_recursive(list_files_tool: ListFilesTool):
 def test_list_files_cmd_recursive(list_files_tool: ListFilesTool):
     cmd = list_files_tool.cmd(ListFilesInput(path="/var", recursive=True))
     assert cmd == ["find", "/var", "-mindepth", "1"]
-
-
-# ---------------------------------------------------------------------------
-# MkdirTool
-# ---------------------------------------------------------------------------
-
-
-@pytest.fixture
-def mkdir_tool() -> MkdirTool:
-    return MkdirTool()
-
-
-def test_mkdir_cmd(mkdir_tool: MkdirTool):
-    assert mkdir_tool.cmd(MkdirInput(path="/a/b/c")) == ["mkdir", "-p", "/a/b/c"]
-    assert mkdir_tool.cmd(MkdirInput(path="/my dir/sub dir")) == ["mkdir", "-p", "/my dir/sub dir"]

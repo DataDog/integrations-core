@@ -16,7 +16,7 @@ from ddev.ai.tools.core.registry import ToolRegistry
 from .conftest import MockAgent, make_agent_factory, make_response, resolve_key
 
 
-def _empty_registry_from_names(cls, names):
+def _empty_registry_from_names(cls, names, *, agent_id, file_registry=None):
     return ToolRegistry([])
 
 
