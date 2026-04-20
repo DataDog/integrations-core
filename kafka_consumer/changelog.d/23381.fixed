@@ -1,0 +1,1 @@
+Lower log level from WARN to DEBUG for the message emitted when a consumer group has offsets for a partition but no stored highwater offset (typically during leader failover).
