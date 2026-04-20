@@ -5,7 +5,12 @@ from __future__ import annotations
 
 import pytest
 
-from ddev.cli.validate.images_utils import hatch_contexts, parse_env_file, substitute_env_vars
+from ddev.cli.validate.images_utils import (
+    hatch_contexts,
+    parse_env_file,
+    scan_compose_file,
+    substitute_env_vars,
+)
 
 
 def test_images_command_registered(fake_repo, ddev):
@@ -81,3 +86,48 @@ def test_hatch_contexts_matrix_expansion(tmp_path):
 
 def test_hatch_contexts_missing_file(tmp_path):
     assert hatch_contexts(tmp_path / 'absent.toml') == [{}]
+
+
+def test_scan_compose_plain(tmp_path):
+    compose = tmp_path / 'docker-compose.yaml'
+    compose.write_text(
+        'services:\n'
+        '  redis:\n'
+        '    image: redis:7.2\n'
+    )
+    refs = list(scan_compose_file(compose, contexts=[{}]))
+    assert sorted(refs) == ['redis:7.2']
+
+
+def test_scan_compose_env_var_with_hatch_matrix(tmp_path):
+    compose = tmp_path / 'docker-compose.yaml'
+    compose.write_text(
+        'services:\n'
+        '  postgres:\n'
+        '    image: "postgres:${POSTGRES_IMAGE}"\n'
+    )
+    contexts = [{'POSTGRES_IMAGE': '15'}, {'POSTGRES_IMAGE': '16'}]
+    refs = list(scan_compose_file(compose, contexts=contexts))
+    assert sorted(refs) == ['postgres:15', 'postgres:16']
+
+
+def test_scan_compose_inline_default(tmp_path):
+    compose = tmp_path / 'docker-compose.yaml'
+    compose.write_text(
+        'services:\n'
+        '  pg:\n'
+        '    image: "postgres:${POSTGRES_IMAGE:-14}"\n'
+    )
+    refs = list(scan_compose_file(compose, contexts=[{}]))
+    assert refs == ['postgres:14']
+
+
+def test_scan_compose_unresolved_is_skipped(tmp_path):
+    compose = tmp_path / 'docker-compose.yaml'
+    compose.write_text(
+        'services:\n'
+        '  x:\n'
+        '    image: "${MYSTERY_IMAGE}"\n'
+    )
+    refs = list(scan_compose_file(compose, contexts=[{}]))
+    assert refs == []

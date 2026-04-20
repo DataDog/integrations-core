@@ -14,8 +14,11 @@ from __future__ import annotations
 
 import re
 import tomllib
+from collections.abc import Iterator
 from itertools import product
 from pathlib import Path
+
+import yaml
 
 _ENV_VAR_RE = re.compile(
     r'''
@@ -126,3 +129,29 @@ def _override_env_var_name(overrides: dict, matrix_key: str) -> str | None:
         if isinstance(name, str):
             return name
     return None
+
+
+def scan_compose_file(path: Path, contexts: list[dict[str, str]]) -> Iterator[str]:
+    """Yield resolved `image:tag` strings from a docker-compose file.
+
+    Unresolved references are skipped silently at this layer; the aggregator
+    is responsible for surfacing warnings.
+    """
+    try:
+        data = yaml.safe_load(path.read_text(encoding='utf-8')) or {}
+    except yaml.YAMLError:
+        return
+
+    services = data.get('services') or {}
+    seen: set[str] = set()
+    for service in services.values():
+        if not isinstance(service, dict):
+            continue
+        raw = service.get('image')
+        if not isinstance(raw, str):
+            continue
+        for ctx in contexts:
+            resolved = substitute_env_vars(raw, ctx)
+            if resolved is not None and resolved not in seen:
+                seen.add(resolved)
+                yield resolved
