@@ -122,10 +122,10 @@ def run_profile_check(recording_name, profile_name=None):
 @pytest.mark.parametrize(
     'definition_file, equivalent_definition',
     [
-        pytest.param('_base_cisco.yaml', {'extends': ['_base.yaml', '_cisco-generic.yaml']}, id='generic'),
+        pytest.param('_base_cisco.yaml', {'extends': ['_cisco-generic.yaml', '_base.yaml']}, id='generic'),
         pytest.param(
             '_base_cisco_voice.yaml',
-            {'extends': ['_base.yaml', '_cisco-generic.yaml', '_cisco-voice.yaml']},
+            {'extends': ['_cisco-generic.yaml', '_cisco-voice.yaml', '_base.yaml']},
             id='voice',
         ),
     ],
