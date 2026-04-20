@@ -6,11 +6,13 @@ from __future__ import annotations
 import pytest
 
 from ddev.cli.validate.images_utils import (
+    classify,
     hatch_contexts,
     parse_env_file,
     scan_compose_file,
     scan_dockerfile,
     scan_python_fixture,
+    split_ref,
     substitute_env_vars,
 )
 
@@ -194,3 +196,30 @@ def test_scan_python_multiple_calls(tmp_path):
         'def b(): return docker_run(image="redis:7.2")\n'
     )
     assert sorted(scan_python_fixture(src)) == ['mysql:8.0', 'redis:7.2']
+
+
+@pytest.mark.parametrize(
+    'ref, expected',
+    [
+        ('redis:7.2', ('redis', '7.2')),
+        ('registry.ddbuild.io/dockerhub/redis:7.2', ('registry.ddbuild.io/dockerhub/redis', '7.2')),
+        ('alpine', ('alpine', 'latest')),
+        ('host:5000/app:1.2.3', ('host:5000/app', '1.2.3')),
+    ],
+)
+def test_split_ref(ref, expected):
+    assert split_ref(ref) == expected
+
+
+def test_classify_mirrored_true():
+    prefixes = ['registry.ddbuild.io/dockerhub/']
+    assert classify('registry.ddbuild.io/dockerhub/redis', prefixes) is True
+
+
+def test_classify_mirrored_false():
+    prefixes = ['registry.ddbuild.io/dockerhub/']
+    assert classify('redis', prefixes) is False
+
+
+def test_classify_empty_prefix_list():
+    assert classify('anything', []) is False

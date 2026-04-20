@@ -203,3 +203,23 @@ def scan_python_fixture(path: Path) -> Iterator[str]:
                 if value and value not in seen:
                     seen.add(value)
                     yield value
+
+
+def split_ref(ref: str) -> tuple[str, str]:
+    """Split an image reference into (image, tag). Untagged refs get 'latest'.
+
+    Handles `host:port/path:tag` by distinguishing a port from a tag:
+    the tag never contains a '/'.
+    """
+    last_colon = ref.rfind(':')
+    if last_colon == -1:
+        return ref, 'latest'
+    candidate_tag = ref[last_colon + 1:]
+    if '/' in candidate_tag:
+        return ref, 'latest'
+    return ref[:last_colon], candidate_tag
+
+
+def classify(image: str, mirror_prefixes: list[str]) -> bool:
+    """True when `image` starts with any configured mirror prefix."""
+    return any(image.startswith(prefix) for prefix in mirror_prefixes)
