@@ -222,9 +222,6 @@ XML_PLAN_OBFUSCATION_ATTRS = frozenset(
     }
 )
 
-XML_PLAN_PARSER = ET.XMLParser(resolve_entities=False, load_dtd=False, no_network=True)
-
-
 def agent_check_getter(self):
     return self._check
 
@@ -238,7 +235,8 @@ def obfuscate_xml_plan(raw_plan, obfuscator_options=None):
     Obfuscates SQL text & Parameters from the provided SQL Server XML Plan
     Also strips unnecessary whitespace
     """
-    tree = ET.fromstring(raw_plan, parser=XML_PLAN_PARSER)
+    parser = ET.XMLParser(resolve_entities=False, load_dtd=False, no_network=True)
+    tree = ET.fromstring(raw_plan, parser=parser)
     for e in tree.iter():
         if e.text:
             e.text = e.text.strip()
