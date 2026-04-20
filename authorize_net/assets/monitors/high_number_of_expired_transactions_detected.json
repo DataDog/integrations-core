@@ -8,7 +8,7 @@
 		"id": 156179306,
 		"name": "High number of expired transactions detected",
 		"type": "log alert",
-		"query": "logs(\"source:authorize-net service:transaction @log.transactionStatus:expired\").index(\"*\").rollup(\"cardinality\", \"@log.transId\").last(\"1d\") > 20",
+		"query": "logs(\"source:authorize-net @log.transactionStatus:expired\").index(\"*\").rollup(\"cardinality\", \"@log.transId\").last(\"1d\") > 20",
 		"message": "{{#is_alert}}\nAn expired transaction in Authorize.Net is one that was authorized but not captured within 30 days.\n\nA high number of expired transactions has been detected. This issue requires immediate attention to ensure proper resolution and avoid customer dissatisfaction.\n{{/is_alert}}",
 		"tags": [
 			"integration:authorize-net"
