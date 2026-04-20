@@ -222,6 +222,7 @@ XML_PLAN_OBFUSCATION_ATTRS = frozenset(
     }
 )
 
+
 def agent_check_getter(self):
     return self._check
 
