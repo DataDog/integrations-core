@@ -243,6 +243,7 @@ __pycache__ = false
 # removed.
 # This is a temporary fix while we implement a metadata.json file that we can add to each integration
 # that replaces the manifest.
+# Used here: https://github.com/DataDog/datadog-agent/blob/main/tasks/agent.py
 # Use manifest-like platforms
 [overrides.manifest.platforms]
 krakend = ["linux", "windows", "mac_os"]
