@@ -1,0 +1,1 @@
+updates the FCI metric collection so that we can still report FCI metrics without needing a cluster name.
