@@ -8,9 +8,11 @@ import pytest
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.fs.read_file import ReadFileTool
 
+from .conftest import AGENT_ID
+
 
 def test_tool_name(registry: FileRegistry) -> None:
-    assert ReadFileTool(registry).name == "read_file"
+    assert ReadFileTool(registry, AGENT_ID).name == "read_file"
 
 
 async def test_read_file_success(read_tool: ReadFileTool, tmp_path) -> None:
@@ -28,7 +30,7 @@ async def test_read_registers_unknown_file(read_tool: ReadFileTool, registry: Fi
     f.write_text("content", encoding="utf-8")
     await read_tool.run({"path": str(f)})
 
-    assert registry.is_known(str(f)) is True
+    assert registry.is_known(AGENT_ID, str(f)) is True
 
 
 async def test_read_file_missing_file(read_tool: ReadFileTool, tmp_path) -> None:

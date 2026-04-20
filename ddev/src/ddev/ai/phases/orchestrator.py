@@ -14,6 +14,8 @@ from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import FlowConfig, FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.react.callbacks import CallbackSet
+from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
+from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 
@@ -47,6 +49,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         anthropic_client: anthropic.AsyncAnthropic,
         callback_sets: list[CallbackSet] | None = None,
         grace_period: float = 10,
+        file_access_policy: FileAccessPolicy | None = None,
     ) -> None:
         super().__init__(logger=logging.getLogger(__name__), grace_period=grace_period)
         self._flow_yaml_path = flow_yaml_path
@@ -57,6 +60,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._phase_registry = PhaseRegistry()
         self._failed_phase: str | None = None
         self._failed_error: str | None = None
+        self._file_registry = FileRegistry(policy=file_access_policy)
 
     async def on_initialize(self) -> None:
         """Discover custom phases, parse flow.yaml, construct phases, submit PhaseTrigger."""
@@ -98,6 +102,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 flow_variables=config.variables,
                 config_dir=config_dir,
                 callback_sets=self._callback_sets,
+                file_registry=self._file_registry,
             )
 
             self.register_processor(phase, [PhaseTrigger])

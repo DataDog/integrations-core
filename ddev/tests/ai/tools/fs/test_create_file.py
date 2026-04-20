@@ -6,9 +6,11 @@ from unittest.mock import patch
 from ddev.ai.tools.fs.create_file import CreateFileTool
 from ddev.ai.tools.fs.file_registry import FileRegistry
 
+from .conftest import AGENT_ID
+
 
 def test_tool_name(registry: FileRegistry) -> None:
-    assert CreateFileTool(registry).name == "create_file"
+    assert CreateFileTool(registry, AGENT_ID).name == "create_file"
 
 
 async def test_create_file_success(create_tool: CreateFileTool, tmp_path) -> None:
@@ -50,15 +52,15 @@ async def test_create_file_fails_if_file_already_exists(
     assert result.success is False
     assert result.error is not None
     assert f.read_text(encoding="utf-8") == "original"
-    assert not registry.is_known(str(f))
+    assert not registry.is_known(AGENT_ID, str(f))
 
 
 async def test_create_tool_registers_in_registry(create_tool: CreateFileTool, registry: FileRegistry, tmp_path) -> None:
     f = tmp_path / "file.txt"
     await create_tool.run({"path": str(f), "content": "hi"})
 
-    assert registry.is_known(str(f)) is True
-    assert registry.verify(str(f), "hi") is True
+    assert registry.is_known(AGENT_ID, str(f)) is True
+    assert registry.verify(AGENT_ID, str(f), "hi") is True
 
 
 async def test_create_file_oserror_on_mkdir(create_tool: CreateFileTool, registry: FileRegistry, tmp_path) -> None:
@@ -70,7 +72,7 @@ async def test_create_file_oserror_on_mkdir(create_tool: CreateFileTool, registr
     assert result.success is False
     assert result.error is not None
     assert not f.exists()
-    assert not registry.is_known(str(f))
+    assert not registry.is_known(AGENT_ID, str(f))
 
 
 async def test_create_file_oserror_on_write(create_tool: CreateFileTool, registry: FileRegistry, tmp_path) -> None:
@@ -81,4 +83,4 @@ async def test_create_file_oserror_on_write(create_tool: CreateFileTool, registr
 
     assert result.success is False
     assert result.error is not None
-    assert not registry.is_known(str(f))
+    assert not registry.is_known(AGENT_ID, str(f))
