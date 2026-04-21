@@ -1,7 +1,7 @@
 name: 'Validate skip QA label'
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize]
     branches:
       - master
@@ -10,16 +10,29 @@ jobs:
     if: '!github.event.pull_request.draft'
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Get token via dd-octo-sts
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        id: octo-sts
+        with:
+          scope: DataDog/integrations-core
+          policy: self.validate-skip-qa.pull-request
 
       - name: Get files changed
         id: changed_files
         uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
         with:
+          json: true
+          escape_json: false
+          safe_output: false
           files: |
             **/datadog_checks/**
             **/changelog.d/**
@@ -34,65 +47,70 @@ jobs:
         uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
         id: find_comment
         with:
+          token: ${{ steps.octo-sts.outputs.token }}
           issue-number: ${{ github.event.pull_request.number }}
-          body-includes: "`qa/skip-qa` label"
-          comment-author: "github-actions[bot]"
+          body-includes: "<!-- validate-skip-qa-comment -->"
+
+      - name: Write comment body - Add skip qa label
+        if: steps.changed_files.outputs.any_changed == 'false' && !contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          body = (
+              "<!-- validate-skip-qa-comment -->\n"
+              "⚠️ **Recommendation: Add `qa/skip-qa` label**\n\n"
+              "This PR does not modify any files shipped with the agent.\n\n"
+              "To help streamline the release process, please consider adding the `qa/skip-qa` label if these changes do not require QA testing.\n"
+          )
+          Path("comment-body.md").write_text(body, encoding="utf-8")
+          PY
 
       - name: Post message - Add skip qa label
         if: steps.changed_files.outputs.any_changed == 'false' && !contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
         uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
+          token: ${{ steps.octo-sts.outputs.token }}
           issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            ⚠️ **Recommendation: Add `qa/skip-qa` label**
-
-            This PR does not modify any files shipped with the agent.
-
-            To help streamline the release process, please consider adding the `qa/skip-qa` label if these changes do not require QA testing.
-
+          body-path: comment-body.md
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
           edit-mode: "replace"
 
-      - name: Format file list for comment
-        id: format_files
+      - name: Write comment body - Remove skip qa label
         if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
+        env:
+          CHANGED_FILES_JSON: ${{ steps.changed_files.outputs.all_changed_files }}
         run: |
-            formatted_list=$(echo "${{ steps.changed_files.outputs.all_changed_files }}" | tr ' ' '\n')
-            echo "file_list<<EOF" >> $GITHUB_OUTPUT
-            echo "$formatted_list" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
 
-      - name: Construct "Remove skip qa label" comment body
-        id: construct_remove_label_comment
-        if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
-        run: |
-          comment_body=$(cat <<EOF
-          ⚠️ **The \`qa/skip-qa\` label has been added with shippable changes**
-
-          The following files, which will be shipped with the agent, were modified in this PR and
-          the \`qa/skip-qa\` label has been added.
-
-          You can ignore this if you are sure the changes in this PR do not require QA. Otherwise, consider removing the label.
-
-          <details>
-          <summary>List of modified files that will be shipped with the agent</summary>
-
-          \`\`\`
-          ${{ steps.format_files.outputs.file_list }}
-          \`\`\`
-
-          </details>
-          EOF
+          files = json.loads(os.environ["CHANGED_FILES_JSON"])
+          formatted_files = json.dumps(files, indent=2)
+          body = (
+              "<!-- validate-skip-qa-comment -->\n"
+              "⚠️ **The `qa/skip-qa` label has been added with shippable changes**\n\n"
+              "The following files, which will be shipped with the agent, were modified in this PR and\n"
+              "the `qa/skip-qa` label has been added.\n\n"
+              "You can ignore this if you are sure the changes in this PR do not require QA. Otherwise,\n"
+              "consider removing the label.\n\n"
+              "<details>\n"
+              "<summary>List of modified files that will be shipped with the agent</summary>\n\n"
+              "```json\n"
+              f"{formatted_files}\n"
+              "```\n\n"
+              "</details>\n"
           )
-          echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "$comment_body" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          Path("comment-body.md").write_text(body, encoding="utf-8")
+          PY
 
       - name: Post comment - Remove skip qa label
         if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
         uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
+          token: ${{ steps.octo-sts.outputs.token }}
           issue-number: ${{ github.event.pull_request.number }}
-          body: ${{ steps.construct_remove_label_comment.outputs.body }}
+          body-path: comment-body.md
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
           edit-mode: "replace"
