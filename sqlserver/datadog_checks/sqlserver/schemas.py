@@ -100,8 +100,11 @@ class SQLServerSchemaCollector(SchemaCollector):
         database_names = self._check.get_databases()
         with self._check.connection.open_managed_default_connection(KEY_PREFIX):
             with self._check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
-                db_names_formatted = ",".join(["'{}'".format(t) for t in database_names])
-                return execute_query(DB_QUERY.format(db_names_formatted), cursor, convert_results_to_str=True)
+                if not database_names:
+                    return []
+                placeholders = ",".join(["?"] * len(database_names))
+                query = DB_QUERY.format(placeholders)
+                return execute_query(query, cursor, convert_results_to_str=True, parameters=tuple(database_names))
 
     @contextlib.contextmanager
     def _get_cursor(self, database_name):
@@ -197,26 +200,28 @@ class SQLServerSchemaCollector(SchemaCollector):
                 "name": cursor_row.get("schema_name"),
                 "id": str(cursor_row.get("schema_id")),  # Backend expects a string
                 "owner_name": cursor_row.get("owner_name"),
-                "tables": [
-                    {
-                        k: v
-                        for k, v in {
-                            "id": str(cursor_row.get("table_id")),  # Backend expects a string
-                            "name": cursor_row.get("table_name"),
-                            "columns": [column for column in columns if column.get("name") is not None],
-                            "indexes": [index for index in indexes if index.get("name") is not None],
-                            "foreign_keys": [
-                                foreign_key
-                                for foreign_key in foreign_keys
-                                if foreign_key.get("foreign_key_name") is not None
-                            ],
-                            "partitions": {"partition_count": partition_count},
-                        }.items()
-                        if v is not None
-                    }
-                ]
-                if cursor_row.get("table_name") is not None
-                else [],
+                "tables": (
+                    [
+                        {
+                            k: v
+                            for k, v in {
+                                "id": str(cursor_row.get("table_id")),  # Backend expects a string
+                                "name": cursor_row.get("table_name"),
+                                "columns": [column for column in columns if column.get("name") is not None],
+                                "indexes": [index for index in indexes if index.get("name") is not None],
+                                "foreign_keys": [
+                                    foreign_key
+                                    for foreign_key in foreign_keys
+                                    if foreign_key.get("foreign_key_name") is not None
+                                ],
+                                "partitions": {"partition_count": partition_count},
+                            }.items()
+                            if v is not None
+                        }
+                    ]
+                    if cursor_row.get("table_name") is not None
+                    else []
+                ),
             }
         ]
         return object

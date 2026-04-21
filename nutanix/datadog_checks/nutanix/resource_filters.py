@@ -32,10 +32,9 @@ def _validate_filter_structure(f: dict[str, Any]) -> bool:
     """Check if filter has required 'resource', 'property', and 'patterns' fields."""
     return (
         isinstance(f, dict)
-        and 'resource' in f
-        and 'property' in f
-        and 'patterns' in f
-        and isinstance(f.get('patterns'), list)
+        and f.get('resource') is not None
+        and f.get('property') is not None
+        and isinstance(f.get('patterns'), (list, tuple))
     )
 
 
