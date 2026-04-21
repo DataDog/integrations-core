@@ -1,1 +1,1 @@
-Validate guarddog_path argument
+Sanitize guarddog_path argument
