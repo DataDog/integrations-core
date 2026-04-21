@@ -16,6 +16,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.13"
+  INTEGRATIONS_WHEELS_STORAGE: "stable"
 
 jobs:
   measure-disk-usage:
