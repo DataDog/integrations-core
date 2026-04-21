@@ -48,6 +48,25 @@ class MockKafkaMessage:
         return None
 
 
+class TestCancel:
+    """Test cancel() cleans up native librdkafka resources."""
+
+    def test_cancel_closes_kafka_client(self):
+        instance = {
+            'remote_config_id': 'test-cancel-001',
+            'kafka_connect_str': 'localhost:9092',
+            'read_messages': {
+                'cluster': 'test-cluster',
+                'topic': 'test-topic',
+            },
+        }
+
+        with patch('datadog_checks.kafka_actions.check.KafkaActionsClient') as mock_client_cls:
+            check = KafkaActionsCheck('kafka_actions', {}, [instance])
+            check.cancel()
+            mock_client_cls.return_value.close_non_blocking.assert_called_once()
+
+
 class TestReadMessagesAction:
     """Test read_messages action with filtering."""
 

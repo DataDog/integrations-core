@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import base64
+import gc
 import json
 from collections import defaultdict
 from io import BytesIO
@@ -43,6 +44,11 @@ class KafkaCheck(AgentCheck):
 
         # Initialize cluster metadata collector
         self.metadata_collector = ClusterMetadataCollector(self, self.client, self.config, self.log)
+
+    def cancel(self):
+        """Clean up native librdkafka resources when the check is unscheduled by the CLC."""
+        self.client.destroy()
+        gc.collect()
 
     def check(self, _):
         """The main entrypoint of the check."""
@@ -271,118 +277,96 @@ class KafkaCheck(AgentCheck):
     def report_highwater_offsets(self, highwater_offsets, contexts_limit, cluster_id):
         """Report the broker highwater offsets."""
         reported_contexts = 0
-        self.log.debug("Reporting broker offset metric")
+        # Pre-build the static suffix once instead of per-iteration
+        base_tags = [f'kafka_cluster_id:{cluster_id}']
+        if self.config._kafka_cluster_id_override:
+            base_tags.append(f'original_kafka_cluster_id:{self.config._auto_detected_cluster_id}')
+        base_tags.extend(self.config._custom_tags)
+
         for (topic, partition), highwater_offset in highwater_offsets.items():
-            broker_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'kafka_cluster_id:%s' % cluster_id]
-            if self.config._kafka_cluster_id_override:
-                broker_tags.append('original_kafka_cluster_id:%s' % self.config._auto_detected_cluster_id)
-            broker_tags.extend(self.config._custom_tags)
+            broker_tags = [f'topic:{topic}', f'partition:{partition}', *base_tags]
             self.gauge('broker_offset', highwater_offset, tags=broker_tags)
-            self.log.debug('%s highwater offset reported with %s tags', highwater_offset, broker_tags)
             reported_contexts += 1
             if reported_contexts == contexts_limit:
                 return
-        self.log.debug('%s highwater offsets reported', reported_contexts)
 
     def report_consumer_offsets_and_lag(
         self, consumer_offsets, highwater_offsets, contexts_limit, broker_timestamps, cluster_id
     ):
         """Report the consumer offsets and consumer lag."""
         reported_contexts = 0
-        self.log.debug("Reporting consumer offsets and lag metrics")
+
+        # Pre-build static tag suffix and convert partition lists to sets for O(1) lookup
+        base_tags = [f'kafka_cluster_id:{cluster_id}']
+        if self.config._kafka_cluster_id_override:
+            base_tags.append(f'original_kafka_cluster_id:{self.config._auto_detected_cluster_id}')
+        base_tags.extend(self.config._custom_tags)
+
+        all_topic_partitions = self.client.get_topic_partitions()
+        topic_partition_sets = {topic: set(parts) for topic, parts in all_topic_partitions.items()}
+        needs_metadata_refresh = False
+
         for consumer_group, offsets in consumer_offsets.items():
             consumer_group_state = None
             for (topic, partition), consumer_offset in offsets.items():
                 if reported_contexts >= contexts_limit:
-                    self.log.debug(
-                        "Reported contexts number %s greater than or equal to contexts limit of %s, returning",
-                        str(reported_contexts),
-                        str(contexts_limit),
-                    )
-                    self.log.debug('%s consumer offsets reported', reported_contexts)
                     return
+
+                valid_partitions = topic_partition_sets.get(topic)
+                if valid_partitions is None or partition not in valid_partitions:
+                    needs_metadata_refresh = True
+                    continue
+
                 consumer_group_tags = [
-                    'topic:%s' % topic,
-                    'partition:%s' % partition,
-                    'consumer_group:%s' % consumer_group,
-                    'kafka_cluster_id:%s' % cluster_id,
+                    f'topic:{topic}',
+                    f'partition:{partition}',
+                    f'consumer_group:{consumer_group}',
+                    *base_tags,
                 ]
-                if self.config._kafka_cluster_id_override:
-                    consumer_group_tags.append('original_kafka_cluster_id:%s' % self.config._auto_detected_cluster_id)
                 if self.config._collect_consumer_group_state:
                     if consumer_group_state is None:
                         consumer_group_state = self.get_consumer_group_state(consumer_group)
                     consumer_group_tags.append(f'consumer_group_state:{consumer_group_state}')
-                consumer_group_tags.extend(self.config._custom_tags)
 
-                partitions = self.client.get_partitions_for_topic(topic)
-                self.log.debug("Received partitions %s for topic %s", partitions, topic)
-                if partition in partitions:
-                    # report consumer offset if the partition is valid because even if leaderless
-                    # the consumer offset will be valid once the leader failover completes
-                    self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
-                    self.log.debug('%s consumer offset reported with %s tags', consumer_offset, consumer_group_tags)
+                # report consumer offset if the partition is valid because even if leaderless
+                # the consumer offset will be valid once the leader failover completes
+                self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
+                reported_contexts += 1
+
+                if (topic, partition) not in highwater_offsets:
+                    continue
+                producer_offset = highwater_offsets[(topic, partition)]
+                consumer_lag = producer_offset - consumer_offset
+
+                if consumer_lag < 0:
+                    title = f"Negative consumer lag for group: {consumer_group}."
+                    message = (
+                        f"Consumer group: {consumer_group}, topic: {topic}, partition: {partition} "
+                        f"has negative consumer lag. This should never happen and will result in the "
+                        f"consumer skipping new messages until the lag turns positive."
+                    )
+                    key = f"{consumer_group}:{topic}:{partition}"
+                    self.send_event(title, message, consumer_group_tags, 'consumer_lag', key, severity="error")
+                    consumer_lag = 0
+
+                if reported_contexts < contexts_limit:
+                    self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
                     reported_contexts += 1
 
-                    if (topic, partition) not in highwater_offsets:
-                        self.log.warning(
-                            "Consumer group: %s has offsets for topic: %s partition: %s, "
-                            "but no stored highwater offset (likely the partition is in the middle of leader failover) "
-                            "so cannot calculate consumer lag.",
-                            consumer_group,
-                            topic,
-                            partition,
-                        )
-                        continue
-                    producer_offset = highwater_offsets[(topic, partition)]
-                    consumer_lag = producer_offset - consumer_offset
+                if not self._data_streams_enabled:
+                    continue
 
-                    if consumer_lag < 0:
-                        # this will effectively result in data loss, so emit an event for max visibility
-                        title = "Negative consumer lag for group: {}.".format(consumer_group)
-                        message = (
-                            "Consumer group: {}, topic: {}, partition: {} has negative consumer lag. This should never "
-                            "happen and will result in the consumer skipping new messages until the lag turns "
-                            "positive.".format(consumer_group, topic, partition)
-                        )
-                        key = "{}:{}:{}".format(consumer_group, topic, partition)
-                        self.send_event(title, message, consumer_group_tags, 'consumer_lag', key, severity="error")
-                        self.log.debug(message)
-                        consumer_lag = 0
+                timestamps = broker_timestamps[f"{topic}_{partition}"]
+                producer_timestamp = timestamps.get(producer_offset)
+                consumer_timestamp = _get_interpolated_timestamp(timestamps, consumer_offset)
+                if consumer_timestamp is None or producer_timestamp is None:
+                    continue
+                lag = producer_timestamp - consumer_timestamp
+                self.gauge('estimated_consumer_lag', lag, tags=consumer_group_tags)
+                reported_contexts += 1
 
-                    if reported_contexts < contexts_limit:
-                        self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
-                        self.log.debug('%s consumer lag reported with %s tags', consumer_lag, consumer_group_tags)
-                        reported_contexts += 1
-
-                    if not self._data_streams_enabled:
-                        continue
-
-                    timestamps = broker_timestamps["{}_{}".format(topic, partition)]
-                    # The producer timestamp can be not set if there was an error fetching broker offsets.
-                    producer_timestamp = timestamps.get(producer_offset, None)
-                    consumer_timestamp = _get_interpolated_timestamp(timestamps, consumer_offset)
-                    if consumer_timestamp is None or producer_timestamp is None:
-                        continue
-                    lag = producer_timestamp - consumer_timestamp
-                    self.gauge('estimated_consumer_lag', lag, tags=consumer_group_tags)
-                    reported_contexts += 1
-                else:
-                    if not partitions:
-                        msg = (
-                            "Consumer group: %s has offsets for topic: %s, partition: %s, "
-                            "but that topic has no partitions in the cluster, "
-                            "so skipping reporting these offsets."
-                        )
-                    else:
-                        msg = (
-                            "Consumer group: %s has offsets for topic: %s, partition: %s, "
-                            "but that topic partition isn't included in the cluster partitions, "
-                            "so skipping reporting these offsets."
-                        )
-                    self.log.warning(msg, consumer_group, topic, partition)
-                    self.client.request_metadata_update()  # force metadata update on next poll()
-        self.log.debug('%s consumer offsets reported', reported_contexts)
+        if needs_metadata_refresh:
+            self.client.request_metadata_update()
 
     def get_consumer_group_state(self, consumer_group):
         consumer_group_state = self.client.describe_consumer_group(consumer_group)

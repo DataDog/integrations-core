@@ -558,3 +558,19 @@ class KafkaActionsClient:
             self.producer = None
         self.admin_client = None
         self.log.debug("Kafka clients closed")
+
+    def close_non_blocking(self):
+        """Release all Kafka clients without blocking on pending operations.
+
+        Safe to call from AgentCheck.cancel() which must not block.
+        Uses purge/unassign to release resources immediately instead of
+        flush/close which can block waiting on broker communication,
+        then deletes the objects to trigger rd_kafka_destroy().
+        """
+        if self.consumer:
+            self.consumer.unassign()
+        if self.producer:
+            self.producer.purge()
+        del self.consumer
+        del self.producer
+        del self.admin_client

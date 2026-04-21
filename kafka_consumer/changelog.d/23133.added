@@ -1,0 +1,1 @@
+Implement cancel() to clean up librdkafka resources when the check is unscheduled by the Cluster Check Runner.
