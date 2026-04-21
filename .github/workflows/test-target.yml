@@ -213,7 +213,7 @@ jobs:
         INPUT_JOB_NAME: "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}"
         INPUT_PYTEST_ARGS: ${{ inputs.pytest-args }}
         INPUT_IS_FORK: ${{ github.event.pull_request.head.repo.fork || false }}
-        DD_API_KEY_SECRET: ${{ steps.dd-sts.outputs.api_key }}
+        DD_API_KEY_SECRET: ${{ steps.dd-sts.outputs.api_key || '' }}
         SETUP_ENV_VARS: ${{ inputs.setup-env-vars }}
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}

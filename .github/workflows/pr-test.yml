@@ -20,6 +20,11 @@ on:
         required: false
         type: string
         default: ""
+      dd-sts-policy:
+        description: "dd-sts policy name matching the calling repo's GitHub identity"
+        required: false
+        default: integrations-core-api-key
+        type: string
 
 jobs:
   compute-matrix:
@@ -41,6 +46,10 @@ jobs:
         include: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
 
     uses: ./.github/workflows/test-target.yml
+    permissions:
+      contents: read
+      # needed for dd-sts in test-target.yml
+      id-token: write
     with:
       job-name: "${{ matrix.name }}"
       target: "${{ matrix.target }}"
@@ -49,6 +58,7 @@ jobs:
       runner: "${{ toJson(matrix.runner) }}"
       repo: "${{ inputs.repo }}"
       context: "pr"
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
 
       # Options
       # We never test Python in integrations-core, but some partners may want to keep testing it
@@ -72,6 +82,10 @@ jobs:
         include: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
 
     uses: ./.github/workflows/test-target.yml
+    permissions:
+      contents: read
+      # needed for dd-sts in test-target.yml
+      id-token: write
     with:
       job-name: "minimum-base-package-${{ matrix.name }}"
       target: "${{ matrix.target }}"
@@ -80,6 +94,7 @@ jobs:
       runner: "${{ toJson(matrix.runner) }}"
       repo: "${{ inputs.repo }}"
       minimum-base-package: true
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
 
       # Options
       # We never test Python in integrations-core, but some partners may want to keep testing it
