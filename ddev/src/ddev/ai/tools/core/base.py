@@ -112,3 +112,13 @@ class BaseTool[TInput: BaseToolInput](ABC):
     async def __call__(self, tool_input: TInput) -> ToolResult:
         """Call the tool with a typed input instance."""
         ...
+
+    def format_call(self, raw_input: dict[str, object]) -> str:
+        """UI-friendly one-line representation of a pending tool invocation.
+
+        Default is just the tool name. Subclasses should override to surface
+        the salient argument (typically a path, pattern, or URL). raw_input is
+        the unvalidated dict as received from the model, so implementations
+        should tolerate missing or unexpected keys.
+        """
+        return self.name

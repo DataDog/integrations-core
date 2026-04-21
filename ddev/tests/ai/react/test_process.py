@@ -68,6 +68,9 @@ class MockToolRegistry:
         self.run_calls.append((name, raw))
         return self._result
 
+    def format_call(self, name: str, raw: dict[str, object]) -> str:
+        return name
+
 
 class RaisingToolRegistry:
     """Registry that always raises a given exception from run()."""
@@ -79,6 +82,9 @@ class RaisingToolRegistry:
     async def run(self, name: str, raw: dict[str, object]) -> ToolResult:
         self.run_calls.append((name, raw))
         raise self._exc
+
+    def format_call(self, name: str, raw: dict[str, object]) -> str:
+        return name
 
 
 class PerToolRegistry:
@@ -95,6 +101,9 @@ class PerToolRegistry:
             raise behavior
         return behavior
 
+    def format_call(self, name: str, raw: dict[str, object]) -> str:
+        return name
+
 
 class CallbackRecorder:
     """Test helper that wires a CallbackSet to record all lifecycle events."""
@@ -110,11 +119,13 @@ class CallbackRecorder:
         self.callback_set = CallbackSet()
 
         @self.callback_set.on_agent_response
-        async def _record_response(response: AgentResponse, iteration: int) -> None:
+        async def _record_response(response: AgentResponse, iteration: int, name: str) -> None:
             self.agent_responses.append((response, iteration))
 
         @self.callback_set.on_tool_call
-        async def _record_tool_call(tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
+        async def _record_tool_call(
+            tool_call: ToolCall, result: ToolResult, display: str, iteration: int, name: str
+        ) -> None:
             self.tool_calls_seen.append((tool_call, result, iteration))
 
         @self.callback_set.on_complete

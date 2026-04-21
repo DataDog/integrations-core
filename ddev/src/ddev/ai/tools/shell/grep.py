@@ -7,6 +7,7 @@ from pydantic import Field
 
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
+from ddev.utils.fs import pretty_path
 
 from .base import CmdTool, run_command
 
@@ -27,6 +28,12 @@ class GrepTool(CmdTool[GrepInput]):
     @property
     def name(self) -> str:
         return "grep"
+
+    def format_call(self, raw_input: dict[str, object]) -> str:
+        pattern = raw_input.get("pattern", "")
+        path = raw_input.get("path", "")
+        pretty = pretty_path(path) if path else ""
+        return f'{self.name} "{pattern}" {pretty}'.rstrip()
 
     async def __call__(self, tool_input: GrepInput) -> ToolResult:
         result = await run_command(self.cmd(tool_input), timeout=self.timeout)

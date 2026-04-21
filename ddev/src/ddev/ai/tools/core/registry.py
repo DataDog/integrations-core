@@ -97,3 +97,10 @@ class ToolRegistry:
         if tool is None:
             return ToolResult(success=False, error=f"Unknown tool: {name!r}")
         return await tool.run(raw)
+
+    def format_call(self, name: str, raw: dict[str, object]) -> str:
+        """Delegate to the tool's format_call for a UI-friendly string. Falls back to name."""
+        tool = self._tools.get(name)
+        if tool is None:
+            return name
+        return tool.format_call(raw)

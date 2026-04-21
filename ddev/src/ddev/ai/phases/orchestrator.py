@@ -46,9 +46,14 @@ class PhaseOrchestrator(EventBusOrchestrator):
         anthropic_client: anthropic.AsyncAnthropic,
         callback_sets: list[CallbackSet] | None = None,
         grace_period: float = 10,
+        max_timeout: float = 300,
         file_access_policy: FileAccessPolicy | None = None,
     ) -> None:
-        super().__init__(logger=logging.getLogger(__name__), grace_period=grace_period)
+        super().__init__(
+            logger=logging.getLogger(__name__),
+            max_timeout=max_timeout,
+            grace_period=grace_period,
+        )
         self._flow_yaml_path = flow_yaml_path
         self._checkpoint_path = checkpoint_path
         self._runtime_variables = runtime_variables

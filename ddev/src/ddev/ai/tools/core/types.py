@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from typing import Any
+
 from pydantic import BaseModel
 
 
@@ -15,3 +17,4 @@ class ToolResult(BaseModel):
     total_size: int | None = None
     shown_size: int | None = None
     hint: str | None = None
+    metadata: dict[str, Any] | None = None

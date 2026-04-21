@@ -8,6 +8,7 @@ from pydantic import Field
 
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
+from ddev.utils.fs import pretty_path
 
 from .base import FileRegistryTool
 
@@ -22,11 +23,19 @@ class CreateFileTool(FileRegistryTool[CreateFileInput]):
     Parent directories are created automatically if they do not exist (no need to call mkdir first).
     Registers the file in the file registry.
     Fails if the file already exists.
-    Use edit_file to modify existing files."""
+    Use edit_file to modify existing files.
+
+    The response metadata includes sha256=<hex>, the new content's hash.
+    Retain this value: subsequent edit_file/append_file calls on this path can
+    pass it as expected_hash to skip the read-before-write check."""
 
     @property
     def name(self) -> str:
         return "create_file"
+
+    def format_call(self, raw_input: dict[str, object]) -> str:
+        path = raw_input.get('path', '')
+        return f"{self.name} {pretty_path(path) if path else ''}".rstrip()
 
     async def __call__(self, tool_input: CreateFileInput) -> ToolResult:
         if fail := self._assert_writable(tool_input.path):
@@ -43,4 +52,8 @@ class CreateFileTool(FileRegistryTool[CreateFileInput]):
             except OSError as e:
                 return ToolResult(success=False, error=str(e))
             self._register(str(path), tool_input.content)
-        return ToolResult(success=True, data=f"File created: {path}")
+        return ToolResult(
+            success=True,
+            data=f"File created: {path}",
+            metadata={"sha256": self._registry.hash(tool_input.content)},
+        )

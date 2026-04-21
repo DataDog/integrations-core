@@ -8,6 +8,7 @@ from pydantic import Field
 
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
+from ddev.utils.fs import pretty_path
 
 from .base import FileRegistryTool
 
@@ -24,6 +25,10 @@ class MkdirTool(FileRegistryTool[MkdirInput]):
     @property
     def name(self) -> str:
         return "mkdir"
+
+    def format_call(self, raw_input: dict[str, object]) -> str:
+        path = raw_input.get('path', '')
+        return f"{self.name} {pretty_path(path) if path else ''}".rstrip()
 
     async def __call__(self, tool_input: MkdirInput) -> ToolResult:
         if fail := self._assert_writable(tool_input.path):

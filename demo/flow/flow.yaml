@@ -1,0 +1,209 @@
+variables:
+  output_dir: /tmp/uv_demo_output
+  spec_path: /tmp/spec.md
+
+agents:
+  planner:
+    tools: ["read_file", "create_file", "list_files"]
+  package_writer:
+    tools: ["read_file", "create_file", "edit_file", "mkdir", "list_files"]
+  tool_writer:
+    tools: ["read_file", "create_file", "edit_file", "append_file", "mkdir", "list_files", "grep"]
+  usage_writer:
+    tools: ["read_file", "create_file", "edit_file", "list_files"]
+  test_writer:
+    tools: ["read_file", "create_file", "edit_file", "append_file", "list_files", "grep"]
+
+phases:
+  plan:
+    agent: planner
+    tasks:
+      - name: produce_plan
+        prompt: >
+          Read the specification at ${spec_path} and produce a complete implementation plan.
+
+          Write ${output_dir}/plan.md with the following sections, in order:
+
+          ## Package Overview
+          - package name (snake_case)
+          - one-sentence description
+          - target Python version
+
+          ## Dependencies
+          - runtime dependencies (exact PyPI names)
+          - dev dependencies (pytest plus anything the tests will need)
+
+          ## 
+          Exact
+
+          ## Entry Point
+          - name of the console_scripts entry under [project.scripts]
+          - arguments it accepts, behavior, and exit codes
+          - environment variables it reads (if any)
+
+          ## Module Design
+          For every .py file in the package, list:
+          - all public classes and functions with full type-hinted signatures
+          - a one-line description of each responsibility
+          - any custom exceptions with their fields
+
+          ## Test Plan
+          - every test function to be written, with a one-line statement of what it verifies
+          - the EXACT shell command users will run to execute the suite
+            (e.g. `uv run pytest`). Specify where in pyproject.toml this is wired
+            (e.g. under [project.scripts] or a [tool.<something>.scripts] block).
+
+          ## Usage Instructions (outline)
+          - how to install the project from source with uv
+          - how to invoke the entry point (with an example)
+          - how to run the tests using the command defined above
+
+          Be specific. Downstream agents will implement this plan verbatim without
+          speaking to you. No ambiguity.
+    checkpoint:
+      memory_prompt: >
+        Start with the exact absolute path to plan.md. Then write these fields
+        on their own lines:
+        package_name: <name>
+        entry_module: <relative path to entry .py>
+        entry_command: <the CLI command name>
+        runtime_deps: <comma-separated>
+        dev_deps: <comma-separated>
+        test_command: <the shell command that runs the tests>
+
+  setup_package:
+    agent: package_writer
+    tasks:
+      - name: scaffold_package
+        prompt: >
+          Scaffold the project structure described by the planner.
+
+          The plan phase produced:
+
+          ${plan_memory}
+
+          Read plan.md at the path above. Then, placing all files under ${output_dir}/:
+
+          - Write pyproject.toml with project metadata, runtime dependencies,
+            dev-dependencies, a build-system table (hatchling is fine), and a
+            [project.scripts] entry for the CLI command from the plan.
+            Do NOT yet add the test-runner script to pyproject.toml — the test
+            writer will do that.
+          - Create src/<package>/__init__.py with a one-line docstring and
+            nothing else.
+          - Create src/<package>/<entry_module>.py as an EMPTY stub module with
+            a one-line docstring. No functions, no logic. Downstream agents will fill it in.
+          - Create tests/__init__.py (empty).
+          - Create an empty USAGE.md as a placeholder.
+
+          Do not write business logic, tests, or documentation content.
+          Your job is scaffolding only.
+    checkpoint:
+      memory_prompt: >
+        List every file you created under ${output_dir}, one absolute path per line.
+        Then add a single line:
+        pyproject_path: <absolute path to pyproject.toml>
+
+  write_tool:
+    agent: tool_writer
+    tasks:
+      - name: implement_tool
+        prompt: >
+          Implement the entry-point script (and any supporting modules) for this package.
+
+          The plan phase produced:
+
+          ${plan_memory}
+
+          The package writer produced:
+
+          ${setup_package_memory}
+
+          Read plan.md and the existing package files listed above. Then:
+          - Implement the entry-point module per the Module Design section of the plan.
+          - Add any supporting modules the plan calls for under src/<package>/.
+          - Use modern type hints throughout (str | None, list[str]).
+          - Do NOT edit pyproject.toml and do NOT create test files.
+
+          After writing each file, re-read it to catch syntax errors. The code must
+          be runnable as-is.
+    checkpoint:
+      memory_prompt: >
+        List every file you created or modified under ${output_dir}, one absolute path per line.
+        Then add a single line:
+        entry_symbol: <fully-qualified name of the top-level function or class that implements the CLI>
+
+  write_usage:
+    agent: usage_writer
+    tasks:
+      - name: write_usage_doc
+        prompt: >
+          Write ${output_dir}/USAGE.md.
+
+          The plan phase produced:
+
+          ${plan_memory}
+
+          Read plan.md to confirm the package name, entry-point command, and the
+          exact test command. Overwrite USAGE.md with these sections:
+
+          # <Package Name>
+
+          ## Installation
+          Exact `uv` commands to install the project from source (e.g. `uv sync`).
+
+          ## Usage
+          Describe the CLI: its arguments, an example invocation, and the expected
+          behavior or output.
+
+          ## Running the tests
+          The exact shell command from the plan's Test Plan.
+
+          Keep the tone technical. No filler prose.
+    checkpoint:
+      memory_prompt: "Record the absolute path to USAGE.md."
+
+  write_tests:
+    agent: test_writer
+    tasks:
+      - name: write_tests
+        prompt: >
+          Write the pytest suite and wire a test runner script into pyproject.toml.
+
+          The plan phase produced:
+
+          ${plan_memory}
+
+          The tool writer produced:
+
+          ${write_tool_memory}
+
+          Read plan.md, then read every source file listed above. Use grep to
+          confirm all public classes/functions/exceptions. Then:
+          - Write tests/test_<entry_point>.py (and any other test files the plan
+            specifies) covering every case in the Test Plan. Use plain pytest
+            functions (no TestCase subclasses). Use @pytest.mark.parametrize to
+            fold similar cases.
+          - Edit ${output_dir}/pyproject.toml to wire the test command named in
+            the plan (e.g. `uv run test` routed to `pytest tests/`). Use the exact
+            table the plan specified ([project.scripts] or [tool.<name>.scripts]).
+          - Do NOT modify the tool source files. If you think something is wrong
+            with them, note it in your checkpoint summary but leave them as-is.
+
+          pyproject.toml must remain valid TOML after your edits.
+    checkpoint:
+      memory_prompt: >
+        Record the absolute path to the test file(s) you created, then write a
+        single line:
+        test_command: <the exact shell command wired into pyproject.toml>
+
+flow:
+  - phase: plan
+  - phase: setup_package
+    dependencies: [plan]
+  - phase: write_tool
+    dependencies: [setup_package]
+  - phase: write_usage
+    dependencies: [setup_package]
+  - phase: write_tests
+    dependencies: [write_tool]

@@ -113,6 +113,28 @@ class Path(_PathBase):
                     pass
 
 
+def pretty_path(path: str | os.PathLike[str], base: str | os.PathLike[str] | None = None) -> str:
+    """Render a filesystem path as relative to base (default: cwd) when that's concise.
+
+    Falls back to the original absolute path if the relative form would need to
+    traverse more than one parent directory — in which case the absolute path is
+    usually easier to read. Matches the heuristic used by ConfigFile.pretty_overrides_path.
+    """
+    from collections import Counter
+
+    base_dir = os.fspath(base) if base is not None else os.getcwd()
+    target = os.fspath(path)
+    try:
+        relative = os.path.relpath(target, base_dir)
+    except ValueError:
+        # Different drive on Windows — no meaningful relative path.
+        return target
+    parents_apart = Counter(relative.split(os.path.sep))
+    if parents_apart.get("..", 0) > 1:
+        return target
+    return relative
+
+
 @contextmanager
 def temp_directory() -> Generator[Path, None, None]:
     from tempfile import TemporaryDirectory

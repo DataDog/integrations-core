@@ -92,9 +92,10 @@ class ReActProcess:
         Raises:
             Every exception is forwarded after notifying callbacks.
         """
+        name = self._agent.name
         try:
             for cb_set in self._callback_sets:
-                await cb_set.fire_before_agent_send(1)
+                await cb_set.fire_before_agent_send(1, name)
 
             response = await self._agent.send(prompt, allowed_tools)
             iterations = 1
@@ -102,7 +103,7 @@ class ReActProcess:
             total_output = response.usage.output_tokens
 
             for cb_set in self._callback_sets:
-                await cb_set.fire_agent_response(response, iterations)
+                await cb_set.fire_agent_response(response, iterations, name)
 
             # No iteration cap — this is an interactive CLI tool; the user can Ctrl+C to stop.
             while response.stop_reason == StopReason.TOOL_USE:
@@ -121,13 +122,14 @@ class ReActProcess:
                 tool_call_results = list(zip(response.tool_calls, tool_results, strict=True))
 
                 for tc, result in tool_call_results:
+                    display = self._tool_registry.format_call(tc.name, tc.input)
                     for cb_set in self._callback_sets:
-                        await cb_set.fire_tool_call(tc, result, iterations)
+                        await cb_set.fire_tool_call(tc, result, display, iterations, name)
 
                 messages = [ToolResultMessage(tool_call_id=tc.id, result=result) for tc, result in tool_call_results]
 
                 for cb_set in self._callback_sets:
-                    await cb_set.fire_before_agent_send(iterations + 1)
+                    await cb_set.fire_before_agent_send(iterations + 1, name)
 
                 response = await self._agent.send(messages, allowed_tools)
                 iterations += 1
@@ -135,7 +137,7 @@ class ReActProcess:
                 total_output += response.usage.output_tokens
 
                 for cb_set in self._callback_sets:
-                    await cb_set.fire_agent_response(response, iterations)
+                    await cb_set.fire_agent_response(response, iterations, name)
 
                 if self._is_compact_needed(response):
                     compact_in, compact_out = await self.compact(response)

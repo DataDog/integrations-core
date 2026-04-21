@@ -10,15 +10,25 @@ from ddev.ai.tools.core.types import ToolResult
 
 
 class OnAgentResponseCallback(Protocol):
-    """Called after every agent.send() returns, including the first."""
+    """Called after every agent.send() returns, including the first.
 
-    async def __call__(self, response: AgentResponse, iteration: int) -> None: ...
+    name is the agent's identifier (typically the phase_id) — useful for
+    labeling output when multiple agents run concurrently.
+    """
+
+    async def __call__(self, response: AgentResponse, iteration: int, name: str) -> None: ...
 
 
 class OnToolCallCallback(Protocol):
-    """Called once per (tool_call, result) pair after all tools in a batch execute."""
+    """Called once per (tool_call, result) pair after all tools in a batch execute.
 
-    async def __call__(self, tool_call: ToolCall, result: ToolResult, iteration: int) -> None: ...
+    display is the tool's UI-friendly rendering of the call (see BaseTool.format_call).
+    name is the agent's identifier (typically the phase_id).
+    """
+
+    async def __call__(
+        self, tool_call: ToolCall, result: ToolResult, display: str, iteration: int, name: str
+    ) -> None: ...
 
 
 class OnCompleteCallback(Protocol):
@@ -52,9 +62,12 @@ class OnPhaseStartCallback(Protocol):
 
 
 class OnBeforeAgentSendCallback(Protocol):
-    """Called immediately before each agent.send() request is issued."""
+    """Called immediately before each agent.send() request is issued.
 
-    async def __call__(self, iteration: int) -> None: ...
+    name is the agent's identifier (typically the phase_id).
+    """
+
+    async def __call__(self, iteration: int, name: str) -> None: ...
 
 
 class CallbackSet:
@@ -119,17 +132,19 @@ class CallbackSet:
         self._on_before_agent_send.append(func)
         return func
 
-    async def fire_agent_response(self, response: AgentResponse, iteration: int) -> None:
+    async def fire_agent_response(self, response: AgentResponse, iteration: int, name: str) -> None:
         for handler in self._on_agent_response:
             try:
-                await handler(response, iteration)
+                await handler(response, iteration, name)
             except Exception:
                 pass  # we will see in the future what to do with this
 
-    async def fire_tool_call(self, tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
+    async def fire_tool_call(
+        self, tool_call: ToolCall, result: ToolResult, display: str, iteration: int, name: str
+    ) -> None:
         for handler in self._on_tool_call:
             try:
-                await handler(tool_call, result, iteration)
+                await handler(tool_call, result, display, iteration, name)
             except Exception:
                 pass
 
@@ -168,9 +183,9 @@ class CallbackSet:
             except Exception:
                 pass
 
-    async def fire_before_agent_send(self, iteration: int) -> None:
+    async def fire_before_agent_send(self, iteration: int, name: str) -> None:
         for handler in self._on_before_agent_send:
             try:
-                await handler(iteration)
+                await handler(iteration, name)
             except Exception:
                 pass

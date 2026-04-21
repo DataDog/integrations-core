@@ -6,6 +6,7 @@ from typing import Annotated
 from pydantic import Field
 
 from ddev.ai.tools.core.base import BaseToolInput
+from ddev.utils.fs import pretty_path
 
 from .base import CmdTool
 
@@ -24,6 +25,10 @@ class ListFilesTool(CmdTool[ListFilesInput]):
     @property
     def name(self) -> str:
         return "list_files"
+
+    def format_call(self, raw_input: dict[str, object]) -> str:
+        path = raw_input.get('path', '')
+        return f"{self.name} {pretty_path(path) if path else ''}".rstrip()
 
     def cmd(self, tool_input: ListFilesInput) -> list[str]:
         cmd = ["find", tool_input.path, "-mindepth", "1"]

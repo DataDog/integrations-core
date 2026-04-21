@@ -32,11 +32,12 @@ class FileRegistry:
     def _normalize(self, path: str) -> str:
         return Path(path).resolve().as_posix()
 
-    def _hash(self, content: str) -> str:
+    def hash(self, content: str) -> str:
+        """Canonical SHA-256 digest of file content, matching what the registry stores."""
         return hashlib.sha256(content.encode()).hexdigest()
 
     def record(self, agent_id: str, path: str, content: str) -> None:
-        self._hashes.setdefault(agent_id, {})[self._normalize(path)] = self._hash(content)
+        self._hashes.setdefault(agent_id, {})[self._normalize(path)] = self.hash(content)
 
     def is_known(self, agent_id: str, path: str) -> bool:
         return self._normalize(path) in self._hashes.get(agent_id, {})
@@ -44,7 +45,7 @@ class FileRegistry:
     def verify(self, agent_id: str, path: str, content: str) -> bool:
         """Check whether content matches what this agent last recorded for path."""
         stored = self._hashes.get(agent_id, {}).get(self._normalize(path))
-        return stored is not None and self._hash(content) == stored
+        return stored is not None and self.hash(content) == stored
 
     def lock_for(self, path: str) -> asyncio.Lock:
         # Safe under single-threaded asyncio; asyncio.Lock is not thread-safe.

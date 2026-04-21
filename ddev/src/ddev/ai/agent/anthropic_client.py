@@ -84,23 +84,37 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             raise AgentError(f"Unknown stop_reason: {raw!r}") from None
         return mapping[raw]
 
+    def _render_result_content(self, msg: ToolResultMessage) -> str | None:
+        """Serialize a ToolResult to the text sent to the model, folding in metadata."""
+        base: str | None
+        if msg.result.data is not None:
+            base = msg.result.data
+        elif not msg.result.success:
+            base = msg.result.error or "(unknown error)"
+        else:
+            base = None
+
+        if not msg.result.metadata:
+            return base
+
+        meta_lines = [f"{k}={v}" for k, v in msg.result.metadata.items()]
+        meta_block = "\n".join(meta_lines)
+        return f"{base}\n\n{meta_block}" if base else meta_block
+
     def _to_tool_result_params(self, messages: list[ToolResultMessage]) -> list[ToolResultBlockParam]:
         """Convert model-agnostic ToolResultMessages to Anthropic SDK ToolResultBlockParams."""
-        return [
-            {
+        out: list[ToolResultBlockParam] = []
+        for msg in messages:
+            content = self._render_result_content(msg)
+            params: ToolResultBlockParam = {
                 "type": "tool_result",
                 "tool_use_id": msg.tool_call_id,
                 "is_error": not msg.result.success,
-                **(
-                    {"content": msg.result.data}
-                    if msg.result.data is not None
-                    else {"content": msg.result.error or "(unknown error)"}
-                    if not msg.result.success
-                    else {}
-                ),
             }
-            for msg in messages
-        ]
+            if content is not None:
+                params["content"] = content
+            out.append(params)
+        return out
 
     async def send(
         self,

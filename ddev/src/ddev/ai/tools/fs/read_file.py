@@ -9,6 +9,7 @@ from pydantic import Field
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.truncation import make_tool_result, truncate
 from ddev.ai.tools.core.types import ToolResult
+from ddev.utils.fs import pretty_path
 
 from .base import FileRegistryTool
 
@@ -28,12 +29,21 @@ class ReadFileTool(FileRegistryTool[ReadFileInput]):
     Use to inspect config files, logs, source code. Do not use for binary files.
     The output is a numbered list of lines starting from 0.
     Supports offset/limit for paging through large files.
-    File does not need to be registered in the file registry.
+
+    The response metadata includes sha256=<hex>, the current content hash.
+    Retain this value: you can pass it as expected_hash to edit_file or append_file
+    later, which lets those tools verify the file is still in the same state without
+    requiring another read_file call.
+
     Note: data="" is a valid result meaning no lines in range."""
 
     @property
     def name(self) -> str:
         return "read_file"
+
+    def format_call(self, raw_input: dict[str, object]) -> str:
+        path = raw_input.get('path', '')
+        return f"{self.name} {pretty_path(path) if path else ''}".rstrip()
 
     async def __call__(self, tool_input: ReadFileInput) -> ToolResult:
         if fail := self._assert_readable(tool_input.path):
@@ -52,4 +62,5 @@ class ReadFileTool(FileRegistryTool[ReadFileInput]):
         width = len(str(offset + len(slice_)))
         numbered = "".join(f"{offset + i:{width}}: {line}" for i, line in enumerate(slice_))
         truncate_result = truncate(numbered)
-        return make_tool_result(success=True, data=truncate_result.output, result=truncate_result)
+        result = make_tool_result(success=True, data=truncate_result.output, result=truncate_result)
+        return result.model_copy(update={"metadata": {"sha256": self._registry.hash(content)}})
