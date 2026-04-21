@@ -1,0 +1,148 @@
+id: nifi
+metric_id: nifi
+backend_only: false
+facets:
+  - groups:
+      - Source Code
+    name: Logger Name
+    path: logger.name
+    source: log
+  - groups:
+      - Source Code
+    name: Thread Name
+    path: logger.thread_name
+    source: log
+  - groups:
+      - Web Access
+    name: Method
+    path: http.method
+    source: log
+  - groups:
+      - Web Access
+    name: Status Code
+    path: http.status_code
+    source: log
+  - groups:
+      - Web Access
+    name: URL Path
+    path: http.url_details.path
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+pipeline:
+  type: pipeline
+  name: NiFi
+  enabled: true
+  filter:
+    query: source:nifi
+  processors:
+    - type: pipeline
+      name: NiFi application logs
+      enabled: true
+      filter:
+        query: -log_type:request
+      processors:
+        - type: grok-parser
+          name: Parsing NiFi application logs
+          enabled: true
+          source: message
+          samples:
+            - "2026-03-20 18:08:33,065 INFO [main] o.a.nifi.NiFi NiFi PID is 1"
+            - "2026-03-20 18:08:33,065 ERROR [Timer-Driven Process Thread-1] o.a.n.p.standard.PutFile PutFile[id=abc] Failed to write"
+            - "2026-03-20 18:08:34,100 WARN [Flow Service Tasks Thread-1] o.a.n.c.s.impl.WriteAheadFlowFileRepository Encountered non-critical error"
+          grok:
+            supportRules: |
+              _date %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp}
+              _level %{word:level}
+              _thread %{regex("[^]]*"):logger.thread_name}
+              _logger %{notSpace:logger.name}
+            matchRules: |
+              nifi_app %{_date} %{_level} \[%{_thread}\] %{_logger} %{data:message}
+        - type: date-remapper
+          name: Define `timestamp` as the official date of the log
+          enabled: true
+          sources:
+            - timestamp
+        - type: status-remapper
+          name: Define `level` as the official status of the log
+          enabled: true
+          sources:
+            - level
+        - type: message-remapper
+          name: Define `message` as the official message of the log
+          enabled: true
+          sources:
+            - message
+    - type: pipeline
+      name: NiFi HTTP request logs
+      enabled: true
+      filter:
+        query: log_type:request
+      processors:
+        - type: grok-parser
+          name: Parsing NiFi HTTP request logs
+          enabled: true
+          source: message
+          samples:
+            - '192.168.1.100 - admin [20/Mar/2026:18:08:33 +0000] "GET /nifi-api/flow/status HTTP/1.1" 200 1234 "-" "python-requests/2.31.0"'
+            - '10.0.0.50 - - [20/Mar/2026:18:10:45 +0000] "POST /nifi-api/process-groups/root/process-groups HTTP/1.1" 404 892 "https://localhost:8443/nifi/" "Mozilla/5.0"'
+          grok:
+            supportRules: |
+              _auth %{notSpace:http.auth:nullIf("-")}
+              _bytes_written %{integer:network.bytes_written}
+              _client_ip %{ipOrHost:network.client.ip}
+              _version HTTP\/%{regex("\\d+\\.\\d+"):http.version}
+              _url %{notSpace:http.url}
+              _ident %{notSpace:http.ident:nullIf("-")}
+              _user_agent %{regex("[^\\\"]*"):http.useragent}
+              _referer %{notSpace:http.referer}
+              _status_code %{integer:http.status_code}
+              _method %{word:http.method}
+              _date_access %{date("dd/MMM/yyyy:HH:mm:ss Z"):date_access}
+            matchRules: |
+              access.common %{_client_ip} %{_ident} %{_auth} \[%{_date_access}\] "(?>%{_method} |)%{_url}(?> %{_version}|)" %{_status_code} (?>%{_bytes_written}|-)
+
+              access.combined %{access.common} "%{_referer}" "%{_user_agent}"
+        - type: url-parser
+          name: Extract URL details
+          enabled: true
+          sources:
+            - http.url
+          target: http.url_details
+        - type: user-agent-parser
+          name: Extract user agent details
+          enabled: true
+          sources:
+            - http.useragent
+          target: http.useragent_details
+          encoded: false
+        - type: date-remapper
+          name: Define `date_access` as the official date of the log
+          enabled: true
+          sources:
+            - date_access
+        - type: category-processor
+          name: Categorize status code
+          enabled: true
+          categories:
+            - filter:
+                query: "@http.status_code:[200 TO 299]"
+              name: OK
+            - filter:
+                query: "@http.status_code:[300 TO 399]"
+              name: notice
+            - filter:
+                query: "@http.status_code:[400 TO 499]"
+              name: warning
+            - filter:
+                query: "@http.status_code:[500 TO 599]"
+              name: error
+          target: http.status_category
+        - type: status-remapper
+          name: Define `http.status_category` as the official status of the log
+          enabled: true
+          sources:
+            - http.status_category
