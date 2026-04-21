@@ -11,6 +11,6 @@
 # .builders/inputs_hash.py plus everything under .builders/images/<target>/.
 
 [inputs]
-linux-aarch64 = "e48bf769667a4f30addf317d2b889aea045e025b981276a5cbfdf5b53ae86ca8"
-linux-x86_64 = "5e769b5c5678a0c578bbaf2289a8359ade8f3420de2a7f7ed3c09217866014c7"
-windows-x86_64 = "beba3774e0929bc4f9377cabcde2f797a83309d88be329154b3e099961c95884"
+linux-aarch64 = "e3b9a63fa95c9d58a54926fd42d1a20ae738a6c05ff8338d995b8cd9c5497ef2"
+linux-x86_64 = "58a8e70bf5f870e210d586662843cdc9948b5d90638e3487f1e07a2b10f27f19"
+windows-x86_64 = "130572854fdcd9ca5d021af13087afa7384b1e659959087db21c77ac144ad313"
