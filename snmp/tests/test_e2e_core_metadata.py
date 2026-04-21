@@ -339,6 +339,7 @@ def test_e2e_core_metadata_hp_ilo4(dd_agent_check):
         'profile': 'hp-ilo4',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.232.9.4.10',
+        'version': 'A04-08/12/2018',
         'tags': [
             'agent_host:' + common.get_agent_hostname(),
             'device_id:' + device_id,
@@ -351,6 +352,7 @@ def test_e2e_core_metadata_hp_ilo4(dd_agent_check):
             'snmp_profile:hp-ilo4',
         ],
         'vendor': 'hp',
+        'serial_number': 'dXPEdPBE5yKtjW9xx3',
         'device_type': 'server',
         'integration': 'snmp',
     }
@@ -386,6 +388,7 @@ def test_e2e_core_metadata_hpe_proliant(dd_agent_check):
         'os_name': 'RHEL',
         'os_version': '3.10.0-862.15.4.el7.ve.x86_64',
         'product_name': 'ProLiant',
+        'version': 'A04-08/12/2019',
         'sys_object_id': '1.3.6.1.4.1.232.1.2',
         'tags': [
             'agent_host:' + common.get_agent_hostname(),
@@ -399,6 +402,7 @@ def test_e2e_core_metadata_hpe_proliant(dd_agent_check):
             'snmp_profile:hpe-proliant',
         ],
         'vendor': 'hp',
+        'serial_number': 'dLPEdPBE5yKtjW9xx3',
         'device_type': 'other',
         'integration': 'snmp',
     }

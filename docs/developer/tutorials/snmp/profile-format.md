@@ -68,6 +68,14 @@ extends:
   - _base.yaml
 ```
 
+#### Vendor mixins that `extend` `_base.yaml`
+
+Some underscore mixins (for example `_hp.yaml`, `_dell.yaml`, `_juniper.yaml`, `_opengear.yaml`, `_palo-alto.yaml`, `_ubiquiti.yaml`, `_vertiv.yaml`, `_apc.yaml`) list only `_base.yaml` under `extends` plus a `vendor` (or similar) field. Expanding that mixin still pulls in **`_base.yaml`’s full device metadata** (for example `serial_number` and `version` from ENTITY-MIB).
+
+Because metadata merge is **first wins**, any other mixin or profile fragment that defines the **same** metadata keys with vendor-specific OIDs must appear **before** that vendor bridge mixin in the device profile’s `extends` list. Otherwise ENTITY values from `_base.yaml` win and the vendor-specific sources are never used (for example list `_hp-base.yaml` before `_hp.yaml` on HP server profiles).
+
+Conversely, list the vendor bridge mixin **after** generic metric mixins that do not define overlapping device metadata, and keep an explicit **`_base.yaml` last** on the top-level profile when you include it, so shared fields remain fallbacks.
+
 ### `metrics`
 
 _(Required)_
