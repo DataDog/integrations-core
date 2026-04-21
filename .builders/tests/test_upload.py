@@ -478,7 +478,7 @@ def test_lockfile_generation(tmp_path, setup_targets_dir, frozen_timestamp):
 
 
 def test_generate_lockfiles_skips_targets_with_no_wheels(tmp_path):
-    """An empty target (no wheels uploaded) should not produce a lockfile."""
+    """An empty target (no wheels uploaded) should not produce a lockfile, and any existing stale lockfile should be removed."""
     lockfile = {
         'linux-x86_64': ['dep @ https://example.com/dep.whl#sha256=abc', ''],
         'windows-x86_64': [''],
@@ -491,12 +491,16 @@ def test_generate_lockfiles_skips_targets_with_no_wheels(tmp_path):
     fake_resolved_dir.mkdir()
     (tmp_path / "targets").mkdir()
 
+    stale_lockfile = fake_resolved_dir / f"windows-x86_64_{upload.CURRENT_PYTHON_VERSION}.txt"
+    stale_lockfile.write_text("stale @ https://example.com/stale.whl#sha256=old\n", encoding="utf-8")
+
     with mock.patch.object(upload, "RESOLUTION_DIR", fake_deps_dir), \
          mock.patch.object(upload, "LOCK_FILE_DIR", fake_resolved_dir):
         upload.generate_lockfiles(str(tmp_path / "targets"), lockfile)
 
     lock_files = {f.name for f in fake_resolved_dir.glob("*.txt")}
     assert lock_files == {f"linux-x86_64_{upload.CURRENT_PYTHON_VERSION}.txt"}
+    assert not stale_lockfile.exists()
 
 
 def test_generate_lockfiles_accepts_string_path(tmp_path):

@@ -290,12 +290,13 @@ def generate_lockfiles(targets_dir, lockfiles):
     image_digests = {}
     builder_inputs = {}
     for target_name, lockfile_lines in lockfiles.items():
-        if not any(line.strip() for line in lockfile_lines):
-            print(f'Skipping lockfile for {target_name}: no wheels were uploaded.')
-            continue
         # The lockfiles contain the major.minor Python version
         # so that the Agent can transition safely
         lock_file = LOCK_FILE_DIR / f'{target_name}_{CURRENT_PYTHON_VERSION}.txt'
+        if not any(line.strip() for line in lockfile_lines):
+            print(f'Skipping lockfile for {target_name}: no wheels were uploaded.')
+            lock_file.unlink(missing_ok=True)
+            continue
         lock_file.write_text('\n'.join(lockfile_lines), encoding='utf-8')
 
         # The `image_digest` and `inputs_sha256` files are written by the
