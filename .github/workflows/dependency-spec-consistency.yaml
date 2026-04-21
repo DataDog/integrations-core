@@ -1,0 +1,71 @@
+name: Dependency Spec Consistency
+
+on:
+  pull_request:
+    branches:
+    - master
+    - 7.*.*
+
+jobs:
+  check:
+    name: Set dependency-spec-consistency status
+    runs-on: ubuntu-22.04
+    permissions:
+      statuses: write
+      contents: read
+    steps:
+    - name: Evaluate consistency of lockfiles with resolution inputs
+      id: evaluate
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      with:
+        script: |
+          const { data: files } = await github.rest.pulls.listFiles({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.payload.pull_request.number,
+            per_page: 100,
+          });
+
+          const inputPaths = [
+            'agent_requirements.in',
+            '.github/workflows/resolve-build-deps.yaml',
+          ];
+          const inputPrefixes = ['.builders/'];
+          const lockfilePrefix = '.deps/resolved/';
+
+          const inputsChanged = files.some(f =>
+            inputPaths.includes(f.filename)
+            || inputPrefixes.some(p => f.filename.startsWith(p))
+          );
+          const lockfilesChanged = files.some(f => f.filename.startsWith(lockfilePrefix));
+
+          const violated = lockfilesChanged && !inputsChanged;
+          core.setOutput('violated', violated ? 'true' : 'false');
+
+    - name: Set dependency-spec-consistency status to failure
+      if: steps.evaluate.outputs.violated == 'true'
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      with:
+        script: |
+          await github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: context.payload.pull_request.head.sha,
+            state: 'failure',
+            context: 'dependency-spec-consistency',
+            description: 'Lockfiles changed without a matching change to resolution inputs.',
+          });
+
+    - name: Set dependency-spec-consistency status to success
+      if: steps.evaluate.outputs.violated == 'false'
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      with:
+        script: |
+          await github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: context.payload.pull_request.head.sha,
+            state: 'success',
+            context: 'dependency-spec-consistency',
+            description: 'Lockfile changes are consistent with resolution input changes.',
+          });
