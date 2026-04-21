@@ -69,6 +69,7 @@ class KafkaCheck(AgentCheck):
         highwater_offsets = {}
         broker_timestamps = defaultdict(dict)
         cluster_id = ""
+        self.log.debug("Consumer offsets: %s", consumer_offsets)
         persistent_cache_key = "broker_timestamps_"
         consumer_contexts_count = self.count_consumer_contexts(consumer_offsets)
         try:
