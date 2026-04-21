@@ -2990,6 +2990,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
