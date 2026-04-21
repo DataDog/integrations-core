@@ -1,1 +1,1 @@
-Prevent SSRF in event pagination by validating that `next_page` URLs stay within the configured Prefect API origin.
+Adds validation for event pagination URLs.
