@@ -8,3 +8,8 @@ def mock_matplotlib_globally(mocker: pytest_mock.MockerFixture):
     mocker.patch("matplotlib.pyplot.show")
     mocker.patch("matplotlib.pyplot.savefig")
     mocker.patch("matplotlib.pyplot.figure")
+
+
+@pytest.fixture(autouse=True)
+def default_wheels_storage(monkeypatch):
+    monkeypatch.setenv("INTEGRATIONS_WHEELS_STORAGE", "stable")

@@ -437,7 +437,7 @@ jobs:
 
   macos-packaging:
     name: Build macOS installer and sign/notarize artifacts
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'push'
     needs:
     - define-tags
     - binaries
