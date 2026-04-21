@@ -245,7 +245,7 @@
                     {
                         "id": 4999502302143787,
                         "definition": {
-                            "title": "Top Incident types",
+                            "title": "Top incident types",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -796,7 +796,7 @@
                     {
                         "id": 7260286942171939,
                         "definition": {
-                            "title": "Top source brand",
+                            "title": "Top source brands",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
