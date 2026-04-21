@@ -132,9 +132,7 @@ def mocked_requests_get(*args, **kwargs):
         with open(f_name, 'r') as f:
             text_data = f.read()
             return MockHTTPResponse(content=text_data, headers={'Content-Type': 'text/plain'})
-    elif url == "http://{}:{}/api/v4/version".format(HOST, GITLAB_LOCAL_PORT) or url == "http://{}:{}/-/health".format(
-        HOST, GITLAB_LOCAL_PORT
-    ):
+    elif url == "http://{}:{}/api/v4/version".format(HOST, GITLAB_LOCAL_PORT):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'version.json')
         with open(f_name, 'r') as f:
             text_data = f.read()
