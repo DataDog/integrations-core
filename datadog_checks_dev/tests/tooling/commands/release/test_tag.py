@@ -40,7 +40,7 @@ def test_new_version_appears_in_output():
     assert result.exit_code == 0
     assert 'activemq-99.99.99' in result.output
     assert 'btrfs-99.99.99' in result.output
-    assert 'Tagged 2 release(s)' in result.output
+    assert f'Tagged 2 release(s), skipped {len(existing_tags) - 2} already-tagged release(s).' in result.output
 
 
 def test_existing_tag_silent_by_default():
