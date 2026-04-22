@@ -47,10 +47,6 @@ _WELL_KNOWN_TYPE_MODULES = (
 )
 
 
-class DeserializationError(Exception):
-    """Raised when a Kafka message cannot be deserialized."""
-
-
 def _preload_well_known_types(pool):
     """Add google/protobuf/*.proto well-known types to a fresh DescriptorPool.
 
@@ -216,10 +212,9 @@ class MessageDeserializer:
                     schema = self._get_or_build_schema(format_type, schema_str)
 
             return self._deserialize_bytes_maybe_schema_registry(raw_bytes, format_type, schema, uses_schema_registry)
-        except DeserializationError:
-            raise
         except Exception as e:
-            raise DeserializationError(f"Failed to deserialize message: {e}") from e
+            self.log.warning("Failed to deserialize message: %s", e)
+            return f"<deserialization error: {e}>", None
 
     def _deserialize_bytes_maybe_schema_registry(
         self, message: bytes, message_format: str, schema, uses_schema_registry: bool
@@ -596,10 +591,21 @@ class DeserializedMessage:
 
     @staticmethod
     def _parse_deserialized(deserialized: str | None):
-        """Parse a deserialized JSON string into a Python object."""
+        """Parse a deserialized string into a Python object.
+
+        deserialize_message returns either:
+        - A valid JSON string (for successfully deserialized messages)
+        - An error string like '<deserialization error: ...>' (on failure)
+        - None (for empty messages)
+
+        Error strings are returned as-is (not parsed as JSON).
+        """
         if not deserialized:
             return None
-        return json.loads(deserialized)
+        try:
+            return json.loads(deserialized)
+        except (json.JSONDecodeError, ValueError):
+            return deserialized
 
     @property
     def key(self) -> dict | str | None:
