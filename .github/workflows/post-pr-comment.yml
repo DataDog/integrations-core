@@ -33,6 +33,12 @@ name: 'Post PR comment'
 #   - find-comment is scoped to the dd-octo-sts[bot] author so a contributor
 #     comment cannot be hijacked even if it happens to contain the marker.
 #
+# Credentials:
+#   A single ephemeral dd-octo-sts token is used for every API call
+#   (artifact list/download, PR lookup, comment find/post). The workflow's
+#   only ambient permission is id-token: write, which is the prerequisite
+#   to minting the STS token; GITHUB_TOKEN itself carries no scopes.
+#
 # Onboarding a new producer:
 #   1) Append the producer's workflow display name to on.workflow_run.workflows.
 #   2) Producer uploads a 'pr-comment' artifact containing body.md.
@@ -46,16 +52,25 @@ on:
     types: [completed]
 
 permissions:
-  contents: read
-  actions: read          # download artifact from the triggering run
-  pull-requests: read    # resolve PR number from the workflow_run head SHA
-  id-token: write        # dd-octo-sts OIDC exchange
+  id-token: write   # required to call the OIDC endpoint for dd-octo-sts
 
 jobs:
   post:
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
+      # Mint the STS token first so every API call below uses a single
+      # ephemeral, scoped credential. The policy grants actions: read +
+      # pull_requests: read + issues: write, covering all of: listing and
+      # downloading the artifact, resolving the PR number, finding and
+      # updating the comment.
+      - name: Get token via dd-octo-sts
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        id: octo-sts
+        with:
+          scope: DataDog/integrations-core
+          policy: self.post-pr-comment.workflow-run
+
       # A successful upstream run may legitimately not produce an artifact
       # (e.g. the skip-qa producer only uploads when a comment is actually
       # needed). Pre-check so the download step only runs when we know the
@@ -65,7 +80,7 @@ jobs:
       - name: Check for comment artifact
         id: check
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
           RUN_ID: ${{ github.event.workflow_run.id }}
           REPO: ${{ github.repository }}
         run: |
@@ -83,7 +98,7 @@ jobs:
         with:
           name: pr-comment
           run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ github.token }}
+          github-token: ${{ steps.octo-sts.outputs.token }}
           path: pr-comment
 
       - name: Derive marker and prepend to body
@@ -112,7 +127,7 @@ jobs:
         if: steps.check.outputs.skip != 'true'
         id: pr
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
           REPO: ${{ github.repository }}
         run: |
@@ -125,14 +140,6 @@ jobs:
           else
             echo "number=$number" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Get token via dd-octo-sts
-        if: steps.check.outputs.skip != 'true' && steps.pr.outputs.skip != 'true'
-        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
-        id: octo-sts
-        with:
-          scope: DataDog/integrations-core
-          policy: self.post-pr-comment.workflow-run
 
       - name: Find existing comment
         if: steps.check.outputs.skip != 'true' && steps.pr.outputs.skip != 'true'
