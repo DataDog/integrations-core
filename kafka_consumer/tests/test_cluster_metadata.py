@@ -1351,3 +1351,66 @@ def test_schema_registry_url_encodes_subject_names(check):
     collector.http.get.assert_called_with(
         'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions/latest'
     )
+
+
+def test_partition_out_of_sync_broker_id_tag(check, dd_run_check, aggregator):
+    """Under-replicated partitions expose an ``out_of_sync_broker_id`` tag per replica missing from the ISR."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'tags': ['test_tag:test_value'],
+    }
+
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+
+    # Mutate the seeded metadata so that partition 0 is under-replicated:
+    # replicas = [1, 2, 3], but only broker 1 is in-sync => brokers 2 and 3 are out-of-sync.
+    # Partition 1 remains fully replicated.
+    topic_metadata = mock_kafka_client.kafka_client.list_topics.return_value.topics['test-topic']
+    topic_metadata.partitions[0].replicas = [1, 2, 3]
+    topic_metadata.partitions[0].isrs = [1]
+
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    mock_schema_registry_methods(kafka_consumer_check.metadata_collector)
+
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=None)
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    under_replicated_tags = [
+        'test_tag:test_value',
+        'kafka_cluster_id:test-cluster-id',
+        'topic:test-topic',
+        'partition:0',
+        'leader_broker_id:1',
+        'replica_broker_id:1',
+        'replica_broker_id:2',
+        'replica_broker_id:3',
+        'out_of_sync_broker_id:2',
+        'out_of_sync_broker_id:3',
+    ]
+
+    aggregator.assert_metric('kafka.partition.under_replicated', value=1, tags=under_replicated_tags)
+    aggregator.assert_metric('kafka.partition.replicas', value=3, tags=under_replicated_tags)
+    aggregator.assert_metric('kafka.partition.isr', value=1, tags=under_replicated_tags)
+
+    # Fully-replicated partitions must not carry an ``out_of_sync_broker_id`` tag.
+    in_sync_tags = [
+        'test_tag:test_value',
+        'kafka_cluster_id:test-cluster-id',
+        'topic:test-topic',
+        'partition:1',
+        'leader_broker_id:2',
+        'replica_broker_id:1',
+        'replica_broker_id:2',
+    ]
+    aggregator.assert_metric('kafka.partition.under_replicated', value=0, tags=in_sync_tags)
+    for metric in aggregator.metrics('kafka.partition.under_replicated'):
+        if 'partition:1' in metric.tags:
+            assert not any(tag.startswith('out_of_sync_broker_id:') for tag in metric.tags), (
+                f"Fully-replicated partition should not have out_of_sync_broker_id tags, got {metric.tags}"
+            )
