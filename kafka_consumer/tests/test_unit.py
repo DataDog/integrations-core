@@ -1557,11 +1557,14 @@ def test_gcp_cloud_managed_kafka_token_handling(oauth_config, use_credentials_fi
     assert 'oauth_cb' in auth_config
     oauth_callback = auth_config['oauth_cb']
 
+    import base64
+    import json
     from datetime import datetime, timezone
 
     mock_credentials = mock.Mock()
     mock_credentials.token = 'fake_gcp_token'
     mock_credentials.expiry = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+    mock_credentials.service_account_email = 'sa@test.iam.gserviceaccount.com'
 
     with mock.patch('datadog_checks.kafka_consumer.client.google.auth') as mock_google_auth:
         mock_google_auth.default.return_value = (mock_credentials, 'test-project')
@@ -1569,7 +1572,22 @@ def test_gcp_cloud_managed_kafka_token_handling(oauth_config, use_credentials_fi
         mock_google_auth.transport.requests.Request.return_value = mock.Mock()
 
         token, expiry = oauth_callback(None)
-        assert token == 'fake_gcp_token'
+
+        parts = token.split('.')
+        assert len(parts) == 3
+
+        def _b64decode(s):
+            return base64.urlsafe_b64decode(s + '=' * (-len(s) % 4))
+
+        header = json.loads(_b64decode(parts[0]))
+        claims = json.loads(_b64decode(parts[1]))
+        raw_token = _b64decode(parts[2]).decode()
+
+        assert header == {'typ': 'JWT', 'alg': 'GOOG_OAUTH2_TOKEN'}
+        assert claims['iss'] == 'Google'
+        assert claims['sub'] == 'sa@test.iam.gserviceaccount.com'
+        assert claims['exp'] == mock_credentials.expiry.timestamp()
+        assert raw_token == 'fake_gcp_token'
         assert expiry == mock_credentials.expiry.timestamp()
 
         if use_credentials_file:

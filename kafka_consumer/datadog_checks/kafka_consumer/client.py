@@ -25,6 +25,37 @@ except ImportError:
     GCP_IAM_AVAILABLE = False
 
 
+def _build_gcp_managed_kafka_token(credentials):
+    """Wrap a Google IAM access token in the envelope Managed Kafka's OAUTHBEARER validator expects.
+
+    See https://github.com/googleapis/managedkafka/blob/main/kafka-auth-local-server/kafka_gcp_credentials_server.py
+    """
+    import base64
+    import datetime
+    import json
+
+    def _b64(s):
+        return base64.urlsafe_b64encode(s.encode("utf-8")).decode("utf-8").rstrip("=")
+
+    header = json.dumps({"typ": "JWT", "alg": "GOOG_OAUTH2_TOKEN"})
+    now = datetime.datetime.now(datetime.timezone.utc)
+    expiry = (
+        credentials.expiry.replace(tzinfo=datetime.timezone.utc)
+        if credentials.expiry is not None
+        else now + datetime.timedelta(hours=1)
+    )
+    claims = json.dumps(
+        {
+            "exp": expiry.timestamp(),
+            "iss": "Google",
+            "iat": now.timestamp(),
+            "sub": getattr(credentials, "service_account_email", "user"),
+        }
+    )
+    token = ".".join([_b64(header), _b64(claims), _b64(credentials.token)])
+    return token, expiry.timestamp()
+
+
 class KafkaClient:
     def __init__(self, config, log) -> None:
         self.config = config
@@ -144,21 +175,10 @@ class KafkaClient:
                         request = google.auth.transport.requests.Request()
                         credentials.refresh(request)
 
-                        token = credentials.token
-                        expiry = credentials.expiry
-                        if expiry is not None:
-                            import time
-
-                            expiry_seconds = expiry.timestamp()
-                        else:
-                            # Default to 1 hour if no expiry is provided
-                            import time
-
-                            expiry_seconds = time.time() + 3600
-
+                        token, expiry_seconds = _build_gcp_managed_kafka_token(credentials)
                         self.log.debug(
-                            "Generated GCP IAM token for Cloud Managed Kafka, expires at %s",
-                            expiry,
+                            "Generated GCP Managed Kafka token, expires at %s",
+                            credentials.expiry,
                         )
                         return token, expiry_seconds
                     except Exception as e:
