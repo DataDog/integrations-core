@@ -267,7 +267,7 @@ class TestGCPIAMInit:
             'ssl': True,
             'gcp': {'managed_authentication': {'enabled': True}},
         }
-        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider') as mock_provider_cls:
+        with patch('datadog_checks.redisdb.gcp.GCPIAMTokenProvider') as mock_provider_cls:
             redis_check = check(instance)
             mock_provider_cls.assert_called_once_with(None)
             assert redis_check._gcp_token_provider is mock_provider_cls.return_value
@@ -284,7 +284,7 @@ class TestGCPIAMInit:
                 }
             },
         }
-        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider') as mock_provider_cls:
+        with patch('datadog_checks.redisdb.gcp.GCPIAMTokenProvider') as mock_provider_cls:
             check(instance)
             mock_provider_cls.assert_called_once_with('datadog@my-project.iam.gserviceaccount.com')
 
@@ -299,7 +299,7 @@ class TestGCPIAMInit:
             'password': 'secret',
             'gcp': {'managed_authentication': {'enabled': True}},
         }
-        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider'):
+        with patch('datadog_checks.redisdb.gcp.GCPIAMTokenProvider'):
             with pytest.raises(ConfigurationError, match="password"):
                 check(instance)
 
@@ -310,7 +310,7 @@ class TestGCPIAMInit:
             'username': 'someuser',
             'gcp': {'managed_authentication': {'enabled': True}},
         }
-        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider'):
+        with patch('datadog_checks.redisdb.gcp.GCPIAMTokenProvider'):
             with pytest.raises(ConfigurationError, match="username"):
                 check(instance)
 
@@ -320,7 +320,7 @@ class TestGCPIAMInit:
             'port': 6380,
             'gcp': {'managed_authentication': {'enabled': True}},
         }
-        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider'):
+        with patch('datadog_checks.redisdb.gcp.GCPIAMTokenProvider'):
             with pytest.raises(ConfigurationError, match="SSL"):
                 check(instance)
 
@@ -331,7 +331,7 @@ class TestGCPIAMInit:
             'ssl': True,
             'gcp': {'managed_authentication': {'enabled': True}},
         }
-        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider'):
+        with patch('datadog_checks.redisdb.gcp.GCPIAMTokenProvider'):
             check(instance)  # should not raise
 
 
@@ -347,7 +347,7 @@ class TestGCPIAMGetConn:
         mock_provider.username = "default"
         mock_provider.get_token.return_value = "iam-token-abc"
         mock_provider.is_token_expired.return_value = False
-        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider', return_value=mock_provider):
+        with patch('datadog_checks.redisdb.gcp.GCPIAMTokenProvider', return_value=mock_provider):
             redis_check = check(instance)
         redis_check._gcp_token_provider = mock_provider
         return redis_check, mock_provider
@@ -403,7 +403,7 @@ class TestGCPIAMCheckDbRetry:
         mock_provider.username = "default"
         mock_provider.get_token.return_value = "iam-token-abc"
         mock_provider.is_token_expired.return_value = False
-        with patch('datadog_checks.redisdb.redisdb.GCPIAMTokenProvider', return_value=mock_provider):
+        with patch('datadog_checks.redisdb.gcp.GCPIAMTokenProvider', return_value=mock_provider):
             redis_check = check(instance)
         redis_check._gcp_token_provider = mock_provider
         return redis_check, mock_provider
@@ -452,3 +452,73 @@ class TestGCPIAMCheckDbRetry:
         mock_conn_b.connection_pool.disconnect.assert_called_once()
         assert redis_check.connections == {}
         mock_provider.invalidate.assert_called_once()
+
+
+class TestGCPIAMSafeErrorMessage:
+    def _make_iam_check(self, check):
+        instance = {
+            'host': 'memorystore.googleapis.com',
+            'port': 6380,
+            'ssl': True,
+            'gcp': {'managed_authentication': {'enabled': True}},
+        }
+        mock_provider = MagicMock()
+        mock_provider.username = "default"
+        mock_provider.get_token.return_value = "iam-token-abc"
+        mock_provider._token = "iam-token-abc"
+        mock_provider.is_token_expired.return_value = False
+        with patch('datadog_checks.redisdb.gcp.GCPIAMTokenProvider', return_value=mock_provider):
+            redis_check = check(instance)
+        redis_check._gcp_token_provider = mock_provider
+        return redis_check, mock_provider
+
+    def test_redacts_token_from_error_message(self, check):
+        redis_check, _ = self._make_iam_check(check)
+        err = Exception("AUTH failed with token iam-token-abc on host")
+        msg = redis_check._safe_error_message(err)
+        assert "iam-token-abc" not in msg
+        assert "<REDACTED>" in msg
+        assert "AUTH failed" in msg
+
+    def test_passes_through_message_without_iam(self, check, redis_instance):
+        redis_check = check(redis_instance)
+        err = Exception("WRONGPASS invalid username-password pair")
+        msg = redis_check._safe_error_message(err)
+        assert msg == "WRONGPASS invalid username-password pair"
+
+    def test_passes_through_message_when_no_token_cached(self, check):
+        redis_check, mock_provider = self._make_iam_check(check)
+        mock_provider._token = None
+        err = Exception("connection refused")
+        msg = redis_check._safe_error_message(err)
+        assert msg == "connection refused"
+
+
+class TestGCPIAMNoCacheDisconnect:
+    def _make_iam_check(self, check):
+        instance = {
+            'host': 'memorystore.googleapis.com',
+            'port': 6380,
+            'ssl': True,
+            'disable_connection_cache': True,
+            'gcp': {'managed_authentication': {'enabled': True}},
+        }
+        mock_provider = MagicMock()
+        mock_provider.username = "default"
+        mock_provider.get_token.return_value = "iam-token-abc"
+        mock_provider.is_token_expired.return_value = False
+        with patch('datadog_checks.redisdb.gcp.GCPIAMTokenProvider', return_value=mock_provider):
+            redis_check = check(instance)
+        redis_check._gcp_token_provider = mock_provider
+        return redis_check, mock_provider
+
+    def test_no_cache_disconnects_old_connection(self, check):
+        redis_check, _ = self._make_iam_check(check)
+        mock_old_conn = MagicMock()
+        key = ('memorystore.googleapis.com', 6380, None)
+        redis_check.connections[key] = mock_old_conn
+
+        with patch('redis.Redis'):
+            redis_check._get_conn(redis_check.instance)
+
+        mock_old_conn.connection_pool.disconnect.assert_called_once()

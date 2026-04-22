@@ -62,7 +62,8 @@ class GCPIAMTokenProvider:
         return self._credentials.token, time.time() + TOKEN_TTL_SECONDS
 
     def is_token_expired(self) -> bool:
-        return time.time() >= self._expires_at
+        with self._lock:
+            return time.time() >= self._expires_at
 
     def invalidate(self) -> None:
         with self._lock:

@@ -24,7 +24,6 @@ from .constants import (
     RATE_KEYS,
     REPL_KEY,
 )
-from .gcp import GCPIAMTokenProvider
 
 
 class Redis(AgentCheck):
@@ -56,6 +55,8 @@ class Redis(AgentCheck):
                     "GCP IAM auth requires SSL. Set 'ssl: true' in the instance configuration "
                     "to prevent IAM tokens from being transmitted in plaintext."
                 )
+            from .gcp import GCPIAMTokenProvider
+
             self._gcp_token_provider = GCPIAMTokenProvider(managed_auth.get('service_account'))
         else:
             self._gcp_token_provider = None
@@ -95,6 +96,10 @@ class Redis(AgentCheck):
             self.connections.clear()
 
         if no_cache or key not in self.connections:
+            if no_cache:
+                old_conn = self.connections.pop(key, None)
+                if old_conn:
+                    old_conn.connection_pool.disconnect()
             try:
                 list_params = [
                     'host',
@@ -147,10 +152,11 @@ class Redis(AgentCheck):
                 raise
 
     def _safe_error_message(self, e: Exception) -> str:
-        """Return a sanitized error message, omitting credentials when IAM auth is active."""
-        if self._gcp_token_provider:
-            return type(e).__name__
-        return str(e)
+        """Return error message with IAM token redacted when IAM auth is active."""
+        msg = str(e)
+        if self._gcp_token_provider and self._gcp_token_provider._token:
+            msg = msg.replace(self._gcp_token_provider._token, '<REDACTED>')
+        return msg
 
     def _force_iam_reconnect(self):
         for conn in self.connections.values():
