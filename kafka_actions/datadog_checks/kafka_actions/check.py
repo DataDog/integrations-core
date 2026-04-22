@@ -9,7 +9,7 @@ from datadog_checks.base import AgentCheck
 
 from .config import KafkaActionsConfig
 from .kafka_client import KafkaActionsClient
-from .message_deserializer import DeserializedMessage, MessageDeserializer
+from .message_deserializer import DeserializationError, DeserializedMessage, MessageDeserializer
 from .schema_registry import SchemaRegistryClient
 
 
@@ -376,6 +376,8 @@ class KafkaActionsCheck(AgentCheck):
             self.log.debug("Filter '%s' evaluated to: %s", filter_expression, result)
             return result
 
+        except DeserializationError:
+            raise
         except Exception as e:
             self.log.warning("Filter evaluation failed for '%s': %s", filter_expression, e)
             return False

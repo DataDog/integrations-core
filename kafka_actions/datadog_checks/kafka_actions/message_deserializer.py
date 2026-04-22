@@ -14,10 +14,61 @@ from io import BytesIO
 from bson import decode as bson_decode
 from bson.json_util import dumps as bson_dumps
 from fastavro import schemaless_reader
-from google.protobuf import descriptor_pb2, descriptor_pool, message_factory
+from google.protobuf import (
+    any_pb2,
+    api_pb2,
+    descriptor_pb2,
+    descriptor_pool,
+    duration_pb2,
+    empty_pb2,
+    field_mask_pb2,
+    message_factory,
+    source_context_pb2,
+    struct_pb2,
+    timestamp_pb2,
+    type_pb2,
+    wrappers_pb2,
+)
 from google.protobuf.json_format import MessageToJson
 
 SCHEMA_REGISTRY_MAGIC_BYTE = 0x00
+
+_WELL_KNOWN_TYPE_MODULES = (
+    any_pb2,
+    duration_pb2,
+    empty_pb2,
+    field_mask_pb2,
+    source_context_pb2,
+    struct_pb2,
+    timestamp_pb2,
+    wrappers_pb2,
+    type_pb2,
+    api_pb2,
+)
+
+
+class DeserializationError(Exception):
+    """Raised when a Kafka message cannot be deserialized."""
+
+
+def _preload_well_known_types(pool):
+    """Add google/protobuf/*.proto well-known types to a fresh DescriptorPool.
+
+    Registry-provided FileDescriptorProtos may depend on well-known types
+    (e.g. google/protobuf/timestamp.proto) without listing them as references.
+    A custom DescriptorPool doesn't have them by default, so we copy them from
+    the generated modules before adding user schemas.
+    """
+    for module in _WELL_KNOWN_TYPE_MODULES:
+        file_name = module.DESCRIPTOR.name
+        try:
+            pool.FindFileByName(file_name)
+            continue
+        except KeyError:
+            pass
+        fd_proto = descriptor_pb2.FileDescriptorProto()
+        module.DESCRIPTOR.CopyToProto(fd_proto)
+        pool.Add(fd_proto)
 
 
 class _AvroJSONEncoder(json.JSONEncoder):
@@ -165,9 +216,10 @@ class MessageDeserializer:
                     schema = self._get_or_build_schema(format_type, schema_str)
 
             return self._deserialize_bytes_maybe_schema_registry(raw_bytes, format_type, schema, uses_schema_registry)
+        except DeserializationError:
+            raise
         except Exception as e:
-            self.log.warning("Failed to deserialize message: %s", e)
-            return f"<deserialization error: {e}>", None
+            raise DeserializationError(f"Failed to deserialize message: {e}") from e
 
     def _deserialize_bytes_maybe_schema_registry(
         self, message: bytes, message_format: str, schema, uses_schema_registry: bool
@@ -432,6 +484,7 @@ class MessageDeserializer:
         descriptor_set.ParseFromString(schema_bytes)
 
         pool = descriptor_pool.DescriptorPool()
+        _preload_well_known_types(pool)
         for fd_proto in descriptor_set.file:
             pool.Add(fd_proto)
 
@@ -460,10 +513,16 @@ class MessageDeserializer:
             _get_protobuf_message_class to select the correct message type.
         """
         pool = descriptor_pool.DescriptorPool()
+        _preload_well_known_types(pool)
         descriptor_set = descriptor_pb2.FileDescriptorSet()
 
         # Add dependencies first (in dependency order), fixing names
         for dep_name, dep_b64 in dep_schemas:
+            try:
+                pool.FindFileByName(dep_name)
+                continue
+            except KeyError:
+                pass
             dep_bytes = base64.b64decode(dep_b64)
             dep_proto = descriptor_pb2.FileDescriptorProto()
             dep_proto.ParseFromString(dep_bytes)
@@ -537,22 +596,10 @@ class DeserializedMessage:
 
     @staticmethod
     def _parse_deserialized(deserialized: str | None):
-        """Parse a deserialized string into a Python object.
-
-        deserialize_message returns either:
-        - A valid JSON string (for successfully deserialized messages)
-        - An error string like '<deserialization error: ...>' (on failure)
-        - None (for empty messages)
-
-        Error strings are returned as-is (not parsed as JSON).
-        """
+        """Parse a deserialized JSON string into a Python object."""
         if not deserialized:
             return None
-        try:
-            return json.loads(deserialized)
-        except (json.JSONDecodeError, ValueError):
-            # Error strings from deserialize_message are not valid JSON
-            return deserialized
+        return json.loads(deserialized)
 
     @property
     def key(self) -> dict | str | None:

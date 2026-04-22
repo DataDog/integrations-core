@@ -9,7 +9,11 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from datadog_checks.kafka_actions.message_deserializer import DeserializedMessage, MessageDeserializer
+from datadog_checks.kafka_actions.message_deserializer import (
+    DeserializationError,
+    DeserializedMessage,
+    MessageDeserializer,
+)
 
 pytestmark = [pytest.mark.unit]
 
@@ -271,9 +275,8 @@ class TestMessageDeserializer:
         assert 'The Go Programming Language' in result[0]
 
         # Test 2: uses_schema_registry=True with plain Avro message - should fail (missing magic byte)
-        result = deserializer.deserialize_message(avro_message_no_sr, 'avro', avro_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail when uses_schema_registry=True"
-        assert result[1] is None
+        with pytest.raises(DeserializationError):
+            deserializer.deserialize_message(avro_message_no_sr, 'avro', avro_schema, True)
 
         # Test 3: uses_schema_registry=True with Schema Registry format - should succeed
         result = deserializer.deserialize_message(avro_message_with_sr, 'avro', avro_schema, True)
@@ -285,13 +288,13 @@ class TestMessageDeserializer:
         wrong_magic_byte = (
             b'\x01\x00\x00\x01\x5e\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan'
         )
-        result = deserializer.deserialize_message(wrong_magic_byte, 'avro', avro_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail with wrong magic byte"
+        with pytest.raises(DeserializationError):
+            deserializer.deserialize_message(wrong_magic_byte, 'avro', avro_schema, True)
 
         # Test 5: Message too short (less than 5 bytes) - should fail
         too_short = b'\x00\x00\x01'
-        result = deserializer.deserialize_message(too_short, 'avro', avro_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail when message too short"
+        with pytest.raises(DeserializationError):
+            deserializer.deserialize_message(too_short, 'avro', avro_schema, True)
 
         # Test 6: Test through DeserializedMessage wrapper
         kafka_msg = MockKafkaMessage(key=key_bytes, value=avro_message_no_sr)
@@ -407,11 +410,8 @@ class TestMessageDeserializer:
         assert 'The Go Programming Language' in result[0]
 
         # Test 2: uses_schema_registry=True with plain Protobuf message - should fail
-        result = deserializer.deserialize_message(protobuf_message_no_sr, 'protobuf', protobuf_schema, True)
-        assert result[0].startswith("<deserialization error:"), (
-            "Protobuf should fail when uses_schema_registry=True but no SR format"
-        )
-        assert result[1] is None
+        with pytest.raises(DeserializationError):
+            deserializer.deserialize_message(protobuf_message_no_sr, 'protobuf', protobuf_schema, True)
 
         # Test 3: uses_schema_registry=True with Schema Registry format - should succeed
         result = deserializer.deserialize_message(protobuf_message_with_sr, 'protobuf', protobuf_schema, True)
@@ -421,13 +421,13 @@ class TestMessageDeserializer:
 
         # Test 4: Wrong magic byte - should fail
         wrong_magic_byte = b'\x01\x00\x00\x01\x5e' + protobuf_message_no_sr
-        result = deserializer.deserialize_message(wrong_magic_byte, 'protobuf', protobuf_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail with wrong magic byte"
+        with pytest.raises(DeserializationError):
+            deserializer.deserialize_message(wrong_magic_byte, 'protobuf', protobuf_schema, True)
 
         # Test 5: Message too short (less than 5 bytes) - should fail
         too_short = b'\x00\x00\x01'
-        result = deserializer.deserialize_message(too_short, 'protobuf', protobuf_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail when message too short"
+        with pytest.raises(DeserializationError):
+            deserializer.deserialize_message(too_short, 'protobuf', protobuf_schema, True)
 
         # Test 6: Test through DeserializedMessage wrapper
         kafka_msg = MockKafkaMessage(key=key_bytes, value=protobuf_message_no_sr)
@@ -638,6 +638,33 @@ class TestSchemaRegistryIntegration:
         result = json.loads(result_str)
         assert result['title'] == 'The Go Programming Language'
 
+    def test_protobuf_with_well_known_type_dependency(self):
+        """Protobuf schema referencing google/protobuf/Timestamp deserializes via preloaded well-known types.
+
+        The registry may return a schema that imports a well-known type without
+        listing it as an explicit reference (dep_schemas is empty). Without
+        preloading, DescriptorPool raises 'Depends on file ... but it has not been loaded'.
+        """
+        # FileDescriptorProto for test.Event { int64 id = 1; google.protobuf.Timestamp created_at = 2; }
+        schema_b64 = (
+            'Cgp0ZXN0LnByb3RvEgR0ZXN0Gh9nb29nbGUvcHJvdG9idWYvdGltZXN0YW1wLnByb3RvIkMKBUV2'
+            'ZW50EgoKAmlkGAEgASgDEi4KCmNyZWF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGlt'
+            'ZXN0YW1wYgZwcm90bzM='
+        )
+        payload = bytes.fromhex('082a12060880daf8b906')
+
+        log = MagicMock()
+        registry = self._mock_registry(schema_b64, 'PROTOBUF')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        raw = self._make_sr_message(101, payload, protobuf_indices=b'\x01\x00')
+        result_str, schema_id = deserializer.deserialize_message(raw, 'protobuf', None, True)
+
+        assert schema_id == 101
+        result = json.loads(result_str)
+        assert result['id'] == '42'
+        assert 'createdAt' in result
+
     def test_json_with_schema_registry_fetch(self):
         """JSON message with schema registry format fetches type from registry."""
         log = MagicMock()
@@ -671,7 +698,7 @@ class TestSchemaRegistryIntegration:
         registry.get_schema.assert_called_once_with(42)
 
     def test_registry_error_surfaces(self):
-        """Registry HTTP error surfaces as deserialization error."""
+        """Registry HTTP error surfaces as DeserializationError."""
         log = MagicMock()
         registry = MagicMock()
         registry.get_schema.side_effect = Exception("HTTP 404: Schema not found")
@@ -679,9 +706,8 @@ class TestSchemaRegistryIntegration:
 
         raw = self._make_sr_message(999, self.AVRO_PAYLOAD)
 
-        result_str, schema_id = deserializer.deserialize_message(raw, 'avro', None, True)
-        assert result_str.startswith("<deserialization error:")
-        assert schema_id is None
+        with pytest.raises(DeserializationError):
+            deserializer.deserialize_message(raw, 'avro', None, True)
 
     def test_registry_always_used_when_uses_schema_registry(self):
         """When uses_schema_registry=True, registry is always used even if inline schema is provided."""
@@ -705,8 +731,8 @@ class TestSchemaRegistryIntegration:
 
         raw = self._make_sr_message(42, self.AVRO_PAYLOAD)
 
-        result_str, schema_id = deserializer.deserialize_message(raw, 'avro', None, True)
-        assert result_str.startswith("<deserialization error:")
+        with pytest.raises(DeserializationError):
+            deserializer.deserialize_message(raw, 'avro', None, True)
 
     def test_deserialized_message_with_registry(self):
         """DeserializedMessage wrapper works with schema registry."""
