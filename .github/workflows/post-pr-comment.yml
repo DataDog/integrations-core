@@ -15,21 +15,29 @@ name: 'Post PR comment'
 # Artifact contract (producer uploads; this workflow consumes):
 #   name: pr-comment
 #   files:
-#     body.md    Markdown body to post. Treated as opaque, attacker-controlled text.
-#     meta.json  {"marker": "<!-- xxx-comment -->"} — validated below.
+#     body.md   Markdown body to post. Treated as opaque, attacker-controlled text.
+#
+# This workflow owns the hidden marker that lets find-comment locate the
+# previously-posted comment. The marker is derived from the triggering
+# workflow's display name (slugified), so producers cannot misconfigure it
+# and there is no attacker-controlled metadata to validate. The marker is
+# prepended to body.md before the comment is posted.
 #
 # Trust boundaries enforced here:
 #   - PR number comes from the workflow_run event (head_sha -> commits/pulls
 #     API), never from the artifact. Prevents cross-PR comment injection.
-#   - Marker is validated against a strict regex before being used as a
-#     find-comment filter. Prevents hijacking of unrelated bot comments.
+#   - Marker is derived from github.event.workflow_run.name (trusted GitHub
+#     event data), never from the artifact.
 #   - body.md is written directly to a file and passed via body-path.
 #     It is never shell-interpolated.
+#   - find-comment is scoped to the dd-octo-sts[bot] author so a contributor
+#     comment cannot be hijacked even if it happens to contain the marker.
 #
 # Onboarding a new producer:
 #   1) Append the producer's workflow display name to on.workflow_run.workflows.
-#   2) Producer uploads an artifact matching the contract above.
-#   3) Pick a unique marker (format: "<!-- <slug>-comment -->").
+#   2) Producer uploads a 'pr-comment' artifact containing body.md.
+#   3) Pick a workflow display name that slugifies to a stable, unique id;
+#      the derived marker is "<!-- pr-comment:<slug> -->".
 
 on:
   workflow_run:
@@ -60,26 +68,32 @@ jobs:
 
       - name: Skip if no artifact was produced
         if: steps.download.outcome != 'success'
+        id: skip_no_artifact
         run: |
           echo "Upstream workflow completed without a pr-comment artifact. Nothing to post."
           echo "skip=true" >> "$GITHUB_OUTPUT"
-        id: skip_no_artifact
 
-      - name: Validate marker
+      - name: Derive marker and prepend to body
         if: steps.skip_no_artifact.outputs.skip != 'true'
-        id: meta
+        id: marker
         env:
-          META_PATH: pr-comment/meta.json
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
         run: |
           set -euo pipefail
-          marker=$(python3 -c 'import json, os; print(json.load(open(os.environ["META_PATH"]))["marker"])')
-          if ! printf '%s' "$marker" | grep -Eq '^<!-- [a-z0-9][a-z0-9_-]{0,62}-comment -->$'; then
-            echo "Rejecting marker (format violation): $marker" >&2
+          slug=$(printf '%s' "$WORKFLOW_NAME" \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g' \
+            | cut -c1-64)
+          if [[ -z "$slug" ]]; then
+            echo "Workflow name did not produce a usable slug: ${WORKFLOW_NAME}" >&2
             exit 1
           fi
-          # Echoing via GITHUB_OUTPUT is safe because the regex above has
-          # constrained the value to [a-z0-9_-] plus a fixed wrapper.
-          echo "marker=$marker" >> "$GITHUB_OUTPUT"
+          marker="<!-- pr-comment:${slug} -->"
+          {
+            printf '%s\n\n' "$marker"
+            cat pr-comment/body.md
+          } > pr-comment/posted-body.md
+          echo "value=$marker" >> "$GITHUB_OUTPUT"
 
       - name: Resolve PR number from head SHA
         if: steps.skip_no_artifact.outputs.skip != 'true'
@@ -114,7 +128,8 @@ jobs:
         with:
           token: ${{ steps.octo-sts.outputs.token }}
           issue-number: ${{ steps.pr.outputs.number }}
-          body-includes: ${{ steps.meta.outputs.marker }}
+          body-includes: ${{ steps.marker.outputs.value }}
+          comment-author: 'dd-octo-sts[bot]'
 
       - name: Post comment
         if: steps.skip_no_artifact.outputs.skip != 'true' && steps.pr.outputs.skip != 'true'
@@ -122,6 +137,6 @@ jobs:
         with:
           token: ${{ steps.octo-sts.outputs.token }}
           issue-number: ${{ steps.pr.outputs.number }}
-          body-path: pr-comment/body.md
+          body-path: pr-comment/posted-body.md
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
           edit-mode: replace
