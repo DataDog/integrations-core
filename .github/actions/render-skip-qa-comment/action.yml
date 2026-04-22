@@ -23,6 +23,8 @@ runs:
         OUTPUT_PATH: ${{ inputs.output }}
         CHANGED_FILES_JSON: ${{ inputs.changed-files-json }}
       run: |
+        set -euo pipefail
+
         args=("$MODE" "--output" "$OUTPUT_PATH")
         if [[ "$MODE" == "remove-label" ]]; then
           args+=("--changed-files-json" "$CHANGED_FILES_JSON")

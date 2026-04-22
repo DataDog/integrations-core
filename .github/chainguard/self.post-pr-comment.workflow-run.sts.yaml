@@ -18,20 +18,9 @@
 #     workflow_run-triggered workflows cannot reuse this policy.
 #
 # Permissions granted:
-#   - pull_requests: write - Create and update PR conversation comments. Although
-#                            PR conversation comments are served by the Issues API
-#                            endpoint (/repos/.../issues/{n}/comments), the endpoint
-#                            accepts either issues:write or pull_requests:write, and
-#                            we only ever comment on pull requests, never on plain
-#                            issues. pull_requests:write is also what works in
-#                            practice for the DD Octo STS installation in this repo.
-#   - actions: read        - List and download the pr-comment artifact from the
-#                            triggering workflow_run.
-#
-# Granting reads to the STS token means the workflow uses a single ephemeral
-# credential end-to-end and never relies on GITHUB_TOKEN. pull_requests:write
-# also subsumes the PR-number lookup (commits/{sha}/pulls) previously covered
-# by pull_requests:read.
+#   - issues: write  - Create and update PR conversation comments
+#                      (PR conversation comments use the Issues API, which is
+#                      why the GitHub App scope is issues, not pull_requests).
 #
 # Usage in workflows:
 #   - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
@@ -51,5 +40,4 @@ claim_pattern:
   repository: DataDog/integrations-core
 
 permissions:
-  pull_requests: write
-  actions: read
+  issues: write

@@ -1,5 +1,21 @@
 name: 'Validate skip QA label'
 
+# Runs under the fork-PR threat model:
+# - No repository secrets are exposed (pull_request from a fork).
+# - GITHUB_TOKEN is forcibly read-only.
+# - No id-token: write and no OIDC/STS exchange happen here, so even if a
+#   fork PR modifies this workflow or the render composite action, there is
+#   no writable credential to steal.
+#
+# The rendered comment body is handed off to .github/workflows/post-pr-comment.yml
+# (triggered via workflow_run, always runs from master) using this artifact
+# contract:
+#   - name: pr-comment
+#   - files:
+#       body.md    rendered markdown (treated as opaque, attacker-controlled text)
+#       meta.json  {"marker": "<!-- … -->"}  (marker must match the regex
+#                  enforced by post-pr-comment.yml)
+
 on:
   pull_request:
     types: [opened, synchronize]
@@ -11,9 +27,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
     env:
       PYTHON_VERSION: "3.13"
+      COMMENT_MARKER: "<!-- validate-skip-qa-comment -->"
 
     steps:
       - name: Checkout Code
@@ -26,13 +42,10 @@ jobs:
         with:
           python-version: "${{ env.PYTHON_VERSION }}"
 
-      - name: Get token via dd-octo-sts
-        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
-        id: octo-sts
-        with:
-          scope: DataDog/integrations-core
-          policy: self.validate-skip-qa.pull-request
-
+      # json: true produces a JSON array. escape_json / safe_output are
+      # string-mode sanitizers that would double-encode a JSON array, so we
+      # disable them. The JSON flows through env vars into a Python json.loads
+      # in the composite action, never through a shell expansion.
       - name: Get files changed
         id: changed_files
         uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
@@ -49,46 +62,36 @@ jobs:
             ddev/**
             datadog_checks_dev/**
             datadog_checks_tests_helper/**
-  
-      - name: Find comment
-        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
-        id: find_comment
-        with:
-          token: ${{ steps.octo-sts.outputs.token }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body-includes: "<!-- validate-skip-qa-comment -->"
 
-      - name: Write comment body - Add skip qa label
+      - name: Render comment body - Add skip qa label
+        id: render_add
         if: steps.changed_files.outputs.any_changed == 'false' && !contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
         uses: ./.github/actions/render-skip-qa-comment
         with:
           mode: add-label
-          output: comment-body.md
+          output: pr-comment/body.md
 
-      - name: Post message - Add skip qa label
-        if: steps.changed_files.outputs.any_changed == 'false' && !contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
-        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
-        with:
-          token: ${{ steps.octo-sts.outputs.token }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body-path: comment-body.md
-          comment-id: ${{ steps.find_comment.outputs.comment-id }}
-          edit-mode: "replace"
-
-      - name: Write comment body - Remove skip qa label
+      - name: Render comment body - Remove skip qa label
+        id: render_remove
         if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
         uses: ./.github/actions/render-skip-qa-comment
         with:
           mode: remove-label
           changed-files-json: ${{ steps.changed_files.outputs.all_changed_files }}
-          output: comment-body.md
+          output: pr-comment/body.md
 
-      - name: Post comment - Remove skip qa label
-        if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
-        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+      - name: Write comment metadata
+        if: steps.render_add.outcome == 'success' || steps.render_remove.outcome == 'success'
+        env:
+          MARKER: ${{ env.COMMENT_MARKER }}
+        run: |
+          python3 -c 'import json, os; json.dump({"marker": os.environ["MARKER"]}, open("pr-comment/meta.json", "w"))'
+
+      - name: Upload comment artifact
+        if: steps.render_add.outcome == 'success' || steps.render_remove.outcome == 'success'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
-          token: ${{ steps.octo-sts.outputs.token }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body-path: comment-body.md
-          comment-id: ${{ steps.find_comment.outputs.comment-id }}
-          edit-mode: "replace"
+          name: pr-comment
+          path: pr-comment/
+          retention-days: 1
+          if-no-files-found: error
