@@ -8,7 +8,7 @@
 
 * Re-order configuration fields based on real-world usage data. ([#23274](https://github.com/DataDog/integrations-core/pull/23274))
 
-## 3.3.0 / 2026-04-01
+## 3.3.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 

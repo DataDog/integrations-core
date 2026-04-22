@@ -23,7 +23,7 @@
     - Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place. ([#23075](https://github.com/DataDog/integrations-core/pull/23075))
     - Improve compile-time error messages for invalid syntax in DB query extras expressions. ([#23140](https://github.com/DataDog/integrations-core/pull/23140)) ([#23282](https://github.com/DataDog/integrations-core/pull/23282))
 
-## 22.14.0 / 2026-03-18
+## 22.14.0 / 2026-03-18 / Agent 7.78.0
 
 ***Added***:
 

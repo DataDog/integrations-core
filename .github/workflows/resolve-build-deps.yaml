@@ -1,20 +1,22 @@
 name: Resolve Dependencies and Build Wheels
 
 on:
-  workflow_dispatch:
-  pull_request:
-    branches:
-    - master
-    - 7.*.*
-
+  # We considered using pull_request as a trigger event, but then the diff will always contain all the changes compared to the target branch.
+  # Using the push target naturally limits the diff to the changes part of the push.
+  # This simplifies the decision whether to trigger the workflow or not.
   push:
-    branches:
+    branches-ignore:
     - master
     - 7.*.*
+    - gh-readonly-queue/**
+    paths:
+    - agent_requirements.in
+    - .builders/**
+    - .github/workflows/resolve-build-deps.yaml
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' && true || false }}
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 defaults:
   run:
@@ -28,58 +30,8 @@ env:
   SOURCE_DATE_EPOCH: "1580601600"
 
 jobs:
-  # measure-disk-usage.yml depends on this workflow being triggered and completed,
-  # so it can wait for the build to calculate dependency sizes.
-  # The 'on' setting ensures it runs, but this job cancels it if no dependency changes are detected.
-
-  check-should-run:
-    name: Check if build should run
-    runs-on: ubuntu-22.04
-    permissions:
-      actions: write
-      contents: read
-    outputs:
-      builder_changed: ${{ steps.dependency-check.outputs.builder_changed }}
-      should_run_build: ${{ steps.dependency-check.outputs.should_run_build }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Define diff commits
-        id: set_sha
-        if: github.event_name != 'workflow_dispatch'
-        run: .github/workflows/scripts/resolve_deps_define_diff_commits.sh
-        env:
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          EVENT_BEFORE: ${{ github.event.before }}
-
-      - name: Get changed files
-        id: changed-files
-        if: github.event_name != 'workflow_dispatch'
-        run: |
-          REPO="${{ github.repository }}"
-
-          CHANGED_FILES=$(gh api "repos/$REPO/compare/${{ steps.set_sha.outputs.prev_sha }}...${{ steps.set_sha.outputs.curr_sha }}" --paginate | \
-          jq -r 'select(.files != null) | .files | map(.filename) | join(" ")')
-
-          echo "files_changed=$CHANGED_FILES" >> $GITHUB_OUTPUT
-          echo "files_changed=$CHANGED_FILES"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Check if build should run
-        id: dependency-check
-        run: .github/workflows/scripts/resolve_deps_check_should_run.sh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FILES_CHANGED: ${{ steps.changed-files.outputs.files_changed }}
-
   test:
     name: Run tests
-    needs:
-      - check-should-run
-    if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -107,9 +59,7 @@ jobs:
   pre-resolve:
     name: Pre-resolve dependency versions
     needs:
-      - check-should-run
       - test
-    if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -147,9 +97,7 @@ jobs:
   build:
     name: Target ${{ matrix.job.image }} on ${{ matrix.job.os }}
     needs:
-      - check-should-run
       - pre-resolve
-    if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: false
@@ -179,6 +127,23 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
+    - name: Detect builder changes
+      # Hashing the builder code is more robust than any kind of dance with git when it comes to determining whether we need to rebuild the builder images.
+      id: builder-check
+      run: |
+        current=$(python .builders/inputs_hash.py compute ${{ matrix.job.image }})
+        pinned=$(python .builders/inputs_hash.py pinned ${{ matrix.job.image }})
+        echo "current hash: $current"
+        echo "pinned  hash: $pinned"
+        echo "current=$current" >> "$GITHUB_OUTPUT"
+        if [[ "$current" == "$pinned" ]]; then
+          echo "=> builder unchanged, will pull image by digest"
+          echo "builder_changed=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "=> builder changed, will rebuild image"
+          echo "builder_changed=true" >> "$GITHUB_OUTPUT"
+        fi
+
     - name: Install management dependencies
       run: pip install -r .builders/deps/host_dependencies.txt
 
@@ -199,31 +164,32 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build image and wheels
-      if: needs.check-should-run.outputs.builder_changed == 'true'
+      if: steps.builder-check.outputs.builder_changed == 'true'
       run: python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --constraints .constraints/constraints.txt
 
     - name: Pull image and build wheels
-      if: needs.check-should-run.outputs.builder_changed == 'false'
+      if: steps.builder-check.outputs.builder_changed == 'false'
       run: |
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
         python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest --constraints .constraints/constraints.txt
 
     - name: Publish image
-      if: github.event_name == 'push' && needs.check-should-run.outputs.builder_changed == 'true'
+      if: steps.builder-check.outputs.builder_changed == 'true'
       run: ${DOCKER} push ${{ env.BUILDER_IMAGE }}
 
-    - name: Save new image digest
-      if: github.event_name == 'push' && needs.check-should-run.outputs.builder_changed == 'true'
-      run: >-
-        ${DOCKER} inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }}
-        | cut -d '@' -f 2
-        > ${{ env.OUT_DIR }}/image_digest
+    - name: Save new image digest and inputs hash
+      if: steps.builder-check.outputs.builder_changed == 'true'
+      run: |
+        ${DOCKER} inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }} \
+          | cut -d '@' -f 2 \
+          > ${{ env.OUT_DIR }}/image_digest
+        echo "${{ steps.builder-check.outputs.current }}" > ${{ env.OUT_DIR }}/inputs_sha256
 
-    - name: Persist current image digest
-      if: needs.check-should-run.outputs.builder_changed == 'false'
-      run: >-
-        jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json
-        > ${{ env.OUT_DIR }}/image_digest
+    - name: Persist current image digest and inputs hash
+      if: steps.builder-check.outputs.builder_changed == 'false'
+      run: |
+        jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json > ${{ env.OUT_DIR }}/image_digest
+        echo "${{ steps.builder-check.outputs.current }}" > ${{ env.OUT_DIR }}/inputs_sha256
 
     - name: Upload artifacts
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
@@ -234,9 +200,7 @@ jobs:
   build-macos:
     name: Target macOS/${{ matrix.job.arch }} on ${{ matrix.job.os }}
     needs:
-      - check-should-run
       - pre-resolve
-    if: needs.check-should-run.outputs.should_run_build == 'true'
     runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: false
@@ -322,24 +286,31 @@ jobs:
 
 
   publish:
-    name: Publish artifacts and update lockfiles via PR
-    if: needs.check-should-run.outputs.should_run_build == 'true' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (github.ref_name == github.event.repository.default_branch || startsWith(github.ref_name, '7.'))))
+    name: Publish artifacts and commit lockfiles to branch
     needs:
     - build
     - build-macos
-    - check-should-run
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
+      contents: write
       id-token: write
       pull-requests: read
 
     steps:
+    - name: Create token
+      uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+      id: token-generator
+      with:
+        app-id: ${{ vars.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
+        private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
+        repositories: integrations-core
+
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: "${{ github.head_ref }}"
+        ref: ${{ github.ref_name }}
+        token: ${{ steps.token-generator.outputs.token }}
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -371,50 +342,14 @@ jobs:
         rm ${{ steps.auth.outputs.credentials_file_path }}
         rm -rf targets
 
-    - name: Get token via dd-octo-sts
-      uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
-      id: token-generator
-      with:
-        scope: DataDog/integrations-core
-        policy: self.resolve-build-deps.push
-
-    - name: Find triggering PR
-      id: find-pr
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-      with:
-        github-token: ${{ steps.token-generator.outputs.token }}
-        script: |
-          const { data: commit } = await github.rest.repos.getCommit({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: context.sha,
-          });
-          const message = commit.commit.message;
-          const match = message.match(/#(\d+)/);
-          const prs = match ? [{ number: parseInt(match[1]), html_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/pull/${match[1]}` }] : [];
-          if (prs.length > 0) {
-            const pr = prs[0];
-            core.setOutput('pr_ref', `[#${pr.number}](${pr.html_url})`);
-          } else {
-            core.setOutput('pr_ref', '');
-          }
-
-    - name: Create pull request
-      uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
-      with:
-        token: ${{ steps.token-generator.outputs.token }}
-        title: Update dependency resolution
-        commit-message: Update dependency resolution
-        branch: bot/update-dependency-resolution
-        branch-suffix: timestamp
-        delete-branch: true
-        labels: bot,qa/skip-qa,bot/resolve-build-deps
-        body: |-
-          ### Motivation
-
-          Direct dependencies were updated in ${{ github.sha }}${{ steps.find-pr.outputs.pr_ref != '' && format(' (triggered by PR {0})', steps.find-pr.outputs.pr_ref) || '' }}.
-
-          ### Additional Notes
-
-          This PR was automatically generated by the following workflow:
-          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    - name: Commit updated lockfiles to branch
+      run: |
+        git config user.name "dd-agent-integrations-bot[bot]"
+        git config user.email "dd-agent-integrations-bot[bot]@users.noreply.github.com"
+        git add .deps/
+        if git diff --cached --quiet; then
+          echo "No lockfile changes to commit."
+        else
+          git commit -m "Update dependency resolution"
+          git push
+        fi

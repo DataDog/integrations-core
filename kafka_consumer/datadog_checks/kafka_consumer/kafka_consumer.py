@@ -325,7 +325,7 @@ class KafkaCheck(AgentCheck):
                     reported_contexts += 1
 
                     if (topic, partition) not in highwater_offsets:
-                        self.log.warning(
+                        self.log.debug(
                             "Consumer group: %s has offsets for topic: %s partition: %s, "
                             "but no stored highwater offset (likely the partition is in the middle of leader failover) "
                             "so cannot calculate consumer lag.",

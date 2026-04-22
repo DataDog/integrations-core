@@ -9,7 +9,7 @@
 * Meraki Cloud Controller: use ``device_status`` tag instead of ``status`` for device-level online/offline to avoid confusion with uplink status (connected/not_connected) per Cisco Meraki API semantics. ([#22974](https://github.com/DataDog/integrations-core/pull/22974))
 * Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
 
-## 12.3.1 / 2026-04-07
+## 12.3.1 / 2026-04-07 / Agent 7.78.0
 
 ***Fixed***:
 

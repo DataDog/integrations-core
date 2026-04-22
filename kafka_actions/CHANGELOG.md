@@ -16,7 +16,7 @@
 * Fix filter type coercion for numeric comparisons on protobuf int64 fields ([#23162](https://github.com/DataDog/integrations-core/pull/23162))
 * Fix Avro deserialization for schemas with logical types (decimal, uuid, date, time, timestamp) that caused "Object of type ... is not JSON serializable" errors. ([#23224](https://github.com/DataDog/integrations-core/pull/23224))
 
-## 2.5.0 / 2026-04-01
+## 2.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 
