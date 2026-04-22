@@ -47,6 +47,7 @@ from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .__about__ import __version__
 from .config import build_config, sanitize
+from .diagnose import PostgresDiagnose
 from .util import (
     ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
@@ -56,6 +57,7 @@ from .util import (
     CONNECTION_METRICS,
     CONNECTION_METRICS_BY_DB,
     COUNT_METRICS,
+    DIAGNOSTIC_METADATA,
     FUNCTION_METRICS,
     IDLE_TX_LOCK_AGE_METRICS,
     INDEX_PROGRESS_METRICS,
@@ -85,6 +87,7 @@ from .util import (
     WAL_FILE_METRICS,
     DatabaseConfigurationError,
     DatabaseHealthCheckError,  # noqa: F401
+    build_remediation,
     fmt,
     get_schema_field,
     payload_pg_version,
@@ -189,6 +192,9 @@ class PostgreSql(DatabaseCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
+
+        # Register explicit pre-flight diagnostics for `datadog-agent diagnose`.
+        PostgresDiagnose(self).register()
 
     def _submit_initialization_health_event(self):
         try:
@@ -1070,6 +1076,16 @@ class PostgreSql(DatabaseCheck):
     def record_warning(self, code, message):
         # type: (DatabaseConfigurationError, str) -> None
         self._warnings_by_code[code] = message
+        # Mirror the warning into the Diagnosis object so `datadog-agent diagnose`
+        # surfaces the same setup/config issues that agent status already shows.
+        meta = DIAGNOSTIC_METADATA.get(code, {})
+        self.diagnosis.warning(
+            name=code.value,
+            diagnosis=message,
+            category="runtime",
+            description=meta.get("description"),
+            remediation=build_remediation(code),
+        )
 
     def _report_warnings(self):
         messages = self._warnings_by_code.values()
