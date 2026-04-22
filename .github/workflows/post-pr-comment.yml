@@ -56,25 +56,38 @@ jobs:
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
+      # A successful upstream run may legitimately not produce an artifact
+      # (e.g. the skip-qa producer only uploads when a comment is actually
+      # needed). Pre-check so the download step only runs when we know the
+      # artifact exists; that way a missing artifact is a clean skip rather
+      # than a failed step, and a real download failure remains a real
+      # failure we want to see.
+      - name: Check for comment artifact
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          count=$(gh api "repos/${REPO}/actions/runs/${RUN_ID}/artifacts" \
+            --jq '[.artifacts[] | select(.name == "pr-comment")] | length')
+          if [[ "$count" -eq 0 ]]; then
+            echo "Upstream run ${RUN_ID} did not upload a pr-comment artifact. Nothing to post."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Download comment artifact
-        id: download
+        if: steps.check.outputs.skip != 'true'
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
-        continue-on-error: true
         with:
           name: pr-comment
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
           path: pr-comment
 
-      - name: Skip if no artifact was produced
-        if: steps.download.outcome != 'success'
-        id: skip_no_artifact
-        run: |
-          echo "Upstream workflow completed without a pr-comment artifact. Nothing to post."
-          echo "skip=true" >> "$GITHUB_OUTPUT"
-
       - name: Derive marker and prepend to body
-        if: steps.skip_no_artifact.outputs.skip != 'true'
+        if: steps.check.outputs.skip != 'true'
         id: marker
         env:
           WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
@@ -96,7 +109,7 @@ jobs:
           echo "value=$marker" >> "$GITHUB_OUTPUT"
 
       - name: Resolve PR number from head SHA
-        if: steps.skip_no_artifact.outputs.skip != 'true'
+        if: steps.check.outputs.skip != 'true'
         id: pr
         env:
           GH_TOKEN: ${{ github.token }}
@@ -114,7 +127,7 @@ jobs:
           fi
 
       - name: Get token via dd-octo-sts
-        if: steps.skip_no_artifact.outputs.skip != 'true' && steps.pr.outputs.skip != 'true'
+        if: steps.check.outputs.skip != 'true' && steps.pr.outputs.skip != 'true'
         uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
         id: octo-sts
         with:
@@ -122,7 +135,7 @@ jobs:
           policy: self.post-pr-comment.workflow-run
 
       - name: Find existing comment
-        if: steps.skip_no_artifact.outputs.skip != 'true' && steps.pr.outputs.skip != 'true'
+        if: steps.check.outputs.skip != 'true' && steps.pr.outputs.skip != 'true'
         uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
         id: find_comment
         with:
@@ -132,7 +145,7 @@ jobs:
           comment-author: 'dd-octo-sts[bot]'
 
       - name: Post comment
-        if: steps.skip_no_artifact.outputs.skip != 'true' && steps.pr.outputs.skip != 'true'
+        if: steps.check.outputs.skip != 'true' && steps.pr.outputs.skip != 'true'
         uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
           token: ${{ steps.octo-sts.outputs.token }}
