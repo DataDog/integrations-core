@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "**DCGM Exporter**\n\nThe DCGM exporter is a tool to connect with Nvidia DCGM and exposes GPU telemetry in containerized environments. This dashboard gives you GPU metrics so you can monitor your GPU's health and performance effectively. \n\n\n**Useful Links**\n\n* [Blog Post](https://www.datadoghq.com/blog/monitor-nvidia-gpus-with-datadog/)\n* [List of GPUs supported](https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/getting-started.html) (cloned)",
+    "description": "**DCGM Exporter**\n\nThe DCGM exporter is a tool to connect with Nvidia DCGM and exposes GPU telemetry in containerized environments. This dashboard gives you GPU metrics so you can monitor your GPU's health and performance effectively. \n\n\n**Useful Links**\n\n* [Blog Post](https://www.datadoghq.com/blog/monitor-nvidia-gpus-with-datadog/)\n* [List of GPUs supported](https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/getting-started.html)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -16,7 +16,7 @@
             "prefix": "service"
         }
     ],
-    "title": "LEGACY - DCGM Exporter (Nvidia GPU Monitoring) Overview (Kathy cloned)",
+    "title": "LEGACY - DCGM Exporter (Nvidia GPU Monitoring) Overview",
     "widgets": [
         {
             "definition": {
