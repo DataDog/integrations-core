@@ -4,29 +4,34 @@
 import re
 import subprocess
 from pathlib import Path
+from unittest.mock import patch
 
 from click.testing import CliRunner
 
 from datadog_checks.dev.tooling.commands import console
 from datadog_checks.dev.tooling.commands.release.tag import tag
 from datadog_checks.dev.tooling.constants import get_root, set_root
+from datadog_checks.dev.tooling.release import get_release_tag_string
+from datadog_checks.dev.tooling.utils import get_valid_checks, get_version_string
 
 REPO_ROOT = str(Path(__file__).parents[5])
 
 
 def test_new_version_appears_in_output():
-    # Bump two checks to a version that has no git tag
     activemq_about = Path(f'{REPO_ROOT}/activemq/datadog_checks/activemq/__about__.py')
     btrfs_about = Path(f'{REPO_ROOT}/btrfs/datadog_checks/btrfs/__about__.py')
     original_activemq = activemq_about.read_text()
     original_btrfs = btrfs_about.read_text()
-    activemq_about.write_text(re.sub(r"(?<=__version__ = ')[^']+", '99.99.99', original_activemq))
-    btrfs_about.write_text(re.sub(r"(?<=__version__ = ')[^']+", '99.99.99', original_btrfs))
     original_root = get_root()
     set_root(REPO_ROOT)
+    # Snapshot current release tags before bumping so the mocked set reflects pre-bump state.
+    existing_tags = {get_release_tag_string(c, get_version_string(c)) for c in get_valid_checks()}
+    activemq_about.write_text(re.sub(r"(?<=__version__ = ')[^']+", '99.99.99', original_activemq))
+    btrfs_about.write_text(re.sub(r"(?<=__version__ = ')[^']+", '99.99.99', original_btrfs))
     try:
         runner = CliRunner()
-        result = runner.invoke(tag, ['--no-fetch', '--no-push', '--dry-run', 'all'], catch_exceptions=False)
+        with patch('datadog_checks.dev.tooling.commands.release.tag.git_tag_list', return_value=existing_tags):
+            result = runner.invoke(tag, ['--no-fetch', '--no-push', '--dry-run', 'all'], catch_exceptions=False)
     finally:
         set_root(original_root)
         activemq_about.write_text(original_activemq)
