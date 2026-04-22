@@ -239,6 +239,27 @@ def test_shared_preload_libraries_missing_fails(integration_check, pg_instance):
     assert 'pg_stat_statements' in spl[0]['diagnosis']
 
 
+def test_shared_preload_libraries_unreadable_warns(integration_check, pg_instance):
+    """Row is hidden from non-pg_monitor users for GUC_SUPERUSER_ONLY settings -- we should
+    surface a WARNING instead of silently dropping the diagnostic."""
+    check = integration_check(pg_instance)
+    # Replace only the shared_preload_libraries response with an empty result (simulates the
+    # pg_settings row being filtered out for non-pg_monitor members).
+    responses = [(m, r) for (m, r) in _happy_server_responses() if getattr(m, "__qualname__", "") != _setting('shared_preload_libraries').__qualname__]
+    responses.append((_setting('shared_preload_libraries'), []))
+    with _patch_connection(check, FakeConn(responses)):
+        diagnoses = _get_diagnoses(check)
+    spl = _by_name(
+        diagnoses,
+        DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements.value,
+    )
+    assert len(spl) == 1, spl
+    assert spl[0]['result'] == Diagnosis.DIAGNOSIS_WARNING
+    assert 'pg_monitor' in spl[0]['diagnosis']
+    # Remediation should point at the pg_monitor fix.
+    assert 'pg_monitor' in spl[0]['remediation']
+
+
 def test_track_activity_query_size_too_small_warns(integration_check, pg_instance):
     check = integration_check(pg_instance)
     responses = _happy_server_responses(track_query_size=1024)

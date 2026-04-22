@@ -156,8 +156,22 @@ class PostgresDiagnose:
 
     def _diagnose_shared_preload_libraries(self, conn):
         code = DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements
-        libs = _show(conn, "shared_preload_libraries")
-        if libs is None:
+        libs, read_ok = _show(conn, "shared_preload_libraries")
+        if not read_ok:
+            # shared_preload_libraries is GUC_SUPERUSER_ONLY: its pg_settings row is hidden from
+            # users who are not members of pg_monitor. Don't silently drop the diagnostic --
+            # surface a WARNING that points at the likely root cause.
+            self._check.diagnosis.warning(
+                name=code.value,
+                diagnosis=(
+                    "Could not read shared_preload_libraries; this setting is restricted to "
+                    "pg_monitor members. Grant pg_monitor to the datadog user so this "
+                    "diagnostic can run."
+                ),
+                category=CATEGORY_SERVER_CONFIG,
+                description=DIAGNOSTIC_METADATA[code]["description"],
+                remediation=build_remediation(DatabaseConfigurationError.missing_pg_monitor_role),
+            )
             return
         entries = [part.strip() for part in libs.split(",") if part.strip()]
         if "pg_stat_statements" in entries:
@@ -180,8 +194,8 @@ class PostgresDiagnose:
 
     def _diagnose_track_activity_query_size(self, conn):
         code = DatabaseConfigurationError.track_activity_query_size_too_small
-        raw = _show(conn, "track_activity_query_size")
-        if raw is None:
+        raw, read_ok = _show(conn, "track_activity_query_size")
+        if not read_ok:
             return
         try:
             size = int(raw)
@@ -207,8 +221,8 @@ class PostgresDiagnose:
 
     def _diagnose_track_io_timing(self, conn):
         code = DatabaseConfigurationError.track_io_timing_disabled
-        raw = _show(conn, "track_io_timing")
-        if raw is None:
+        raw, read_ok = _show(conn, "track_io_timing")
+        if not read_ok:
             return
         if raw == "on":
             self._check.diagnosis.success(
@@ -227,9 +241,10 @@ class PostgresDiagnose:
 
     def _diagnose_pg_stat_statements_max(self, conn):
         code = DatabaseConfigurationError.high_pg_stat_statements_max
-        raw = _show(conn, "pg_stat_statements.max")
-        if raw is None:
-            # Not configured or not loaded — shared_preload_libraries diagnostic covers the cause.
+        raw, read_ok = _show(conn, "pg_stat_statements.max")
+        if not read_ok:
+            # Not configured, extension not loaded, or restricted from the datadog user
+            # -- the shared_preload_libraries / pg_monitor diagnostics report the root cause.
             return
         try:
             value = int(raw)
@@ -444,9 +459,17 @@ def _fetchone(conn, sql, params=None):
 
 
 def _show(conn, setting):
-    """Run `SHOW <setting>` via pg_settings to avoid identifier-quoting issues."""
+    """Look up a GUC in pg_settings.
+
+    Returns (value, read_ok):
+      - (value, True)  -- row returned, setting visible
+      - (None,  False) -- no row (undefined GUC, or hidden from non-pg_monitor users for
+                          ``GUC_SUPERUSER_ONLY`` settings like ``shared_preload_libraries``)
+    """
     row = _fetchone(conn, "SELECT setting FROM pg_settings WHERE name = %s", (setting,))
-    return row[0] if row else None
+    if not row:
+        return None, False
+    return row[0], True
 
 
 def _safe_close(conn):
