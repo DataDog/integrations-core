@@ -12,9 +12,10 @@ name: 'Validate skip QA label'
 # contract:
 #   - name: pr-comment
 #   - files:
-#       body.md    rendered markdown (treated as opaque, attacker-controlled text)
-#       meta.json  {"marker": "<!-- … -->"}  (marker must match the regex
-#                  enforced by post-pr-comment.yml)
+#       body.md   rendered markdown (treated as opaque, attacker-controlled text)
+#
+# The central workflow owns the hidden marker used by find-comment; producers
+# here are not concerned with it.
 
 on:
   pull_request:
@@ -29,7 +30,6 @@ jobs:
       contents: read
     env:
       PYTHON_VERSION: "3.13"
-      COMMENT_MARKER: "<!-- validate-skip-qa-comment -->"
 
     steps:
       - name: Checkout Code
@@ -79,13 +79,6 @@ jobs:
           mode: remove-label
           changed-files-json: ${{ steps.changed_files.outputs.all_changed_files }}
           output: pr-comment/body.md
-
-      - name: Write comment metadata
-        if: steps.render_add.outcome == 'success' || steps.render_remove.outcome == 'success'
-        env:
-          MARKER: ${{ env.COMMENT_MARKER }}
-        run: |
-          python3 -c 'import json, os; json.dump({"marker": os.environ["MARKER"]}, open("pr-comment/meta.json", "w"))'
 
       - name: Upload comment artifact
         if: steps.render_add.outcome == 'success' || steps.render_remove.outcome == 'success'

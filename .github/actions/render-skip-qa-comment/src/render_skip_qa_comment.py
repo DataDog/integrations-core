@@ -12,10 +12,7 @@ import json
 from pathlib import Path
 from string import Template
 
-COMMENT_MARKER = "<!-- validate-skip-qa-comment -->"
-
 ADD_LABEL_TEMPLATE = Template(
-    "${marker}\n"
     "⚠️ **Recommendation: Add `qa/skip-qa` label**\n\n"
     "This PR does not modify any files shipped with the agent.\n\n"
     "To help streamline the release process, please consider adding the `qa/skip-qa` label "
@@ -23,7 +20,6 @@ ADD_LABEL_TEMPLATE = Template(
 )
 
 REMOVE_LABEL_TEMPLATE = Template(
-    "${marker}\n"
     "⚠️ **The `qa/skip-qa` label has been added with shippable changes**\n\n"
     "The following files, which will be shipped with the agent, were modified in this PR and\n"
     "the `qa/skip-qa` label has been added.\n\n"
@@ -39,7 +35,7 @@ REMOVE_LABEL_TEMPLATE = Template(
 
 
 def build_add_label_comment() -> str:
-    return ADD_LABEL_TEMPLATE.substitute(marker=COMMENT_MARKER)
+    return ADD_LABEL_TEMPLATE.substitute()
 
 
 def parse_changed_files_json(changed_files_json: str) -> list[str]:
@@ -51,10 +47,7 @@ def parse_changed_files_json(changed_files_json: str) -> list[str]:
 
 
 def build_remove_label_comment(changed_files: list[str]) -> str:
-    return REMOVE_LABEL_TEMPLATE.substitute(
-        marker=COMMENT_MARKER,
-        file_list="\n".join(changed_files),
-    )
+    return REMOVE_LABEL_TEMPLATE.substitute(file_list="\n".join(changed_files))
 
 
 def build_parser() -> argparse.ArgumentParser:
