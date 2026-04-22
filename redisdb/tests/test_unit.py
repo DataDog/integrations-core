@@ -271,7 +271,7 @@ def _make_iam_check(check, instance_overrides=None):
     mock_provider = MagicMock()
     mock_provider.username = "default"
     mock_provider.get_token.return_value = "iam-token-abc"
-    mock_provider._token = "iam-token-abc"
+    mock_provider.current_token = "iam-token-abc"
     mock_provider.is_token_expired.return_value = False
     with patch('datadog_checks.redisdb.gcp.GCPIAMTokenProvider', return_value=mock_provider):
         redis_check = check(instance)
@@ -436,5 +436,5 @@ class TestGCPIAMSafeErrorMessage:
 
     def test_passes_through_when_no_token_cached(self, check):
         redis_check, mock_provider = _make_iam_check(check)
-        mock_provider._token = None
+        mock_provider.current_token = None
         assert redis_check._safe_error_message(Exception("connection refused")) == "connection refused"

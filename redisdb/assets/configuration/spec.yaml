@@ -164,7 +164,7 @@ files:
       description: |
         Configuration for Google Cloud Platform managed authentication.
         Used with GCP Memorystore Redis and Valkey instances.
-        Requires the google-auth package: pip install datadog-checks-redisdb[gcp]
+        Requires the google-auth package, included in the standard Agent distribution.
       value:
         type: object
         properties:

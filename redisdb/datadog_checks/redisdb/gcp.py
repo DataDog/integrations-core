@@ -61,6 +61,12 @@ class GCPIAMTokenProvider:
         self._credentials.refresh(request)
         return self._credentials.token, time.time() + TOKEN_TTL_SECONDS
 
+    @property
+    def current_token(self) -> str | None:
+        """Return the cached token without triggering a refresh, for redaction purposes."""
+        with self._lock:
+            return self._token
+
     def is_token_expired(self) -> bool:
         with self._lock:
             return time.time() >= self._expires_at

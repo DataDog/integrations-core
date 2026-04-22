@@ -133,7 +133,7 @@ instances:
     ## @param gcp - mapping - optional
     ## Configuration for Google Cloud Platform managed authentication.
     ## Used with GCP Memorystore Redis and Valkey instances.
-    ## Requires the google-auth package: pip install datadog-checks-redisdb[gcp]
+    ## Requires the google-auth package, included in the standard Agent distribution.
     #
     # gcp:
     #   managed_authentication:

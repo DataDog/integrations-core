@@ -154,8 +154,10 @@ class Redis(AgentCheck):
     def _safe_error_message(self, e: Exception) -> str:
         """Return error message with IAM token redacted when IAM auth is active."""
         msg = str(e)
-        if self._gcp_token_provider and self._gcp_token_provider._token:
-            msg = msg.replace(self._gcp_token_provider._token, '<REDACTED>')
+        if self._gcp_token_provider:
+            token = self._gcp_token_provider.current_token
+            if token:
+                msg = msg.replace(token, '<REDACTED>')
         return msg
 
     def _force_iam_reconnect(self):
