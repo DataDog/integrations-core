@@ -1,0 +1,31 @@
+name: "Render skip-qa comment body"
+description: "Renders the validate-skip-qa PR comment into a markdown file."
+
+inputs:
+  mode:
+    description: "Rendering mode: add-label or remove-label."
+    required: true
+  output:
+    description: "Path to write the rendered markdown body."
+    required: true
+  changed-files-json:
+    description: "JSON array containing changed files (required for remove-label mode)."
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Render comment body
+      shell: bash
+      env:
+        MODE: ${{ inputs.mode }}
+        OUTPUT_PATH: ${{ inputs.output }}
+        CHANGED_FILES_JSON: ${{ inputs.changed-files-json }}
+      run: |
+        args=("$MODE" "--output" "$OUTPUT_PATH")
+        if [[ "$MODE" == "remove-label" ]]; then
+          args+=("--changed-files-json" "$CHANGED_FILES_JSON")
+        fi
+
+        python3 "${{ github.action_path }}/src/render_skip_qa_comment.py" "${args[@]}"
