@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.dev.http import MockResponse
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sonatype_nexus import constants
 from datadog_checks.sonatype_nexus.check import SonatypeNexusCheck
 from datadog_checks.sonatype_nexus.errors import EmptyResponseError
@@ -33,7 +34,7 @@ def test_successful_metrics_collection(dd_run_check, mocker, aggregator):
             return status_response
         if "metrics/data" in url:
             return analytics_response
-        raise ValueError(f"Unexpected URL: {url}")
+        pytest.fail(f"url `{url}` not registered")
 
     mocker.patch("requests.Session.get", side_effect=side_effect)
 
@@ -48,6 +49,7 @@ def test_successful_metrics_collection(dd_run_check, mocker, aggregator):
     aggregator.assert_metric("sonatype_nexus.analytics.downloaded_bytes_by_format", value=200, count=1)
     aggregator.assert_metric("sonatype_nexus.analytics.blob_store.count_by_type", value=5, count=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_create_metric_for_configs_int(mocker, aggregator):
