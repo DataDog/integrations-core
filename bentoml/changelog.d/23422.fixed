@@ -1,0 +1,1 @@
+Fix double-slash in health endpoint URLs from _extract_base_url

@@ -21,7 +21,7 @@ class BentomlCheck(OpenMetricsBaseCheckV2):
         parsed = urlparse(endpoint)
         path = parsed.path.rstrip('/')
         base_path = path.rsplit('/', 1)[0] if '/' in path else ''
-        return urlunparse(parsed._replace(path=base_path or '/'))
+        return urlunparse(parsed._replace(path=base_path))
 
     def get_default_config(self):
         return {
