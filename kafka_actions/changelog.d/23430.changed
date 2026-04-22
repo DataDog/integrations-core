@@ -1,1 +1,0 @@
-Remove unused `MessageFilter` class; filtering is handled by the jq-style filter in `check.py`.
