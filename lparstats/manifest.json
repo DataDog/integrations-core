@@ -13,7 +13,6 @@
     "title": "LPARStats",
     "media": [],
     "classifier_tags": [
-      "Supported OS::AIX",
       "Category::OS & System",
       "Offering::Integration"
     ]
@@ -27,7 +26,11 @@
   "assets": {
     "integration": {
       "source_type_name": "LPARStats",
-      "configuration": {},
+      "source_type_id": 71534100,
+      "auto_install": true,
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
       "events": {
         "creates_events": false
       },
