@@ -119,6 +119,13 @@ class PostgresDiagnose:
                 rawerror=str(e),
             )
             return None
+        # Probe queries are read-only; running in autocommit keeps one failing probe from
+        # poisoning the implicit transaction and cascading silent failures through the rest
+        # of the diagnostics.
+        try:
+            conn.autocommit = True
+        except psycopg.Error:
+            pass
         self._check.diagnosis.success(
             name=DatabaseConfigurationError.connection_failure.value,
             diagnosis="Connected to {host} (dbname={db}) as {user}".format(host=host_desc, db=dbname, user=username),
