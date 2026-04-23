@@ -22,9 +22,11 @@ def _run_cmd(cmd, sudo=False, timeout=None):
             stderr=subprocess.PIPE,
             timeout=timeout,
         )
-        return result.stdout.decode('utf-8', errors='replace'), \
-               result.stderr.decode('utf-8', errors='replace'), \
-               result.returncode
+        return (
+            result.stdout.decode('utf-8', errors='replace'),
+            result.stderr.decode('utf-8', errors='replace'),
+            result.returncode,
+        )
     except subprocess.TimeoutExpired:
         return '', 'timeout', -1
     except Exception as e:
@@ -71,7 +73,7 @@ class LPARStats(AgentCheck):
         cmd.extend(['1', '1'])
 
         output, _, _ = _run_cmd(cmd, sudo=sudo, timeout=timeout)
-        stats = [_f for _f in output.splitlines() if _f][self.MEMORY_METRICS_START_IDX:]
+        stats = [_f for _f in output.splitlines() if _f][self.MEMORY_METRICS_START_IDX :]
         if len(stats) < 3:
             self.log.warning('lparstat -m output too short, skipping memory metrics')
             return
@@ -91,7 +93,7 @@ class LPARStats(AgentCheck):
     def collect_hypervisor(self, sudo=False, timeout=None):
         cmd = ['lparstat', '-H', '1', '1']
         output, _, _ = _run_cmd(cmd, sudo=sudo, timeout=timeout)
-        stats = [_f for _f in output.splitlines() if _f][self.HYPERVISOR_METRICS_START_IDX:]
+        stats = [_f for _f in output.splitlines() if _f][self.HYPERVISOR_METRICS_START_IDX :]
         for stat in stats:
             values = [_f for _f in stat.split(' ') if _f]
             if len(values) < 2:
@@ -105,13 +107,16 @@ class LPARStats(AgentCheck):
                     v = float(entry)
                     self.gauge(m, v, tags=[call_tag])
                 except ValueError:
-                    self.log.info("unable to convert %s to float for %s - skipping",
-                                  self.HYPERVISOR_IDX_METRIC_MAP.get(idx, idx), call_tag)
+                    self.log.info(
+                        "unable to convert %s to float for %s - skipping",
+                        self.HYPERVISOR_IDX_METRIC_MAP.get(idx, idx),
+                        call_tag,
+                    )
 
     def collect_memory_entitlements(self, sudo=False, timeout=None):
         cmd = ['lparstat', '-m', '-eR', '1', '1']
         output, _, _ = _run_cmd(cmd, sudo=sudo, timeout=timeout)
-        stats = [_f for _f in output.splitlines() if _f][self.MEMORY_ENTITLEMENTS_START_IDX:]
+        stats = [_f for _f in output.splitlines() if _f][self.MEMORY_ENTITLEMENTS_START_IDX :]
         if len(stats) < 2:
             self.log.warning('lparstat -m -eR output too short, skipping entitlement metrics')
             return
@@ -134,7 +139,7 @@ class LPARStats(AgentCheck):
     def collect_spurr(self, sudo=False, timeout=None):
         cmd = ['lparstat', '-E', '1', '1']
         output, _, _ = _run_cmd(cmd, sudo=sudo, timeout=timeout)
-        table = [_f for _f in output.splitlines() if _f][self.SPURR_PROCESSOR_UTILIZATION_START_IDX:]
+        table = [_f for _f in output.splitlines() if _f][self.SPURR_PROCESSOR_UTILIZATION_START_IDX :]
         if len(table) < 3:
             self.log.warning('lparstat -E output too short, skipping SPURR metrics')
             return
