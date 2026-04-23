@@ -805,12 +805,13 @@ def test_emit_events_shape(check):
     assert payload['dbm_type'] == DBM_TYPE
     assert payload['dbms'] == 'clickhouse'
     assert payload['collection_interval'] == 60
-    assert payload['top_tables_by_parts'] == _collected_parts()
-    assert payload['active_merges'] == _collected_merges()
-    assert payload['pending_mutations'] == _collected_mutations()
-    assert len(payload['replication_queue']) == 2
-    assert payload['detached_parts'] == _collected_detached()
     assert payload['ddtags'] == ['test:clickhouse']
+    ch = payload['clickhouse']
+    assert ch['top_tables_by_parts'] == _collected_parts()
+    assert ch['active_merges'] == _collected_merges()
+    assert ch['pending_mutations'] == _collected_mutations()
+    assert len(ch['replication_queue']) == 2
+    assert ch['detached_parts'] == _collected_detached()
 
 
 def test_emit_events_uses_query_activity_channel_not_metadata(check):
@@ -872,8 +873,8 @@ def test_collect_and_emit_runs_with_partial_failures(check):
 
     assert len(captured) == 1
     payload = json.loads(captured[0])
-    assert payload['top_tables_by_parts'] == []
-    assert payload['active_merges'] == _collected_merges()
+    assert payload['clickhouse']['top_tables_by_parts'] == []
+    assert payload['clickhouse']['active_merges'] == _collected_merges()
 
 
 # -----------------------------------------------------------------------------

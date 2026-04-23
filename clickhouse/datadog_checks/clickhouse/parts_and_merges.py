@@ -820,12 +820,14 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             "ddtags": list(self._tags_no_db) if self._tags_no_db else [],
             "timestamp": now_ms,
             "collection_interval": self._collection_interval,
-            "top_tables_by_parts": parts,
-            "active_merges": merges,
-            "pending_mutations": mutations,
-            "replication_queue": replication_queue,
-            "detached_parts": detached_parts,
-            "thresholds": thresholds or [],
+            "clickhouse": {
+                "top_tables_by_parts": parts,
+                "active_merges": merges,
+                "pending_mutations": mutations,
+                "replication_queue": replication_queue,
+                "detached_parts": detached_parts,
+                "thresholds": thresholds or [],
+            },
         }
         self._check.database_monitoring_query_activity(json.dumps(payload, default=default_json_event_encoding))
 
