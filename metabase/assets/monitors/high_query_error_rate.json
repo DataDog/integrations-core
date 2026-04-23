@@ -12,7 +12,7 @@
 		"message": "{{#is_warning}}\n\nThe query error rate has surpassed the warning threshold of {{warn_threshold}}%.\nQuery Error Rate: {{value}}%\n\n{{/is_warning}}\n\n{{#is_alert}}\n\nThe percentage of queries resulting in errors has exceeded the alert threshold of {{threshold}}%, indicating a significant query error rate.\nQuery Error Rate: {{value}}%\n\n{{/is_alert}}\n\n@example@example.com",
 		"tags": [
 			"integration:metabase",
-			"service:query-logs"
+			"vendor.endpoint:query-logs"
 		],
 		"options": {
 			"thresholds": {
@@ -35,7 +35,7 @@
 					},
 					"group_by": [],
 					"search": {
-						"query": "source:metabase service:query-logs @error:*"
+						"query": "source:metabase (service:query-logs OR @vendor.endpoint:query-logs) @error:*"
 					},
 					"storage": "hot"
 				},
@@ -50,7 +50,7 @@
 					},
 					"group_by": [],
 					"search": {
-						"query": "source:metabase service:query-logs"
+						"query": "source:metabase (service:query-logs OR @vendor.endpoint:query-logs)"
 					},
 					"storage": "hot"
 				}
