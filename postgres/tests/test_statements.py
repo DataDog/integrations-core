@@ -1846,12 +1846,13 @@ def test_statement_metrics_attributes_undefined_table_to_not_loaded_when_spl_mis
         self.pg_settings['shared_preload_libraries'] = 'pgaudit'
 
     err = psycopg.errors.UndefinedTable('relation "pg_stat_statements" does not exist')
-    with mock.patch(
-        'datadog_checks.postgres.statements.PostgresStatementMetrics._get_pg_stat_statements_columns',
-        return_value=[],
-        side_effect=err,
-    ), mock.patch(
-        'datadog_checks.postgres.postgres.PostgreSql._load_pg_settings', fake_load
+    with (
+        mock.patch(
+            'datadog_checks.postgres.statements.PostgresStatementMetrics._get_pg_stat_statements_columns',
+            return_value=[],
+            side_effect=err,
+        ),
+        mock.patch('datadog_checks.postgres.postgres.PostgreSql._load_pg_settings', fake_load),
     ):
         run_one_check(check)
 
