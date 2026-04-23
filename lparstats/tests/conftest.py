@@ -7,6 +7,13 @@ import pytest
 CHECK_NAME = 'lparstats'
 
 
+@pytest.fixture(scope='session')
+def dd_environment():
+    # lparstats uses lparstat which is only available on AIX; no external
+    # service or container is needed for e2e tests.
+    yield
+
+
 @pytest.fixture
 def instance():
     return {
