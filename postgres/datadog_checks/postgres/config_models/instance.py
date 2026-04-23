@@ -305,6 +305,7 @@ class InstanceConfig(BaseModel):
     collect_function_metrics: Optional[bool] = None
     collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
     collect_schemas: Optional[CollectSchemas] = None
+    collect_sequence_metrics: Optional[bool] = None
     collect_settings: Optional[CollectSettings] = None
     collect_wal_metrics: Optional[bool] = None
     custom_metrics: Optional[tuple[MappingProxyType[str, Any], ...]] = None
