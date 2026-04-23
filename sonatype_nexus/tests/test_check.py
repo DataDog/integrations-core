@@ -12,26 +12,32 @@ from datadog_checks.sonatype_nexus.errors import EmptyResponseError
 from .conftest import instance
 
 
-@pytest.fixture
-def mock_http_response(mocker):
-    yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop("method", "requests.Session.get"), return_value=MockResponse(*args, **kwargs)
-    )
+def test_successful_metrics_collection(dd_run_check, mock_http_response_per_endpoint, aggregator):
+    status_response_data = {key: {"healthy": True} for key in constants.STATUS_METRICS_MAP.keys()}
+    analytics_response_data = {
+        "gauges": {
+            "jvm.memory.heap.used": {"value": 123456789},
+            "nexus.analytics.bytes_transferred_by_format": {"value": []},
+            "nexus.analytics.blobstore_type_counts": {"value": {}},
+        }
+    }
 
-
-def test_successful_metrics_collection(dd_run_check, mock_http_response, aggregator):
-    status_metrics_response_data = {key: {"healthy": True} for key in constants.STATUS_METRICS_MAP.keys()}
-
-    mock_http_response(
-        "https://example.com/service/rest/v1/status/check",
-        status_code=200,
-        json_data=status_metrics_response_data.update({"gauges": {"jvm.memory.heap.used": {"value": 123456789}}}),
+    mock_http_response_per_endpoint(
+        {
+            "https://example.com/service/rest/v1/status/check": [
+                MockResponse(status_code=200, json_data=status_response_data)
+            ],
+            "https://example.com/service/metrics/data": [
+                MockResponse(status_code=200, json_data=analytics_response_data)
+            ],
+        }
     )
 
     check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
     dd_run_check(check)
 
-    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metric("sonatype_nexus.status.available_cpus_health", value=1.0)
+    aggregator.assert_metric("sonatype_nexus.analytics.jvm.heap_memory_used", value=123456789)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
