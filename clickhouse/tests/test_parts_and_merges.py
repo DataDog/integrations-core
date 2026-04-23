@@ -8,6 +8,7 @@ from unittest import mock
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
+from datadog_checks.clickhouse.config_models.instance import PartsAndMerges as PartsAndMergesConfig
 from datadog_checks.clickhouse.parts_and_merges import (
     DBM_TYPE,
     ClickhousePartsAndMerges,
@@ -53,6 +54,24 @@ def test_initialization(check):
     assert check.parts_and_merges._config.collection_interval == 60
     assert check.parts_and_merges._max_tables == 200
     assert check.parts_and_merges._include_partition_tag is False
+
+
+def test_init_none_optional_fields_use_defaults(check):
+    """Directly constructing with None optional fields must not leave None in __init__ attributes.
+
+    PartsAndMergesConfig has Optional[int] = None for these fields; without the `or` guard,
+    elapsed > None and countIf(num_tries > None) would raise TypeError at runtime.
+    """
+    config = PartsAndMergesConfig(
+        collection_interval=60,
+        enabled=True,
+        run_sync=True,
+        stalled_merge_elapsed_threshold_seconds=None,
+        stuck_replication_num_tries=None,
+    )
+    job = ClickhousePartsAndMerges(check, config)
+    assert job._stalled_merge_threshold == 3600
+    assert job._stuck_replication_num_tries == 3
 
 
 def test_enabled_by_default_when_dbm_on():
@@ -329,13 +348,20 @@ def test_collect_thresholds_normalizes(check):
     rows_in = [
         ('node-1', 'parts_to_delay_insert', '150'),
         ('node-1', 'parts_to_throw_insert', '300'),
+        ('node-1', 'min_age_to_force_merge_seconds', '86400'),
+        ('node-1', 'merge_with_ttl_timeout', '14400'),
         ('node-1', 'unrelated', 'not-a-number'),
     ]
     with mock.patch.object(job, '_execute_query', return_value=rows_in):
         out = job._collect_thresholds()
-    assert len(out) == 2
+    assert len(out) == 4
     by_name = {r['name']: r['value'] for r in out}
-    assert by_name == {'parts_to_delay_insert': 150, 'parts_to_throw_insert': 300}
+    assert by_name == {
+        'parts_to_delay_insert': 150,
+        'parts_to_throw_insert': 300,
+        'min_age_to_force_merge_seconds': 86400,
+        'merge_with_ttl_timeout': 14400,
+    }
 
 
 def test_emit_gauges_thresholds(check):
@@ -348,12 +374,16 @@ def test_emit_gauges_thresholds(check):
     thresholds = [
         {'server_node': 'node-1', 'name': 'parts_to_delay_insert', 'value': 150},
         {'server_node': 'node-1', 'name': 'parts_to_throw_insert', 'value': 300},
+        {'server_node': 'node-1', 'name': 'min_age_to_force_merge_seconds', 'value': 86400},
+        {'server_node': 'node-1', 'name': 'merge_with_ttl_timeout', 'value': 14400},
     ]
     job._emit_gauges([], [], [], [], [], thresholds)
 
     by_name = {n: (v, t) for n, v, t in emitted}
     assert by_name['parts.threshold.delay_insert'][0] == 150
     assert by_name['parts.threshold.throw_insert'][0] == 300
+    assert by_name['merges.threshold.min_age_to_force_merge_seconds'][0] == 86400
+    assert by_name['merges.threshold.merge_with_ttl_timeout'][0] == 14400
     # Thresholds are server-level — no database/table tags.
     for _, tags in by_name.values():
         assert not any(t.startswith('database:') or t.startswith('table:') for t in tags)

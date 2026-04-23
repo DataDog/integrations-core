@@ -639,6 +639,8 @@ clickhouse.merges.avg_progress,gauge,,fraction,,Average progress (0.0 to 1.0) ac
 clickhouse.merges.max_elapsed_seconds,gauge,,second,,Maximum elapsed time in seconds across all active merges for the table.,0,clickhouse,,,
 clickhouse.merges.memory_bytes,gauge,,byte,,Total memory in bytes currently consumed by active merges for the table.,0,clickhouse,,,
 clickhouse.merges.stalled,gauge,,merge,,Number of active merges whose elapsed time exceeds the stall threshold.,0,clickhouse,,,
+clickhouse.merges.threshold.merge_with_ttl_timeout,gauge,,second,,"Server-level merge_with_ttl_timeout from system.merge_tree_settings; minimum seconds between TTL-deletion merges (default 14400). Lower values trigger more frequent TTL merges.",0,clickhouse,,,
+clickhouse.merges.threshold.min_age_to_force_merge_seconds,gauge,,second,,"Server-level min_age_to_force_merge_seconds from system.merge_tree_settings; parts older than this are force-merged regardless of normal heuristics. 0 means disabled.",0,clickhouse,,,
 clickhouse.merges.total_bytes,gauge,,byte,,Total compressed bytes being merged across all active merges for the table.,0,clickhouse,,,
 clickhouse.merges_mutations.bytes.total,gauge,,,,Total amount of memory (bytes) allocated by background tasks (merges and mutations).,0,clickhouse,,,
 clickhouse.mmapped.file.current,gauge,,file,,Total number of mmapped files.,0,clickhouse,,,

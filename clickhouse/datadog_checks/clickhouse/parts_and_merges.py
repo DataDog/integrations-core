@@ -197,8 +197,10 @@ FROM {replication_queue_table}
 GROUP BY database, table, server_node
 """
 
-#   parts_to_delay_insert  — ClickHouse starts throttling INSERTs at this count.
-#   parts_to_throw_insert  — ClickHouse rejects INSERTs at this count.
+#   parts_to_delay_insert        — ClickHouse starts throttling INSERTs at this part count.
+#   parts_to_throw_insert        — ClickHouse rejects INSERTs at this part count.
+#   min_age_to_force_merge_seconds — Force-merge parts older than this; 0 = disabled.
+#   merge_with_ttl_timeout       — Minimum seconds between TTL-deletion merges (default 14400).
 # Per-table SETTINGS overrides are not surfaced here; this returns only the server defaults.
 THRESHOLDS_QUERY = """\
 SELECT
@@ -206,7 +208,12 @@ SELECT
     name,
     value
 FROM {merge_tree_settings_table}
-WHERE name IN ('parts_to_delay_insert', 'parts_to_throw_insert')
+WHERE name IN (
+    'parts_to_delay_insert',
+    'parts_to_throw_insert',
+    'min_age_to_force_merge_seconds',
+    'merge_with_ttl_timeout'
+)
 """
 
 
@@ -246,8 +253,8 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
 
         self._include_partition_tag: bool = bool(config.table_metrics_include_partition_tag)
         self._max_tables: int = config.table_metrics_max_tables
-        self._stalled_merge_threshold: int = config.stalled_merge_elapsed_threshold_seconds
-        self._stuck_replication_num_tries: int = config.stuck_replication_num_tries
+        self._stalled_merge_threshold: int = config.stalled_merge_elapsed_threshold_seconds or 3600
+        self._stuck_replication_num_tries: int = config.stuck_replication_num_tries or 3
 
         self._db_client = None
 
@@ -796,6 +803,10 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
                 self._check.gauge('parts.threshold.delay_insert', row['value'], tags=tags)
             elif row['name'] == 'parts_to_throw_insert':
                 self._check.gauge('parts.threshold.throw_insert', row['value'], tags=tags)
+            elif row['name'] == 'min_age_to_force_merge_seconds':
+                self._check.gauge('merges.threshold.min_age_to_force_merge_seconds', row['value'], tags=tags)
+            elif row['name'] == 'merge_with_ttl_timeout':
+                self._check.gauge('merges.threshold.merge_with_ttl_timeout', row['value'], tags=tags)
 
     def _emit_events(
         self,
