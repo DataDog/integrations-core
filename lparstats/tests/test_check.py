@@ -4,8 +4,6 @@
 
 from unittest.mock import patch
 
-import pytest
-
 from datadog_checks.lparstats import LPARStats
 
 MEMORY_OUTPUT = """\
