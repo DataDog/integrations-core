@@ -131,7 +131,7 @@ def test_get_diagnoses_returns_json(integration_check, pg_instance):
     check.diagnosis.warning(
         name=DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
         diagnosis="pg_stat_statements is not loaded",
-        category="server-config",
+        category="postgres",
         description=DIAGNOSTIC_METADATA[DatabaseConfigurationError.pg_stat_statements_not_loaded]["description"],
         remediation=build_remediation(DatabaseConfigurationError.pg_stat_statements_not_loaded),
     )

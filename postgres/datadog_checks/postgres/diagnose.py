@@ -29,10 +29,7 @@ from .util import (
 )
 from .version_utils import V9_6, VersionUtils
 
-CATEGORY_CONNECTION = "connection"
-CATEGORY_SERVER_CONFIG = "server-config"
-CATEGORY_PRIVILEGES = "privileges"
-CATEGORY_DBM = "dbm"
+CATEGORY_POSTGRES = "postgres"
 
 # Recommended minimum track_activity_query_size. Default Postgres value is 1024, which
 # silently truncates queries and breaks explain plan collection.
@@ -167,7 +164,7 @@ class PostgresDiagnose:
                 diagnosis="Failed to connect to {host} (dbname={db}) as {user}: {err}".format(
                     host=host_desc, db=dbname, user=username, err=e
                 ),
-                category=CATEGORY_CONNECTION,
+                category=CATEGORY_POSTGRES,
                 description=DIAGNOSTIC_METADATA[code]["description"],
                 remediation=build_remediation(code),
                 rawerror=str(e),
@@ -183,7 +180,7 @@ class PostgresDiagnose:
         self._check.diagnosis.success(
             name=DatabaseConfigurationError.connection_failure.value,
             diagnosis="Connected to {host} (dbname={db}) as {user}".format(host=host_desc, db=dbname, user=username),
-            category=CATEGORY_CONNECTION,
+            category=CATEGORY_POSTGRES,
         )
         return conn
 
@@ -196,7 +193,7 @@ class PostgresDiagnose:
             self._fail(
                 code,
                 diagnosis="Unable to determine Postgres version: {}".format(e),
-                category=CATEGORY_SERVER_CONFIG,
+                category=CATEGORY_POSTGRES,
                 rawerror=str(e),
             )
             return
@@ -204,7 +201,7 @@ class PostgresDiagnose:
             self._fail(
                 code,
                 diagnosis="Postgres version {} is below the minimum supported version (9.6).".format(raw_version),
-                category=CATEGORY_SERVER_CONFIG,
+                category=CATEGORY_POSTGRES,
                 description=DIAGNOSTIC_METADATA[code]["description"],
                 remediation=build_remediation(code),
             )
@@ -212,7 +209,7 @@ class PostgresDiagnose:
         self._check.diagnosis.success(
             name=code.value,
             diagnosis="Postgres version {} is supported.".format(raw_version),
-            category=CATEGORY_SERVER_CONFIG,
+            category=CATEGORY_POSTGRES,
         )
 
     def _diagnose_shared_preload_libraries(self, conn):
@@ -229,7 +226,7 @@ class PostgresDiagnose:
                     "pg_monitor members. Grant pg_monitor to the datadog user so this "
                     "diagnostic can run."
                 ),
-                category=CATEGORY_SERVER_CONFIG,
+                category=CATEGORY_POSTGRES,
                 description=DIAGNOSTIC_METADATA[code]["description"],
                 remediation=build_remediation(DatabaseConfigurationError.missing_pg_monitor_role),
             )
@@ -238,7 +235,7 @@ class PostgresDiagnose:
             self._check.diagnosis.success(
                 name=code.value,
                 diagnosis="shared_preload_libraries contains pg_stat_statements.",
-                category=CATEGORY_SERVER_CONFIG,
+                category=CATEGORY_POSTGRES,
             )
             return
         self._fail(
@@ -247,7 +244,7 @@ class PostgresDiagnose:
                 "shared_preload_libraries = '{}' does not contain pg_stat_statements; DBM query metrics "
                 "will not be collected until the server is restarted with it loaded."
             ).format(libs),
-            category=CATEGORY_SERVER_CONFIG,
+            category=CATEGORY_POSTGRES,
             description=DIAGNOSTIC_METADATA[code]["description"],
             remediation=build_remediation(code),
         )
@@ -265,7 +262,7 @@ class PostgresDiagnose:
             self._check.diagnosis.success(
                 name=code.value,
                 diagnosis="track_activity_query_size = {} (>= {}).".format(size, RECOMMENDED_TRACK_ACTIVITY_QUERY_SIZE),
-                category=CATEGORY_SERVER_CONFIG,
+                category=CATEGORY_POSTGRES,
             )
             return
         self._check.diagnosis.warning(
@@ -274,7 +271,7 @@ class PostgresDiagnose:
                 "track_activity_query_size = {} is below the recommended {}; long queries will be "
                 "truncated and may not be explainable."
             ).format(size, RECOMMENDED_TRACK_ACTIVITY_QUERY_SIZE),
-            category=CATEGORY_SERVER_CONFIG,
+            category=CATEGORY_POSTGRES,
             description=DIAGNOSTIC_METADATA[code]["description"],
             remediation=build_remediation(code),
         )
@@ -288,13 +285,13 @@ class PostgresDiagnose:
             self._check.diagnosis.success(
                 name=code.value,
                 diagnosis="track_io_timing is on.",
-                category=CATEGORY_SERVER_CONFIG,
+                category=CATEGORY_POSTGRES,
             )
             return
         self._check.diagnosis.warning(
             name=code.value,
             diagnosis="track_io_timing = {}; I/O timing columns will not be collected.".format(raw),
-            category=CATEGORY_SERVER_CONFIG,
+            category=CATEGORY_POSTGRES,
             description=DIAGNOSTIC_METADATA[code]["description"],
             remediation=build_remediation(code),
         )
@@ -315,7 +312,7 @@ class PostgresDiagnose:
             self._check.diagnosis.success(
                 name=code.value,
                 diagnosis="pg_stat_statements.max = {} (<= threshold {}).".format(value, threshold),
-                category=CATEGORY_SERVER_CONFIG,
+                category=CATEGORY_POSTGRES,
             )
             return
         self._check.diagnosis.warning(
@@ -323,7 +320,7 @@ class PostgresDiagnose:
             diagnosis=(
                 "pg_stat_statements.max = {} exceeds the threshold of {}; the collection query may run slowly."
             ).format(value, threshold),
-            category=CATEGORY_SERVER_CONFIG,
+            category=CATEGORY_POSTGRES,
             description=DIAGNOSTIC_METADATA[code]["description"],
             remediation=build_remediation(code),
         )
@@ -346,7 +343,7 @@ class PostgresDiagnose:
             self._check.diagnosis.success(
                 name=code.value,
                 diagnosis="Current user is a member of pg_monitor.",
-                category=CATEGORY_PRIVILEGES,
+                category=CATEGORY_POSTGRES,
             )
             return
         self._fail(
@@ -355,7 +352,7 @@ class PostgresDiagnose:
                 "The datadog user is not a member of pg_monitor; other users' activity and statement "
                 "metrics will be invisible."
             ),
-            category=CATEGORY_PRIVILEGES,
+            category=CATEGORY_POSTGRES,
             description=DIAGNOSTIC_METADATA[code]["description"],
             remediation=build_remediation(code),
         )
@@ -377,7 +374,7 @@ class PostgresDiagnose:
             self._fail(
                 DatabaseConfigurationError.undefined_activity_view,
                 diagnosis="Unable to query {}: {}".format(view, e),
-                category=CATEGORY_PRIVILEGES,
+                category=CATEGORY_POSTGRES,
                 description=DIAGNOSTIC_METADATA[DatabaseConfigurationError.undefined_activity_view]["description"],
                 remediation=build_remediation(DatabaseConfigurationError.undefined_activity_view),
                 rawerror=str(e),
@@ -390,7 +387,7 @@ class PostgresDiagnose:
                     "{} rows in {} are masked as '<insufficient privilege>'; activity samples will miss "
                     "other users' queries."
                 ).format(masked, view),
-                category=CATEGORY_PRIVILEGES,
+                category=CATEGORY_POSTGRES,
                 description=DIAGNOSTIC_METADATA[code]["description"],
                 remediation=build_remediation(code),
             )
@@ -398,7 +395,7 @@ class PostgresDiagnose:
         self._check.diagnosis.success(
             name=code.value,
             diagnosis="{} is readable with full query visibility.".format(view),
-            category=CATEGORY_PRIVILEGES,
+            category=CATEGORY_POSTGRES,
         )
 
     def _diagnose_datadog_schema(self, conn, dbname=None, failed=None):
@@ -420,13 +417,13 @@ class PostgresDiagnose:
             self._check.diagnosis.success(
                 name=code.value,
                 diagnosis="`datadog` schema exists in {}.".format(dbname),
-                category=CATEGORY_DBM,
+                category=CATEGORY_POSTGRES,
             )
             return
         self._fail(
             code,
             diagnosis="`datadog` schema is missing in {}; DBM setup is incomplete.".format(dbname),
-            category=CATEGORY_DBM,
+            category=CATEGORY_POSTGRES,
             description=DIAGNOSTIC_METADATA[code]["description"],
             remediation=build_remediation(code),
             failed_codes=failed,
@@ -447,13 +444,13 @@ class PostgresDiagnose:
             self._check.diagnosis.success(
                 name=created.value,
                 diagnosis="pg_stat_statements extension is installed in {}.".format(self._check._config.dbname),
-                category=CATEGORY_DBM,
+                category=CATEGORY_POSTGRES,
             )
             return
         self._fail(
             created,
             diagnosis="pg_stat_statements extension is not installed in {}.".format(self._check._config.dbname),
-            category=CATEGORY_DBM,
+            category=CATEGORY_POSTGRES,
             description=DIAGNOSTIC_METADATA[created]["description"],
             remediation=build_remediation(created),
         )
@@ -481,7 +478,7 @@ class PostgresDiagnose:
             self._fail(
                 code,
                 diagnosis="Unable to SELECT from {} in {}: {}".format(view, self._check._config.dbname, e),
-                category=CATEGORY_DBM,
+                category=CATEGORY_POSTGRES,
                 description=DIAGNOSTIC_METADATA[code]["description"],
                 remediation=build_remediation(code),
                 rawerror=str(e),
@@ -490,7 +487,7 @@ class PostgresDiagnose:
         self._check.diagnosis.success(
             name=code.value,
             diagnosis="{} is readable in {}.".format(view, self._check._config.dbname),
-            category=CATEGORY_DBM,
+            category=CATEGORY_POSTGRES,
         )
 
     def _diagnose_explain_function(self, conn, dbname=None, failed=None):
@@ -527,13 +524,13 @@ class PostgresDiagnose:
             self._check.diagnosis.success(
                 name=code.value,
                 diagnosis="{} exists in {}.".format(explain_function, dbname),
-                category=CATEGORY_DBM,
+                category=CATEGORY_POSTGRES,
             )
             return
         self._fail(
             code,
             diagnosis="{} is not defined in {}; execution plans cannot be collected.".format(explain_function, dbname),
-            category=CATEGORY_DBM,
+            category=CATEGORY_POSTGRES,
             description=build_description(code, explain_function=explain_function),
             remediation=build_remediation(code, explain_function=explain_function),
             failed_codes=failed,
