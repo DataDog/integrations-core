@@ -1,9 +1,8 @@
-# Unless explicitly stated otherwise all files in this repository are licensed
-# under the Apache License Version 2.0.
-# This product includes software developed at Datadog (https://www.datadoghq.com/).
-# Copyright 2018-present Datadog, Inc.
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 #
-# Ported from datadog-unix-agent to datadog-agent (Python 3, datadog_checks_base).
+# Ported from datadog-unix-agent to integrations-core (Python 3, datadog_checks_base).
 # Original: https://github.com/DataDog/datadog-unix-agent/tree/master/checks/bundled/lparstats
 
 import os
