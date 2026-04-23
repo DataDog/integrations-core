@@ -1082,7 +1082,7 @@ class PostgreSql(DatabaseCheck):
         self.diagnosis.warning(
             name=code.value,
             diagnosis=message,
-            category="postgres.runtime",
+            category="runtime",
             description=meta.get("description"),
             remediation=build_remediation(code),
         )

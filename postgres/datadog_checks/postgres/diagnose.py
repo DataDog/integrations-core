@@ -27,15 +27,11 @@ from .util import (
 )
 from .version_utils import V9_6, VersionUtils
 
-# Diagnose categories are `{check_name}.{area}` so `agent diagnose` output can be filtered or
-# grouped by integration on the consumer side. The agent itself only renders the string in
-# brackets, but the namespaced form is still the only identity that tells the postgres entries
-# apart from other Python checks sharing the `check-datadog` suite.
-CATEGORY_CONNECTION = "postgres.connection"
-CATEGORY_SERVER_CONFIG = "postgres.server-config"
-CATEGORY_PRIVILEGES = "postgres.privileges"
-CATEGORY_DBM = "postgres.dbm"
-CATEGORY_RUNTIME = "postgres.runtime"
+CATEGORY_CONNECTION = "connection"
+CATEGORY_SERVER_CONFIG = "server-config"
+CATEGORY_PRIVILEGES = "privileges"
+CATEGORY_DBM = "dbm"
+CATEGORY_RUNTIME = "runtime"
 
 # Recommended minimum track_activity_query_size. Default Postgres value is 1024, which
 # silently truncates queries and breaks explain plan collection.
