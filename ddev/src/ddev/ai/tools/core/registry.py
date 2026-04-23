@@ -63,14 +63,14 @@ class ToolRegistry:
         cls,
         tool_names: list[str],
         *,
-        agent_id: str,
+        owner_id: str,
         file_registry: FileRegistry | None = None,
     ) -> ToolRegistry:
         """Build a ToolRegistry from a list of tool name strings.
 
-        The file_registry is expected to be shared across all agents in a run so
+        The file_registry is expected to be shared across all owners in a run so
         that the access policy applies globally; hashes inside it are partitioned
-        by agent_id so each agent must still read-before-write on its own.
+        by owner_id so each owner must still read-before-write on its own.
         A new (unshared) FileRegistry is created if one is not supplied.
         """
         tools: list[ToolProtocol] = []
@@ -81,7 +81,7 @@ class ToolRegistry:
                 raise ValueError(f"Unknown tool name: {name!r}")
             tool_cls = getattr(import_module(f"{TOOLS_PACKAGE}.{spec.module}"), spec.cls)
             if spec.requires_file_registry:
-                tools.append(tool_cls(shared_registry, agent_id))
+                tools.append(tool_cls(shared_registry, owner_id))
             else:
                 tools.append(tool_cls())
         return cls(tools)

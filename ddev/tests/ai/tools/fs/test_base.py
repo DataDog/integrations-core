@@ -11,7 +11,7 @@ from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.fs.base import FileRegistryTool
 from ddev.ai.tools.fs.file_registry import FileRegistry
 
-AGENT_ID = "test-agent"
+OWNER_ID = "test-agent"
 
 # ---------------------------------------------------------------------------
 # Minimal concrete subclass for testing
@@ -45,7 +45,7 @@ def registry() -> FileRegistry:
 
 @pytest.fixture
 def tool(registry: FileRegistry) -> DummyTool:
-    return DummyTool(registry, AGENT_ID)
+    return DummyTool(registry, OWNER_ID)
 
 
 # ---------------------------------------------------------------------------
@@ -66,7 +66,7 @@ def test_read_verified_fails_if_not_known(tool: DummyTool, tmp_path) -> None:
 def test_read_verified_fails_if_file_changed_externally(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
     f = tmp_path / "file.txt"
     f.write_text("original", encoding="utf-8")
-    registry.record(AGENT_ID, str(f), "original")
+    registry.record(OWNER_ID, str(f), "original")
 
     f.write_text("modified", encoding="utf-8")
 
@@ -81,7 +81,7 @@ def test_read_verified_fails_if_file_changed_externally(tool: DummyTool, registr
 def test_read_verified_succeeds_if_content_matches(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
     f = tmp_path / "file.txt"
     f.write_text("hello", encoding="utf-8")
-    registry.record(AGENT_ID, str(f), "hello")
+    registry.record(OWNER_ID, str(f), "hello")
 
     content, error = tool._read_verified(str(f))
 
@@ -91,7 +91,7 @@ def test_read_verified_succeeds_if_content_matches(tool: DummyTool, registry: Fi
 
 def test_read_verified_handles_oserror(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
     path = str(tmp_path / "ghost.txt")
-    registry.record(AGENT_ID, path, "anything")
+    registry.record(OWNER_ID, path, "anything")
 
     content, error = tool._read_verified(path)
 
@@ -123,8 +123,8 @@ def test_register_registers_path(tool: DummyTool, registry: FileRegistry, tmp_pa
     path = str(tmp_path / "file.txt")
     tool._register(path, "written")
 
-    assert registry.is_known(AGENT_ID, path) is True
-    assert registry.verify(AGENT_ID, path, "written") is True
+    assert registry.is_known(OWNER_ID, path) is True
+    assert registry.verify(OWNER_ID, path, "written") is True
 
 
 def test_register_updates_hash_after_register(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
@@ -132,8 +132,8 @@ def test_register_updates_hash_after_register(tool: DummyTool, registry: FileReg
     tool._register(path, "old")
     tool._register(path, "new")
 
-    assert registry.verify(AGENT_ID, path, "new") is True
-    assert registry.verify(AGENT_ID, path, "old") is False
+    assert registry.verify(OWNER_ID, path, "new") is True
+    assert registry.verify(OWNER_ID, path, "old") is False
 
 
 def test_register_scopes_to_the_tools_agent(registry: FileRegistry, tmp_path) -> None:

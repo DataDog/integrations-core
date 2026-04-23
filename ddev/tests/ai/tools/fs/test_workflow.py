@@ -38,9 +38,9 @@ async def test_workflow_create_read_edit_append(
     assert f.read_text(encoding="utf-8").endswith("# updated\n")
 
     # Registry must reflect the final state for this agent
-    from .conftest import AGENT_ID
+    from .conftest import OWNER_ID
 
-    assert registry.verify(AGENT_ID, str(f), f.read_text(encoding="utf-8")) is True
+    assert registry.verify(OWNER_ID, str(f), f.read_text(encoding="utf-8")) is True
 
 
 async def test_workflow_stale_file(

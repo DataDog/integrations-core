@@ -12,12 +12,12 @@ from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.fs.mkdir import MkdirTool
 from ddev.ai.tools.fs.read_file import ReadFileTool
 
-AGENT_ID = "test-agent"
+OWNER_ID = "test-agent"
 
 
 @pytest.fixture
-def agent_id() -> str:
-    return AGENT_ID
+def owner_id() -> str:
+    return OWNER_ID
 
 
 @pytest.fixture
@@ -31,28 +31,28 @@ def registry(permissive_policy: FileAccessPolicy) -> FileRegistry:
 
 
 @pytest.fixture
-def read_tool(registry: FileRegistry, agent_id: str) -> ReadFileTool:
-    return ReadFileTool(registry, agent_id)
+def read_tool(registry: FileRegistry, owner_id: str) -> ReadFileTool:
+    return ReadFileTool(registry, owner_id)
 
 
 @pytest.fixture
-def create_tool(registry: FileRegistry, agent_id: str) -> CreateFileTool:
-    return CreateFileTool(registry, agent_id)
+def create_tool(registry: FileRegistry, owner_id: str) -> CreateFileTool:
+    return CreateFileTool(registry, owner_id)
 
 
 @pytest.fixture
-def edit_tool(registry: FileRegistry, agent_id: str) -> EditFileTool:
-    return EditFileTool(registry, agent_id)
+def edit_tool(registry: FileRegistry, owner_id: str) -> EditFileTool:
+    return EditFileTool(registry, owner_id)
 
 
 @pytest.fixture
-def append_tool(registry: FileRegistry, agent_id: str) -> AppendFileTool:
-    return AppendFileTool(registry, agent_id)
+def append_tool(registry: FileRegistry, owner_id: str) -> AppendFileTool:
+    return AppendFileTool(registry, owner_id)
 
 
 @pytest.fixture
-def mkdir_tool(registry: FileRegistry, agent_id: str) -> MkdirTool:
-    return MkdirTool(registry, agent_id)
+def mkdir_tool(registry: FileRegistry, owner_id: str) -> MkdirTool:
+    return MkdirTool(registry, owner_id)
 
 
 @pytest.fixture
