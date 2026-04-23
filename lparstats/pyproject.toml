@@ -29,6 +29,9 @@ dependencies = ["datadog-checks-base"]
 dynamic = ["version"]
 license = "BSD-3-Clause"
 
+[project.optional-dependencies]
+deps = []
+
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
 
