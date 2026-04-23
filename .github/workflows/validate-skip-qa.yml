@@ -63,6 +63,26 @@ jobs:
             datadog_checks_dev/**
             datadog_checks_tests_helper/**
 
+      - name: Debug - Show detected changed files
+        env:
+          ANY_CHANGED: ${{ steps.changed_files.outputs.any_changed }}
+          ALL_CHANGED_FILES: ${{ steps.changed_files.outputs.all_changed_files }}
+          ALL_MODIFIED_FILES: ${{ steps.changed_files.outputs.all_modified_files }}
+          ADDED_FILES: ${{ steps.changed_files.outputs.added_files }}
+          MODIFIED_FILES: ${{ steps.changed_files.outputs.modified_files }}
+          DELETED_FILES: ${{ steps.changed_files.outputs.deleted_files }}
+          RENAMED_FILES: ${{ steps.changed_files.outputs.renamed_files }}
+          HAS_SKIP_QA_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'qa/skip-qa') }}
+        run: |
+          echo "any_changed=${ANY_CHANGED}"
+          echo "has_skip_qa_label=${HAS_SKIP_QA_LABEL}"
+          echo "all_changed_files=${ALL_CHANGED_FILES}"
+          echo "all_modified_files=${ALL_MODIFIED_FILES}"
+          echo "added_files=${ADDED_FILES}"
+          echo "modified_files=${MODIFIED_FILES}"
+          echo "deleted_files=${DELETED_FILES}"
+          echo "renamed_files=${RENAMED_FILES}"
+
       - name: Render comment body - Add skip qa label
         id: render_add
         if: steps.changed_files.outputs.any_changed == 'false' && !contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
