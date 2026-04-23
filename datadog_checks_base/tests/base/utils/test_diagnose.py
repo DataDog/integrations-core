@@ -154,7 +154,9 @@ def test_dedup_collapses_character_identical_entries():
     diag.success("probe", "Connected to localhost:5432", category="connection")
     diag.success("probe", "Connected to localhost:5432", category="connection")
     assert diag.diagnoses == [
-        Diagnosis.Result(Diagnosis.DIAGNOSIS_SUCCESS, "probe", "Connected to localhost:5432", "connection", None, None, None),
+        Diagnosis.Result(
+            Diagnosis.DIAGNOSIS_SUCCESS, "probe", "Connected to localhost:5432", "connection", None, None, None
+        ),
     ]
 
 
