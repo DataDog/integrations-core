@@ -998,10 +998,6 @@ integration/nagios:
 - changed-files:
   - any-glob-to-any-file:
     - nagios/**/*
-integration/nifi:
-- changed-files:
-  - any-glob-to-any-file:
-    - nifi/**/*
 integration/network:
 - changed-files:
   - any-glob-to-any-file:
@@ -1022,6 +1018,10 @@ integration/nginx_ingress_controller:
 - changed-files:
   - any-glob-to-any-file:
     - nginx_ingress_controller/**/*
+integration/nifi:
+- changed-files:
+  - any-glob-to-any-file:
+    - nifi/**/*
 integration/ntp:
 - changed-files:
   - any-glob-to-any-file:
