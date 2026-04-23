@@ -88,6 +88,7 @@ from .util import (
     DatabaseConfigurationError,
     DatabaseHealthCheckError,  # noqa: F401
     build_remediation,
+    diagnosis_name,
     fmt,
     get_schema_field,
     payload_pg_version,
@@ -1080,7 +1081,7 @@ class PostgreSql(DatabaseCheck):
         # surfaces the same setup/config issues that agent status already shows.
         meta = DIAGNOSTIC_METADATA.get(code, {})
         self.diagnosis.warning(
-            name=code.value,
+            name=diagnosis_name(code),
             diagnosis=message,
             category="runtime",
             description=meta.get("description"),

@@ -17,6 +17,7 @@ from datadog_checks.postgres.util import (
     DIAGNOSTIC_METADATA,
     DatabaseConfigurationError,
     build_remediation,
+    diagnosis_name,
 )
 
 pytestmark = pytest.mark.unit
@@ -124,7 +125,7 @@ def test_record_warning_emits_diagnosis(integration_check, pg_instance):
     assert len(diagnoses) == 1
     d = diagnoses[0]
     assert d.result == Diagnosis.DIAGNOSIS_WARNING
-    assert d.name == code.value
+    assert d.name == diagnosis_name(code)
     assert d.diagnosis == "pg_stat_statements is not loaded"
     assert d.description == DIAGNOSTIC_METADATA[code]["description"]
     assert "shared_preload_libraries" in d.remediation
@@ -143,7 +144,7 @@ def test_record_warning_unknown_code_still_emits(integration_check, pg_instance)
         check.record_warning(fake, "too many dbs")
     diagnoses = check.diagnosis.diagnoses
     assert len(diagnoses) == 1
-    assert diagnoses[0].name == fake.value
+    assert diagnoses[0].name == diagnosis_name(fake)
     # Remediation always contains the docs URL as a fallback.
     assert "https://docs.datadoghq.com" in diagnoses[0].remediation
 
@@ -156,7 +157,9 @@ def test_get_diagnoses_returns_json(integration_check, pg_instance):
     with mock.patch.object(check.diagnosis, '_diagnostics', []):
         payload = check.get_diagnoses()
     parsed = json.loads(payload)
-    assert any(d['name'] == DatabaseConfigurationError.pg_stat_statements_not_loaded.value for d in parsed)
+    assert any(
+        d['name'] == diagnosis_name(DatabaseConfigurationError.pg_stat_statements_not_loaded) for d in parsed
+    )
 
 
 # -- Connection diagnostic ----------------------------------------------------
@@ -168,7 +171,7 @@ def test_connection_fails_surfaces_fail(integration_check, pg_instance):
     with mock.patch('datadog_checks.postgres.diagnose.TokenAwareConnection.connect', side_effect=err):
         diagnoses = _get_diagnoses(check)
 
-    conn_fail = _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
+    conn_fail = _by_name(diagnoses, diagnosis_name(DatabaseConfigurationError.connection_failure))
     assert len(conn_fail) == 1  # connection & dbm orchestrators both call open; DBM skipped when dbm=false
     assert conn_fail[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert 'could not connect' in conn_fail[0]['diagnosis']
@@ -181,7 +184,7 @@ def test_connection_fails_dbm_enabled_reports_once_per_orchestrator(integration_
     err = psycopg.OperationalError('boom')
     with mock.patch('datadog_checks.postgres.diagnose.TokenAwareConnection.connect', side_effect=err):
         diagnoses = _get_diagnoses(check)
-    conn_diags = _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
+    conn_diags = _by_name(diagnoses, diagnosis_name(DatabaseConfigurationError.connection_failure))
     assert all(d['result'] == Diagnosis.DIAGNOSIS_FAIL for d in conn_diags)
     assert len(conn_diags) == 2
 
@@ -221,8 +224,8 @@ def test_server_config_happy_path(integration_check, pg_instance):
         DatabaseConfigurationError.missing_pg_monitor_role,
         DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity,
     ):
-        assert (code.value, Diagnosis.DIAGNOSIS_SUCCESS) in names_and_results, (
-            f"expected {code.value} to pass, got {[d for d in diagnoses if d['name'] == code.value]}"
+        assert (diagnosis_name(code), Diagnosis.DIAGNOSIS_SUCCESS) in names_and_results, (
+            f"expected {diagnosis_name(code)} to pass, got {[d for d in diagnoses if d['name'] == diagnosis_name(code)]}"
         )
 
 
@@ -233,7 +236,7 @@ def test_shared_preload_libraries_missing_fails(integration_check, pg_instance):
         diagnoses = _get_diagnoses(check)
     spl = _by_name(
         diagnoses,
-        DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements.value,
+        diagnosis_name(DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements),
     )
     assert spl and spl[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert 'pg_stat_statements' in spl[0]['diagnosis']
@@ -251,7 +254,7 @@ def test_shared_preload_libraries_unreadable_warns(integration_check, pg_instanc
         diagnoses = _get_diagnoses(check)
     spl = _by_name(
         diagnoses,
-        DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements.value,
+        diagnosis_name(DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements),
     )
     assert len(spl) == 1, spl
     assert spl[0]['result'] == Diagnosis.DIAGNOSIS_WARNING
@@ -265,7 +268,7 @@ def test_track_activity_query_size_too_small_warns(integration_check, pg_instanc
     responses = _happy_server_responses(track_query_size=1024)
     with _patch_connection(check, FakeConn(responses)):
         diagnoses = _get_diagnoses(check)
-    entry = _by_name(diagnoses, DatabaseConfigurationError.track_activity_query_size_too_small.value)[0]
+    entry = _by_name(diagnoses, diagnosis_name(DatabaseConfigurationError.track_activity_query_size_too_small))[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_WARNING
     assert str(RECOMMENDED_TRACK_ACTIVITY_QUERY_SIZE) in entry['diagnosis']
 
@@ -275,7 +278,7 @@ def test_track_io_timing_off_warns(integration_check, pg_instance):
     responses = _happy_server_responses(track_io='off')
     with _patch_connection(check, FakeConn(responses)):
         diagnoses = _get_diagnoses(check)
-    entry = _by_name(diagnoses, DatabaseConfigurationError.track_io_timing_disabled.value)[0]
+    entry = _by_name(diagnoses, diagnosis_name(DatabaseConfigurationError.track_io_timing_disabled))[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_WARNING
 
 
@@ -285,7 +288,7 @@ def test_pg_stat_statements_max_above_threshold_warns(integration_check, pg_inst
     responses = _happy_server_responses(pgss_max=50000)
     with _patch_connection(check, FakeConn(responses)):
         diagnoses = _get_diagnoses(check)
-    entry = _by_name(diagnoses, DatabaseConfigurationError.high_pg_stat_statements_max.value)[0]
+    entry = _by_name(diagnoses, diagnosis_name(DatabaseConfigurationError.high_pg_stat_statements_max))[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_WARNING
     assert '50000' in entry['diagnosis']
 
@@ -295,7 +298,7 @@ def test_unsupported_postgres_version_fails(integration_check, pg_instance):
     responses = _happy_server_responses(server_version='9.5.1')
     with _patch_connection(check, FakeConn(responses)):
         diagnoses = _get_diagnoses(check)
-    entry = _by_name(diagnoses, DatabaseConfigurationError.postgres_version_unsupported.value)[0]
+    entry = _by_name(diagnoses, diagnosis_name(DatabaseConfigurationError.postgres_version_unsupported))[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert '9.5' in entry['diagnosis']
 
@@ -310,7 +313,7 @@ def test_missing_pg_monitor_role_fails(integration_check, pg_instance):
     responses = [(m, [(False,)]) if isinstance(m, str) and m == 'pg_has_role' else (m, r) for m, r in responses]
     with _patch_connection(check, FakeConn(responses)):
         diagnoses = _get_diagnoses(check)
-    entry = _by_name(diagnoses, DatabaseConfigurationError.missing_pg_monitor_role.value)[0]
+    entry = _by_name(diagnoses, diagnosis_name(DatabaseConfigurationError.missing_pg_monitor_role))[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert 'pg_monitor' in entry['remediation']
 
@@ -321,7 +324,7 @@ def test_insufficient_privilege_on_pg_stat_activity_warns(integration_check, pg_
     responses = [(m, [(3,)]) if m == "query = %s" else (m, r) for m, r in responses]
     with _patch_connection(check, FakeConn(responses)):
         diagnoses = _get_diagnoses(check)
-    entry = _by_name(diagnoses, DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity.value)[0]
+    entry = _by_name(diagnoses, diagnosis_name(DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity))[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_WARNING
     assert '3' in entry['diagnosis']
 
@@ -346,10 +349,10 @@ def test_dbm_disabled_skips_dbm_diagnostics(integration_check, pg_instance):
         diagnoses = _get_diagnoses(check)
     # No dbm-category diagnoses should appear.
     dbm_names = {
-        DatabaseConfigurationError.missing_datadog_schema.value,
-        DatabaseConfigurationError.pg_stat_statements_not_created.value,
-        DatabaseConfigurationError.pg_stat_statements_not_readable.value,
-        DatabaseConfigurationError.undefined_explain_function.value,
+        diagnosis_name(DatabaseConfigurationError.missing_datadog_schema),
+        diagnosis_name(DatabaseConfigurationError.pg_stat_statements_not_created),
+        diagnosis_name(DatabaseConfigurationError.pg_stat_statements_not_readable),
+        diagnosis_name(DatabaseConfigurationError.undefined_explain_function),
     }
     assert not any(d['name'] in dbm_names for d in diagnoses)
 
@@ -366,8 +369,8 @@ def test_dbm_happy_path(integration_check, pg_instance):
         DatabaseConfigurationError.pg_stat_statements_not_readable,
         DatabaseConfigurationError.undefined_explain_function,
     ):
-        assert (code.value, Diagnosis.DIAGNOSIS_SUCCESS) in names_and_results, (
-            f"expected {code.value} to pass, got {[d for d in diagnoses if d['name'] == code.value]}"
+        assert (diagnosis_name(code), Diagnosis.DIAGNOSIS_SUCCESS) in names_and_results, (
+            f"expected {diagnosis_name(code)} to pass, got {[d for d in diagnoses if d['name'] == diagnosis_name(code)]}"
         )
 
 
@@ -382,7 +385,7 @@ def test_missing_datadog_schema_fails(integration_check, pg_instance):
     conn = FakeConn(_happy_server_responses() + dbm_responses)
     with _patch_connection(check, conn):
         diagnoses = _get_diagnoses(check)
-    entry = _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)[0]
+    entry = _by_name(diagnoses, diagnosis_name(DatabaseConfigurationError.missing_datadog_schema))[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
 
 
@@ -401,10 +404,10 @@ def test_missing_pg_stat_statements_extension_fails(integration_check, pg_instan
     conn = FakeConn(_happy_server_responses() + dbm_responses)
     with _patch_connection(check, conn):
         diagnoses = _get_diagnoses(check)
-    created = _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_created.value)[0]
+    created = _by_name(diagnoses, diagnosis_name(DatabaseConfigurationError.pg_stat_statements_not_created))[0]
     assert created['result'] == Diagnosis.DIAGNOSIS_FAIL
     # readable probe is suppressed when UndefinedTable raised (to avoid double-report)
-    assert not _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_readable.value)
+    assert not _by_name(diagnoses, diagnosis_name(DatabaseConfigurationError.pg_stat_statements_not_readable))
 
 
 def test_missing_explain_function_fails(integration_check, pg_instance):
@@ -418,7 +421,7 @@ def test_missing_explain_function_fails(integration_check, pg_instance):
     conn = FakeConn(_happy_server_responses() + dbm_responses)
     with _patch_connection(check, conn):
         diagnoses = _get_diagnoses(check)
-    entry = _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)[0]
+    entry = _by_name(diagnoses, diagnosis_name(DatabaseConfigurationError.undefined_explain_function))[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert 'explain_statement' in entry['diagnosis']
 
