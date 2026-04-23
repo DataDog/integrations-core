@@ -5,13 +5,10 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import CLICKHOUSE_VERSION, IS_TLS
+from .common import CLICKHOUSE_VERSION
 from .metrics import OPTIONAL_METRICS, get_metrics
 
-pytestmark = [
-    pytest.mark.e2e,
-    pytest.mark.skipif(IS_TLS, reason='E2E test does not run in TLS flavor'),
-]
+pytestmark = pytest.mark.e2e
 
 
 def test_check(dd_agent_check, instance):

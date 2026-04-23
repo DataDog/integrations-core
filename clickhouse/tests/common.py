@@ -8,12 +8,15 @@ import pytest
 from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
-COMPOSE_FILE = os.getenv('COMPOSE_FILE', 'docker-compose.yaml')
-IS_TLS = COMPOSE_FILE == 'docker-compose-tls.yaml'
-COMPOSE_FILE_PATH = os.path.join(HERE, 'docker', COMPOSE_FILE)
+COMPOSE_FILE_PATH = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 SERVER_CERT_PATH = os.path.join(HERE, 'docker', 'certs', 'server.crt')
 
-tls = pytest.mark.skipif(not IS_TLS, reason='Test only valid for TLS flavor')
+TLS_ENABLED = 'tls' in os.getenv('COMPOSE_PROFILES', '').split(',')
+
+tls = pytest.mark.skipif(
+    not TLS_ENABLED,
+    reason='TLS tests require a ClickHouse version that supports modern TLS (22.7+)',
+)
 
 HOST = get_docker_hostname()
 HTTP_START_PORT = 8128

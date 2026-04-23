@@ -14,22 +14,6 @@ from . import common
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    if common.IS_TLS:
-        conditions = [
-            WaitFor(
-                ping_clickhouse(
-                    common.TLS_CONFIG['server'],
-                    common.TLS_CONFIG['port'],
-                    common.TLS_CONFIG['username'],
-                    common.TLS_CONFIG['password'],
-                    secure=True,
-                )
-            )
-        ]
-        with docker_run(common.COMPOSE_FILE_PATH, conditions=conditions, sleep=10, attempts=2):
-            yield common.TLS_CONFIG
-        return
-
     conditions = []
 
     for i in range(6):
@@ -50,6 +34,19 @@ def dd_environment():
             )
         )
     )
+
+    if common.TLS_ENABLED:
+        conditions.append(
+            WaitFor(
+                ping_clickhouse(
+                    common.TLS_CONFIG['server'],
+                    common.TLS_CONFIG['port'],
+                    common.TLS_CONFIG['username'],
+                    common.TLS_CONFIG['password'],
+                    secure=True,
+                )
+            )
+        )
 
     with docker_run(common.COMPOSE_FILE_PATH, conditions=conditions, sleep=10, attempts=2):
         yield common.CONFIG

@@ -122,6 +122,21 @@ services:
       - ./test_dictionary.xml:/etc/clickhouse-server/test_dictionary.xml
       - ./test.csv:/opt/dictionaries/test.csv
 
+  clickhouse-tls:
+    profiles: ["tls"]
+    image: ${CLICKHOUSE_REPOSITORY}:${CLICKHOUSE_VERSION}
+    hostname: clickhouse-tls
+    container_name: clickhouse-tls
+    ports:
+      - "8134:8443"
+    volumes:
+      - ./tls_config.xml:/etc/clickhouse-server/config.d/tls.xml
+      - ./certs/server.crt:/etc/clickhouse-server/ssl/server.crt
+      - ./certs/server.key:/etc/clickhouse-server/ssl/server.key
+      - ./users.xml:/etc/clickhouse-server/users.d/users.xml
+    networks:
+      - clickhouse-network
+
   clickhouse-zookeeper:
     # Using zookeeper `3.6.0` is raising this error:
     #   Connection request from old client /172.30.0.7:51646; will be dropped if server is in r-o mode

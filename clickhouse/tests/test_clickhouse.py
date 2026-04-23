@@ -6,14 +6,10 @@ import pytest
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import CLICKHOUSE_VERSION, IS_TLS
+from .common import CLICKHOUSE_VERSION
 from .metrics import OPTIONAL_METRICS, get_metrics
 
-pytestmark = [
-    pytest.mark.integration,
-    pytest.mark.usefixtures('dd_environment'),
-    pytest.mark.skipif(IS_TLS, reason='Non-TLS tests do not run in TLS flavor'),
-]
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
 def test_check(aggregator, instance, dd_run_check):
