@@ -1,1 +1,0 @@
-Deduplicate character-identical diagnosis entries in the `Diagnosis` helper so orchestrators or worker threads emitting the same success/warning/failure row collapse to one entry within a single `agent diagnose` run.

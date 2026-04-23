@@ -157,15 +157,13 @@ def test_connection_fails_surfaces_fail(integration_check, pg_instance):
     assert 'troubleshooting' in conn_fail[0]['remediation']
 
 
-def test_connection_fails_dbm_enabled_collapses_duplicate_probes(integration_check, pg_instance):
-    """With dbm=true, both orchestrators try to connect -- but the base Diagnosis dedups the
-    character-identical FAIL rows, so the user sees exactly one connection-failure entry."""
+def test_connection_fails_dbm_enabled_reports_once(integration_check, pg_instance):
+    """With dbm=true, the single orchestrator opens one probe connection -- one FAIL row."""
     check = integration_check(dict(pg_instance, dbm=True))
     err = psycopg.OperationalError('boom')
     with mock.patch('datadog_checks.postgres.diagnose.TokenAwareConnection.connect', side_effect=err) as connect:
         diagnoses = _get_diagnoses(check)
-    # Both orchestrators still attempt a probe.
-    assert connect.call_count == 2
+    assert connect.call_count == 1
     conn_diags = _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
     assert len(conn_diags) == 1
     assert conn_diags[0]['result'] == Diagnosis.DIAGNOSIS_FAIL

@@ -49,29 +49,30 @@ class PostgresDiagnose:
     # -- registration ---------------------------------------------------------
 
     def register(self):
-        """Register diagnostic entry points with the check's Diagnosis object.
-
-        A single orchestrator per category keeps the output tidy: if one category
-        fails catastrophically, the others still report.
+        """Register the diagnostic entry point with the check's Diagnosis object.
 
         Idempotent: re-invoking `register` on the same Diagnosis object is a no-op.
         ``Diagnosis.register`` extends an internal list, so without this guard a
-        repeated call would stack orchestrators and produce N× the diagnostics.
+        repeated call would stack the entry point and produce N× the diagnostics.
         """
         d = self._check.diagnosis
         if getattr(d, '_postgres_diagnostics_registered', False):
             return
         d._postgres_diagnostics_registered = True
-        d.register(
-            self._run_connection_and_server_diagnostics,
-            self._run_dbm_diagnostics,
-        )
+        d.register(self._run)
 
-    # -- orchestrators --------------------------------------------------------
+    # -- orchestrator ---------------------------------------------------------
 
-    def _run_connection_and_server_diagnostics(self):
-        """Open a connection and run every diagnostic that doesn't depend on DBM."""
-        # Runs first -- reset cascade state so run-to-run FAILs don't leak between invocations.
+    def _run(self):
+        """Single entry point: open one probe connection and run every diagnostic.
+
+        A single orchestrator means a single `connection-failure` row per run
+        (vs. one per orchestrator when the dbname matches). DBM-specific probes
+        are gated on the subfeatures that actually consume each dependency:
+        a query-activity-only setup (``dbm: true`` with query_metrics/query_samples
+        disabled) should not be flagged unhealthy for a missing pg_stat_statements
+        or explain function it will never call.
+        """
         self._failed = set()
         conn = self._open_probe_connection(self._check._config.dbname)
         if conn is None:
@@ -80,52 +81,39 @@ class PostgresDiagnose:
             self._diagnose_version(conn)
             self._diagnose_pg_monitor_role(conn)
             self._diagnose_pg_stat_activity_access(conn)
+            if self._check._config.dbm:
+                self._run_dbm_probes(conn)
         finally:
             _safe_close(conn)
 
-    def _run_dbm_diagnostics(self):
-        """Run DBM-only pre-flight checks against the main dbname.
-
-        Probes are gated on the subfeatures that actually consume each dependency:
-        a query-activity-only setup (``dbm: true`` with query_metrics/query_samples
-        disabled) should not be flagged unhealthy for a missing pg_stat_statements
-        or explain function it will never call.
-        """
-        if not self._check._config.dbm:
-            return
-        conn = self._open_probe_connection(self._check._config.dbname)
-        if conn is None:
-            return
-        try:
-            query_metrics = self._check._config.query_metrics.enabled
-            query_samples = self._check._config.query_samples.enabled
-            # track_activity_query_size backs pg_stat_activity's query column, used by
-            # both query_samples (for explain) and query_activity.
-            if query_samples or self._check._config.query_activity.enabled:
-                self._diagnose_track_activity_query_size(conn)
-            # pg_stat_statements-backed probes -- only relevant to query_metrics.
-            # Keep SPL first so the extension/readable probes can cascade-skip off it.
-            if query_metrics:
-                self._diagnose_shared_preload_libraries(conn)
-                self._diagnose_track_io_timing(conn)
-                self._diagnose_pg_stat_statements_max(conn)
-                self._diagnose_pg_stat_statements_extension(conn)
-                self._diagnose_pg_stat_statements_readable(conn)
-            # Explain-function probes run against every database that query samples may explain.
-            if query_samples:
-                for dbname in self._get_query_samples_probe_databases(conn):
-                    probe_conn = conn if dbname == self._check._config.dbname else self._open_probe_connection(dbname)
-                    if probe_conn is None:
-                        continue
-                    failed = set()
-                    try:
-                        self._diagnose_datadog_schema(probe_conn, dbname, failed)
-                        self._diagnose_explain_function(probe_conn, dbname, failed)
-                    finally:
-                        if probe_conn is not conn:
-                            _safe_close(probe_conn)
-        finally:
-            _safe_close(conn)
+    def _run_dbm_probes(self, conn):
+        query_metrics = self._check._config.query_metrics.enabled
+        query_samples = self._check._config.query_samples.enabled
+        # track_activity_query_size backs pg_stat_activity's query column, used by
+        # both query_samples (for explain) and query_activity.
+        if query_samples or self._check._config.query_activity.enabled:
+            self._diagnose_track_activity_query_size(conn)
+        # pg_stat_statements-backed probes -- only relevant to query_metrics.
+        # Keep SPL first so the extension/readable probes can cascade-skip off it.
+        if query_metrics:
+            self._diagnose_shared_preload_libraries(conn)
+            self._diagnose_track_io_timing(conn)
+            self._diagnose_pg_stat_statements_max(conn)
+            self._diagnose_pg_stat_statements_extension(conn)
+            self._diagnose_pg_stat_statements_readable(conn)
+        # Explain-function probes run against every database that query samples may explain.
+        if query_samples:
+            for dbname in self._get_query_samples_probe_databases(conn):
+                probe_conn = conn if dbname == self._check._config.dbname else self._open_probe_connection(dbname)
+                if probe_conn is None:
+                    continue
+                failed = set()
+                try:
+                    self._diagnose_datadog_schema(probe_conn, dbname, failed)
+                    self._diagnose_explain_function(probe_conn, dbname, failed)
+                finally:
+                    if probe_conn is not conn:
+                        _safe_close(probe_conn)
 
     # -- diagnostics ----------------------------------------------------------
 

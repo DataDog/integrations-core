@@ -148,59 +148,6 @@ def test_diagnose_fields_get_sanitized():
     ]
 
 
-def test_dedup_collapses_character_identical_entries():
-    """Two calls with identical (result, name, category, diagnosis, rawerror) collapse to one row."""
-    diag = Diagnosis()
-    diag.success("probe", "Connected to localhost:5432", category="connection")
-    diag.success("probe", "Connected to localhost:5432", category="connection")
-    assert diag.diagnoses == [
-        Diagnosis.Result(
-            Diagnosis.DIAGNOSIS_SUCCESS, "probe", "Connected to localhost:5432", "connection", None, None, None
-        ),
-    ]
-
-
-def test_dedup_preserves_entries_with_different_fields():
-    """Rows that differ in any deduped field remain distinct."""
-    diag = Diagnosis()
-    diag.fail("probe", "Failed to connect to db-a", category="connection")
-    diag.fail("probe", "Failed to connect to db-b", category="connection")  # different diagnosis text
-    diag.fail("probe", "Failed to connect to db-a", category="dbm")  # different category
-    diag.warning("probe", "Failed to connect to db-a", category="connection")  # different result
-    assert len(diag.diagnoses) == 4
-
-
-def test_dedup_state_resets_on_clear():
-    """After clear(), a previously-seen key is emittable again."""
-    diag = Diagnosis()
-    diag.success("probe", "ok")
-    diag.success("probe", "ok")
-    assert len(diag.diagnoses) == 1
-    diag.clear()
-    diag.success("probe", "ok")
-    assert len(diag.diagnoses) == 1
-
-
-def test_dedup_scoped_per_explicit_run():
-    """Each explicit run starts with a fresh dedup set -- a cached entry from a prior run
-    doesn't suppress an identical entry emitted by an explicit diagnostic."""
-    diag = Diagnosis()
-    diag.success("probe", "ok")  # cached
-    emissions = []
-
-    def diagnostic():
-        diag.success("probe", "ok")
-        emissions.append(len(diag.diagnoses))  # explicit-run list only
-
-    diag.register(diagnostic)
-    results = diag.run_explicit()
-    # Explicit run captured the emission (not suppressed by the cached entry).
-    assert len(results) == 1
-    assert emissions == [1]
-    # Cached list is unchanged by run_explicit.
-    assert len(diag.diagnoses) == 1
-
-
 def get_diagnoses(check):
     """Get diagnoses from a check as a list of dictionaries."""
     return json.loads(check.get_diagnoses())
