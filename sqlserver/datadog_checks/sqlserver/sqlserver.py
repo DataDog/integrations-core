@@ -34,6 +34,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverAvailabilityReplicasMetrics,
     SqlserverDatabaseBackupMetrics,
     SqlserverDatabaseFilesMetrics,
+    SqlserverDatabaseMemoryMetrics,
     SqlserverDatabaseReplicationStatsMetrics,
     SqlserverDatabaseStatsMetrics,
     SqlserverDBFragmentationMetrics,
@@ -948,6 +949,7 @@ class SQLServer(DatabaseCheck):
             SqlserverMasterFilesMetrics,
             SqlserverDatabaseStatsMetrics,
             SqlserverDatabaseBackupMetrics,
+            SqlserverDatabaseMemoryMetrics,
             SqlserverAgentMetrics,
             SQLServerXESessionMetrics,
         ]
