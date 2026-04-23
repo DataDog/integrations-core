@@ -25,6 +25,7 @@ files:
           Note: This only takes effect when `is_jmx` is set to `false` and is required for all
           API metrics.
         fleet_configurable: true
+        formats: ["url"]
         value:
           type: string
       - name: default_tag
@@ -62,7 +63,9 @@ files:
             type: string
       - name: components
         description: |
-          A mapping of components for which metrics should be collected. Each object may override the default
+          A mapping of components for which metrics should be collected.
+
+          Each object may override the default
           options. Each component key may be configured with an optional configuration mapping to filter the metrics 
           that should be collected.
           

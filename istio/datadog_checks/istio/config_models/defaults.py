@@ -72,6 +72,10 @@ def instance_ignore_connection_errors():
     return False
 
 
+def instance_istio_mode():
+    return 'sidecar'
+
+
 def instance_kerberos_auth():
     return 'disabled'
 

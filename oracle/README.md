@@ -428,7 +428,7 @@ See [service_checks.json][12] for a list of service checks provided by this inte
 Need help? Contact [Datadog support][14].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/oracle/images/oracle_dashboard.png
-[2]: https://docs.datadoghq.com/database_monitoring/
+[2]: https://docs.datadoghq.com/database_monitoring/setup_oracle/
 [3]: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
 [4]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst
 [5]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/oracle.d/conf.yaml.example

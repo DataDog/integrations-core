@@ -18,6 +18,7 @@ files:
     - name: leader_election_kind
       description: |
         Kind of object to look at for the leader election.
+
         Can be:
           * auto
           * lease
@@ -32,6 +33,7 @@ files:
       description: |
         URL for the kube-scheduler health endpoint.
       fleet_configurable: true
+      formats: ["url"]
       value:
         type: string
         example: http://localhost:10251/healthz
@@ -89,6 +91,7 @@ files:
       description: Used to specify the path where the service account token is located.
       value:
         type: string
+        require_trusted_provider: true
         example: /var/run/secrets/kubernetes.io/serviceaccount/token
     - name: ssl_verify
       description: Used to verify self signed certificates.

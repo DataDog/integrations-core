@@ -26,6 +26,19 @@ MOCK_V2_ISTIOD_INSTANCE = {
     'use_openmetrics': True,
 }
 
+# Ambient mode instances (istio_mode: ambient)
+MOCK_V2_AMBIENT_ZTUNNEL_INSTANCE = {
+    'istio_mode': 'ambient',
+    'ztunnel_endpoint': 'http://localhost:15020/stats/prometheus',
+    'use_openmetrics': True,
+}
+
+MOCK_V2_AMBIENT_WAYPOINT_INSTANCE = {
+    'istio_mode': 'ambient',
+    'waypoint_endpoint': 'http://localhost:15020/stats/prometheus',
+    'use_openmetrics': True,
+}
+
 MOCK_LEGACY_MESH_INSTANCE = {
     'istio_mesh_endpoint': 'http://localhost:15090/metrics',
     'use_openmetrics': False,
@@ -394,6 +407,30 @@ MOCK_TEST_METRICS = [
     'istio.galley.istio.networking.destinationrules',
     'istio.galley.istio.networking.gateways',
     'istio.galley.istio.authentication.meshpolicies',
+]
+
+# Ambient mode (ztunnel) - default namespace istio.ztunnel (OpenMetrics submits counters as .count)
+V2_ZTUNNEL_METRICS = [
+    'istio.ztunnel.tcp.connections_opened.count',
+    'istio.ztunnel.tcp.connections_closed.count',
+    'istio.ztunnel.tcp.send_bytes.count',
+    'istio.ztunnel.tcp.received_bytes.count',
+    'istio.ztunnel.dns.requests.count',
+    'istio.ztunnel.dns.upstream_requests.count',
+    'istio.ztunnel.dns.upstream_failures.count',
+    'istio.ztunnel.connection.opens.count',
+    'istio.ztunnel.connection.closes.count',
+]
+
+# Ambient mode (waypoint) - default namespace istio.waypoint
+V2_WAYPOINT_METRICS = [
+    'istio.waypoint.request.count',
+    'istio.waypoint.request.duration.milliseconds.count',
+    'istio.waypoint.request.duration.milliseconds.sum',
+    'istio.waypoint.tcp.connections_opened.count',
+    'istio.waypoint.tcp.connections_closed.count',
+    'istio.waypoint.tcp.send_bytes.count',
+    'istio.waypoint.tcp.received_bytes.count',
 ]
 
 # Tags were previously excluded from agent 7.32.x to 7.52.x or check version 3.15.0 to 5.5.0

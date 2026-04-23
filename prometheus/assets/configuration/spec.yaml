@@ -10,6 +10,7 @@ files:
       options:
       - name: prometheus_url
         fleet_configurable: true
+        formats: ["url"]
         required: true
         description: The URL where your application metrics are exposed by Prometheus.
         value:
@@ -151,7 +152,6 @@ files:
       - name: max_returned_metrics
         description: |
           The check limits itself to 2000 metrics by default, increase this limit if needed.
-        fleet_configurable: true
         value:
           example: 2000
           type: integer

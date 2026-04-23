@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: valence-security
 metric_id: valence-security
 backend_only: false

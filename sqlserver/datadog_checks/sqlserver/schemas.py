@@ -100,8 +100,11 @@ class SQLServerSchemaCollector(SchemaCollector):
         database_names = self._check.get_databases()
         with self._check.connection.open_managed_default_connection(KEY_PREFIX):
             with self._check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
-                db_names_formatted = ",".join(["'{}'".format(t) for t in database_names])
-                return execute_query(DB_QUERY.format(db_names_formatted), cursor, convert_results_to_str=True)
+                if not database_names:
+                    return []
+                placeholders = ",".join(["?"] * len(database_names))
+                query = DB_QUERY.format(placeholders)
+                return execute_query(query, cursor, convert_results_to_str=True, parameters=tuple(database_names))
 
     @contextlib.contextmanager
     def _get_cursor(self, database_name):

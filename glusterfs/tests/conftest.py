@@ -98,6 +98,16 @@ def gstatus_ready():
         healinfo = vol.get('healinfo', [])
         if all(h.get('status', '').lower() != 'connected' for h in healinfo):
             raise Exception("Heal info not ready yet")
+        subvols = vol.get('subvols', [])
+        if not subvols:
+            raise Exception("No subvols data yet")
+        for subvol in subvols:
+            bricks = subvol.get('bricks', [])
+            if not bricks:
+                raise Exception("No brick data yet")
+            for brick in bricks:
+                if 'block_size' not in brick:
+                    raise Exception("Brick stats not fully populated yet")
 
 
 def delete_volume():

@@ -37,6 +37,11 @@ instances:
     #
   - host: localhost
 
+    ## @param port - number - optional - default: 3306
+    ## Port to use when connecting to MySQL.
+    #
+    port: 3306
+
     ## @param username - string - optional
     ## Username used to connect to MySQL.
     #
@@ -47,109 +52,19 @@ instances:
     #
     password: <PASSWORD>
 
-    ## @param port - number - optional - default: 3306
-    ## Port to use when connecting to MySQL.
-    #
-    port: 3306
-
-    ## @param propagate_agent_tags - boolean - optional - default: false
-    ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
-    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
-    #
-    # propagate_agent_tags: false
-
-    ## @param reported_hostname - string - optional
-    ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
-    ## and can be useful to set a custom hostname when connecting to a remote database through a proxy.
-    #
-    # reported_hostname: <REPORTED_HOSTNAME>
-
-    ## @param exclude_hostname - boolean - optional - default: false
-    ## Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
-    #
-    # exclude_hostname: false
-
-    ## Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
-    ## billable instance.
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
-    ##
-    ## This value will be used as-is for the display name of the instance but will be normalized
-    ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
-    ## for more details on Datadog tag normalization.
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
-    # database_identifier:
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
-        ## @param template - string - optional - default: $resolved_hostname
-        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
-        ## You can use the following variables, prefixed by `$` in the template:
-        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
-        ## - host: The provided host of the instance.
-        ## - port: The port number of the instance.
-        ## - mysql_sock: The socket path of the instance.
-        ## In addition, you can use any key from the `tags` section of the configuration.
-        #
-        # template: $env-$resolved_hostname:$port
-
-    ## @param sock - string - optional
-    ## Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
-    ## If you specify a socket you dont need to specify a host.
+    ## @param dbm - boolean - optional - default: false
+    ## Set to `true` to enable Database Monitoring.
     #
-    # sock: <SOCK>
-
-    ## @param charset - string - optional
-    ## Charset you want to use.
-    #
-    # charset: utf8
-
-    ## @param defaults_file - string - optional
-    ## Path to an alternative configuration mechanism file.
-    ## If providing this then there is no need to specify host, port, user, pass or socket.
-    #
-    # defaults_file: <DEFAULTS_FILE>
-
-    ## @param connect_timeout - number - optional - default: 10
-    ## Maximum number of seconds to wait before timing out when connecting to MySQL.
-    ## The default connection timeout is 10 seconds.
-    #
-    # connect_timeout: 10
-
-    ## @param read_timeout - number - optional
-    ## The timeout for reading from the connection in seconds.
-    ## By default, no read timeout is set.
-    #
-    # read_timeout: 10
-
-    ## @param ssl - mapping - optional
-    ## Use this section to configure a TLS connection between the Agent and MySQL.
-    ##
-    ## The following fields are supported:
-    ##
-    ## key: Path to a key file.
-    ## cert: Path to a cert file.
-    ## ca: Path to a CA bundle file.
-    ## check_hostname: Set to false to ignore the strict relationship between the certificate and the hostname.
-    #
-    # ssl:
-    #   key: <KEY_FILE_PATH>
-    #   cert: <CERT_FILE_PATH>
-    #   ca: <CA_PATH_FILE>
-    #   check_hostname: true
-
-    ## @param only_custom_queries - boolean - optional - default: false
-    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
-    ## Only metrics specified in `custom_queries` will be collected.
-    #
-    # only_custom_queries: false
-
-    ## @param use_global_custom_queries - string - optional - default: true
-    ## How `global_custom_queries` should be used for this instance. There are 3 options:
-    ##
-    ## 1. true - `global_custom_queries` override `custom_queries`.
-    ## 2. false - `custom_queries` override `global_custom_queries`.
-    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
-    #
-    # use_global_custom_queries: 'true'
+    # dbm: false
 
     ## @param custom_queries - list of mappings - optional
     ## Each query must have 2 fields, and can have a third optional field:
@@ -210,6 +125,90 @@ instances:
     #     tags:
     #     - test:mysql
     #     metric_prefix: mysql
+
+    ## @param propagate_agent_tags - boolean - optional - default: false
+    ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
+    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+    #
+    # propagate_agent_tags: false
+
+    ## @param reported_hostname - string - optional
+    ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+    ## and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+    #
+    # reported_hostname: <REPORTED_HOSTNAME>
+
+    ## @param exclude_hostname - boolean - optional - default: false
+    ## Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
+    #
+    # exclude_hostname: false
+
+    ## Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+    ## billable instance.
+    ##
+    ## The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
+    ##
+    ## This value will be used as-is for the display name of the instance but will be normalized
+    ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
+    ## for more details on Datadog tag normalization.
+    #
+    # database_identifier:
+
+        ## @param template - string - optional - default: $resolved_hostname
+        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
+        ## You can use the following variables, prefixed by `$` in the template:
+        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+        ## - host: The provided host of the instance.
+        ## - port: The port number of the instance.
+        ## - mysql_sock: The socket path of the instance.
+        ## In addition, you can use any key from the `tags` section of the configuration.
+        #
+        # template: $env-$resolved_hostname:$port
+
+    ## @param sock - string - optional
+    ## Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
+    ## If you specify a socket you don't need to specify a host.
+    #
+    # sock: <SOCK>
+
+    ## @param charset - string - optional
+    ## Charset you want to use.
+    #
+    # charset: utf8
+
+    ## @param defaults_file - string - optional
+    ## Path to an alternative configuration mechanism file.
+    ## If providing this then there is no need to specify host, port, user, pass or socket.
+    #
+    # defaults_file: <DEFAULTS_FILE>
+
+    ## @param connect_timeout - number - optional - default: 10
+    ## Maximum number of seconds to wait before timing out when connecting to MySQL.
+    ## The default connection timeout is 10 seconds.
+    #
+    # connect_timeout: 10
+
+    ## @param read_timeout - number - optional
+    ## The timeout for reading from the connection in seconds.
+    ## By default, no read timeout is set.
+    #
+    # read_timeout: 10
+
+    ## @param ssl - mapping - optional
+    ## Use this section to configure a TLS connection between the Agent and MySQL.
+    ##
+    ## The following fields are supported:
+    ##
+    ## key: Path to a key file.
+    ## cert: Path to a cert file.
+    ## ca: Path to a CA bundle file.
+    ## check_hostname: Set to false to ignore the strict relationship between the certificate and the hostname.
+    #
+    # ssl:
+    #   key: <KEY_FILE_PATH>
+    #   cert: <CERT_FILE_PATH>
+    #   ca: <CA_PATH_FILE>
+    #   check_hostname: true
 
     ## @param additional_status - list of mappings - optional
     ## Set this parameter to collect additional MySQL status variables as metrics
@@ -377,11 +376,6 @@ instances:
         ## MySQL integration tile in the Datadog Web UI for further instructions.
         #
         # extra_performance_metrics: false
-
-    ## @param dbm - boolean - optional - default: false
-    ## Set to `true` enable Database Monitoring.
-    #
-    # dbm: false
 
     ## Configure collection of performance_schema.global_variables.
     #
@@ -775,14 +769,20 @@ instances:
         #
         # keep_identifier_quotation: false
 
-    ## @param tags - list of strings - optional
-    ## A list of tags to attach to every metric and service check emitted by this instance.
-    ##
-    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
     #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
+    # only_custom_queries: false
+
+    ## @param use_global_custom_queries - string - optional - default: true
+    ## How `global_custom_queries` should be used for this instance. There are 3 options:
+    ##
+    ## 1. true - `global_custom_queries` override `custom_queries`.
+    ## 2. false - `custom_queries` override `global_custom_queries`.
+    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+    #
+    # use_global_custom_queries: 'true'
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.

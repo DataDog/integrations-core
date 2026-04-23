@@ -40,6 +40,10 @@ def instance_detailed_index_stats():
     return False
 
 
+def instance_detailed_shard_metrics():
+    return False
+
+
 def instance_disable_generic_tags():
     return False
 

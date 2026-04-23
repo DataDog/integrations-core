@@ -26,6 +26,7 @@ files:
         type: boolean
     - name: api_url
       fleet_configurable: true
+      formats: ["url"]
       required: true
       description: URL of the Vault to query.
       value:
@@ -58,9 +59,11 @@ files:
          Path to a file containing the client token. Overrides `client_token`.
          The token will be re-read after every authorization error.
       fleet_configurable: true
+      formats: ["path"]
       value:
         example: <CLIENT_TOKEN_PATH>
         type: string
+        require_trusted_provider: true
     - name: no_token
       description: Attempt metric collection without a token.
       fleet_configurable: true

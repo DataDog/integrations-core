@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Tests for message deserialization."""
 
+import base64
 import json
 from unittest.mock import MagicMock
 
@@ -16,12 +17,13 @@ pytestmark = [pytest.mark.unit]
 class MockKafkaMessage:
     """Mock confluent_kafka.Message for testing."""
 
-    def __init__(self, key, value, topic='test-topic', partition=0, offset=0):
+    def __init__(self, key, value, topic='test-topic', partition=0, offset=0, headers=None):
         self._key = key
         self._value = value
         self._topic = topic
         self._partition = partition
         self._offset = offset
+        self._headers = headers
 
     def key(self):
         return self._key
@@ -42,7 +44,7 @@ class MockKafkaMessage:
         return (1, 1732128000000)  # (timestamp_type, timestamp_ms)
 
     def headers(self):
-        return None
+        return self._headers
 
 
 class TestMessageDeserializer:
@@ -323,6 +325,51 @@ class TestMessageDeserializer:
         assert deserialized_msg_sr.value['title'] == 'The Go Programming Language'
         assert deserialized_msg_sr.value_schema_id == 350
 
+    def test_avro_logical_types_decimal_timestamp_uuid(self):
+        """Test that Avro messages with all logical types deserialize correctly."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        avro_schema = json.dumps(
+            {
+                "type": "record",
+                "name": "Payment",
+                "fields": [
+                    {"name": "id", "type": "long"},
+                    {
+                        "name": "amount",
+                        "type": {"type": "bytes", "logicalType": "decimal", "precision": 18, "scale": 4},
+                    },
+                    {"name": "created_at", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+                    {"name": "due_date", "type": {"type": "int", "logicalType": "date"}},
+                    {"name": "due_time", "type": {"type": "int", "logicalType": "time-millis"}},
+                    {"name": "tx_id", "type": {"type": "string", "logicalType": "uuid"}},
+                    {"name": "memo", "type": "string"},
+                ],
+            }
+        )
+
+        # Payment: id=42, amount=99.9500, created_at=2024-06-15T12:00:00Z, due_date=2024-07-01,
+        #          due_time=14:30:00, tx_id=550e8400-e29b-41d4-a716-446655440000, memo="Test payment"
+        avro_message = (
+            b'T\x06\x0f@L\x80\xa8\xa6\xbc\x83d\x82\xb7\x02'
+            b'\x80\x89\xe41'
+            b'H550e8400-e29b-41d4-a716-446655440000\x18Test payment'
+        )
+
+        result_str, schema_id = deserializer.deserialize_message(avro_message, 'avro', avro_schema, False)
+        assert result_str is not None
+        assert schema_id is None
+
+        result = json.loads(result_str)
+        assert result['id'] == 42
+        assert result['amount'] == '99.9500'
+        assert '2024-06-15' in result['created_at']
+        assert result['due_date'] == '2024-07-01'
+        assert result['due_time'] == '14:30:00'
+        assert result['tx_id'] == '550e8400-e29b-41d4-a716-446655440000'
+        assert result['memo'] == 'Test payment'
+
     def test_protobuf_explicit_schema_registry_configuration(self):
         """Test that explicit Protobuf schema registry configuration is enforced."""
         log = MagicMock()
@@ -414,6 +461,362 @@ class TestMessageDeserializer:
         assert isinstance(deserialized_msg_sr.value, dict)
         assert deserialized_msg_sr.value['title'] == 'The Go Programming Language'
         assert deserialized_msg_sr.value_schema_id == 350
+
+    def test_deserialize_raw_format(self):
+        """Test raw format returns base64-encoded bytes for both key and value."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        raw_bytes = b'\x00\x01\x02\xff\xfe\xde\xad\xbe\xef'
+        key_bytes = b'\xca\xfe\xba\xbe'
+
+        kafka_msg = MockKafkaMessage(key=key_bytes, value=raw_bytes)
+
+        config = {
+            'key_format': 'raw',
+            'key_uses_schema_registry': False,
+            'value_format': 'raw',
+            'value_uses_schema_registry': False,
+        }
+
+        deserialized_msg = DeserializedMessage(kafka_msg, deserializer, config)
+
+        expected_value = base64.b64encode(raw_bytes).decode('ascii')
+        expected_key = base64.b64encode(key_bytes).decode('ascii')
+
+        assert deserialized_msg.value == expected_value
+        assert deserialized_msg.key == expected_key
+        assert deserialized_msg.value_schema_id is None
+        assert deserialized_msg.key_schema_id is None
+
+    def test_deserialize_raw_value_with_json_key(self):
+        """Test raw value format with JSON key format."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        raw_bytes = b'\x00\x01\x02\xff\xfe'
+        key_bytes = b'{"name": "test"}'
+
+        kafka_msg = MockKafkaMessage(key=key_bytes, value=raw_bytes)
+
+        config = {
+            'key_format': 'json',
+            'key_uses_schema_registry': False,
+            'value_format': 'raw',
+            'value_uses_schema_registry': False,
+        }
+
+        deserialized_msg = DeserializedMessage(kafka_msg, deserializer, config)
+
+        assert deserialized_msg.value == base64.b64encode(raw_bytes).decode('ascii')
+        assert deserialized_msg.key == {'name': 'test'}
+
+    def test_deserialize_raw_empty_message(self):
+        """Test raw format with empty/None messages."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        # None value
+        result, schema_id = deserializer.deserialize_message(None, 'raw')
+        assert result is None
+        assert schema_id is None
+
+        # Empty bytes
+        result, schema_id = deserializer.deserialize_message(b'', 'raw')
+        assert result is None
+        assert schema_id is None
+
+    def test_deserialize_raw_via_deserialize_message(self):
+        """Test raw format directly through deserialize_message."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        raw_bytes = b'\xde\xad\xbe\xef'
+        result, schema_id = deserializer.deserialize_message(raw_bytes, 'raw')
+
+        expected_b64 = base64.b64encode(raw_bytes).decode('ascii')
+        assert result == json.dumps(expected_b64)
+        assert json.loads(result) == expected_b64
+        assert schema_id is None
+
+    def test_deserialize_raw_no_coercion_for_json_like_base64(self):
+        """Test that raw format is not coerced by _parse_deserialized for JSON-like base64 values."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        # b'\x9e\xe9\x65' base64-encodes to "null", which json.loads would coerce to None
+        null_bytes = b'\x9e\xe9\x65'
+        assert base64.b64encode(null_bytes).decode('ascii') == 'null'
+
+        kafka_msg = MockKafkaMessage(key=null_bytes, value=null_bytes)
+        config = {'key_format': 'raw', 'value_format': 'raw'}
+        msg = DeserializedMessage(kafka_msg, deserializer, config)
+
+        assert msg.value == 'null', "raw base64 'null' must stay as string, not become None"
+        assert msg.key == 'null', "raw base64 'null' must stay as string, not become None"
+
+        # b'\xd7\x6d\xf8' base64-encodes to "1234", which json.loads would coerce to int
+        int_bytes = b'\xd7\x6d\xf8'
+        assert base64.b64encode(int_bytes).decode('ascii') == '1234'
+
+        kafka_msg = MockKafkaMessage(key=int_bytes, value=int_bytes)
+        msg = DeserializedMessage(kafka_msg, deserializer, config)
+
+        assert msg.value == '1234', "raw base64 '1234' must stay as string, not become int"
+        assert isinstance(msg.value, str)
+
+
+class TestSchemaRegistryIntegration:
+    """Test MessageDeserializer with schema registry client."""
+
+    AVRO_SCHEMA_JSON = (
+        '{"type": "record", "name": "Book", "namespace": "com.book", '
+        '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
+        '{"name": "author", "type": "string"}]}'
+    )
+
+    # Base64-encoded FileDescriptorProto (what Schema Registry ?format=serialized returns)
+    PROTOBUF_SCHEMA_B64 = (
+        'CgxzY2hlbWEucHJvdG8SCGNvbS5ib29rIkgKBEJvb2sSEgoEaXNibhgBIAEoA1IEaXNibhIU'
+        'CgV0aXRsZRgCIAEoCVIFdGl0bGUSFgoGYXV0aG9yGAMgASgJUgZhdXRob3JiBnByb3RvMw=='
+    )
+
+    # Avro-encoded Book: isbn=9780134190440, title="The Go Programming Language", author="Alan Donovan"
+    AVRO_PAYLOAD = b'\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan'
+
+    # Protobuf-encoded Book (same fields)
+    PROTOBUF_PAYLOAD = (
+        b'\x08\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1b\x54\x68\x65\x20\x47\x6f\x20\x50\x72\x6f\x67\x72\x61\x6d'
+        b'\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65'
+        b'\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e'
+    )
+
+    @staticmethod
+    def _make_sr_message(schema_id: int, payload: bytes, protobuf_indices: bytes | None = None) -> bytes:
+        """Build a Schema Registry wire-format message."""
+        header = b'\x00' + schema_id.to_bytes(4, 'big')
+        if protobuf_indices is not None:
+            return header + protobuf_indices + payload
+        return header + payload
+
+    @staticmethod
+    def _mock_registry(schema_str: str, schema_type: str = 'AVRO', dep_schemas: list[str] | None = None) -> MagicMock:
+        registry = MagicMock()
+        registry.get_schema.return_value = (schema_str, schema_type, dep_schemas or [])
+        return registry
+
+    def test_avro_with_schema_registry_fetch(self):
+        """Avro message with schema fetched from registry."""
+        log = MagicMock()
+        registry = self._mock_registry(self.AVRO_SCHEMA_JSON, 'AVRO')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        raw = self._make_sr_message(42, self.AVRO_PAYLOAD)
+
+        result_str, schema_id = deserializer.deserialize_message(raw, 'avro', None, True)
+        assert schema_id == 42
+        registry.get_schema.assert_called_once_with(42)
+
+        result = json.loads(result_str)
+        assert result['isbn'] == 9780134190440
+        assert result['title'] == 'The Go Programming Language'
+        assert result['author'] == 'Alan Donovan'
+
+    def test_protobuf_with_schema_registry_fetch(self):
+        """Protobuf message with schema fetched from registry."""
+        log = MagicMock()
+        registry = self._mock_registry(self.PROTOBUF_SCHEMA_B64, 'PROTOBUF')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        # Confluent protobuf wire format: indices [0] encoded as varint array
+        raw = self._make_sr_message(99, self.PROTOBUF_PAYLOAD, protobuf_indices=b'\x01\x00')
+
+        result_str, schema_id = deserializer.deserialize_message(raw, 'protobuf', None, True)
+        assert schema_id == 99
+        registry.get_schema.assert_called_once_with(99)
+
+        result = json.loads(result_str)
+        assert result['title'] == 'The Go Programming Language'
+
+    def test_protobuf_with_well_known_type_dependency(self):
+        """Protobuf schema referencing google/protobuf/Timestamp deserializes via preloaded well-known types.
+
+        The registry may return a schema that imports a well-known type without
+        listing it as an explicit reference (dep_schemas is empty). Without
+        preloading, DescriptorPool raises 'Depends on file ... but it has not been loaded'.
+        """
+        # FileDescriptorProto for test.Event { int64 id = 1; google.protobuf.Timestamp created_at = 2; }
+        schema_b64 = (
+            'Cgp0ZXN0LnByb3RvEgR0ZXN0Gh9nb29nbGUvcHJvdG9idWYvdGltZXN0YW1wLnByb3RvIkMKBUV2'
+            'ZW50EgoKAmlkGAEgASgDEi4KCmNyZWF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGlt'
+            'ZXN0YW1wYgZwcm90bzM='
+        )
+        payload = bytes.fromhex('082a12060880daf8b906')
+
+        log = MagicMock()
+        registry = self._mock_registry(schema_b64, 'PROTOBUF')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        raw = self._make_sr_message(101, payload, protobuf_indices=b'\x01\x00')
+        result_str, schema_id = deserializer.deserialize_message(raw, 'protobuf', None, True)
+
+        assert schema_id == 101
+        result = json.loads(result_str)
+        assert result['id'] == '42'
+        assert 'createdAt' in result
+
+    def test_json_with_schema_registry_fetch(self):
+        """JSON message with schema registry format fetches type from registry."""
+        log = MagicMock()
+        json_schema = '{"type": "object"}'
+        registry = self._mock_registry(json_schema, 'JSON')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        payload = json.dumps({"hello": "world"}).encode()
+        raw = self._make_sr_message(7, payload)
+
+        result_str, schema_id = deserializer.deserialize_message(raw, 'json', None, True)
+        assert schema_id == 7
+        registry.get_schema.assert_called_once_with(7)
+
+        result = json.loads(result_str)
+        assert result['hello'] == 'world'
+
+    def test_schema_caching_across_messages(self):
+        """Schema is fetched once from registry and reused for subsequent messages."""
+        log = MagicMock()
+        registry = self._mock_registry(self.AVRO_SCHEMA_JSON, 'AVRO')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        raw = self._make_sr_message(42, self.AVRO_PAYLOAD)
+
+        deserializer.deserialize_message(raw, 'avro', None, True)
+        deserializer.deserialize_message(raw, 'avro', None, True)
+        deserializer.deserialize_message(raw, 'avro', None, True)
+
+        # Registry is called once; the schema object is cached by _get_or_build_schema
+        registry.get_schema.assert_called_once_with(42)
+
+    def test_registry_error_surfaces(self):
+        """Registry HTTP error surfaces as deserialization error."""
+        log = MagicMock()
+        registry = MagicMock()
+        registry.get_schema.side_effect = Exception("HTTP 404: Schema not found")
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        raw = self._make_sr_message(999, self.AVRO_PAYLOAD)
+
+        result_str, schema_id = deserializer.deserialize_message(raw, 'avro', None, True)
+        assert result_str.startswith("<deserialization error:")
+        assert schema_id is None
+
+    def test_registry_always_used_when_uses_schema_registry(self):
+        """When uses_schema_registry=True, registry is always used even if inline schema is provided."""
+        log = MagicMock()
+        registry = self._mock_registry(self.AVRO_SCHEMA_JSON, 'AVRO')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        raw = self._make_sr_message(42, self.AVRO_PAYLOAD)
+
+        result_str, schema_id = deserializer.deserialize_message(raw, 'avro', self.AVRO_SCHEMA_JSON, True)
+        assert schema_id == 42
+        registry.get_schema.assert_called_once_with(42)
+
+        result = json.loads(result_str)
+        assert result['title'] == 'The Go Programming Language'
+
+    def test_no_registry_and_no_schema_raises(self):
+        """Without registry or inline schema, avro deserialization fails."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log, schema_registry=None)
+
+        raw = self._make_sr_message(42, self.AVRO_PAYLOAD)
+
+        result_str, schema_id = deserializer.deserialize_message(raw, 'avro', None, True)
+        assert result_str.startswith("<deserialization error:")
+
+    def test_deserialized_message_with_registry(self):
+        """DeserializedMessage wrapper works with schema registry."""
+        log = MagicMock()
+        registry = self._mock_registry(self.AVRO_SCHEMA_JSON, 'AVRO')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        raw_value = self._make_sr_message(42, self.AVRO_PAYLOAD)
+        kafka_msg = MockKafkaMessage(key=b'test-key', value=raw_value)
+
+        config = {
+            'key_format': 'string',
+            'key_uses_schema_registry': False,
+            'value_format': 'avro',
+            'value_schema': None,
+            'value_uses_schema_registry': True,
+        }
+
+        msg = DeserializedMessage(kafka_msg, deserializer, config)
+        assert msg.value['title'] == 'The Go Programming Language'
+        assert msg.value_schema_id == 42
+
+
+class TestHeaderSerialization:
+    """Test header serialization in DeserializedMessage."""
+
+    def test_utf8_headers(self):
+        """Test that UTF-8 headers are decoded as strings."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+        kafka_msg = MockKafkaMessage(
+            key=b'key',
+            value=b'{}',
+            headers=[('dbmOrgId', b'2'), ('traceparent', b'00-abc-def-00')],
+        )
+        config = {'key_format': 'string', 'value_format': 'json', 'value_uses_schema_registry': False}
+        msg = DeserializedMessage(kafka_msg, deserializer, config)
+        assert msg.headers == {'dbmOrgId': '2', 'traceparent': '00-abc-def-00'}
+
+    def test_binary_headers_base64_encoded(self):
+        """Test that binary headers are base64-encoded with prefix."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+        binary_value = bytes([0x80, 0xFF, 0x00, 0x01, 0xDE, 0xAD, 0xBE, 0xEF])
+        kafka_msg = MockKafkaMessage(
+            key=b'key',
+            value=b'{}',
+            headers=[('koutrisngId', binary_value)],
+        )
+        config = {'key_format': 'string', 'value_format': 'json', 'value_uses_schema_registry': False}
+        msg = DeserializedMessage(kafka_msg, deserializer, config)
+        import base64
+
+        expected = f"<base64>{base64.b64encode(binary_value).decode('ascii')}"
+        assert msg.headers['koutrisngId'] == expected
+
+    def test_mixed_headers(self):
+        """Test mix of UTF-8 and binary headers."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+        binary_value = bytes([0x80, 0xFF])
+        kafka_msg = MockKafkaMessage(
+            key=b'key',
+            value=b'{}',
+            headers=[('text', b'hello'), ('binary', binary_value)],
+        )
+        config = {'key_format': 'string', 'value_format': 'json', 'value_uses_schema_registry': False}
+        msg = DeserializedMessage(kafka_msg, deserializer, config)
+        assert msg.headers['text'] == 'hello'
+        assert msg.headers['binary'].startswith('<base64>')
+
+    def test_null_header_value(self):
+        """Test that null header values are preserved as None."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+        kafka_msg = MockKafkaMessage(
+            key=b'key',
+            value=b'{}',
+            headers=[('empty', None)],
+        )
+        config = {'key_format': 'string', 'value_format': 'json', 'value_uses_schema_registry': False}
+        msg = DeserializedMessage(kafka_msg, deserializer, config)
+        assert msg.headers['empty'] is None
 
 
 if __name__ == '__main__':

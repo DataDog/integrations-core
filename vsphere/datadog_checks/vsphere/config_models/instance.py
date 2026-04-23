@@ -176,6 +176,7 @@ class InstanceConfig(BaseModel):
     service: Optional[str] = None
     ssl_cafile: Optional[str] = None
     ssl_capath: Optional[str] = None
+    ssl_ciphers: Optional[tuple[str, ...]] = None
     ssl_verify: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     tags_prefix: Optional[str] = None

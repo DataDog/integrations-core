@@ -1,0 +1,9 @@
+provides:
+  - id: tokumx-metrics
+    always_on: true
+    data_type: metrics
+    direction: inbound
+  - id: tokumx-events
+    always_on: true
+    data_type: events
+    direction: inbound

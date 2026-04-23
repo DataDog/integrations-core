@@ -10,51 +10,18 @@ files:
   - template: instances
     options:
     - name: url
+      display_priority: 7
       fleet_configurable: true
       required: true
       description: |
         The URL where Elasticsearch accepts HTTP requests. This is used to
         fetch statistics from the nodes and information about the cluster health.
+      formats: ["url"]
       value:
         example: http://localhost:9200
         type: string
-    - name: node_name_as_host
-      description: |
-        If each machine only runs a single Elasticsearch node per cluster, you
-        want to set each Elasticsearch `node.name` to the machine hostname. You may
-        then set `node_name_as_host` to `true` to avoid duplicate hostnames.
-        See: https://www.elastic.co/guide/en/elasticsearch/reference/current/node.name.html
-      fleet_configurable: true
-      value:
-        type: boolean
-        example: false
-    - name: cluster_stats
-      description: |
-        If your cluster is hosted externally (i.e., you're not pointing to localhost),
-        you must set `cluster_stats` to true, otherwise the check only
-        submits metrics of the local node.
-        This parameter was also called `is_external` and you can still use it but it
-        is removed in Agent version 6+.
-      fleet_configurable: true
-      value:
-        type: boolean
-        example: false
-    - name: detailed_index_stats
-      description: |
-        If you want to obtain index-specific stats, use this flag with `cluster_stats` and `pshard_stats` set to true.
-        Without this flag you only get stats from `_all`.
-        Do not use it if you are pointing to localhost.
-      fleet_configurable: true
-      value:
-        type: boolean
-        example: false
-    - name: index_stats
-      description: Set `index_stats` to true to collect metrics for individual indices.
-      fleet_configurable: true
-      value:
-        type: boolean
-        example: false
     - name: pshard_stats
+      display_priority: 6
       description: |
         If you enable the `pshard_stats` flag, statistics over primary shards
         are collected by the check and sent to the backend with the
@@ -67,21 +34,15 @@ files:
       value:
         type: boolean
         example: false
-    - name: slm_stats
-      description: |
-        Set `slm_stats` to true to collect statistics about Snapshot Lifecycle Management.
-        The user must have the `read_slm` cluster privilege to get these metrics.
-      fleet_configurable: true
-      value:
-        type: boolean
-        example: false
-    - name: pshard_graceful_timeout
-      description: Continue gracefully if pshard stats timeout.
+    - name: index_stats
+      display_priority: 5
+      description: Set `index_stats` to true to collect metrics for individual indices.
       fleet_configurable: true
       value:
         type: boolean
         example: false
     - name: pending_task_stats
+      display_priority: 4
       description: |
         Specifies whether to collect data exposed by the `pending_tasks` cluster endpoint.
         Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-pending.html
@@ -91,7 +52,20 @@ files:
       value:
         type: boolean
         example: true
+    - name: cluster_stats
+      display_priority: 3
+      description: |
+        If your cluster is hosted externally (i.e., you're not pointing to localhost),
+        you must set `cluster_stats` to true, otherwise the check only
+        submits metrics of the local node.
+        This parameter was also called `is_external` and you can still use it but it
+        is removed in Agent version 6+.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: false
     - name: cat_allocation_stats
+      display_priority: 2
       description: |
         Enable to collect Elastic Cat Allocation metrics. Available only for Elasticsearch 5.0 or higher.
         Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html.
@@ -99,7 +73,57 @@ files:
       value:
         type: boolean
         example: false
+    - name: slm_stats
+      display_priority: 1
+      description: |
+        Set `slm_stats` to true to collect statistics about Snapshot Lifecycle Management.
+        The user must have the `read_slm` cluster privilege to get these metrics.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: false
+    - name: node_name_as_host
+      display_priority: 0
+      description: |
+        If each machine only runs a single Elasticsearch node per cluster, you
+        want to set each Elasticsearch `node.name` to the machine hostname. You may
+        then set `node_name_as_host` to `true` to avoid duplicate hostnames.
+        See: https://www.elastic.co/guide/en/elasticsearch/reference/current/node.name.html
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: false
+    - name: detailed_index_stats
+      display_priority: 0
+      description: |
+        If you want to obtain index-specific stats, use this flag with `cluster_stats` and `pshard_stats` set to true.
+        Without this flag you only get stats from `_all`.
+        Do not use it if you are pointing to localhost.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: false
+    - name: pshard_graceful_timeout
+      display_priority: 0
+      description: Continue gracefully if pshard stats timeout.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: false
+    - name: detailed_shard_metrics
+      display_priority: 0
+      description: |
+        Enable to collect detailed shard placement metrics with `index_name` and `prirep` (primary/replica) tags.
+        Requires `cat_allocation_stats` to be enabled.
+        When disabled (default), reports aggregated shard counts per node.
+        When enabled, reports shard counts per node-index_name-prirep combination for detailed placement reporting.
+        Enabling this increases metric cardinality (node_count * index_count).
+        Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-shards.html.
+      value:
+        type: boolean
+        example: false
     - name: admin_forwarder
+      display_priority: 0
       description: |
         Specifies a URL that includes a context root
         needed for a forwarder application to access Elasticsearch REST services, for example:
@@ -109,6 +133,7 @@ files:
         type: boolean
         example: false
     - name: gc_collectors_as_rate
+      display_priority: 0
       description: |
         Submit `jvm.gc.collectors` metrics as rate.
         Note: Only for ES versions 0.9.10 or higher.
@@ -117,6 +142,7 @@ files:
         type: boolean
         example: false
     - name: disable_legacy_cluster_tag
+      display_priority: 0
       description: Enable to stop submitting the tag `cluster_name`, which has been renamed to `elastic_cluster`.
       fleet_configurable: true
       value:
@@ -125,6 +151,7 @@ files:
         example: true
       enabled: false
     - name: disable_legacy_service_check_tags
+      display_priority: 0
       description: |
         Disable the submission of the Elasticsearch `host` and `port` as tags in service checks.
         Submit them as `url` instead.
@@ -135,6 +162,7 @@ files:
         example: true
       enabled: true
     - name: custom_queries
+      display_priority: 0
       description: |
         Run custom queries for Elasticsearch. Each custom query endpoint can collect multiple metrics and tags.
         Note: Each custom query requires an `endpoint`, `data_path`, and `columns` parameter. Each `columns` parameter
@@ -208,6 +236,7 @@ files:
               items:
                 type: string
     - name: submit_events
+      display_priority: 0
       description: |
         By default we submit events to Datadog if the cluster starts unhealthy or anytime its health changes.
         You can set this option to `false` to disable submitting the events in case you already implemented

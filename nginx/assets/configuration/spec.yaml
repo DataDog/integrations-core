@@ -12,12 +12,13 @@ files:
     - name: nginx_status_url
       fleet_configurable: true
       required: true
-      display_priority: 2
+      display_priority: 1
+      formats: ["url"]
       description: |
         For every instance, you need an `nginx_status_url` and can optionally
         supply a list of tags.  This plugin requires nginx to be compiled with
         the nginx stub status module option, and activated with the correct
-        configuration stanza.  On debian/ubuntu, this is included in the
+        configuration stanza.  On Debian or Ubuntu, this is included in the
         `nginx-extras` package.  For more details, see:
 
           https://docs.datadoghq.com/integrations/nginx/
@@ -29,6 +30,7 @@ files:
         example: http://localhost:81/nginx_status/
         type: string
     - name: use_plus_api
+      display_priority: 0
       description: |
         If you are using the commercial version of NGINX for releases R13 and above,
         there is a new API that replaces the extended status API.
@@ -39,24 +41,27 @@ files:
         type: boolean
         example: false
     - name: use_plus_api_stream
+      display_priority: 0
       description: |
        If you are using the commercial version of NGINX, for releases R13 and above,
        there is an API that replaces the extended status API.
        See https://www.nginx.com/blog/nginx-plus-r13-released/
        If you're not using Stream servers, you can disable this part to remove errors in NGINX Plus API calls.
-       To use it set `use_plus_api_stream` to `true`.
+       To use it, set `use_plus_api_stream` to `true`.
       fleet_configurable: true
       value:
         type: boolean
         example: false
         display_default: true
     - name: plus_api_version
+      display_priority: 0
       description: Specify the version of the Plus API to use. The check supports versions 1-7.
       fleet_configurable: true
       value:
         type: integer
         display_default: 2
     - name: only_query_enabled_endpoints
+      display_priority: 0
       description: |
         Enable this option if you would like the check to determine which API endpoints
         to query based on your NGINX Plus configuration.
@@ -67,6 +72,7 @@ files:
         display_default: false
       enabled: true
     - name: use_vts
+      display_priority: 0
       description: |
         Set this option to true if you are using the nginx vhost_traffic_status module.
         If you are using VTS, set the nginx_status_url to something like http://localhost/nginx_stats/format/json.

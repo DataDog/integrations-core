@@ -34,6 +34,28 @@ This way, whether a and b are either strings or bytes, they cannot be mixed.
 
 If a single argument is present in the function, `str | bytes` is preferred.
 
+## Code Style and Organization
+
+### Docstrings
+
+- Use concise one-liner docstrings for most methods
+- Method names should be self-descriptive
+- Multi-line docstrings with Args/Returns are acceptable only for important public interface methods that require detailed documentation
+- Avoid verbose docstrings for internal/private methods
+
+### Comments
+
+- Avoid unnecessary inline comments
+- Write self-explanatory code instead
+- If a comment is needed, keep it to one line
+- Code clarity should come from descriptive names, not comments
+
+### Code Duplication
+
+- Extract helper functions to eliminate duplicated logic
+- Small, focused functions with descriptive names are better than repeated code blocks
+- Reusable helpers improve maintainability and reduce the need for comments
+
 ## Configuration Models
 
 **Applicable to:** `**/config_models/*.py`, `*/assets/configuration/spec.yaml`

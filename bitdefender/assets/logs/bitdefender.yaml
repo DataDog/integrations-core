@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: bitdefender
 metric_id: bitdefender
 backend_only: false

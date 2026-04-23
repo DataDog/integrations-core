@@ -11,6 +11,7 @@ files:
     options:
     - name: url
       fleet_configurable: true
+      formats: ["url"]
       required: true
       description: The URL used to connect to the Airflow instance (use the Airflow web server REST API endpoint).
       value:

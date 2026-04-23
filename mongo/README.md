@@ -611,5 +611,5 @@ Additional helpful documentation, links, and articles:
 [25]: https://docs.datadoghq.com/help/
 [26]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger
 [27]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap
-[28]: https://docs.datadoghq.com/database_monitoring/
+[28]: https://docs.datadoghq.com/database_monitoring/setup_mongodb/
 [29]: https://docs.datadoghq.com/database_monitoring/#mongodb

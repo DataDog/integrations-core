@@ -188,18 +188,32 @@ instances:
     #
     # sasl_oauth_token_provider:
 
-        ## @param url - string - required
-        ## The token endpoint.
+        ## @param method - string - optional - default: oidc
+        ## The OAuth method to use. Either `aws_msk_iam` for AWS MSK IAM authentication
+        ## or `oidc` for standard OIDC authentication. Defaults to `oidc` for backwards compatibility.
+        #
+        # method: aws_msk_iam
+
+        ## @param aws_region - string - optional - default: us-west-2
+        ## AWS region for MSK IAM authentication. Required when method is `aws_msk_iam` and the region
+        ## cannot be automatically detected from the environment
+        ## (for example, through `AWS_REGION` or instance metadata).
+        ## If not specified, attempts to detect the region automatically.
+        #
+        # aws_region: us-west-2
+
+        ## @param url - string - optional
+        ## The token endpoint. Required when method is `oidc`.
         #
         # url: <URL>
 
-        ## @param client_id - string - required
-        ## The client identifier.
+        ## @param client_id - string - optional
+        ## The client identifier. Required when method is `oidc`.
         #
         # client_id: <CLIENT_ID>
 
-        ## @param client_secret - string - required
-        ## The client secret.
+        ## @param client_secret - string - optional
+        ## The client secret. Required when method is `oidc`.
         #
         # client_secret: <CLIENT_SECRET>
 
@@ -331,8 +345,16 @@ instances:
     #
     # data_streams_enabled: false
 
+    ## @param kafka_cluster_id_override - string - optional
+    ## Override the auto-detected kafka_cluster_id. When set, this value is used as
+    ## the kafka_cluster_id tag on all metrics and events. The original auto-detected
+    ## cluster ID is preserved as an original_kafka_cluster_id tag.
+    #
+    # kafka_cluster_id_override: <KAFKA_CLUSTER_ID_OVERRIDE>
+
     ## @param enable_cluster_monitoring - boolean - optional - default: false
-    ## (PREVIEW) Enable cluster monitoring to collect broker, topic, partition, consumer group,
+    ## (PREVIEW) Enable cluster monitoring to collect cluster-wide metrics for Data Streams
+    ## Monitoring. Collects broker, topic, partition, consumer group,
     ## and schema registry metadata. Events are cached and tagged with kafka_cluster_id.
     ## May increase resource consumption on large clusters.
     ##
@@ -342,6 +364,15 @@ instances:
     ##   - Enables Data Streams monitoring (same as data_streams_enabled)
     #
     # enable_cluster_monitoring: false
+
+    ## @param kafka_configs_refresh_interval - integer - optional - default: 180
+    ## How often (in seconds) to re-fetch broker configurations, topic configurations,
+    ## and schema registry version checks from Kafka. A longer interval reduces load on
+    ## the Kafka cluster and Schema Registry. On clusters with many topics or schemas,
+    ## the check fetches in batches and gracefully degrades by re-fetching less often if
+    ## it cannot keep up within this interval.
+    #
+    # kafka_configs_refresh_interval: 180
 
     ## @param schema_registry_url - string - optional - default: http://localhost:8081
     ## Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.
@@ -383,3 +414,44 @@ instances:
     ## Must be used in combination with schema_registry_tls_cert.
     #
     # schema_registry_tls_key: /path/to/client_key.pem
+
+    ## OAuth token provider settings for Schema Registry authentication.
+    ## When configured, the check will fetch an OAuth token and use it as a Bearer token
+    ## for Schema Registry HTTP requests.
+    #
+    # schema_registry_oauth_token_provider:
+
+        ## @param url - string - required
+        ## The token endpoint.
+        #
+        # url: <URL>
+
+        ## @param client_id - string - required
+        ## The client identifier.
+        #
+        # client_id: <CLIENT_ID>
+
+        ## @param client_secret - string - required
+        ## The client secret.
+        #
+        # client_secret: <CLIENT_SECRET>
+
+        ## @param scope - string - optional
+        ## The OAuth scope to request.
+        #
+        # scope: <SCOPE>
+
+        ## @param custom_headers - mapping - optional
+        ## Additional HTTP headers to include in Schema Registry requests.
+        ## For Confluent Cloud, this typically includes the identity pool ID and
+        ## the Schema Registry cluster ID.
+        ## Example:
+        ##   Confluent-Identity-Pool-Id: pool-xxxxx
+        ##   target-sr-cluster: lsrc-xxxxx
+        #
+        # custom_headers: {}
+
+        ## @param tls_ca_cert - string - optional - default: /path/to/oauth_ca_cert.pem
+        ## Path to a CA certificate file used to verify the OIDC token endpoint's TLS certificate.
+        #
+        # tls_ca_cert: /path/to/oauth_ca_cert.pem

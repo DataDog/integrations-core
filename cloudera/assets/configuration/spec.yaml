@@ -18,8 +18,8 @@ files:
         The Workload password. This value can be found in the `User Management` tab of the Management
         Console in the `Workload Password`.
       fleet_configurable: true
-      required: true
       secret: true
+      required: true
       value:
         type: string
     - template: init_config/default
@@ -27,6 +27,7 @@ files:
     options:
     - name: api_url
       fleet_configurable: true
+      formats: ["url"]
       required: true
       description: |
         The URL endpoint for the Cloudera Manager API. This can be found under the Endpoints tab for
@@ -52,16 +53,19 @@ files:
       value:
         example: <CERT_PATH>
         type: string
+        require_trusted_provider: true
     - name: cert_file
       description: Path to the file from which the local certificates can be loaded.
       value:
         example: <CERT_FILE_PATH>
         type: string
+        require_trusted_provider: true
     - name: key_file
       description: Path to the file from which to load the private key.
       value:
         example: <KEY_FILE_PATH>
         type: string
+        require_trusted_provider: true
     - name: pools_size
       description: |
         Number of connection pools to cache before discarding the least recently used pool.

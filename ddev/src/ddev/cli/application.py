@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import logging
 import os
 from functools import cached_property
 from typing import cast
@@ -14,6 +15,23 @@ from ddev.repo.core import Repository
 from ddev.utils.fs import Path
 from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
+
+
+class AppLoggingHandler(logging.Handler):
+    """Routes Python logging through the Application display methods."""
+
+    def __init__(self, app: Application):
+        super().__init__()
+        self._app = app
+
+    def emit(self, record: logging.LogRecord) -> None:
+        msg = self.format(record)
+        if record.levelno >= logging.ERROR:
+            self._app.display_error(msg)
+        elif record.levelno >= logging.WARNING:
+            self._app.display_warning(msg)
+        else:
+            self._app.display_info(msg)
 
 
 class Application(Terminal):
@@ -46,6 +64,14 @@ class Application(Terminal):
         from platformdirs import user_data_dir
 
         return Path(os.getenv(ConfigEnvVars.DATA) or user_data_dir('ddev', appauthor=False)).expand()
+
+    @cached_property
+    def logger(self) -> logging.Logger:
+        logger = logging.getLogger("ddev.app")
+        if not any(isinstance(h, AppLoggingHandler) for h in logger.handlers):
+            logger.addHandler(AppLoggingHandler(self))
+            logger.setLevel(logging.WARNING)
+        return logger
 
     @property
     def github(self) -> GitHubManager:
@@ -94,6 +120,11 @@ class Application(Terminal):
         self.__config['color'] = not self.console.no_color
         self.__config['dd_api_key'] = self.config.orgs.get('default', {}).get('api_key', '')
         self.__config['dd_app_key'] = self.config.orgs.get('default', {}).get('app_key', '')
+        # Ensure GitHub config is available for old CLI commands that need it
+        self.__config['github'] = {
+            'user': self.config.github.user,
+            'token': self.config.github.token,
+        }
         # Make sure that envvar overrides of repo make it into config.
         self.__config['repo'] = self.repo.name
         # Transfer the -x/--here flag to the old CLI.
