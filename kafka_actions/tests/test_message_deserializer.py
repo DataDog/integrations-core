@@ -638,6 +638,33 @@ class TestSchemaRegistryIntegration:
         result = json.loads(result_str)
         assert result['title'] == 'The Go Programming Language'
 
+    def test_protobuf_with_well_known_type_dependency(self):
+        """Protobuf schema referencing google/protobuf/Timestamp deserializes via preloaded well-known types.
+
+        The registry may return a schema that imports a well-known type without
+        listing it as an explicit reference (dep_schemas is empty). Without
+        preloading, DescriptorPool raises 'Depends on file ... but it has not been loaded'.
+        """
+        # FileDescriptorProto for test.Event { int64 id = 1; google.protobuf.Timestamp created_at = 2; }
+        schema_b64 = (
+            'Cgp0ZXN0LnByb3RvEgR0ZXN0Gh9nb29nbGUvcHJvdG9idWYvdGltZXN0YW1wLnByb3RvIkMKBUV2'
+            'ZW50EgoKAmlkGAEgASgDEi4KCmNyZWF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGlt'
+            'ZXN0YW1wYgZwcm90bzM='
+        )
+        payload = bytes.fromhex('082a12060880daf8b906')
+
+        log = MagicMock()
+        registry = self._mock_registry(schema_b64, 'PROTOBUF')
+        deserializer = MessageDeserializer(log, schema_registry=registry)
+
+        raw = self._make_sr_message(101, payload, protobuf_indices=b'\x01\x00')
+        result_str, schema_id = deserializer.deserialize_message(raw, 'protobuf', None, True)
+
+        assert schema_id == 101
+        result = json.loads(result_str)
+        assert result['id'] == '42'
+        assert 'createdAt' in result
+
     def test_json_with_schema_registry_fetch(self):
         """JSON message with schema registry format fetches type from registry."""
         log = MagicMock()

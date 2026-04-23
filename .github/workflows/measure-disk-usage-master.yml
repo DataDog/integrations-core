@@ -11,8 +11,6 @@ on:
   push:
     branches:
       - master
-    paths:
-      - .deps/**
 
 env:
   PYTHON_VERSION: "3.13"
@@ -58,3 +56,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ddev -v size status --commit "${{ github.sha }}" --format json --to-dd-key ${{ steps.dd-sts.outputs.api_key }} --compressed
+
+      - name: Upload JSON uncompressed sizes artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: status_uncompressed.json
+          path: status_uncompressed.json
+          if-no-files-found: error
+
+      - name: Upload JSON compressed sizes artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: status_compressed.json
+          path: status_compressed.json
+          if-no-files-found: error
