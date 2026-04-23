@@ -108,17 +108,30 @@ def test_invalid_controller_service_check(aggregator, mock_http_response):
     aggregator.assert_service_check('traefik_mesh.controller.ready', ServiceCheck.CRITICAL)
 
 
-def test_get_version(mock_http_response):
+def test_get_version(datadog_agent, dd_run_check, mock_http_response_per_endpoint):
+    from datadog_checks.dev.http import MockResponse
+
     instance = {
         'openmetrics_endpoint': 'http://localhost:8080/metrics',
         'traefik_proxy_api_endpoint': 'http://localhost:8080',
         'tags': ['test:traefik_mesh'],
     }
     check = TraefikMeshCheck('traefik_mesh', {}, [instance])
-    mock_http_response(file_path=get_fixture_path('mesh_proxy_version.json'))
+    check.check_id = 'test:123'
 
-    version = check.get_version()
-    assert version == '2.5.7'
+    mock_http_response_per_endpoint({
+        'http://localhost:8080/metrics': [MockResponse(file_path=get_fixture_path('traefik_proxy.txt'))],
+        'http://localhost:8080/api/version': [MockResponse(file_path=get_fixture_path('mesh_proxy_version.json'))],
+    })
+    dd_run_check(check)
+
+    datadog_agent.assert_metadata('test:123', {
+        'version.raw': '2.5.7',
+        'version.scheme': 'semver',
+        'version.major': '2',
+        'version.minor': '5',
+        'version.patch': '7',
+    })
 
 
 def test_submit_version(datadog_agent, dd_run_check, mock_http_response):
