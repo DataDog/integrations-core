@@ -31,7 +31,6 @@ CATEGORY_CONNECTION = "connection"
 CATEGORY_SERVER_CONFIG = "server-config"
 CATEGORY_PRIVILEGES = "privileges"
 CATEGORY_DBM = "dbm"
-CATEGORY_RUNTIME = "runtime"
 
 # Recommended minimum track_activity_query_size. Default Postgres value is 1024, which
 # silently truncates queries and breaks explain plan collection.
@@ -43,6 +42,10 @@ class PostgresDiagnose:
 
     def __init__(self, check):
         self._check = check
+        # Codes that have FAIL'd in the current explicit run. Used for cascade skipping so we
+        # don't emit downstream-effect FAILs with nonsensical remediations (e.g. "CREATE EXTENSION"
+        # when shared_preload_libraries is empty). Reset at the top of the first orchestrator.
+        self._failed = set()
 
     # -- registration ---------------------------------------------------------
 
@@ -69,6 +72,8 @@ class PostgresDiagnose:
 
     def _run_connection_and_server_diagnostics(self):
         """Open a connection and run every diagnostic that doesn't depend on DBM."""
+        # Runs first -- reset cascade state so run-to-run FAILs don't leak between invocations.
+        self._failed = set()
         conn = self._open_probe_connection(self._check._config.dbname)
         if conn is None:
             return
@@ -100,6 +105,18 @@ class PostgresDiagnose:
 
     # -- diagnostics ----------------------------------------------------------
 
+    def _fail(self, code, diagnosis, category, description=None, remediation=None, rawerror=None):
+        """Emit a FAIL and record the code so dependent diagnostics can cascade-skip."""
+        self._check.diagnosis.fail(
+            name=code.value,
+            diagnosis=diagnosis,
+            category=category,
+            description=description,
+            remediation=remediation,
+            rawerror=rawerror,
+        )
+        self._failed.add(code.value)
+
     def _open_probe_connection(self, dbname):
         """Open a short-lived diagnostic connection. Records the connection diagnosis.
 
@@ -116,8 +133,8 @@ class PostgresDiagnose:
             conn = TokenAwareConnection.connect(**kwargs)
         except psycopg.Error as e:
             code = DatabaseConfigurationError.connection_failure
-            self._check.diagnosis.fail(
-                name=code.value,
+            self._fail(
+                code,
                 diagnosis="Failed to connect to {host} (dbname={db}) as {user}: {err}".format(
                     host=host_desc, db=dbname, user=username, err=e
                 ),
@@ -147,16 +164,16 @@ class PostgresDiagnose:
             raw_version = _fetchone(conn, "SHOW SERVER_VERSION")[0]
             version = VersionUtils.parse_version(raw_version)
         except Exception as e:
-            self._check.diagnosis.fail(
-                name=code.value,
+            self._fail(
+                code,
                 diagnosis="Unable to determine Postgres version: {}".format(e),
                 category=CATEGORY_SERVER_CONFIG,
                 rawerror=str(e),
             )
             return
         if version < V9_6:
-            self._check.diagnosis.fail(
-                name=code.value,
+            self._fail(
+                code,
                 diagnosis="Postgres version {} is below the minimum supported version (9.6).".format(raw_version),
                 category=CATEGORY_SERVER_CONFIG,
                 description=DIAGNOSTIC_METADATA[code]["description"],
@@ -196,8 +213,8 @@ class PostgresDiagnose:
                 category=CATEGORY_SERVER_CONFIG,
             )
             return
-        self._check.diagnosis.fail(
-            name=code.value,
+        self._fail(
+            code,
             diagnosis=(
                 "shared_preload_libraries = '{}' does not contain pg_stat_statements; DBM query metrics "
                 "will not be collected until the server is restarted with it loaded."
@@ -304,8 +321,8 @@ class PostgresDiagnose:
                 category=CATEGORY_PRIVILEGES,
             )
             return
-        self._check.diagnosis.fail(
-            name=code.value,
+        self._fail(
+            code,
             diagnosis=(
                 "The datadog user is not a member of pg_monitor; other users' activity and statement "
                 "metrics will be invisible."
@@ -317,6 +334,9 @@ class PostgresDiagnose:
 
     def _diagnose_pg_stat_activity_access(self, conn):
         code = DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity
+        if DatabaseConfigurationError.missing_pg_monitor_role.value in self._failed:
+            # Without pg_monitor, rows are masked -- the pg_monitor FAIL is the actionable item.
+            return
         view = self._check._config.pg_stat_activity_view
         try:
             with conn.cursor() as cursor:
@@ -326,8 +346,8 @@ class PostgresDiagnose:
                 )
                 masked = cursor.fetchone()[0]
         except psycopg.Error as e:
-            self._check.diagnosis.fail(
-                name=DatabaseConfigurationError.undefined_activity_view.value,
+            self._fail(
+                DatabaseConfigurationError.undefined_activity_view,
                 diagnosis="Unable to query {}: {}".format(view, e),
                 category=CATEGORY_PRIVILEGES,
                 description=DIAGNOSTIC_METADATA[DatabaseConfigurationError.undefined_activity_view]["description"],
@@ -366,8 +386,8 @@ class PostgresDiagnose:
                 category=CATEGORY_DBM,
             )
             return
-        self._check.diagnosis.fail(
-            name=code.value,
+        self._fail(
+            code,
             diagnosis="`datadog` schema is missing in {}; DBM setup is incomplete.".format(self._check._config.dbname),
             category=CATEGORY_DBM,
             description=DIAGNOSTIC_METADATA[code]["description"],
@@ -376,6 +396,11 @@ class PostgresDiagnose:
 
     def _diagnose_pg_stat_statements_extension(self, conn):
         created = DatabaseConfigurationError.pg_stat_statements_not_created
+        spl = DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements
+        if spl.value in self._failed:
+            # `CREATE EXTENSION` requires SPL -- emitting this FAIL would just point the user at
+            # a command that will fail until they fix SPL and restart.
+            return
         row = _fetchone(
             conn,
             "SELECT 1 FROM pg_extension WHERE extname = 'pg_stat_statements'",
@@ -387,8 +412,8 @@ class PostgresDiagnose:
                 category=CATEGORY_DBM,
             )
             return
-        self._check.diagnosis.fail(
-            name=created.value,
+        self._fail(
+            created,
             diagnosis="pg_stat_statements extension is not installed in {}.".format(self._check._config.dbname),
             category=CATEGORY_DBM,
             description=DIAGNOSTIC_METADATA[created]["description"],
@@ -397,22 +422,27 @@ class PostgresDiagnose:
 
     def _diagnose_pg_stat_statements_readable(self, conn):
         code = DatabaseConfigurationError.pg_stat_statements_not_readable
+        spl = DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements
+        created = DatabaseConfigurationError.pg_stat_statements_not_created
+        if spl.value in self._failed or created.value in self._failed:
+            # No extension means no view to read; root cause already reported.
+            return
         view = self._check._config.pg_stat_statements_view
         try:
             with conn.cursor() as cursor:
                 cursor.execute("SELECT 1 FROM {} LIMIT 1".format(_safe_identifier(view)))
                 cursor.fetchall()
         except psycopg.errors.UndefinedTable as e:
-            # Extension is not CREATEd — the extension diagnostic reports this; don't double up.
+            # Fallback: the extension probe didn't fire for some reason -- don't double up anyway.
             self._check.log.debug("pg_stat_statements not readable (not created): %s", e)
             return
         except psycopg.errors.ObjectNotInPrerequisiteState as e:
-            # shared_preload_libraries missing — the shared_preload_libraries diagnostic reports this.
+            # Fallback: SPL diagnostic didn't fire -- don't double up.
             self._check.log.debug("pg_stat_statements not readable (not loaded): %s", e)
             return
         except psycopg.Error as e:
-            self._check.diagnosis.fail(
-                name=code.value,
+            self._fail(
+                code,
                 diagnosis="Unable to SELECT from {} in {}: {}".format(view, self._check._config.dbname, e),
                 category=CATEGORY_DBM,
                 description=DIAGNOSTIC_METADATA[code]["description"],
@@ -430,6 +460,9 @@ class PostgresDiagnose:
         code = DatabaseConfigurationError.undefined_explain_function
         explain_function = self._check._config.query_samples.explain_function
         schema, name = _split_function(explain_function)
+        if schema == "datadog" and DatabaseConfigurationError.missing_datadog_schema.value in self._failed:
+            # Function lives in a schema that doesn't exist; the schema FAIL is the actionable item.
+            return
         row = _fetchone(
             conn,
             (
@@ -445,8 +478,8 @@ class PostgresDiagnose:
                 category=CATEGORY_DBM,
             )
             return
-        self._check.diagnosis.fail(
-            name=code.value,
+        self._fail(
+            code,
             diagnosis="{} is not defined in {}; execution plans cannot be collected.".format(
                 explain_function, self._check._config.dbname
             ),

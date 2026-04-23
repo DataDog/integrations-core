@@ -57,7 +57,6 @@ from .util import (
     CONNECTION_METRICS,
     CONNECTION_METRICS_BY_DB,
     COUNT_METRICS,
-    DIAGNOSTIC_METADATA,
     FUNCTION_METRICS,
     IDLE_TX_LOCK_AGE_METRICS,
     INDEX_PROGRESS_METRICS,
@@ -87,7 +86,6 @@ from .util import (
     WAL_FILE_METRICS,
     DatabaseConfigurationError,
     DatabaseHealthCheckError,  # noqa: F401
-    build_remediation,
     fmt,
     get_schema_field,
     payload_pg_version,
@@ -102,7 +100,7 @@ except ImportError:
 
 MAX_CUSTOM_RESULTS = 100
 
-PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
+PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s, %s)"
 
 
 class PostgreSql(DatabaseCheck):
@@ -1039,7 +1037,12 @@ class PostgreSql(DatabaseCheck):
                 self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                 cursor.execute(
                     PG_SETTINGS_QUERY,
-                    ("pg_stat_statements.max", "track_activity_query_size", "track_io_timing"),
+                    (
+                        "pg_stat_statements.max",
+                        "track_activity_query_size",
+                        "track_io_timing",
+                        "shared_preload_libraries",
+                    ),
                 )
                 rows = cursor.fetchall()
                 self.pg_settings.clear()
@@ -1075,17 +1078,11 @@ class PostgreSql(DatabaseCheck):
 
     def record_warning(self, code, message):
         # type: (DatabaseConfigurationError, str) -> None
+        # Feeds `agent status` via `_report_warnings`. `agent diagnose` is served by the
+        # pre-flight orchestrators in `diagnose.py`, which cover the same codes with better
+        # attribution and fresh connections -- mirroring runtime warnings here too produced
+        # N× duplicates (one per worker/collection pass) and is no longer needed.
         self._warnings_by_code[code] = message
-        # Mirror the warning into the Diagnosis object so `datadog-agent diagnose`
-        # surfaces the same setup/config issues that agent status already shows.
-        meta = DIAGNOSTIC_METADATA.get(code, {})
-        self.diagnosis.warning(
-            name=code.value,
-            diagnosis=message,
-            category="runtime",
-            description=meta.get("description"),
-            remediation=build_remediation(code),
-        )
 
     def _report_warnings(self):
         messages = self._warnings_by_code.values()

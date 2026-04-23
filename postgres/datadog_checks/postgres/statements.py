@@ -439,20 +439,45 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     ),
                 )
             elif isinstance(e, psycopg.errors.UndefinedTable) and 'pg_stat_statements' in str(e):
-                error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
-                self._check.record_warning(
-                    DatabaseConfigurationError.pg_stat_statements_not_created,
-                    warning_with_tags(
-                        "Unable to collect statement metrics because pg_stat_statements is not created "
-                        "in database '%s'. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-                        "troubleshooting#%s for more details",
-                        self._config.dbname,
-                        DatabaseConfigurationError.pg_stat_statements_not_created.value,
-                        host=self._check.reported_hostname,
-                        dbname=self._config.dbname,
-                        code=DatabaseConfigurationError.pg_stat_statements_not_created.value,
-                    ),
-                )
+                # UndefinedTable fires whether the extension was never CREATEd OR the library was
+                # never loaded via shared_preload_libraries (you can't CREATE EXTENSION without SPL).
+                # Inspect pg_settings (populated at connect time) to attribute correctly -- otherwise
+                # we'd tell the user to `CREATE EXTENSION` when that command will fail until SPL is
+                # fixed and the server restarted. pg_settings returns an empty string when the
+                # datadog user lacks pg_monitor and can't read SPL; fall back to `not_created` then.
+                spl = self._check.pg_settings.get("shared_preload_libraries", "") or ""
+                spl_entries = {p.strip() for p in spl.split(",") if p.strip()}
+                if spl and "pg_stat_statements" not in spl_entries:
+                    error_tag = "error:database-{}-pg_stat_statements_not_loaded".format(type(e).__name__)
+                    self._check.record_warning(
+                        DatabaseConfigurationError.pg_stat_statements_not_loaded,
+                        warning_with_tags(
+                            "Unable to collect statement metrics because pg_stat_statements "
+                            "extension is not loaded in database '%s'. "
+                            "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                            "troubleshooting#%s for more details",
+                            self._config.dbname,
+                            DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
+                            host=self._check.reported_hostname,
+                            dbname=self._config.dbname,
+                            code=DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
+                        ),
+                    )
+                else:
+                    error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
+                    self._check.record_warning(
+                        DatabaseConfigurationError.pg_stat_statements_not_created,
+                        warning_with_tags(
+                            "Unable to collect statement metrics because pg_stat_statements is not created "
+                            "in database '%s'. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                            "troubleshooting#%s for more details",
+                            self._config.dbname,
+                            DatabaseConfigurationError.pg_stat_statements_not_created.value,
+                            host=self._check.reported_hostname,
+                            dbname=self._config.dbname,
+                            code=DatabaseConfigurationError.pg_stat_statements_not_created.value,
+                        ),
+                    )
             else:
                 self._check.warning(
                     warning_with_tags(

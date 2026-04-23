@@ -110,49 +110,31 @@ def _patch_connection(check, conn):
 # -- record_warning regression ------------------------------------------------
 
 
-def test_record_warning_emits_diagnosis(integration_check, pg_instance):
+def test_record_warning_populates_legacy_dict_only(integration_check, pg_instance):
+    """`record_warning` feeds `agent status` via `_warnings_by_code`; `agent diagnose` is served
+    by the pre-flight orchestrators in `diagnose.py`, so no diagnosis row should be emitted here."""
     check = integration_check(pg_instance)
     code = DatabaseConfigurationError.pg_stat_statements_not_loaded
     check.diagnosis.clear()
 
     check.record_warning(code, "pg_stat_statements is not loaded")
 
-    # Legacy path still populated.
     assert check._warnings_by_code[code] == "pg_stat_statements is not loaded"
-    # Diagnosis populated with matching metadata.
-    diagnoses = check.diagnosis.diagnoses
-    assert len(diagnoses) == 1
-    d = diagnoses[0]
-    assert d.result == Diagnosis.DIAGNOSIS_WARNING
-    assert d.name == code.value
-    assert d.diagnosis == "pg_stat_statements is not loaded"
-    assert d.description == DIAGNOSTIC_METADATA[code]["description"]
-    assert "shared_preload_libraries" in d.remediation
-    assert "troubleshooting" in d.remediation
-
-
-def test_record_warning_unknown_code_still_emits(integration_check, pg_instance):
-    """A code without DIAGNOSTIC_METADATA entry should still produce a diagnosis with a doc URL."""
-    check = integration_check(pg_instance)
-    # Fabricate a code-like object missing from metadata by using a code from the enum that
-    # we'll temporarily exclude.
-    fake = DatabaseConfigurationError.autodiscovered_databases_exceeds_limit
-    check.diagnosis.clear()
-    with mock.patch.dict(DIAGNOSTIC_METADATA, clear=False) as metadata:
-        metadata.pop(fake, None)
-        check.record_warning(fake, "too many dbs")
-    diagnoses = check.diagnosis.diagnoses
-    assert len(diagnoses) == 1
-    assert diagnoses[0].name == fake.value
-    # Remediation always contains the docs URL as a fallback.
-    assert "https://docs.datadoghq.com" in diagnoses[0].remediation
+    assert check.diagnosis.diagnoses == []
 
 
 def test_get_diagnoses_returns_json(integration_check, pg_instance):
+    """Seed the cached diagnoses directly (the legacy `record_warning` mirror is gone) and
+    verify `get_diagnoses` returns a JSON payload containing the entry."""
     check = integration_check(pg_instance)
-    # record_warning -> cached diagnosis, then run_explicit invoked by get_diagnoses.
     check.diagnosis.clear()
-    check.record_warning(DatabaseConfigurationError.pg_stat_statements_not_loaded, "pg_stat_statements is not loaded")
+    check.diagnosis.warning(
+        name=DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
+        diagnosis="pg_stat_statements is not loaded",
+        category="server-config",
+        description=DIAGNOSTIC_METADATA[DatabaseConfigurationError.pg_stat_statements_not_loaded]["description"],
+        remediation=build_remediation(DatabaseConfigurationError.pg_stat_statements_not_loaded),
+    )
     with mock.patch.object(check.diagnosis, '_diagnostics', []):
         payload = check.get_diagnoses()
     parsed = json.loads(payload)
@@ -177,15 +159,20 @@ def test_connection_fails_surfaces_fail(integration_check, pg_instance):
     assert 'troubleshooting' in conn_fail[0]['remediation']
 
 
-def test_connection_fails_dbm_enabled_reports_once_per_orchestrator(integration_check, pg_instance):
-    """With dbm=true, both orchestrators try to connect. Each failure is reported."""
+def test_connection_fails_dbm_enabled_collapses_duplicate_probes(integration_check, pg_instance):
+    """With dbm=true, both orchestrators try to connect -- but the base Diagnosis dedups the
+    character-identical FAIL rows, so the user sees exactly one connection-failure entry."""
     check = integration_check(dict(pg_instance, dbm=True))
     err = psycopg.OperationalError('boom')
-    with mock.patch('datadog_checks.postgres.diagnose.TokenAwareConnection.connect', side_effect=err):
+    with mock.patch(
+        'datadog_checks.postgres.diagnose.TokenAwareConnection.connect', side_effect=err
+    ) as connect:
         diagnoses = _get_diagnoses(check)
+    # Both orchestrators still attempt a probe.
+    assert connect.call_count == 2
     conn_diags = _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
-    assert all(d['result'] == Diagnosis.DIAGNOSIS_FAIL for d in conn_diags)
-    assert len(conn_diags) == 2
+    assert len(conn_diags) == 1
+    assert conn_diags[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
 
 
 # -- Server config diagnostics ------------------------------------------------
@@ -423,6 +410,96 @@ def test_missing_explain_function_fails(integration_check, pg_instance):
     entry = _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)[0]
     assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
     assert 'explain_statement' in entry['diagnosis']
+
+
+# -- Cascade skipping ---------------------------------------------------------
+
+
+def test_cascade_skip_spl_missing_suppresses_pgss_extension_and_readable(integration_check, pg_instance):
+    """When SPL lacks pg_stat_statements, the extension+readable FAILs add no information --
+    `CREATE EXTENSION` can't succeed until SPL is fixed and the server restarted."""
+    check = integration_check(dict(pg_instance, dbm=True))
+    responses = _happy_server_responses(spl='pgaudit') + [
+        ("nspname = 'datadog'", [(1,)]),
+        # If the extension/readable diagnostics did run, these would fail — but they shouldn't run.
+        ("extname = 'pg_stat_statements'", []),
+        (
+            'SELECT 1 FROM "pg_stat_statements" LIMIT 1',
+            psycopg.errors.UndefinedTable('does not exist'),
+        ),
+        ("p.proname", [(1,)]),
+    ]
+    with _patch_connection(check, FakeConn(responses)):
+        diagnoses = _get_diagnoses(check)
+    # Root cause still reported.
+    spl_entry = _by_name(
+        diagnoses,
+        DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements.value,
+    )[0]
+    assert spl_entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    # Downstream diagnostics skipped entirely (no entry, not even SUCCESS).
+    assert not _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_created.value)
+    assert not _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_readable.value)
+
+
+def test_cascade_skip_pg_monitor_missing_suppresses_pg_stat_activity_warning(
+    integration_check, pg_instance
+):
+    """Without pg_monitor, pg_stat_activity masking is a symptom -- the root cause is the role FAIL."""
+    check = integration_check(pg_instance)
+    responses = _happy_server_responses()
+    responses = [(m, [(False,)]) if isinstance(m, str) and m == 'pg_has_role' else (m, r) for m, r in responses]
+    # Flip the pg_stat_activity masked-row count to non-zero, so the WARNING *would* fire absent cascade.
+    responses = [(m, [(16,)]) if m == "query = %s" else (m, r) for m, r in responses]
+    with _patch_connection(check, FakeConn(responses)):
+        diagnoses = _get_diagnoses(check)
+    role_entry = _by_name(diagnoses, DatabaseConfigurationError.missing_pg_monitor_role.value)[0]
+    assert role_entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert not _by_name(
+        diagnoses, DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity.value
+    )
+
+
+def test_cascade_skip_missing_schema_suppresses_explain_function_in_datadog_schema(
+    integration_check, pg_instance
+):
+    """When `datadog` schema is missing, `datadog.explain_statement` can't exist -- the schema
+    FAIL is the actionable item; don't emit an explain-function FAIL with a nonsensical fix."""
+    check = integration_check(dict(pg_instance, dbm=True))
+    dbm_responses = [
+        ("nspname = 'datadog'", []),
+        ("extname = 'pg_stat_statements'", [(1,)]),
+        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
+        # If the explain-function diagnostic did run, this would produce a FAIL — but it shouldn't run.
+        ("p.proname", []),
+    ]
+    conn = FakeConn(_happy_server_responses() + dbm_responses)
+    with _patch_connection(check, conn):
+        diagnoses = _get_diagnoses(check)
+    schema = _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)[0]
+    assert schema['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert not _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)
+
+
+def test_cascade_skip_missing_schema_does_not_suppress_explain_function_in_public_schema(
+    integration_check, pg_instance
+):
+    """If the user configured an explain_function outside the `datadog` schema, the missing
+    datadog schema is irrelevant to that function -- the function check must still run."""
+    instance = dict(pg_instance, dbm=True, query_samples={'explain_function': 'public.my_explain'})
+    check = integration_check(instance)
+    dbm_responses = [
+        ("nspname = 'datadog'", []),
+        ("extname = 'pg_stat_statements'", [(1,)]),
+        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
+        ("p.proname", [(1,)]),
+    ]
+    conn = FakeConn(_happy_server_responses() + dbm_responses)
+    with _patch_connection(check, conn):
+        diagnoses = _get_diagnoses(check)
+    # The explain-function diagnostic ran and passed (function exists in public).
+    explain = _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)[0]
+    assert explain['result'] == Diagnosis.DIAGNOSIS_SUCCESS
 
 
 # -- Internal helpers ---------------------------------------------------------

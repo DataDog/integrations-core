@@ -48,6 +48,10 @@ class Diagnosis:
     def __init__(self, sanitize=None):
         # Holds results
         self._diagnoses = []
+        # Tracks (result, name, category, diagnosis, rawerror) of emitted entries to suppress
+        # character-identical duplicates (e.g. two orchestrators emitting the same "Connected to ..."
+        # success row, or a runtime warning firing once per worker thread).
+        self._seen = set()
         # Holds explicit diagnostic routines (callables)
         self._diagnostics = []
         # Sanitization function
@@ -60,10 +64,11 @@ class Diagnosis:
     def clear(self):
         """Remove all cached diagnoses."""
         self._diagnoses = []
+        self._seen = set()
 
     def success(self, name, diagnosis, category=None, description=None, remediation=None, rawerror=None):
         """Register a successful diagnostic result."""
-        self._diagnoses.append(
+        self._append(
             self._result(
                 self.DIAGNOSIS_SUCCESS,
                 name,
@@ -77,7 +82,7 @@ class Diagnosis:
 
     def fail(self, name, diagnosis, category=None, description=None, remediation=None, rawerror=None):
         """Register a failing diagnostic result."""
-        self._diagnoses.append(
+        self._append(
             self._result(
                 self.DIAGNOSIS_FAIL,
                 name,
@@ -91,7 +96,7 @@ class Diagnosis:
 
     def warning(self, name, diagnosis, category=None, description=None, remediation=None, rawerror=None):
         """Register a warning for a diagnostic result."""
-        self._diagnoses.append(
+        self._append(
             self._result(
                 self.DIAGNOSIS_WARNING,
                 name,
@@ -118,21 +123,33 @@ class Diagnosis:
         of type `DIAGNOSIS_UNEXPECTED_ERROR`.
         """
         # Keep a reference to existing cached results, to be restored at the end,
-        # and start from an empty list to collect explicit diagnoses (to be returned later)
+        # and start from an empty list to collect explicit diagnoses (to be returned later).
+        # Dedup is scoped per explicit run so orchestrator-level duplicates within a single
+        # `agent diagnose` invocation collapse, but a subsequent run starts fresh.
         cached_results, self._diagnoses = self._diagnoses, []
+        cached_seen, self._seen = self._seen, set()
         for diagnostic in self._diagnostics:
             try:
                 diagnostic()
             except Exception as e:
-                self._diagnoses.append(self._result(self.DIAGNOSIS_UNEXPECTED_ERROR, "", "", rawerror=str(e)))
+                self._append(self._result(self.DIAGNOSIS_UNEXPECTED_ERROR, "", "", rawerror=str(e)))
 
         explicit_results, self._diagnoses = self._diagnoses, cached_results
+        self._seen = cached_seen
         return explicit_results
 
     @property
     def diagnoses(self):
         """The list of cached diagnostics."""
         return self._diagnoses
+
+    def _append(self, result):
+        """Append a Result, collapsing character-identical duplicates."""
+        key = (result.result, result.name, result.category, result.diagnosis, result.rawerror)
+        if key in self._seen:
+            return
+        self._seen.add(key)
+        self._diagnoses.append(result)
 
     def _result(self, result, name, diagnosis, category=None, description=None, remediation=None, rawerror=None):
         return self.Result(
