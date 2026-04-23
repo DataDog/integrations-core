@@ -23,6 +23,7 @@ from datadog_checks.postgres.connection_pool import TokenAwareConnection
 from .util import (
     DIAGNOSTIC_METADATA,
     DatabaseConfigurationError,
+    build_description,
     build_remediation,
     parse_shared_preload_libraries,
 )
@@ -113,16 +114,25 @@ class PostgresDiagnose:
                 self._diagnose_pg_stat_statements_max(conn)
                 self._diagnose_pg_stat_statements_extension(conn)
                 self._diagnose_pg_stat_statements_readable(conn)
-            # Explain-function probes -- only relevant to query_samples.
+            # Explain-function probes run against every database that query samples may explain.
             if query_samples:
-                self._diagnose_datadog_schema(conn)
-                self._diagnose_explain_function(conn)
+                for dbname in self._get_query_samples_probe_databases(conn):
+                    probe_conn = conn if dbname == self._check._config.dbname else self._open_probe_connection(dbname)
+                    if probe_conn is None:
+                        continue
+                    failed = set()
+                    try:
+                        self._diagnose_datadog_schema(probe_conn, dbname, failed)
+                        self._diagnose_explain_function(probe_conn, dbname, failed)
+                    finally:
+                        if probe_conn is not conn:
+                            _safe_close(probe_conn)
         finally:
             _safe_close(conn)
 
     # -- diagnostics ----------------------------------------------------------
 
-    def _fail(self, code, diagnosis, category, description=None, remediation=None, rawerror=None):
+    def _fail(self, code, diagnosis, category, description=None, remediation=None, rawerror=None, failed_codes=None):
         """Emit a FAIL and record the code so dependent diagnostics can cascade-skip."""
         self._check.diagnosis.fail(
             name=code.value,
@@ -132,7 +142,9 @@ class PostgresDiagnose:
             remediation=remediation,
             rawerror=rawerror,
         )
-        self._failed.add(code.value)
+        if failed_codes is None:
+            failed_codes = self._failed
+        failed_codes.add(code.value)
 
     def _open_probe_connection(self, dbname):
         """Open a short-lived diagnostic connection. Records the connection diagnosis.
@@ -389,8 +401,10 @@ class PostgresDiagnose:
             category=CATEGORY_PRIVILEGES,
         )
 
-    def _diagnose_datadog_schema(self, conn):
+    def _diagnose_datadog_schema(self, conn, dbname=None, failed=None):
         code = DatabaseConfigurationError.missing_datadog_schema
+        dbname = dbname or self._check._config.dbname
+        failed = self._failed if failed is None else failed
         schema, _ = _split_function(self._check._config.query_samples.explain_function)
         # Only run when the user has explicitly qualified the function with `datadog.`.
         # For any other schema -- or an unqualified name resolved via search_path --
@@ -405,16 +419,17 @@ class PostgresDiagnose:
         if row:
             self._check.diagnosis.success(
                 name=code.value,
-                diagnosis="`datadog` schema exists in {}.".format(self._check._config.dbname),
+                diagnosis="`datadog` schema exists in {}.".format(dbname),
                 category=CATEGORY_DBM,
             )
             return
         self._fail(
             code,
-            diagnosis="`datadog` schema is missing in {}; DBM setup is incomplete.".format(self._check._config.dbname),
+            diagnosis="`datadog` schema is missing in {}; DBM setup is incomplete.".format(dbname),
             category=CATEGORY_DBM,
             description=DIAGNOSTIC_METADATA[code]["description"],
             remediation=build_remediation(code),
+            failed_codes=failed,
         )
 
     def _diagnose_pg_stat_statements_extension(self, conn):
@@ -478,11 +493,13 @@ class PostgresDiagnose:
             category=CATEGORY_DBM,
         )
 
-    def _diagnose_explain_function(self, conn):
+    def _diagnose_explain_function(self, conn, dbname=None, failed=None):
         code = DatabaseConfigurationError.undefined_explain_function
+        dbname = dbname or self._check._config.dbname
+        failed = self._failed if failed is None else failed
         explain_function = self._check._config.query_samples.explain_function
         schema, name = _split_function(explain_function)
-        if schema == "datadog" and DatabaseConfigurationError.missing_datadog_schema.value in self._failed:
+        if schema == "datadog" and DatabaseConfigurationError.missing_datadog_schema.value in failed:
             # Function lives in a schema that doesn't exist; the schema FAIL is the actionable item.
             return
         if schema is None:
@@ -509,18 +526,17 @@ class PostgresDiagnose:
         if row:
             self._check.diagnosis.success(
                 name=code.value,
-                diagnosis="{} exists in {}.".format(explain_function, self._check._config.dbname),
+                diagnosis="{} exists in {}.".format(explain_function, dbname),
                 category=CATEGORY_DBM,
             )
             return
         self._fail(
             code,
-            diagnosis="{} is not defined in {}; execution plans cannot be collected.".format(
-                explain_function, self._check._config.dbname
-            ),
+            diagnosis="{} is not defined in {}; execution plans cannot be collected.".format(explain_function, dbname),
             category=CATEGORY_DBM,
-            description=DIAGNOSTIC_METADATA[code]["description"],
-            remediation=build_remediation(code),
+            description=build_description(code, explain_function=explain_function),
+            remediation=build_remediation(code, explain_function=explain_function),
+            failed_codes=failed,
         )
 
     # -- helpers --------------------------------------------------------------
@@ -530,6 +546,29 @@ class PostgresDiagnose:
         port = self._check._config.port
         return "{}:{}".format(host, port) if port else host
 
+    def _get_query_samples_probe_databases(self, conn):
+        if self._check._config.dbstrict:
+            return [self._check._config.dbname]
+
+        sql = "SELECT datname FROM pg_catalog.pg_database WHERE datistemplate = false AND datallowconn"
+        params = ()
+        if self._check._config.ignore_databases:
+            sql += " AND " + " AND ".join("datname NOT ILIKE %s" for _ in self._check._config.ignore_databases)
+            params = tuple(self._check._config.ignore_databases)
+
+        rows = _fetchall(conn, sql, params if params else None)
+        if not rows:
+            return [self._check._config.dbname]
+
+        dbnames = []
+        seen = set()
+        for row in rows:
+            if not row or not row[0] or row[0] in seen:
+                continue
+            dbnames.append(row[0])
+            seen.add(row[0])
+        return dbnames or [self._check._config.dbname]
+
 
 def _fetchone(conn, sql, params=None):
     """Run a single-row query, swallowing psycopg errors and returning None on failure."""
@@ -537,6 +576,16 @@ def _fetchone(conn, sql, params=None):
         with conn.cursor() as cursor:
             cursor.execute(sql, params) if params is not None else cursor.execute(sql)
             return cursor.fetchone()
+    except psycopg.Error:
+        return None
+
+
+def _fetchall(conn, sql, params=None):
+    """Run a query, swallowing psycopg errors and returning None on failure."""
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(sql, params) if params is not None else cursor.execute(sql)
+            return cursor.fetchall()
     except psycopg.Error:
         return None
 

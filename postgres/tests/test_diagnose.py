@@ -435,6 +435,38 @@ def test_missing_explain_function_fails(integration_check, pg_instance):
     assert 'explain_statement' in entry['diagnosis']
 
 
+def test_query_samples_probes_each_monitored_database(integration_check, pg_instance):
+    instance = dict(pg_instance, dbm=True, query_metrics={'enabled': False})
+    check = integration_check(instance)
+    connections = {
+        pg_instance['dbname']: FakeConn(
+            _happy_server_responses()
+            + [
+                ("pg_catalog.pg_database", [(pg_instance['dbname'],), ('broken_schema',), ('broken_function',)]),
+                ("nspname = 'datadog'", [(1,)]),
+                ("p.proname", [(1,)]),
+            ]
+        ),
+        'broken_schema': FakeConn([("nspname = 'datadog'", [])]),
+        'broken_function': FakeConn([("nspname = 'datadog'", [(1,)]), ("p.proname", [])]),
+    }
+    with mock.patch(
+        'datadog_checks.postgres.diagnose.TokenAwareConnection.connect',
+        side_effect=lambda **kwargs: connections[kwargs['dbname']],
+    ):
+        diagnoses = _get_diagnoses(check)
+
+    missing_schema = _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)
+    assert any(d['result'] == Diagnosis.DIAGNOSIS_FAIL and 'broken_schema' in d['diagnosis'] for d in missing_schema), (
+        missing_schema
+    )
+
+    missing_explain = _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)
+    assert any(
+        d['result'] == Diagnosis.DIAGNOSIS_FAIL and 'broken_function' in d['diagnosis'] for d in missing_explain
+    ), missing_explain
+
+
 # -- Subfeature gating --------------------------------------------------------
 
 
@@ -662,6 +694,26 @@ def test_custom_explain_function_schema_skips_datadog_schema_check(integration_c
     # The explain-function diagnostic ran and passed (function exists in public).
     explain = _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)[0]
     assert explain['result'] == Diagnosis.DIAGNOSIS_SUCCESS
+
+
+def test_custom_explain_function_guidance_uses_override(integration_check, pg_instance):
+    instance = dict(pg_instance, dbm=True, query_samples={'explain_function': 'public.my_explain'})
+    check = integration_check(instance)
+    dbm_responses = [
+        ("extname = 'pg_stat_statements'", [(1,)]),
+        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
+        ("p.proname", []),
+    ]
+    conn = FakeConn(_happy_server_responses() + dbm_responses)
+    with _patch_connection(check, conn):
+        diagnoses = _get_diagnoses(check)
+
+    explain = _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)[0]
+    assert explain['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'public.my_explain' in explain['description']
+    assert 'public.my_explain' in explain['remediation']
+    assert 'datadog.explain_statement' not in explain['description']
+    assert 'datadog.explain_statement' not in explain['remediation']
 
 
 # -- Internal helpers ---------------------------------------------------------

@@ -71,9 +71,9 @@ DIAGNOSTIC_METADATA = {
         "docs_anchor": DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
     },
     DatabaseConfigurationError.undefined_explain_function: {
-        "description": "The datadog.explain_statement function is required to collect execution plans.",
+        "description": "The `{explain_function}` function is required to collect execution plans.",
         "remediation": (
-            "Create the `datadog.explain_statement` function in every monitored database as documented in the "
+            "Create the `{explain_function}` function in every monitored database as documented in the "
             "Postgres DBM setup guide."
         ),
         "docs_anchor": DatabaseConfigurationError.undefined_explain_function.value,
@@ -196,11 +196,17 @@ def parse_shared_preload_libraries(value):
     return {part.strip() for part in value.split(",") if part.strip()}
 
 
-def build_remediation(code):
+def build_description(code, **kwargs):
+    """Return the formatted description string for a DatabaseConfigurationError."""
+    meta = DIAGNOSTIC_METADATA.get(code, {})
+    return _format_diagnostic_text(meta.get("description"), **_diagnostic_context(code, **kwargs))
+
+
+def build_remediation(code, **kwargs):
     """Return the full remediation string (prose + docs URL) for a DatabaseConfigurationError."""
     meta = DIAGNOSTIC_METADATA.get(code, {})
     parts = []
-    remediation = meta.get("remediation")
+    remediation = _format_diagnostic_text(meta.get("remediation"), **_diagnostic_context(code, **kwargs))
     if remediation:
         parts.append(remediation)
     anchor = meta.get("docs_anchor")
@@ -209,6 +215,19 @@ def build_remediation(code):
     else:
         parts.append("See {url} for details.".format(url=TROUBLESHOOTING_DOC_URL))
     return " ".join(parts)
+
+
+def _diagnostic_context(code, **kwargs):
+    context = dict(kwargs)
+    if code == DatabaseConfigurationError.undefined_explain_function:
+        context.setdefault("explain_function", "datadog.explain_statement")
+    return context
+
+
+def _format_diagnostic_text(template, **kwargs):
+    if not template:
+        return template
+    return PartialFormatter().format(template, **kwargs)
 
 
 class DBExplainError(Enum):
