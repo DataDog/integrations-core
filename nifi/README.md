@@ -82,7 +82,7 @@ NiFi bulletins (errors and warnings from processors and system components) are f
 
 ### Service Checks
 
-The NiFi check does not include any service checks. Connectivity is reported via the `nifi.can_connect` gauge (`1` = OK, `0` = unreachable).
+The NiFi check does not include any service checks. Connectivity is reported with the `nifi.can_connect` gauge (`1` = OK, `0` = unreachable).
 
 ## Troubleshooting
 
