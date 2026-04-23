@@ -55,8 +55,15 @@ class PostgresDiagnose:
 
         A single orchestrator per category keeps the output tidy: if one category
         fails catastrophically, the others still report.
+
+        Idempotent: re-invoking `register` on the same Diagnosis object is a no-op.
+        ``Diagnosis.register`` extends an internal list, so without this guard a
+        repeated call would stack orchestrators and produce N× the diagnostics.
         """
         d = self._check.diagnosis
+        if getattr(d, '_postgres_diagnostics_registered', False):
+            return
+        d._postgres_diagnostics_registered = True
         d.register(
             self._run_connection_and_server_diagnostics,
             self._run_dbm_diagnostics,
