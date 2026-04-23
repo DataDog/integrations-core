@@ -257,6 +257,23 @@ instances:
         #
         # table_metrics_max_tables: 200
 
+        ## @param stalled_merge_elapsed_threshold_seconds - integer - optional - default: 3600
+        ## Number of seconds a merge must be running before it is counted as stalled
+        ## in the `clickhouse.merges.stalled` gauge. Raise this threshold if long-running
+        ## merges are expected in your environment (e.g. large Wide-part merges on spinning
+        ## disks) to avoid false-positive stall alerts.
+        #
+        # stalled_merge_elapsed_threshold_seconds: 3600
+
+        ## @param stuck_replication_num_tries - integer - optional - default: 3
+        ## Minimum number of failed attempts (num_tries) before a replication queue entry
+        ## is counted as stuck in the `clickhouse.replication.stuck` gauge. Entries below
+        ## this threshold are still counted in `clickhouse.replication.queue.depth`.
+        ## Increase this value if transient failures routinely exceed the default before
+        ## self-healing.
+        #
+        # stuck_replication_num_tries: 3
+
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
     ## Only metrics specified in `custom_queries` will be collected.

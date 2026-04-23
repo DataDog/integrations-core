@@ -68,4 +68,6 @@ def instance_parts_and_merges():
         run_sync=False,
         table_metrics_include_partition_tag=False,
         table_metrics_max_tables=200,
+        stalled_merge_elapsed_threshold_seconds=3600,
+        stuck_replication_num_tries=3,
     )

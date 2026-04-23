@@ -363,6 +363,25 @@ files:
           value:
             type: integer
             example: 200
+        - name: stalled_merge_elapsed_threshold_seconds
+          description: |
+            Number of seconds a merge must be running before it is counted as stalled
+            in the `clickhouse.merges.stalled` gauge. Raise this threshold if long-running
+            merges are expected in your environment (e.g. large Wide-part merges on spinning
+            disks) to avoid false-positive stall alerts.
+          value:
+            type: integer
+            example: 3600
+        - name: stuck_replication_num_tries
+          description: |
+            Minimum number of failed attempts (num_tries) before a replication queue entry
+            is counted as stuck in the `clickhouse.replication.stuck` gauge. Entries below
+            this threshold are still counted in `clickhouse.replication.queue.depth`.
+            Increase this value if transient failures routinely exceed the default before
+            self-healing.
+          value:
+            type: integer
+            example: 3
         - name: run_sync
           hidden: true
           description: |

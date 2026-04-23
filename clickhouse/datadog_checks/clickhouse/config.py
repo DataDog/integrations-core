@@ -231,6 +231,8 @@ def _apply_validated_defaults(args: dict, instance: dict, validation_result: Val
         'max_detached_parts_rows',
         'max_replication_queue_rows',
         'table_metrics_max_tables',
+        'stalled_merge_elapsed_threshold_seconds',
+        'stuck_replication_num_tries',
     ):
         if _safefloat(args.get('parts_and_merges', {}).get(_field)) <= 0:
             default_value = getattr(_pm_defaults, _field)

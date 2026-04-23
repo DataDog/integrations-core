@@ -33,8 +33,6 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
 DBM_TYPE = "storage_health"
-STALLED_MERGE_ELAPSED_THRESHOLD_SECONDS = 3600
-STUCK_REPLICATION_NUM_TRIES = 3
 
 # system.detached_parts.reason values that indicate actual data integrity problems
 # (ClickHouse quarantined the part). NULL/empty reason means operator ran ALTER TABLE ... DETACH
@@ -248,6 +246,8 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
 
         self._include_partition_tag: bool = bool(config.table_metrics_include_partition_tag)
         self._max_tables: int = config.table_metrics_max_tables
+        self._stalled_merge_threshold: int = config.stalled_merge_elapsed_threshold_seconds
+        self._stuck_replication_num_tries: int = config.stuck_replication_num_tries
 
         self._db_client = None
 
@@ -567,7 +567,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
     def _collect_replication_queue_aggregated(self) -> list[dict]:
         query = REPLICATION_QUEUE_AGGREGATED_QUERY.format(
             replication_queue_table=self._check.get_system_table('replication_queue'),
-            stuck_threshold=STUCK_REPLICATION_NUM_TRIES,
+            stuck_threshold=self._stuck_replication_num_tries,
         )
         try:
             rows = self._execute_query(query)
@@ -715,7 +715,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             agg = merges_agg[key]
             agg['active'] += 1
             elapsed = row.get('elapsed', 0.0)
-            if elapsed > STALLED_MERGE_ELAPSED_THRESHOLD_SECONDS:
+            if elapsed > self._stalled_merge_threshold:
                 agg['stalled'] += 1
             if elapsed > agg['max_elapsed']:
                 agg['max_elapsed'] = elapsed

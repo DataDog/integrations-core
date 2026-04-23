@@ -64,6 +64,8 @@ class PartsAndMerges(BaseModel):
     max_parts_rows: Optional[int] = None
     max_replication_queue_rows: Optional[int] = None
     run_sync: Optional[bool] = None
+    stalled_merge_elapsed_threshold_seconds: Optional[int] = None
+    stuck_replication_num_tries: Optional[int] = None
     table_metrics_include_partition_tag: Optional[bool] = None
     table_metrics_max_tables: Optional[int] = None
 
