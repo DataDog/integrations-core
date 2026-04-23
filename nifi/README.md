@@ -4,7 +4,7 @@
 
 This check monitors [Apache NiFi][1] through the Datadog Agent.
 
-Apache NiFi is an open-source platform for routing, transforming, and automating data flow between systems. This check collects JVM health, flow throughput, queue backpressure, processor status, and bulletin events from the NiFi REST API. No NiFi-side reporting task or JMX exporter is required.
+Apache NiFi is an open source platform for routing, transforming, and automating data flow between systems. This check collects JVM health, flow throughput, queue backpressure, processor status, and bulletin events from the NiFi REST API. No NiFi-side reporting task or JMX exporter is required.
 
 With the Datadog NiFi integration, you can:
 
