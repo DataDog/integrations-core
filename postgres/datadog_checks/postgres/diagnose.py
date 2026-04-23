@@ -24,14 +24,18 @@ from .util import (
     DIAGNOSTIC_METADATA,
     DatabaseConfigurationError,
     build_remediation,
-    diagnosis_name,
 )
 from .version_utils import V9_6, VersionUtils
 
-CATEGORY_CONNECTION = "connection"
-CATEGORY_SERVER_CONFIG = "server-config"
-CATEGORY_PRIVILEGES = "privileges"
-CATEGORY_DBM = "dbm"
+# Diagnose categories are `{check_name}.{area}` so `agent diagnose` output can be filtered or
+# grouped by integration on the consumer side. The agent itself only renders the string in
+# brackets, but the namespaced form is still the only identity that tells the postgres entries
+# apart from other Python checks sharing the `check-datadog` suite.
+CATEGORY_CONNECTION = "postgres.connection"
+CATEGORY_SERVER_CONFIG = "postgres.server-config"
+CATEGORY_PRIVILEGES = "postgres.privileges"
+CATEGORY_DBM = "postgres.dbm"
+CATEGORY_RUNTIME = "postgres.runtime"
 
 # Recommended minimum track_activity_query_size. Default Postgres value is 1024, which
 # silently truncates queries and breaks explain plan collection.
@@ -110,7 +114,7 @@ class PostgresDiagnose:
         except psycopg.Error as e:
             code = DatabaseConfigurationError.connection_failure
             self._check.diagnosis.fail(
-                name=diagnosis_name(code),
+                name=code.value,
                 diagnosis="Failed to connect to {host} (dbname={db}) as {user}: {err}".format(
                     host=host_desc, db=dbname, user=username, err=e
                 ),
@@ -128,7 +132,7 @@ class PostgresDiagnose:
         except psycopg.Error:
             pass
         self._check.diagnosis.success(
-            name=diagnosis_name(DatabaseConfigurationError.connection_failure),
+            name=DatabaseConfigurationError.connection_failure.value,
             diagnosis="Connected to {host} (dbname={db}) as {user}".format(host=host_desc, db=dbname, user=username),
             category=CATEGORY_CONNECTION,
         )
@@ -141,7 +145,7 @@ class PostgresDiagnose:
             version = VersionUtils.parse_version(raw_version)
         except Exception as e:
             self._check.diagnosis.fail(
-                name=diagnosis_name(code),
+                name=code.value,
                 diagnosis="Unable to determine Postgres version: {}".format(e),
                 category=CATEGORY_SERVER_CONFIG,
                 rawerror=str(e),
@@ -149,7 +153,7 @@ class PostgresDiagnose:
             return
         if version < V9_6:
             self._check.diagnosis.fail(
-                name=diagnosis_name(code),
+                name=code.value,
                 diagnosis="Postgres version {} is below the minimum supported version (9.6).".format(raw_version),
                 category=CATEGORY_SERVER_CONFIG,
                 description=DIAGNOSTIC_METADATA[code]["description"],
@@ -157,7 +161,7 @@ class PostgresDiagnose:
             )
             return
         self._check.diagnosis.success(
-            name=diagnosis_name(code),
+            name=code.value,
             diagnosis="Postgres version {} is supported.".format(raw_version),
             category=CATEGORY_SERVER_CONFIG,
         )
@@ -170,7 +174,7 @@ class PostgresDiagnose:
             # users who are not members of pg_monitor. Don't silently drop the diagnostic --
             # surface a WARNING that points at the likely root cause.
             self._check.diagnosis.warning(
-                name=diagnosis_name(code),
+                name=code.value,
                 diagnosis=(
                     "Could not read shared_preload_libraries; this setting is restricted to "
                     "pg_monitor members. Grant pg_monitor to the datadog user so this "
@@ -184,13 +188,13 @@ class PostgresDiagnose:
         entries = [part.strip() for part in libs.split(",") if part.strip()]
         if "pg_stat_statements" in entries:
             self._check.diagnosis.success(
-                name=diagnosis_name(code),
+                name=code.value,
                 diagnosis="shared_preload_libraries contains pg_stat_statements.",
                 category=CATEGORY_SERVER_CONFIG,
             )
             return
         self._check.diagnosis.fail(
-            name=diagnosis_name(code),
+            name=code.value,
             diagnosis=(
                 "shared_preload_libraries = '{}' does not contain pg_stat_statements; DBM query metrics "
                 "will not be collected until the server is restarted with it loaded."
@@ -211,13 +215,13 @@ class PostgresDiagnose:
             return
         if size >= RECOMMENDED_TRACK_ACTIVITY_QUERY_SIZE:
             self._check.diagnosis.success(
-                name=diagnosis_name(code),
+                name=code.value,
                 diagnosis="track_activity_query_size = {} (>= {}).".format(size, RECOMMENDED_TRACK_ACTIVITY_QUERY_SIZE),
                 category=CATEGORY_SERVER_CONFIG,
             )
             return
         self._check.diagnosis.warning(
-            name=diagnosis_name(code),
+            name=code.value,
             diagnosis=(
                 "track_activity_query_size = {} is below the recommended {}; long queries will be "
                 "truncated and may not be explainable."
@@ -234,13 +238,13 @@ class PostgresDiagnose:
             return
         if raw == "on":
             self._check.diagnosis.success(
-                name=diagnosis_name(code),
+                name=code.value,
                 diagnosis="track_io_timing is on.",
                 category=CATEGORY_SERVER_CONFIG,
             )
             return
         self._check.diagnosis.warning(
-            name=diagnosis_name(code),
+            name=code.value,
             diagnosis="track_io_timing = {}; I/O timing columns will not be collected.".format(raw),
             category=CATEGORY_SERVER_CONFIG,
             description=DIAGNOSTIC_METADATA[code]["description"],
@@ -261,13 +265,13 @@ class PostgresDiagnose:
         threshold = self._check._config.query_metrics.pg_stat_statements_max_warning_threshold
         if value <= threshold:
             self._check.diagnosis.success(
-                name=diagnosis_name(code),
+                name=code.value,
                 diagnosis="pg_stat_statements.max = {} (<= threshold {}).".format(value, threshold),
                 category=CATEGORY_SERVER_CONFIG,
             )
             return
         self._check.diagnosis.warning(
-            name=diagnosis_name(code),
+            name=code.value,
             diagnosis=(
                 "pg_stat_statements.max = {} exceeds the threshold of {}; the collection query may run slowly."
             ).format(value, threshold),
@@ -292,13 +296,13 @@ class PostgresDiagnose:
         )
         if has_role and has_role[0]:
             self._check.diagnosis.success(
-                name=diagnosis_name(code),
+                name=code.value,
                 diagnosis="Current user is a member of pg_monitor.",
                 category=CATEGORY_PRIVILEGES,
             )
             return
         self._check.diagnosis.fail(
-            name=diagnosis_name(code),
+            name=code.value,
             diagnosis=(
                 "The datadog user is not a member of pg_monitor; other users' activity and statement "
                 "metrics will be invisible."
@@ -320,7 +324,7 @@ class PostgresDiagnose:
                 masked = cursor.fetchone()[0]
         except psycopg.Error as e:
             self._check.diagnosis.fail(
-                name=diagnosis_name(DatabaseConfigurationError.undefined_activity_view),
+                name=DatabaseConfigurationError.undefined_activity_view.value,
                 diagnosis="Unable to query {}: {}".format(view, e),
                 category=CATEGORY_PRIVILEGES,
                 description=DIAGNOSTIC_METADATA[DatabaseConfigurationError.undefined_activity_view]["description"],
@@ -330,7 +334,7 @@ class PostgresDiagnose:
             return
         if masked:
             self._check.diagnosis.warning(
-                name=diagnosis_name(code),
+                name=code.value,
                 diagnosis=(
                     "{} rows in {} are masked as '<insufficient privilege>'; activity samples will miss "
                     "other users' queries."
@@ -341,7 +345,7 @@ class PostgresDiagnose:
             )
             return
         self._check.diagnosis.success(
-            name=diagnosis_name(code),
+            name=code.value,
             diagnosis="{} is readable with full query visibility.".format(view),
             category=CATEGORY_PRIVILEGES,
         )
@@ -354,13 +358,13 @@ class PostgresDiagnose:
         )
         if row:
             self._check.diagnosis.success(
-                name=diagnosis_name(code),
+                name=code.value,
                 diagnosis="`datadog` schema exists in {}.".format(self._check._config.dbname),
                 category=CATEGORY_DBM,
             )
             return
         self._check.diagnosis.fail(
-            name=diagnosis_name(code),
+            name=code.value,
             diagnosis="`datadog` schema is missing in {}; DBM setup is incomplete.".format(self._check._config.dbname),
             category=CATEGORY_DBM,
             description=DIAGNOSTIC_METADATA[code]["description"],
@@ -375,13 +379,13 @@ class PostgresDiagnose:
         )
         if row:
             self._check.diagnosis.success(
-                name=diagnosis_name(created),
+                name=created.value,
                 diagnosis="pg_stat_statements extension is installed in {}.".format(self._check._config.dbname),
                 category=CATEGORY_DBM,
             )
             return
         self._check.diagnosis.fail(
-            name=diagnosis_name(created),
+            name=created.value,
             diagnosis="pg_stat_statements extension is not installed in {}.".format(self._check._config.dbname),
             category=CATEGORY_DBM,
             description=DIAGNOSTIC_METADATA[created]["description"],
@@ -405,7 +409,7 @@ class PostgresDiagnose:
             return
         except psycopg.Error as e:
             self._check.diagnosis.fail(
-                name=diagnosis_name(code),
+                name=code.value,
                 diagnosis="Unable to SELECT from {} in {}: {}".format(view, self._check._config.dbname, e),
                 category=CATEGORY_DBM,
                 description=DIAGNOSTIC_METADATA[code]["description"],
@@ -414,7 +418,7 @@ class PostgresDiagnose:
             )
             return
         self._check.diagnosis.success(
-            name=diagnosis_name(code),
+            name=code.value,
             diagnosis="{} is readable in {}.".format(view, self._check._config.dbname),
             category=CATEGORY_DBM,
         )
@@ -433,13 +437,13 @@ class PostgresDiagnose:
         )
         if row:
             self._check.diagnosis.success(
-                name=diagnosis_name(code),
+                name=code.value,
                 diagnosis="{} exists in {}.".format(explain_function, self._check._config.dbname),
                 category=CATEGORY_DBM,
             )
             return
         self._check.diagnosis.fail(
-            name=diagnosis_name(code),
+            name=code.value,
             diagnosis="{} is not defined in {}; execution plans cannot be collected.".format(
                 explain_function, self._check._config.dbname
             ),

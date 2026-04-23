@@ -53,16 +53,6 @@ class DatabaseConfigurationError(Enum):
 # Docs anchor is appended to the troubleshooting URL to land the user on the right section.
 TROUBLESHOOTING_DOC_URL = "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting/"
 
-# Prefix applied to every diagnose `name` so `agent diagnose` output is easy to filter to
-# just the postgres integration (e.g. `grep 'postgres\\.'`).
-DIAGNOSIS_NAMESPACE = "postgres"
-
-
-def diagnosis_name(code):
-    """Return the namespaced diagnose name for a DatabaseConfigurationError (or a raw str)."""
-    raw = code.value if hasattr(code, "value") else code
-    return "{ns}.{name}".format(ns=DIAGNOSIS_NAMESPACE, name=raw)
-
 
 # Central map of diagnostic metadata for every DatabaseConfigurationError code. Used by both the
 # runtime `record_warning` path (so `agent diagnose` sees the same remediation text as `agent status`)
