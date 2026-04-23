@@ -1,6 +1,6 @@
 {
   "title": "AWS GPU Cost Overview",
-  "description": "Monitor AWS GPU compute spend including instance type breakdowns, On-Demand vs committed pricing coverage, and cost trends.",
+  "description": "Use this dashboard to investigate AWS GPU compute spend, understand where spend is concentrated across instance types and pricing terms, and correlate costs with GPU hardware utilization.",
   "widgets": [
     {
       "id": 4035703146780275,
@@ -12,12 +12,116 @@
         "layout_type": "ordered",
         "widgets": [
           {
+            "id": 4035703146780300,
+            "definition": {
+              "title": "AWS GPU Spend by Instance Type (past 1 month)",
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "comparison_time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "cloud_cost_summary",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND $availability-zone AND $team} by {aws_instance_type}.rollup(sum, daily)"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "graph_options": [
+                {"type": "query_value", "view": "total"},
+                {"type": "query_value", "view": "change"},
+                {"type": "timeseries", "display_type": "bars"},
+                {"type": "cloud_cost_table", "view": "summary", "sort": {"type": "formula", "index": 0, "order": "desc"}}
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 6
+            }
+          },
+          {
             "id": 400177514017573,
             "definition": {
-              "title": "AWS GPU Spend",
+              "title": "AWS GPU Spend (past 30 days)",
               "title_size": "16",
               "title_align": "left",
               "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\")) AND $availability-zone AND $team}"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:aws.cost.net.unblended{aws_usage_type:*CapacityBlock* AND $availability-zone AND $team}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 4035703146780301,
+            "definition": {
+              "title": "AWS Capacity Block Spend (past 30 days)",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
                 "hide_incomplete_cost_data": true
               },
               "type": "query_value",
@@ -39,7 +143,7 @@
                       "aggregator": "sum",
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{(aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\")) AND $availability-zone AND $team AND $kube_cluster_name}"
+                      "query": "sum:aws.cost.net.unblended{aws_usage_type:*CapacityBlock* AND $availability-zone AND $team}"
                     }
                   ],
                   "response_format": "scalar"
@@ -52,8 +156,8 @@
               }
             },
             "layout": {
-              "x": 0,
-              "y": 0,
+              "x": 3,
+              "y": 6,
               "width": 3,
               "height": 2
             }
@@ -62,7 +166,7 @@
             "id": 8701257412207113,
             "definition": {
               "type": "note",
-              "content": "AWS GPU instances include the **GPU instance** and **Machine Learning ASIC Instances** families (p3, p4, p5, g4, g5, g6, inf1, inf2, trn1, dl1, and more). Coverage shows On-Demand vs committed spend. On-demand % tracks how much GPU spend is at on-demand rates.",
+              "content": "AWS GPU instances include the **GPU instance**, **Machine Learning ASIC Instances**, and **Accelerated Computing** families (p3, p4, p5, p6, g4, g5, g6, inf1, inf2, trn1, dl1, and more). The top chart shows **amortized** spend by instance type. **Capacity Block** upfront reservations are tracked separately (AWS excludes them from amortized cost).",
               "background_color": "green",
               "font_size": "14",
               "text_align": "left",
@@ -71,9 +175,9 @@
               "has_padding": true
             },
             "layout": {
-              "x": 3,
-              "y": 0,
-              "width": 9,
+              "x": 6,
+              "y": 6,
+              "width": 6,
               "height": 2
             }
           },
@@ -107,7 +211,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername IN (aws) AND aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND $availability-zone AND $team AND $kube_cluster_name} by {aws_cost_type}.rollup(sum, daily)"
+                      "query": "sum:all.cost{providername IN (aws) AND aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND $availability-zone AND $team} by {aws_cost_type}.rollup(sum, daily)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -125,7 +229,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 2,
+              "y": 8,
               "width": 6,
               "height": 3
             }
@@ -165,12 +269,12 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query2",
-                      "query": "sum:all.cost{providername IN (aws) AND aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND is_aws_ec2_compute_on_demand:true AND $availability-zone AND $team AND $kube_cluster_name}.rollup(sum, daily)"
+                      "query": "sum:all.cost{providername IN (aws) AND aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND is_aws_ec2_compute_on_demand:true AND $availability-zone AND $team}.rollup(sum, daily)"
                     },
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername IN (aws) AND aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND $availability-zone AND $team AND $kube_cluster_name}.rollup(sum, daily)"
+                      "query": "sum:all.cost{providername IN (aws) AND aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND $availability-zone AND $team}.rollup(sum, daily)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -188,7 +292,7 @@
             },
             "layout": {
               "x": 6,
-              "y": 2,
+              "y": 8,
               "width": 6,
               "height": 3
             }
@@ -210,19 +314,19 @@
                       "aggregator": "sum",
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND aws_operation:RunInstances AND aws_usage_type:*BoxUsage* AND is_aws_ec2_compute_on_demand:true AND $availability-zone AND $team AND $kube_cluster_name} by {aws_instance_type}"
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND aws_operation:RunInstances AND aws_usage_type:*BoxUsage* AND is_aws_ec2_compute_on_demand:true AND $availability-zone AND $team} by {aws_instance_type}"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "cloud_cost",
                       "name": "query2",
-                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND aws_operation:RunInstances AND aws_usage_type:*BoxUsage* AND NOT is_aws_ec2_compute_on_demand:true AND $availability-zone AND $team AND $kube_cluster_name} by {aws_instance_type}"
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND aws_operation:RunInstances AND aws_usage_type:*BoxUsage* AND NOT is_aws_ec2_compute_on_demand:true AND $availability-zone AND $team} by {aws_instance_type}"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "cloud_cost",
                       "name": "query3",
-                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND aws_operation:RunInstances AND aws_usage_type:*Unused* AND NOT is_aws_ec2_compute_on_demand:true AND $availability-zone AND $team AND $kube_cluster_name} by {aws_instance_type}"
+                      "query": "sum:aws.cost.net.amortized.shared.resources.allocated{aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND aws_operation:RunInstances AND aws_usage_type:*Unused* AND NOT is_aws_ec2_compute_on_demand:true AND $availability-zone AND $team} by {aws_instance_type}"
                     }
                   ],
                   "response_format": "scalar",
@@ -238,23 +342,47 @@
                   },
                   "formulas": [
                     {
-                      "alias": "On-Demand",
+                      "alias": "On-Demand %",
                       "cell_display_mode": "bar",
-                      "formula": "query1"
+                      "formula": "query1 / (query1 + query2 + query3) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
                     },
                     {
-                      "alias": "Used ODCR",
+                      "alias": "Used ODCR %",
                       "cell_display_mode": "bar",
-                      "formula": "query2"
+                      "formula": "query2 / (query1 + query2 + query3) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
                     },
                     {
-                      "alias": "Unused ODCR",
+                      "alias": "Unused ODCR %",
                       "cell_display_mode": "bar",
-                      "formula": "query3"
+                      "formula": "query3 / (query1 + query2 + query3) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
                     },
                     {
                       "alias": "Total",
-                      "formula": "query1 + query2 + query3"
+                      "formula": "query1 + query2 + query3",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      }
                     }
                   ]
                 }
@@ -263,7 +391,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 5,
+              "y": 11,
               "width": 6,
               "height": 4
             }
@@ -298,7 +426,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername IN (aws) AND aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND $availability-zone AND $team AND $kube_cluster_name} by {aws_instance_type}.rollup(sum, daily)"
+                      "query": "sum:all.cost{providername IN (aws) AND aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND $availability-zone AND $team} by {aws_instance_type}.rollup(sum, daily)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -316,7 +444,7 @@
             },
             "layout": {
               "x": 6,
-              "y": 5,
+              "y": 11,
               "width": 6,
               "height": 4
             }
@@ -354,7 +482,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername IN (aws) AND aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\") AND $availability-zone AND $team AND $kube_cluster_name} by {team}.rollup(sum, monthly)"
+                      "query": "sum:all.cost{providername IN (aws) AND aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND $availability-zone AND $team} by {team}.rollup(sum, monthly)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -371,7 +499,58 @@
             },
             "layout": {
               "x": 0,
-              "y": 9,
+              "y": 15,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 4590686058690557,
+            "definition": {
+              "title": "AWS GPU Spend by Availability Zone (Daily)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername IN (aws) AND aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND $availability-zone AND $team} by {availability-zone}.rollup(sum, daily)"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 18,
               "width": 12,
               "height": 4
             }
@@ -380,9 +559,320 @@
       },
       "layout": {
         "x": 0,
-        "y": 9,
+        "y": 0,
         "width": 12,
-        "height": 14
+        "height": 23
+      }
+    },
+    {
+      "id": 5668933968713017,
+      "definition": {
+        "title": "GPU Utilization & Efficiency",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3354043528305278,
+            "definition": {
+              "title": "Avg GPU Compute Utilization",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:gpu.sm_active{cloud_provider:aws AND $availability-zone AND $team}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 60,
+                      "palette": "white_on_green"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 30,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 30,
+                      "palette": "white_on_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 1,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2207449732205371,
+            "definition": {
+              "title": "Active GPU Devices",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:gpu.device.total{cloud_provider:aws AND $availability-zone AND $team}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 4416204606596654,
+            "definition": {
+              "title": "Unhealthy GPU Devices",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:gpu.device.unhealthy{cloud_provider:aws AND $availability-zone AND $team}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": "<=",
+                          "value": 0,
+                          "palette": "white_on_green"
+                        }
+                      ]
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 493627915955487,
+            "definition": {
+              "title": "GPU Daily Cost vs Compute Utilization",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername IN (aws) AND aws_instance_family IN (\"GPU instance\",\"Machine Learning ASIC Instances\",\"Accelerated Computing\") AND $availability-zone AND $team}.rollup(sum, daily)"
+                    },
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:aws.cost.net.unblended{aws_usage_type:*CapacityBlock* AND $availability-zone AND $team}.rollup(sum, daily)"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Amortized"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Capacity Blocks"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:gpu.sm_active{cloud_provider:aws AND $availability-zone AND $team}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query2",
+                      "alias": "Avg Compute Utilization %"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": true,
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "thick"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "right_yaxis": {
+                "min": "0",
+                "max": "100"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 4937025950232702,
+            "definition": {
+              "title": "GPU Compute Utilization by Instance Type",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:gpu.sm_active{cloud_provider:aws AND $availability-zone AND $team} by {instance_type}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "min": "0",
+                "max": "100"
+              },
+              "markers": [
+                {
+                  "label": "Low utilization",
+                  "value": "y = 30",
+                  "display_type": "warning dashed"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 23,
+        "width": 12,
+        "height": 6
       }
     }
   ],
@@ -396,12 +886,6 @@
     {
       "name": "team",
       "prefix": "team",
-      "available_values": [],
-      "default": "*"
-    },
-    {
-      "name": "kube_cluster_name",
-      "prefix": "kube_cluster_name",
       "available_values": [],
       "default": "*"
     }
