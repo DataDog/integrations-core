@@ -72,8 +72,6 @@ def test_custom_queries(aggregator, instance, dd_run_check):
     )
 
 
-
-
 @pytest.mark.skipif(CLICKHOUSE_VERSION == 'latest', reason='Version `latest` is ever-changing, skipping')
 def test_version_metadata(instance, datadog_agent, dd_run_check):
     check = ClickhouseCheck('clickhouse', {}, [instance])
