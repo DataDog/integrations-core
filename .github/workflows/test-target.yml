@@ -89,6 +89,11 @@ on:
         required: false
         default: 60
         type: number
+      dd-sts-policy:
+        description: "dd-sts policy name matching the calling repo's GitHub identity"
+        required: false
+        default: integrations-core-api-key
+        type: string
 
 defaults:
   run:
@@ -100,8 +105,9 @@ jobs:
     runs-on: ${{ fromJson(inputs.runner) }}
 
     permissions:
-       # needed for compute-matrix in test-target.yml
        contents: read
+       # needed for dd-sts OIDC token minting
+       id-token: write
     steps:
 
     - name: Set up Windows
@@ -144,6 +150,15 @@ jobs:
     - name: Install workflow scripts (non-core)
       if: inputs.repo != 'core'
       uses: ./core-temp/.github/actions/setup-test-target-scripts
+
+    - name: Get Datadog credentials
+      id: dd-sts
+      # Fork PRs cannot mint OIDC tokens, so skip dd-sts and run without CI visibility.
+      # Uses github.event context directly because INPUT_IS_FORK is not set until the next step.
+      if: github.event.pull_request.head.repo.fork != true
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: ${{ inputs.dd-sts-policy }}
 
     - name: Set environment variables
       # This step sets the following environment variables for the entire workflow via setup-test-env.sh:
@@ -198,7 +213,7 @@ jobs:
         INPUT_JOB_NAME: "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}"
         INPUT_PYTEST_ARGS: ${{ inputs.pytest-args }}
         INPUT_IS_FORK: ${{ github.event.pull_request.head.repo.fork || false }}
-        DD_API_KEY_SECRET: ${{ secrets.DD_API_KEY }}
+        DD_API_KEY_SECRET: ${{ steps.dd-sts.outputs.api_key || '' }}
         SETUP_ENV_VARS: ${{ inputs.setup-env-vars }}
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_ACCESS_TOKEN }}

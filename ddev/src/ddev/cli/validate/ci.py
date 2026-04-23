@@ -136,6 +136,7 @@ def ci(app: Application, sync: bool):
             'runner': json.dumps(data['runner'], separators=(',', ':')),
             'repo': '${{ inputs.repo }}',
             'context': '${{ inputs.context }}',
+            'dd-sts-policy': '${{ inputs.dd-sts-policy }}',
             # Options
             'python-version': '${{ inputs.python-version }}',
             'latest': '${{ inputs.latest }}',
@@ -203,6 +204,7 @@ def ci(app: Application, sync: bool):
         'repo',
         'python-version',
         'setup-env-vars',
+        'dd-sts-policy',
         'agent-image',
         'agent-image-py2',
         'agent-image-windows',

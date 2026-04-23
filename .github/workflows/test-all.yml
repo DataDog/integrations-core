@@ -60,6 +60,11 @@ on:
         required: false
         default: "standard"
         type: string
+      dd-sts-policy:
+        description: "dd-sts policy name matching the calling repo's GitHub identity"
+        required: false
+        default: integrations-core-api-key
+        type: string
 
 jobs:
   jd316aba:
@@ -71,6 +76,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -92,6 +98,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -112,6 +119,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -132,6 +140,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -152,6 +161,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -172,6 +182,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -192,6 +203,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -212,6 +224,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -232,6 +245,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -252,6 +266,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -272,6 +287,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -292,6 +308,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -312,6 +329,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -332,6 +350,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -352,6 +371,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -372,6 +392,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -392,6 +413,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -412,6 +434,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -432,6 +455,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -452,6 +476,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -472,6 +497,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -492,6 +518,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -512,6 +539,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -532,6 +560,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -552,6 +581,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -572,6 +602,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -592,6 +623,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -612,6 +644,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -632,6 +665,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -652,6 +686,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -672,6 +707,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -692,6 +728,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -712,6 +749,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -746,6 +784,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -766,6 +805,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -786,6 +826,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -806,6 +847,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -826,6 +868,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -846,6 +889,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -866,6 +910,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -886,6 +931,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -906,6 +952,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -926,6 +973,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -946,6 +994,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -966,6 +1015,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -986,6 +1036,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1006,6 +1057,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1026,6 +1078,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1046,6 +1099,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1066,6 +1120,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1086,6 +1141,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1106,6 +1162,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1126,6 +1183,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1146,6 +1204,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1166,6 +1225,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1186,6 +1246,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1206,6 +1267,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1226,6 +1288,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1246,6 +1309,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1266,6 +1330,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1286,6 +1351,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1306,6 +1372,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1326,6 +1393,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1346,6 +1414,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1366,6 +1435,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1386,6 +1456,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1406,6 +1477,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1426,6 +1498,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1446,6 +1519,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1466,6 +1540,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1486,6 +1561,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1506,6 +1582,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1526,6 +1603,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1546,6 +1624,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1566,6 +1645,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1586,6 +1666,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1606,6 +1687,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1626,6 +1708,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1646,6 +1729,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1666,6 +1750,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1686,6 +1771,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1706,6 +1792,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1726,6 +1813,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1746,6 +1834,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1766,6 +1855,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1786,6 +1876,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1806,6 +1897,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1826,6 +1918,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1846,6 +1939,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1866,6 +1960,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1886,6 +1981,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1906,6 +2002,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1926,6 +2023,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1946,6 +2044,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1966,6 +2065,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1986,6 +2086,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2006,6 +2107,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2026,6 +2128,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2046,6 +2149,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2066,6 +2170,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2086,6 +2191,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2106,6 +2212,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2126,6 +2233,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2146,6 +2254,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2166,6 +2275,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2186,6 +2296,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2206,6 +2317,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2226,6 +2338,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2246,6 +2359,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2266,6 +2380,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2286,6 +2401,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2306,6 +2422,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2326,6 +2443,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2346,6 +2464,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2366,6 +2485,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2386,6 +2506,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2406,6 +2527,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2426,6 +2548,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2446,6 +2569,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2466,6 +2590,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2486,6 +2611,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2506,6 +2632,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2526,6 +2653,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2546,6 +2674,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2566,6 +2695,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2586,6 +2716,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2606,6 +2737,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2626,6 +2758,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2646,6 +2779,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2692,6 +2826,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2729,6 +2864,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2749,6 +2885,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2769,6 +2906,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2789,6 +2927,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2809,6 +2948,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2829,6 +2969,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2849,6 +2990,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2869,6 +3011,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2889,6 +3032,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2909,6 +3053,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2929,6 +3074,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2949,6 +3095,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2969,6 +3116,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2989,6 +3137,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3009,6 +3158,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3029,6 +3179,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3049,6 +3200,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3069,6 +3221,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3089,6 +3242,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3133,6 +3287,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3153,6 +3308,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3173,6 +3329,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3193,6 +3350,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3213,6 +3371,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3233,6 +3392,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3253,6 +3413,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3273,6 +3434,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3293,6 +3455,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3313,6 +3476,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3333,6 +3497,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3353,6 +3518,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3373,6 +3539,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3393,6 +3560,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3413,6 +3581,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3433,6 +3602,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3453,6 +3623,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3473,6 +3644,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3493,6 +3665,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3513,6 +3686,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3533,6 +3707,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3553,6 +3728,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3573,6 +3749,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3593,6 +3770,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3613,6 +3791,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3633,6 +3812,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3653,6 +3833,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3692,6 +3873,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3712,6 +3894,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3732,6 +3915,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3752,6 +3936,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3772,6 +3957,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3792,6 +3978,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3812,6 +3999,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3832,6 +4020,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3852,6 +4041,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3872,6 +4062,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3892,6 +4083,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3912,6 +4104,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3932,6 +4125,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3952,6 +4146,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3972,6 +4167,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3992,6 +4188,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4012,6 +4209,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4032,6 +4230,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4052,6 +4251,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4072,6 +4272,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4092,6 +4293,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4112,6 +4314,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4132,6 +4335,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4152,6 +4356,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4172,6 +4377,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4192,6 +4398,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4212,6 +4419,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4232,6 +4440,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4252,6 +4461,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4272,6 +4482,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4292,6 +4503,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4312,6 +4524,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4332,6 +4545,7 @@ jobs:
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
+      dd-sts-policy: "${{ inputs.dd-sts-policy }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
