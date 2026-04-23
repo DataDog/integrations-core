@@ -1,0 +1,16 @@
+# Content hashes of the inputs that determine each builder image.
+#
+# The `Resolve Dependencies and Build Wheels` workflow compares these
+# hashes against hashes computed from the working tree (via
+# .builders/inputs_hash.py) to decide whether to rebuild a builder image
+# from scratch or pull the existing one by digest from image_digests.json.
+#
+# This file is rewritten by .builders/upload.py whenever dependency
+# resolution publishes new artifacts and should not be edited by hand.
+# The set of files covered by each hash is defined by COMMON_INPUTS in
+# .builders/inputs_hash.py plus everything under .builders/images/<target>/.
+
+[inputs]
+linux-aarch64 = "e48bf769667a4f30addf317d2b889aea045e025b981276a5cbfdf5b53ae86ca8"
+linux-x86_64 = "5e769b5c5678a0c578bbaf2289a8359ade8f3420de2a7f7ed3c09217866014c7"
+windows-x86_64 = "beba3774e0929bc4f9377cabcde2f797a83309d88be329154b3e099961c95884"
