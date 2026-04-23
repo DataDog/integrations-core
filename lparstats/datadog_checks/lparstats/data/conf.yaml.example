@@ -1,0 +1,32 @@
+init_config:
+
+instances:
+  - name: lparstats
+
+    ## @param sudo - boolean - optional - default: false
+    ## Run lparstat with sudo. Requires adding dd-agent to the sudoers file:
+    ##   dd-agent ALL=(ALL) NOPASSWD: /usr/bin/lparstat
+    ## When running as root, sudo is not needed.
+    # sudo: false
+
+    ## @param memory_stats - boolean - optional - default: true
+    ## Collect physical memory and page statistics (lparstat -m).
+    # memory_stats: true
+
+    ## @param page_stats - boolean - optional - default: true
+    ## Include page-level statistics (-pw flag). Requires memory_stats: true.
+    # page_stats: true
+
+    ## @param memory_entitlements - boolean - optional - default: true
+    ## Collect per-I/O-memory-pool entitlement stats (lparstat -m -eR).
+    ## Requires root or sudo.
+    # memory_entitlements: true
+
+    ## @param hypervisor - boolean - optional - default: true
+    ## Collect hypervisor call statistics (lparstat -H).
+    ## Requires root or sudo.
+    # hypervisor: true
+
+    ## @param spurr_utilization - boolean - optional - default: true
+    ## Collect SPURR physical processor utilization (lparstat -E).
+    # spurr_utilization: true
