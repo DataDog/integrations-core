@@ -998,6 +998,10 @@ integration/nagios:
 - changed-files:
   - any-glob-to-any-file:
     - nagios/**/*
+integration/nifi:
+- changed-files:
+  - any-glob-to-any-file:
+    - nifi/**/*
 integration/network:
 - changed-files:
   - any-glob-to-any-file:

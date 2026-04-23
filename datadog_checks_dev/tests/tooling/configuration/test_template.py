@@ -230,3 +230,25 @@ class TestApplyOverrides:
 
         assert len(errors) == 1
         assert errors[0] == 'Template override `proxy.description` does not refer to a mapping'
+
+    def test_nested_template_override(self):
+        """Overrides should reach fields in nested template refs."""
+        templates = ConfigTemplates()
+
+        # instances/default → instances/all_integrations → instances/tags (tags field)
+        template = templates.load('instances/default')
+        errors = templates.apply_overrides(template, {'tags.display_priority': 5})
+        assert not errors
+
+        tags_item = next((item for item in template if isinstance(item, dict) and item.get('name') == 'tags'), None)
+        assert tags_item is not None
+        assert tags_item['display_priority'] == 5
+
+    def test_nested_template_override_not_found(self):
+        """An override for a name absent from nested templates still reports an error."""
+        templates = ConfigTemplates()
+
+        template = templates.load('instances/default')
+        errors = templates.apply_overrides(template, {'nonexistent_field.display_priority': 5})
+
+        assert len(errors) == 1

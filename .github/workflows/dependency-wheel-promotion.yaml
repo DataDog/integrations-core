@@ -23,10 +23,17 @@ jobs:
       pull-requests: write
 
     steps:
-    - name: Checkout code
+    - name: Checkout trusted code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Checkout PR lockfiles only
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         ref: ${{ inputs.head_sha }}
+        path: pr
+        sparse-checkout: |
+          .deps/resolved
+        sparse-checkout-cone-mode: false
 
     - name: Set up Python
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -44,6 +51,8 @@ jobs:
         workload_identity_provider: projects/574011472402/locations/global/workloadIdentityPools/github/providers/integrations-core
 
     - name: Promote wheels
+      env:
+        PROMOTE_LOCKFILE_DIR: pr/.deps/resolved
       run: python .builders/promote.py
 
     - name: Clean up credentials
