@@ -18,6 +18,7 @@ class FeatureKey(Enum):
     QUERY_ACTIVITY = "query_activity"
     QUERY_METRICS = "query_metrics"
     DATA_OBSERVABILITY = "data_observability"
+    COLLECT_COLUMN_STATS = "collect_column_stats"
 
 
 FeatureNames = {
@@ -28,6 +29,7 @@ FeatureNames = {
     FeatureKey.QUERY_ACTIVITY: 'Query Activity',
     FeatureKey.QUERY_METRICS: 'Query Metrics',
     FeatureKey.DATA_OBSERVABILITY: 'Data Observability',
+    FeatureKey.COLLECT_COLUMN_STATS: 'Collect Column Stats',
 }
 
 

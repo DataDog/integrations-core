@@ -654,6 +654,47 @@ instances:
         # exclude_tables:
         #   - customer.*
 
+    ## Enable collection of column statistics from pg_stats.
+    ## Requires the `datadog.column_stats()` function to be created in the database.
+    #
+    # collect_column_stats:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of column statistics. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 14400
+        ## Set the column statistics collection interval (in seconds).
+        #
+        # collection_interval: 14400
+
+        ## @param max_tables - number - optional - default: 500
+        ## Maximum number of tables to collect column statistics for.
+        #
+        # max_tables: 500
+
+        ## @param include_tables - list of strings - optional
+        ## A list of regex patterns to include tables.
+        ## Any table whose name matches any one of these patterns will be included.
+        ## If empty, all tables matching other filters are included.
+        #
+        # include_tables:
+        #   - users.*
+
+        ## @param exclude_tables - list of strings - optional
+        ## A list of regex patterns to exclude tables.
+        ## Any table whose name matches any one of these patterns will be excluded.
+        ## If empty, all tables matching other filters are included.
+        #
+        # exclude_tables:
+        #   - temp_.*
+
+        ## @param max_query_duration - number - optional - default: 60
+        ## Maximum duration of the column statistics query in seconds.
+        #
+        # max_query_duration: <MAX_QUERY_DURATION>
+
     ## This block defines the configuration for AWS RDS and Aurora instances.
     ##
     ## Complete this section if you have installed the Datadog AWS Integration

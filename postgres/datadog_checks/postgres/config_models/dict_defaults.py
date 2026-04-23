@@ -84,6 +84,17 @@ def instance_collect_settings():
     )
 
 
+def instance_collect_column_stats():
+    return instance.CollectColumnStats(
+        enabled=True,
+        max_tables=500,
+        collection_interval=14400,
+        include_tables=[],
+        exclude_tables=[],
+        max_query_duration=60,
+    )
+
+
 def instance_collect_schemas():
     return instance.CollectSchemas(
         enabled=False,
