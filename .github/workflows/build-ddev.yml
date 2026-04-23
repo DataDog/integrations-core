@@ -52,6 +52,25 @@ jobs:
         fi
         echo "base_tags=team:agent-integrations,service:ddev,context:$context" >> $GITHUB_OUTPUT
 
+  should-sign-and-upload:
+    name: Determine signing conditions
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Override workflow-level working-directory since this job does not checkout code
+        working-directory: .
+    outputs:
+      result: ${{ steps.check.outputs.result }}
+    steps:
+    - id: check
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        REF: ${{ github.ref }}
+      run: |
+        if [[ "$EVENT_NAME" == "schedule" || ( "$EVENT_NAME" == "push" && "$REF" == refs/tags/* ) ]]; then
+          echo "result=true" >> $GITHUB_OUTPUT
+        fi
+
   python-artifacts:
     name: Build wheel and source distribution
     runs-on: ubuntu-latest
@@ -318,6 +337,7 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'schedule' || github.event.pull_request.head.repo.full_name == github.repository
     needs:
     - define-tags
+    - should-sign-and-upload
     - binaries
     runs-on: windows-2022
     permissions:
@@ -429,7 +449,7 @@ jobs:
         mv build/*/release/*/*.{exe,msi} installers
 
     - name: Upload installers
-      if: github.event_name == 'schedule' || (github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags'))
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: installers-${{ runner.os }}
@@ -441,6 +461,7 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'schedule' || github.event.pull_request.head.repo.full_name == github.repository
     needs:
     - define-tags
+    - should-sign-and-upload
     - binaries
     runs-on: macos-14-large
     permissions:
@@ -484,7 +505,7 @@ jobs:
         tar --strip-components=1 -xzf - -C /usr/local/bin "$ARCHIVE_NAME/rcodesign"
 
     - name: Write credentials
-      if: github.event_name == 'schedule' || (github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags'))
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       env:
         APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE: "${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE }}"
         APPLE_DEVELOPER_ID_APPLICATION_PRIVATE_KEY: "${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_PRIVATE_KEY }}"
@@ -563,11 +584,11 @@ jobs:
       run: ${{ steps.script-extract.outputs.script }}
 
     - name: Sign standalone binaries
-      if: github.event_name == 'schedule' || (github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags'))
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-sign.outputs.script }}
 
     - name: Notarize standalone binaries
-      if: github.event_name == 'schedule' || (github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags'))
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-notarize.outputs.script }}
 
     - name: Archive standalone binaries
@@ -600,11 +621,11 @@ jobs:
       run: ${{ steps.script-extract.outputs.script }}
 
     - name: Sign managed binaries
-      if: github.event_name == 'schedule' || (github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags'))
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-sign.outputs.script }}
 
     - name: Notarize managed binaries
-      if: github.event_name == 'schedule' || (github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags'))
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-notarize.outputs.script }}
 
     # bin/<APP_NAME>-<VERSION>-<TARGET> -> targets/<TARGET>/<APP_NAME>
@@ -647,7 +668,7 @@ jobs:
         echo "path=$pkg_file" >> "$GITHUB_OUTPUT"
 
     - name: Sign PKG
-      if: github.event_name == 'schedule' || (github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags'))
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: >-
         rcodesign sign -vv
         --pem-source /tmp/certificate-installer.pem
@@ -656,7 +677,7 @@ jobs:
         "signed/${{ steps.pkg.outputs.path }}"
 
     - name: Notarize PKG
-      if: github.event_name == 'schedule' || (github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags'))
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: >-
         rcodesign notary-submit
         --api-key-path /tmp/app-store-connect.json
@@ -664,7 +685,7 @@ jobs:
         "signed/${{ steps.pkg.outputs.path }}"
 
     - name: Upload installer
-      if: github.event_name == 'schedule' || (github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags'))
+      if: needs.should-sign-and-upload.outputs.result == 'true'
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: installers-${{ runner.os }}
