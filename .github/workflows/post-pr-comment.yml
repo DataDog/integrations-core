@@ -1,0 +1,162 @@
+name: 'Post PR comment'
+
+# Central privileged poster for PR comments produced by fork-safe upstream
+# workflows.
+#
+# Why this exists:
+#   pull_request events from forks cannot safely mint a writable token
+#   (attacker can modify the workflow YAML, exchange OIDC via dd-octo-sts,
+#   and get the policy-scoped token). workflow_run, in contrast, always
+#   runs the version of *this* workflow that lives on the default branch
+#   and is therefore invulnerable to fork-PR modification. The dd-octo-sts
+#   policy for this workflow pins ref=refs/heads/master, so only the
+#   master-committed version of this file can ever exchange for a token.
+#
+# Artifact contract (producer uploads; this workflow consumes):
+#   name: pr-comment
+#   files:
+#     body.md   Markdown body to post. Treated as opaque, attacker-controlled text.
+#
+# This workflow owns the hidden marker that lets find-comment locate the
+# previously-posted comment. The marker is derived from the triggering
+# workflow's display name (slugified), so producers cannot misconfigure it
+# and there is no attacker-controlled metadata to validate. The marker is
+# prepended to body.md before the comment is posted.
+#
+# Trust boundaries enforced here:
+#   - PR number comes from the workflow_run event (head_sha -> commits/pulls
+#     API), never from the artifact. Prevents cross-PR comment injection.
+#   - Marker is derived from github.event.workflow_run.name (trusted GitHub
+#     event data), never from the artifact.
+#   - body.md is written directly to a file and passed via body-path.
+#     It is never shell-interpolated.
+#   - find-comment is scoped to the dd-octo-sts[bot] author so a contributor
+#     comment cannot be hijacked even if it happens to contain the marker.
+#
+# Credentials:
+#   A single ephemeral dd-octo-sts token is used for every API call
+#   (artifact list/download, PR lookup, comment find/post). The workflow's
+#   only ambient permission is id-token: write, which is the prerequisite
+#   to minting the STS token; GITHUB_TOKEN itself carries no scopes.
+#
+# Onboarding a new producer:
+#   1) Append the producer's workflow display name to on.workflow_run.workflows.
+#   2) Producer uploads a 'pr-comment' artifact containing body.md.
+#   3) Pick a workflow display name that slugifies to a stable, unique id;
+#      the derived marker is "<!-- pr-comment:<slug> -->".
+
+on:
+  workflow_run:
+    workflows:
+      - 'Validate skip QA label'
+    types: [completed]
+
+permissions:
+  id-token: write   # required to call the OIDC endpoint for dd-octo-sts
+
+jobs:
+  post:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      # Mint the STS token first so every API call below uses a single
+      # ephemeral, scoped credential. The policy grants actions: read +
+      # pull_requests: read + issues: write, covering all of: listing and
+      # downloading the artifact, resolving the PR number, finding and
+      # updating the comment.
+      - name: Get token via dd-octo-sts
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        id: octo-sts
+        with:
+          scope: DataDog/integrations-core
+          policy: self.post-pr-comment.workflow-run
+
+      # A successful upstream run may legitimately not produce an artifact
+      # (e.g. the skip-qa producer only uploads when a comment is actually
+      # needed). Pre-check so the download step only runs when we know the
+      # artifact exists; that way a missing artifact is a clean skip rather
+      # than a failed step, and a real download failure remains a real
+      # failure we want to see.
+      - name: Check for comment artifact
+        id: check
+        env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          count=$(gh api "repos/${REPO}/actions/runs/${RUN_ID}/artifacts" \
+            --jq '[.artifacts[] | select(.name == "pr-comment")] | length')
+          if [[ "$count" -eq 0 ]]; then
+            echo "Upstream run ${RUN_ID} did not upload a pr-comment artifact. Nothing to post."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download comment artifact
+        if: steps.check.outputs.skip != 'true'
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: pr-comment
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ steps.octo-sts.outputs.token }}
+          path: pr-comment
+
+      - name: Derive marker and prepend to body
+        if: steps.check.outputs.skip != 'true'
+        id: marker
+        env:
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+        run: |
+          set -euo pipefail
+          slug=$(printf '%s' "$WORKFLOW_NAME" \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g' \
+            | cut -c1-64)
+          if [[ -z "$slug" ]]; then
+            echo "Workflow name did not produce a usable slug: ${WORKFLOW_NAME}" >&2
+            exit 1
+          fi
+          marker="<!-- pr-comment:${slug} -->"
+          {
+            printf '%s\n\n' "$marker"
+            cat pr-comment/body.md
+          } > pr-comment/posted-body.md
+          echo "value=$marker" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve PR number from head SHA
+        if: steps.check.outputs.skip != 'true'
+        id: pr
+        env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          number=$(gh api "repos/${REPO}/commits/${HEAD_SHA}/pulls" \
+            --jq '[.[] | select(.state == "open")][0].number // empty')
+          if [[ -z "$number" ]]; then
+            echo "No open PR matches head SHA ${HEAD_SHA}; nothing to post." >&2
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "number=$number" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Find existing comment
+        if: steps.check.outputs.skip != 'true' && steps.pr.outputs.skip != 'true'
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
+        id: find_comment
+        with:
+          token: ${{ steps.octo-sts.outputs.token }}
+          issue-number: ${{ steps.pr.outputs.number }}
+          body-includes: ${{ steps.marker.outputs.value }}
+          comment-author: 'dd-octo-sts[bot]'
+
+      - name: Post comment
+        if: steps.check.outputs.skip != 'true' && steps.pr.outputs.skip != 'true'
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+        with:
+          token: ${{ steps.octo-sts.outputs.token }}
+          issue-number: ${{ steps.pr.outputs.number }}
+          body-path: pr-comment/posted-body.md
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          edit-mode: replace
