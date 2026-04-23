@@ -67,9 +67,11 @@ jobs:
         EVENT_NAME: ${{ github.event_name }}
         REF: ${{ github.ref }}
       run: |
+        result=false
         if [[ "$EVENT_NAME" == "schedule" || ( "$EVENT_NAME" == "push" && "$REF" == refs/tags/* ) ]]; then
-          echo "result=true" >> $GITHUB_OUTPUT
+          result=true
         fi
+        echo "result=$result" >> $GITHUB_OUTPUT
 
   python-artifacts:
     name: Build wheel and source distribution
