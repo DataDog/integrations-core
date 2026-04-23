@@ -11,3 +11,5 @@ services:
       - ./certs/server.key:/etc/clickhouse-server/ssl/server.key
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    # The private key is created 600 on the host; chmod it so the clickhouse process can read it.
+    entrypoint: ["/bin/bash", "-c", "chmod 644 /etc/clickhouse-server/ssl/server.key && exec /entrypoint.sh"]

@@ -14,7 +14,7 @@ import pytest
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_metadata
 from datadog_checks.clickhouse import ClickhouseCheck
 
-from .common import CLICKHOUSE_VERSION
+from .common import CLICKHOUSE_VERSION, IS_TLS
 
 # DBM features require ClickHouse 21.8+ for normalized_query_hash, query_kind, etc.
 # 21.8 itself is excluded because:
@@ -52,6 +52,7 @@ def _is_dbm_supported():
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.usefixtures('dd_environment'),
+    pytest.mark.skipif(IS_TLS, reason='DBM integration tests do not run in TLS flavor'),
     pytest.mark.skipif(
         not _is_dbm_supported(),
         reason="DBM features require ClickHouse 21.8+ (normalized_query_hash, query_kind, etc.)",
