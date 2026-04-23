@@ -166,6 +166,14 @@ class KafkaConfig:
                             "AWS MSK IAM authentication requires 'boto3' and 'aws-msk-iam-sasl-signer-python' "
                             "libraries. Install them with: pip install boto3 aws-msk-iam-sasl-signer-python"
                         )
+            elif method == "gcp_cloud_managed_kafka":
+                try:
+                    import google.auth  # noqa: F401
+                except ImportError:
+                    raise ConfigurationError(
+                        "GCP Cloud Managed Kafka IAM authentication requires 'google-auth' library. "
+                        "Install it with: pip install google-auth"
+                    )
             elif method == "oidc":
                 if self._sasl_oauth_token_provider.get("url") is None:
                     raise ConfigurationError("The `url` setting of `auth_token` reader is required")
@@ -177,7 +185,8 @@ class KafkaConfig:
                     raise ConfigurationError("The `client_secret` setting of `auth_token` reader is required")
             else:
                 raise ConfigurationError(
-                    f"Invalid method '{method}' for sasl_oauth_token_provider. Must be 'aws_msk_iam' or 'oidc'"
+                    f"Invalid method '{method}' for sasl_oauth_token_provider. "
+                    "Must be 'aws_msk_iam', 'gcp_cloud_managed_kafka', or 'oidc'"
                 )
 
         if self._schema_registry_oauth_token_provider is not None:

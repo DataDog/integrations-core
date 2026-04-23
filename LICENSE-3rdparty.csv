@@ -26,6 +26,7 @@ fastavro,PyPI,MIT,Copyright (c) 2011 Miki Tebeka
 flup,Vendor,BSD-3-Clause,Copyright (c) 2005 Allan Saddi. All Rights Reserved.
 flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.com> All rights reserved."
 foundationdb,PyPI,Apache-2.0,Copyright 2017 FoundationDB
+google-auth,PyPI,Apache-2.0,Copyright 2016 Google Cloud Platform
 hazelcast-python-client,PyPI,Apache-2.0,"Copyright (c) 2008-2026, Hazelcast, Inc. All Rights Reserved."
 in-toto,PyPI,Apache-2.0,Copyright 2018 New York University
 jellyfish,PyPI,MIT,Copyright (c) 2015 James Turk
@@ -50,6 +51,7 @@ psutil,PyPI,BSD-3-Clause,"Copyright (c) 2009, Jay Loden, Dave Daeschler, Giampao
 psycopg,PyPI,LGPL-3.0-only,Copyright (C) 2020 The Psycopg Team
 pyOpenSSL,PyPI,Apache-2.0,Copyright The pyOpenSSL developers
 pyasn1,PyPI,BSD-2-Clause,"Copyright (c) 2005-2020, Ilya Etingof <etingof@gmail.com>"
+pyasn1-modules,PyPI,BSD-3-Clause,"Copyright (c) 2005-2020, Ilya Etingof <etingof@gmail.com>"
 pydantic,PyPI,MIT,Copyright (c) 2017 to present Pydantic Services Inc. and individual contributors.
 pymongo,PyPI,Apache-2.0,Copyright The MongoDB Python Team
 pymqi,PyPI,PSF,Copyright (c) Zato Source s.r.o.
