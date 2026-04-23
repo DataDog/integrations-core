@@ -118,7 +118,7 @@ class Diagnosis:
         of type `DIAGNOSIS_UNEXPECTED_ERROR`.
         """
         # Keep a reference to existing cached results, to be restored at the end,
-        # and start from an empty list to collect explicit diagnoses (to be returned later).
+        # and start from an empty list to collect explicit diagnoses (to be returned later)
         cached_results, self._diagnoses = self._diagnoses, []
         for diagnostic in self._diagnostics:
             try:
