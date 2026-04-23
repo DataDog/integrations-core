@@ -1078,10 +1078,6 @@ class PostgreSql(DatabaseCheck):
 
     def record_warning(self, code, message):
         # type: (DatabaseConfigurationError, str) -> None
-        # Feeds `agent status` via `_report_warnings`. `agent diagnose` is served by the
-        # pre-flight orchestrators in `diagnose.py`, which cover the same codes with better
-        # attribution and fresh connections -- mirroring runtime warnings here too produced
-        # N× duplicates (one per worker/collection pass) and is no longer needed.
         self._warnings_by_code[code] = message
 
     def _report_warnings(self):
