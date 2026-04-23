@@ -42,6 +42,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     CREATE TABLE public2.cities (city VARCHAR(255), country VARCHAR(255), PRIMARY KEY(city));
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bob;
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO blocking_bob;
+    CREATE SEQUENCE dog_sequence;
+    SELECT nextval('dog_sequence');
 EOSQL
 
 # Create a foreign table
@@ -103,6 +105,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-EOSQL
     CREATE INDEX breed_names ON breed(name);
     INSERT INTO breed (name) VALUES ('Labrador Retriver'), ('German Shepherd'), ('Yorkshire Terrier'), ('Golden Retriever'), ('Bulldog');
     SELECT * FROM breed WHERE name = 'Labrador';
+    CREATE SEQUENCE dog_sequence;
+    SELECT nextval('dog_sequence');
 EOSQL
 
 done

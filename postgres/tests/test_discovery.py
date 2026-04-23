@@ -14,7 +14,7 @@ import pytest
 
 from datadog_checks.postgres.config_models.dict_defaults import instance_database_autodiscovery
 
-from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags, check_common_metrics
+from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags, check_common_metrics, check_sequence_metrics
 from .utils import requires_over_13, run_one_check
 
 DISCOVERY_CONFIG = {
@@ -188,6 +188,7 @@ def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_ins
     pg_instance['collect_function_metrics'] = True
     pg_instance['collect_count_metrics'] = True
     pg_instance['collect_checksum_metrics'] = True
+    pg_instance['collect_sequence_metrics'] = True
     del pg_instance['dbname']
 
     # execute dummy_function to populate pg_stat_user_functions for dogs_nofunc database
@@ -211,6 +212,10 @@ def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_ins
         relation_metrics_expected_tags = _get_expected_tags(check, pg_instance, db=db, table='breed', schema='public')
         count_metrics_expected_tags = _get_expected_tags(check, pg_instance, db=db, schema='public')
         checksum_metrics_expected_tags = _get_expected_tags(check, pg_instance, db=db)
+        sequence_metrics_expected_tags = _get_expected_tags(
+            check, pg_instance, schema='public', owner='postgres', cycle=False, sequence='dog_sequence', db=db
+        )
+
         for metric in RELATION_METRICS:
             aggregator.assert_metric(metric, tags=relation_metrics_expected_tags)
         for metric in DYNAMIC_RELATION_METRICS:
@@ -220,6 +225,13 @@ def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_ins
         if float(POSTGRES_VERSION) >= 12:
             for metric in CHECKSUM_METRICS:
                 aggregator.assert_metric(metric, tags=checksum_metrics_expected_tags)
+        if float(POSTGRES_VERSION) >= 10:
+            if db == 'dogs_noschema':
+                # dogs_noschema doesn't have the datadog.pg_sequences function, so no metrics
+                # should be generated
+                check_sequence_metrics(aggregator, sequence_metrics_expected_tags, count=0)
+            else:
+                check_sequence_metrics(aggregator, sequence_metrics_expected_tags)
 
     # we only created and executed the dummy_function in dogs_nofunc database
     for metric in FUNCTION_METRICS:

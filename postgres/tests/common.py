@@ -21,6 +21,7 @@ from datadog_checks.postgres.util import (
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
     QUERY_PG_WAIT_EVENT_METRICS,
+    SEQUENCE_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
     STAT_IO_METRICS,
@@ -467,6 +468,11 @@ def check_stat_wal_metrics(aggregator, expected_tags, count=1):
     else:
         for metric_name in _iterate_metric_name(STAT_WAL_METRICS):
             aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_sequence_metrics(aggregator, expected_tags, count=1):
+    for metric_name in _iterate_metric_name(SEQUENCE_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_performance_metrics(aggregator, expected_tags, count=1, is_aurora=False):
