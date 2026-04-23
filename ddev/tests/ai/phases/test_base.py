@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datetime import UTC, datetime
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -16,7 +17,7 @@ from ddev.ai.tools.core.registry import ToolRegistry
 from .conftest import MockAgent, make_agent_factory, make_response, resolve_key
 
 
-def _empty_registry_from_names(cls, names, *, agent_id, file_registry=None):
+def _empty_registry_from_names(cls, names, *, owner_id, file_registry=None):
     return ToolRegistry([])
 
 
@@ -158,11 +159,12 @@ async def test_happy_path_single_task(flow_dir, monkeypatch, message_queue):
     # Memory was written
     assert mgr.get_memory("p1") == "summary"
 
-    # Checkpoint was written
+    # Checkpoint was written with memory_path and final token totals (including memory step)
     checkpoint = mgr.read()["p1"]
     assert checkpoint["status"] == "success"
     assert checkpoint["tokens"]["total_input"] == 110
     assert checkpoint["tokens"]["total_output"] == 55
+    assert checkpoint["memory_path"]  # non-empty string
 
     # on_success is called by _task_wrapper, not process_message directly.
     # But we verify it would work by checking the send calls.
@@ -194,6 +196,7 @@ async def test_happy_path_two_tasks(flow_dir, monkeypatch, message_queue):
     checkpoint = mgr.read()["p1"]
     assert checkpoint["tokens"]["total_input"] == 310
     assert checkpoint["tokens"]["total_output"] == 135
+    assert checkpoint["memory_path"]
 
 
 # ---------------------------------------------------------------------------
@@ -264,6 +267,7 @@ async def test_compact_between_tasks_when_above_threshold(flow_dir, monkeypatch,
 
     checkpoint = mgr.read()["p1"]
     assert checkpoint["status"] == "success"
+    assert checkpoint["memory_path"]
     assert mock_agent.compact_call_count >= 1
 
 
@@ -286,7 +290,9 @@ async def test_no_compact_when_below_threshold(flow_dir, monkeypatch, message_qu
     )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
-    assert mgr.read()["p1"]["status"] == "success"
+    checkpoint = mgr.read()["p1"]
+    assert checkpoint["status"] == "success"
+    assert checkpoint["memory_path"]
     assert mock_agent.compact_call_count == 0
 
 
@@ -574,3 +580,72 @@ def test_should_process_returns_false_after_already_executed(flow_dir, monkeypat
     result = phase.should_process_message(PhaseTrigger(id="start2", phase_id=None))
 
     assert result is False
+
+
+# ---------------------------------------------------------------------------
+# Phase.process_message — memory step failure behaviour
+# ---------------------------------------------------------------------------
+
+
+async def test_memory_api_failure_fails_phase(flow_dir, monkeypatch, message_queue):
+    # Only 1 response provided; second send (memory step) raises IndexError.
+    responses = [make_response("task done", 100, 50)]
+    mock_agent = MockAgent(responses)
+    phase, mgr = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+
+    with pytest.raises(IndexError):
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    # Checkpoint must not have been written (exception before checkpoint write)
+    assert mgr.read() == {}
+
+
+async def test_memory_template_error_fails_phase(flow_dir, monkeypatch, message_queue):
+    responses = [make_response("task done", 100, 50)]
+    mock_agent = MockAgent(responses)
+    phase, mgr = _make_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        checkpoint=CheckpointConfig(memory_prompt="Summarize."),
+    )
+
+    def raise_render_error(*args, **kwargs):
+        raise ValueError("template error")
+
+    monkeypatch.setattr("ddev.ai.phases.base.render_memory_prompt", raise_render_error)
+
+    with pytest.raises(ValueError, match="template error"):
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert mgr.read() == {}
+
+
+async def test_successful_phase_writes_memory_path_into_checkpoint(flow_dir, monkeypatch, message_queue):
+    responses = [
+        make_response("task done", 100, 50),
+        make_response("summary text", 10, 5),
+    ]
+    mock_agent = MockAgent(responses)
+    phase, mgr = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    checkpoint = mgr.read()["p1"]
+    assert "memory_path" in checkpoint
+    memory_path = Path(checkpoint["memory_path"])
+    assert memory_path.is_absolute()
+    assert memory_path.exists()
+    assert memory_path.name == "p1_memory.md"
+    assert memory_path.read_text() == "summary text"
+
+
+async def test_failed_phase_omits_memory_path(flow_dir, monkeypatch, message_queue):
+    mock_agent = MockAgent([])
+    phase, mgr = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+
+    await phase.on_error(PhaseTrigger(id="start", phase_id=None), RuntimeError("boom"))
+
+    checkpoint = mgr.read()["p1"]
+    assert "memory_path" not in checkpoint

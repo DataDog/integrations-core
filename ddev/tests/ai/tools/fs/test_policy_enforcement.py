@@ -13,7 +13,7 @@ from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.fs.mkdir import MkdirTool
 from ddev.ai.tools.fs.read_file import ReadFileTool
 
-AGENT_ID = "test-agent"
+OWNER_ID = "test-agent"
 
 
 @pytest.fixture
@@ -33,7 +33,7 @@ def sandboxed_registry(sandbox) -> FileRegistry:
 
 
 async def test_create_file_refuses_outside_write_root(tmp_path, sandboxed_registry) -> None:
-    tool = CreateFileTool(sandboxed_registry, AGENT_ID)
+    tool = CreateFileTool(sandboxed_registry, OWNER_ID)
     outside = tmp_path.parent / "outside.txt"
     result = await tool.run({"path": str(outside), "content": "x"})
     assert result.success is False
@@ -42,7 +42,7 @@ async def test_create_file_refuses_outside_write_root(tmp_path, sandboxed_regist
 
 
 async def test_create_file_allows_inside_write_root(sandbox, sandboxed_registry) -> None:
-    tool = CreateFileTool(sandboxed_registry, AGENT_ID)
+    tool = CreateFileTool(sandboxed_registry, OWNER_ID)
     target = sandbox / "nested" / "file.txt"
     result = await tool.run({"path": str(target), "content": "x"})
     assert result.success is True
@@ -52,9 +52,9 @@ async def test_create_file_allows_inside_write_root(sandbox, sandboxed_registry)
 async def test_edit_file_refuses_outside_write_root(tmp_path, sandboxed_registry) -> None:
     outside = tmp_path.parent / "outside.txt"
     outside.write_text("old")
-    sandboxed_registry.record(AGENT_ID, str(outside), "old")
+    sandboxed_registry.record(OWNER_ID, str(outside), "old")
 
-    tool = EditFileTool(sandboxed_registry, AGENT_ID)
+    tool = EditFileTool(sandboxed_registry, OWNER_ID)
     result = await tool.run({"path": str(outside), "old_string": "old", "new_string": "new"})
     assert result.success is False
     assert "outside write root" in result.error
@@ -64,16 +64,16 @@ async def test_edit_file_refuses_outside_write_root(tmp_path, sandboxed_registry
 async def test_append_file_refuses_outside_write_root(tmp_path, sandboxed_registry) -> None:
     outside = tmp_path.parent / "outside.txt"
     outside.write_text("hello")
-    sandboxed_registry.record(AGENT_ID, str(outside), "hello")
+    sandboxed_registry.record(OWNER_ID, str(outside), "hello")
 
-    tool = AppendFileTool(sandboxed_registry, AGENT_ID)
+    tool = AppendFileTool(sandboxed_registry, OWNER_ID)
     result = await tool.run({"path": str(outside), "content": " world"})
     assert result.success is False
     assert "outside write root" in result.error
 
 
 async def test_mkdir_refuses_outside_write_root(tmp_path, sandboxed_registry) -> None:
-    tool = MkdirTool(sandboxed_registry, AGENT_ID)
+    tool = MkdirTool(sandboxed_registry, OWNER_ID)
     outside = tmp_path.parent / "outside_dir"
     result = await tool.run({"path": str(outside)})
     assert result.success is False
@@ -82,7 +82,7 @@ async def test_mkdir_refuses_outside_write_root(tmp_path, sandboxed_registry) ->
 
 
 async def test_mkdir_allows_inside_write_root(sandbox, sandboxed_registry) -> None:
-    tool = MkdirTool(sandboxed_registry, AGENT_ID)
+    tool = MkdirTool(sandboxed_registry, OWNER_ID)
     target = sandbox / "a" / "b" / "c"
     result = await tool.run({"path": str(target)})
     assert result.success is True
@@ -99,7 +99,7 @@ async def test_read_file_refuses_denied_names(tmp_path, sandboxed_registry, file
     target = tmp_path / filename
     target.write_text("secret")
 
-    tool = ReadFileTool(sandboxed_registry, AGENT_ID)
+    tool = ReadFileTool(sandboxed_registry, OWNER_ID)
     result = await tool.run({"path": str(target)})
     assert result.success is False
     assert "Read denied" in result.error
@@ -110,13 +110,13 @@ async def test_read_file_allows_normal_files(tmp_path) -> None:
     target = tmp_path / "data.txt"
     target.write_text("ok")
 
-    tool = ReadFileTool(registry, AGENT_ID)
+    tool = ReadFileTool(registry, OWNER_ID)
     result = await tool.run({"path": str(target)})
     assert result.success is True
 
 
 async def test_write_to_denied_name_refused(sandbox, sandboxed_registry) -> None:
-    tool = CreateFileTool(sandboxed_registry, AGENT_ID)
+    tool = CreateFileTool(sandboxed_registry, OWNER_ID)
     target = sandbox / ".env"
     result = await tool.run({"path": str(target), "content": "SECRET=1"})
     assert result.success is False

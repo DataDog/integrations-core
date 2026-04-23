@@ -150,29 +150,29 @@ def test_available_tool_names_returns_fresh_copy():
 # ---------------------------------------------------------------------------
 
 
-AGENT_ID = "test-agent"
+OWNER_ID = "test-agent"
 
 
 def test_from_names_empty():
-    registry = ToolRegistry.from_names([], agent_id=AGENT_ID)
+    registry = ToolRegistry.from_names([], owner_id=OWNER_ID)
     assert registry.definitions == []
 
 
 def test_from_names_unknown_raises():
     with pytest.raises(ValueError, match="Unknown tool name: 'teleport'"):
-        ToolRegistry.from_names(["teleport"], agent_id=AGENT_ID)
+        ToolRegistry.from_names(["teleport"], owner_id=OWNER_ID)
 
 
 @pytest.mark.parametrize("name", ToolRegistry.available_tool_names())
 def test_from_names_each_known_tool(name):
-    registry = ToolRegistry.from_names([name], agent_id=AGENT_ID)
+    registry = ToolRegistry.from_names([name], owner_id=OWNER_ID)
     assert len(registry.definitions) == 1
     assert registry.definitions[0]["name"] == name
 
 
 def test_from_names_all_at_once():
     all_names = ToolRegistry.available_tool_names()
-    registry = ToolRegistry.from_names(all_names, agent_id=AGENT_ID)
+    registry = ToolRegistry.from_names(all_names, owner_id=OWNER_ID)
     built_names = {d["name"] for d in registry.definitions}
     assert built_names == set(all_names)
 
@@ -184,23 +184,23 @@ def test_from_names_fs_tools_share_file_registry():
     fs_names = [name for name, spec in TOOL_MANIFEST.items() if spec.requires_file_registry]
     if len(fs_names) < 2:
         pytest.skip("Need at least 2 fs tools to test shared registry")
-    registry = ToolRegistry.from_names(fs_names, agent_id=AGENT_ID)
+    registry = ToolRegistry.from_names(fs_names, owner_id=OWNER_ID)
     tools = [registry._tools[name] for name in fs_names]
     registries = [t._registry for t in tools]
     assert all(r is registries[0] for r in registries)
 
 
 def test_from_names_reuses_supplied_file_registry():
-    """Multiple ToolRegistries can share one FileRegistry; tools carry their own agent_id."""
+    """Multiple ToolRegistries can share one FileRegistry; tools carry their own owner_id."""
     from ddev.ai.tools.fs.file_registry import FileRegistry
 
     shared = FileRegistry()
-    reg_a = ToolRegistry.from_names(["read_file", "create_file"], agent_id="a", file_registry=shared)
-    reg_b = ToolRegistry.from_names(["read_file", "create_file"], agent_id="b", file_registry=shared)
+    reg_a = ToolRegistry.from_names(["read_file", "create_file"], owner_id="a", file_registry=shared)
+    reg_b = ToolRegistry.from_names(["read_file", "create_file"], owner_id="b", file_registry=shared)
 
     for tool in reg_a._tools.values():
         assert tool._registry is shared
-        assert tool._agent_id == "a"
+        assert tool._owner_id == "a"
     for tool in reg_b._tools.values():
         assert tool._registry is shared
-        assert tool._agent_id == "b"
+        assert tool._owner_id == "b"

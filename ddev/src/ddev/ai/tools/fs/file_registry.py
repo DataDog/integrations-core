@@ -9,15 +9,15 @@ from .file_access_policy import FileAccessPolicy
 
 
 class FileRegistry:
-    """Tracks the files each agent has seen, along with their last-seen content hash.
+    """Tracks the files each owner has seen, along with their last-seen content hash.
 
-    One FileRegistry is intended to be shared across all agents in a run. Hashes
-    are partitioned by agent_id so that each agent must independently read or
-    create a file before modifying it; reads by agent A never authorize writes
-    by agent B. Only SHA-256 digests are stored (not file contents).
+    One FileRegistry is intended to be shared across all owners in a run. Hashes
+    are partitioned by owner_id so that each owner must independently read or
+    create a file before modifying it; reads by owner A never authorize writes
+    by owner B. Only SHA-256 digests are stored (not file contents).
 
-    Path-level locks are shared across agents so that concurrent writes to the
-    same file are serialized regardless of which agent initiated them.
+    Path-level locks are shared across owners so that concurrent writes to the
+    same file are serialized regardless of which owner initiated them.
     """
 
     def __init__(self, policy: FileAccessPolicy | None = None) -> None:
@@ -35,15 +35,15 @@ class FileRegistry:
     def _hash(self, content: str) -> str:
         return hashlib.sha256(content.encode()).hexdigest()
 
-    def record(self, agent_id: str, path: str, content: str) -> None:
-        self._hashes.setdefault(agent_id, {})[self._normalize(path)] = self._hash(content)
+    def record(self, owner_id: str, path: str, content: str) -> None:
+        self._hashes.setdefault(owner_id, {})[self._normalize(path)] = self._hash(content)
 
-    def is_known(self, agent_id: str, path: str) -> bool:
-        return self._normalize(path) in self._hashes.get(agent_id, {})
+    def is_known(self, owner_id: str, path: str) -> bool:
+        return self._normalize(path) in self._hashes.get(owner_id, {})
 
-    def verify(self, agent_id: str, path: str, content: str) -> bool:
+    def verify(self, owner_id: str, path: str, content: str) -> bool:
         """Check whether content matches what this agent last recorded for path."""
-        stored = self._hashes.get(agent_id, {}).get(self._normalize(path))
+        stored = self._hashes.get(owner_id, {}).get(self._normalize(path))
         return stored is not None and self._hash(content) == stored
 
     def lock_for(self, path: str) -> asyncio.Lock:

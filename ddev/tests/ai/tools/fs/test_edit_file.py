@@ -9,11 +9,11 @@ from ddev.ai.tools.fs.create_file import CreateFileTool
 from ddev.ai.tools.fs.edit_file import EditFileTool
 from ddev.ai.tools.fs.file_registry import FileRegistry
 
-from .conftest import AGENT_ID
+from .conftest import OWNER_ID
 
 
 def test_tool_name(registry: FileRegistry) -> None:
-    assert EditFileTool(registry, AGENT_ID).name == "edit_file"
+    assert EditFileTool(registry, OWNER_ID).name == "edit_file"
 
 
 async def test_edit_file_replaces_string(edit_tool: EditFileTool, known_file) -> None:
@@ -77,8 +77,8 @@ async def test_edit_file_updates_registry(edit_tool: EditFileTool, registry: Fil
     await edit_tool.run({"path": str(known_file), "old_string": "line one", "new_string": "LINE ONE"})
 
     new_content = known_file.read_text(encoding="utf-8")
-    assert registry.verify(AGENT_ID, str(known_file), new_content) is True
-    assert registry.verify(AGENT_ID, str(known_file), "line one\nline two\nline three\n") is False
+    assert registry.verify(OWNER_ID, str(known_file), new_content) is True
+    assert registry.verify(OWNER_ID, str(known_file), "line one\nline two\nline three\n") is False
 
 
 @pytest.mark.parametrize(
@@ -110,4 +110,4 @@ async def test_edit_file_oserror_on_write(edit_tool: EditFileTool, registry: Fil
     assert result.error is not None
     # File must be untouched and registry must still reflect the original content
     assert known_file.read_text(encoding="utf-8") == original_content
-    assert registry.verify(AGENT_ID, str(known_file), original_content) is True
+    assert registry.verify(OWNER_ID, str(known_file), original_content) is True

@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from pathlib import Path
+
 import pytest
 
 from ddev.ai.phases.checkpoint import CheckpointManager
@@ -81,15 +83,19 @@ def test_build_memory_prompt_with_additions(manager):
 
 def test_write_memory_and_read_back(manager):
     manager.write_phase_checkpoint("p", {})  # ensure parent dir exists
-    manager.write_memory("draft", "Created integration.py and tests.")
+    result = manager.write_memory("draft", "Created integration.py and tests.")
     assert manager.get_memory("draft") == "Created integration.py and tests."
+    assert isinstance(result, Path)
+    assert result.is_absolute()
 
 
 def test_write_memory_overwrites(manager):
     manager.write_phase_checkpoint("p", {})
     manager.write_memory("draft", "first version")
-    manager.write_memory("draft", "second version")
+    result = manager.write_memory("draft", "second version")
     assert manager.get_memory("draft") == "second version"
+    assert isinstance(result, Path)
+    assert result.is_absolute()
 
 
 def test_get_memory_absent_returns_placeholder(manager):
@@ -98,7 +104,8 @@ def test_get_memory_absent_returns_placeholder(manager):
 
 def test_memory_file_location(manager):
     manager.write_phase_checkpoint("p", {})
-    manager.write_memory("phase1", "content")
+    returned_path = manager.write_memory("phase1", "content")
     expected_path = manager._path.parent / "phase1_memory.md"
     assert expected_path.exists()
     assert expected_path.read_text() == "content"
+    assert returned_path == expected_path.resolve()

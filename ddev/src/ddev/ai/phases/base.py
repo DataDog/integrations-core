@@ -185,7 +185,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         )
         tool_registry = ToolRegistry.from_names(
             self._agent_config.tools,
-            agent_id=self._phase_id,
+            owner_id=self._phase_id,
             file_registry=self._file_registry,
         )
 
@@ -216,7 +216,21 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         # 7. Call after_react()
         self.after_react()
 
-        # 8. Write success checkpoint — task work is done
+        # 8. Build memory prompt (template errors fail the phase)
+        user_additions = None
+        if self._config.checkpoint is not None:
+            user_additions = render_memory_prompt(self._config.checkpoint, self._config_dir, context)
+        memory_prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
+
+        # 9. Call the agent for the summary — text-only (allowed_tools=[])
+        response = await agent.send(memory_prompt, allowed_tools=[])
+        total_input += response.usage.input_tokens
+        total_output += response.usage.output_tokens
+
+        # 10. Persist the memory file
+        memory_path = self._checkpoint_manager.write_memory(self._phase_id, response.text)
+
+        # 11. Write the success checkpoint (with memory_path and final token totals)
         self._checkpoint_manager.write_phase_checkpoint(
             self._phase_id,
             {
@@ -224,23 +238,9 @@ class Phase(AsyncProcessor[PhaseTrigger]):
                 "started_at": self._started_at.isoformat(),
                 "finished_at": datetime.now(UTC).isoformat(),
                 "tokens": {"total_input": total_input, "total_output": total_output},
+                "memory_path": str(memory_path),
             },
         )
-
-        # 9. Best-effort memory step — failure here doesn't invalidate a completed phase
-        user_additions = None
-        if self._config.checkpoint is not None:
-            user_additions = render_memory_prompt(self._config.checkpoint, self._config_dir, context)
-
-        try:
-            prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
-            # allowed_tools=[] forces a text-only response
-            response = await agent.send(prompt, allowed_tools=[])
-            total_input += response.usage.input_tokens
-            total_output += response.usage.output_tokens
-            self._checkpoint_manager.write_memory(self._phase_id, response.text)
-        except Exception:
-            pass
 
     async def on_success(self, message: PhaseTrigger) -> None:
         """Emit PhaseTrigger to unblock dependent phases."""
