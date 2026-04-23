@@ -37,6 +37,7 @@ def test_successful_metrics_collection(dd_run_check, mock_http_response_per_endp
     dd_run_check(check)
 
     aggregator.assert_metric("sonatype_nexus.status.available_cpus_health", value=1.0)
+    aggregator.assert_metric("sonatype_nexus.status.scheduler_health", value=1.0)
     aggregator.assert_metric("sonatype_nexus.analytics.jvm.heap_memory_used", value=123456789)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
