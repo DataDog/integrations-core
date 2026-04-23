@@ -53,6 +53,19 @@ def test_config_verify_false(instance):
         mock_pool.assert_called_once_with(maxsize=8, num_pools=4, verify=False, ca_cert=None)
 
 
+def test_config_tls_ca_cert_forwarded_to_pool_manager(instance):
+    """Regression: tls_ca_cert must be forwarded to the shared pool manager.
+
+    Same failure mode as verify=False: if ca_cert isn't baked into the pre-supplied
+    pool manager, clickhouse-connect's get_client can't apply it later.
+    """
+    instance = {**instance, 'tls_ca_cert': '/path/to/ca.pem'}
+    with mock.patch('clickhouse_connect.driver.httputil.get_pool_manager') as mock_pool:
+        mock_pool.return_value = mock.MagicMock()
+        ClickhouseCheck('clickhouse', {}, [instance])
+        mock_pool.assert_called_once_with(maxsize=8, num_pools=4, verify=True, ca_cert='/path/to/ca.pem')
+
+
 def test_error_query(instance, dd_run_check):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.log = mock.MagicMock()

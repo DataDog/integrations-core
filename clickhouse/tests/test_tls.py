@@ -5,6 +5,7 @@ import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
 
+from . import common
 from .common import tls
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
@@ -35,3 +36,19 @@ def test_connect_ssl_verify_true_fails(tls_instance, dd_run_check):
     check = ClickhouseCheck('clickhouse', {}, [tls_instance])
     with pytest.raises(Exception):
         dd_run_check(check)
+
+
+@tls
+def test_connect_verify_true_with_ca_cert(aggregator, tls_instance, dd_run_check):
+    """Production path: verify=True + tls_ca_cert pointing at a trusted CA must succeed.
+
+    Most TLS-using DBM customers configure the integration this way — TLS on, cert
+    validation on, with a custom CA bundle that trusts the server's cert. Pins that
+    path against the self-signed server so the ca_cert plumbing in the shared pool
+    manager doesn't silently regress.
+    """
+    tls_instance['verify'] = True
+    tls_instance['tls_ca_cert'] = common.SERVER_CERT_PATH
+    check = ClickhouseCheck('clickhouse', {}, [tls_instance])
+    dd_run_check(check)
+    aggregator.assert_service_check('clickhouse.can_connect', status=ClickhouseCheck.OK)

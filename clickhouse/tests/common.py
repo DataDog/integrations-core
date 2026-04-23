@@ -11,6 +11,7 @@ HERE = get_here()
 COMPOSE_FILE = os.getenv('COMPOSE_FILE', 'docker-compose.yaml')
 IS_TLS = COMPOSE_FILE == 'docker-compose-tls.yaml'
 COMPOSE_FILE_PATH = os.path.join(HERE, 'docker', COMPOSE_FILE)
+SERVER_CERT_PATH = os.path.join(HERE, 'docker', 'certs', 'server.crt')
 
 tls = pytest.mark.skipif(not IS_TLS, reason='Test only valid for TLS flavor')
 
