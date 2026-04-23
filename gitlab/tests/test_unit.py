@@ -12,7 +12,9 @@ from .common import (
     CUSTOM_TAGS,
     GITALY_METRICS,
     GITLAB_GITALY_PROMETHEUS_ENDPOINT,
+    GITLAB_LOCAL_PORT,
     GITLAB_TAGS,
+    HOST,
     V1_METRICS,
     V2_METRICS,
     assert_check,
@@ -173,3 +175,11 @@ def test_parse_readiness_service_checks(
         )
 
     assert len(aggregator.service_check_names) == 13
+
+
+def test_version_mock_returns_parsed_dict(mock_data):
+    import requests
+
+    session = requests.Session()
+    response = session.get("http://{}:{}/api/v4/version".format(HOST, GITLAB_LOCAL_PORT))
+    assert response.json() == {"version": "1.2.3"}
