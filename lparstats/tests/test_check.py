@@ -38,7 +38,6 @@ def _mock_run_cmd(cmd, sudo=False, timeout=None):
     return '', '', 0
 
 
-@pytest.mark.usefixtures('dd_environment')
 def test_check_runs(aggregator, instance):
     check = LPARStats('lparstats', {}, [instance])
     with patch('datadog_checks.lparstats.lparstats._run_cmd', side_effect=_mock_run_cmd):
