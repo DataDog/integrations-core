@@ -435,6 +435,148 @@ def test_missing_explain_function_fails(integration_check, pg_instance):
     assert 'explain_statement' in entry['diagnosis']
 
 
+# -- Subfeature gating --------------------------------------------------------
+
+
+def test_dbm_with_query_metrics_disabled_skips_pg_stat_statements_probes(integration_check, pg_instance):
+    """query_metrics disabled -> pg_stat_statements is not a prerequisite. Don't fail a
+    query-samples-only or query-activity-only DBM setup for a missing extension."""
+    instance = dict(
+        pg_instance,
+        dbm=True,
+        query_metrics={'enabled': False},
+    )
+    check = integration_check(instance)
+    # Set up responses that would FAIL the pg_stat_statements probes if they ran.
+    responses = _happy_server_responses(spl='pgaudit') + [
+        ("nspname = 'datadog'", [(1,)]),
+        ("extname = 'pg_stat_statements'", []),  # extension missing
+        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', psycopg.errors.UndefinedTable('boom')),
+        ("p.proname", [(1,)]),
+    ]
+    with _patch_connection(check, FakeConn(responses)):
+        diagnoses = _get_diagnoses(check)
+    gated = {
+        DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements.value,
+        DatabaseConfigurationError.track_io_timing_disabled.value,
+        DatabaseConfigurationError.high_pg_stat_statements_max.value,
+        DatabaseConfigurationError.pg_stat_statements_not_created.value,
+        DatabaseConfigurationError.pg_stat_statements_not_readable.value,
+    }
+    assert not any(d['name'] in gated for d in diagnoses), [d['name'] for d in diagnoses if d['name'] in gated]
+    # Samples-side probes still run.
+    assert _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)
+
+
+def test_dbm_with_query_samples_disabled_skips_explain_probes(integration_check, pg_instance):
+    """query_samples disabled -> the explain function and datadog schema are not prerequisites."""
+    instance = dict(
+        pg_instance,
+        dbm=True,
+        query_samples={'enabled': False},
+    )
+    check = integration_check(instance)
+    responses = _happy_server_responses() + [
+        # If the schema/explain probes ran they'd FAIL on these responses -- they shouldn't run.
+        ("nspname = 'datadog'", []),
+        ("extname = 'pg_stat_statements'", [(1,)]),
+        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
+        ("p.proname", []),
+    ]
+    with _patch_connection(check, FakeConn(responses)):
+        diagnoses = _get_diagnoses(check)
+    gated = {
+        DatabaseConfigurationError.missing_datadog_schema.value,
+        DatabaseConfigurationError.undefined_explain_function.value,
+    }
+    assert not any(d['name'] in gated for d in diagnoses)
+    # Metrics-side probes still run.
+    assert _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_created.value)
+
+
+def test_dbm_with_both_subfeatures_disabled_still_runs_track_activity_query_size(integration_check, pg_instance):
+    """query_activity defaults to enabled and reads pg_stat_activity.query, so the
+    track_activity_query_size warning still applies even when metrics+samples are off."""
+    instance = dict(
+        pg_instance,
+        dbm=True,
+        query_metrics={'enabled': False},
+        query_samples={'enabled': False},
+    )
+    check = integration_check(instance)
+    responses = _happy_server_responses(track_query_size=1024)
+    with _patch_connection(check, FakeConn(responses)):
+        diagnoses = _get_diagnoses(check)
+    entry = _by_name(diagnoses, DatabaseConfigurationError.track_activity_query_size_too_small.value)[0]
+    assert entry['result'] == Diagnosis.DIAGNOSIS_WARNING
+
+
+# -- pg_stat_statements_view misconfiguration --------------------------------
+
+
+def test_pg_stat_statements_readable_fails_when_view_misconfigured(integration_check, pg_instance):
+    """Extension is installed but `pg_stat_statements_view` points at a nonexistent name.
+    This can no longer be swallowed by the UndefinedTable fast-path; the user needs a FAIL."""
+    check = integration_check(dict(pg_instance, dbm=True, pg_stat_statements_view='public.wrong_view'))
+    dbm_responses = [
+        ("nspname = 'datadog'", [(1,)]),
+        # Extension probe succeeds.
+        ("extname = 'pg_stat_statements'", [(1,)]),
+        # But the configured view doesn't exist.
+        ('"public"."wrong_view"', psycopg.errors.UndefinedTable('relation "public.wrong_view" does not exist')),
+        ("p.proname", [(1,)]),
+    ]
+    conn = FakeConn(_happy_server_responses() + dbm_responses)
+    with _patch_connection(check, conn):
+        diagnoses = _get_diagnoses(check)
+    entry = _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_readable.value)[0]
+    assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'public.wrong_view' in entry['diagnosis']
+
+
+# -- Unqualified explain_function resolution ---------------------------------
+
+
+def test_unqualified_explain_function_resolves_via_search_path(integration_check, pg_instance):
+    """Runtime calls `SELECT explain_statement(...)` and lets Postgres' search_path find it.
+    The diagnose lookup must follow the same resolution rules rather than hardcoding `public`."""
+    instance = dict(pg_instance, dbm=True, query_samples={'explain_function': 'explain_statement'})
+    check = integration_check(instance)
+    dbm_responses = [
+        # Unqualified function -> datadog schema probe must not run (no explicit `datadog.`).
+        ("nspname = 'datadog'", []),
+        ("extname = 'pg_stat_statements'", [(1,)]),
+        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
+        # search_path-based lookup succeeds.
+        ("current_schemas(false)", [(1,)]),
+    ]
+    conn = FakeConn(_happy_server_responses() + dbm_responses)
+    with _patch_connection(check, conn):
+        diagnoses = _get_diagnoses(check)
+    # datadog schema probe skipped entirely (unqualified function).
+    assert not _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)
+    explain = _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)[0]
+    assert explain['result'] == Diagnosis.DIAGNOSIS_SUCCESS
+
+
+def test_unqualified_explain_function_not_in_search_path_fails(integration_check, pg_instance):
+    instance = dict(pg_instance, dbm=True, query_samples={'explain_function': 'explain_statement'})
+    check = integration_check(instance)
+    dbm_responses = [
+        ("nspname = 'datadog'", []),
+        ("extname = 'pg_stat_statements'", [(1,)]),
+        ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
+        # search_path resolution finds nothing -- FAIL, matching a runtime call that would throw.
+        ("current_schemas(false)", []),
+    ]
+    conn = FakeConn(_happy_server_responses() + dbm_responses)
+    with _patch_connection(check, conn):
+        diagnoses = _get_diagnoses(check)
+    explain = _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)[0]
+    assert explain['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'explain_statement' in explain['diagnosis']
+
+
 # -- Cascade skipping ---------------------------------------------------------
 
 
@@ -547,7 +689,8 @@ def test_safe_identifier_rejects(name):
     'name,expected',
     [
         ('datadog.explain_statement', ('datadog', 'explain_statement')),
-        ('explain_statement', ('public', 'explain_statement')),
+        # Unqualified -> None schema; resolved via search_path at call time.
+        ('explain_statement', (None, 'explain_statement')),
     ],
 )
 def test_split_function(name, expected):

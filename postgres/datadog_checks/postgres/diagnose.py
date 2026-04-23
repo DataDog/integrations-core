@@ -86,24 +86,37 @@ class PostgresDiagnose:
             _safe_close(conn)
 
     def _run_dbm_diagnostics(self):
-        """Run DBM-only pre-flight checks against the main dbname."""
+        """Run DBM-only pre-flight checks against the main dbname.
+
+        Probes are gated on the subfeatures that actually consume each dependency:
+        a query-activity-only setup (``dbm: true`` with query_metrics/query_samples
+        disabled) should not be flagged unhealthy for a missing pg_stat_statements
+        or explain function it will never call.
+        """
         if not self._check._config.dbm:
             return
         conn = self._open_probe_connection(self._check._config.dbname)
         if conn is None:
             return
         try:
-            # Server-wide GUCs that only matter for DBM query metrics / samples. The
-            # downstream pg_stat_statements diagnostics read `self._failed` set here to
-            # cascade-skip, so keep them in the same orchestrator.
-            self._diagnose_shared_preload_libraries(conn)
-            self._diagnose_track_activity_query_size(conn)
-            self._diagnose_track_io_timing(conn)
-            self._diagnose_pg_stat_statements_max(conn)
-            self._diagnose_datadog_schema(conn)
-            self._diagnose_pg_stat_statements_extension(conn)
-            self._diagnose_pg_stat_statements_readable(conn)
-            self._diagnose_explain_function(conn)
+            query_metrics = self._check._config.query_metrics.enabled
+            query_samples = self._check._config.query_samples.enabled
+            # track_activity_query_size backs pg_stat_activity's query column, used by
+            # both query_samples (for explain) and query_activity.
+            if query_samples or self._check._config.query_activity.enabled:
+                self._diagnose_track_activity_query_size(conn)
+            # pg_stat_statements-backed probes -- only relevant to query_metrics.
+            # Keep SPL first so the extension/readable probes can cascade-skip off it.
+            if query_metrics:
+                self._diagnose_shared_preload_libraries(conn)
+                self._diagnose_track_io_timing(conn)
+                self._diagnose_pg_stat_statements_max(conn)
+                self._diagnose_pg_stat_statements_extension(conn)
+                self._diagnose_pg_stat_statements_readable(conn)
+            # Explain-function probes -- only relevant to query_samples.
+            if query_samples:
+                self._diagnose_datadog_schema(conn)
+                self._diagnose_explain_function(conn)
         finally:
             _safe_close(conn)
 
@@ -379,9 +392,10 @@ class PostgresDiagnose:
     def _diagnose_datadog_schema(self, conn):
         code = DatabaseConfigurationError.missing_datadog_schema
         schema, _ = _split_function(self._check._config.query_samples.explain_function)
-        # When the user points `explain_function` at a non-`datadog` schema, the `datadog`
-        # schema isn't a DBM prerequisite -- `_diagnose_explain_function` validates the
-        # configured function directly, which implicitly covers its schema.
+        # Only run when the user has explicitly qualified the function with `datadog.`.
+        # For any other schema -- or an unqualified name resolved via search_path --
+        # `_diagnose_explain_function` validates the function directly, which implicitly
+        # proves its schema exists.
         if schema != "datadog":
             return
         row = _fetchone(
@@ -441,15 +455,14 @@ class PostgresDiagnose:
             with conn.cursor() as cursor:
                 cursor.execute("SELECT 1 FROM {} LIMIT 1".format(_safe_identifier(view)))
                 cursor.fetchall()
-        except psycopg.errors.UndefinedTable as e:
-            # Fallback: the extension probe didn't fire for some reason -- don't double up anyway.
-            self._check.log.debug("pg_stat_statements not readable (not created): %s", e)
-            return
         except psycopg.errors.ObjectNotInPrerequisiteState as e:
             # Fallback: SPL diagnostic didn't fire -- don't double up.
             self._check.log.debug("pg_stat_statements not readable (not loaded): %s", e)
             return
         except psycopg.Error as e:
+            # If the extension probe succeeded but this SELECT still can't find the view,
+            # the user's `pg_stat_statements_view` is misconfigured -- surface it. Otherwise
+            # the top-of-function guard already swallowed the duplicate before we got here.
             self._fail(
                 code,
                 diagnosis="Unable to SELECT from {} in {}: {}".format(view, self._check._config.dbname, e),
@@ -472,14 +485,27 @@ class PostgresDiagnose:
         if schema == "datadog" and DatabaseConfigurationError.missing_datadog_schema.value in self._failed:
             # Function lives in a schema that doesn't exist; the schema FAIL is the actionable item.
             return
-        row = _fetchone(
-            conn,
-            (
-                "SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace "
-                "WHERE n.nspname = %s AND p.proname = %s"
-            ),
-            (schema, name),
-        )
+        if schema is None:
+            # Unqualified -- follow the same search_path resolution the runtime uses when
+            # it calls `SELECT {explain_function}(...)`. `current_schemas(false)` returns
+            # the effective user-visible schemas for this session.
+            row = _fetchone(
+                conn,
+                (
+                    "SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace "
+                    "WHERE p.proname = %s AND n.nspname = ANY(current_schemas(false))"
+                ),
+                (name,),
+            )
+        else:
+            row = _fetchone(
+                conn,
+                (
+                    "SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace "
+                    "WHERE n.nspname = %s AND p.proname = %s"
+                ),
+                (schema, name),
+            )
         if row:
             self._check.diagnosis.success(
                 name=code.value,
@@ -561,11 +587,13 @@ def _safe_identifier(name):
 def _split_function(name):
     """Split a possibly schema-qualified function name into (schema, name).
 
-    Defaults the schema to ``public`` when unqualified, matching Postgres' behavior.
+    Returns ``(None, name)`` for unqualified names -- Postgres resolves those via
+    ``search_path`` at call time, so the schema cannot be determined statically.
+    Callers must follow that resolution rather than defaulting to ``public``.
     """
     if not name:
-        return "public", ""
+        return None, ""
     parts = name.split(".", 1)
     if len(parts) == 1:
-        return "public", parts[0]
+        return None, parts[0]
     return parts[0], parts[1]
