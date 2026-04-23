@@ -6,10 +6,14 @@ import pytest
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import CLICKHOUSE_VERSION
+from .common import CLICKHOUSE_VERSION, IS_TLS
 from .metrics import OPTIONAL_METRICS, get_metrics
 
-pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.usefixtures('dd_environment'),
+    pytest.mark.skipif(IS_TLS, reason='Non-TLS tests do not run in TLS flavor'),
+]
 
 
 def test_check(aggregator, instance, dd_run_check):
@@ -66,6 +70,8 @@ def test_custom_queries(aggregator, instance, dd_run_check):
             'database_instance:{}:{}:default'.format(instance['server'], instance['port']),
         ],
     )
+
+
 
 
 @pytest.mark.skipif(CLICKHOUSE_VERSION == 'latest', reason='Version `latest` is ever-changing, skipping')

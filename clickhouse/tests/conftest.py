@@ -14,6 +14,22 @@ from . import common
 
 @pytest.fixture(scope='session')
 def dd_environment():
+    if common.IS_TLS:
+        conditions = [
+            WaitFor(
+                ping_clickhouse(
+                    common.TLS_CONFIG['server'],
+                    common.TLS_CONFIG['port'],
+                    common.TLS_CONFIG['username'],
+                    common.TLS_CONFIG['password'],
+                    secure=True,
+                )
+            )
+        ]
+        with docker_run(common.COMPOSE_FILE_PATH, conditions=conditions, sleep=10, attempts=2):
+            yield common.TLS_CONFIG
+        return
+
     conditions = []
 
     for i in range(6):
@@ -35,7 +51,7 @@ def dd_environment():
         )
     )
 
-    with docker_run(common.COMPOSE_FILE, conditions=conditions, sleep=10, attempts=2):
+    with docker_run(common.COMPOSE_FILE_PATH, conditions=conditions, sleep=10, attempts=2):
         yield common.CONFIG
 
 
@@ -44,13 +60,20 @@ def instance():
     return deepcopy(common.CONFIG)
 
 
-def ping_clickhouse(host, port, username, password):
+@pytest.fixture
+def tls_instance():
+    return deepcopy(common.TLS_CONFIG)
+
+
+def ping_clickhouse(host, port, username, password, secure=False):
     def _ping_clickhouse():
         client = clickhouse_connect.get_client(
             host=host,
             port=port,
             username=username,
             password=password,
+            secure=secure,
+            verify=False,
         )
         return client.ping()
 

@@ -40,6 +40,19 @@ def test_config(instance):
         )
 
 
+def test_config_verify_false(instance):
+    """Regression: verify: false must be forwarded to the shared pool manager.
+
+    When pool_mgr is provided to clickhouse-connect, it skips creating its own
+    TLS-aware pool, so TLS settings must be baked into the pool at creation time.
+    """
+    instance = {**instance, 'verify': False}
+    with mock.patch('clickhouse_connect.driver.httputil.get_pool_manager') as mock_pool:
+        mock_pool.return_value = mock.MagicMock()
+        ClickhouseCheck('clickhouse', {}, [instance])
+        mock_pool.assert_called_once_with(maxsize=8, num_pools=4, verify=False, ca_cert=None)
+
+
 def test_error_query(instance, dd_run_check):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.log = mock.MagicMock()
