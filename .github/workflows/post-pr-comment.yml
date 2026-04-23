@@ -61,9 +61,9 @@ jobs:
     steps:
       # Mint the STS token first so every API call below uses a single
       # ephemeral, scoped credential. The policy grants actions: read +
-      # pull_requests: read + issues: write, covering all of: listing and
-      # downloading the artifact, resolving the PR number, finding and
-      # updating the comment.
+      # pull_requests: write, covering all of: listing and downloading the
+      # artifact, resolving the PR number, and finding and updating the
+      # comment.
       - name: Get token via dd-octo-sts
         uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
         id: octo-sts
