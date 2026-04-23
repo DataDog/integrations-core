@@ -138,9 +138,7 @@ def test_get_diagnoses_returns_json(integration_check, pg_instance):
     with mock.patch.object(check.diagnosis, '_diagnostics', []):
         payload = check.get_diagnoses()
     parsed = json.loads(payload)
-    assert any(
-        d['name'] == DatabaseConfigurationError.pg_stat_statements_not_loaded.value for d in parsed
-    )
+    assert any(d['name'] == DatabaseConfigurationError.pg_stat_statements_not_loaded.value for d in parsed)
 
 
 # -- Connection diagnostic ----------------------------------------------------
@@ -164,9 +162,7 @@ def test_connection_fails_dbm_enabled_collapses_duplicate_probes(integration_che
     character-identical FAIL rows, so the user sees exactly one connection-failure entry."""
     check = integration_check(dict(pg_instance, dbm=True))
     err = psycopg.OperationalError('boom')
-    with mock.patch(
-        'datadog_checks.postgres.diagnose.TokenAwareConnection.connect', side_effect=err
-    ) as connect:
+    with mock.patch('datadog_checks.postgres.diagnose.TokenAwareConnection.connect', side_effect=err) as connect:
         diagnoses = _get_diagnoses(check)
     # Both orchestrators still attempt a probe.
     assert connect.call_count == 2
@@ -194,19 +190,16 @@ def _happy_server_responses(
 
 
 def test_server_config_happy_path(integration_check, pg_instance):
+    """Non-DBM orchestrator covers version + pg_monitor + pg_stat_activity; the DBM-gated
+    server-config diagnostics are covered by `test_dbm_server_config_happy_path`."""
     check = integration_check(pg_instance)
     conn = FakeConn(_happy_server_responses())
     with _patch_connection(check, conn):
         diagnoses = _get_diagnoses(check)
 
     names_and_results = {(d['name'], d['result']) for d in diagnoses}
-    # All server-config + privilege diagnostics should be SUCCESS.
     for code in (
         DatabaseConfigurationError.postgres_version_unsupported,
-        DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements,
-        DatabaseConfigurationError.track_activity_query_size_too_small,
-        DatabaseConfigurationError.track_io_timing_disabled,
-        DatabaseConfigurationError.high_pg_stat_statements_max,
         DatabaseConfigurationError.missing_pg_monitor_role,
         DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity,
     ):
@@ -215,9 +208,29 @@ def test_server_config_happy_path(integration_check, pg_instance):
         )
 
 
+def test_dbm_server_config_happy_path(integration_check, pg_instance):
+    """With dbm=true the DBM-gated GUC diagnostics also run and should all succeed on a healthy
+    Postgres."""
+    check = integration_check(dict(pg_instance, dbm=True))
+    conn = FakeConn(_happy_server_responses() + _happy_dbm_responses())
+    with _patch_connection(check, conn):
+        diagnoses = _get_diagnoses(check)
+
+    names_and_results = {(d['name'], d['result']) for d in diagnoses}
+    for code in (
+        DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements,
+        DatabaseConfigurationError.track_activity_query_size_too_small,
+        DatabaseConfigurationError.track_io_timing_disabled,
+        DatabaseConfigurationError.high_pg_stat_statements_max,
+    ):
+        assert (code.value, Diagnosis.DIAGNOSIS_SUCCESS) in names_and_results, (
+            f"expected {code.value} to pass, got {[d for d in diagnoses if d['name'] == code.value]}"
+        )
+
+
 def test_shared_preload_libraries_missing_fails(integration_check, pg_instance):
-    check = integration_check(pg_instance)
-    responses = _happy_server_responses(spl='pgaudit')
+    check = integration_check(dict(pg_instance, dbm=True))
+    responses = _happy_server_responses(spl='pgaudit') + _happy_dbm_responses()
     with _patch_connection(check, FakeConn(responses)):
         diagnoses = _get_diagnoses(check)
     spl = _by_name(
@@ -231,11 +244,16 @@ def test_shared_preload_libraries_missing_fails(integration_check, pg_instance):
 def test_shared_preload_libraries_unreadable_warns(integration_check, pg_instance):
     """Row is hidden from non-pg_monitor users for GUC_SUPERUSER_ONLY settings -- we should
     surface a WARNING instead of silently dropping the diagnostic."""
-    check = integration_check(pg_instance)
+    check = integration_check(dict(pg_instance, dbm=True))
     # Replace only the shared_preload_libraries response with an empty result (simulates the
     # pg_settings row being filtered out for non-pg_monitor members).
-    responses = [(m, r) for (m, r) in _happy_server_responses() if getattr(m, "__qualname__", "") != _setting('shared_preload_libraries').__qualname__]
+    responses = [
+        (m, r)
+        for (m, r) in _happy_server_responses()
+        if getattr(m, "__qualname__", "") != _setting('shared_preload_libraries').__qualname__
+    ]
     responses.append((_setting('shared_preload_libraries'), []))
+    responses += _happy_dbm_responses()
     with _patch_connection(check, FakeConn(responses)):
         diagnoses = _get_diagnoses(check)
     spl = _by_name(
@@ -250,8 +268,8 @@ def test_shared_preload_libraries_unreadable_warns(integration_check, pg_instanc
 
 
 def test_track_activity_query_size_too_small_warns(integration_check, pg_instance):
-    check = integration_check(pg_instance)
-    responses = _happy_server_responses(track_query_size=1024)
+    check = integration_check(dict(pg_instance, dbm=True))
+    responses = _happy_server_responses(track_query_size=1024) + _happy_dbm_responses()
     with _patch_connection(check, FakeConn(responses)):
         diagnoses = _get_diagnoses(check)
     entry = _by_name(diagnoses, DatabaseConfigurationError.track_activity_query_size_too_small.value)[0]
@@ -260,8 +278,8 @@ def test_track_activity_query_size_too_small_warns(integration_check, pg_instanc
 
 
 def test_track_io_timing_off_warns(integration_check, pg_instance):
-    check = integration_check(pg_instance)
-    responses = _happy_server_responses(track_io='off')
+    check = integration_check(dict(pg_instance, dbm=True))
+    responses = _happy_server_responses(track_io='off') + _happy_dbm_responses()
     with _patch_connection(check, FakeConn(responses)):
         diagnoses = _get_diagnoses(check)
     entry = _by_name(diagnoses, DatabaseConfigurationError.track_io_timing_disabled.value)[0]
@@ -269,9 +287,9 @@ def test_track_io_timing_off_warns(integration_check, pg_instance):
 
 
 def test_pg_stat_statements_max_above_threshold_warns(integration_check, pg_instance):
-    check = integration_check(pg_instance)
+    check = integration_check(dict(pg_instance, dbm=True))
     # Default threshold is 10000; exceed it.
-    responses = _happy_server_responses(pgss_max=50000)
+    responses = _happy_server_responses(pgss_max=50000) + _happy_dbm_responses()
     with _patch_connection(check, FakeConn(responses)):
         diagnoses = _get_diagnoses(check)
     entry = _by_name(diagnoses, DatabaseConfigurationError.high_pg_stat_statements_max.value)[0]
@@ -333,8 +351,13 @@ def test_dbm_disabled_skips_dbm_diagnostics(integration_check, pg_instance):
     conn = FakeConn(_happy_server_responses() + _happy_dbm_responses())
     with _patch_connection(check, conn):
         diagnoses = _get_diagnoses(check)
-    # No dbm-category diagnoses should appear.
+    # Neither the DBM database-scoped checks nor the DBM-only server GUC checks should run
+    # without dbm=true -- running them against a plain Postgres would fail a healthy instance.
     dbm_names = {
+        DatabaseConfigurationError.shared_preload_libraries_missing_pg_stat_statements.value,
+        DatabaseConfigurationError.track_activity_query_size_too_small.value,
+        DatabaseConfigurationError.track_io_timing_disabled.value,
+        DatabaseConfigurationError.high_pg_stat_statements_max.value,
         DatabaseConfigurationError.missing_datadog_schema.value,
         DatabaseConfigurationError.pg_stat_statements_not_created.value,
         DatabaseConfigurationError.pg_stat_statements_not_readable.value,
@@ -442,9 +465,7 @@ def test_cascade_skip_spl_missing_suppresses_pgss_extension_and_readable(integra
     assert not _by_name(diagnoses, DatabaseConfigurationError.pg_stat_statements_not_readable.value)
 
 
-def test_cascade_skip_pg_monitor_missing_suppresses_pg_stat_activity_warning(
-    integration_check, pg_instance
-):
+def test_cascade_skip_pg_monitor_missing_suppresses_pg_stat_activity_warning(integration_check, pg_instance):
     """Without pg_monitor, pg_stat_activity masking is a symptom -- the root cause is the role FAIL."""
     check = integration_check(pg_instance)
     responses = _happy_server_responses()
@@ -455,14 +476,10 @@ def test_cascade_skip_pg_monitor_missing_suppresses_pg_stat_activity_warning(
         diagnoses = _get_diagnoses(check)
     role_entry = _by_name(diagnoses, DatabaseConfigurationError.missing_pg_monitor_role.value)[0]
     assert role_entry['result'] == Diagnosis.DIAGNOSIS_FAIL
-    assert not _by_name(
-        diagnoses, DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity.value
-    )
+    assert not _by_name(diagnoses, DatabaseConfigurationError.insufficient_privilege_on_pg_stat_activity.value)
 
 
-def test_cascade_skip_missing_schema_suppresses_explain_function_in_datadog_schema(
-    integration_check, pg_instance
-):
+def test_cascade_skip_missing_schema_suppresses_explain_function_in_datadog_schema(integration_check, pg_instance):
     """When `datadog` schema is missing, `datadog.explain_statement` can't exist -- the schema
     FAIL is the actionable item; don't emit an explain-function FAIL with a nonsensical fix."""
     check = integration_check(dict(pg_instance, dbm=True))
@@ -481,14 +498,15 @@ def test_cascade_skip_missing_schema_suppresses_explain_function_in_datadog_sche
     assert not _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)
 
 
-def test_cascade_skip_missing_schema_does_not_suppress_explain_function_in_public_schema(
-    integration_check, pg_instance
-):
-    """If the user configured an explain_function outside the `datadog` schema, the missing
-    datadog schema is irrelevant to that function -- the function check must still run."""
+def test_custom_explain_function_schema_skips_datadog_schema_check(integration_check, pg_instance):
+    """If the user configured an explain_function outside the `datadog` schema, the
+    `datadog` schema is not a DBM prerequisite -- the schema check short-circuits entirely
+    (no success, warning, or fail row) and the function check carries the DBM verdict."""
     instance = dict(pg_instance, dbm=True, query_samples={'explain_function': 'public.my_explain'})
     check = integration_check(instance)
     dbm_responses = [
+        # `datadog` schema is absent -- but since the configured function lives in `public`,
+        # _diagnose_datadog_schema must early-return without hitting pg_namespace at all.
         ("nspname = 'datadog'", []),
         ("extname = 'pg_stat_statements'", [(1,)]),
         ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
@@ -497,6 +515,8 @@ def test_cascade_skip_missing_schema_does_not_suppress_explain_function_in_publi
     conn = FakeConn(_happy_server_responses() + dbm_responses)
     with _patch_connection(check, conn):
         diagnoses = _get_diagnoses(check)
+    # No `missing-datadog-schema` diagnosis emitted at all -- success or fail would both be wrong.
+    assert not _by_name(diagnoses, DatabaseConfigurationError.missing_datadog_schema.value)
     # The explain-function diagnostic ran and passed (function exists in public).
     explain = _by_name(diagnoses, DatabaseConfigurationError.undefined_explain_function.value)[0]
     assert explain['result'] == Diagnosis.DIAGNOSIS_SUCCESS

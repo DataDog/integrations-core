@@ -79,10 +79,6 @@ class PostgresDiagnose:
             return
         try:
             self._diagnose_version(conn)
-            self._diagnose_shared_preload_libraries(conn)
-            self._diagnose_track_activity_query_size(conn)
-            self._diagnose_track_io_timing(conn)
-            self._diagnose_pg_stat_statements_max(conn)
             self._diagnose_pg_monitor_role(conn)
             self._diagnose_pg_stat_activity_access(conn)
         finally:
@@ -96,6 +92,13 @@ class PostgresDiagnose:
         if conn is None:
             return
         try:
+            # Server-wide GUCs that only matter for DBM query metrics / samples. The
+            # downstream pg_stat_statements diagnostics read `self._failed` set here to
+            # cascade-skip, so keep them in the same orchestrator.
+            self._diagnose_shared_preload_libraries(conn)
+            self._diagnose_track_activity_query_size(conn)
+            self._diagnose_track_io_timing(conn)
+            self._diagnose_pg_stat_statements_max(conn)
             self._diagnose_datadog_schema(conn)
             self._diagnose_pg_stat_statements_extension(conn)
             self._diagnose_pg_stat_statements_readable(conn)
@@ -375,6 +378,12 @@ class PostgresDiagnose:
 
     def _diagnose_datadog_schema(self, conn):
         code = DatabaseConfigurationError.missing_datadog_schema
+        schema, _ = _split_function(self._check._config.query_samples.explain_function)
+        # When the user points `explain_function` at a non-`datadog` schema, the `datadog`
+        # schema isn't a DBM prerequisite -- `_diagnose_explain_function` validates the
+        # configured function directly, which implicitly covers its schema.
+        if schema != "datadog":
+            return
         row = _fetchone(
             conn,
             "SELECT 1 FROM pg_namespace WHERE nspname = 'datadog'",
