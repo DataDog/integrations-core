@@ -24,6 +24,7 @@ from .util import (
     DIAGNOSTIC_METADATA,
     DatabaseConfigurationError,
     build_remediation,
+    parse_shared_preload_libraries,
 )
 from .version_utils import V9_6, VersionUtils
 
@@ -208,8 +209,7 @@ class PostgresDiagnose:
                 remediation=build_remediation(DatabaseConfigurationError.missing_pg_monitor_role),
             )
             return
-        entries = [part.strip() for part in libs.split(",") if part.strip()]
-        if "pg_stat_statements" in entries:
+        if "pg_stat_statements" in parse_shared_preload_libraries(libs):
             self._check.diagnosis.success(
                 name=code.value,
                 diagnosis="shared_preload_libraries contains pg_stat_statements.",

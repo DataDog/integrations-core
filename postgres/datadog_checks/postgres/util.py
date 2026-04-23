@@ -184,6 +184,18 @@ DIAGNOSTIC_METADATA = {
 }
 
 
+def parse_shared_preload_libraries(value):
+    """Split a `shared_preload_libraries` GUC value into a set of loaded library names.
+
+    Postgres stores this GUC as a comma-separated list; callers need to check membership
+    (`'pg_stat_statements' in ...`) to decide whether the extension is loaded. An empty or
+    missing value yields an empty set.
+    """
+    if not value:
+        return set()
+    return {part.strip() for part in value.split(",") if part.strip()}
+
+
 def build_remediation(code):
     """Return the full remediation string (prose + docs URL) for a DatabaseConfigurationError."""
     meta = DIAGNOSTIC_METADATA.get(code, {})
