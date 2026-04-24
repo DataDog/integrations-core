@@ -259,10 +259,19 @@ class KafkaCheck(AgentCheck):
     def _add_broker_timestamps(self, broker_timestamps, highwater_offsets):
         for (topic, partition), highwater_offset in highwater_offsets.items():
             timestamps = broker_timestamps["{}_{}".format(topic, partition)]
+            # If the highwater offset went backwards (topic recreated,
+            # retention wipe, or offset reset) any cached pair with a larger
+            # offset points to a now-nonexistent message and would poison
+            # interpolation. Drop those entries.
+            stale = [o for o in timestamps if o > highwater_offset]
+            for o in stale:
+                del timestamps[o]
             timestamps[highwater_offset] = time()
-            # If there's too many timestamps, we delete the oldest
+            # If there's too many timestamps, we delete the oldest one (by
+            # timestamp, not by offset — evicting by min offset would discard
+            # the fresh post-reset entries and keep poisonous stale ones).
             if len(timestamps) > self._max_timestamps:
-                del timestamps[min(timestamps)]
+                del timestamps[min(timestamps, key=timestamps.get)]
 
     def _save_broker_timestamps(self, broker_timestamps, persistent_cache_key):
         """Saves broker timestamps to persistent cache."""
