@@ -18,6 +18,9 @@ class FileRegistry:
 
     Path-level locks are shared across owners so that concurrent writes to the
     same file are serialized regardless of which owner initiated them.
+
+    _hashes layout: {owner_id: {normalized_path: sha256_hex}}.
+    _locks and _hashes grow for the registry's lifetime and are never evicted.
     """
 
     def __init__(self, policy: FileAccessPolicy | None = None) -> None:

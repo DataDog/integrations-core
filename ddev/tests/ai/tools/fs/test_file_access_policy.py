@@ -103,3 +103,44 @@ def test_write_denied_for_denied_roots(tmp_path) -> None:
     policy = FileAccessPolicy(write_root=tmp_path, read_deny_names=(), read_deny_roots=(str(denied),))
     with pytest.raises(FileAccessError, match="Write denied"):
         policy.assert_writable(str(denied / "x.txt"))
+
+
+# ---------------------------------------------------------------------------
+# DEFAULT_READ_DENY_NAMES — uncovered entries
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "filename",
+    [
+        ".netrc",
+        "credentials",
+        "credentials.json",
+        "id_ed25519",
+        "id_ed25519.pub",
+        "id_ecdsa",
+        "id_ecdsa.pub",
+    ],
+)
+def test_read_denied_by_default_name_additional(tmp_path, filename) -> None:
+    policy = FileAccessPolicy()
+    with pytest.raises(FileAccessError, match="Read denied"):
+        policy.assert_readable(str(tmp_path / filename))
+
+
+# ---------------------------------------------------------------------------
+# DEFAULT_READ_DENY_ROOTS
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "root",
+    ["~/.aws", "~/.kube", "~/.gnupg", "~/.docker", "~/.config/gcloud"],
+)
+def test_read_denied_by_default_root(root) -> None:
+    from pathlib import Path
+
+    policy = FileAccessPolicy()
+    resolved_root = Path(root).expanduser().resolve(strict=False)
+    with pytest.raises(FileAccessError, match="Read denied"):
+        policy.assert_readable(str(resolved_root / "config"))

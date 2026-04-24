@@ -14,6 +14,10 @@ class CheckpointManager:
     def __init__(self, path: Path) -> None:
         self._path = path
 
+    def _ensure_dir(self) -> None:
+        if not self._path.parent.exists():
+            self._path.parent.mkdir(parents=True, exist_ok=True)
+
     def read(self) -> dict[str, Any]:
         """Return full checkpoint data, keyed by phase_id. Empty dict if file absent."""
         if not self._path.exists():
@@ -24,7 +28,7 @@ class CheckpointManager:
         """Write or overwrite one phase's section in checkpoints.yaml."""
         checkpoints = self.read()
         checkpoints[phase_id] = data
-        self._path.parent.mkdir(parents=True, exist_ok=True)
+        self._ensure_dir()
         self._path.write_text(yaml.dump(checkpoints, default_flow_style=False))
 
     def build_memory_prompt(self, user_additions: str | None) -> str:
@@ -33,16 +37,13 @@ class CheckpointManager:
         return f"{user_additions}\n\n{base_prompt}" if user_additions else base_prompt
 
     def write_memory(self, phase_id: str, text: str) -> Path:
-        """Write agent-authored text to this phase's memory file ({phase_id}_memory.md).
-
-        Returns the absolute path of the file that was written.
-        """
+        """Write agent-authored text to this phase's memory file."""
         memory_path = self._path.parent / f"{phase_id}_memory.md"
-        self._path.parent.mkdir(parents=True, exist_ok=True)
-        memory_path.write_text(text)
+        self._ensure_dir()
+        memory_path.write_text(text, encoding="utf-8")
         return memory_path.resolve()
 
     def get_memory(self, phase_id: str) -> str:
         """Return the contents of a phase's memory file, or a NOT FOUND placeholder."""
         memory_path = self._path.parent / f"{phase_id}_memory.md"
-        return memory_path.read_text() if memory_path.exists() else f"<MEMORY NOT FOUND: {phase_id}>"
+        return memory_path.read_text(encoding="utf-8") if memory_path.exists() else f"<MEMORY NOT FOUND: {phase_id}>"

@@ -649,3 +649,22 @@ async def test_failed_phase_omits_memory_path(flow_dir, monkeypatch, message_que
 
     checkpoint = mgr.read()["p1"]
     assert "memory_path" not in checkpoint
+
+
+async def test_write_memory_disk_failure_fails_phase(flow_dir, monkeypatch, message_queue):
+    responses = [
+        make_response("task done", 100, 50),
+        make_response("summary text", 10, 5),
+    ]
+    mock_agent = MockAgent(responses)
+    phase, mgr = _make_phase(flow_dir, mock_agent, monkeypatch, message_queue)
+
+    def raise_permission_error(*args, **kwargs):
+        raise PermissionError("disk is read-only")
+
+    monkeypatch.setattr("ddev.ai.phases.checkpoint.CheckpointManager.write_memory", raise_permission_error)
+
+    with pytest.raises(PermissionError, match="disk is read-only"):
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert mgr.read() == {}

@@ -178,15 +178,13 @@ def test_from_names_all_at_once():
 
 
 def test_from_names_fs_tools_share_file_registry():
-    """All tools that require the file registry in the same ToolRegistry share a single instance."""
-    from ddev.ai.tools.core.registry import TOOL_MANIFEST
-
-    fs_names = [name for name, spec in TOOL_MANIFEST.items() if spec.requires_file_registry]
-    if len(fs_names) < 2:
+    """All tools that use the file registry in the same ToolRegistry share a single instance."""
+    all_names = ToolRegistry.available_tool_names()
+    registry = ToolRegistry.from_names(all_names, owner_id=OWNER_ID)
+    fs_tools = [t for t in registry._tools.values() if hasattr(t, "_registry")]
+    if len(fs_tools) < 2:
         pytest.skip("Need at least 2 fs tools to test shared registry")
-    registry = ToolRegistry.from_names(fs_names, owner_id=OWNER_ID)
-    tools = [registry._tools[name] for name in fs_names]
-    registries = [t._registry for t in tools]
+    registries = [t._registry for t in fs_tools]
     assert all(r is registries[0] for r in registries)
 
 

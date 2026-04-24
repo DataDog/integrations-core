@@ -100,6 +100,18 @@ def test_read_verified_handles_oserror(tool: DummyTool, registry: FileRegistry, 
     assert error.success is False
 
 
+def test_read_verified_handles_unicode_decode_error(tool: DummyTool, registry: FileRegistry, tmp_path) -> None:
+    f = tmp_path / "binary.bin"
+    f.write_bytes(b"\xff\xfe invalid utf-8")
+    registry.record(OWNER_ID, str(f), "anything")
+
+    content, error = tool._read_verified(str(f))
+
+    assert content == ""
+    assert error is not None
+    assert error.success is False
+
+
 def test_read_verified_is_isolated_between_agents(registry: FileRegistry, tmp_path) -> None:
     """A file registered by agent A cannot be read-verified by agent B."""
     f = tmp_path / "file.txt"

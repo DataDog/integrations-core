@@ -64,6 +64,7 @@ class FileAccessPolicy:
         return self._write_root
 
     def _resolve(self, path: str) -> Path:
+        # strict=False allows validating paths for files that don't exist yet (e.g. pre-creation checks)
         return Path(path).expanduser().resolve(strict=False)
 
     def _is_denied(self, resolved: Path) -> bool:

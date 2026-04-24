@@ -44,7 +44,7 @@ class FileRegistryTool[TInput: BaseToolInput](BaseTool[TInput]):
             return "", ToolResult(success=False, error=f"Not authorized to modify '{path}'.")
         try:
             content = Path(path).read_text(encoding="utf-8")
-        except OSError as e:
+        except (OSError, UnicodeDecodeError) as e:
             return "", ToolResult(success=False, error=str(e))
         if not self._registry.verify(self._owner_id, path, content):
             return "", ToolResult(success=False, error=f"File '{path}' has changed since last read. Re-read and retry.")
