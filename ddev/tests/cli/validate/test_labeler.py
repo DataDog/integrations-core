@@ -167,6 +167,8 @@ def test_labeler_sync_ignores_gitignored_directories(fake_repo, ddev):
 
     labeler_path = fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml'
     labeler_path.write_text(labeler_test_config(["dummy", "dummy2"]))
+
+
 LONG_CHECK_NAME = "a_very_long_integration_name_that_exceeds_the_limit"
 
 
