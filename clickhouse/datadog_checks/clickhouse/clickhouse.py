@@ -17,6 +17,7 @@ from . import queries
 from .__about__ import __version__
 from .config import build_config, sanitize
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
+from .metadata import ClickhouseMetadata
 from .query_completions import ClickhouseQueryCompletions
 from .query_errors import ClickhouseQueryErrors
 from .statement_samples import ClickhouseStatementSamples
@@ -126,6 +127,14 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_errors = ClickhouseQueryErrors(self, self._config.query_errors)
         else:
             self.query_errors = None
+
+        # Initialize catalog metadata collection (tables + views + columns)
+        # for dbm-metadata-processor. Opt-in during rollout; flip to
+        # enabled=True in instance_collect_schemas() after UI GA.
+        if self._config.dbm and self._config.collect_schemas and self._config.collect_schemas.enabled:
+            self.metadata = ClickhouseMetadata(self, self._config.collect_schemas)
+        else:
+            self.metadata = None
 
     @property
     def tags(self) -> list[str]:
@@ -254,6 +263,10 @@ class ClickhouseCheck(DatabaseCheck):
         # Run query errors if DBM is enabled (from system.query_log - failed queries)
         if self.query_errors:
             self.query_errors.run_job_loop(self.tags)
+
+        # Run catalog metadata collection (tables + views + columns)
+        if self.metadata:
+            self.metadata.run_job_loop(self.tags)
 
     @AgentCheck.metadata_entrypoint
     def collect_version(self):
@@ -474,6 +487,8 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_completions.cancel()
         if self.query_errors:
             self.query_errors.cancel()
+        if self.metadata:
+            self.metadata.cancel()
 
         # Wait for job loops to finish
         if self.statement_metrics and self.statement_metrics._job_loop_future:
@@ -484,6 +499,8 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_completions._job_loop_future.result()
         if self.query_errors and self.query_errors._job_loop_future:
             self.query_errors._job_loop_future.result()
+        if self.metadata and self.metadata._job_loop_future:
+            self.metadata._job_loop_future.result()
 
         # Close main client
         if self._client:
