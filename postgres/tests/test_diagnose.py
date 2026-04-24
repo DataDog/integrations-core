@@ -755,3 +755,143 @@ def test_build_remediation_has_docs_url_for_every_code():
         remediation = build_remediation(code)
         assert 'troubleshooting' in remediation
         assert remediation.endswith('for details.')
+
+
+# -- config-validation diagnostic --------------------------------------------
+
+
+def _make_validation_result(errors=(), warnings=(), features=()):
+    from datadog_checks.postgres.config import ValidationResult
+
+    vr = ValidationResult()
+    for err in errors:
+        vr.add_error(err)
+    for w in warnings:
+        vr.add_warning(w)
+    for feat in features:
+        vr.features.append(feat)
+    return vr
+
+
+def _feature(key, enabled):
+    from datadog_checks.postgres.features import Feature, FeatureKey, FeatureNames
+
+    return Feature(key=FeatureKey(key), name=FeatureNames[FeatureKey(key)], enabled=enabled, description=None)
+
+
+def _config_validation_entries(diagnoses):
+    return _by_name(diagnoses, DatabaseConfigurationError.config_validation.value)
+
+
+def test_config_validation_ok(integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    check._validation_result = _make_validation_result()
+    with _patch_connection(check, FakeConn(_happy_server_responses())):
+        diagnoses = _get_diagnoses(check)
+
+    entries = _config_validation_entries(diagnoses)
+    assert len(entries) == 1
+    entry = entries[0]
+    assert entry['result'] == Diagnosis.DIAGNOSIS_SUCCESS
+    assert entry['diagnosis'] == "Postgres config validation: 0 error(s), 0 warning(s)."
+
+
+def test_config_validation_warning(integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    check._validation_result = _make_validation_result(
+        warnings=["The `statement_samples` option is deprecated. Use `query_samples` instead."],
+    )
+    with _patch_connection(check, FakeConn(_happy_server_responses())):
+        diagnoses = _get_diagnoses(check)
+
+    entry = _config_validation_entries(diagnoses)[0]
+    assert entry['result'] == Diagnosis.DIAGNOSIS_WARNING
+    assert "0 error(s), 1 warning(s)" in entry['diagnosis']
+    assert "Warnings:" in entry['description']
+    assert "statement_samples" in entry['description']
+
+
+def test_config_validation_error(integration_check, pg_instance):
+    from datadog_checks.base import ConfigurationError
+
+    check = integration_check(pg_instance)
+    check._validation_result = _make_validation_result(
+        errors=[ConfigurationError("Application name can include only ASCII characters: foo")],
+    )
+    with _patch_connection(check, FakeConn(_happy_server_responses())):
+        diagnoses = _get_diagnoses(check)
+
+    entry = _config_validation_entries(diagnoses)[0]
+    assert entry['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert "1 error(s), 0 warning(s)" in entry['diagnosis']
+    assert "Errors:" in entry['description']
+    assert "Application name can include only ASCII characters: foo" in entry['description']
+    assert entry['remediation'] == (
+        "Resolve the errors and warnings listed above by editing "
+        "conf.d/postgres.d/conf.yaml, then restart the agent."
+    )
+
+
+def test_config_validation_emits_when_connection_fails(integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    check._validation_result = _make_validation_result(warnings=["invalid ssl option"])
+    err = psycopg.OperationalError('could not connect')
+    with mock.patch('datadog_checks.postgres.diagnose.TokenAwareConnection.connect', side_effect=err):
+        diagnoses = _get_diagnoses(check)
+
+    entries = _config_validation_entries(diagnoses)
+    assert len(entries) == 1
+    assert entries[0]['result'] == Diagnosis.DIAGNOSIS_WARNING
+    # connection_failure still fires alongside config-validation.
+    assert _by_name(diagnoses, DatabaseConfigurationError.connection_failure.value)
+
+
+def test_config_validation_handles_missing_validation_result(integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    check._validation_result = None
+    with _patch_connection(check, FakeConn(_happy_server_responses())):
+        diagnoses = _get_diagnoses(check)
+    entry = _config_validation_entries(diagnoses)[0]
+    assert entry['result'] == Diagnosis.DIAGNOSIS_WARNING
+    assert entry['diagnosis'] == "Postgres config validation did not complete (check initialization failed)."
+
+
+def test_config_validation_renders_features(integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    check._validation_result = _make_validation_result(
+        warnings=["some warning"],
+        features=[
+            _feature("query_metrics", enabled=True),
+            _feature("query_samples", enabled=True),
+            _feature("relation_metrics", enabled=False),
+            _feature("collect_schemas", enabled=False),
+        ],
+    )
+    with _patch_connection(check, FakeConn(_happy_server_responses())):
+        diagnoses = _get_diagnoses(check)
+    entry = _config_validation_entries(diagnoses)[0]
+    assert "Features enabled: query_metrics, query_samples" in entry['description']
+    assert "Features disabled: relation_metrics, collect_schemas" in entry['description']
+
+
+def test_config_validation_strings_are_neutral(integration_check, pg_instance):
+    """No user-facing string may reference the internal surface this probe mirrors."""
+    from datadog_checks.base import ConfigurationError
+
+    check = integration_check(pg_instance)
+    check._validation_result = _make_validation_result(
+        errors=[ConfigurationError("bad config")],
+        warnings=["deprecated option"],
+        features=[_feature("query_metrics", enabled=True)],
+    )
+    with _patch_connection(check, FakeConn(_happy_server_responses())):
+        diagnoses = _get_diagnoses(check)
+
+    entry = _config_validation_entries(diagnoses)[0]
+    forbidden = ("agent health", "health event", "dbm-health", "dbm_health")
+    for field in ('diagnosis', 'description', 'remediation'):
+        text = (entry.get(field) or "").lower()
+        for token in forbidden:
+            assert token not in text, "{} leaked forbidden token {!r}: {!r}".format(
+                field, token, entry.get(field)
+            )

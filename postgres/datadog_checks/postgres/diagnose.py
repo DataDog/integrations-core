@@ -72,19 +72,23 @@ class PostgresDiagnose:
         a query-activity-only setup (``dbm: true`` with query_metrics/query_samples
         disabled) should not be flagged unhealthy for a missing pg_stat_statements
         or explain function it will never call.
+
+        ``_diagnose_config_validation`` always runs, even when the probe connection
+        cannot be opened -- it only reads in-memory state from ``build_config``.
         """
         self._failed = set()
         conn = self._open_probe_connection(self._check._config.dbname)
-        if conn is None:
-            return
         try:
-            self._diagnose_version(conn)
-            self._diagnose_pg_monitor_role(conn)
-            self._diagnose_pg_stat_activity_access(conn)
-            if self._check._config.dbm:
-                self._run_dbm_probes(conn)
+            if conn is not None:
+                self._diagnose_version(conn)
+                self._diagnose_pg_monitor_role(conn)
+                self._diagnose_pg_stat_activity_access(conn)
+                if self._check._config.dbm:
+                    self._run_dbm_probes(conn)
         finally:
-            _safe_close(conn)
+            if conn is not None:
+                _safe_close(conn)
+            self._diagnose_config_validation()
 
     def _run_dbm_probes(self, conn):
         query_metrics = self._check._config.query_metrics.enabled
@@ -522,6 +526,68 @@ class PostgresDiagnose:
             description=build_description(code, explain_function=explain_function),
             remediation=build_remediation(code, explain_function=explain_function),
             failed_codes=failed,
+        )
+
+    def _diagnose_config_validation(self):
+        """Report the check's config-validation state to `agent diagnose`.
+
+        Reads ``self._check._validation_result`` populated by ``build_config`` during
+        ``__init__``. That same object also feeds the ``dbm-health`` event, but the
+        user-facing strings emitted here must NOT mention the event or any other
+        downstream surface -- this diagnostic stands on its own as a postgres
+        config-validation probe.
+        """
+        code = DatabaseConfigurationError.config_validation
+        vr = getattr(self._check, "_validation_result", None)
+        if vr is None:
+            self._check.diagnosis.warning(
+                name=code.value,
+                diagnosis="Postgres config validation did not complete (check initialization failed).",
+                category=CATEGORY_POSTGRES,
+            )
+            return
+
+        errors = list(vr.errors or [])
+        warnings = list(vr.warnings or [])
+        features = list(vr.features or [])
+        diagnosis_line = "Postgres config validation: {} error(s), {} warning(s).".format(
+            len(errors), len(warnings)
+        )
+
+        if not errors and not warnings:
+            self._check.diagnosis.success(
+                name=code.value,
+                diagnosis=diagnosis_line,
+                category=CATEGORY_POSTGRES,
+            )
+            return
+
+        body_lines = []
+        if errors:
+            body_lines.append("Errors:")
+            body_lines.extend("  - {}".format(err) for err in errors)
+        if warnings:
+            body_lines.append("Warnings:")
+            body_lines.extend("  - {}".format(w) for w in warnings)
+        if features:
+            enabled = [f["key"].value for f in features if f.get("enabled")]
+            disabled = [f["key"].value for f in features if not f.get("enabled")]
+            body_lines.append("Features enabled: {}".format(", ".join(enabled) or "none"))
+            body_lines.append("Features disabled: {}".format(", ".join(disabled) or "none"))
+        description = "\n".join(body_lines)
+
+        remediation = (
+            "Resolve the errors and warnings listed above by editing "
+            "conf.d/postgres.d/conf.yaml, then restart the agent."
+        )
+
+        method = self._check.diagnosis.fail if errors else self._check.diagnosis.warning
+        method(
+            name=code.value,
+            diagnosis=diagnosis_line,
+            category=CATEGORY_POSTGRES,
+            description=description,
+            remediation=remediation,
         )
 
     # -- helpers --------------------------------------------------------------

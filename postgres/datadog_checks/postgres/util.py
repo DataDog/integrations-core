@@ -46,6 +46,7 @@ class DatabaseConfigurationError(Enum):
     insufficient_privilege_on_pg_stat_activity = 'insufficient-privilege-on-pg-stat-activity'
     missing_datadog_schema = 'missing-datadog-schema'
     pg_stat_statements_not_readable = 'pg-stat-statements-not-readable'
+    config_validation = 'config-validation'
 
 
 # Docs anchor is appended to the troubleshooting URL to land the user on the right section.
