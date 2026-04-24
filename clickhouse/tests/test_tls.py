@@ -6,12 +6,10 @@ import pytest
 from datadog_checks.clickhouse import ClickhouseCheck
 
 from . import common
-from .common import tls
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
-@tls
 def test_connect_with_verify_false(aggregator, tls_instance, dd_run_check):
     """Regression: verify: false must allow connection to a self-signed cert.
 
@@ -25,7 +23,6 @@ def test_connect_with_verify_false(aggregator, tls_instance, dd_run_check):
     aggregator.assert_service_check('clickhouse.can_connect', status=ClickhouseCheck.OK)
 
 
-@tls
 def test_connect_ssl_verify_true_fails(tls_instance, dd_run_check):
     """Sanity: verify=True (default) must reject a self-signed cert.
 
@@ -38,7 +35,6 @@ def test_connect_ssl_verify_true_fails(tls_instance, dd_run_check):
         dd_run_check(check)
 
 
-@tls
 def test_connect_verify_true_with_ca_cert(aggregator, tls_instance, dd_run_check):
     """Production path: verify=True + tls_ca_cert pointing at a trusted CA must succeed.
 

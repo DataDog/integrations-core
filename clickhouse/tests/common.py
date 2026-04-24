@@ -3,20 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-import pytest
-
 from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
 COMPOSE_FILE_PATH = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 SERVER_CERT_PATH = os.path.join(HERE, 'docker', 'certs', 'server.crt')
-
-TLS_ENABLED = 'tls' in os.getenv('COMPOSE_PROFILES', '').split(',')
-
-tls = pytest.mark.skipif(
-    not TLS_ENABLED,
-    reason='TLS tests require the tls compose profile',
-)
 
 HOST = get_docker_hostname()
 HTTP_START_PORT = 8128

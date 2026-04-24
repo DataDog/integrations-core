@@ -3,7 +3,6 @@ base-package-features = ["deps", "db"]
 
 [envs.default.env-vars]
 CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
-COMPOSE_PROFILES = "tls"
 
 [[envs.default.matrix]]
 python = ["3.13"]
@@ -18,4 +17,3 @@ matrix.version.env-vars = [
 [envs.latest.env-vars]
 CLICKHOUSE_VERSION = "latest"
 CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
-COMPOSE_PROFILES = "tls"
