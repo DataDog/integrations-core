@@ -13555,3 +13555,598 @@ workflow_update_registry_size_bytes_bucket{namespace="default",operation="Workfl
 workflow_update_registry_size_bytes_bucket{namespace="default",operation="WorkflowUpdate",service_name="history",le="+Inf"} 10
 workflow_update_registry_size_bytes_sum{namespace="default",operation="WorkflowUpdate",service_name="history"} 512
 workflow_update_registry_size_bytes_count{namespace="default",operation="WorkflowUpdate",service_name="history"} 10
+
+# HELP acquire_shards_latency_seconds acquire_shards_latency_seconds histogram
+# TYPE acquire_shards_latency_seconds histogram
+acquire_shards_latency_seconds_bucket{le="0.1"} 1
+acquire_shards_latency_seconds_bucket{le="+Inf"} 1
+acquire_shards_latency_seconds_sum 0.05
+acquire_shards_latency_seconds_count 1
+
+# HELP activity_end_to_end_latency_seconds activity_end_to_end_latency_seconds histogram
+# TYPE activity_end_to_end_latency_seconds histogram
+activity_end_to_end_latency_seconds_bucket{le="0.1"} 1
+activity_end_to_end_latency_seconds_bucket{le="+Inf"} 1
+activity_end_to_end_latency_seconds_sum 0.05
+activity_end_to_end_latency_seconds_count 1
+
+# HELP activity_schedule_to_close_latency_seconds activity_schedule_to_close_latency_seconds histogram
+# TYPE activity_schedule_to_close_latency_seconds histogram
+activity_schedule_to_close_latency_seconds_bucket{le="0.1"} 1
+activity_schedule_to_close_latency_seconds_bucket{le="+Inf"} 1
+activity_schedule_to_close_latency_seconds_sum 0.05
+activity_schedule_to_close_latency_seconds_count 1
+
+# HELP activity_start_to_close_latency_seconds activity_start_to_close_latency_seconds histogram
+# TYPE activity_start_to_close_latency_seconds histogram
+activity_start_to_close_latency_seconds_bucket{le="0.1"} 1
+activity_start_to_close_latency_seconds_bucket{le="+Inf"} 1
+activity_start_to_close_latency_seconds_sum 0.05
+activity_start_to_close_latency_seconds_count 1
+
+# HELP archiver_archive_latency_seconds archiver_archive_latency_seconds histogram
+# TYPE archiver_archive_latency_seconds histogram
+archiver_archive_latency_seconds_bucket{le="0.1"} 1
+archiver_archive_latency_seconds_bucket{le="+Inf"} 1
+archiver_archive_latency_seconds_sum 0.05
+archiver_archive_latency_seconds_count 1
+
+# HELP archiver_archive_target_latency_seconds archiver_archive_target_latency_seconds histogram
+# TYPE archiver_archive_target_latency_seconds histogram
+archiver_archive_target_latency_seconds_bucket{le="0.1"} 1
+archiver_archive_target_latency_seconds_bucket{le="+Inf"} 1
+archiver_archive_target_latency_seconds_sum 0.05
+archiver_archive_target_latency_seconds_count 1
+
+# HELP asyncmatch_latency_seconds asyncmatch_latency_seconds histogram
+# TYPE asyncmatch_latency_seconds histogram
+asyncmatch_latency_seconds_bucket{le="0.1"} 1
+asyncmatch_latency_seconds_bucket{le="+Inf"} 1
+asyncmatch_latency_seconds_sum 0.05
+asyncmatch_latency_seconds_count 1
+
+# HELP cache_entry_age_on_eviction_seconds cache_entry_age_on_eviction_seconds histogram
+# TYPE cache_entry_age_on_eviction_seconds histogram
+cache_entry_age_on_eviction_seconds_bucket{le="0.1"} 1
+cache_entry_age_on_eviction_seconds_bucket{le="+Inf"} 1
+cache_entry_age_on_eviction_seconds_sum 0.05
+cache_entry_age_on_eviction_seconds_count 1
+
+# HELP cache_entry_age_on_get_seconds cache_entry_age_on_get_seconds histogram
+# TYPE cache_entry_age_on_get_seconds histogram
+cache_entry_age_on_get_seconds_bucket{le="0.1"} 1
+cache_entry_age_on_get_seconds_bucket{le="+Inf"} 1
+cache_entry_age_on_get_seconds_sum 0.05
+cache_entry_age_on_get_seconds_count 1
+
+# HELP cache_latency_seconds cache_latency_seconds histogram
+# TYPE cache_latency_seconds histogram
+cache_latency_seconds_bucket{le="0.1"} 1
+cache_latency_seconds_bucket{le="+Inf"} 1
+cache_latency_seconds_sum 0.05
+cache_latency_seconds_count 1
+
+# HELP cache_ttl_seconds cache_ttl_seconds histogram
+# TYPE cache_ttl_seconds histogram
+cache_ttl_seconds_bucket{le="0.1"} 1
+cache_ttl_seconds_bucket{le="+Inf"} 1
+cache_ttl_seconds_sum 0.05
+cache_ttl_seconds_count 1
+
+# HELP cassandra_init_session_latency_seconds cassandra_init_session_latency_seconds histogram
+# TYPE cassandra_init_session_latency_seconds histogram
+cassandra_init_session_latency_seconds_bucket{le="0.1"} 1
+cassandra_init_session_latency_seconds_bucket{le="+Inf"} 1
+cassandra_init_session_latency_seconds_sum 0.05
+cassandra_init_session_latency_seconds_count 1
+
+# HELP client_latency_seconds client_latency_seconds histogram
+# TYPE client_latency_seconds histogram
+client_latency_seconds_bucket{le="0.1"} 1
+client_latency_seconds_bucket{le="+Inf"} 1
+client_latency_seconds_sum 0.05
+client_latency_seconds_count 1
+
+# HELP client_redirection_latency_seconds client_redirection_latency_seconds histogram
+# TYPE client_redirection_latency_seconds histogram
+client_redirection_latency_seconds_bucket{le="0.1"} 1
+client_redirection_latency_seconds_bucket{le="+Inf"} 1
+client_redirection_latency_seconds_sum 0.05
+client_redirection_latency_seconds_count 1
+
+# HELP dd_cluster_metadata_callback_lock_latency_seconds dd_cluster_metadata_callback_lock_latency_seconds histogram
+# TYPE dd_cluster_metadata_callback_lock_latency_seconds histogram
+dd_cluster_metadata_callback_lock_latency_seconds_bucket{le="0.1"} 1
+dd_cluster_metadata_callback_lock_latency_seconds_bucket{le="+Inf"} 1
+dd_cluster_metadata_callback_lock_latency_seconds_sum 0.05
+dd_cluster_metadata_callback_lock_latency_seconds_count 1
+
+# HELP dd_cluster_metadata_lock_latency_seconds dd_cluster_metadata_lock_latency_seconds histogram
+# TYPE dd_cluster_metadata_lock_latency_seconds histogram
+dd_cluster_metadata_lock_latency_seconds_bucket{le="0.1"} 1
+dd_cluster_metadata_lock_latency_seconds_bucket{le="+Inf"} 1
+dd_cluster_metadata_lock_latency_seconds_sum 0.05
+dd_cluster_metadata_lock_latency_seconds_count 1
+
+# HELP dd_namespace_registry_lock_latency_seconds dd_namespace_registry_lock_latency_seconds histogram
+# TYPE dd_namespace_registry_lock_latency_seconds histogram
+dd_namespace_registry_lock_latency_seconds_bucket{le="0.1"} 1
+dd_namespace_registry_lock_latency_seconds_bucket{le="+Inf"} 1
+dd_namespace_registry_lock_latency_seconds_sum 0.05
+dd_namespace_registry_lock_latency_seconds_count 1
+
+# HELP dd_shard_controller_lock_latency_seconds dd_shard_controller_lock_latency_seconds histogram
+# TYPE dd_shard_controller_lock_latency_seconds histogram
+dd_shard_controller_lock_latency_seconds_bucket{le="0.1"} 1
+dd_shard_controller_lock_latency_seconds_bucket{le="+Inf"} 1
+dd_shard_controller_lock_latency_seconds_sum 0.05
+dd_shard_controller_lock_latency_seconds_count 1
+
+# HELP dd_shard_io_semaphore_latency_seconds dd_shard_io_semaphore_latency_seconds histogram
+# TYPE dd_shard_io_semaphore_latency_seconds histogram
+dd_shard_io_semaphore_latency_seconds_bucket{le="0.1"} 1
+dd_shard_io_semaphore_latency_seconds_bucket{le="+Inf"} 1
+dd_shard_io_semaphore_latency_seconds_sum 0.05
+dd_shard_io_semaphore_latency_seconds_count 1
+
+# HELP dd_shard_lock_latency_seconds dd_shard_lock_latency_seconds histogram
+# TYPE dd_shard_lock_latency_seconds histogram
+dd_shard_lock_latency_seconds_bucket{le="0.1"} 1
+dd_shard_lock_latency_seconds_bucket{le="+Inf"} 1
+dd_shard_lock_latency_seconds_sum 0.05
+dd_shard_lock_latency_seconds_count 1
+
+# HELP direct_query_dispatch_clear_stickiness_latency_seconds direct_query_dispatch_clear_stickiness_latency_seconds histogram
+# TYPE direct_query_dispatch_clear_stickiness_latency_seconds histogram
+direct_query_dispatch_clear_stickiness_latency_seconds_bucket{le="0.1"} 1
+direct_query_dispatch_clear_stickiness_latency_seconds_bucket{le="+Inf"} 1
+direct_query_dispatch_clear_stickiness_latency_seconds_sum 0.05
+direct_query_dispatch_clear_stickiness_latency_seconds_count 1
+
+# HELP direct_query_dispatch_latency_seconds direct_query_dispatch_latency_seconds histogram
+# TYPE direct_query_dispatch_latency_seconds histogram
+direct_query_dispatch_latency_seconds_bucket{le="0.1"} 1
+direct_query_dispatch_latency_seconds_bucket{le="+Inf"} 1
+direct_query_dispatch_latency_seconds_sum 0.05
+direct_query_dispatch_latency_seconds_count 1
+
+# HELP direct_query_dispatch_non_sticky_latency_seconds direct_query_dispatch_non_sticky_latency_seconds histogram
+# TYPE direct_query_dispatch_non_sticky_latency_seconds histogram
+direct_query_dispatch_non_sticky_latency_seconds_bucket{le="0.1"} 1
+direct_query_dispatch_non_sticky_latency_seconds_bucket{le="+Inf"} 1
+direct_query_dispatch_non_sticky_latency_seconds_sum 0.05
+direct_query_dispatch_non_sticky_latency_seconds_count 1
+
+# HELP direct_query_dispatch_sticky_latency_seconds direct_query_dispatch_sticky_latency_seconds histogram
+# TYPE direct_query_dispatch_sticky_latency_seconds histogram
+direct_query_dispatch_sticky_latency_seconds_bucket{le="0.1"} 1
+direct_query_dispatch_sticky_latency_seconds_bucket{le="+Inf"} 1
+direct_query_dispatch_sticky_latency_seconds_sum 0.05
+direct_query_dispatch_sticky_latency_seconds_count 1
+
+# HELP elasticsearch_bulk_processor_bulk_request_took_latency_seconds elasticsearch_bulk_processor_bulk_request_took_latency_seconds histogram
+# TYPE elasticsearch_bulk_processor_bulk_request_took_latency_seconds histogram
+elasticsearch_bulk_processor_bulk_request_took_latency_seconds_bucket{le="0.1"} 1
+elasticsearch_bulk_processor_bulk_request_took_latency_seconds_bucket{le="+Inf"} 1
+elasticsearch_bulk_processor_bulk_request_took_latency_seconds_sum 0.05
+elasticsearch_bulk_processor_bulk_request_took_latency_seconds_count 1
+
+# HELP elasticsearch_bulk_processor_commit_latency_seconds elasticsearch_bulk_processor_commit_latency_seconds histogram
+# TYPE elasticsearch_bulk_processor_commit_latency_seconds histogram
+elasticsearch_bulk_processor_commit_latency_seconds_bucket{le="0.1"} 1
+elasticsearch_bulk_processor_commit_latency_seconds_bucket{le="+Inf"} 1
+elasticsearch_bulk_processor_commit_latency_seconds_sum 0.05
+elasticsearch_bulk_processor_commit_latency_seconds_count 1
+
+# HELP elasticsearch_bulk_processor_request_latency_seconds elasticsearch_bulk_processor_request_latency_seconds histogram
+# TYPE elasticsearch_bulk_processor_request_latency_seconds histogram
+elasticsearch_bulk_processor_request_latency_seconds_bucket{le="0.1"} 1
+elasticsearch_bulk_processor_request_latency_seconds_bucket{le="+Inf"} 1
+elasticsearch_bulk_processor_request_latency_seconds_sum 0.05
+elasticsearch_bulk_processor_request_latency_seconds_count 1
+
+# HELP elasticsearch_bulk_processor_wait_add_latency_seconds elasticsearch_bulk_processor_wait_add_latency_seconds histogram
+# TYPE elasticsearch_bulk_processor_wait_add_latency_seconds histogram
+elasticsearch_bulk_processor_wait_add_latency_seconds_bucket{le="0.1"} 1
+elasticsearch_bulk_processor_wait_add_latency_seconds_bucket{le="+Inf"} 1
+elasticsearch_bulk_processor_wait_add_latency_seconds_sum 0.05
+elasticsearch_bulk_processor_wait_add_latency_seconds_count 1
+
+# HELP elasticsearch_bulk_processor_wait_start_latency_seconds elasticsearch_bulk_processor_wait_start_latency_seconds histogram
+# TYPE elasticsearch_bulk_processor_wait_start_latency_seconds histogram
+elasticsearch_bulk_processor_wait_start_latency_seconds_bucket{le="0.1"} 1
+elasticsearch_bulk_processor_wait_start_latency_seconds_bucket{le="+Inf"} 1
+elasticsearch_bulk_processor_wait_start_latency_seconds_sum 0.05
+elasticsearch_bulk_processor_wait_start_latency_seconds_count 1
+
+# HELP finalizer_latency_seconds finalizer_latency_seconds histogram
+# TYPE finalizer_latency_seconds histogram
+finalizer_latency_seconds_bucket{le="0.1"} 1
+finalizer_latency_seconds_bucket{le="+Inf"} 1
+finalizer_latency_seconds_sum 0.05
+finalizer_latency_seconds_count 1
+
+# HELP generate_replication_tasks_latency_seconds generate_replication_tasks_latency_seconds histogram
+# TYPE generate_replication_tasks_latency_seconds histogram
+generate_replication_tasks_latency_seconds_bucket{le="0.1"} 1
+generate_replication_tasks_latency_seconds_bucket{le="+Inf"} 1
+generate_replication_tasks_latency_seconds_sum 0.05
+generate_replication_tasks_latency_seconds_count 1
+
+# HELP get_engine_for_shard_latency_seconds get_engine_for_shard_latency_seconds histogram
+# TYPE get_engine_for_shard_latency_seconds histogram
+get_engine_for_shard_latency_seconds_bucket{le="0.1"} 1
+get_engine_for_shard_latency_seconds_bucket{le="+Inf"} 1
+get_engine_for_shard_latency_seconds_sum 0.05
+get_engine_for_shard_latency_seconds_count 1
+
+# HELP handover_wait_latency_seconds handover_wait_latency_seconds histogram
+# TYPE handover_wait_latency_seconds histogram
+handover_wait_latency_seconds_bucket{le="0.1"} 1
+handover_wait_latency_seconds_bucket{le="+Inf"} 1
+handover_wait_latency_seconds_sum 0.05
+handover_wait_latency_seconds_count 1
+
+# HELP history_event_notification_fanout_latency_seconds history_event_notification_fanout_latency_seconds histogram
+# TYPE history_event_notification_fanout_latency_seconds histogram
+history_event_notification_fanout_latency_seconds_bucket{le="0.1"} 1
+history_event_notification_fanout_latency_seconds_bucket{le="+Inf"} 1
+history_event_notification_fanout_latency_seconds_sum 0.05
+history_event_notification_fanout_latency_seconds_count 1
+
+# HELP history_event_notification_queueing_latency_seconds history_event_notification_queueing_latency_seconds histogram
+# TYPE history_event_notification_queueing_latency_seconds histogram
+history_event_notification_queueing_latency_seconds_bucket{le="0.1"} 1
+history_event_notification_queueing_latency_seconds_bucket{le="+Inf"} 1
+history_event_notification_queueing_latency_seconds_sum 0.05
+history_event_notification_queueing_latency_seconds_count 1
+
+# HELP history_workflow_execution_cache_latency_seconds history_workflow_execution_cache_latency_seconds histogram
+# TYPE history_workflow_execution_cache_latency_seconds histogram
+history_workflow_execution_cache_latency_seconds_bucket{le="0.1"} 1
+history_workflow_execution_cache_latency_seconds_bucket{le="+Inf"} 1
+history_workflow_execution_cache_latency_seconds_sum 0.05
+history_workflow_execution_cache_latency_seconds_count 1
+
+# HELP history_workflow_execution_cache_lock_hold_duration_seconds history_workflow_execution_cache_lock_hold_duration_seconds histogram
+# TYPE history_workflow_execution_cache_lock_hold_duration_seconds histogram
+history_workflow_execution_cache_lock_hold_duration_seconds_bucket{le="0.1"} 1
+history_workflow_execution_cache_lock_hold_duration_seconds_bucket{le="+Inf"} 1
+history_workflow_execution_cache_lock_hold_duration_seconds_sum 0.05
+history_workflow_execution_cache_lock_hold_duration_seconds_count 1
+
+# HELP lock_latency_seconds lock_latency_seconds histogram
+# TYPE lock_latency_seconds histogram
+lock_latency_seconds_bucket{le="0.1"} 1
+lock_latency_seconds_bucket{le="+Inf"} 1
+lock_latency_seconds_sum 0.05
+lock_latency_seconds_count 1
+
+# HELP memory_gc_pause_ms_seconds memory_gc_pause_ms_seconds histogram
+# TYPE memory_gc_pause_ms_seconds histogram
+memory_gc_pause_ms_seconds_bucket{le="0.1"} 1
+memory_gc_pause_ms_seconds_bucket{le="+Inf"} 1
+memory_gc_pause_ms_seconds_sum 0.05
+memory_gc_pause_ms_seconds_count 1
+
+# HELP namespace_registry_refresh_latency_seconds namespace_registry_refresh_latency_seconds histogram
+# TYPE namespace_registry_refresh_latency_seconds histogram
+namespace_registry_refresh_latency_seconds_bucket{le="0.1"} 1
+namespace_registry_refresh_latency_seconds_bucket{le="+Inf"} 1
+namespace_registry_refresh_latency_seconds_sum 0.05
+namespace_registry_refresh_latency_seconds_count 1
+
+# HELP nexus_completion_latency_seconds nexus_completion_latency_seconds histogram
+# TYPE nexus_completion_latency_seconds histogram
+nexus_completion_latency_seconds_bucket{le="0.1"} 1
+nexus_completion_latency_seconds_bucket{le="+Inf"} 1
+nexus_completion_latency_seconds_sum 0.05
+nexus_completion_latency_seconds_count 1
+
+# HELP nexus_latency_seconds nexus_latency_seconds histogram
+# TYPE nexus_latency_seconds histogram
+nexus_latency_seconds_bucket{le="0.1"} 1
+nexus_latency_seconds_bucket{le="+Inf"} 1
+nexus_latency_seconds_sum 0.05
+nexus_latency_seconds_count 1
+
+# HELP persistence_latency_seconds persistence_latency_seconds histogram
+# TYPE persistence_latency_seconds histogram
+persistence_latency_seconds_bucket{le="0.1"} 1
+persistence_latency_seconds_bucket{le="+Inf"} 1
+persistence_latency_seconds_sum 0.05
+persistence_latency_seconds_count 1
+
+# HELP poll_latency_seconds poll_latency_seconds histogram
+# TYPE poll_latency_seconds histogram
+poll_latency_seconds_bucket{le="0.1"} 1
+poll_latency_seconds_bucket{le="+Inf"} 1
+poll_latency_seconds_sum 0.05
+poll_latency_seconds_count 1
+
+# HELP queue_latency_schedule_seconds queue_latency_schedule_seconds histogram
+# TYPE queue_latency_schedule_seconds histogram
+queue_latency_schedule_seconds_bucket{le="0.1"} 1
+queue_latency_schedule_seconds_bucket{le="+Inf"} 1
+queue_latency_schedule_seconds_sum 0.05
+queue_latency_schedule_seconds_count 1
+
+# HELP rate_limited_task_runnable_wait_time_seconds rate_limited_task_runnable_wait_time_seconds histogram
+# TYPE rate_limited_task_runnable_wait_time_seconds histogram
+rate_limited_task_runnable_wait_time_seconds_bucket{le="0.1"} 1
+rate_limited_task_runnable_wait_time_seconds_bucket{le="+Inf"} 1
+rate_limited_task_runnable_wait_time_seconds_sum 0.05
+rate_limited_task_runnable_wait_time_seconds_count 1
+
+# HELP remove_engine_for_shard_latency_seconds remove_engine_for_shard_latency_seconds histogram
+# TYPE remove_engine_for_shard_latency_seconds histogram
+remove_engine_for_shard_latency_seconds_bucket{le="0.1"} 1
+remove_engine_for_shard_latency_seconds_bucket{le="+Inf"} 1
+remove_engine_for_shard_latency_seconds_sum 0.05
+remove_engine_for_shard_latency_seconds_count 1
+
+# HELP replication_latency_seconds replication_latency_seconds histogram
+# TYPE replication_latency_seconds histogram
+replication_latency_seconds_bucket{le="0.1"} 1
+replication_latency_seconds_bucket{le="+Inf"} 1
+replication_latency_seconds_sum 0.05
+replication_latency_seconds_count 1
+
+# HELP replication_sender_rate_limit_latency_seconds replication_sender_rate_limit_latency_seconds histogram
+# TYPE replication_sender_rate_limit_latency_seconds histogram
+replication_sender_rate_limit_latency_seconds_bucket{le="0.1"} 1
+replication_sender_rate_limit_latency_seconds_bucket{le="+Inf"} 1
+replication_sender_rate_limit_latency_seconds_sum 0.05
+replication_sender_rate_limit_latency_seconds_count 1
+
+# HELP replication_task_generation_latency_seconds replication_task_generation_latency_seconds histogram
+# TYPE replication_task_generation_latency_seconds histogram
+replication_task_generation_latency_seconds_bucket{le="0.1"} 1
+replication_task_generation_latency_seconds_bucket{le="+Inf"} 1
+replication_task_generation_latency_seconds_sum 0.05
+replication_task_generation_latency_seconds_count 1
+
+# HELP replication_task_load_latency_seconds replication_task_load_latency_seconds histogram
+# TYPE replication_task_load_latency_seconds histogram
+replication_task_load_latency_seconds_bucket{le="0.1"} 1
+replication_task_load_latency_seconds_bucket{le="+Inf"} 1
+replication_task_load_latency_seconds_sum 0.05
+replication_task_load_latency_seconds_count 1
+
+# HELP replication_task_processing_latency_seconds replication_task_processing_latency_seconds histogram
+# TYPE replication_task_processing_latency_seconds histogram
+replication_task_processing_latency_seconds_bucket{le="0.1"} 1
+replication_task_processing_latency_seconds_bucket{le="+Inf"} 1
+replication_task_processing_latency_seconds_sum 0.05
+replication_task_processing_latency_seconds_count 1
+
+# HELP replication_task_queue_latency_seconds replication_task_queue_latency_seconds histogram
+# TYPE replication_task_queue_latency_seconds histogram
+replication_task_queue_latency_seconds_bucket{le="0.1"} 1
+replication_task_queue_latency_seconds_bucket{le="+Inf"} 1
+replication_task_queue_latency_seconds_sum 0.05
+replication_task_queue_latency_seconds_count 1
+
+# HELP replication_task_send_latency_seconds replication_task_send_latency_seconds histogram
+# TYPE replication_task_send_latency_seconds histogram
+replication_task_send_latency_seconds_bucket{le="0.1"} 1
+replication_task_send_latency_seconds_bucket{le="+Inf"} 1
+replication_task_send_latency_seconds_sum 0.05
+replication_task_send_latency_seconds_count 1
+
+# HELP replication_task_transmission_latency_seconds replication_task_transmission_latency_seconds histogram
+# TYPE replication_task_transmission_latency_seconds histogram
+replication_task_transmission_latency_seconds_bucket{le="0.1"} 1
+replication_task_transmission_latency_seconds_bucket{le="+Inf"} 1
+replication_task_transmission_latency_seconds_sum 0.05
+replication_task_transmission_latency_seconds_count 1
+
+# HELP replication_tasks_back_fill_latency_seconds replication_tasks_back_fill_latency_seconds histogram
+# TYPE replication_tasks_back_fill_latency_seconds histogram
+replication_tasks_back_fill_latency_seconds_bucket{le="0.1"} 1
+replication_tasks_back_fill_latency_seconds_bucket{le="+Inf"} 1
+replication_tasks_back_fill_latency_seconds_sum 0.05
+replication_tasks_back_fill_latency_seconds_count 1
+
+# HELP replicator_latency_seconds replicator_latency_seconds histogram
+# TYPE replicator_latency_seconds histogram
+replicator_latency_seconds_bucket{le="0.1"} 1
+replicator_latency_seconds_bucket{le="+Inf"} 1
+replicator_latency_seconds_sum 0.05
+replicator_latency_seconds_count 1
+
+# HELP schedule_action_delay_seconds schedule_action_delay_seconds histogram
+# TYPE schedule_action_delay_seconds histogram
+schedule_action_delay_seconds_bucket{le="0.1"} 1
+schedule_action_delay_seconds_bucket{le="+Inf"} 1
+schedule_action_delay_seconds_sum 0.05
+schedule_action_delay_seconds_count 1
+
+# HELP semaphore_latency_seconds semaphore_latency_seconds histogram
+# TYPE semaphore_latency_seconds histogram
+semaphore_latency_seconds_bucket{le="0.1"} 1
+semaphore_latency_seconds_bucket{le="+Inf"} 1
+semaphore_latency_seconds_sum 0.05
+semaphore_latency_seconds_count 1
+
+# HELP service_authorization_latency_seconds service_authorization_latency_seconds histogram
+# TYPE service_authorization_latency_seconds histogram
+service_authorization_latency_seconds_bucket{le="0.1"} 1
+service_authorization_latency_seconds_bucket{le="+Inf"} 1
+service_authorization_latency_seconds_sum 0.05
+service_authorization_latency_seconds_count 1
+
+# HELP service_dial_latency_seconds service_dial_latency_seconds histogram
+# TYPE service_dial_latency_seconds histogram
+service_dial_latency_seconds_bucket{le="0.1"} 1
+service_dial_latency_seconds_bucket{le="+Inf"} 1
+service_dial_latency_seconds_sum 0.05
+service_dial_latency_seconds_count 1
+
+# HELP service_latency_nouserlatency_seconds service_latency_nouserlatency_seconds histogram
+# TYPE service_latency_nouserlatency_seconds histogram
+service_latency_nouserlatency_seconds_bucket{le="0.1"} 1
+service_latency_nouserlatency_seconds_bucket{le="+Inf"} 1
+service_latency_nouserlatency_seconds_sum 0.05
+service_latency_nouserlatency_seconds_count 1
+
+# HELP service_latency_seconds service_latency_seconds histogram
+# TYPE service_latency_seconds histogram
+service_latency_seconds_bucket{le="0.1"} 1
+service_latency_seconds_bucket{le="+Inf"} 1
+service_latency_seconds_sum 0.05
+service_latency_seconds_count 1
+
+# HELP service_latency_userlatency_seconds service_latency_userlatency_seconds histogram
+# TYPE service_latency_userlatency_seconds histogram
+service_latency_userlatency_seconds_bucket{le="0.1"} 1
+service_latency_userlatency_seconds_bucket{le="+Inf"} 1
+service_latency_userlatency_seconds_sum 0.05
+service_latency_userlatency_seconds_count 1
+
+# HELP shard_linger_success_seconds shard_linger_success_seconds histogram
+# TYPE shard_linger_success_seconds histogram
+shard_linger_success_seconds_bucket{le="0.1"} 1
+shard_linger_success_seconds_bucket{le="+Inf"} 1
+shard_linger_success_seconds_sum 0.05
+shard_linger_success_seconds_count 1
+
+# HELP shardinfo_scheduled_queue_lag_seconds shardinfo_scheduled_queue_lag_seconds histogram
+# TYPE shardinfo_scheduled_queue_lag_seconds histogram
+shardinfo_scheduled_queue_lag_seconds_bucket{le="0.1"} 1
+shardinfo_scheduled_queue_lag_seconds_bucket{le="+Inf"} 1
+shardinfo_scheduled_queue_lag_seconds_sum 0.05
+shardinfo_scheduled_queue_lag_seconds_count 1
+
+# HELP sharditem_acquisition_latency_seconds sharditem_acquisition_latency_seconds histogram
+# TYPE sharditem_acquisition_latency_seconds histogram
+sharditem_acquisition_latency_seconds_bucket{le="0.1"} 1
+sharditem_acquisition_latency_seconds_bucket{le="+Inf"} 1
+sharditem_acquisition_latency_seconds_sum 0.05
+sharditem_acquisition_latency_seconds_count 1
+
+# HELP syncmatch_latency_seconds syncmatch_latency_seconds histogram
+# TYPE syncmatch_latency_seconds histogram
+syncmatch_latency_seconds_bucket{le="0.1"} 1
+syncmatch_latency_seconds_bucket{le="+Inf"} 1
+syncmatch_latency_seconds_sum 0.05
+syncmatch_latency_seconds_count 1
+
+# HELP task_dispatch_latency_seconds task_dispatch_latency_seconds histogram
+# TYPE task_dispatch_latency_seconds histogram
+task_dispatch_latency_seconds_bucket{le="0.1"} 1
+task_dispatch_latency_seconds_bucket{le="+Inf"} 1
+task_dispatch_latency_seconds_sum 0.05
+task_dispatch_latency_seconds_count 1
+
+# HELP task_dlq_latency_seconds task_dlq_latency_seconds histogram
+# TYPE task_dlq_latency_seconds histogram
+task_dlq_latency_seconds_bucket{le="0.1"} 1
+task_dlq_latency_seconds_bucket{le="+Inf"} 1
+task_dlq_latency_seconds_sum 0.05
+task_dlq_latency_seconds_count 1
+
+# HELP task_latency_load_seconds task_latency_load_seconds histogram
+# TYPE task_latency_load_seconds histogram
+task_latency_load_seconds_bucket{le="0.1"} 1
+task_latency_load_seconds_bucket{le="+Inf"} 1
+task_latency_load_seconds_sum 0.05
+task_latency_load_seconds_count 1
+
+# HELP task_latency_processing_seconds task_latency_processing_seconds histogram
+# TYPE task_latency_processing_seconds histogram
+task_latency_processing_seconds_bucket{le="0.1"} 1
+task_latency_processing_seconds_bucket{le="+Inf"} 1
+task_latency_processing_seconds_sum 0.05
+task_latency_processing_seconds_count 1
+
+# HELP task_latency_queue_seconds task_latency_queue_seconds histogram
+# TYPE task_latency_queue_seconds histogram
+task_latency_queue_seconds_bucket{le="0.1"} 1
+task_latency_queue_seconds_bucket{le="+Inf"} 1
+task_latency_queue_seconds_sum 0.05
+task_latency_queue_seconds_count 1
+
+# HELP task_latency_schedule_seconds task_latency_schedule_seconds histogram
+# TYPE task_latency_schedule_seconds histogram
+task_latency_schedule_seconds_bucket{le="0.1"} 1
+task_latency_schedule_seconds_bucket{le="+Inf"} 1
+task_latency_schedule_seconds_sum 0.05
+task_latency_schedule_seconds_count 1
+
+# HELP task_latency_seconds task_latency_seconds histogram
+# TYPE task_latency_seconds histogram
+task_latency_seconds_bucket{le="0.1"} 1
+task_latency_seconds_bucket{le="+Inf"} 1
+task_latency_seconds_sum 0.05
+task_latency_seconds_count 1
+
+# HELP task_schedule_to_start_latency_seconds task_schedule_to_start_latency_seconds histogram
+# TYPE task_schedule_to_start_latency_seconds histogram
+task_schedule_to_start_latency_seconds_bucket{le="0.1"} 1
+task_schedule_to_start_latency_seconds_bucket{le="+Inf"} 1
+task_schedule_to_start_latency_seconds_sum 0.05
+task_schedule_to_start_latency_seconds_count 1
+
+# HELP task_write_latency_seconds task_write_latency_seconds histogram
+# TYPE task_write_latency_seconds histogram
+task_write_latency_seconds_bucket{le="0.1"} 1
+task_write_latency_seconds_bucket{le="+Inf"} 1
+task_write_latency_seconds_sum 0.05
+task_write_latency_seconds_count 1
+
+# HELP time_between_shardinfo_update_seconds time_between_shardinfo_update_seconds histogram
+# TYPE time_between_shardinfo_update_seconds histogram
+time_between_shardinfo_update_seconds_bucket{le="0.1"} 1
+time_between_shardinfo_update_seconds_bucket{le="+Inf"} 1
+time_between_shardinfo_update_seconds_sum 0.05
+time_between_shardinfo_update_seconds_count 1
+
+# HELP verify_describe_mutable_state_latency_seconds verify_describe_mutable_state_latency_seconds histogram
+# TYPE verify_describe_mutable_state_latency_seconds histogram
+verify_describe_mutable_state_latency_seconds_bucket{le="0.1"} 1
+verify_describe_mutable_state_latency_seconds_bucket{le="+Inf"} 1
+verify_describe_mutable_state_latency_seconds_sum 0.05
+verify_describe_mutable_state_latency_seconds_count 1
+
+# HELP verify_replication_tasks_latency_seconds verify_replication_tasks_latency_seconds histogram
+# TYPE verify_replication_tasks_latency_seconds histogram
+verify_replication_tasks_latency_seconds_bucket{le="0.1"} 1
+verify_replication_tasks_latency_seconds_bucket{le="+Inf"} 1
+verify_replication_tasks_latency_seconds_sum 0.05
+verify_replication_tasks_latency_seconds_count 1
+
+# HELP version_check_latency_seconds version_check_latency_seconds histogram
+# TYPE version_check_latency_seconds histogram
+version_check_latency_seconds_bucket{le="0.1"} 1
+version_check_latency_seconds_bucket{le="+Inf"} 1
+version_check_latency_seconds_sum 0.05
+version_check_latency_seconds_count 1
+
+# HELP versioning_data_propagation_latency_seconds versioning_data_propagation_latency_seconds histogram
+# TYPE versioning_data_propagation_latency_seconds histogram
+versioning_data_propagation_latency_seconds_bucket{le="0.1"} 1
+versioning_data_propagation_latency_seconds_bucket{le="+Inf"} 1
+versioning_data_propagation_latency_seconds_sum 0.05
+versioning_data_propagation_latency_seconds_count 1
+
+# HELP visibility_persistence_latency_seconds visibility_persistence_latency_seconds histogram
+# TYPE visibility_persistence_latency_seconds histogram
+visibility_persistence_latency_seconds_bucket{le="0.1"} 1
+visibility_persistence_latency_seconds_bucket{le="+Inf"} 1
+visibility_persistence_latency_seconds_sum 0.05
+visibility_persistence_latency_seconds_count 1
+
+# HELP workflow_schedule_to_close_latency_seconds workflow_schedule_to_close_latency_seconds histogram
+# TYPE workflow_schedule_to_close_latency_seconds histogram
+workflow_schedule_to_close_latency_seconds_bucket{le="0.1"} 1
+workflow_schedule_to_close_latency_seconds_bucket{le="+Inf"} 1
+workflow_schedule_to_close_latency_seconds_sum 0.05
+workflow_schedule_to_close_latency_seconds_count 1
+
+# HELP workflow_task_query_latency_seconds workflow_task_query_latency_seconds histogram
+# TYPE workflow_task_query_latency_seconds histogram
+workflow_task_query_latency_seconds_bucket{le="0.1"} 1
+workflow_task_query_latency_seconds_bucket{le="+Inf"} 1
+workflow_task_query_latency_seconds_sum 0.05
+workflow_task_query_latency_seconds_count 1
