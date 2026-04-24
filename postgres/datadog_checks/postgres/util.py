@@ -46,8 +46,6 @@ class DatabaseConfigurationError(Enum):
     insufficient_privilege_on_pg_stat_activity = 'insufficient-privilege-on-pg-stat-activity'
     missing_datadog_schema = 'missing-datadog-schema'
     pg_stat_statements_not_readable = 'pg-stat-statements-not-readable'
-    pooler_detected = 'pooler-detected'
-    dbm_feature_without_dbm_enabled = 'dbm-feature-without-dbm-enabled'
 
 
 # Docs anchor is appended to the troubleshooting URL to land the user on the right section.
@@ -167,19 +165,6 @@ DIAGNOSTIC_METADATA = {
             "`ALTER ROLE <datadog_user> SET search_path = \"$user\",public,<schema>;`."
         ),
         "docs_anchor": DatabaseConfigurationError.pg_stat_statements_not_readable.value,
-    },
-    DatabaseConfigurationError.pooler_detected: {
-        "description": "The agent appears to be connected through a connection pooler (e.g. pgbouncer).",
-        "remediation": (
-            "DBM requires a direct connection to Postgres. Point the agent at the database host directly "
-            "rather than through a pooler."
-        ),
-        "docs_anchor": DatabaseConfigurationError.pooler_detected.value,
-    },
-    DatabaseConfigurationError.dbm_feature_without_dbm_enabled: {
-        "description": "A DBM-only feature is enabled but `dbm` is false.",
-        "remediation": "Set `dbm: true` in the instance config or disable the DBM-only feature.",
-        "docs_anchor": DatabaseConfigurationError.dbm_feature_without_dbm_enabled.value,
     },
 }
 
