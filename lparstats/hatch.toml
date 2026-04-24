@@ -1,4 +1,7 @@
 [env.collectors.datadog-checks]
 
+[envs.default]
+e2e-env = false
+
 [[envs.default.matrix]]
 python = ["3.13"]

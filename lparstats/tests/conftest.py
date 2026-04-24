@@ -7,11 +7,6 @@ import pytest
 CHECK_NAME = 'lparstats'
 
 
-@pytest.fixture(scope='session')
-def dd_environment():
-    pytest.skip('lparstats requires IBM AIX; no e2e environment available on Linux CI')
-
-
 @pytest.fixture
 def instance():
     return {
