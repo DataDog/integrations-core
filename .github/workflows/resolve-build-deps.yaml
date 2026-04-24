@@ -31,6 +31,7 @@ jobs:
       rebuild_linux_x86_64: ${{ steps.hash-check.outputs.rebuild_linux_x86_64 }}
       rebuild_linux_aarch64: ${{ steps.hash-check.outputs.rebuild_linux_aarch64 }}
       rebuild_windows_x86_64: ${{ steps.hash-check.outputs.rebuild_windows_x86_64 }}
+      hashes: ${{ steps.hash-check.outputs.hashes }}
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -157,13 +158,18 @@ jobs:
 
     - name: Detect builder changes
       id: builder-check
+      env:
+        HASHES: ${{ needs.gate.outputs.hashes }}
+        TARGET: ${{ matrix.job.image }}
       run: |
-        case "${{ matrix.job.image }}" in
-          linux-x86_64)  rebuild="${{ needs.gate.outputs.rebuild_linux_x86_64 }}" ;;
-          linux-aarch64) rebuild="${{ needs.gate.outputs.rebuild_linux_aarch64 }}" ;;
-          windows-x86_64) rebuild="${{ needs.gate.outputs.rebuild_windows_x86_64 }}" ;;
+        jq -er --arg t "$TARGET" '.[$t]' <<<"$HASHES" > /tmp/inputs_sha256
+        case "$TARGET" in
+          linux-x86_64)   changed="${{ needs.gate.outputs.rebuild_linux_x86_64 }}" ;;
+          linux-aarch64)  changed="${{ needs.gate.outputs.rebuild_linux_aarch64 }}" ;;
+          windows-x86_64) changed="${{ needs.gate.outputs.rebuild_windows_x86_64 }}" ;;
+          *) echo "unknown target: $TARGET" >&2; exit 1 ;;
         esac
-        echo "builder_changed=$rebuild" >> "$GITHUB_OUTPUT"
+        echo "builder_changed=$changed" >> "$GITHUB_OUTPUT"
 
     - name: Install management dependencies
       run: pip install -r .builders/deps/host_dependencies.txt
@@ -204,15 +210,13 @@ jobs:
         ${DOCKER} inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }} \
           | cut -d '@' -f 2 \
           > ${{ env.OUT_DIR }}/image_digest
-        cd .builders && python -c "import inputs_hash, sys; sys.stdout.write(inputs_hash.compute_target('${{ matrix.job.image }}'))" \
-          > ../${{ env.OUT_DIR }}/inputs_sha256
+        cp /tmp/inputs_sha256 ${{ env.OUT_DIR }}/inputs_sha256
 
     - name: Persist current image digest and inputs hash
       if: steps.builder-check.outputs.builder_changed == 'false'
       run: |
         jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json > ${{ env.OUT_DIR }}/image_digest
-        cd .builders && python -c "import inputs_hash, sys; sys.stdout.write(inputs_hash.compute_target('${{ matrix.job.image }}'))" \
-          > ../${{ env.OUT_DIR }}/inputs_sha256
+        cp /tmp/inputs_sha256 ${{ env.OUT_DIR }}/inputs_sha256
 
     - name: Upload artifacts
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
