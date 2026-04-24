@@ -86,8 +86,8 @@
     },
     "monitors": {
       "Anomalous spikes in playbook execution failure": "assets/monitors/anomalous_spikes_in_playbook_execution_failure.json",
-      "Connectivity errors per integration alert": "assets/monitors/connectivity_errors_per_integration_alert.json",
-      "High integration error rate alert": "assets/monitors/high_integration_error_rate_alert.json"
+      "Connectivity errors per integration": "assets/monitors/connectivity_errors_per_integration.json",
+      "High integration error rate": "assets/monitors/high_integration_error_rate.json"
     },
     "logs": {
       "source": "palo-alto-networks-cortex-xsoar"
