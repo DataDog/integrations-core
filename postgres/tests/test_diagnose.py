@@ -827,8 +827,7 @@ def test_config_validation_error(integration_check, pg_instance):
     assert "Errors:" in entry['description']
     assert "Application name can include only ASCII characters: foo" in entry['description']
     assert entry['remediation'] == (
-        "Resolve the errors and warnings listed above by editing "
-        "conf.d/postgres.d/conf.yaml, then restart the agent."
+        "Resolve the errors and warnings listed above by editing conf.d/postgres.d/conf.yaml, then restart the agent."
     )
 
 
@@ -892,6 +891,4 @@ def test_config_validation_strings_are_neutral(integration_check, pg_instance):
     for field in ('diagnosis', 'description', 'remediation'):
         text = (entry.get(field) or "").lower()
         for token in forbidden:
-            assert token not in text, "{} leaked forbidden token {!r}: {!r}".format(
-                field, token, entry.get(field)
-            )
+            assert token not in text, "{} leaked forbidden token {!r}: {!r}".format(field, token, entry.get(field))

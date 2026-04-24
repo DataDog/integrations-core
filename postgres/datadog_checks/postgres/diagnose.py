@@ -550,9 +550,7 @@ class PostgresDiagnose:
         errors = list(vr.errors or [])
         warnings = list(vr.warnings or [])
         features = list(vr.features or [])
-        diagnosis_line = "Postgres config validation: {} error(s), {} warning(s).".format(
-            len(errors), len(warnings)
-        )
+        diagnosis_line = "Postgres config validation: {} error(s), {} warning(s).".format(len(errors), len(warnings))
 
         if not errors and not warnings:
             self._check.diagnosis.success(
